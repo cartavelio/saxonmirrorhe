@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *  Tests of the NodeInfo interface as implemented by the tinytree
  */
 public class TinyTreeTest {
+    private final ConfigTest configTest = new ConfigTest();
 
     @Test
     public void testIsAncestor() {
@@ -64,14 +65,14 @@ public class TinyTreeTest {
             configuration.setTreeModel(
               net.sf.saxon.om.TreeModel.TINY_TREE_CONDENSED.getSymbolicValue());
 
-            Source source = new StreamSource(new File(ConfigTest.DATA_DIR + "tinytreetest.xsl"));
+            Source source = new StreamSource(new File(configTest.getDataDir() + "tinytreetest.xsl"));
 
             Templates templates = transformerFactory.newTemplates(source);
             Transformer transformer = templates.newTransformer();
 
             transformer.transform(
               new StreamSource(new StringReader("<e/>")),
-              new StreamResult(new File(ConfigTest.DATA_DIR + "temp/out.xml")));
+              new StreamResult(new File(configTest.getDataDir() + "temp/out.xml")));
           }
        catch (Exception err) {
            err.printStackTrace();

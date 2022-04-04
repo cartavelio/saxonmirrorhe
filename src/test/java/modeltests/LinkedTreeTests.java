@@ -20,7 +20,7 @@ public class LinkedTreeTests extends ObjectModelTests {
         try {
             DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setTreeModel(TreeModel.LINKED_TREE);
-            return builder.build(new File(ConfigTest.DATA_DIR + fileName));
+            return builder.build(new File(configTest.getDataDir() + fileName));
         } catch (SaxonApiException e) {
             fail();
             return null;

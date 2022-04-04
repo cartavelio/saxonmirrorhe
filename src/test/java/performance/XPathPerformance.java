@@ -40,7 +40,7 @@ public class XPathPerformance extends PerformanceTestCase {
             Configuration config = p.getUnderlyingConfiguration();
             DocumentBuilder b = p.newDocumentBuilder();
             long start = System.nanoTime();
-            XdmNode foo = b.build(new StreamSource(new File(ConfigTest.DATA_DIR + "aip_520.xml")));
+            XdmNode foo = b.build(new StreamSource(new File(configTest.getDataDir() + "aip_520.xml")));
             long buildTime = (System.nanoTime() - start) / 1000000;
             assertTrue(buildTime < 500, "buildTime " + buildTime);
             System.err.println("Build time: " + buildTime + "ms");

@@ -44,7 +44,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XQueryCompiler
  */
 public class TestSerializer {
-
+    private final ConfigTest configTest = new ConfigTest();
+    
     @Test
     public void testXQuerySerialization() {
         try {
@@ -196,8 +197,8 @@ public class TestSerializer {
     @Test
     public void testSecondaryOutputDestination() {
         try {
-            new File(ConfigTest.DATA_DIR + "temp/first.xml").delete();
-            new File(ConfigTest.DATA_DIR + "temp/second.xml").delete();
+            new File(configTest.getDataDir() + "temp/first.xml").delete();
+            new File(configTest.getDataDir() + "temp/second.xml").delete();
             Processor proc = new Processor(false);
             proc.setConfigurationProperty(Feature.TIMING, true);
             StringReader sr = new StringReader("<doc><e>text</e></doc>");
@@ -216,13 +217,13 @@ public class TestSerializer {
             XsltTransformer trans = xqcomp.compile(style).load();
 
             Serializer serializer = proc.newSerializer();
-            serializer.setOutputFile(new File(ConfigTest.DATA_DIR + "temp/first.xml"));
+            serializer.setOutputFile(new File(configTest.getDataDir() + "temp/first.xml"));
             trans.setSource(node.asSource());
             trans.setDestination(serializer);
             trans.transform();
 
-            assertTrue(new File(ConfigTest.DATA_DIR + "temp/first.xml").exists(), "first exists");
-            assertTrue(new File(ConfigTest.DATA_DIR + "temp/second.xml").exists(), "second exists");
+            assertTrue(new File(configTest.getDataDir() + "temp/first.xml").exists(), "first exists");
+            assertTrue(new File(configTest.getDataDir() + "temp/second.xml").exists(), "second exists");
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
@@ -250,7 +251,7 @@ public class TestSerializer {
 
             XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            StreamSource xsltSource = new StreamSource(ConfigTest.DATA_DIR + "welch-ser/A.xsl");
+            StreamSource xsltSource = new StreamSource(configTest.getDataDir() + "welch-ser/A.xsl");
 
             XsltExecutable xsltExecutable = xsltCompiler.compile(xsltSource);
             XsltTransformer xsltTransformer = xsltExecutable.load();
@@ -292,7 +293,7 @@ public class TestSerializer {
                     // no action
                 }
             } );
-            Transformer transformer = factory.newTransformer(new StreamSource(ConfigTest.DATA_DIR + "welch-ser/A.xsl"));
+            Transformer transformer = factory.newTransformer(new StreamSource(configTest.getDataDir() + "welch-ser/A.xsl"));
 
             ((TransformerImpl) transformer).setInitialTemplate("main");
 
@@ -342,7 +343,7 @@ public class TestSerializer {
     @Test
     public void test3631() {
         try {
-            String dir = ConfigTest.DATA_DIR + "nadolu3631/";
+            String dir = configTest.getDataDir() + "nadolu3631/";
             String sourceID = dir + "test.xml";
             String xslID = dir + "main.xsl";
 
@@ -522,7 +523,7 @@ public class TestSerializer {
                     + "  \n"
                     + "</xsl:stylesheet>";
             Processor processor = new Processor(false);
-            XdmNode inputDoc = processor.newDocumentBuilder().build(new File(ConfigTest.DATA_DIR + "renvooi.xml"));
+            XdmNode inputDoc = processor.newDocumentBuilder().build(new File(configTest.getDataDir() + "renvooi.xml"));
             StringWriter sw = new StringWriter();
             Serializer serializer = processor.newSerializer(sw);
             XMLStreamWriter xsw = serializer.getXMLStreamWriter();
@@ -596,7 +597,7 @@ public class TestSerializer {
           // Test to check that indentation produces reasonable results. Commented out because
           // there is no automated checking of the results, it relies on visual inspection.
 //
-//        File dir = new File(ConfigTest.DATA_DIR);
+//        File dir = new File(configTest.getDataDir());
 //        File[] files = dir.listFiles(
 //                new FilenameFilter() {
 //                    public boolean accept(File dir, String name) {

@@ -16,13 +16,14 @@ import java.util.regex.Pattern;
  *
  */
 public class testRegex {
+    private ConfigTest configTest = new ConfigTest();
 
     @Test
     public void testCharacterClasses() {
 
         PrintWriter out;
         try {
-            out = new PrintWriter(new FileWriter(new File(ConfigTest.TEMP_DIR + "JavaSubCategories.xml")));
+            out = new PrintWriter(new FileWriter(new File(configTest.getTempDir() + "JavaSubCategories.xml")));
         } catch (IOException e) {
             e.printStackTrace();
             return;

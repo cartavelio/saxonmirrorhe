@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class SimonSoftTest2 {
+    private final ConfigTest configTest = new ConfigTest();
 
     // See bug 2929 - search for unused namespaces
 
@@ -95,7 +96,7 @@ public class SimonSoftTest2 {
             numTransformed = 0;
             try {
                 StreamSource xslSource = new StreamSource(new StringReader(xsl));
-                InputStream xml = new FileInputStream(ConfigTest.DATA_DIR + "xmark1withns.xml");
+                InputStream xml = new FileInputStream(configTest.getDataDir() + "xmark1withns.xml");
                 transformElements(xslSource, xml);
             } catch (FileNotFoundException | SaxonApiException e) {
                 fail();

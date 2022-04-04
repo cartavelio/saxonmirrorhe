@@ -38,7 +38,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XQueryCompiler
  */
 public class TestXQueryEvaluator {
-
+    private final ConfigTest configTest = new ConfigTest();
+    
     @Test
     public void testReturnDocumentNode() {
         try {
@@ -72,7 +73,7 @@ public class TestXQueryEvaluator {
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setLineNumbering(true);
             builder.setWhitespaceStrippingPolicy(WhitespaceStrippingPolicy.ALL);
-            XdmNode source = builder.build(new File(ConfigTest.DATA_DIR + "books.xml"));
+            XdmNode source = builder.build(new File(configTest.getDataDir() + "books.xml"));
 
             XQueryExecutable exp = comp.compile("saxon:line-number((//WEIGHT)[1])");
             XQueryEvaluator eval = exp.load();
@@ -290,7 +291,7 @@ public class TestXQueryEvaluator {
         try {
             Processor proc = new Processor(true);
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.compileLibrary(new File(ConfigTest.DATA_DIR + "module-one.xq"));
+            comp.compileLibrary(new File(configTest.getDataDir() + "module-one.xq"));
             String q1 = "import module namespace m='http://www.example.com/module-one'; m:add(2,2)";
             XQueryEvaluator ev = comp.compile(q1).load();
             assertEquals("4", ev.evaluate().toString(), "2+2");
@@ -424,7 +425,7 @@ public class TestXQueryEvaluator {
             final Processor processor = new Processor(true);
             final XQueryCompiler qc = processor.newXQueryCompiler();
             final XQueryExecutable exp1 = qc.compile("declare namespace f='f.ns';" +
-                                                             "declare variable $z := 1 + xs:integer(doc-available('file:///" + ConfigTest.DATA_DIR + "books.xml'));" +
+                                                             "declare variable $z := 1 + xs:integer(doc-available('file:///" + configTest.getDataDir() + "books.xml'));" +
                                                              "declare variable $p as xs:integer external;" +
                                                              "declare function f:t1($v1 as xs:integer) { " +
                                                              "   $v1 div $z + $p" +
@@ -888,7 +889,7 @@ public class TestXQueryEvaluator {
             StringWriter sw = new StringWriter();
             Serializer out = p.newSerializer(sw);
             out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            StreamSource in = new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml"));
+            StreamSource in = new StreamSource(new File(configTest.getDataDir() + "books.xml"));
             eval.runStreamed(in, out);
             assertEquals("128.67", sw.toString());
         } catch (SaxonApiException e) {
@@ -912,7 +913,7 @@ public class TestXQueryEvaluator {
             StringWriter sw = new StringWriter();
             Serializer out = p.newSerializer(sw);
             out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            StreamSource in = new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml"));
+            StreamSource in = new StreamSource(new File(configTest.getDataDir() + "books.xml"));
             eval.runStreamed(in, out);
             assertEquals("128.67", sw.toString());
         } catch (SaxonApiException e) {
@@ -930,7 +931,7 @@ public class TestXQueryEvaluator {
             StringWriter sw = new StringWriter();
             Serializer out = p.newSerializer(sw);
             out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            StreamSource in = new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml"));
+            StreamSource in = new StreamSource(new File(configTest.getDataDir() + "books.xml"));
             eval.runStreamed(in, out);
             fail("Unexpected success");
         } catch (SaxonApiException e) {

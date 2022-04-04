@@ -26,7 +26,7 @@ public class JDOM2TreeTests extends ObjectModelTests {
     XdmNode buildExternalDocument(Processor processor, String fileName) {
         try {
             SAXBuilder jdomBuilder = new SAXBuilder();
-            Document jdomDocument = jdomBuilder.build(new File(ConfigTest.DATA_DIR + fileName).toURI().toString());
+            Document jdomDocument = jdomBuilder.build(new File(configTest.getDataDir() + fileName).toURI().toString());
             DocumentBuilder builder = processor.newDocumentBuilder();
             return builder.wrap(jdomDocument);
         } catch (IOException | JDOMException e) {

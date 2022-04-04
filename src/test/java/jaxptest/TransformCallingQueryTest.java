@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Tests for saxon:import-query
  */
 public class TransformCallingQueryTest  {
+    private final ConfigTest configTest = new ConfigTest();
 
     @Test
     public void testTransformCallingQuery()
@@ -26,12 +27,12 @@ public class TransformCallingQueryTest  {
         try {
             TransformerFactory transformerFactory = new TransformerFactoryImpl();
             transformerFactory.setAttribute(FeatureKeys.GENERATE_BYTE_CODE, false);
-            Transformer transformer = transformerFactory.newTransformer(new StreamSource(ConfigTest.BUGS_DIR + "hedenus/bug.xslt"));
+            Transformer transformer = transformerFactory.newTransformer(new StreamSource(configTest.getBugsDir() + "hedenus/bug.xslt"));
             transformer.setParameter("myparam", "london");
 
 
             StringWriter writer = new StringWriter();
-            transformer.transform(new StreamSource(ConfigTest.BUGS_DIR +"hedenus/bug.xslt"), new StreamResult(writer));
+            transformer.transform(new StreamSource(configTest.getBugsDir() +"hedenus/bug.xslt"), new StreamResult(writer));
             System.err.println(writer.toString());
             assertTrue(writer.toString().contains("<london><a/></london>"));
 

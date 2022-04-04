@@ -14,7 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class IncludeImportJarUri {
-    public static final String TESTROOT = ConfigTest.DATA_DIR + "jaruri/";
+    private final ConfigTest configTest = new ConfigTest();
+    public final String TESTROOT = configTest.getDataDir() + "jaruri/";
 
     @Test
     public void testJarImport() {

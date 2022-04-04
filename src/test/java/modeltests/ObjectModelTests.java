@@ -33,6 +33,9 @@ import static org.junit.Assert.assertTrue;
  */
 
 public abstract class ObjectModelTests {
+    protected final ConfigTest configTest = new ConfigTest();
+    
+    abstract TreeModel getTreeModel();
 
     abstract TreeModel getTreeModel();
 
@@ -245,7 +248,7 @@ public abstract class ObjectModelTests {
         try {
             Processor proc = new Processor(true);
             DocumentBuilder builder = proc.newDocumentBuilder();
-            XdmNode source = builder.build(new File(ConfigTest.DATA_DIR + "books-sql.xsl"));
+            XdmNode source = builder.build(new File(configTest.getDataDir() + "books-sql.xsl"));
             XdmDestination dest = makeDestination(proc);
             XQueryCompiler compiler = proc.newXQueryCompiler();
             XQueryExecutable exec = compiler.compile("copy-of(.)");

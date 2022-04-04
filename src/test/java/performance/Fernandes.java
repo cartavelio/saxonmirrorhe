@@ -20,9 +20,9 @@ public class Fernandes extends PerformanceTestCase {
         try {
             Processor proc = new Processor(false);
             XsltCompiler comp = proc.newXsltCompiler();
-            XsltExecutable t1 = comp.compile(new StreamSource(new File(ConfigTest.DATA_DIR + "fernandes/t1.xsl")));
-            XsltExecutable t2 = comp.compile(new StreamSource(new File(ConfigTest.DATA_DIR + "fernandes/t2.xsl")));
-            final XdmNode initial = proc.newDocumentBuilder().build(new File(ConfigTest.DATA_DIR + "fernandes/test.xml"));
+            XsltExecutable t1 = comp.compile(new StreamSource(new File(configTest.getDataDir() + "fernandes/t1.xsl")));
+            XsltExecutable t2 = comp.compile(new StreamSource(new File(configTest.getDataDir() + "fernandes/t2.xsl")));
+            final XdmNode initial = proc.newDocumentBuilder().build(new File(configTest.getDataDir() + "fernandes/test.xml"));
             final List<XdmNode> wrapper = new ArrayList<>();
             wrapper.add(initial);
             measure(new Measurable() {

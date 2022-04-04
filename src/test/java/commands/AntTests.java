@@ -10,7 +10,8 @@ import java.io.File;
  * Tests invocation of Saxon via Ant
  */
 public class AntTests {
-
+    private final ConfigTest configTest = new ConfigTest();
+    
     public static void main(String[] args) {
         org.apache.tools.ant.launch.Launcher.main(args);
     }
@@ -24,7 +25,7 @@ public class AntTests {
 
     @Test
     public void testTransformTask() {
-        runAnt(ConfigTest.DATA_DIR + "ant/build1.xml");
+        runAnt(configTest.getDataDir() + "ant/build1.xml");
     }
 
     //public void testValidateTask() {
@@ -48,12 +49,12 @@ public class AntTests {
 
     @Test
     public void testWalmsleyBug() {
-        runAnt(ConfigTest.DATA_DIR + "ant/walmsley/saxonbug/build.xml");
+        runAnt(configTest.getDataDir() + "ant/walmsley/saxonbug/build.xml");
     }
 
 //    public void testXmlCatalog() {
     // removed because it depends too much on the machine setup, e.g CatalogManager.properties
-//        runAnt(ConfigTest.DATA_DIR + "ant/buildWithCatalog.xml");
+//        runAnt(configTest.getDataDir() + "ant/buildWithCatalog.xml");
 //    }
 }
 

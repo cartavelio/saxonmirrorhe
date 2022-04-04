@@ -14,13 +14,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  */
 public class TestSchematron {
-
+    ConfigTest configTest = new ConfigTest();
+    
     @Test
     public void testAssertXMLDocument() {
-        XmlAssertor xmlAssertor = new XmlAssertor(ConfigTest.DATA_DIR + "radu/iso_schematron_text.xsl");
+        XmlAssertor xmlAssertor = new XmlAssertor(configTest.getDataDir() + "radu/iso_schematron_text.xsl");
         String sAssertionResult = xmlAssertor.assertXMLDocument(
-                new File(ConfigTest.DATA_DIR + "radu/to_be_asserted.xml"),
-                ConfigTest.DATA_DIR + "radu/legacygcib.sch");
+                new File(configTest.getDataDir() + "radu/to_be_asserted.xml"),
+                configTest.getDataDir() + "radu/legacygcib.sch");
 
         System.out.println("sAssertionResult = " + sAssertionResult);
 

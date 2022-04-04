@@ -49,7 +49,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XsltTransformer
  */
 public class TestXsltTransformer {
-
+    private final ConfigTest configTest = new ConfigTest();
+    
     /**
      * Simple test
      */
@@ -63,7 +64,7 @@ public class TestXsltTransformer {
 
             // Create a transformer for the stylesheet.
             XsltTransformer transformer = processor.newXsltCompiler().compile(
-                    new StreamSource(new File(ConfigTest.DATA_DIR + "caffo/Transform2.xslt"))).load();
+                    new StreamSource(new File(configTest.getDataDir() + "caffo/Transform2.xslt"))).load();
 
             // Create a serializer
             XdmDestination serializer = new XdmDestination();
@@ -74,7 +75,7 @@ public class TestXsltTransformer {
             for (int i = 0; i < 10; i++) {
                 // Load the source document
                 XdmNode input = processor.newDocumentBuilder().build(
-                        new File(ConfigTest.DATA_DIR + "caffo/Input.xml"));
+                        new File(configTest.getDataDir() + "caffo/Input.xml"));
                 // Set the root node of the source document to be the initial context node
                 transformer.setInitialContextNode(input);
                 transformer.transform();
@@ -229,7 +230,7 @@ public class TestXsltTransformer {
             XsltCompiler xqcomp = proc.newXsltCompiler();
 
             sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
-                    "<xsl:import href='file:///" + ConfigTest.DATA_DIR + "identity.xsl'/>\n" +
+                    "<xsl:import href='file:///" + configTest.getDataDir() + "identity.xsl'/>\n" +
                     "<xsl:import href='http://imported'/>\n" +
                     "<xsl:param name='x' select='0'/>\n" +
                     "<xsl:template match='/'>\n" +
@@ -315,7 +316,7 @@ public class TestXsltTransformer {
             XsltCompiler xqcomp = proc.newXsltCompiler();
             xqcomp.setErrorListener(listener);
 
-            XsltTransformer trans = xqcomp.compile(new StreamSource(new File(ConfigTest.DATA_DIR + "main.xsl"))).load();
+            XsltTransformer trans = xqcomp.compile(new StreamSource(new File(configTest.getDataDir() + "main.xsl"))).load();
 
             Serializer serializer = proc.newSerializer();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -516,10 +517,10 @@ public class TestXsltTransformer {
             XsltTransformer transformer = exec.load();
 
             SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xsd")));
+            sm.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setSchemaValidator(sm.newSchemaValidator());
-            XdmNode books = builder.build(new File(ConfigTest.DATA_DIR + "books.xml"));
+            XdmNode books = builder.build(new File(configTest.getDataDir() + "books.xml"));
             transformer.setInitialContextNode(books);
             // Create a serializer
             //String outfile = @"C:/MyJava/users/caffo/Output.xml";
@@ -720,10 +721,10 @@ public class TestXsltTransformer {
             Processor processor = new Processor(true);
             processor.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, Boolean.TRUE);
             processor.getUnderlyingConfiguration().addSchemaSource(
-                    new StreamSource(ConfigTest.DATA_DIR + "books.xsd"));
+                    new StreamSource(configTest.getDataDir() + "books.xsd"));
 
             Serializer serializer = processor.newSerializer();
-            serializer.setOutputFile(new File(ConfigTest.TEMP_DIR + "validationWarnings.xml"));
+            serializer.setOutputFile(new File(configTest.getTempDir() + "validationWarnings.xml"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.setSchemaAware(true);
@@ -770,8 +771,8 @@ public class TestXsltTransformer {
         builder.setDTDValidation(false);
         builder.setLineNumbering(true);
 
-        XdmNode document = builder.build(new File(ConfigTest.DATA_DIR + "books.xml"));
-        XdmNode stylesheet = builder.build(new File(ConfigTest.DATA_DIR + "books.xsl"));
+        XdmNode document = builder.build(new File(configTest.getDataDir() + "books.xml"));
+        XdmNode stylesheet = builder.build(new File(configTest.getDataDir() + "books.xsl"));
 
         XsltCompiler compiler = processor.newXsltCompiler();
         compiler.setSchemaAware(processor.isSchemaAware());
@@ -903,7 +904,7 @@ public class TestXsltTransformer {
 
             // Create a transformer for the stylesheet.
             XsltTransformer transformer = processor.newXsltCompiler().compile(
-                    new StreamSource(new File(ConfigTest.DATA_DIR + "next-in-chain/main.xsl"))).load();
+                    new StreamSource(new File(configTest.getDataDir() + "next-in-chain/main.xsl"))).load();
 
             // Create a destination
             Serializer out = processor.newSerializer();
@@ -912,7 +913,7 @@ public class TestXsltTransformer {
 
             // Load the source document
             XdmNode input = processor.newDocumentBuilder().build(
-                    new File(ConfigTest.DATA_DIR + "next-in-chain/test.xml"));
+                    new File(configTest.getDataDir() + "next-in-chain/test.xml"));
             // Set the root node of the source document to be the initial context node
             transformer.setSource(input.asSource());
             transformer.setDestination(out);

@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test use of options XMLConstants.ACCESS_EXTERNAL_STYLESHEET, ACCESS_EXTERNAL_DTD
  */
 public class AllowedProtocolsTest {
-
+    private final ConfigTest configTest = new ConfigTest();
 
     private void externalProtocolsCompileTime(String baseURI, String declaration, String rule, boolean expectSuccess) {
         try {
@@ -48,7 +48,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsCompileTime001() {
-        externalProtocolsCompileTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsCompileTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                      "<xsl:include href='identity.xsl'/>",
                                      "all",
                                      true);
@@ -56,7 +56,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsCompileTime002() {
-        externalProtocolsCompileTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsCompileTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                      "<xsl:include href='identity.xsl'/>",
                                      "file",
                                      true);
@@ -64,7 +64,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsCompileTime003() {
-        externalProtocolsCompileTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsCompileTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                      "<xsl:include href='identity.xsl'/>",
                                      "http, file",
                                      true);
@@ -72,7 +72,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsCompileTime004() {
-        externalProtocolsCompileTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsCompileTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                      "<xsl:include href='identity.xsl'/>",
                                      "http, https",
                                      false);
@@ -80,7 +80,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsCompileTime005() {
-        externalProtocolsCompileTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsCompileTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                      "<xsl:include href='identity.xsl'/>",
                                      "",
                                      false);
@@ -88,7 +88,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsCompileTime006() {
-        externalProtocolsCompileTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsCompileTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                      "<xsl:import href='identity.xsl'/>",
                                      "all",
                                      true);
@@ -96,7 +96,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsCompileTime007() {
-        externalProtocolsCompileTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsCompileTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                      "<xsl:import href='identity.xsl'/>",
                                      "",
                                      false);
@@ -104,7 +104,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsCompileTime008() {
-        externalProtocolsCompileTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsCompileTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                      "<xsl:import-schema schema-location='books.xsd'/>",
                                      "all",
                                      true);
@@ -112,7 +112,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsCompileTime009() {
-        externalProtocolsCompileTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsCompileTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                      "<xsl:import-schema schema-location='books.xsd'/>",
                                      "",
                                      false);
@@ -149,7 +149,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime001() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "{name(doc('birthdays.xml')/*)}",
                                  "all",
                                  true);
@@ -157,7 +157,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime002() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "{name(doc('birthdays.xml')/*)}",
                                  "file",
                                  true);
@@ -165,7 +165,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime003() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "{name(doc('birthdays.xml')/*)}",
                                  "http, https",
                                  false);
@@ -173,7 +173,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime004() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "{name(doc('birthdays.xml')/*)}",
                                  "",
                                  false);
@@ -181,7 +181,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime005() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "{string-length(unparsed-text('birthdays.xml'))}",
                                  "file, http",
                                  true);
@@ -189,7 +189,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime006() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "{string-length(unparsed-text('birthdays.xml'))}",
                                  "https, http",
                                  false);
@@ -197,7 +197,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime007() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "{json-doc('sample.json')?name}",
                                  "file, http",
                                  true);
@@ -205,7 +205,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime008() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "{json-doc('sample.json')?name}",
                                  "https, http",
                                  false);
@@ -213,7 +213,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime009() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "<xsl:source-document href='birthdays.xml'>{name(/*)}</xsl:source-document>",
                                  "file, http",
                                  true);
@@ -221,7 +221,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime010() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "<xsl:source-document href='birthdays.xml'>{name(/*)}</xsl:source-document>",
                                  "",
                                  false);
@@ -229,7 +229,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime011() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "<xsl:sequence select=\"document('data:text/xml;base64,PGRvYy8+')/*/local-name()\"/>",
                                  "file, data",
                                  true);
@@ -237,7 +237,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime012() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "<xsl:sequence select=\"document('data:text/xml;base64,PGRvYy8+')/*/local-name()\"/>",
                                  "file, http, https",
                                  false);
@@ -245,7 +245,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime013() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "<xsl:sequence select=\"unparsed-text('classpath:saxon-license.lic')\"/>",
                                  "file, data, classpath",
                                  true);
@@ -253,7 +253,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime014() {
-        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + configTest.getDataDir() + "dummy.xsl",
                                  "<xsl:sequence select=\"unparsed-text('classpath:saxon-license.lic')\"/>",
                                  "file, http, https",
                                  false);
@@ -293,7 +293,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsDTD001() {
-        externalProtocolsDTD("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsDTD("file:///" + configTest.getDataDir() + "dummy.xsl",
                              "{name(doc('othello.xml')/*)}",
                              "all",
                              true);
@@ -301,7 +301,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsDTD002() {
-        externalProtocolsDTD("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsDTD("file:///" + configTest.getDataDir() + "dummy.xsl",
                              "{name(doc('othello.xml')/*)}",
                              "file",
                              true);
@@ -309,7 +309,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsDTD003() {
-        externalProtocolsDTD("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsDTD("file:///" + configTest.getDataDir() + "dummy.xsl",
                              "{name(doc('othello.xml')/*)}",
                              "http",
                              false);

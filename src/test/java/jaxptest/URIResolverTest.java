@@ -29,11 +29,12 @@ import static org.junit.jupiter.api.Assertions.*;
  * originally created by Scott Boag, but much evolved since.
  */
 public class URIResolverTest {
+    private final ConfigTest configTest = new ConfigTest();
 
-    private static final String d = ConfigTest.DATA_DIR + "trax/";
+    private final String d = configTest.getDataDir() + "trax/";
 
-    private static final String foo_xml = d + "xml/foo.xml";
-    private static final String foo_xsl = d + "xsl/foo.xsl";
+    private final String foo_xml = d + "xml/foo.xml";
+    private final String foo_xsl = d + "xsl/foo.xsl";
 
     @Test
     public void testGetURIResolver() {

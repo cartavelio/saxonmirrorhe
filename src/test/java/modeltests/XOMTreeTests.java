@@ -26,7 +26,7 @@ public class XOMTreeTests extends ObjectModelTests {
     XdmNode buildExternalDocument(Processor processor, String fileName) {
         try {
             Builder xomBuilder = new Builder();
-            Document jdomDocument = xomBuilder.build(new File(ConfigTest.DATA_DIR + fileName).toURI().toString());
+            Document jdomDocument = xomBuilder.build(new File(configTest.getDataDir() + fileName).toURI().toString());
             DocumentBuilder builder = processor.newDocumentBuilder();
             return builder.wrap(jdomDocument);
         } catch (IOException | ParsingException e) {

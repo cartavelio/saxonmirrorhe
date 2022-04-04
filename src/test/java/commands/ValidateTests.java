@@ -18,7 +18,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests on Validate Command Line options
  */
 public class ValidateTests {
-    private static String TEMPDIR = ConfigTest.DATA_DIR + "temp/";
+    private final ConfigTest configTest = new ConfigTest();
+
+    private String TEMPDIR = configTest.getDataDir() + "temp/";
 
     public void setUp() {
         System.err.println("TEMP:" + TEMPDIR);
@@ -28,7 +30,7 @@ public class ValidateTests {
     public void testSchemaValidation() {
 
         String[] args = {
-                "-xsd:" + ConfigTest.DATA_DIR + "books.xsd",
+                "-xsd:" + configTest.getDataDir() + "books.xsd",
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
@@ -43,8 +45,8 @@ public class ValidateTests {
     public void testBasicInstanceValidation() {
 
         String[] args = {
-                "-xsd:" + ConfigTest.DATA_DIR + "books.xsd",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-xsd:" + configTest.getDataDir() + "books.xsd",
+                "-s:" + configTest.getDataDir() + "books.xml",
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
@@ -58,7 +60,7 @@ public class ValidateTests {
     private void testExportSCM() {
 
         String[] args = {
-                "-xsd:" + ConfigTest.DATA_DIR + "books.xsd",
+                "-xsd:" + configTest.getDataDir() + "books.xsd",
                 "-scmout:" + TEMPDIR + "books.scm",
                 "-t"};
         try {
@@ -75,7 +77,7 @@ public class ValidateTests {
 
         String[] args = {
                 "-scmin:" + TEMPDIR + "books.scm",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-s:" + configTest.getDataDir() + "books.xml",
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
@@ -95,8 +97,8 @@ public class ValidateTests {
     @Test
     public void testValidationWithParams() {
         String[] args = {
-                "-xsd:" + ConfigTest.DATA_DIR + "schema-with-param.xsd",
-                "-s:" + ConfigTest.DATA_DIR + "birthdays.xml",
+                "-xsd:" + configTest.getDataDir() + "schema-with-param.xsd",
+                "-s:" + configTest.getDataDir() + "birthdays.xml",
                 "-xsdversion:1.1",
                 "-t",
                 "baseLine=2012-01-01",
@@ -113,8 +115,8 @@ public class ValidateTests {
     @Test
     public void testValidationFailureWithParams() {
         String[] args = {
-                "-xsd:" + ConfigTest.DATA_DIR + "schema-with-param.xsd",
-                "-s:" + ConfigTest.DATA_DIR + "birthdays.xml",
+                "-xsd:" + configTest.getDataDir() + "schema-with-param.xsd",
+                "-s:" + configTest.getDataDir() + "birthdays.xml",
                 "-xsdversion:1.1",
                 "-t",
                 "-quit:off",
@@ -131,8 +133,8 @@ public class ValidateTests {
     @Test
     public void testTypeAlternativeWithParams() {
         String[] args = {
-                "-xsd:" + ConfigTest.DATA_DIR + "schema-with-param.xsd",
-                "-s:" + ConfigTest.DATA_DIR + "stayAtHome.xml",
+                "-xsd:" + configTest.getDataDir() + "schema-with-param.xsd",
+                "-s:" + configTest.getDataDir() + "stayAtHome.xml",
                 "-xsdversion:1.1",
                 "-t",
                 "dayOfWeek=Sunday"};
@@ -148,8 +150,8 @@ public class ValidateTests {
     @Test
     public void testTypeAlternativeWithParams2() {
         String[] args = {
-                "-xsd:" + ConfigTest.DATA_DIR + "schema-with-param.xsd",
-                "-s:" + ConfigTest.DATA_DIR + "goToWork.xml",
+                "-xsd:" + configTest.getDataDir() + "schema-with-param.xsd",
+                "-s:" + configTest.getDataDir() + "goToWork.xml",
                 "-xsdversion:1.1",
                 "-t",
                 "dayOfWeek=Monday"};
@@ -165,8 +167,8 @@ public class ValidateTests {
     @Test
     public void testTypeAlternativeWithParamsFailure() {
         String[] args = {
-                "-xsd:" + ConfigTest.DATA_DIR + "schema-with-param.xsd",
-                "-s:" + ConfigTest.DATA_DIR + "goToWork.xml",
+                "-xsd:" + configTest.getDataDir() + "schema-with-param.xsd",
+                "-s:" + configTest.getDataDir() + "goToWork.xml",
                 "-xsdversion:1.1",
                 "-t",
                 "dayOfWeek=Sunday"};
@@ -185,8 +187,8 @@ public class ValidateTests {
         new File(TEMPDIR + "validation-report.xml").delete();
 
         String[] args = {
-                "-xsd:" + ConfigTest.DATA_DIR + "books.xsd",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-xsd:" + configTest.getDataDir() + "books.xsd",
+                "-s:" + configTest.getDataDir() + "books.xml",
                 "-stats:" + TEMPDIR + "validation-report.xml",
                 "-t"};
         try {

@@ -26,7 +26,7 @@ public class DOM4JTreeTests extends ObjectModelTests {
         try {
             SAXReader dom4jBuilder = new SAXReader();
             dom4jBuilder.setMergeAdjacentText(true);
-            Document doc = dom4jBuilder.read(new File(ConfigTest.DATA_DIR + fileName).toURI().toString());
+            Document doc = dom4jBuilder.read(new File(configTest.getDataDir() + fileName).toURI().toString());
             DocumentBuilder builder = processor.newDocumentBuilder();
             return builder.wrap(doc);
         } catch (DocumentException e) {

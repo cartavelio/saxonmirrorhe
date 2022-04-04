@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TransformChainTest {
+    private final ConfigTest configTest = new ConfigTest();
 
     private static final String IDENTITY_STYLESHEET
             = "<?xml version=\"1.0\"?> \n" +
@@ -163,11 +164,11 @@ public class TransformChainTest {
                 }
             });
             Templates templates = factory.newTemplates(
-                    new StreamSource(new File(ConfigTest.DATA_DIR + "next-in-chain/main.xsl")));
+                    new StreamSource(new File(configTest.getDataDir() + "next-in-chain/main.xsl")));
             Transformer transformer = templates.newTransformer();
             StringWriter sw = new StringWriter();
             transformer.transform(
-                    new StreamSource(new File(ConfigTest.DATA_DIR + "next-in-chain/test.xml")),
+                    new StreamSource(new File(configTest.getDataDir() + "next-in-chain/test.xml")),
                     new StreamResult(sw)
             );
             assertTrue(sw.toString().equals("<second>principal</second>"));

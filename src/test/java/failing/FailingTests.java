@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * tests are known problems and should not inhibit progress.
  */
 public class FailingTests {
-
-    public static final String DATA_DIR = ConfigTest.DATA_DIR;
+    private final ConfigTest configTest = new ConfigTest();
+    public final String DATA_DIR = configTest.getDataDir();
 
     /**
      * Test the effect of changing a schema to add members to a substitution group.

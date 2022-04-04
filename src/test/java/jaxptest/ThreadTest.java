@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test that DOM access is threadsafe. Test deleted - because DOM access is not thread-safe!
  */
 public class ThreadTest {
+    private final ConfigTest configTest = new ConfigTest();
 
     @Test
     public void testDummy() {
@@ -198,11 +199,11 @@ public class ThreadTest {
                         factory.setAttribute(FeatureKeys.OPTIMIZATION_LEVEL, "-j");
                         factory.setAttribute(FeatureKeys.GENERATE_BYTE_CODE, true);
                         factory.setAttribute(FeatureKeys.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, 1);
-                        StreamSource styleSource = new StreamSource(new File(ConfigTest.DATA_DIR + "bills.xsl"));
+                        StreamSource styleSource = new StreamSource(new File(configTest.getDataDir() + "bills.xsl"));
                         Templates templates = factory.newTemplates(styleSource);
                         Transformer trans = templates.newTransformer();
                         StringWriter sw = new StringWriter();
-                        trans.transform(new StreamSource(new File(ConfigTest.DATA_DIR + "bills.xsl")),
+                        trans.transform(new StreamSource(new File(configTest.getDataDir() + "bills.xsl")),
                                         new StreamResult(sw));
                         System.out.println("thread-#" + Thread.currentThread().getId() + " OK");
                     } catch (Throwable ex) {
@@ -249,7 +250,7 @@ public class ThreadTest {
                     @Override
                     public void run() {
                         try {
-                            StreamSource styleSource = new StreamSource(new StringReader(copyXslSa), ConfigTest.DATA_DIR + "/");
+                            StreamSource styleSource = new StreamSource(new StringReader(copyXslSa), configTest.getDataDir() + "/");
                             final Templates templates = factory.newTemplates(styleSource);
                             System.out.println("thread-#" + Thread.currentThread().getId() + " OK");
                             assertNotNull(templates);
