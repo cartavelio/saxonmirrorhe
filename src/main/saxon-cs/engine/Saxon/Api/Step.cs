@@ -68,7 +68,7 @@ namespace Saxon.Api {
         /// Obtain a <c>Step</c> that selects the Nth item in the results of this step.
         /// </summary>
         /// <remarks>
-        /// <para>The standard LINQ methods <c>First()</c> and <c>Last()</c> methods can be
+        /// <para>The standard LINQ methods <c>First()</c> and <c>Last()</c> can be
         /// used on the results of a step to select the first and last items in the result.</para>
         /// </remarks>
         /// <param name="index">The zero-based index of the item to be selected</param>
@@ -97,7 +97,7 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// The underlying function corresponding to this <c>Step</c>
+        /// The underlying function corresponding to this <c>Step</c>.
         /// </summary>
         public Func<TInput, IEnumerable<TResult>> Func => function;
 
