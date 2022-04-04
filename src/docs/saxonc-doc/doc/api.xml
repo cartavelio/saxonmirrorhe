@@ -135,7 +135,7 @@
             </td>
             <td>
                <p>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/classSchemaValidator.html"
+                  <a href="https://www.saxonica.com/saxon-c/doc11/html/classschemavalidator.html"
                      >C++</a><br/>
                   <a href="/api/saxon_c_php_api/saxon_c_php_schemavalidator">PHP</a><br/>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PySchemaValidator"
