@@ -578,7 +578,10 @@ public class XPathParser {
         }
         language = ParsedLanguage.SEQUENCE_TYPE;
         t = new Tokenizer();
-        t.languageLevel = env.getXPathVersion();
+        int version = env.getXPathVersion();
+        t.languageLevel = version;
+        allowXPath30Syntax = version >= 30;
+        allowXPath31Syntax = version >= 31;
         allowXPath40Syntax =
                 t.allowSaxonExtensions =
                         env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || t.languageLevel == 40;
