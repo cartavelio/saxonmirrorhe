@@ -22,7 +22,6 @@ com/saxonica/testdriver/ee/XQTSCollectionFinder.class
 com/saxonica/testdriver/ee/XQTSModuleURIResolver.class
 com/saxonica/testdriver/ee/XQuery10TestSuiteDriver.class
 com/saxonica/testdriver/gui/
-com/saxonica/testdriver/gui/TestDriverGui.class
 com/saxonica/testdriver/gui/images/
 com/saxonica/testdriver/gui/images/saxonica_logo.gif
 net/
