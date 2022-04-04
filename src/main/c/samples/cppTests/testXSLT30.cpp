@@ -596,6 +596,7 @@ void testTrackingOfValueReferenceError(SaxonProcessor *processor, Xslt30Processo
     }
     sresult->failure++;
     sresult->failureList.push_back("testTrackingOfValueReferenceError");
+    trans->exceptionClear();
 
 }
 
@@ -2420,14 +2421,14 @@ int main(int argc, char* argv[]) {
     }
 
     SaxonProcessor *processor = new SaxonProcessor(true);
-    processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/local/lib/saxon-license.lic");
+    //processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/lib/saxon-license.lic");
     cout << "Test: Xslt30Processor with Saxon version=" << processor->version() << endl << endl;
 
     char buff[FILENAME_MAX]; //create string buffer to hold path
     GetCurrentDir( buff, FILENAME_MAX );
     cout<<"CWD = "<< buff<<endl;
     if(cwd != nullptr) {
-   	 processor->setcwd(cwd);//"/Users/ond1/work/development/git/saxon-dev/saxondev/src/main/c/samples/cppTests"); //set to the current working directory
+   	 processor->setcwd(cwd); //set to the current working directory
     } else {
         processor->setcwd(buff);
     }
