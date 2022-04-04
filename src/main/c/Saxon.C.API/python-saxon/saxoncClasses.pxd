@@ -19,6 +19,9 @@ cdef extern from "../SaxonProcessor.h":
         void setcwd(char* cwd)
         const char* getcwd()
 
+        void attachCurrentThread()
+
+        void detachCurrentThread()
 
         XdmValue ** createXdmValueArray(int len)
 

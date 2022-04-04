@@ -22,7 +22,7 @@
 #include <windows.h>
 #endif
 
-//#define DEBUG //remove
+#define DEBUG //remove
 //#define MEM_DEBUG //remove
 #define CVERSION "11.1"
 #define CVERSION_API_NO 1110
@@ -489,6 +489,12 @@ public:
 
     //! Clean up and destroy Java VM to release memory used. Method to be called at the end of the program
     static void release();
+
+    //! Attaches a current thread to the a Java VM
+    static void attachCurrentThread();
+
+    //! Detach JVM from the current thread
+    static void detachCurrentThread();
 
 
     //! Set the current working directory

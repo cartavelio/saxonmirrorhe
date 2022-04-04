@@ -2340,7 +2340,7 @@ void RunThread(XsltExecutable * executable, int tid, const std::string filename)
     att_arg.name = NULL;
     att_arg.group = NULL;
 
-   // SaxonProcessor::sxn_environ->jvm->AttachCurrentThread((void**)&SaxonProcessor::sxn_environ->env, &att_arg);
+    SaxonProcessor::sxn_environ->jvm->AttachCurrentThread((void**)&SaxonProcessor::sxn_environ->env, NULL);
     cerr<<endl<<"RunThread cp0,  THEAD ID="<<tid<<endl;
     fflush(stderr);
     fflush(stdout);
@@ -2377,7 +2377,7 @@ void RunThread(XsltExecutable * executable, int tid, const std::string filename)
         cerr << "XsltExecutable is nullptr" << endl;
     }
 
-   // (   SaxonProcessor::sxn_environ->jvm)->DetachCurrentThread();
+    (   SaxonProcessor::sxn_environ->jvm)->DetachCurrentThread();
 
 }
 
@@ -2394,7 +2394,10 @@ void testThreads (SaxonProcessor * processor, Xslt30Processor * trans, sResultCo
 
     for (int i = 0; i < s.size(); i++) {
 
-        XsltExecutable * executable = trans->compileFromFile("q12.xsl");
+        XsltExecutable * executable = trans->compileFromFile("../data/q12.xsl");
+        if(executable == nullptr) {
+            continue;
+        }
             threads.push_back(std::thread(RunThread, executable, i, s[i]));
 
     }

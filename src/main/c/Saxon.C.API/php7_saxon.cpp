@@ -422,6 +422,38 @@ PHP_METHOD(SaxonProcessor, createQNameValue)
 
 }
 
+PHP_METHOD(SaxonProcessor,  attachCurrentThread){
+    SaxonProcessor *saxonProcessor;
+
+    if (ZEND_NUM_ARGS()>0) {
+        WRONG_PARAM_COUNT;
+    }
+    zend_object* pobj = Z_OBJ_P(getThis());
+    saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
+    saxonProcessor = obj->saxonProcessor;
+    if (saxonProcessor != nullptr) {
+        saxonProcessor->attachCurrentThread();
+        return;
+    }
+    return;
+
+}
+PHP_METHOD(SaxonProcessor,  detachCurrentThread){
+    SaxonProcessor *saxonProcessor;
+
+    if (ZEND_NUM_ARGS()>0) {
+        WRONG_PARAM_COUNT;
+    }
+    zend_object* pobj = Z_OBJ_P(getThis());
+    saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
+    saxonProcessor = obj->saxonProcessor;
+    if (saxonProcessor != nullptr) {
+        saxonProcessor->detachCurrentThread();
+        return;
+    }
+        return;
+    }
+
 
 PHP_METHOD(SaxonProcessor, isSchemaAware)
 {
