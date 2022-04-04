@@ -8,13 +8,25 @@ class JarSignPluginExtension {
   String password = "THIS-IS-NOT-THE-PASSWORD"
   String keystore = "THIS-IS-NOT-THE-KEYSTORE"
   ArrayList jarSigner = ["jarsigner"]
+  ArrayList nugetSigner = ["nuget"]
   ArrayList exeSigner = ["signtool"]
   boolean signJars = false
+  boolean signNugets = false
   boolean signExes = false
   OperatingSystem systemOs = OperatingSystem.current()
 
   public boolean getCanSignJars() {
     if (jarSigner[0] == "echo") {
+      return true
+    }
+
+    return !(alias.startsWith("THIS-IS-NOT")
+             || password.startsWith("THIS-IS-NOT")
+             || keystore.startsWith("THIS-IS-NOT"))
+  }
+
+  public boolean getCanSignNuget() {
+    if (nugetSigner[0] == "echo") {
       return true
     }
 
@@ -40,6 +52,13 @@ class JarSignPluginExtension {
     return signJars
   }    
 
+  public boolean getMakeSignedNuget() {
+    if (signNugets && !getCanSignNuget()) {
+      throw new GradleException("Build is not configured to sign nupkg files.")
+    }
+    return signJars
+  }    
+
   public boolean getMakeSignedExes() {
     if (signExes && !getCanSignExes()) {
       throw new GradleException("Build is not configured to sign executables.")
@@ -53,6 +72,17 @@ class JarSignPluginExtension {
                 "-keystore", keystore,
                 "-tsa", "http://rfc3161timestamp.globalsign.com/advanced"]
     return command += [jarfile, alias, "-storepass", password]
+  }
+
+  public ArrayList signNugetCommand(String nugetfile) {
+    ArrayList command = nugetSigner
+    command += ["sign", nugetfile,
+	        "-CertificatePath", keystore,
+	        "-Timestamper", "http://timestamp.digicert.com",
+	        "-OutputDirectory", "build/distributions",
+	        "-Verbosity", "detailed",
+	        "-CertificatePassword", password]
+    return command
   }
 
   public ArrayList signExeCommand(String exefile) {
@@ -124,5 +154,13 @@ public class JarSignPlugin implements Plugin<Project> {
     if (prop != null) {
       extension.exeSigner = [prop]
     }
+
+    if (project.findProperty("testSignNuget") == "true") {
+      extension.exeSigner = ["echo", "NUGET"]
+    }
+
+    prop = project.findProperty("saxonSignNugets") ?: System.getenv("SAXON_SIGN_NUGETS")
+
+    extension.signNugets = (prop == "true")
   }
 }
