@@ -190,9 +190,13 @@ public class ConsumingOperand extends UnaryExpression {
 
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
-        destination.startElement("consume", this);
-        getBaseExpression().export(destination);
-        destination.endElement();
+        if ("JS".equals(((ExpressionPresenter.ExportOptions) destination.getOptions()).target)) {
+            getBaseExpression().export(destination);
+        } else {
+            destination.startElement("consume", this);
+            getBaseExpression().export(destination);
+            destination.endElement();
+        }
     }
 
     /**
