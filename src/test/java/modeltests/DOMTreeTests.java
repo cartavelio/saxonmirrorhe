@@ -1,6 +1,8 @@
 package modeltests;
 
 import jaxptest.ConfigTest;
+import net.sf.saxon.dom.DOMObjectModel;
+import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.DocumentBuilder;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XdmNode;
@@ -17,6 +19,11 @@ import static org.junit.Assert.fail;
 public class DOMTreeTests extends ObjectModelTests {
 
     @Override
+    TreeModel getTreeModel() {
+        return DOMObjectModel.getInstance();
+    }
+
+    @Override
     XdmNode buildExternalDocument(Processor processor, String fileName) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -31,5 +38,6 @@ public class DOMTreeTests extends ObjectModelTests {
             return null;
         }
     }
+
 }
 
