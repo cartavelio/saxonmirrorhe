@@ -1850,9 +1850,8 @@ public class DOMTest {
                     StringWriter sw = new StringWriter();
                     StreamResult result = new StreamResult(sw);
                     transformerFactory.newTransformer().transform(new DOMSource(document), result);
-                    fail("Should be rejected");
                 } catch (XPathException err) {
-                    // OK
+                    fail("Should be a warning");
                 }
             }
 
