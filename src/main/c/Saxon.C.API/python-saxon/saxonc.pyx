@@ -1456,20 +1456,27 @@ cdef class PyXsltExecutable:
         #else:
         #raise Warning("setJustInTimeCompilation: argument must be a boolean type. JIT not set")
 
-     def set_capture_result_documents(self, bool value):
+     def set_capture_result_documents(self, bool value, bool raw_result=False):
         """
-        set_capture_result_documents(self, value)
-        Enable the capture of the result-document output into a PyXdmMap. This overrides the default mechanism.
+        set_capture_result_documents(self, value, raw_result)
+        Enable the capture of the result-document output into a dict. This overrides the default mechanism.
         If this option is enabled, then any document created using xsl:result-document is saved (as a PyXdmNode)
-        in a PyXdmMap object where it is accessible using the URI as a key. After the execution of the transformation
+        in a dict object where it is accessible using the URI as a key. After the execution of the transformation
         a call on the get_result_documents method is required to get access to the result-documents in the map.
+        It is also possible to capture the result-document as a raw result directly as an PyXdmValue, without
+        constructing an XML tree, and without serialization. It corresponds to the serialization.
         Args:
             value (bool): true causes secondary result documents from the transformation to be saved in a map;
             false disables this option.
+            raw_result (bool): true enables the handling of raw destination for resultsDocuments. If not
+            supplied this can also be set on the setResultAsRawValue method. The setResultAsRawValue method
+            has higher priority to this flag
         """
         cdef bool c_value
         c_value = value
-        self.thisxptr.setCaptureResultDocuments(c_value)
+        cdef bool c_raw_result
+        c_raw_result = raw_result
+        self.thisxptr.setCaptureResultDocuments(c_value, c_raw_result)
 
      def get_result_documents(self):
          """
@@ -1478,24 +1485,24 @@ cdef class PyXsltExecutable:
          returned if the user has not enabled this feature via the method set_capture_result_documents
 
          Returns:
-             dict [str, PyXdmNode]: Dict of the key, value pair. Indexed by the absolute URI of each result
-             document, and the corresponding value is an PyXdmNode object containing the result document (as
+             dict [str, PyXdmValue]: Dict of the key, value pair. Indexed by the absolute URI of each result
+             document, and the corresponding value is an PyXdmValue object containing the result document (as
              an in-memory tree, without serialization).
          """
-         cdef map[string , saxoncClasses.XdmNode * ] c_dataMap
+         cdef map[string , saxoncClasses.XdmValue * ] c_dataMap
          cdef dict p_dataMap = {}
-         cdef PyXdmNode nval = None
+         cdef PyXdmValue nval = None
 
          c_dataMap = self.thisxptr.getResultDocuments()
 
-         cdef map[string , saxoncClasses.XdmNode * ].iterator it = c_dataMap.begin()
+         cdef map[string , saxoncClasses.XdmValue * ].iterator it = c_dataMap.begin()
          cdef int size = c_dataMap.size()
 
          cdef str key_str
          while(it != c_dataMap.end()):
              c_xdmNode =  dereference(it).second
-             nval = PyXdmNode()
-             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>c_xdmNode
+             nval = PyXdmValue()
+             nval.thisvptr = <saxoncClasses.XdmValue*>c_xdmNode
              key_str = make_py_str(dereference(it).first.c_str())
              p_dataMap[key_str] =  nval
              postincrement(it)
@@ -2777,13 +2784,33 @@ cdef class PyXPathProcessor:
         if type_ == 4:
             aval = PyXdmAtomicValue()
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmItem
+            aval.derivedptr.incrementRefCount()
             return aval
         elif type_ == 3:
             val = PyXdmNode()
             val.derivednptr = val.derivedptr = val.thisvptr = <saxoncClasses.XdmNode*>xdmItem
+            val.derivedptr.incrementRefCount()
             return val
+        elif type_ == 5:
+            fval = PyXdmFunctionItem()
+            fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmItem
+            fval.thisvptr.incrementRefCount()
+            return fval
+        elif type_ == 6:
+            mval = PyXdmMap()
+            mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmItem
+            mval.thisvptr.incrementRefCount()
+            return mval
+        elif type_ == 7:
+            aaval = PyXdmArray()
+            aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmItem
+            aaval.thisvptr.incrementRefCount()
+            return aaval
         else:
-            return None
+            val = PyXdmItem()
+            val.derivedptr = val.thisvptr = xdmItem
+            val.derivedptr.incrementRefCount()
+            return val
 
      def set_context(self, **kwds):
         """

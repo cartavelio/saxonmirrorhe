@@ -241,7 +241,7 @@ cdef extern from "../SaxonProcessor.h":
 
         void setInitialMode(const char * modeName)
 
-        void setCaptureResultDocuments(bool flag)
+        void setCaptureResultDocuments(bool flag, bool rawResult)
 
         # The initial value to which templates are to be applied (equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>)
         void setInitialMatchSelection(XdmValue * selection)
@@ -255,7 +255,7 @@ cdef extern from "../SaxonProcessor.h":
 
         void setResultAsRawValue(bool option)
 
-        map[string,XdmNode*]& getResultDocuments()
+        map[string,XdmValue*]& getResultDocuments()
 
         XsltExecutable *clone()
 

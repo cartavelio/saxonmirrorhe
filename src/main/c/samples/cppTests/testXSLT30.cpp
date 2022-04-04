@@ -1415,6 +1415,49 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans, sResultCo
     parameterValues.clear();
 }
 
+
+void  testResultDocumentAsMap(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *sresult) {
+
+    cout << endl << "Test: testResultDocumentAsMap:" << endl;
+
+    XdmNode * inputDoc = proc->parseXmlFromString("<a>b</a>");
+
+    XsltExecutable * executable = trans->compileFromString("<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='a'><xsl:result-document href='out.xml'><e>f</e> </xsl:result-document> <xsl:result-document href='out2.xml'><e>hello</e> </xsl:result-document></xsl:template></xsl:stylesheet>");
+
+    if(executable == nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testResultDocumentAsMap");
+        if(trans->exceptionOccurred()) {
+            const char * message = trans->getErrorMessage();
+            if(message != nullptr) {
+                cout << "Error: " << trans->getErrorMessage() << endl;
+            }
+        }
+        trans->exceptionClear();
+        return;
+    }
+    executable->setCaptureResultDocuments(true);
+
+        if(executable->exceptionOccurred()) {
+            sresult->failureList.push_back("testResultDocumentAsMap");
+            const char * message = executable->getErrorMessage();
+            if(message != nullptr) {
+                cout << "Error: " << executable->getErrorMessage() << endl;
+            }
+            executable->exceptionClear();
+            delete executable;
+            return;
+        }
+
+    sresult->success++;
+    delete executable;
+    return;
+
+
+
+
+}
+
 void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *sresult) {
     cout << endl << "Test: testResolveUri:" << endl;
 
@@ -2406,6 +2449,10 @@ int main(int argc, char* argv[]) {
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
+    testResultDocumentAsMap(processor, trans, sresult);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+
     testContextNotRoot(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
@@ -2461,7 +2508,7 @@ int main(int argc, char* argv[]) {
         processor->setcwd(buff);
     }
     Xslt30Processor *trans2 = processor->newXslt30Processor();
-    cerr<<" after trans2 cp0"<<endl;
+
     testApplyTemplatesString1(trans2, sresult);
     cout<<endl<<"============================================================="<<endl<<endl;
 
