@@ -37,11 +37,11 @@ import java.util.stream.Stream;
  * its typed value. Navigation to other nodes is supported through a single method, {@link #axisIterator},
  * which allows other nodes to be retrieved by following any of the XPath axes.</p>
  * <p>Note that node identity cannot be inferred from object identity. The same node may be represented
- * by different <code>XdmNode</code> instances at different times, or even at the same time. The equals()
+ * by different <code>XdmNode</code> instances at different times, or even at the same time. The {@link #equals}
  * method on this class can be used to test for node identity.</p>
  * <p>Navigation from a node to other related nodes can be achieved using the {@link XdmValue#select(Step)}
  * method which this class inherits. Simple navigation to children or attributes can also be achieved using
- * the {@link #children()} and {@link #attribute} methods.</p>
+ * the {@link #children} and {@link #attribute} methods.</p>
  * @see net.sf.saxon.sapling.SaplingDocument#toXdmNode(Processor)
  * @see net.sf.saxon.sapling.SaplingElement#toXdmNode(Processor)
  *
