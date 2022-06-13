@@ -36,6 +36,9 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      */
     public AxiomDocumentNodeWrapper(OMDocument root, String baseURI, Configuration config) {
         super(root);
+        if (!config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+            config.requireProfessionalLicense("Axiom");
+        }
         treeInfo = new AxiomDocument(root, baseURI, config);
         ((GenericTreeInfo)treeInfo).setRootNode(this);
     }
