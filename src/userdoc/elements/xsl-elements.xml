@@ -4449,9 +4449,9 @@
             <name>sort</name>
             <description>
                 <p>Used within an <a class="bodylink code" href="../for-each">xsl:for-each</a>, <a
-                        class="bodylink code" href="../apply-templates">xsl:apply-templates</a>, <a
+                    class="bodylink code" href="../apply-templates">xsl:apply-templates</a>, <a
                         class="bodylink code" href="../for-each-group">xsl:for-each-group</a>, or <a
-                        class="bodylink code" href="../perform-sort">xsl:perform-sort</a> to
+                            class="bodylink code" href="../perform-sort">xsl:perform-sort</a> to
                     indicate the order in which the selected elements are processed.</p>
             </description>
             <attributes>
@@ -4459,44 +4459,47 @@
                     key. Default value ".".</attribute>
                 <attribute name="lang" use="optional">Determines the algorithm used for alphabetic
                     collating, as an ISO language code such as <code>en</code> (English) or
-                        <code>de</code> (German). The default is based on the Java system locale.
+                    <code>de</code> (German). 
                     The value is used to select a collating sequence associated with the Java Locale
-                    for that language.</attribute>
+                    for that language. If the attribute is omitted, and in the absence of a specific collation,
+                    Saxon uses Unicode codepoint collation.</attribute>
                 <attribute name="order" use="optional">Determines the sort order; the default is
-                        <code>ascending</code>. There is no control over language, collating
-                    sequence, or data type.</attribute>
+                    <code>ascending</code>.</attribute>
                 <attribute name="collation" use="optional">The name of a collating sequence. If
                     present it must be a collation URI recognized by
                     Saxon: see <a class="bodylink"
                         href="/localization/sorting-and-collations"
                         >Sorting and collations</a>.</attribute>
                 <attribute name="stable" use="optional">Permitted only on the first
-                        <code>xsl:sort</code> element within a sort key. Determines the ordering
+                    <code>xsl:sort</code> element within a sort key. Determines the ordering
                     when two sort key values compare equal. For such elements, the value
-                        <code>yes</code> (the default) means that the order after sorting is the
+                    <code>yes</code> (the default) means that the order after sorting is the
                     same as the order before sorting; while the value <code>no</code> means that the
                     ordering is implementation-dependent.</attribute>
                 <attribute name="case-order" use="optional">Relevant only for
-                        <code>data-type="text"</code>; it determines whether uppercase letters are
+                    <code>data-type="text"</code>; it determines whether uppercase letters are
                     sorted before their lowercase equivalents, or vice-versa.</attribute>
                 <attribute name="data-type" use="optional">Determines whether collating is based on
                     alphabetic sequence or numeric sequence. The permitted values are either
-                        <code>text</code> or <code>number</code>, or a built-in type in XML Schema,
-                    such as <code>xs:date</code> or <code>xs:decimal</code>.</attribute>
+                    <code>text</code> or <code>number</code>. The W3C specification permits other
+                    values and states that their effect is implementation-defined; Saxon rejects all values
+                    other than <code>text</code> and <code>number</code>. The default is to sort according
+                    to the data type of the sort key, for example <code>select="xs:date(@date-of-birth)"</code>
+                    does a chronological sort.</attribute>
             </attributes>
             <details>
                 <p>When using the Unicode Collation Algorithm, only the <code>order</code> and
-                        <code>data-type</code> control attributes are relevant - all other controls
+                    <code>data-type</code> control attributes are relevant - all other controls
                     are attached as query parameters to the collation URI.</p>
-
+                
                 <p>Several sort keys are allowed: they are written in major-to-minor order.</p>
             </details>
             <examples>
                 <example>
                     <p>Sorting with <code>xsl:apply-templates</code>. This example shows a template
                         for a <code>&lt;BOOKLIST&gt;</code> element which processes all the child
-                            <code>&lt;BOOK&gt;</code> elements in order of their child
-                            <code>&lt;AUTHOR&gt;</code> elements; books with the same author are in
+                        <code>&lt;BOOK&gt;</code> elements in order of their child
+                        <code>&lt;AUTHOR&gt;</code> elements; books with the same author are in
                         descending order of the <code>DATE</code> attribute.</p>
                     <samp><![CDATA[<xsl:template match="BOOKLIST">
     <h2>
@@ -4510,8 +4513,8 @@
                 <example>
                     <p>Sorting with <code>xsl:for-each</code>. This example also shows a template
                         for a <code>&lt;BOOKLIST&gt;</code> element which processes all the child
-                            <code>&lt;BOOK&gt;</code> elements in order of their child
-                            <code>&lt;AUTHOR&gt;</code> elements.</p>
+                        <code>&lt;BOOK&gt;</code> elements in order of their child
+                        <code>&lt;AUTHOR&gt;</code> elements.</p>
                     <samp><![CDATA[<xsl:template match="BOOKLIST">
     <h2>
         <xsl:for-each select="BOOK">
@@ -4525,8 +4528,8 @@
                 </example>
                 <example>
                     <p>Sorting with <code>xsl:for-each</code> using Unicode Collation Algorithm.
-                            <code>&lt;BOOK&gt;</code> elements are processed in order of their child
-                            <code>&lt;TITLE&gt;</code> elements, sorted as if they were in French
+                        <code>&lt;BOOK&gt;</code> elements are processed in order of their child
+                        <code>&lt;TITLE&gt;</code> elements, sorted as if they were in French
                         dictionary order (where accents are compared in a reverse direction).</p>
                     <samp><![CDATA[<xsl:for-each select="BOOK">
     <xsl:sort select="TITLE" 
@@ -4541,7 +4544,10 @@
             <in-spec>xslt20</in-spec>
             <in-spec>xslt30</in-spec>
             <saxon-edition>ALL</saxon-edition>
-            <status>The Saxon implementation uses an internal sort routine using the QuickSort algorithm.</status>
+            <status>The SaxonJ implementation uses <code>java.util.Arrays.sort()</code>: see the
+                Javadoc documentation for that method for information about the performance characteristics
+                of the sort algorithm. The SaxonCS implementation uses <code>System.Array.sort()</code>:
+                see the .NET documentation for details of the sort algorithm used.</status>
             <see-also name="apply-templates" type="xsl-elements"/>
             <see-also name="for-each" type="xsl-elements"/>
             <see-also name="for-each-group" type="xsl-elements"/>
