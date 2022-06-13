@@ -621,7 +621,7 @@ public class Gizmo {
                 } else {
                     throw new XPathException("New name must evaluate to a string or QName");
                 }
-                ((MutableNodeInfo) item).rename(new FingerprintedQName(newQName, config.getNamePool()));
+                ((MutableNodeInfo) item).rename(new FingerprintedQName(newQName, config.getNamePool()), true);
             } else {
                 throw new XPathException("Selected item is not a renameable node");
             }
@@ -690,7 +690,7 @@ public class Gizmo {
                                 ((NodeInfo)newValue.itemAt(0)).getNodeKind() == Type.ATTRIBUTE) {
                             NodeInfo att = ((NodeInfo) newValue.itemAt(0));
                             ((MutableNodeInfo) target.getParent()).addAttribute(
-                                    NameOfNode.makeName(att), (SimpleType)att.getSchemaType(), att.getStringValueCS(), 0);
+                                    NameOfNode.makeName(att), (SimpleType)att.getSchemaType(), att.getStringValueCS(), 0, true);
                         } else {
                             throw new XPathException("Replacement for an attribute must be an attribute");
                         }
@@ -787,7 +787,7 @@ public class Gizmo {
                         if (existing != null) {
                             target.removeAttribute(existing);
                         }
-                        target.addAttribute(attName, BuiltInAtomicType.UNTYPED_ATOMIC, att.getStringValue(), 0);
+                        target.addAttribute(attName, BuiltInAtomicType.UNTYPED_ATOMIC, att.getStringValue(), 0, true);
                     }
                 }
             } else {

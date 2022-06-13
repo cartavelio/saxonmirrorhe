@@ -310,7 +310,8 @@ public class StaticQueryContext {
     /**
      * Set the Base URI of the query
      *
-     * @param baseURI the base URI of the query, or null to indicate that no base URI is available
+     * @param baseURI the base URI of the query, or null to indicate that no base URI is available.
+     *                This should be a valid absolute URI.
      * @since 8.4
      */
 

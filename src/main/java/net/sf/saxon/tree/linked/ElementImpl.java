@@ -439,10 +439,11 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * Rename this node
      *
      * @param newName the new name
+     * @param inheritNamespaces
      */
 
     @Override
-    public void rename(NodeName newName) {
+    public void rename(NodeName newName, boolean inheritNamespaces) {
         String prefix = newName.getPrefix();
         String uri = newName.getURI();
         NamespaceBinding ns = new NamespaceBinding(prefix, uri);
@@ -452,7 +453,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         }
         if (!uc.equals(uri)) {
             if (uc.isEmpty()) {
-                addNamespace(ns);
+                addNamespace(ns, inheritNamespaces);
             } else {
                 throw new IllegalArgumentException(
                         "Namespace binding of new name conflicts with existing namespace binding");
@@ -472,7 +473,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      */
 
     @Override
-    public void addNamespace(/*@NotNull*/ NamespaceBinding binding) {
+    public void addNamespace(/*@NotNull*/ NamespaceBinding binding, boolean inheritNamespaces) {
         if (binding.getURI().isEmpty()) {
             throw new IllegalArgumentException("Cannot add a namespace undeclaration");
         }
@@ -540,11 +541,12 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * @param attType    the type annotation of the new attribute
      * @param value      the string value of the new attribute
      * @param properties properties including IS_ID and IS_IDREF properties
+     * @param inheritNamespaces
      * @throws IllegalStateException if the element already has an attribute with the given name.
      */
 
     @Override
-    public void addAttribute(/*@NotNull*/ NodeName nodeName, SimpleType attType, /*@NotNull*/ CharSequence value, int properties) {
+    public void addAttribute(/*@NotNull*/ NodeName nodeName, SimpleType attType, /*@NotNull*/ CharSequence value, int properties, boolean inheritNamespaces) {
         AttributeMapWithIdentity atts = prepareAttributesForUpdate();
         atts = atts.add(new AttributeInfo(nodeName, attType, value.toString(), Loc.NONE, ReceiverOption.NONE));
         setAttributes(atts);
@@ -555,7 +557,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             String uc = getURIForPrefix(prefix, false);
             if (uc == null) {
                 // The namespace is not already declared on the element
-                addNamespace(binding);
+                addNamespace(binding, inheritNamespaces);
             } else if (!uc.equals(binding.getURI())) {
                 throw new IllegalStateException(
                         "Namespace binding of new name conflicts with existing namespace binding");
@@ -624,20 +626,46 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * Add a namespace node from this node. The namespaces of its descendant nodes are unaffected.
      * The method has no effect on non-element nodes. If there is an existing namespace using this
      * prefix, the method throws an exception.
-     *
-     * @param prefix the namespace prefix. Empty string for the default namespace.
+     *  @param prefix the namespace prefix. Empty string for the default namespace.
      * @param uri    The namespace URI.
+     * @param inherit
      */
     @Override
-    public void addNamespace(String prefix, String uri) {
-        String existingURI = namespaceMap.getURI(prefix);
-        if (existingURI == null) {
-            namespaceMap = namespaceMap.put(prefix, uri);
-        } else if (!existingURI.equals(uri)) {
-            throw new IllegalStateException(
-                    "New namespace binding conflicts with existing namespace binding");
+    public void addNamespace(String prefix, String uri, boolean inherit) {
+        NamespaceBinding binding = new NamespaceBinding(prefix, uri);
+        if (binding.getURI().isEmpty()) {
+            throw new IllegalArgumentException("Cannot add a namespace undeclaration");
+        }
+        String existing = namespaceMap.getURI(binding.getPrefix());
+        if (existing != null) {
+            if (!existing.equals(binding.getURI())) {
+                throw new IllegalArgumentException("New namespace conflicts with existing namespace binding");
+            }
+        } else {
+            NamespaceMap oldMap = namespaceMap;
+            namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getURI());
+            if (inherit && namespaceMap != oldMap) {
+                for (NodeInfo child : children(NodeKindTest.ELEMENT)) {
+                    ((ElementImpl) child).inheritParentNamespaces(binding, oldMap, namespaceMap);
+                }
+            }
         }
     }
+
+    private void inheritParentNamespaces(NamespaceBinding binding, NamespaceMap oldParentMap, NamespaceMap newParentMap) {
+        NamespaceMap oldMap = namespaceMap;
+        if (oldMap.getURIForPrefix(binding.getPrefix(), false) == null) {
+            if (namespaceMap == oldParentMap) {
+                namespaceMap = newParentMap;
+            } else {
+                namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getURI());
+            }
+            for (NodeInfo child : children(NodeKindTest.ELEMENT)) {
+                ((ElementImpl) child).inheritParentNamespaces(binding, oldMap, namespaceMap);
+            }
+        }
+    }
+
 
     /**
      * Remove type information from this node (and its ancestors, recursively).
