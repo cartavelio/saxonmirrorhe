@@ -10,16 +10,19 @@ package net.sf.saxon.testdriver;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Query;
+import net.sf.saxon.event.Builder;
 import net.sf.saxon.functions.ResolveQName;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Step;
+import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.XSLTTraceListener;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 
@@ -33,8 +36,14 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static net.sf.saxon.s9api.streams.Predicates.*;
-import static net.sf.saxon.s9api.streams.Steps.*;
+import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
+import static net.sf.saxon.s9api.streams.Predicates.isElement;
+import static net.sf.saxon.s9api.streams.Predicates.not;
+import static net.sf.saxon.s9api.streams.Steps.attribute;
+import static net.sf.saxon.s9api.streams.Steps.child;
+import static net.sf.saxon.s9api.streams.Steps.descendant;
+import static net.sf.saxon.s9api.streams.Steps.path;
+import static net.sf.saxon.s9api.streams.Steps.root;
 
 /**
  * This class runs the W3C XSLT Test Suite, driven from the test catalog.
@@ -383,7 +392,6 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                             resultsDoc.writeTestcaseElement(testName, "fail", outcome.getComment());
                         }
                     }
-                    System.err.println("Optimization OK: " + optimizationAssertion);
                 } catch (SaxonApiException e) {
                     System.err.println("Optimization assertion failed: " + optimizationAssertion);
                 }
@@ -549,6 +557,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         boolean expectEarlyExit = earlyExit.equals(Optional.of("true"));
         if (expectEarlyExit != collector.isMadeEarlyExit()) {
             outcome.setComment(expectEarlyExit ? "Failed to make early exit" : "Unexpected early exit");
+            System.err.println(expectEarlyExit ? "Failed to make early exit" : "Unexpected early exit");
             if (strict) {
                 noteFailure(testSetName, testName);
                 resultsDoc.writeTestcaseElement(testName, "fail", outcome.getComment());
@@ -1154,19 +1163,25 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
     protected boolean assertOptimization(XsltExecutable stylesheet, String assertion) throws SaxonApiException {
 
-        XdmDestination builder = new XdmDestination();
-        stylesheet.explain(builder);
-        builder.close();
-        XdmNode expressionTree = builder.getXdmNode();
-        XPathCompiler xpe = stylesheet.getProcessor().newXPathCompiler();
-        XPathSelector exp = xpe.compile(assertion).load();
-        exp.setContextItem(expressionTree);
-        XdmAtomicValue bv = (XdmAtomicValue) exp.evaluateSingle();
-        if (bv == null || !bv.getBooleanValue()) {
-            println("** Optimization assertion failed");
-            println(expressionTree.toString());
+        try {
+            Builder builder = new TinyBuilder(stylesheet.getProcessor().getUnderlyingConfiguration().makePipelineConfiguration());
+            ExpressionPresenter presenter = new ExpressionPresenter(builder);
+            stylesheet.getUnderlyingCompiledStylesheet().getTopLevelPackage().export(presenter);
+            builder.close();
+            XdmNode expressionTree = new XdmNode(builder.getCurrentRoot());
+            XPathCompiler xpe = stylesheet.getProcessor().newXPathCompiler();
+            xpe.declareNamespace("", "http://ns.saxonica.com/xslt/export");
+            XPathSelector exp = xpe.compile(assertion).load();
+            exp.setContextItem(expressionTree);
+            XdmAtomicValue bv = (XdmAtomicValue) exp.evaluateSingle();
+            if (bv == null || !bv.getBooleanValue()) {
+                println("** Optimization assertion failed: " + assertion);
+                println(expressionTree.toString());
+            }
+            return bv != null && bv.getBooleanValue();
+        } catch (XPathException e) {
+            throw new SaxonApiException(e);
         }
-        return bv != null && bv.getBooleanValue();
     }
 
     // Dependencies which are always satisfied in Saxon. (Note, this doesn't necessarily

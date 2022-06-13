@@ -82,8 +82,20 @@ public class ExpressionPresenter {
     }
 
     /**
+     * Make an ExpressionPresenter that writes to a specified tree builder
+     *
+     * @param builder the tree builder
+     */
+
+    public ExpressionPresenter(Builder builder) {
+        this();
+        init(builder.getConfiguration(), builder, false);
+    }
+
+
+    /**
      * Make an ExpressionPresenter that writes indented output to a specified output stream,
-     * with checksumming
+     * with optional checksum
      *
      * @param config   the Saxon configuration
      * @param out      the output destination

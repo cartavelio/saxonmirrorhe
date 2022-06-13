@@ -525,9 +525,9 @@ public class StylesheetPackage extends PackageData {
             int slot = slotManager.allocateSlotNumber(var.getVariableQName());
             var.setPackageData(this);
             var.setBinderySlotNumber(slot);
-            if (c.getVisibility() != Visibility.HIDDEN) {
-                addGlobalVariable(var);
-            }
+//            if (c.getVisibility() != Visibility.HIDDEN) {
+//                addGlobalVariable(var);
+//            }
         }
     }
 
