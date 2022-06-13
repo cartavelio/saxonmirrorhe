@@ -1,8 +1,10 @@
 package regextests;
 
 import jaxptest.ConfigTest;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntRangeSet;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -91,6 +93,35 @@ public class testRegex {
         System.err.println("Finding P{Lu}");
         while (m1.find()) {
             System.err.println("Found at " + m1.start());
+        }
+    }
+
+    @Test
+    public void testJFlagMatches() {
+        // Saxon extension; j flag causes use of Java regex engine
+        try {
+            Processor p = new Processor(true);
+            XPathCompiler c = p.newXPathCompiler();
+            XdmItem result = c.evaluateSingle("matches(' ', '^\\x20$', ';j')", null);
+            Assertions.assertTrue(((XdmAtomicValue)result).getBooleanValue());
+            result = c.evaluateSingle("matches('Z ', '^z\\x20$', 'i;j')", null);
+            Assertions.assertTrue(((XdmAtomicValue) result).getBooleanValue());
+        } catch (SaxonApiException e) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void testJFlagReplace() {
+        // Saxon extension; j flag causes use of Java regex engine
+        try {
+            Processor p = new Processor(true);
+            XPathCompiler c = p.newXPathCompiler();
+            XdmItem result = c.evaluateSingle(
+                    "replace('3/20/1986', '(?<mm>[0-9]+)/(?<dd>[0-9]+)/(?<yy>[0-9]+)', '${yy}/${mm}/${dd}\\$', ';j')", null);
+            Assertions.assertEquals("1986/3/20$", result.getStringValue());
+        } catch (SaxonApiException e) {
+            Assertions.fail(e);
         }
     }
 
