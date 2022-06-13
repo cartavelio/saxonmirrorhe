@@ -37,7 +37,7 @@ import java.util.*;
 public class Compilation {
 
     // diagnostic switch to control output of timing information
-    public static boolean TIMING = false;
+    public static boolean TIMING = true;
     private Configuration config;
     private CompilerInfo compilerInfo;
     private PrincipalStylesheetModule principalStylesheetModule;

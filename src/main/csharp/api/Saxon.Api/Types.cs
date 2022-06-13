@@ -962,11 +962,25 @@ namespace Saxon.Api
 		internal char occurrenceIn;
         internal int occurrence;
 
-
+		/// <summary>
+		/// Occurrence indicator representing zero or more occurrences ("*")
+		/// </summary>
 		public const char ZERO_OR_MORE='*';
+		/// <summary>
+		/// Occurrence indicator representing one or more occurrences ("+")
+		/// </summary>
 		public const char ONE_OR_MORE = '+';
+		/// <summary>
+		/// Occurrence indicator representing zero or one occurrences ("?")
+		/// </summary>
 		public const char ZERO_OR_ONE = '?';
-		public const char ZERO = '0'; //xBA
+		/// <summary>
+		/// Occurrence indicator representing exactly zero occurrences ("0")
+		/// </summary>
+		public const char ZERO = '0'; 
+		/// <summary>
+		/// Occurrence indicator representing zero or more occurrences (space character, " ")
+		/// </summary>
 		public const char ONE = ' ';
 
 		/// <summary>

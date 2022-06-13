@@ -913,9 +913,20 @@ namespace Saxon.Api
 
         private net.sf.saxon.functions.URIQueryParameters uriQueryParameters;
 
-
+        /// <summary>
+        /// Constant indicating that failure to retrieve document in the collection is to be treated
+        /// as a fatal error.
+        /// </summary>
         public const int ON_ERROR_FAIL = 1;
+        /// <summary>
+        /// Constant indicating that failure to retrieve document in the collection is to be treated
+        /// as a warning condition.
+        /// </summary>
         public const int ON_ERROR_WARNING = 2;
+        /// <summary>
+        /// Constant indicating that failure to retrieve document in the collection is to be silently
+        /// ignored
+        /// </summary>
         public const int ON_ERROR_IGNORE = 3;
 
 		/// <summary>
@@ -981,7 +992,17 @@ namespace Saxon.Api
             return uriQueryParameters.getXInclude().booleanValue();
         }
 
+        /// <summary>
+        /// Misspelt and obsolete synonym of <c>GetMetaData</c>
+        /// </summary>
+        /// <returns></returns>
+
         public bool GetMeataData()
+        {
+            return uriQueryParameters.getMetaData().booleanValue();
+        }
+        
+        public bool GetMetaData()
         {
             return uriQueryParameters.getMetaData().booleanValue();
         }

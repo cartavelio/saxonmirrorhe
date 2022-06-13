@@ -149,6 +149,29 @@ namespace Saxon.Api
             config.registerExternalObjectModel(new DotNetObjectModelDefinition());
             processor = new JProcessor(config);
         }
+        
+        /// <summary>
+        /// A used-supplied callback that is used to retrieve a resource collection given a collection URI.
+        /// </summary>
+        /// <remarks>
+        /// <para>If no collection finder is supplied, then the built-in collection finder is used. The
+        /// built-in collection finder recognizes various kinds of collection including directory collections
+        /// and catalog collections. A user-defined collection finder can delegate to the built-in collection finder
+        /// by invoking the function available as <c>Processor.StandardCollectionFinder</c>.</para>
+        /// <para>A collection finder should be set only while the processor is being initialized; the
+        /// effect of changing the collection finder (or changing any data on which it depends) while
+        /// queries or transformations are in progress is undefined.</para>
+        /// <para>The collection finder returns a set of <c>IResource</c> objects. Typically a used-defined
+        /// class implementing <c>IResource</c> is used. An <c>IResource</c> has a resource URI, a content type
+        /// (MIME or media type), and a method to deliver the resource content as an <c>XdmItem</c>. Typically
+        /// fetching the resource over the network, and parsing it according to the rules of the relevant content
+        /// type, is delayed until the <c>GetXdmItem</c> method is called.</para>
+        /// <para>For deterministic results, and for W3C conformance, it is recommended that the supplied function
+        /// should be deterministic: repeated calls for the same collection URI should deliver the same set of
+        /// resources. However, this requirement can lead to high memory requirements, so Saxon does not enforce it.</para>
+        /// <para>The <c>CollectionFinder</c> registered with a processor is available to all queries and stylesheets
+        /// running under the control of that processor.</para>
+        /// </remarks>
 
         public ICollectionFinder CollectionFinder
 		{  
@@ -167,6 +190,11 @@ namespace Saxon.Api
 
         }
 
+        /// <summary>
+        /// The standard (built-in) collection finder that is used by default if no user-defined
+        /// collection finder has been supplied. This is exposed as a property of the <c>Processor</c>
+        /// so that it can be invoked by a user-written collection finder.
+        /// </summary>
 
         public StandardCollectionFinder StandardCollectionFinder
         {
