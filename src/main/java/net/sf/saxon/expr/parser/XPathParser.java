@@ -578,10 +578,7 @@ public class XPathParser {
         }
         language = ParsedLanguage.SEQUENCE_TYPE;
         t = new Tokenizer();
-        int version = env.getXPathVersion();
-        t.languageLevel = version;
-        allowXPath30Syntax = version >= 30;
-        allowXPath31Syntax = version >= 31;
+        t.languageLevel = env.getXPathVersion();
         allowXPath40Syntax =
                 t.allowSaxonExtensions =
                         env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || t.languageLevel == 40;
@@ -645,9 +642,9 @@ public class XPathParser {
         t = new Tokenizer();
         t.languageLevel = languageVersion = env.getXPathVersion();
         allowSaxonExtensions = t.allowSaxonExtensions = true;
-        allowXPath30Syntax = true;
-        allowXPath31Syntax = true;
-        allowXPath40Syntax = true;
+        allowXPath30Syntax = languageVersion >= 30;
+        allowXPath31Syntax = languageVersion >= 31;
+        allowXPath40Syntax = languageVersion >= 40;
         try {
             t.tokenize(input, 0, -1);
         } catch (XPathException err) {

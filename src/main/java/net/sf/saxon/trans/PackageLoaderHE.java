@@ -285,7 +285,6 @@ public class PackageLoaderHE implements IPackageLoader {
 
         FunctionLibraryList functionLibrary = new FunctionLibraryList();
         functionLibrary.addFunctionLibrary(config.getXSLT30FunctionSet());
-        addVendorFunctionLibrary(functionLibrary, config);
         functionLibrary.addFunctionLibrary(MapFunctionSet.getInstance());
         functionLibrary.addFunctionLibrary(ArrayFunctionSet.getInstance());
         functionLibrary.addFunctionLibrary(MathFunctionSet.getInstance());
@@ -339,10 +338,6 @@ public class PackageLoaderHE implements IPackageLoader {
         } else {
             pack.setDefaultMode(defaultModeName);
         }
-    }
-
-    protected void addVendorFunctionLibrary(FunctionLibraryList targetList, Configuration config) {
-        // no action for HE
     }
 
     private void readGlobalContext(NodeInfo packageElement) throws XPathException {
@@ -2308,6 +2303,7 @@ public class PackageLoaderHE implements IPackageLoader {
             }
 
             if (e instanceof SystemFunctionCall) {
+                ((SystemFunctionCall) e).allocateArgumentEvaluators(args);
                 final SystemFunction fn = ((SystemFunctionCall) e).getTargetFunction();
                 fn.setRetainedStaticContext(rsc);
                 SequenceIterator iter = element.iterateAxis(AxisInfo.ATTRIBUTE);
@@ -2317,7 +2313,6 @@ public class PackageLoaderHE implements IPackageLoader {
                     props.setProperty(att.getLocalPart(), att.getStringValue());
                 }
                 fn.importAttributes(props);
-                loader.addCompletionAction(() -> ((SystemFunctionCall) e).allocateArgumentEvaluators(args));
                 loader.addCompletionAction(() -> fn.fixArguments(args));
             }
             loader.contextStack.pop();

@@ -165,7 +165,9 @@ import java.util.Set;
  * brackets and separated by commas. For example, the alphacode for the function fn:dateTime#2 (with signature
  * ($arg1 as xs:date?, $arg2 as xs:time?) as xs:dateTime?) is "1F r[?AM] a[?AA,?AT]"</p>
  *
- *     <p>Also used for record types: indicates the types declared for the fields of the record type.</p></li>
+ *     <p>Also used for record types: indicates the types declared for the fields of the record type.
+ *     As a special case, a self-reference field within a record type is represented by "%.." where
+ *     % is the occurrence indicator, for example "1.." for a self-reference field with cardinality one.</p></li>
  *
  * <li><p>m - Member types of an anonymous union type. The value is an array of alphacodes for the member
  * types (these will always be atomic types), enclosed in square brackets and comma-separated. The basic code
@@ -337,6 +339,9 @@ public class AlphaCode {
         public void setMultiStringProperty(AlphaCodeTree tree, String key, List<String> value) {
             if (key.equals("f")) { // fields in tuple type
                 tree.fieldNames = value;
+            } else if (key.equals("optionalFields")) {
+                tree.optionalFieldNames = new HashSet<>();
+                tree.optionalFieldNames.addAll(value);
             } else {
                 throw new IllegalArgumentException("Bad alphacode component " + key);
             }
@@ -356,6 +361,9 @@ public class AlphaCode {
                     break;
                 case "e": // element type of document type
                     tree.elementType = value;
+                    break;
+                case "selfReference":
+                    tree.selfReference = value;
                     break;
                 default:
                     throw new IllegalArgumentException("Bad alphacode component " + key);
@@ -451,7 +459,7 @@ public class AlphaCode {
             }
         }
 
-        T parseType() {
+        T parseType(T parent) {
             T container = callBack.makeContainer();
             int indicator = nextChar();
             if (indicator < 0) {
@@ -467,6 +475,9 @@ public class AlphaCode {
             }
             String primary = nextToken();
             callBack.setStringProperty(container, "p", primary);
+            if (primary.equals("..")) {
+                callBack.setTypeProperty(container, "selfReference", parent);
+            }
             while (position < input.length()) {
                 char c = input.charAt(position);
                 switch (c) {
@@ -496,7 +507,7 @@ public class AlphaCode {
                     case 'e':
                         position++;
                         expect('[');
-                        T nestedType = parseType();
+                        T nestedType = parseType(parent);
                         expect(']');
                         callBack.setTypeProperty(container, "" + c, nestedType);
                         break;
@@ -513,7 +524,7 @@ public class AlphaCode {
                             callBack.setMultiTypeProperty(container, "" + c, nestedTypes);
                         } else {
                             while (true) {
-                                nestedTypes.add(parseType());
+                                nestedTypes.add(parseType(container));
                                 if (input.charAt(position) == ',') {
                                     position++;
                                 } else {
@@ -532,12 +543,15 @@ public class AlphaCode {
                         position++;
                         expect('[');
                         List<String> fieldNames = new ArrayList<>();
+                        List<String> optionalFieldNames = new ArrayList<>();
                         StringBuilder currName = new StringBuilder();
                         boolean escaped = false;
                         while (true) {
                             char ch = input.charAt(position++);
                             if (ch == '\\' && !escaped) {
                                 escaped = true;
+                            } else if (ch == '?' && !escaped) {
+                                optionalFieldNames.add(currName.toString());
                             } else if (ch == ',' && !escaped) {
                                 fieldNames.add(currName.toString());
                                 currName.setLength(0);
@@ -546,6 +560,7 @@ public class AlphaCode {
                                 fieldNames.add(currName.toString());
                                 currName.setLength(0);
                                 callBack.setMultiStringProperty(container, "f", fieldNames);
+                                callBack.setMultiStringProperty(container, "optionalFields", optionalFieldNames);
                                 break;
                             } else {
                                 currName.append(ch);
@@ -572,7 +587,7 @@ public class AlphaCode {
     public static MapItem toXdmMap(String input) {
         MapItemCallBack callBack = new MapItemCallBack();
         AlphaCodeParser<DictionaryMap> parser = new AlphaCodeParser<>(input, callBack);
-        return parser.parseType();
+        return parser.parseType(null);
     }
 
     public static String fromXdmMap(MapItem map) {
@@ -655,6 +670,7 @@ public class AlphaCode {
         List<String> fieldNames;
         Set<String> optionalFieldNames;
         boolean extensibleTupleType;
+        AlphaCodeTree selfReference;
     }
 
     /**
@@ -670,7 +686,7 @@ public class AlphaCode {
     public static SequenceType toSequenceType(String input, Configuration config) {
         TreeCallBack callBack = new TreeCallBack();
         AlphaCodeParser<AlphaCodeTree> parser = new AlphaCodeParser<>(input, callBack);
-        AlphaCodeTree tree = parser.parseType();
+        AlphaCodeTree tree = parser.parseType(null);
         return sequenceTypeFromTree(tree, config);
     }
 
@@ -922,11 +938,18 @@ public class AlphaCode {
                     }
                 } else {
                     List<SequenceType> fieldTypes = new ArrayList<>(tree.argTypes.size());
+                    RecordTest recordTest = new RecordTest();
                     for (AlphaCodeTree t : tree.argTypes) {
-                        fieldTypes.add(sequenceTypeFromTree(t, config));
+                        if (t.selfReference != null) {
+                            SelfReferenceRecordTest selfie = new SelfReferenceRecordTest(recordTest);
+                            int cardinality = Cardinality.fromOccurrenceIndicator(tree.cardinality);
+                            fieldTypes.add(SequenceType.makeSequenceType(selfie, cardinality));
+                        } else {
+                            fieldTypes.add(sequenceTypeFromTree(t, config));
+                        }
                     }
-                    List<String> optionalFields = new ArrayList<>(); // TODO: capture this in the AlphaCode
-                    itemType = new RecordTest(tree.fieldNames, fieldTypes, optionalFields, tree.extensibleTupleType);
+                    recordTest.setDetails(tree.fieldNames, fieldTypes, tree.optionalFieldNames, tree.extensibleTupleType);
+                    itemType = recordTest;
                 }
             } else {
                 AlphaCodeTree returnType = tree.resultType;
@@ -1051,7 +1074,18 @@ public class AlphaCode {
                 result.argTypes = new ArrayList<>();
                 for (String s : ((RecordTest) primary).getFieldNames()) {
                     result.fieldNames.add(s);
-                    result.argTypes.add(makeTree(((RecordTest) primary).getFieldType(s)));
+                    SequenceType fieldType = ((RecordTest) primary).getFieldType(s);
+                    if (fieldType.getPrimaryType() instanceof SelfReferenceRecordTest) {
+                        // we have a self-reference ("..")
+                        AlphaCodeTree selfRef = new AlphaCodeTree();
+                        selfRef.selfReference = result;
+                        selfRef.cardinality = fieldType.getCardinality() == StaticProperty.EXACTLY_ONE
+                                ? "1"
+                                : Cardinality.getOccurrenceIndicator(fieldType.getCardinality());
+                        result.argTypes.add(selfRef);
+                    } else {
+                        result.argTypes.add(makeTree(((RecordTest) primary).getFieldType(s)));
+                    }
                     if (((RecordTest) primary).isOptionalField(s)) {
                         result.optionalFieldNames.add(s);
                     }
@@ -1096,6 +1130,10 @@ public class AlphaCode {
     private static void alphaCodeFromTree(AlphaCodeTree tree, boolean withCardinality, StringBuilder sb) {
         if (withCardinality) {
             sb.append(tree.cardinality);
+        }
+        if (tree.selfReference != null) {
+            sb.append("..");
+            return;
         }
         sb.append(tree.principal);
         if (tree.name != null) {
