@@ -245,22 +245,32 @@ queryProc->runQueryToString();
          directory also includes some python example scripts: <code>saxon_example.py</code>,
             <code>saxon_example2.py</code> and <code>saxon_example3.py</code>.</p>
 
-      <p>Example 1: Python script using the SaxonC API:</p>
+      <p>Example 1: Python script using the SaxonC API with a simple stylesheet test.xsl:</p>
 
-      <samp><![CDATA[with saxonc.PySaxonProcessor(license=False) as proc:
+     <samp><![CDATA[from saxonc import *
+
+with PySaxonProcessor(license=False) as proc:
 
   print(proc.version)
-  #print(dir(proc))
   xdmAtomicval = proc.make_boolean_value(False)
-  xsltproc = proc.new_xslt_processor()
+  xsltproc = proc.new_xslt30_processor()
   document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
-  xsltproc.set_source(xdm_node=document)
-  xsltproc.set_just_in_time_compilation(True)
-  executable = xsltproc.compile_stylesheet(stylesheet_file="test2.xsl")
+  executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
 
-  output2 = executable.transform_to_string()
-  print(output2)
-  print('test 0 \n')
+  if(xsltproc.exception_occurred):
+      print("Error found: ")
+      print(xsltproc.error_message)
+
+  print(document) 
+
+  output = executable.transform_to_string(xdm_node=document)
+  if output is None:
+      print(executable.error_message)
+  else:
+      print(output)
+
+
+  print('Example 2 \n')
   xml = """\
     <out>
       <person>text1</person>
@@ -278,21 +288,23 @@ queryProc->runQueryToString();
      
      <p>Example 2: Python script using PyXsltExecutable:</p>
      
-     <samp><![CDATA[with saxonc.PySaxonProcessor(license=False) as proc:
+     <samp><![CDATA[from saxonc import *
+
+with PySaxonProcessor(license=False) as proc:
 
   print(proc.version)
-  #print(dir(proc))
   xdmAtomicval = proc.make_boolean_value(False)
-  xsltproc = proc.new_xslt_processor()
-  document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
-  xsltproc.set_source(xdm_node=document)
-  xsltproc.set_just_in_time_compilation(True)
-  executable = xsltproc.compile_stylesheet(stylesheet_file="test2.xsl")
+  xsltproc = proc.new_xslt30_processor()
+  executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
   executable.set_result_as_raw_value(True)
-  executable.set_initial_match_selection(file_name=FILE)
-  executable.set_parameter(param,proc.make_string("text"))
-  executable.set_parameter(param2,xdmAtomicvale)
+  executable.set_initial_match_selection(file_name="cat.xml")
+  xdm_atomic_value = proc.make_integer_value(5)
+  value1= proc.make_string_value("text")
+
+  executable.set_parameter("param",value1)
+  executable.set_parameter("param2",xdm_atomic_value)
   result = executable.apply_templates_returning_string()
+  print(result)
     ]]></samp>
      
    </section>
