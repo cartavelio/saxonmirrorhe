@@ -1464,7 +1464,7 @@ task pejRelease(
 
 task eejRelease(
   type: Copy,
-  dependsOn: ["eejJar", "eejJarSql", "eejJarTests", "eej_extras", , "eejJarXqj"],
+  dependsOn: ["eejJar", "eejJarSql", "eejJarTests", "eej_extras", "eejJarXqj"],
   description: "Build the EE release for Java"
 ) {
   from "${buildDir}/libs"
