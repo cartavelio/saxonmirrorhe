@@ -151,7 +151,7 @@ public interface Item extends GroundedValue {
      */
     @Override
     default SingletonIterator iterate() {
-        return new SingletonIterator(this);
+        return (SingletonIterator)SingletonIterator.makeIterator(this);
     }
 
     /**

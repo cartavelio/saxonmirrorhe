@@ -31,6 +31,22 @@ public class SingleAtomicIterator
         super(value);
     }
 
+    /**
+     * Factory method.
+     *
+     * @param item the item to iterate over
+     * @return a SingletonIterator over the supplied item, or an EmptyIterator
+     * if the supplied item is null.
+     */
+
+    /*@NotNull*/
+    public static AtomicIterator makeIterator(AtomicValue item) {
+        if (item == null) {
+            return EmptyIterator.ofAtomic();
+        } else {
+            return new SingleAtomicIterator(item);
+        }
+    }
 
     /*@NotNull*/
     @Override
