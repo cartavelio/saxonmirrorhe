@@ -1713,20 +1713,22 @@ cdef class PyXsltExecutable:
               '''make_c_str(value)'''
               py_string_string = value.encode('utf-8') if value is not None else None
               c_sourcefile = py_string_string if value is not None else ""
-            if key == "base_output_uri":
+            elif key == "base_output_uri":
               c_base_output_uri = NULL
               '''make_c_str(value)'''
               py_string_string = value.encode('utf-8') if value is not None else None
               c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
-            if "xdm_node" in kwds:
-              xdm_node = kwds["xdm_node"]
-              if isinstance(xdm_node, PyXdmNode):
-                derivednptr = xdm_node.derivednptr
             else:
               raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, stylesheet_file)")
-        if derivednptr is not NULL:
-          c_string = self.thisxptr.transformToString(derivednptr)
+          elif key == "xdm_node":
+
+            if isinstance(value, PyXdmNode):
+                xdm_node = value
+          else:
+            raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, stylesheet_file)")
+        if xdm_node is not None:
+          c_string = self.thisxptr.transformToString(xdm_node.derivednptr)
           return make_py_str(c_string)
         else:
           c_string = self.thisxptr.transformFileToString(c_sourcefile)
@@ -1778,7 +1780,7 @@ cdef class PyXsltExecutable:
         if "xdm_node" in kwds:
             py_value = kwds["xdm_node"]
             if(isinstance(py_value, PyXdmNode)):
-                node_ = py_value;
+                node_ = py_value
                 self.thisxptr.transformToFile(node_.derivednptr)
             else:
                 raise Exception("Keyword argument 'xdm_node' is not of type PyXdmNode")
@@ -1832,7 +1834,7 @@ cdef class PyXsltExecutable:
         if "xdm_node" in kwds:
             py_value = kwds["xdm_node"]
             if(isinstance(py_value, PyXdmNode)):
-                node_ = py_value;
+                node_ = py_value
                 xdmValue = self.thisxptr.transformToValue(node_.derivednptr)
             else:
                 raise Exception("Keyword argument 'xdm_node' is not of type PyXdmNode")
@@ -1908,7 +1910,7 @@ cdef class PyXsltExecutable:
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
           elif key == "xdm_value":
             if isinstance(value, PyXdmValue):
-              value_ = value;
+              value_ = value
               self.thisxptr.setInitialMatchSelection(value_.thisvptr)
         cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
@@ -1986,7 +1988,7 @@ cdef class PyXsltExecutable:
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
           elif key == "xdm_value":
             if isinstance(value, PyXdmValue):
-              value_ = value;
+              value_ = value
               self.thisxptr.setInitialMatchSelection(value_.thisvptr)
         cdef const char* c_string  = self.thisxptr.applyTemplatesReturningString()
         return make_py_str(c_string)
@@ -2031,7 +2033,7 @@ cdef class PyXsltExecutable:
               c_outputfile = py_output_string if value is not None else ""
           elif key == "xdm_value":
             if isinstance(value, PyXdmNode):
-              value_ = value;
+              value_ = value
               self.thisxptr.setInitialMatchSelection(value_.thisvptr)
         self.thisxptr.applyTemplatesReturningFile(c_outputfile)
 
@@ -2073,7 +2075,7 @@ cdef class PyXsltExecutable:
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
           elif key == "xdm_node":
             if isinstance(value, PyXdmValue):
-              value_ = value;
+              value_ = value
               self.thisxptr.setInitialMatchSelection(value_.thisvptr)
         c_templateName = make_c_str(template_name)
         cdef PyXdmValue val = None
@@ -2159,7 +2161,7 @@ cdef class PyXsltExecutable:
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
           elif key == "xdm_value":
             if isinstance(value, PyXdmValue):
-              value_ = value;
+              value_ = value
               self.thisxptr.setInitialMatchSelection(value_.thisvptr)
         c_templateName = make_c_str(template_name)
         c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
@@ -2208,7 +2210,7 @@ cdef class PyXsltExecutable:
               c_outputfile = py_output_string if value is not None else ""
           elif key == "xdm_value":
             if isinstance(value, PyXdmValue):
-              value_ = value;
+              value_ = value
               self.thisxptr.setInitialMatchSelection(value_.thisvptr)
         c_templateName = make_c_str(template_name)
         self.thisxptr.callTemplateReturningFile(c_templateName, c_outputfile)
@@ -2247,7 +2249,7 @@ cdef class PyXsltExecutable:
               self.thisxptr.setInitialMatchSelectionAsFile(c_sourcefile)
           elif key == "xdm_value":
             if isinstance(value, PyXdmValue):
-              value_ = value;
+              value_ = value
               self.thisxptr.setInitialMatchSelection(value_.thisvptr)
         cdef int len_= 0;
         len_ = len(args)
@@ -2346,7 +2348,7 @@ cdef class PyXsltExecutable:
                 raise Exception("Stylesheet file does not exist")'''
           elif key == "xdm_value":
             if isinstance(value, PyXdmValue):
-              value_ = value;
+              value_ = value
               self.thisxptr.setInitialMatchSelection(value_.thisvptr)
         cdef int _len = len(args)
         """ TODO handle memory when finished with XdmValues """
@@ -2417,7 +2419,7 @@ cdef class PyXsltExecutable:
                 raise Exception("Stylesheet file does not exist")'''
           elif key == "xdm_value":
             if isinstance(value, PyXdmValue):
-              value_ = value;
+              value_ = value
               self.thisxptr.setInitialMatchSelection(value_.thisvptr)
         cdef int _len = len(args)
         """ TODO handle memory when finished with XdmValues """
