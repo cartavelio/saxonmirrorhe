@@ -42,14 +42,7 @@ public class GizmoCommandTests {
             Configuration config = gizmo.getConfiguration();
             Processor proc = new Processor(config);
             config.setTreeModel(LINKED_TREE);
-            TreeInfo doc;
-            try {
-                doc = config.buildDocumentTree(new StreamSource(configTest.getDataDir() + "books.xml"));
-            } catch (Exception ex) {
-                System.err.println("CAUGHT ONE");
-                ex.printStackTrace();
-                throw ex;
-            }
+            TreeInfo doc = config.buildDocumentTree(new StreamSource(configTest.getDataDir() + "books.xml"));
             gizmo.setCurrentDoc((DocumentImpl) doc.getRootNode());
             String result = gizmo.executeTestCommand(command);
             XPathCompiler xpc = proc.newXPathCompiler();
