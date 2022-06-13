@@ -33,7 +33,7 @@ public class PipelineConfiguration {
     /*@NotNull*/ private Configuration config;
     private Controller controller;
     private ParseOptions parseOptions;
-    private HostLanguage hostLanguage = HostLanguage.XSLT;
+    private HostLanguage hostLanguage = HostLanguage.UNKNOWN;
     private Map<String, Object> components;
     private XPathContext context;
     private java.util.function.Function<NodeInfo, Object> copyInformee;
@@ -69,6 +69,7 @@ public class PipelineConfiguration {
             components = new HashMap<>(p.components);
         }
         context = p.context;
+        copyInformee = null;
     }
 
     /**
@@ -101,9 +102,9 @@ public class PipelineConfiguration {
      */
 
     public ErrorReporter getErrorReporter() {
-        ErrorReporter reporter = parseOptions.getErrorReporter();
+        ErrorReporter reporter = getParseOptions().getErrorReporter();
         if (reporter == null) {
-            reporter = config.makeErrorReporter();
+            reporter = controller == null ? config.makeErrorReporter() : controller.getErrorReporter();
         }
         return reporter;
     }
@@ -115,7 +116,7 @@ public class PipelineConfiguration {
      */
 
     public void setErrorReporter(ErrorReporter errorReporter) {
-        parseOptions.setErrorReporter(errorReporter);
+        getParseOptions().setErrorReporter(errorReporter);
     }
 
     /**
@@ -136,6 +137,9 @@ public class PipelineConfiguration {
      */
 
     public ParseOptions getParseOptions() {
+        if (parseOptions == null) {
+            parseOptions = config.getParseOptions();
+        }
         return parseOptions;
     }
 
@@ -147,7 +151,7 @@ public class PipelineConfiguration {
      */
 
     public void setUseXsiSchemaLocation(boolean recognize) {
-        parseOptions.setUseXsiSchemaLocation(recognize);
+        getParseOptions().setUseXsiSchemaLocation(recognize);
     }
 
     /**
@@ -164,7 +168,7 @@ public class PipelineConfiguration {
      */
 
     public void setRecoverFromValidationErrors(boolean recover) {
-        parseOptions.setContinueAfterValidationErrors(recover);
+        getParseOptions().setContinueAfterValidationErrors(recover);
     }
 
     /**
@@ -177,7 +181,7 @@ public class PipelineConfiguration {
      */
 
     public boolean isRecoverFromValidationErrors() {
-        return parseOptions.isContinueAfterValidationErrors();
+        return getParseOptions().isContinueAfterValidationErrors();
     }
 
 //    /**
@@ -218,6 +222,9 @@ public class PipelineConfiguration {
      */
 
     public HostLanguage getHostLanguage() {
+        if (hostLanguage == HostLanguage.UNKNOWN) {
+            hostLanguage = controller == null ? HostLanguage.UNKNOWN : controller.getExecutable().getHostLanguage();
+        }
         return hostLanguage;
     }
 
@@ -227,7 +234,7 @@ public class PipelineConfiguration {
      */
 
     public boolean isXSLT() {
-        return hostLanguage == HostLanguage.XSLT;
+        return getHostLanguage() == HostLanguage.XSLT;
     }
 
     /**
@@ -249,7 +256,7 @@ public class PipelineConfiguration {
      */
 
     public void setExpandAttributeDefaults(boolean expand) {
-        parseOptions.setExpandAttributeDefaults(expand);
+        getParseOptions().setExpandAttributeDefaults(expand);
     }
 
     /**
