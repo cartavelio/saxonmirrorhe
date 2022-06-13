@@ -89,7 +89,7 @@ task product_javadoc(
       packages[fn] = 1
     }
 
-    command = ["javadoc",
+    command = [ System.getenv('JAVA_HOME') + '/bin/javadoc',
                "-sourcepath", "${buildDir}/javadoc_src",
                "-Xdoclint:none",
                "-d", "${buildDir}/javadoc",
@@ -153,7 +153,7 @@ task he_javadoc(
       packages[fn] = 1
     }
 
-    command = ["javadoc",
+    command = [ System.getenv('JAVA_HOME') + '/bin/javadoc',
                "-sourcepath", "${buildDir}/javadoc_src",
                "-Xdoclint:none",
                "-d", "${buildDir}/he_javadoc",
@@ -211,7 +211,7 @@ task product_jeljavadoc(
       packages[fn] = 1
     }
 
-    command = ["javadoc",
+    command = [ System.getenv('JAVA_HOME') + '/bin/javadoc',
                "-sourcepath", "${buildDir}/javadoc_src",
                "-d", "${buildDir}/jeljavadoc",
                "-package",
