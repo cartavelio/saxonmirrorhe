@@ -135,20 +135,13 @@ public class StyleNodeFactory implements NodeFactory {
             e.setNamespaceMap(namespaces);
             e.initialise(elemName, elemType, attlist, parent, sequence);
             e.setLocation(baseURI, lineNumber, columnNumber);
-                e.processExtensionElementAttribute("");
-                e.processExcludedNamespaces("");
-                e.processVersionAttribute("");
+            e.processExtensionElementAttribute("");
+            e.processExcludedNamespaces("");
+            e.processVersionAttribute("");
             e.processDefaultXPathNamespaceAttribute("");
-                e.processExpandTextAttribute("");
-                e.processDefaultValidationAttribute("");
+            e.processExpandTextAttribute("");
+            e.processDefaultValidationAttribute("");
 
-//            if (e.isInstruction() && e.getEffectiveVersion() == 10 &&
-//                    !config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-//                e.setValidationError(
-//                        new XPathException("XSLT 1.0 compatibility mode is not available in this configuration", "XTDE0160"),
-//                        StyleElement.REPORT_IF_INSTANTIATED
-//                );
-//            }
 
             if (toplevel && !e.isDeclaration() && !(e instanceof XSLExpose) && e.forwardsCompatibleModeIsEnabled()) {
                 DataElement d = new DataElement();
@@ -191,11 +184,12 @@ public class StyleNodeFactory implements NodeFactory {
             // Detect a misspelt XSLT element, or a 3.0 element used in a 2.0 stylesheet
 
             if (uri.equals(NamespaceConstant.XSLT)) {
+                int processorVersion = compilation.getCompilerInfo().getXsltVersion();
                 if (parent instanceof XSLStylesheet) {
-                    if (((XSLStylesheet) parent).getEffectiveVersion() <= 20) {
+                    if (((XSLStylesheet) parent).getEffectiveVersion() <= processorVersion) {
                         temp = new AbsentExtensionElement();
                         temp.setCompilation(compilation);
-                        temp.setValidationError(new XmlProcessingIncident("Unknown top-level XSLT declaration"),
+                        temp.setValidationError(new XmlProcessingIncident("Unknown top-level XSLT declaration " + elemName.getDisplayName()),
                                 StyleElement.OnFailure.REPORT_UNLESS_FORWARDS_COMPATIBLE);
                     }
                 } else {
@@ -204,13 +198,11 @@ public class StyleNodeFactory implements NodeFactory {
                     temp.setLocation(baseURI, lineNumber, columnNumber);
                     temp.setCompilation(compilation);
                     temp.processStandardAttributes("");
-                    if (temp.getEffectiveVersion() > 20) {
-                        temp.setValidationError(new XmlProcessingIncident("Unknown XSLT instruction"),
-                                                StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
-                    } else {
-                        temp.setValidationError(new XmlProcessingIncident("Unknown XSLT instruction"),
-                                                StyleElement.OnFailure.REPORT_IF_INSTANTIATED);
-                    }
+                    temp.setValidationError(
+                            new XmlProcessingIncident("Unknown XSLT instruction " + elemName.getDisplayName(), "XTSE0010"),
+                            temp.getEffectiveVersion() > processorVersion
+                                ? StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE
+                                : StyleElement.OnFailure.REPORT_ALWAYS);
                 }
             }
 
@@ -248,12 +240,7 @@ public class StyleNodeFactory implements NodeFactory {
             XmlProcessingIncident reason;
             Class<? extends StyleElement> actualClass;
 
-            if (uri.equals(NamespaceConstant.XSLT)) {
-                reason = new XmlProcessingIncident("Unknown XSLT element: " + Err.wrap(localname, Err.ELEMENT), "XTSE0010");
-                actualClass = AbsentExtensionElement.class;
-                temp.setValidationError(reason, StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
-
-            } else if (temp.isExtensionNamespace(uri) && !toplevel) {
+            if (temp.isExtensionNamespace(uri) && !toplevel) {
 
                 // if we can't instantiate an extension element, we don't give up
                 // immediately, because there might be an xsl:fallback defined. We
