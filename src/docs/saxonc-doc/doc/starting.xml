@@ -86,9 +86,9 @@ provide any other feedback.</p>
     library is installed is no longer recommended. It is better to set
     the SAXONC_HOME environment variable directly.</aside>
 
-    <p>SaxonC is now installed, and ready to run. Please see <a href="../running">Running
+    <p>SaxonC is now installed, and ready to run. Please see <a href="../../running">Running
     SaxonC</a> to get started. Note that the commercial products SaxonC-PE and
-    SaxonC-EE require a license, so you may also need to refer to <a href="../licensing"
+    SaxonC-EE require a license, so you may also need to refer to <a href="../../licensing"
     >Licensing</a> for details about how to get this set up.</p>
   </section>
 
@@ -150,9 +150,9 @@ provide any other feedback.</p>
     </ol>
 
     <p>SaxonC is now installed, and ready to run. Please see <a
-    href="../running">Running SaxonC</a> to get started. Note that the
+    href="../../running">Running SaxonC</a> to get started. Note that the
     commercial products SaxonC-PE and SaxonC-EE require a license, so
-    you may also need to refer to <a href="../licensing"
+    you may also need to refer to <a href="../../licensing"
     >Licensing</a> for details about how to get this set up.</p>
   </section>
 
@@ -198,9 +198,9 @@ provide any other feedback.</p>
       </li>
     </ol>
 
-    <p>SaxonC is now installed, and ready to run. Please see <a href="../running">Running
+    <p>SaxonC is now installed, and ready to run. Please see <a href="../../running">Running
     SaxonC</a> to get started. Note that the commercial products SaxonC-PE and
-    SaxonC-EE require a license, so you may also need to refer to <a href="../licensing"
+    SaxonC-EE require a license, so you may also need to refer to <a href="../../licensing"
     >Licensing</a> for details about how to get this set up.</p>
   </section>
 </section>
