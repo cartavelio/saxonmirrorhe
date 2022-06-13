@@ -16,6 +16,7 @@ import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Steps;
+import net.sf.saxon.trace.Instrumentation;
 import org.w3c.dom.Document;
 
 import javax.xml.stream.XMLStreamException;
@@ -27,7 +28,9 @@ import java.util.regex.Pattern;
 
 import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
 import static net.sf.saxon.s9api.streams.Predicates.hasAttribute;
-import static net.sf.saxon.s9api.streams.Steps.*;
+import static net.sf.saxon.s9api.streams.Steps.child;
+import static net.sf.saxon.s9api.streams.Steps.descendant;
+import static net.sf.saxon.s9api.streams.Steps.path;
 import static net.sf.saxon.s9api.streams.XdmCollectors.asString;
 
 public abstract class TestDriver {
@@ -375,7 +378,7 @@ public abstract class TestDriver {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        Instrumentation.report();
 
     }
 
