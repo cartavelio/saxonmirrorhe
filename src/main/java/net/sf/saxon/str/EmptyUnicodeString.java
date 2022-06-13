@@ -106,7 +106,7 @@ public final class EmptyUnicodeString extends UnicodeString {
 
     @Override
     public long indexOf(UnicodeString other, long from) {
-        return -1;
+        return other.isEmpty() && from == 0 ? 0 : -1;
     }
 
 
