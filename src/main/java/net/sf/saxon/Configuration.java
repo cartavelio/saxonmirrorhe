@@ -4031,8 +4031,9 @@ public class Configuration implements SourceResolver, NotationSet {
             return new ActiveSource() {
                 @Override
                 public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
+                    options.merge(((AugmentedSource) source).getParseOptions());
                     resolveSource(((AugmentedSource)source).getContainedSource(), config)
-                            .deliver(receiver, ((AugmentedSource) source).getParseOptions());
+                            .deliver(receiver, options);
                 }
 
                 @Override
