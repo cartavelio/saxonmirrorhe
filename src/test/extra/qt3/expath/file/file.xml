@@ -2185,7 +2185,7 @@
       </all-of>
     </result>
   </test-case>
-  <test-case name="EXPath-file-writeBinary3-005">
+  <test-case name="EXPath-file-writeBinary3-006">
     <description>Use file:write-binary with three arguments, file already exists, offset just at
       end</description>
     <created by="John Lumley" on="2013-12-02"/>
@@ -2330,7 +2330,7 @@
     </result>
   </test-case>
 
-  <test-case name="EXPath-file-children-001">
+  <test-case name="EXPath-file-children-001a">
     <description>List empty directory</description>
     <created by="Christian Grün" on="2015-01-29"/>
     <environment ref="EXPath-file"/>
@@ -2344,7 +2344,7 @@
     </result>
   </test-case>
 
-  <test-case name="EXPath-file-children-001">
+  <test-case name="EXPath-file-children-001b">
     <description>Return children of empty directory</description>
     <created by="Christian Grün" on="2015-01-29"/>
     <environment ref="EXPath-file"/>
