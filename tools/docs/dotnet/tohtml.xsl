@@ -830,7 +830,8 @@
         </tr>
       </thead>
       <tbody>
-        <xsl:for-each select="$root//*[local-name() eq lower-case($member)][@public='true'][(@base eq 'Exception') eq $exception]">
+        <xsl:for-each select="$root//*[local-name() eq lower-case($member)][@public='true'][if
+          ($exception) then (@base eq 'System.Exception') else true()]">
           <xsl:sort select="lower-case(@name)"/>
           <tr class="TableRow">
             <td>
