@@ -202,5 +202,76 @@ namespace SaxonCS_NUnit
 
         
 
+        [Test]
+        public void testMakeWarningFatal() {
+
+            // Attempt to promote the warning on an unresolved xsl:include to a fatal error. Bug 5478.
+
+            string xsd = "<xsd:schema\n"
+                         + "elementFormDefault='qualified'\n"
+                         + "xmlns:xsd='http://www.w3.org/2001/XMLSchema'>\n"
+                         + "<xsd:include schemaLocation='nonexistentA.xsd'/>\n"
+                         + "<xsd:include schemaLocation='nonexistentB.xsd'/>\n"
+                         + "</xsd:schema>";
+            List<Error> errorList = new ();
+            try {
+                Processor proc = new Processor(true);
+                SchemaManager sm = proc.SchemaManager;
+                sm.ErrorReporter = err=> {
+                    err.TerminationMessage = "Far too many errors";
+                    errorList.Add(err);
+                };
+
+                sm.Compile(new StringReader(xsd));
+                Assert.Fail("Validation errors not detected");
+
+            }
+            catch (SaxonApiException sapie) {
+                Assert.AreEqual(1, errorList.Count());
+                Assert.True(sapie.Message.Contains("Far too many errors"));
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [Test]
+        public void testMakeDuplicateErrorFatal() {
+
+            // Attempt to promote the error on a duplicate declaration to a fatal error. Bug 5478.
+
+            string xsd = "<xsd:schema\n"
+                         + "elementFormDefault='qualified'\n"
+                         + "xmlns:xsd='http://www.w3.org/2001/XMLSchema'>\n"
+                         + "<xsd:element name='AAA'/>\n"
+                         + "<xsd:element name='AAA'/>\n"
+                         + "<xsd:element name='BBB'/>\n"
+                         + "<xsd:element name='BBB'/>\n"
+                         + "</xsd:schema>";
+            List<Error> errorList = new ();
+            try {
+                Processor proc = new Processor(true);
+                SchemaManager sm = proc.SchemaManager;
+                sm.ErrorReporter = err=> {
+                    err.TerminationMessage = "Far too many errors";
+                    errorList.Add(err);
+                };
+
+                sm.Compile(new StringReader(xsd));
+                Assert.Fail("Validation errors not detected");
+
+            }
+            catch (SaxonApiException sapie) {
+                Assert.AreEqual(1, errorList.Count);
+                Assert.True(sapie.Message.Contains("Far too many errors"));
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
     }
+
+        
+
+
 }
