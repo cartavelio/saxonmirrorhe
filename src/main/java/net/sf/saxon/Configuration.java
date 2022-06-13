@@ -601,19 +601,6 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Assert that a PE license is required, and fail if none is available
-     *
-     * @param featureName name of the required feature, to include in the error message
-     * @throws LicenseException if no license key is available
-     */
-
-    public void requireProfessionalLicense(String featureName) throws LicenseException {
-        if (!isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-            throw new LicenseException("Use of " + featureName + " requires a license key for Saxon-PE or Saxon-EE", LicenseException.NOT_FOUND);
-        }
-    }
-
-    /**
      * Get the value of a named license feature
      *
      * @param name the name of the feature
@@ -4031,9 +4018,8 @@ public class Configuration implements SourceResolver, NotationSet {
             return new ActiveSource() {
                 @Override
                 public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
-                    options.merge(((AugmentedSource) source).getParseOptions());
                     resolveSource(((AugmentedSource)source).getContainedSource(), config)
-                            .deliver(receiver, options);
+                            .deliver(receiver, ((AugmentedSource) source).getParseOptions());
                 }
 
                 @Override
@@ -4339,12 +4325,10 @@ public class Configuration implements SourceResolver, NotationSet {
             switch (code) {
                 case FeatureCode.ALLOWED_PROTOCOLS:
                     protocolRestrictor = new ProtocolRestrictor((String)value);
-                    //#if CSHARP==false
                     ResourceResolver rsrcResolver = getResourceResolver();
                     if (rsrcResolver instanceof CatalogResourceResolver) {
                         ((CatalogResourceResolver) rsrcResolver).setFeature(ResolverFeature.ACCESS_EXTERNAL_DOCUMENT, (String) value);
                     }
-                    //#endif
                     break;
                 case FeatureCode.COLLATION_URI_RESOLVER:
                     if (!(value instanceof CollationURIResolver)) {
