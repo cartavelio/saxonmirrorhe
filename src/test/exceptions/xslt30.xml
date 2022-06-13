@@ -40,6 +40,16 @@
     <created by="Michael Kay" on="2020-09-09"/>
     <reason>The streaming spec allows calling last() on a grounding consuming sequence but we don't know how to implement this.</reason>
   </exception>
+  
+  <exception test-case="stream-001" run="true" strict="no">
+    <created by="Michael Kay" on="2022-05-12"/>
+    <reason>Not reporting early exit because the streamed input isn't actually read.</reason>
+  </exception>
+  
+  <exception test-case="stream-005" run="true" strict="no">
+    <created by="Michael Kay" on="2022-05-12"/>
+    <reason>We make no attempt to exit early.</reason>
+  </exception>
 
 
 </exceptions>
