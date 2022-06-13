@@ -145,27 +145,18 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
      * @param value of the query parameter, or nullptr to clear a previously set value
      */
     void XQueryProcessor::setParameter(const char * name, XdmValue*value){
-	if(value != nullptr){
-		value->incrementRefCount();
-		int s = parameters.size();
-		std::string skey = "param:"+std::string(name);
-		parameters[skey] = value;
-		if(s == parameters.size()) {
-            std::map<std::string, XdmValue*>::iterator it;
-            it = parameters.find(skey);
+        if(value != nullptr && name != nullptr) {
+            std::string skey = ("param:" + std::string(name));
+            std::map<std::string, XdmValue *>::iterator it = parameters.find(skey);
             if (it != parameters.end()) {
-                XdmValue * valuei = it->second;
-                if(valuei != nullptr) {
+                XdmValue *valuei = it->second;
+                if (valuei != nullptr) {
                     valuei->decrementRefCount();
-                    if (valuei->getRefCount() < 1) {
-                        delete value;
-                    }
                     parameters.erase(skey);
-                    parameters[skey] = value;
                 }
             }
-		}
-	} 
+            parameters[skey] = value;
+        }
     }
 
 
@@ -191,22 +182,11 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 		std::cerr<<"XQueryProc setProperty is nullptr"<<std::endl;
 	}
 #endif
-    	if(name != nullptr) {
-    	    int s = properties.size();
-    		std::string skey = std::string(name);
-    		properties.insert(std::pair<std::string, std::string>(skey, std::string((value == nullptr ? "" : value))));
-
-    		if(s == properties.size()) {
-                std::map<std::string, std::string>::iterator it;
-                it = properties.find(skey);
-                if (it != properties.end()) {
-                    properties.erase(skey);
-                    properties[skey] = std::string((value == nullptr ? "" : value));
-                }
-    		}
-    	}
-
-
+        if (name != nullptr) {
+            properties.erase(name);
+            std::string skey = std::string(name);
+            properties[skey] = std::string((value == nullptr ? "" : value));
+        }
 
     }
 
