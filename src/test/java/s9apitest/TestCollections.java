@@ -16,6 +16,7 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -156,6 +157,7 @@ public class TestCollections {
     }
 
     @Test
+    @Tag("performance")
     public void testParallelSpeed() {
         try {
             for (int i = 0; i < 5; i++) {
