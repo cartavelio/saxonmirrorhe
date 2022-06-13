@@ -38,7 +38,6 @@ public class DOM4JDocumentWrapper extends GenericTreeInfo implements ActiveSourc
 
     public DOM4JDocumentWrapper(Document doc, String baseURI, Configuration config) {
         super(config);
-        config.requireProfessionalLicense("DOM4J");
         setRootNode(wrap(doc));
         setSystemId(baseURI);
     }
@@ -81,15 +80,11 @@ public class DOM4JDocumentWrapper extends GenericTreeInfo implements ActiveSourc
     @Override
     public NodeInfo selectID(String id, boolean getParent) {
         HashMap<String, Element> idIndex = (HashMap<String, Element>)getUserData("saxon-id-index");
-        if (idIndex == null) {
-            // System-constructed document
-            Element e = ((DOM4JNodeWrapper)getRootNode()).getUnderlyingNode().getDocument().elementByID(id);
-            return e == null ? null : wrap(e);
-        } else {
-            // Document constructed using Dom4JWriter
+        if (idIndex != null) {
             Element e = idIndex.get(id);
             return e==null ? null : wrap(e);
         }
+        return null;
     }
 
     /**

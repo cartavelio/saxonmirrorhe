@@ -42,7 +42,6 @@ public class AxiomDocument extends GenericTreeInfo implements ActiveSource {
      */
     public AxiomDocument(OMDocument root, String baseURI, Configuration config) {
         super(config);
-        setRootNode(new AxiomDocumentNodeWrapper(root, baseURI, config, this));
         setSystemId(baseURI);
     }
 

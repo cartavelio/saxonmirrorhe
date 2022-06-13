@@ -47,7 +47,6 @@ public class JDOM2DocumentWrapper extends GenericTreeInfo implements ActiveSourc
 
     public JDOM2DocumentWrapper(Document doc, Configuration config) {
         super(config);
-        config.requireProfessionalLicense("JDOM2");
         setRootNode(wrap(doc));
         setSystemId(doc.getBaseURI());
     }
