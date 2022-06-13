@@ -1,9 +1,10 @@
 package regextests;
 
 import jaxptest.ConfigTest;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntRangeSet;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -94,7 +95,19 @@ public class testRegex {
         }
     }
 
-    public static String diagnosticDisplay(String s) {
-        return StringValue.diagnosticDisplay(s);
+
+    @Test
+    public void testJFlagMatches() {
+        // Saxon extension; j flag causes use of Java regex engine
+        try {
+            Processor p = new Processor(true);
+            XPathCompiler c = p.newXPathCompiler();
+            XdmItem result = c.evaluateSingle("matches(' ', '^\\x20$', ';j')", null);
+            Assertions.assertTrue(((XdmAtomicValue) result).getBooleanValue());
+            result = c.evaluateSingle("matches('Z ', '^z\\x20$', 'i;j')", null);
+            Assertions.assertTrue(((XdmAtomicValue) result).getBooleanValue());
+        } catch (SaxonApiException e) {
+            Assertions.fail();
+        }
     }
 }
