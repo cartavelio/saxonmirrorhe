@@ -36,6 +36,78 @@
     <created by="Michael Kay" on="2020-09-09"/>
     <reason>The streaming spec allows calling last() on a grounding consuming sequence but we don't know how to implement this.</reason>
   </exception>
+  
+  <exception test-case="
+    sx-except-302
+    sx-except-303
+    sx-except-310
+    sx-except-311
+    sx-except-312
+    sx-except-313
+    sx-except-314
+    sx-except-316
+    sx-except-317
+    sx-except-320
+    sx-except-320a
+    sx-except-321
+    sx-except-322
+    sx-except-323
+    sx-except-331
+    sx-except-332
+    sx-except-333
+    sx-except-334
+    sx-except-335" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2022-05-24"/>
+    <reason>Saxon bug 5488, streaming "except" with two consuming operands.</reason>
+  </exception>
+  
+  <exception test-case="
+    sx-union-302
+    sx-union-303
+    sx-union-310
+    sx-union-311
+    sx-union-312
+    sx-union-313
+    sx-union-314
+    sx-union-316
+    sx-union-317
+    sx-union-320
+    sx-union-320a
+    sx-union-321
+    sx-union-322
+    sx-union-323
+    sx-union-331
+    sx-union-332
+    sx-union-333
+    sx-union-334
+    sx-union-335" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2022-05-24"/>
+    <reason>Saxon bug 5488, streaming "union" with two consuming operands.</reason>
+  </exception>
+  
+  <exception test-case="
+    sx-intersect-302
+    sx-intersect-303
+    sx-intersect-310
+    sx-intersect-311
+    sx-intersect-312
+    sx-intersect-313
+    sx-intersect-314
+    sx-intersect-316
+    sx-intersect-317
+    sx-intersect-320
+    sx-intersect-320a
+    sx-intersect-321
+    sx-intersect-322
+    sx-intersect-323
+    sx-intersect-331
+    sx-intersect-332
+    sx-intersect-333
+    sx-intersect-334
+    sx-intersect-335" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2022-05-24"/>
+    <reason>Saxon bug 5488, streaming "intersect" with two consuming operands.</reason>
+  </exception>
 
 
 </exceptions>
