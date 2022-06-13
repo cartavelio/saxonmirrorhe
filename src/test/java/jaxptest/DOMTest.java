@@ -1816,50 +1816,7 @@ public class DOMTest {
         assertNull(inner.getAttributes().getNamedItemNS(NamespaceConstant.XMLNS, "c"));
     }
 
-    @Test
-    public void testBug5375() {
-        try {
-            TransformerFactory transformerFactory = new TransformerFactoryImpl();
-            DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
-            documentFactory.setNamespaceAware(true);
-            InputSource stub = new InputSource(new StringReader("<a xmlns:abc=\"a\" />"));
-            Document document = documentFactory.newDocumentBuilder().parse(stub);
-            DOMResult result = new DOMResult(document.getDocumentElement());
-            String xml = "<X xmlns:ab=\"b\" xmlns:ac=\"c\"/>";
-            transformerFactory.newTransformer().transform(new StreamSource(
-                    new StringReader(xml)), result);
-            StringWriter sw = new StringWriter();
-            transformerFactory.newTransformer().transform(new DOMSource(document), new StreamResult(sw));
-        } catch (SAXException | TransformerException | ParserConfigurationException | IOException e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
 
-    @Test
-    public void testRejectedIfNotNamespaceAware() {
-        try {
-            String[] testDocs = {"<a xmlns='http://a.com/'/>", "<p:a xmlns:p='http://a.com/'/>"};
-            TransformerFactory transformerFactory = new TransformerFactoryImpl();
-            DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
-            documentFactory.setNamespaceAware(false);   // the default, but used here for emphasis
-            for (String test : testDocs) {
-                try {
-                    InputSource stub = new InputSource(new StringReader(test));
-                    Document document = documentFactory.newDocumentBuilder().parse(stub);
-                    StringWriter sw = new StringWriter();
-                    StreamResult result = new StreamResult(sw);
-                    transformerFactory.newTransformer().transform(new DOMSource(document), result);
-                } catch (XPathException err) {
-                    fail("Should be a warning");
-                }
-            }
-
-        } catch (SAXException | TransformerException | ParserConfigurationException | IOException e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
 }
 
 

@@ -25,8 +25,8 @@ public class AxiomTreeTests extends ObjectModelTests {
     @Override
     XdmNode buildExternalDocument(Processor processor, String fileName) {
         try {
-            //InputStream in = new FileInputStream(ConfigTest.DATA_DIR + fileName);
-            StreamSource ss = new StreamSource(new File(ConfigTest.DATA_DIR + fileName));
+            //InputStream in = new FileInputStream(configTest.getDataDir() + fileName);
+            StreamSource ss = new StreamSource(new File(configTest.getDataDir() + fileName));
             OMXMLParserWrapper axiomBuilder = OMXMLBuilderFactory.createOMBuilder(ss);
             OMDocument doc = axiomBuilder.getDocument();
             DocumentBuilder builder = processor.newDocumentBuilder();

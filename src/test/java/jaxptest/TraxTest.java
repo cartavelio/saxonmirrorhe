@@ -10,9 +10,9 @@ import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.str.StringView;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -62,13 +62,6 @@ public class TraxTest {
     private final String multidoc_xsl = d+"xsl/multidoc.xsl";
     private final String identity_xsl = d+"xsl/identity.xsl";
 
-
-    private static TransformerFactory makeFactory() {
-        // We don't simply do newInstance(), because that can give us Xalan in cases where the test is
-        // run from a development environment.
-        return TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", ClassLoader.getSystemClassLoader());
-    }
-
     @Test
     public void testExampleParseOnly() {
         try {
@@ -89,7 +82,7 @@ public class TraxTest {
         try {
 
             // Create a transform factory instance.
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // Create a transformer for the stylesheet.
             Transformer transformer =
@@ -110,7 +103,7 @@ public class TraxTest {
         try {
 
             // Create a transform factory instance.
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // Create a transformer for the stylesheet.
             Transformer transformer =
@@ -132,7 +125,7 @@ public class TraxTest {
     public void testExampleErrorListener() {
 
         try {
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
             tfactory.setErrorListener(new ErrorListener() {
                 @Override
                 public void error(TransformerException exception) throws TransformerException {
@@ -170,7 +163,7 @@ public class TraxTest {
         try {
 
             // Create a transform factory instance.
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
             InputStream xslIS =
                     new BufferedInputStream(new FileInputStream(baz_xsl));
             StreamSource xslSource = new StreamSource(xslIS);
@@ -202,7 +195,7 @@ public class TraxTest {
         try {
 
             // Create a transform factory instance.
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // Note that in this case the XML encoding can not be processed!
             Reader xslReader = new BufferedReader(new FileReader(foo_xsl));
@@ -234,7 +227,7 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // Create a templates object, which is the processed,
             // thread-safe representation of the stylesheet.
@@ -262,7 +255,7 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // Does this factory support SAX features?
             if (tfactory.getFeature(SAXSource.FEATURE)) {
@@ -312,7 +305,7 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // Does this factory support SAX features?
             if (tfactory.getFeature(SAXResult.FEATURE)) {
@@ -344,7 +337,7 @@ public class TraxTest {
 //
 //        try {
 //
-//            TransformerFactory tfactory = makeFactory();
+//            TransformerFactory tfactory = TransformerFactory.newInstance();
 //
 //            // Does this factory support SAX features?
 //            if (tfactory.getFeature(SAXResult.FEATURE)) {
@@ -399,7 +392,7 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // Does this factory support SAX features?
             if (tfactory.getFeature(SAXSource.FEATURE)) {
@@ -444,7 +437,7 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             if (tfactory.getFeature(SAXSource.FEATURE)) {
                 XMLReader reader =
@@ -465,7 +458,7 @@ public class TraxTest {
     public void testExampleXMLFilter() {
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
             XMLReader reader = makeXMLReader();
 
 
@@ -499,7 +492,7 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // If one success, assume all will succeed.
             if (tfactory.getFeature(SAXSource.FEATURE)) {
@@ -549,7 +542,7 @@ public class TraxTest {
     public void testSaxonToSaxon() {
         try {
 
-            //TransformerFactory tfactory = makeFactory();
+            //TransformerFactory tfactory = TransformerFactory.newInstance();
             TransformerFactory tfactory = new net.sf.saxon.TransformerFactoryImpl();
             Configuration config = ((TransformerFactoryImpl) tfactory).getConfiguration();
             NodeInfo doc = config.buildDocumentTree(new StreamSource(new File(foo_xsl))).getRootNode();
@@ -580,7 +573,7 @@ public class TraxTest {
 
         try {
 
-            //TransformerFactory tfactory = makeFactory();
+            //TransformerFactory tfactory = TransformerFactory.newInstance();
             TransformerFactory tfactory = new net.sf.saxon.TransformerFactoryImpl();
             Configuration config = ((TransformerFactoryImpl) tfactory).getConfiguration();
             NodeInfo sdoc = config.buildDocumentTree(new StreamSource(new File(foo_xsl).toURI().toString())).getRootNode();
@@ -623,7 +616,7 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
             Transformer transformer = tfactory.newTransformer();
 
             if (tfactory.getFeature(DOMSource.FEATURE)) {
@@ -672,7 +665,7 @@ public class TraxTest {
 
             System.setProperty("javax.xml.parsers.DocumentBuilderFactory", factory);
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             if (tfactory.getFeature(DOMSource.FEATURE)) {
                 Templates templates;
@@ -753,7 +746,7 @@ public class TraxTest {
 
             System.setProperty("javax.xml.parsers.DocumentBuilderFactory", factory);
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             if (tfactory.getFeature(DOMSource.FEATURE)) {
                 Templates templates;
@@ -831,7 +824,7 @@ public class TraxTest {
 
             System.setProperty("javax.xml.parsers.DocumentBuilderFactory", factory);
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             if (tfactory.getFeature(DOMResult.FEATURE)) {
                 Templates templates = tfactory.newTemplates(new StreamSource(new File(foo_xsl)));
@@ -883,7 +876,7 @@ public class TraxTest {
 
             System.setProperty("javax.xml.parsers.DocumentBuilderFactory", factory);
 
-            //TransformerFactory tfactory = makeFactory();
+            //TransformerFactory tfactory = TransformerFactory.newInstance();
             TransformerFactory tfactory = new net.sf.saxon.TransformerFactoryImpl();
 
             if (tfactory.getFeature(DOMSource.FEATURE)) {
@@ -925,7 +918,7 @@ public class TraxTest {
     public void testNodeInfo() {
         try {
 
-            //TransformerFactory tfactory = makeFactory();
+            //TransformerFactory tfactory = TransformerFactory.newInstance();
             TransformerFactory tfactory = new net.sf.saxon.TransformerFactoryImpl();
             Templates templates = tfactory.newTemplates(new StreamSource(foo_xsl));
             Transformer transformer = templates.newTransformer();
@@ -942,7 +935,7 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
             Transformer transformer = tfactory.newTransformer();
             SAXSource source = new SAXSource(new InputSource(foo_xml));
             DOMResult result = new DOMResult();
@@ -969,7 +962,7 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
             Templates templates =
                     tfactory.newTemplates(new StreamSource(new File(foo_xsl)));
             Transformer transformer1 = templates.newTransformer();
@@ -997,7 +990,7 @@ public class TraxTest {
         try {
 
             // Create a transform factory instance.
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // Create a transformer for the stylesheet.
             Transformer transformer =
@@ -1025,7 +1018,7 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
             Templates templates =
                     tfactory.newTemplates(new StreamSource(new File(foo_xsl)));
             Properties oprops = templates.getOutputProperties();
@@ -1046,7 +1039,7 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // The DOM tfactory will have it's own way, based on DOM2,
             // of getting associated stylesheets.
@@ -1075,7 +1068,7 @@ public class TraxTest {
     public void testUseEmbedded() {
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // The DOM tfactory will have it's own way, based on DOM2,
             // of getting associated stylesheets.
@@ -1105,7 +1098,7 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // Make sure the transformer factory we obtained supports both
             // DOM and SAX.
@@ -1162,7 +1155,7 @@ public class TraxTest {
             DocumentBuilder docBuilder = dfactory.newDocumentBuilder();
             Node doc =
                     docBuilder.parse(new InputSource(foo_xml));
-            TransformerFactory tfactory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", ClassLoader.getSystemClassLoader());
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // This creates a transformer that does a simple identity transform,
             // and thus can be used for all intents and purposes as a serializer.
@@ -1223,7 +1216,7 @@ public class TraxTest {
             Element docElement = doc.createElementNS("nsx.uri", "x");
             doc.appendChild(docElement);
 
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // This creates a transformer that does a simple identity transform,
             // and thus can be used for all intents and purposes as a serializer.
@@ -1246,7 +1239,7 @@ public class TraxTest {
         try {
 
             // Create a transform factory instance.
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // Create a transformer for the stylesheet.
             Transformer transformer =
@@ -1270,7 +1263,7 @@ public class TraxTest {
         try {
 
             // Create a transform factory instance.
-            //TransformerFactory tfactory = makeFactory();
+            //TransformerFactory tfactory = TransformerFactory.newInstance();
             TransformerFactory tfactory = new net.sf.saxon.TransformerFactoryImpl();
 
             // Set the OutputURIResolver
@@ -1300,7 +1293,7 @@ public class TraxTest {
         try {
 
             // Create a transform factory instance.
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // Create a transformer for the stylesheet.
             Transformer transformer =
@@ -1506,7 +1499,7 @@ public class TraxTest {
     public static void exampleSerializeNode(Node node)
             throws TransformerException {
 
-        TransformerFactory tfactory = makeFactory();
+        TransformerFactory tfactory = TransformerFactory.newInstance();
 
         // This creates a transformer that does a simple identity transform,
         // and thus can be used for all intents and purposes as a serializer.
@@ -1525,7 +1518,7 @@ public class TraxTest {
         try {
 
             // Create a transform factory instance.
-            TransformerFactory tfactory = makeFactory();
+            TransformerFactory tfactory = TransformerFactory.newInstance();
 
             // Create a transformer for the stylesheet.
             Transformer transformer =

@@ -19,7 +19,7 @@ public class TinyTreeTests extends ObjectModelTests {
     XdmNode buildExternalDocument(Processor processor, String fileName) {
         try {
             DocumentBuilder builder = processor.newDocumentBuilder();
-            return builder.build(new File(ConfigTest.DATA_DIR + fileName));
+            return builder.build(new File(configTest.getDataDir() + fileName));
         } catch (SaxonApiException e) {
             fail();
             return null;
