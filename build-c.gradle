@@ -167,9 +167,7 @@ task rejar_Xerces(
           include "Saxon.C.API/jni/**/*.h"
           include "Saxon.C.API/readme.md"
           exclude "Saxon.C.API/config.m4"
-          exclude "Saxon.C.API/HEC"
-          exclude "Saxon.C.API/PEC"
-          exclude "Saxon.C.API/EEC"
+          exclude "Saxon.C.API/SaxonCGlue.c"
           exclude "Saxon.C.API/Makefile"
           exclude "Saxon.C.API/PHP7-Build/config.m4"
           exclude "Saxon.C.API/PHP7-Build/config.w32"
@@ -211,17 +209,20 @@ task rejar_Xerces(
           exclude "samples/data/config_file.xml"
           exclude "samples/data/package*"
           include "saxon-data/**/*"
+          include "command/*.c"
+          include "command/jni/**/*"
         }
+        filter { line ->
+          line.replaceAll("@@VERSION@@", saxonVersion)
+        }
+      }
 
+      copy {
+        into "${buildDir}/c/${release}c"
         from("${projectDir}/src/docs") {
           include "notices/JAMESCLARK.txt"
           include "notices/CERN.txt"
           include "notices/LICENSE.txt"
-        }
-
-        from("${projectDir}/src/main/c") {
-          include "command/*.c"
-          include "command/jni/**/*"
         }
       }
     }
@@ -235,7 +236,14 @@ task rejar_Xerces(
       doLast {
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
-          from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
+          from("${projectDir}/src/main/c/Saxon.C.API") {
+            include "SaxonCGlue.c"
+          }
+          filter { line ->
+            line.replaceAll("@@VERSION@@", saxonVersion)
+              .replaceAll("@@release@@", release)
+              .replaceAll("@@RELEASE@@", RELEASE)
+          }
         }
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
@@ -277,7 +285,14 @@ task rejar_Xerces(
       doLast {
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
-          from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
+          from("${projectDir}/src/main/c/Saxon.C.API") {
+            include "SaxonCGlue.c"
+          }
+          filter { line ->
+            line.replaceAll("@@VERSION@@", saxonVersion)
+              .replaceAll("@@release@@", release)
+              .replaceAll("@@RELEASE@@", RELEASE)
+          }
         }
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
@@ -325,7 +340,14 @@ task rejar_Xerces(
       doLast {
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
-          from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
+          from("${projectDir}/src/main/c/Saxon.C.API") {
+            include "SaxonCGlue.c"
+          }
+          filter { line ->
+            line.replaceAll("@@VERSION@@", saxonVersion)
+              .replaceAll("@@release@@", release)
+              .replaceAll("@@RELEASE@@", RELEASE)
+          }
         }
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
