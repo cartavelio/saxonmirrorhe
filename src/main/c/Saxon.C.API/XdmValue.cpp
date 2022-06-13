@@ -64,8 +64,10 @@ const char * XdmValue::toString() {
         if(toStringValue.empty()) {
             return nullptr;
         }
+
         return toStringValue.c_str();
     } else {
+
         return toStringValue.c_str();
 
     }
@@ -109,10 +111,6 @@ XdmValue::XdmValue(jobject val, bool arr){
 		jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
 		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
 		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
-        jclass mapItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                           "net/sf/saxon/s9api/XdmMap");
-        jclass arrayItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                             "net/sf/saxon/s9api/XdmArray");
 
 		//XdmValue * value = new XdmValue();
 		//value->setProcessor(proc);
@@ -131,18 +129,11 @@ XdmValue::XdmValue(jobject val, bool arr){
 
 
 			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, functionItemClass)           == JNI_TRUE) {
-
+			      //Not Supported yet
+#if CVERSION_API_NO >= 123
 				xdmItem = new XdmFunctionItem(SaxonProcessor::sxn_environ->env->NewGlobalRef(resulti));
-
-			}  else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, mapItemClass)           == JNI_TRUE) {
-
-                xdmItem = new XdmMap(SaxonProcessor::sxn_environ->env->NewGlobalRef(resulti));
-
-            }  else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, arrayItemClass)           == JNI_TRUE) {
-
-                xdmItem = new XdmArray(SaxonProcessor::sxn_environ->env->NewGlobalRef(resulti));
-
-            }
+#endif
+			}
 			//xdmItem->setProcessor(proc);
 			addXdmItem(xdmItem);
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(resulti);

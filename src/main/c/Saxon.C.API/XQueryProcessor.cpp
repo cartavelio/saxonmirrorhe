@@ -19,18 +19,14 @@
 
 
     XQueryProcessor::~XQueryProcessor(){
-        SaxonProcessor::attachCurrentThread();
         clearProperties();
         clearParameters();
-        if(!cppXQ) {
-            SaxonProcessor::sxn_environ->env->DeleteGlobalRef(cppXQ);
-        }
+        SaxonProcessor::sxn_environ->env->DeleteGlobalRef(cppXQ);
         cwdXQ.erase();
         exceptionClear();
     }
 
     XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
-        SaxonProcessor::attachCurrentThread();
     proc = p;
         exception = nullptr;
      cppClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XQueryEngine");
@@ -242,7 +238,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
 
     void XQueryProcessor::setUpdating(bool updating){
-        SaxonProcessor::attachCurrentThread();
+     
     	jmethodID mID =
     		(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass, "setUpdating",
     				"(Z)V");
@@ -259,7 +255,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
     }
 
     void XQueryProcessor::executeQueryToFile(const char * infilename, const char * ofilename, const char * query){
-        SaxonProcessor::attachCurrentThread();
+
 
 	jmethodID mID = (jmethodID)SaxonProcessor::sxn_environ->env->GetMethodID (cppClass,"executeQueryToFile", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)V");
  	if (!mID) {
@@ -323,7 +319,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
 
     XdmValue * XQueryProcessor::executeQueryToValue(const char * infilename, const char * query){
-        SaxonProcessor::attachCurrentThread();
+
  jmethodID mID = (jmethodID)SaxonProcessor::sxn_environ->env->GetMethodID (cppClass,"executeQueryToValue", "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmValue;");
  if (!mID) {
         std::cerr<<"Error: MyClassInDll."<<"executeQueryToValue"<<" not found\n"<<std::endl;
@@ -426,12 +422,12 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 }
 
     const char * XQueryProcessor::executeQueryToString(const char * infilename, const char * query){
-        SaxonProcessor::attachCurrentThread();
-        jmethodID mID = (jmethodID)SaxonProcessor::sxn_environ->env->GetMethodID (cppClass,"executeQueryToString", "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)[B");
-        if (!mID) {
-            std::cerr<<"Error: MyClassInDll."<<"executeQueryToString"<<" not found\n"<<std::endl;
-        } else {
-            if(cppXQ == nullptr) {
+
+ jmethodID mID = (jmethodID)SaxonProcessor::sxn_environ->env->GetMethodID (cppClass,"executeQueryToString", "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)[B");
+ if (!mID) {
+        std::cerr<<"Error: MyClassInDll."<<"executeQueryToString"<<" not found\n"<<std::endl;
+    } else {
+     if(cppXQ == nullptr) {
 #if defined(DEBUG)
          std::cerr << "The Java XQueryEngine object (i.e. cppXQ) is NULL - Possible exception thrown" << std::endl;
 #endif
@@ -475,7 +471,6 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
      jbyteArray result = nullptr;
      jobject obj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXQ, mID, SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXQ.c_str()), stringArray, objectArray ));
-
 	  SaxonProcessor::sxn_environ->env->DeleteLocalRef(objectArray);
 	  SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray);
 
@@ -532,7 +527,6 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
 
 void XQueryProcessor::exceptionClear(){
-    SaxonProcessor::attachCurrentThread();
     SaxonProcessor::sxn_environ->env->ExceptionClear();
 	if(exception != nullptr) {
 		delete exception;
