@@ -1835,6 +1835,32 @@ public class DOMTest {
             fail();
         }
     }
+
+    @Test
+    public void testRejectedIfNotNamespaceAware() {
+        try {
+            String[] testDocs = {"<a xmlns='http://a.com/'/>", "<p:a xmlns:p='http://a.com/'/>"};
+            TransformerFactory transformerFactory = new TransformerFactoryImpl();
+            DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+            documentFactory.setNamespaceAware(false);   // the default, but used here for emphasis
+            for (String test : testDocs) {
+                try {
+                    InputSource stub = new InputSource(new StringReader(test));
+                    Document document = documentFactory.newDocumentBuilder().parse(stub);
+                    StringWriter sw = new StringWriter();
+                    StreamResult result = new StreamResult(sw);
+                    transformerFactory.newTransformer().transform(new DOMSource(document), result);
+                    fail("Should be rejected");
+                } catch (XPathException err) {
+                    // OK
+                }
+            }
+
+        } catch (SAXException | TransformerException | ParserConfigurationException | IOException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
 }
 
 
