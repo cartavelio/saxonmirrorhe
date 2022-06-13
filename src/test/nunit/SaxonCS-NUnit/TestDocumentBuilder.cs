@@ -483,21 +483,26 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void TestWhitespacePolicySchemaTyped() {
-            string s = buildWithWhitespacePolicyTyped(WhitespacePolicy.StripIgnorable);
+            string s = buildWithWhitespacePolicyTyped(WhitespacePolicy.StripIgnorable, true);
             Assert.That(s.Contains("<BOOKS><ITEM"));
-            s = buildWithWhitespacePolicyTyped(WhitespacePolicy.PreserveAll);
+            Assert.That(s.Contains("TAX=\"V\""));
+            s = buildWithWhitespacePolicyTyped(WhitespacePolicy.StripIgnorable, false);
+            Assert.That(s.Contains("<BOOKS><ITEM"));
+            Assert.That(!s.Contains("TAX=\"V\""));
+            s = buildWithWhitespacePolicyTyped(WhitespacePolicy.PreserveAll, true);
             Assert.That(s.StartsWith("rejected"));
-            s = buildWithWhitespacePolicyTyped(WhitespacePolicy.StripAll);
+            s = buildWithWhitespacePolicyTyped(WhitespacePolicy.StripAll, true);
             Assert.That(s.StartsWith("rejected"));
         }
 
-        private string buildWithWhitespacePolicyTyped(WhitespacePolicy policy) {
+        private string buildWithWhitespacePolicyTyped(WhitespacePolicy policy, bool expandDefaults) {
             try {
                 Processor proc = new Processor(true);
 
                 SchemaManager mgr = proc.SchemaManager;
                 mgr.Compile(new XmlTextReader(ConfigTest.DATA_DIR + "books.xsd"));
                 SchemaValidator v = mgr.NewSchemaValidator();
+                v.ExpendAttributeDefaults = expandDefaults;
 
                 Serializer serializer = proc.NewSerializer();
                 serializer.SetOutputProperty(Serializer.METHOD, "xml");
