@@ -2,6 +2,7 @@ package jaxptest;
 
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.FeatureKeys;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -44,6 +45,7 @@ public class TestIdentityTransformer {
         }
     }
 
+    @Ignore
     @Test
     public void testIdentityTransformFromDom() {
         try {
