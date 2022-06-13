@@ -251,8 +251,7 @@ queryProc->runQueryToString();
 
 with PySaxonProcessor(license=False) as proc:
 
-  print(proc.version)
-  xdmAtomicval = proc.make_boolean_value(False)
+  print(proc.version)  
   xsltproc = proc.new_xslt30_processor()
   document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
   executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
@@ -293,7 +292,6 @@ with PySaxonProcessor(license=False) as proc:
 with PySaxonProcessor(license=False) as proc:
 
   print(proc.version)
-  xdmAtomicval = proc.make_boolean_value(False)
   xsltproc = proc.new_xslt30_processor()
   executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
   executable.set_result_as_raw_value(True)
