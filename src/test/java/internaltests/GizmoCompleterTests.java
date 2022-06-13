@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -191,7 +192,10 @@ public class GizmoCompleterTests {
         List<String> options = new ArrayList<>();
         int pos = go("load trax/xs", options);
         assertEquals(1, options.size(), "xsl/");
-        assertTrue(options.contains("xsl/"), "b");
+
+        String expected = "xsl" + File.separator;
+
+        assertTrue(options.contains(expected), "b");
         assertEquals(pos, "load trax/".length(), "e");
     }
 
