@@ -1718,6 +1718,8 @@ publishing {
         artifact mavenPeJavadocJar
         artifact mavenPeTestJar
         artifact mavenPeTestSourcesJar
+        artifact mavenPeSqlJar
+        artifact mavenPeSqlSourcesJar
       }
 
       mavenEE(MavenPublication) {
@@ -1745,6 +1747,8 @@ publishing {
         artifact mavenEeJavadocJar
         artifact mavenEeTestJar
         artifact mavenEeTestSourcesJar
+        artifact mavenEeSqlJar
+        artifact mavenEeSqlSourcesJar
       }
     }
   }
