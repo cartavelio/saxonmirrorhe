@@ -43,7 +43,7 @@ namespace Saxon.Api {
         private SchemaManager schemaManager;
         private TextWriter textWriter = Console.Error;
         private CollectionFinder userCollectionFinder;
-        private bool licenseHasBeenChecked = false;
+
         internal Processor(Saxon.Hej.s9api.Processor p) {
             JProcessor = p;
             JProcessor.getUnderlyingConfiguration().setProcessor(this);
@@ -129,18 +129,16 @@ namespace Saxon.Api {
         }
 
         private void init() {
-            Saxon.Hej.expr.XPathContext context = new EarlyEvaluationContext(JProcessor.getUnderlyingConfiguration());
+            checkLicense();
+            Saxon.Hej.expr.XPathContext context = new EarlyEvaluationContext(Implementation);
             StandardCollectionFinder = uri => new ResourceCollectionWrapper(
                 new StandardCollectionFinder().findCollection(context, uri.ToString()), context);
             userCollectionFinder = StandardCollectionFinder;
         }
 
         private void checkLicense() {
-            if (!licenseHasBeenChecked) {
-                Implementation.checkLicensedFeature(
-                    Configuration.LicenseFeature.SCHEMA_VALIDATION, "Saxon-CS", -1);
-                licenseHasBeenChecked = true;
-            }
+            Implementation.checkLicensedFeature(
+                Configuration.LicenseFeature.SCHEMA_VALIDATION, "Saxon-CS", -1);
         }
         
         /// <summary>
@@ -249,7 +247,6 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>A new <c>DocumentBuilder</c></returns>
         public DocumentBuilder NewDocumentBuilder() {
-            checkLicense();
             return new DocumentBuilder(this);
         }
         
@@ -259,7 +256,6 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>A new <c>JsonBuilder</c></returns>
         public JsonBuilder NewJsonBuilder() {
-            checkLicense();
             return new JsonBuilder(Implementation);
         }
 
@@ -272,7 +268,6 @@ namespace Saxon.Api {
         /// </remarks>
         /// <returns>A new <c>XQueryCompiler</c></returns>
         public XQueryCompiler NewXQueryCompiler() {
-            checkLicense();
             return new XQueryCompiler(this);
         }
 
@@ -285,7 +280,6 @@ namespace Saxon.Api {
         /// </remarks>
         /// <returns>A new <c>XsltCompiler</c></returns>
         public XsltCompiler NewXsltCompiler() {
-            checkLicense();
             return new XsltCompiler(this);
         }
 
@@ -298,7 +292,6 @@ namespace Saxon.Api {
         /// </remarks>
         /// <returns>A new <c>XPathCompiler</c></returns>
         public XPathCompiler NewXPathCompiler() {
-            checkLicense();
             return new XPathCompiler(this, JProcessor.newXPathCompiler());
         }
 
@@ -307,7 +300,6 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns> a new <c>Serializer</c> </returns>
         public Serializer NewSerializer() {
-            checkLicense();
             return new Serializer(this, JProcessor.newSerializer());
         }
 
@@ -318,7 +310,6 @@ namespace Saxon.Api {
         /// <param name="textWriter">The <c>TextWriter</c> to which the <c>Serializer</c> will write</param>
         /// <returns> a new <c>Serializer</c> </returns>
         public Serializer NewSerializer(TextWriter textWriter) {
-            checkLicense();
             Serializer s = new Serializer(this, JProcessor.newSerializer());
             s.OutputWriter = textWriter;
             return s;
@@ -331,7 +322,6 @@ namespace Saxon.Api {
         /// <param name="stream">The output <c>Stream</c> to which the <c>Serializer</c> will write</param>
         /// <returns> a new Serializer </returns>
         public Serializer NewSerializer(Stream stream) {
-            checkLicense();
             Serializer s = new Serializer(this, JProcessor.newSerializer());
             s.OutputStream = stream;
             return s;
@@ -667,7 +657,6 @@ namespace Saxon.Api {
         /// <param name="arity">The required arity</param>
         /// <returns>The system function if it exists, or null otherwise</returns>
         public XdmFunctionItem GetSystemFunction(QName name, int arity) {
-            checkLicense();
             Saxon.Hej.om.Function f = Implementation.getSystemFunction(name.GetStructuredQName(), arity);
             return f==null ? null : new XdmFunctionItem(f);
         }
