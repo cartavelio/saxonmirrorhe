@@ -121,10 +121,10 @@ public class JLine2Talker implements Talker {
                             } else if (translated.startsWith("~")) {
                                 translated = homeDir.getParentFile().getAbsolutePath();
                             } else if (!translated.contains(separator())) {
-                                String cwd = System.getProperty("user.dir");
+                                String cwd = getUserDir().getAbsolutePath();
                                 translated = cwd + separator() + translated;
                             } else if (!(new File(translated).isAbsolute())) {
-                                String cwd = System.getProperty("user.dir"); 
+                                String cwd = getUserDir().getAbsolutePath();
                                 translated = cwd + separator() + translated;
                             }
 
