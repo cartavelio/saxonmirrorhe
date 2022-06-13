@@ -279,7 +279,9 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                     InputStream stream = getInputStream();
                     String enc = encoding;
                     if (enc == null) {
-                        stream = InputStreamMarker.ensureMarkSupported(stream);
+                        if (!stream.markSupported()) {
+                            stream = new BufferedInputStream(stream);
+                        }
                         enc = EncodingDetector.inferStreamEncoding(stream, null);
                     }
                     return characterContent = CatalogCollection.makeStringFromStream(stream, enc);
