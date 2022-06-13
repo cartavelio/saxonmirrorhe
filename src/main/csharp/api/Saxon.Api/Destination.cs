@@ -542,6 +542,11 @@ namespace Saxon.Api
 
 
     }
+    
+    /// <summary>
+    /// This class represents a Destination (for example, the destination of the output of a transformation)
+    /// in which the results are written to a newly constructed DOM tree in memory.
+    /// </summary>
 
      public class DomDestination : XmlDestination
     {
@@ -552,7 +557,7 @@ namespace Saxon.Api
         /// <summary>Construct a <c>DomDestination</c>.</summary>
         /// <remarks>With this constructor, the system will create a new DOM Document
         /// to act as the destination of the query or transformation results. The document
-		/// node of the new document may be retrieved via the <c>XmlDocument</c> property.</remarks>
+        /// node of the new document may be retrieved via the <c>XmlDocument</c> property.</remarks>
 
         public DomDestination()
         {
@@ -665,7 +670,7 @@ namespace Saxon.Api
         }
     }
 	/// <summary>
-	/// A <c>RawDestination</c> is an <c>Destination</c> that accepts a sequence output
+	/// A <c>RawDestination</c> is an <c>XmlDestination</c> that accepts a sequence output
 	/// by a stylesheet or query and returns it directly as an <c>XdmValue</c>, without
 	/// constructing an XML tree, and without serialization. It corresponds to the serialization
 	/// option <code>build-tree="no"</code>.

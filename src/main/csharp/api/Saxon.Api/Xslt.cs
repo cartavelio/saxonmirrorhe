@@ -741,8 +741,11 @@ namespace Saxon.Api
             set { xsltCompiler.setFastCompilation(value); }
             get { return xsltCompiler.isFastCompilation(); }
         }
-
-
+        
+        /// <summary>
+        /// Property to check and set fast compilation.
+        /// This property name has been misspelt, use <c>FastCompilation</c> instead.
+        /// </summary>
         [Obsolete("This property has been replaced by FastCompilation.")]
         public bool FastCompliation
         {
@@ -1613,6 +1616,11 @@ namespace Saxon.Api
         {
             transformer.setParameter(net.sf.saxon.s9api.QName.fromEQName(name.EQName), net.sf.saxon.s9api.XdmValue.wrap(value.value));
         }
+
+
+        /// <summary>
+        /// Get the underlying destination.
+        /// </summary>
 
 		public JDestination GetUnderlyingDestination() 
 		{

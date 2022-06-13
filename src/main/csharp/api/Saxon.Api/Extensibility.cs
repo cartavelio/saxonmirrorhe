@@ -456,7 +456,7 @@ namespace Saxon.Api
         /// or the { @link UnparsedTextURIResolver }
         /// (in the case of unparsed text and JSON resources), etc.
         /// </summary>
-        /// <param name="context">context the XPath evaluation context</param>
+        /// <param name="context">the XPath evaluation context</param>
         /// <returns>an iterator over the URIs of the resources in the collection. The URIs are represented
         /// as Strings.They should preferably be absolute URIs.</returns>
 		/**public**/ List<String> GetResourceURIs(DynamicContext context);
@@ -688,7 +688,7 @@ namespace Saxon.Api
     }
 
 	/// <summary>
-	/// ResourceCollection class that implements the IResourcecollection interface.
+	/// ResourceCollection class that implements the IResourceCollection interface.
     /// This class is used to map the URI of collection into a sequence of Resource objects.
     /// It is used to support the fn:collection() and fn:uri-collection() functions.
 	/// </summary>
@@ -746,7 +746,7 @@ namespace Saxon.Api
         /// returned bear any particular relationship to the URIs returned by the getResourceURIs() method
         /// for the same collection URI.
         /// </summary>
-        /// <param name="context">context the XPath evaluation context</param>
+        /// <param name="context">the XPath evaluation context</param>
         /// <returns>a list over the resources in the collection. This returns objects of implementations of the interface <code>IResource</code></returns>
         public List<IResource> GetResources(DynamicContext context)
         {
@@ -764,6 +764,12 @@ namespace Saxon.Api
             return list;
         }
 
+        /// <summary>
+        /// Ask whether the collection is stable: in this case Saxon will retain the contents of the
+        /// collection in memory, and will not make a second request on the CollectionFinder for the
+        /// same collection URI.
+        /// </summary>
+        /// <param name="context">the XPath dynamic evaluation context (in case the decision is context dependent)</param>
         public bool IsStable(DynamicContext context)
         {
             return resourceCollection.isStable(context.context);
@@ -809,7 +815,9 @@ namespace Saxon.Api
     {
         internal JResource resource = null;
 
-        //Default constructor
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public Resource() 
 		{ 
 			resource = null; 
@@ -842,6 +850,15 @@ namespace Saxon.Api
             return resource.getResourceURI();
         }
 
+        /// <summary>
+        /// Get an XDM Item holding the contents of this resource.
+        /// </summary>
+        /// <param name="context">the XPath evaluation context</param>
+        /// <returns>an item holding the contents of the resource. The type of item will
+        /// reflect the type of the resource: a document node for XML resources, a string
+        /// for text resources, a map or array for JSON resources, a base64Binary value
+        /// for binary resource. May also return null if the resource cannot be materialized
+        /// and this is not to be treated as an error.</returns>
         public XdmItem GetXdmItem(DynamicContext context)
         {
             return XdmItem.FromGroundedValue(resource.getItem(context.context).materialize()).ItemAt(0);

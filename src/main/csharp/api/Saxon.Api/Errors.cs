@@ -258,7 +258,10 @@ namespace Saxon.Api
         {
             this.reporter = reporter;
         }
-
+        
+        /// <summary>
+        /// Get property on the wrapped <c>IErrorReporter</c>.
+        /// </summary>
         public IErrorReporter ErrorReporter {
             get { return reporter; }
         }
@@ -330,6 +333,9 @@ namespace Saxon.Api
             this.errorList = errorList;
         }
 
+        /// <summary>
+        /// Get property on the wrapped error list.
+        /// </summary>
         public IList<StaticError> ErrorList
         {
             get { return errorList; }

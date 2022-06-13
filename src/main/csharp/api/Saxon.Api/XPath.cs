@@ -940,6 +940,10 @@ namespace Saxon.Api
             return new FileNameFilter(net.sf.saxon.functions.URIQueryParameters.makeGlobFilter(value));
         } */
 
+        /// <summary>
+        /// Get the value of the validation=strict|lax|preserve|strip parameter, or null if unspecified.
+        /// </summary>
+
         public int ValidationMode() 
 		{
             return uriQueryParameters.getValidationMode().intValue();
@@ -953,34 +957,46 @@ namespace Saxon.Api
             
         }*/
 
+        /// <summary>
+        /// Get the value of the recurse=yes|no parameter, or null if unspecified.
+        /// </summary>
         public bool GetRecurse() 
 		{
             return uriQueryParameters.getRecurse().booleanValue();
         }
 
+        /// <summary>
+        /// Get the value of the on-error=fail|warning|ignore parameter, or null if unspecified.
+        /// </summary>
         public int GetOnError() 
 		{
             return uriQueryParameters.getOnError().intValue();
         }
 
-
+        /// <summary>
+        /// Get the value of xinclude=yes|no, or null if unspecified.
+        /// </summary>
         public bool GetXInclude()
         {
             return uriQueryParameters.getXInclude().booleanValue();
         }
-
 
         public bool GetMeataData()
         {
             return uriQueryParameters.getMetaData().booleanValue();
         }
 
-
+        /// <summary>
+        /// Get the value of media-type, or null if absent.
+        /// </summary>
         public String ContentType()
         {
             return uriQueryParameters.getContentType();
         }
 
+        /// <summary>
+        /// Get the value of stable=yes|no, or null if unspecified.
+        /// </summary>
         public bool GetStable()
         {
             return uriQueryParameters.getStable().booleanValue();
