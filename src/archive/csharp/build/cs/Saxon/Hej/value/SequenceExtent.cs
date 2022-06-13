@@ -157,6 +157,16 @@ namespace Saxon.Hej.value {
         
         }
     
+        /* Expanding default method materialize from interface GroundedValue */
+        public virtual Saxon.Hej.om.GroundedValue materialize() {
+            return this;
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
+        }
+
         /* Expanding default method effectiveBooleanValue from interface GroundedValue */
         public virtual bool effectiveBooleanValue() {
             return Saxon.Hej.expr.parser.ExpressionTool.effectiveBooleanValue(iterate());
@@ -165,11 +175,6 @@ namespace Saxon.Hej.value {
         /* Expanding default method reduce from interface GroundedValue */
         public virtual Saxon.Hej.om.GroundedValue reduce() {
             return this;
-        }
-
-        /* Expanding default method materialize from interface Sequence */
-        public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
         }
 
         /* Expanding default method toShortString from interface GroundedValue */
@@ -197,25 +202,20 @@ namespace Saxon.Hej.value {
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
+        /* Creating stub method head to satisfy interface Sequence */
+        /* (Also inherited from GroundedValue) */
+        public virtual Saxon.Hej.om.Item head() {
+            throw new System.NotImplementedException();
         }
 
-        /* Creating stub method iterate to satisfy interface GroundedValue */
-        /* (Also inherited from Sequence) */
+        /* Creating stub method iterate to satisfy interface Sequence */
+        /* (Also inherited from GroundedValue) */
         public virtual Saxon.Hej.om.SequenceIterator iterate() {
             throw new System.NotImplementedException();
         }
 
         /* Creating stub method itemAt to satisfy interface GroundedValue */
         public virtual Saxon.Hej.om.Item itemAt(int arg1) {
-            throw new System.NotImplementedException();
-        }
-
-        /* Creating stub method head to satisfy interface GroundedValue */
-        /* (Also inherited from Sequence) */
-        public virtual Saxon.Hej.om.Item head() {
             throw new System.NotImplementedException();
         }
 

@@ -636,7 +636,8 @@ namespace Saxon.Hej.functions {
                                 sourceNode = tree.getRootNode();
                                 sourceLocation = null;
                             } catch (Saxon.Hej.trans.XPathException e) {
-                                e.setErrorCode("FOXT0003");
+                                e.maybeSetErrorCode("FOXT0003");
+                                throw;
                             }
                         }
                     }

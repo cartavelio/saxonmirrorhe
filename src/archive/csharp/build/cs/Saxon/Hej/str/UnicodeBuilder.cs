@@ -186,6 +186,10 @@ namespace Saxon.Hej.str {
         public void close() {
         }
     
+        /* Expanding default method open from interface UniStringConsumer */
+        public void open() {
+        }
+
         /* Expanding default method writeCodePoint from interface UnicodeWriter */
         public void writeCodePoint(int codepoint) {
             write(new Saxon.Hej.str.UnicodeChar(codepoint));
@@ -201,10 +205,6 @@ namespace Saxon.Hej.str {
 
         /* Expanding default method flush from interface UnicodeWriter */
         public void flush() {
-        }
-
-        /* Expanding default method open from interface UniStringConsumer */
-        public void open() {
         }
 
     }
