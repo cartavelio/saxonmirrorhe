@@ -43,14 +43,40 @@ namespace SaxonCS_NUnit {
         
         [Test]
         public void TestReadConfigFileWithLinkToLicenseFile() {
+            // Copy the license file from the standard location to a new location in the build directory,
+            // and then pick it up by reference from a configuration file. This test doesn't rule out the
+            // possibility that we're ignoring the configuration file and loading the license from the usual
+            // location. To eliminate that possibility, we do the same again, corrupting the license and
+            // checking that loading now fails.
             try {
-                // Create a Processor using a configuration file that contains a link to a local license file.
+                
+                // Phase 1: should pick up license file from build directory
+                string existingLicenseFileLocation =
+                    Environment.GetEnvironmentVariable("SAXON_LICENSE_DIR") + "/saxon-license.lic";
+                string newLicenseLocation = ConfigTest.DATA_DIR.Replace("src/test/testdata", "build/license") + "copied-license.text";
+                File.Copy(existingLicenseFileLocation, newLicenseLocation, true);
                 Uri address = new Uri(ConfigTest.DataDirUri, "config-with-link-to-license-file.config");
                 Stream configFile = new WebClient().OpenRead(address);
                 Processor processor = new(configFile, address);
                 Assert.NotNull(processor);
                 Assert.That(processor.Implementation.isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
-                Assert.AreEqual("V010267", processor.Implementation.getLicenseFeature("Serial"));
+                configFile.Close();
+                
+                // Phase 2: the same, except the license file is corrupted so we should get a failure
+                string content = File.ReadAllText(existingLicenseFileLocation);
+                content = content.Replace("Signature=", "Signature=FFFF");
+                File.WriteAllText(newLicenseLocation, content);
+
+                try {
+                    Stream configFile2 = new WebClient().OpenRead(address);
+                    Processor processor2 = new(configFile2, address);
+                    Assert.Fail("Failed to detect invalid license");
+                }
+                catch (Exception e) {
+                    Assert.That(e.Message.Contains("Failed to process license"));
+                    Assert.That(e.Message.Contains("build/license/copied-license.text"));
+                }
+                
             }
             catch (Exception ex) {
                 Console.Error.WriteLine(ex.StackTrace);
