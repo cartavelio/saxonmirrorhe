@@ -189,6 +189,14 @@ cdef class PySaxonProcessor:
             return ustring
 
     @property
+    def attach_current_thread(self):
+        self.thisptr.attachCurrentThread()
+
+    @property
+    def detach_current_thread(self):
+        self.thisptr.detachCurrentThread()
+
+    @property
     def cwd(self):
         """
         cwd Property represents the current working directory

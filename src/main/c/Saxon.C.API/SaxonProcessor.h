@@ -22,10 +22,10 @@
 #include <windows.h>
 #endif
 
-//#define DEBUG //remove
+#define DEBUG //remove
 //#define MEM_DEBUG //remove
-#define CVERSION "11.3"
-#define CVERSION_API_NO 1130
+#define CVERSION "11.1"
+#define CVERSION_API_NO 1110
 
 
 
@@ -666,7 +666,6 @@ private:
 
     void createException(const char * message=nullptr);
 
-    void initialize(bool l);
 
     void applyConfigurationProperties();
 
