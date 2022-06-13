@@ -1,0 +1,18 @@
+Licensor=Saxonica
+Licensee=Michael Kay
+Company=OEM Saxonica (Test)
+Email=mike@saxonica.com
+Edition=EE
+SAT=yes
+SAQ=yes
+SAV=yes
+Issued=2022-02-24
+Series=V
+Serial=V010267
+User=P0001
+Evaluation=no
+Expiration=never
+UpgradeDays=366
+MaintenanceDays=366
+
+Signature=302C021445504770BA69FDA52ADC4D9166D3F812302096F602144ED09984CC716D7628FE52CF2D2A7C70D0487A8D
