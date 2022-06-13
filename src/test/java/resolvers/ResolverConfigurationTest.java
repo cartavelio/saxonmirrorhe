@@ -25,8 +25,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class ResolverConfigurationTest {
-    private final ConfigTest configTest = new ConfigTest();
-    
     @Test
     public void defaultCatalogResourceResolver() {
         Configuration config = new Configuration();
@@ -74,7 +72,7 @@ public class ResolverConfigurationTest {
         try {
             Configuration config = new Configuration();
             config.setResourceResolver(new ResourceResolverWrappingURIResolver(new StandardURIResolver(config)));
-            TreeInfo info = config.buildDocumentTree(new StreamSource(new File(configTest.getDataDir() + "books.xml")));
+            TreeInfo info = config.buildDocumentTree(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml")));
             assertTrue(info.getRootNode().getBaseURI().endsWith("books.xml"));
         } catch (XPathException e) {
             fail();
@@ -112,9 +110,9 @@ public class ResolverConfigurationTest {
                             }));
 
             //config.setResourceResolver(new ResourceResolverWrappingURIResolver(new StandardURIResolver(config)));
-            TreeInfo info = config.buildDocumentTree(new StreamSource(new File(configTest.getDataDir() + "books.xml")));
+            TreeInfo info = config.buildDocumentTree(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml")));
             XQueryCompiler xqc = proc.newXQueryCompiler();
-            xqc.setBaseURI(new File(configTest.getDataDir()).toURI());
+            xqc.setBaseURI(new File(ConfigTest.DATA_DIR).toURI());
             XQueryExecutable exec = xqc.compile("doc('books.xml')");
             exec.load().run(new NullDestination());
             assertTrue(info.getRootNode().getBaseURI().endsWith("books.xml"));
