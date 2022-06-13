@@ -13,11 +13,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -260,40 +255,13 @@ public class LicenseTests {
 
     @Test
     public void TestReadConfigFileWithLinkToLicenseFile() {
-        // Copy the license file from the standard location to a new location in the build directory,
-        // and then pick it up by reference from a configuration file. This test doesn't rule out the
-        // possibility that we're ignoring the configuration file and loading the license from the usual
-        // location. To eliminate that possibility, we do the same again, corrupting the license and
-        // checking that loading now fails.
         try {
-            // First phase - should work
-            String existingLicenseFileLocation = System.getenv("SAXON_LICENSE_DIR") + "/saxon-license.lic";
-            String newLicenseLocation = new ConfigTest().getDataDir().replace("src/test/testdata", "build/license");
-            Path newLicensePath = Paths.get(newLicenseLocation + "/copied-license.text");
-            Files.createDirectories(Paths.get(newLicenseLocation));
-            Files.copy(Paths.get(existingLicenseFileLocation), newLicensePath, StandardCopyOption.REPLACE_EXISTING);
+            // Create a Processor instance.
             Processor processor = new Processor(new StreamSource(new File(
                     new ConfigTest().getDataDir() + "config-with-link-to-license-file.config")));
             assertNotNull(processor);
             assertTrue(processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
-            // Second phase - should fail
-            List<String> content = Files.readAllLines(newLicensePath);
-            for (int i=0; i<content.size(); i++) {
-                if (content.get(i).startsWith("Signature=")) {
-                    content.set(i, "Signature=FFFFFFFF");
-                }
-            }
-            Files.write(newLicensePath, content);
-            try {
-                Processor proc2 = new Processor(new StreamSource(new File(
-                        new ConfigTest().getDataDir() + "config-with-link-to-license-file.config")));
-                assertNotNull(proc2);
-                processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION);
-                fail("Invalid license not detected");
-            } catch (SaxonApiException e) {
-                assertTrue(e.getMessage().contains("Failed to process license"));
-                assertTrue(e.getMessage().contains("build/license/copied-license.text"));
-            }
+            assertEquals("V010267", processor.getUnderlyingConfiguration().getLicenseFeature("Serial"));
         } catch (Exception ex) {
             ex.printStackTrace();
             fail(ex);
