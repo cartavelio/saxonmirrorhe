@@ -581,11 +581,10 @@ task "n_notices"(
   task "${release}nSigner"(
     dependsOn: ["${release}nInstaller"]
   ) {
+    def exefile = "${buildDir}/distributions/Saxon${RELEASE}${saxonMajorVersion}-${saxonMinorVersion}N-setup.exe"
     doLast {
       exec {
-        def exefile = "${buildDir}/distributions/Saxon${RELEASE}${saxonMajorVersion}-${saxonMinorVersion}N-setup.exe"
-        println(jarsigner.signtoolCommand(exefile))
-        commandLine jarsigner.signtoolCommand(exefile)
+        commandLine jarsigner.signExeCommand(exefile)
       }
     }
   }
