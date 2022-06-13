@@ -111,6 +111,7 @@ public class XPathExpressionImpl implements XPathExpression {
      * @return the result of the evaluation, as a Java object of the appropriate type. Saxon interprets the
      *         rules as follows:
      *         <table>
+     *             <caption>Return value types</caption>
      *         <thead><tr><td>QName</td><td>Return Value</td></thead>
      *         <tbody>
      *         <tr><td valign="top">BOOLEAN</td>
