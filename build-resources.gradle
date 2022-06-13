@@ -18,6 +18,7 @@ task releaseResources(
         description: "Build the saxon-resources release"
 ) {
     from "${buildDir}/resources"
+    exclude 'main/**'
     archiveFileName = "saxon-resources-${saxonMajorVersion}.zip"
 }
 
