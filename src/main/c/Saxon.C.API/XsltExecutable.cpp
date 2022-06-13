@@ -1559,10 +1559,11 @@ const char *XsltExecutable::transformFileToString(const char *source) {
             jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
             jsize num_bytes = SaxonProcessor::sxn_environ->env->GetArrayLength(result);
 
-            const char *str = new char[num_bytes+1];
-            memcpy ((void *) str, b , num_bytes );
+            char * str = new char[num_bytes+1];
+            memcpy ( str, b , num_bytes );
             str[num_bytes] = '\0';
 
+            SaxonProcessor::sxn_environ->env->ReleaseByteArrayElements( result, b, 0);
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
             return str;
         }
