@@ -15,7 +15,7 @@ import net.sf.saxon.value.EmptySequence;
 
 
 /**
- * SingletonIterator: an iterator over a sequence of zero or one values
+ * SingletonIterator: an iterator over a sequence of exactly one item
  */
 
 public class SingletonIterator implements SequenceIterator,
@@ -30,7 +30,8 @@ public class SingletonIterator implements SequenceIterator,
      * @param value the item to iterate over
      */
 
-    public SingletonIterator(Item value) {
+    protected SingletonIterator(Item value) {
+        assert value != null;
         this.item = value;
     }
 
@@ -51,19 +52,6 @@ public class SingletonIterator implements SequenceIterator,
         }
     }
 
-    /**
-     * Factory method for use when it is known the item will not be null
-     *
-     * @param item the item to iterate over; must not be null
-     * @return a SingletonIterator over the supplied item
-     */
-
-
-    public static SingletonIterator rawIterator(Item item) {
-        assert item != null;
-        return new SingletonIterator(item);
-    }
-
     @Override
     public boolean supportsHasNext() {
         return true;
@@ -72,7 +60,7 @@ public class SingletonIterator implements SequenceIterator,
 
     /**
      * Determine whether there are more items to come. Note that this operation
-     * is stateless and it is not necessary (or usual) to call it before calling
+     * is stateless, and it is not necessary (or usual) to call it before calling
      * next(). It is used only when there is an explicit need to tell if we
      * are at the last element.
      *
@@ -130,11 +118,7 @@ public class SingletonIterator implements SequenceIterator,
     /*@NotNull*/
     @Override
     public GroundedValue materialize() {
-        if (item != null) {
-            return item;
-        } else {
-            return EmptySequence.getInstance();
-        }
+        return item;
     }
 
     @Override

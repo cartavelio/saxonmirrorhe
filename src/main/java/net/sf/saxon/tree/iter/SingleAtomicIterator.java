@@ -12,7 +12,7 @@ import net.sf.saxon.value.AtomicValue;
 
 
 /**
- * SingletonIterator: an iterator over a sequence of zero or one values
+ * SingleAtomicIterator: an iterator over a sequence of exactly one atomic value
  */
 
 public class SingleAtomicIterator
@@ -22,12 +22,12 @@ public class SingleAtomicIterator
         GroundedIterator, LookaheadIterator {
 
     /**
-     * Private constructor: external classes should use the factory method
+     * Protected constructor: external classes should use the factory method
      *
      * @param value the item to iterate over
      */
 
-    public SingleAtomicIterator(AtomicValue value) {
+    protected SingleAtomicIterator(AtomicValue value) {
         super(value);
     }
 
