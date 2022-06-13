@@ -995,13 +995,15 @@ namespace Saxon.Api
         /// <summary>
         /// Misspelt and obsolete synonym of <c>GetMetaData</c>
         /// </summary>
-        /// <returns></returns>
-
+        [Obsolete("This method has been replaced by GetMetaData.")]
         public bool GetMeataData()
         {
             return uriQueryParameters.getMetaData().booleanValue();
         }
-        
+
+        /// <summary>
+        /// Get the value of metadata=yes|no, or null if unspecified.
+        /// </summary>
         public bool GetMetaData()
         {
             return uriQueryParameters.getMetaData().booleanValue();
