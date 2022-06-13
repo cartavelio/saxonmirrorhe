@@ -604,6 +604,7 @@ public class TransformFn extends SystemFunction implements Callable {
         XsltCompiler xsltCompiler = processor.newXsltCompiler();
         xsltCompiler.setURIResolver(context.getURIResolver());
         xsltCompiler.setJustInTimeCompilation(false);
+        xsltCompiler.setErrorReporter(context.getErrorReporter());
 
         // Set static params on XsltCompiler before compiling stylesheet (XSLT 3.0 processing only)
         if (options.get("static-params") != null) {
@@ -612,6 +613,7 @@ public class TransformFn extends SystemFunction implements Callable {
 
         XsltExecutable sheet = getStylesheet(options, xsltCompiler, styleOption, context);
         Xslt30Transformer transformer = sheet.load30();
+        transformer.setErrorReporter(context.getErrorReporter());
 
         //Destination primaryDestination = new XdmDestination();
         String deliveryFormat = "document";
