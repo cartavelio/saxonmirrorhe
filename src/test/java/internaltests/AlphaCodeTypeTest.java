@@ -29,8 +29,9 @@ public class AlphaCodeTypeTest {
             Configuration config = new EnterpriseConfiguration();
             IndependentContext ic = new IndependentContext(config);
             ic.declareNamespace("foo", "http://foo.com/");
-            ic.setXPathLanguageLevel(31);
             XPathParser parser = new XPathParser();
+            parser.setParserExtension(new SaxonSyntaxExtension());
+            parser.setLanguage(XPathParser.ParsedLanguage.XPATH, 31);
             String[] testCases = new String[]{
                     "item()",
                     "item()*",
@@ -77,6 +78,7 @@ public class AlphaCodeTypeTest {
             ic.declareNamespace("foo", "http://foo.com/");
             ic.setXPathLanguageLevel(31);
             XPathParser parser = new XPathParser();
+            parser.setParserExtension(new SaxonSyntaxExtension());
             String[] testCases = new String[]{
                     "item()",
                     "item()*",
@@ -99,7 +101,6 @@ public class AlphaCodeTypeTest {
                     "document-node(element(foo, xs:integer))?"
             };
             for (String s : testCases) {
-                System.err.println("Processing " + s);
                 SequenceType t = parser.parseSequenceType(s, ic);
                 String alpha = AlphaCode.fromSequenceType(t);
                 SequenceType t2 = AlphaCode.toSequenceType(alpha, config);
