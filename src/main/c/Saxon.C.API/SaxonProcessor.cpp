@@ -208,9 +208,7 @@ SaxonApiException * SaxonProcessor::checkForExceptionCPP(JNIEnv *env, jclass cal
 
                 if(errCodeQName) {
                     qnameStr = (jstring) (env->CallObjectMethod(errCodeQName, qnameStrID));
-                }   /*else {
-                  std::cerr<<"checkForExceptionCPP errorCodeQName is null"<<std::endl;
-                }    */
+                }
 
                 SaxonApiException *saxonExceptions = new SaxonApiException(result1.c_str(),
                                                                            (qnameStr ? env->GetStringUTFChars(qnameStr,
@@ -287,7 +285,7 @@ SaxonProcessor::SaxonProcessor(bool l) {
     proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(proci);
     if (proc == nullptr) {
         checkAndCreateException(saxonCAPIClass);
-        std::cout << "proc is nullptr in SaxonProcessor constructor" << std::endl;
+        std::cerr << "proc is nullptr in SaxonProcessor constructor" << std::endl;
     }
 
     xdmAtomicClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
@@ -395,7 +393,7 @@ bool SaxonProcessor::isSchemaAwareProcessor() {
         static jmethodID MID_schema = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(procClass,
                                                                                                 "isSchemaAware", "()Z");
         if (!MID_schema) {
-            std::cerr << "\nError: Saxonc " << "SaxonProcessor.isSchemaAware()" << " not found" << std::endl;
+            std::cerr << "\nError: Saxonc.SaxonProcessor.isSchemaAware()" << " not found" << std::endl;
             return false;
         }
 
@@ -804,7 +802,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
     jobject configObj = SaxonProcessor::sxn_environ->env->CallObjectMethod(proc, configMID);
 
     if (!configObj) {
-        std::cout << "proc is null in SaxonProcessor setcatalog - config obj" << std::endl;
+        std::cerr << "proc is null in SaxonProcessor setcatalog - config obj" << std::endl;
         return;
     }
     SaxonProcessor::sxn_environ->env->CallStaticVoidMethod(xmlResolverClass, catalogMID,
@@ -1117,9 +1115,9 @@ const char *SaxonProcessor::getStringValue(XdmItem *item) {
     const char *result = stringValue(SaxonProcessor::sxn_environ, item->getUnderlyingValue());
 #ifdef DEBUG
     if(result == nullptr) {
-        std::cout<<"getStringValue of XdmItem is nullptr"<<std::endl;
+        std::cerr<<"getStringValue of XdmItem is nullptr"<<std::endl;
     } else {
-        std::cout<<"getStringValue of XdmItem is OK"<<std::endl;
+        std::cerr<<"getStringValue of XdmItem is OK"<<std::endl;
     }
 #endif
 
