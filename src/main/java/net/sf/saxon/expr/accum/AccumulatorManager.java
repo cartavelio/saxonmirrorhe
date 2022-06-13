@@ -58,12 +58,12 @@ public class AccumulatorManager {
      * Get the set of accumulators applicable to a particular tree
      *
      * @param tree        the tree in question
-     * @return the set of applicable accumulators; a value of null indicates the universal set (all accumulators
-     * are applicable
+     * @return true the set of applicable accumulators
      */
 
     public Set<? extends Accumulator> getApplicableAccumulators(TreeInfo tree) {
-        return applicableAccumulators.get(tree);
+        Set<? extends Accumulator> accSet = applicableAccumulators.get(tree);
+        return accSet == null ? Collections.emptySet() : accSet;
     }
 
     /**

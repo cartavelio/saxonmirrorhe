@@ -849,7 +849,6 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
         final Controller controller = context.getController();
-        boolean isXSLT = getRetainedStaticContext().getPackageData().isXSLT();
         assert controller != null;
         if (schemaType == null /*&& copyNamespaces*/ && !copyForUpdate) {
             if (validation == Validation.PRESERVE) {
@@ -869,7 +868,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                         }
                         VirtualCopy vc = VirtualCopy.makeVirtualCopy((NodeInfo) item);
                         vc.setDropNamespaces(!copyNamespaces);
-                        if (isXSLT && copyAccumulators) {
+                        if (copyAccumulators) {
                             vc.getTreeInfo().setCopyAccumulators(true);
                             AccumulatorManager am = ((XsltController) context.getController()).getAccumulatorManager();
                             am.setApplicableAccumulators(vc.getTreeInfo(), am.getApplicableAccumulators(((NodeInfo) item).getTreeInfo()));
