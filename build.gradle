@@ -719,7 +719,7 @@ task record_branch(
 
 task hejCompile(
   type: JavaCompile,
-  dependsOn: ["hej_preprocess"],
+  dependsOn: ["hej_preprocess", "processResources"],
   description: "Compile HE for production"
 ) {
   classpath = configurations.compileClasspath
@@ -729,7 +729,7 @@ task hejCompile(
 
 task pejCompile(
   type: JavaCompile,
-  dependsOn: ["pej_preprocess"],
+  dependsOn: ["pej_preprocess", "processResources"],
   description: "Compile PE for production"
 ) {
   classpath = configurations.compileClasspath
@@ -739,7 +739,7 @@ task pejCompile(
 
 task eejCompile(
   type: JavaCompile,
-  dependsOn: ["eej_preprocess"],
+  dependsOn: ["eej_preprocess", "processResources"],
   description: "Compile EE for Saxon/Java"
 ) {
   classpath = configurations.compileClasspath + configurations.jarjarAsm
@@ -1023,6 +1023,7 @@ def jarClasses(String release) {
         include "net/**/*.class"
         include "com/saxonica/**/*.class"
         include "javax/xml/xquery/*.class"
+        include "org/objectweb/asm/xml/*.class"
         exclude "**/sql"
         exclude "com/saxonica/StatsTransform*.class"
       }
