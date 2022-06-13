@@ -2529,6 +2529,10 @@
               expression engine only.</p>
           </li>
         </ul>
+        <p>In the case of <code>fn:replace()</code>, if the platform-native regex engine is used
+        (Java or .NET) then the syntax for the replacement expression in the third argument also
+        follows the rules for the platform. For example, the syntax <code>${name}</code> can be used
+        in a reference to a named captured group.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
