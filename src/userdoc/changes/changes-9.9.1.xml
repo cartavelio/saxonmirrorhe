@@ -156,9 +156,6 @@
         <p>In the class <code java="Saxon.Api.XdmAtomicValue">XdmAtomicValue</code> we have added the constructor
             <code>XdmAtomicValue(String lexicalForm, XdmAtomicType type)</code>, which is used to construct an atomic
             value of a given type given as an <code java="Saxon.Api.XdmAtomicType">XdmAtomicType</code>.</p>
-
-        <p>The interface <code>IXdmEnumerator</code> and <code>IXdmEnumerable</code> now use generic type parameter <code java="Saxon.Api.XdmItem">XdmItem</code>.
-            This change affects the implemented classes <code java="Saxon.Api.SequenceEnumerator">SequenceEnumerator</code>, <code java="Saxon.Api.DotNetSequenceIterator">DotNetSequenceIterator</code> and <code java="Saxon.Api.EmptyIterator">EmptyIterator</code>.</p>
     </category>
     
     <category name="optimization">
