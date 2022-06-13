@@ -137,7 +137,6 @@ class TestSuite {
       description msg
 
       def depends = ["${prod}Compile", "${prod}_compileTestDrivers"]
-      depends += ["compile_function_library"]
       depends += options.getOrDefault("depends", [])
       depends.each { name ->
         dependsOn name
