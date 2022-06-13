@@ -1,39 +1,20 @@
-package modeltests;
-
-import jaxptest.ConfigTest;
-import net.sf.saxon.om.TreeModel;
-import net.sf.saxon.s9api.*;
-
-import java.io.File;
-
-import static org.junit.Assert.fail;
-
-public class TinyTreeTests extends ObjectModelTests {
-
-    @Override
-    TreeModel getTreeModel() {
-        return TreeModel.TINY_TREE;
-    }
-
-    @Override
-    XdmNode buildExternalDocument(Processor processor, String fileName) {
-        try {
-            DocumentBuilder builder = processor.newDocumentBuilder();
-            return builder.build(new File(configTest.getDataDir() + fileName));
-        } catch (SaxonApiException e) {
-            fail();
-            return null;
-        }
-    }
-
-    @Override
-    XdmDestination makeDestination(Processor processor) {
-        return new XdmDestination();
-    }
-
-    @Override
-    boolean stripsIgnorableWhitespace() {
-        return true;
-    }
+package modeltests;public class TinyTreeTests {
 }
 
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis,
+// WITHOUT WARRANTY OF ANY KIND, either express or implied.
+// See the License for the specific language governing rights and limitations under the License.
+//
+// The Original Code is: all this file.
+//
+// The Initial Developer of the Original Code is Saxonica Limited
+//
+// Portions created by (your name) are Copyright (C) (your legal entity). All Rights Reserved.
+//
+// Contributor(s): none.
+//
