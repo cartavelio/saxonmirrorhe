@@ -297,7 +297,7 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
             // to catch the common case of failing to set namespace-awareness on the DOM factory
             if (startNode.getNodeType() == Type.DOCUMENT) {
                 Element top = ((Document)startNode).getDocumentElement();
-                if (top.getNamespaceURI() == null) {
+                if (top != null && top.getNamespaceURI() == null) {
                     if (top.getNodeName().contains(":")) {
                         throw new XPathException("Supplied DOM uses namespaces, but is not created as namespace-aware");
                     } else if (top.hasAttribute("xmlns")) {
