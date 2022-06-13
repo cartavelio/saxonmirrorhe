@@ -104,8 +104,10 @@ void testValidator4a(SaxonProcessor * processor, SchemaValidator * val){
 	val->registerSchemaFromFile("family.xsd");
 	XdmNode * node = val->validateToNode("family.xml");
 	if(node != NULL) {
-		if(!val->exceptionOccurred()) {
-			cout<<endl<<"Doc1 is OK:"<<node->toString()<<endl;
+	    const char * valueStr = node->toString();
+		if(!val->exceptionOccurred() && valueStr != nullptr) {
+			cout<<endl<<"Doc1 is OK:"<<valueStr<<endl;
+			delete valueStr;
 	 	} else {
 			cout<<endl<<"Error: Doc reported as valid!"<<endl;
 		}
@@ -124,7 +126,7 @@ void testValidator5(SaxonProcessor * processor, SchemaValidator * val){
   const char* sch1 = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' elementFormDefault='qualified' attributeFormDefault='unqualified'><xs:element name='request'><xs:complexType><xs:sequence><xs:element name='a' type='xs:string'/><xs:element name='b' type='xs:string'/></xs:sequence><xs:assert test='count(child::node()) = 3'/></xs:complexType></xs:element></xs:schema>";
 
 
-        string doc1 = "<request xmlns='http://myexample/family'><Parent>John</Parent><Child1>Alice</Child1></request>";
+  string doc1 = "<request xmlns='http://myexample/family'><Parent>John</Parent><Child1>Alice</Child1></request>";
 
 	 XdmNode * input = processor->parseXmlFromString(doc1.c_str());
 	//val->setSourceNode(input);
@@ -141,7 +143,13 @@ void testValidator5(SaxonProcessor * processor, SchemaValidator * val){
 	val->validate();
 	XdmNode * node = val->getValidationReport(); 
 	if(node != NULL) {
-		cout<<endl<<node->size()<<"Validation Report"<<node->getStringValue()<<endl;
+        const char * value = node->toString();
+        if(value != nullptr) {
+            cout << endl << "Validation Report: " << value << endl;
+        } else {
+            cout << endl << "Validation Report value is NULL" << endl;
+        }
+
 	} else {
 		cout<<endl<<"Error: Validation Report is NULL - This should not be NULL. Probably no valid license file found."<<endl;
 	}
@@ -177,11 +185,29 @@ void testValidator6(SaxonProcessor * processor, SchemaValidator * val){
     }
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 
 	SaxonProcessor * processor = new SaxonProcessor(true);
-       cout<<"Test: SchemaValidator with Saxon version="<<processor->version()<<endl<<endl;
+    cout<<"Test: SchemaValidator with Saxon version="<<processor->version()<<endl<<endl;
+
+    char * cwd = nullptr;
+    if(argc > 0) {
+        cwd = argv[1];
+    }
+    char buff[FILENAME_MAX]; //create string buffer to hold path
+    GetCurrentDir( buff, FILENAME_MAX );
+    cout<<"CWD = "<< buff<<endl;
+    if(cwd == nullptr) {
+        cwd = (char *)malloc(strlen(buff)+1);
+        strcpy(cwd, buff);
+    }
+
+    if(cwd != nullptr) {
+        processor->setcwd(cwd); //set to the current working directory
+    } else {
+        processor->setcwd(buff);
+    }
 
 	//processor->setConfigurationProperty("xsdversion", "1.1");
 	
