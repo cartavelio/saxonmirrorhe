@@ -689,19 +689,23 @@ DocumentBuilder * SaxonProcessor::newDocumentBuilder(){
 
 
 Xslt30Processor *SaxonProcessor::newXslt30Processor() {
+    applyConfigurationProperties();
     return (new Xslt30Processor(this, cwd));
 }
 
 XQueryProcessor *SaxonProcessor::newXQueryProcessor() {
+    applyConfigurationProperties();
     return (new XQueryProcessor(this, cwd));
 }
 
 XPathProcessor *SaxonProcessor::newXPathProcessor() {
+    applyConfigurationProperties();
     return (new XPathProcessor(this, cwd));
 }
 
 SchemaValidator *SaxonProcessor::newSchemaValidator() {
     if (licensei) {
+        applyConfigurationProperties();
         return (new SchemaValidator(this, cwd));
     } else {
         std::cerr << "\nError: Processor is not licensed for schema processing!!" << std::endl;
@@ -942,7 +946,7 @@ XdmNode *SaxonProcessor::parseXmlFromUri(const char *source, SchemaValidator * v
    * @param value of the property
    */
 void SaxonProcessor::setConfigurationProperty(const char *name, const char *value) {
-    if (name != nullptr) {
+    if (name != nullptr && value != nullptr) {
         configProperties.insert(
                 std::pair<std::string, std::string>(std::string(name), std::string((value == nullptr ? "" : value))));
     }
