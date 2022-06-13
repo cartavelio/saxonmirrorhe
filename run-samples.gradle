@@ -413,7 +413,10 @@ def heSampleArgs = ["JAXPExamples": ["all"],
             }
           }
 
-          systemProperties = ["javax.xml.transform.TransformerFactory": "net.sf.saxon.TransformerFactoryImpl"]
+          systemProperties = [
+            "javax.xml.transform.TransformerFactory": "net.sf.saxon.TransformerFactoryImpl",
+            "runSamplesWithLicense": edition == "he" ? "false" : "true"
+          ]
 
           main = sampleClass
           args sampleArgs

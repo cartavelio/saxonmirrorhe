@@ -25,6 +25,7 @@ import java.util.*;
  * using different object models (see S9APIExamples for main S9API examples)
  */
 public class S9APIExamplesOM {
+    private static boolean useLicense = false;
 
     /**
      * Class is not instantiated, so give it a private constructor
@@ -40,7 +41,6 @@ public class S9APIExamplesOM {
      *             name of a test, or "all" to run all tests, or "nonschema" to run all the tests that are not schema-aware.
      */
     public static void main(String[] argv) {
-
         List<Test> tests = new ArrayList<>();
         tests.add(new S9APIExamplesOM.XPathDOM());
         tests.add(new S9APIExamplesOM.XPathJDOM());
@@ -52,6 +52,12 @@ public class S9APIExamplesOM {
             requestedTest = argv[0];
         }
 
+        useLicense
+            = "true".equals(System.getProperty("runSamplesWithLicense"));
+
+        if (useLicense) {
+            System.err.println("Running HE samples with license...");
+        }
 
         boolean found = false;
         for (Test next : tests) {
@@ -127,7 +133,7 @@ public class S9APIExamplesOM {
                 throw new SaxonApiException(e);
             }
             // Compile the XPath Expression
-            Processor processor = new Processor(false);
+            Processor processor = new Processor(useLicense);
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode xdmDoc = builder.wrap(doc);
             XPathCompiler xpath = processor.newXPathCompiler();
@@ -168,7 +174,7 @@ public class S9APIExamplesOM {
             } catch (org.jdom2.JDOMException | IOException e) {
                 throw new SaxonApiException(e);
             }
-            Processor processor = new Processor(false);
+            Processor processor = new Processor(useLicense);
             processor.getUnderlyingConfiguration().registerExternalObjectModel(new JDOM2ObjectModel());
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode xdmDoc = builder.wrap(doc);
@@ -208,7 +214,7 @@ public class S9APIExamplesOM {
             } catch (nu.xom.ParsingException | IOException e) {
                 throw new SaxonApiException(e);
             }
-            Processor processor = new Processor(false);
+            Processor processor = new Processor(useLicense);
             processor.getUnderlyingConfiguration().registerExternalObjectModel(new XOMObjectModel());
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode xdmDoc = builder.wrap(doc);
@@ -248,7 +254,7 @@ public class S9APIExamplesOM {
             } catch (org.dom4j.DocumentException e) {
                 throw new SaxonApiException(e);
             }
-            Processor processor = new Processor(false);
+            Processor processor = new Processor(useLicense);
             processor.getUnderlyingConfiguration().registerExternalObjectModel(new DOM4JObjectModel());
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode xdmDoc = builder.wrap(doc);
