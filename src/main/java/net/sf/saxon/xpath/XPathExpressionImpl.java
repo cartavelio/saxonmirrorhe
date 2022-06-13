@@ -157,7 +157,7 @@ public class XPathExpressionImpl implements XPathExpression {
                 throw new XPathExpressionException(
                         "Supplied node must be built using the same or a compatible Configuration");
             }
-            if (node instanceof TreeInfo && ((TreeInfo) node).isTyped() && !executable.isSchemaAware()) {
+            if (((NodeInfo) node).getTreeInfo().isTyped() && !executable.isSchemaAware()) {
                 throw new XPathExpressionException(
                         "The expression was compiled to handled untyped data, but the input is typed");
             }
