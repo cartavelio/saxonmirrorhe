@@ -239,15 +239,6 @@ task eecs_preprocess(
   }
 }
 
-task eecs_resources(
-  type: Copy,
-  dependsOn: ["compile_function_library"],
-  description: "Copy the SEF file for SaxonCS"
-) {
-  from "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
-  into "${buildDir}/cs/resources/sef"
-}
-
 task eecs_sources(
   type: Copy,
   dependsOn: ["eecs_preprocess"],
@@ -365,7 +356,7 @@ task eecs_generateCSharp(
 
 task eecs_project_files (
   type: Copy,
-  dependsOn: ["eecs_generateCSharp", "eecs_resources"],
+  dependsOn: ["eecs_generateCSharp"],
   description: "Prepare the project files used for EECS build"
 ) {
   from "src/main/saxon-cs/csproj"
@@ -529,24 +520,11 @@ task dotnetRelease(
 
   doLast {
     signExe("${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll")
-    if (systemOs.isWindows()) {
-      signNuget("${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg")
-    } else {
+    if (!systemOs.isWindows()) {
       signExe("${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg")
     }
   }
 }
-
-task copyNuGetPackage(
-  type: Copy,
-  dependsOn: ["dotnetRelease"],
-  description: "Copy the architecture-independent .nupkg file"
-) {
-  from "${buildDir}/cs/bin/Release"
-  into "${buildDir}/distributions"
-  include "SaxonCS.${csver}.nupkg"
-}
-dotnetRelease.finalizedBy copyNuGetPackage
 
 task dotnetPublish(
   dependsOn: ['dotnetRelease']
