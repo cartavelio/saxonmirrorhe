@@ -297,11 +297,11 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
             // to catch the common case of failing to set namespace-awareness on the DOM factory
             if (startNode.getNodeType() == Type.DOCUMENT) {
                 Element top = ((Document)startNode).getDocumentElement();
-                if (top != null && top.getNamespaceURI() == null) {
+                if (top.getNamespaceURI() == null) {
                     if (top.getNodeName().contains(":")) {
-                        issueWarning(receiver, "Supplied DOM uses namespaces, but is not created as namespace-aware");
+                        throw new XPathException("Supplied DOM uses namespaces, but is not created as namespace-aware");
                     } else if (top.hasAttribute("xmlns")) {
-                        issueWarning(receiver, "Supplied DOM declares a default namespace, but is not created as namespace-aware");
+                        throw new XPathException("Supplied DOM declares a default namespace, but is not created as namespace-aware");
                     }
                 }
             }
@@ -310,15 +310,6 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
             receiver.open();
             driver.send();
             receiver.close();
-        }
-    }
-
-    private static void issueWarning(Receiver receiver, String text) {
-        try {
-            Configuration config = receiver.getPipelineConfiguration().getConfiguration();
-            config.getLogger().warning("WARNING: " + text);
-        } catch (Exception e) {
-            System.err.println("WARNING: " + text);
         }
     }
 
