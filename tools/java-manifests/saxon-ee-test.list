@@ -2,6 +2,12 @@ META-INF/
 META-INF/MANIFEST.MF
 com/
 com/saxonica/
+com/saxonica/js/
+com/saxonica/js/JSHelper.class
+com/saxonica/js/RunJS2Transform.class
+com/saxonica/js/RunJSTransform.class
+com/saxonica/js/RunNodeJSTransform.class
+com/saxonica/js/XsltTestSuiteDriverJS.class
 com/saxonica/testdriver/
 com/saxonica/testdriver/Licensor.class
 com/saxonica/testdriver/QT3TestDriverEE.class
@@ -15,6 +21,9 @@ com/saxonica/testdriver/ee/UpdateTestSuiteDriver.class
 com/saxonica/testdriver/ee/XQTSCollectionFinder.class
 com/saxonica/testdriver/ee/XQTSModuleURIResolver.class
 com/saxonica/testdriver/ee/XQuery10TestSuiteDriver.class
+com/saxonica/testdriver/gui/
+com/saxonica/testdriver/gui/images/
+com/saxonica/testdriver/gui/images/saxonica_logo.gif
 net/
 net/sf/
 net/sf/saxon/
