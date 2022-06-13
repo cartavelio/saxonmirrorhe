@@ -165,12 +165,12 @@ cdef class PySaxonProcessor:
     def __enter__(self):
       """enter method for use with the keyword 'with' context"""
       return self
-    
+
     def __exit__(self, exception_type, exception_value, traceback):
         """The exit method for the context PySaxonProcessor. Here we release the Jet VM resources.
         If we have more than one live PySaxonProcessor object the release() method has no effect.
         """
-        
+
         ''' if self.thisptr is not NULL:
           del self.thisptr
           self.thisptr = NULL        
@@ -246,14 +246,14 @@ cdef class PySaxonProcessor:
         py_value_string = value.encode('UTF-8') if value is not None else None
         c_value_str_ = py_value_string if value is not None else ""
         self.thisptr.setConfigurationProperty(c_str_, c_value_str_)
-        
+
     def clear_configuration_properties(self):
         """
         clear_configuration_properties(self)
         Clear the configurations properties in use by the processor
         """
         self.thisptr.clearConfigurationProperties()
-        
+
     @property
     def is_schema_aware(self):
         """
@@ -522,7 +522,7 @@ cdef class PySaxonProcessor:
             i +=1
 
 
-                
+
 
         if len_ == 0:
             return None
@@ -593,7 +593,7 @@ cdef class PySaxonProcessor:
         if newMap_.derivedmmptr == NULL:
             return None
         return newMap_
-        
+
 
     def set_catalog(self, str file_name, is_tracing=False):
         """
@@ -1109,24 +1109,28 @@ cdef class PyXslt30Processor:
 
         if "source_file" in kwds:
             py_value2 = kwds["source_file"]
-            '''c_sourcefile = make_c_str(py_value2)'''
-
-            py_string_string = py_value2.encode('utf-8') if py_value2 is not None else None
-            c_sourcefile = py_string_string if py_value2 is not None else ""
+            py_source_string = py_value2.encode('utf-8') if py_value2 is not None else None
+            c_sourcefile = py_source_string if py_value2 is not None else ""
 
         if "base_output_uri" in kwds:
             py_value = kwds["base_output_uri"]
             '''c_base_output_uri = make_c_str(py_value)'''
-            py_string_string = py_value.encode('utf-8') if py_value is not None else None
-            c_base_output_uri = py_string_string if py_value is not None else ""
+            py_base_string = py_value.encode('utf-8') if py_value is not None else None
+            c_base_output_uri = py_base_string if py_value is not None else ""
             self.thisxptr.setBaseOutputURI(c_base_output_uri)
+
+        if "output_file" in kwds:
+            py_value3 = kwds["output_file"]
+            '''c_sourcefile = make_c_str(py_value2)'''
+
+            py_output_string = py_value3.encode('utf-8') if py_value3 is not None else None
+            c_outputfile = py_output_string if py_value3 is not None else ""
 
         if "stylesheet_file" in kwds:
             py_value1 = kwds["stylesheet_file"]
             py_string_string = py_value1.encode('utf-8') if py_value1 is not None else None
             c_stylesheet = py_string_string if py_value1 is not None else ""
-            '''make_c_str(py_value)'''
-            
+
 
         cdef const char* c_string
         c_string = self.thisxptr.transformFileToString(c_sourcefile, c_stylesheet)
@@ -1156,7 +1160,8 @@ cdef class PyXslt30Processor:
         for key, value in kwds.items():
                 if isinstance(value, str):
                         if key == "source_file":
-                                c_sourcefile = make_c_str(value)
+                                py_source_string = value.encode('utf-8') if value is not None else None
+                                c_sourcefile = py_source_string if value is not None else ""
                         elif key == "base_output_uri":
                                 '''c_base_output_uri = make_c_str(value)'''
                                 py_string_string = value.encode('utf-8') if value is not None else None
@@ -1436,7 +1441,7 @@ cdef class PyXsltExecutable:
                     self.thisxptr.setInitialMatchSelection(<saxoncClasses.XdmValue *> avalue_.derivedaptr)
                 else:
                     raise Exception("Supplied value is not of the right type")
-         
+
      def set_output_file(self, output_file):
         """
         set_output_file(self, output_file)
@@ -1513,7 +1518,7 @@ cdef class PyXsltExecutable:
              key_str = make_py_str(dereference(it).first.c_str())
              p_dataMap[key_str] =  nval
              postincrement(it)
-             
+
          return p_dataMap
 
      def set_parameter(self, name, value):
@@ -1545,7 +1550,7 @@ cdef class PyXsltExecutable:
             elif  isinstance(value, PyXdmAtomicValue):
                 avalue_ = value
                 self.thisxptr.setParameter(c_str, <saxoncClasses.XdmValue *> avalue_.derivedaptr)
-                 
+
      def get_parameter(self, name):
         """
         get_parameter(self, name)
@@ -1823,7 +1828,7 @@ cdef class PyXsltExecutable:
         cdef PyXdmFunctionItem fval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
         cdef PyXdmNode node_ = None
-        
+
         if "xdm_node" in kwds:
             py_value = kwds["xdm_node"]
             if(isinstance(py_value, PyXdmNode)):
@@ -1867,7 +1872,7 @@ cdef class PyXsltExecutable:
             val.thisvptr = xdmValue
             return val
 
-         
+
      def apply_templates_returning_value(self, **kwds):
         """
         apply_templates_returning_value(self, **kwds)
@@ -1880,7 +1885,7 @@ cdef class PyXsltExecutable:
             PyXdmValue: Result of the transformation as an PyXdmValue object
         Example:
               xslt30_proc = saxon_proc.new_xsl30_processor()
-              executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")            
+              executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.set_initial_match_selection(file_name="cat.xml")\r
                node = executable.apply_templates_returning_value()
             2) node = executable.apply_templates_returning_value(source_file="cat.xml")
@@ -2116,7 +2121,7 @@ cdef class PyXsltExecutable:
         If no source file or xdm value has been supplied, then the clark name 'xsl:initial-template' is used.
         Args:
 			template_name(str): The name of the template to invoke. If None is supplied then call the initial-template
-            **kwds: Possible optional arguments: source_file (str) or  xdm_Value (PyXdmValue). Other allowed argument: 
+            **kwds: Possible optional arguments: source_file (str) or  xdm_Value (PyXdmValue). Other allowed argument:
             base_output_uri (str) which is used for for resolving relative URIs in the href attribute of the xsl:result-document instruction
         Returns:
             PyXdmValue: Result of the transformation as an PyXdmValue object
@@ -2159,7 +2164,7 @@ cdef class PyXsltExecutable:
         c_templateName = make_c_str(template_name)
         c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
         return make_py_str(c_string)
-     
+
      def call_template_returning_file(self, str template_name=None, **kwds):
         """
         call_template_returning_file(self, str template_name, **kwds)
@@ -2224,7 +2229,7 @@ cdef class PyXsltExecutable:
             2) xsltproc.set_initial_match_selection(file_name="cat.xml")\r
                value = executable.call_function_returning_value("{http://localhost/test}add")
             3) value = executable.call_function_returning_value(source_file="cat.xml", "{http://exmaple.com}func1")
-            
+
         """
         cdef const char * c_functionName = NULL
         cdef const char * c_sourcefile = NULL
@@ -2526,7 +2531,7 @@ cdef class PyXQueryProcessor:
             self.thisxqptr.setContextItem(xdm_item.derivedptr)
         else:
           raise Exception(py_error_message)
-         
+
      def set_output_file(self, output_file):
         """
         set_output_file(self, output_file)
