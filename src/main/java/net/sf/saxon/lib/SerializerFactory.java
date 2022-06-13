@@ -333,7 +333,6 @@ public class SerializerFactory {
                     props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
                     if (uWriter == null) {
                         uWriter = expandedResult.obtainUnicodeWriter();
-                        emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                     }
                     JSONEmitter je = new JSONEmitter(pipe, uWriter, props);
                     JSONSerializer js = new JSONSerializer(pipe, je, props);
@@ -350,7 +349,6 @@ public class SerializerFactory {
                     if (uWriter == null) {
                         assert expandedResult != null;
                         uWriter = expandedResult.obtainUnicodeWriter();
-                        emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                     }
                     AdaptiveEmitter je = new AdaptiveEmitter(pipe, uWriter);
                     je.setOutputProperties(props);
