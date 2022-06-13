@@ -72,8 +72,8 @@ public class TestXQueryUpdate {
             NodeName name = new FingerprintedQName("a", "http://foo.bar/", "x");
             NamespaceBinding nsCode = new NamespaceBinding("a", "http://foo.bar/");
             MutableNodeInfo elem = (MutableNodeInfo)doc.iterateAxis(AxisInfo.CHILD).next();
-            elem.addAttribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, "xxxx", ReceiverOption.NONE);
-            elem.addNamespace(nsCode);
+            elem.addAttribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, "xxxx", ReceiverOption.NONE, true);
+            elem.addNamespace(nsCode, true);
             String s = QueryResult.serialize(elem).trim();
             assertEquals("<foo xmlns:a=\"http://foo.bar/\" a:x=\"xxxx\"/>", s, "result");
             //System.err.println(s);
