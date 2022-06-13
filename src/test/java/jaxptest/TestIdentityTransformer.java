@@ -46,7 +46,6 @@ public class TestIdentityTransformer {
     }
 
     @Ignore
-    @Test
     public void testIdentityTransformFromDom() {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
