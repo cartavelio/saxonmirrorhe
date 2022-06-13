@@ -89,10 +89,9 @@ void testApplyTemplatesString1(Xslt30Processor *trans, sResultCount *sresult) {
 /*
 * Test transform to String. Source and stylesheet supplied as arguments
 */
-void testTransformToStringExtensionFunc(const char * cwd,SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
+void testTransformToStringExtensionFunc(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
 
     cout << endl << "Test: TransformToStringExtensionFunc:" << endl;
-
     bool nativeFound = processor->registerNativeMethods(SaxonProcessor::sxn_environ->env,
                                                         "com/saxonica/functions/extfn/cpp/NativeCall",
                                                         cppMethods, sizeof(cppMethods) / sizeof(cppMethods[0]));
@@ -108,15 +107,8 @@ void testTransformToStringExtensionFunc(const char * cwd,SaxonProcessor *process
         }
         return;
     }
-    if(cwd == nullptr) {
-        std::cerr<<"cwd is null"<<std::endl;
-    }
-    executable->setcwd(cwd);
-    std::string libStr= std::string(cwd);
 
-    libStr.append("/cppExtensionFunction");
-
-    executable->setProperty("extc",  libStr.c_str());
+    executable->setProperty("extc", "home/ond1/work/svn/latest9.9-saxonc/samples/cppTests/cppExtensionFunction");
 
     if (nativeFound) {
         const char *output = executable->transformFileToString("../data/cat.xml");
@@ -603,7 +595,6 @@ void testTrackingOfValueReferenceError(SaxonProcessor *processor, Xslt30Processo
     }
     sresult->failure++;
     sresult->failureList.push_back("testTrackingOfValueReferenceError");
-    trans->exceptionClear();
 
 }
 
@@ -847,114 +838,6 @@ void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
 
 }
 
-void exampleTransformToFile(SaxonProcessor * sproc, Xslt30Processor *proc, sResultCount *sresult) {
-    cout << "<b>exampleTransformToFile:</b><br/>" << endl;
-
-    XdmNode* xmlfile = sproc->parseXmlFromFile("../php/xml/foo.xml");
-    if(xmlfile == nullptr) {
-        sresult->failure++;
-        sresult->failureList.push_back("exampleTransformToFile");
-        cerr << "exampleTransformToFile NULL found" << endl;
-        if (sproc->exceptionOccurred()) {
-            cerr <<"exampleTransformToFile error: "<< sproc->getErrorMessage() << endl;
-        }
-
-        return;
-    }
-    XsltExecutable * executable = proc->compileFromFile("../php/xsl/foo.xsl");
-    if(executable== nullptr) {
-        sresult->failure++;
-        sresult->failureList.push_back("exampleTransformToFile");
-        cerr << "exampleTransformToFile NULL found" << endl;
-        if (proc->exceptionOccurred()) {
-            cerr <<"exampleTransformToFile error: "<< proc->getErrorMessage() << endl;
-        }
-        return;
-    }
-
-    const char *filename = "output2.xml";
-    executable->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
-    executable->setOutputFile(filename);
-    executable->transformToFile(xmlfile);
-
-    if (CppTestUtils::exists("output2.xml")) {
-        cout << "The file output2.xml exists" << endl;
-        remove("output2.xml");
-        sresult->success++;
-    } else {
-        cout << "The file " << filename << " does not exist" << endl;
-        if (executable->exceptionOccurred()) {
-            cout << proc->getErrorMessage() << endl;
-        }
-        sresult->failure++;
-        sresult->failureList.push_back("exampleTransformToFile");
-    }
-
-    delete executable;
-
-}
-
-void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sResultCount *sresult) {
-    cout << "<b>exampleTransformToString:</b><br/>" << endl;
-
-    XdmNode* xmlfile = sproc->parseXmlFromString("<xml>\n"
-                                                 " <value>5</value>\n"
-                                                 "</xml>");
-    if(xmlfile == nullptr) {
-        sresult->failure++;
-        sresult->failureList.push_back("exampleTransformToString");
-        cerr << "exampleTransformToFile NULL found" << endl;
-        if (sproc->exceptionOccurred()) {
-            cerr <<"exampleTransformToFile error: "<< sproc->getErrorMessage() << endl;
-        }
-
-        return;
-    }
-    XsltExecutable * executable = proc->compileFromString("<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"2.0\">\n"
-                                                          "  <xsl:output method=\"xml\" encoding=\"utf-8\" standalone=\"yes\" indent=\"yes\"/>\n"
-                                                          "\n"
-                                                          "  <xsl:template match=\"/\">\n"
-                                                          "    <xsl:message>producing sheet</xsl:message>\n"
-                                                          "    <xsl:result-document href=\"output.xml\">\n"
-                                                          "      <result>\n"
-                                                          "        <value>You put a <xsl:value-of select=\"/xml/value\"/></value>\n"
-                                                          "      </result>\n"
-                                                          "    </xsl:result-document>\n"
-                                                          "  </xsl:template>\n"
-                                                          "</xsl:stylesheet>");
-    if(executable== nullptr) {
-        sresult->failure++;
-        sresult->failureList.push_back("exampleTransformToString");
-        cerr << "exampleTransformToString NULL found" << endl;
-        if (proc->exceptionOccurred()) {
-            cerr <<"exampleTransformToString error: "<< proc->getErrorMessage() << endl;
-        }
-        return;
-    }
-
-    executable->setInitialMatchSelection(xmlfile);
-    executable->setGlobalContextItem(xmlfile);
-    const char * result = executable->transformToString();
-
-    if (result == nullptr) {
-
-
-        if (executable->exceptionOccurred()) {
-            cout << executable->getErrorMessage() << endl;
-        }
-        sresult->failure++;
-        sresult->failureList.push_back("exampleTransformToString");
-    } else {
-        cout<< "exampleTransformToString = "<<result<<endl;
-        sresult->success++;
-    }
-    delete result;
-    delete executable;
-
-}
-
-
-
 void exampleSimple3(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCount *sresult) {
     cout << "<b>exampleSimple3:</b><br/>" << endl;
     proc->clearParameters();
@@ -976,7 +859,7 @@ void exampleSimple3(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCou
 	cout << "executable is NULL" <<endl;
 	if(proc->exceptionOccurred()) {
 		cout << proc->getErrorMessage() <<endl;
-
+		
 	}
 	sresult->failure++;
 	sresult->failureList.push_back("exampleSimple3");
@@ -1381,7 +1264,7 @@ void testPackage1a(Xslt30Processor *trans, sResultCount *sresult) {
           sresult->failureList.push_back("testPackage1a");
           trans->exceptionClear();
     	}
-	return;
+	return;   
 
 
     }
@@ -2348,7 +2231,7 @@ void RunThread(XsltExecutable * executable, int tid, const std::string filename)
     att_arg.name = NULL;
     att_arg.group = NULL;
 
-    SaxonProcessor::sxn_environ->jvm->AttachCurrentThread((void**)&SaxonProcessor::sxn_environ->env, NULL);
+   // SaxonProcessor::sxn_environ->jvm->AttachCurrentThread((void**)&SaxonProcessor::sxn_environ->env, &att_arg);
     cerr<<endl<<"RunThread cp0,  THEAD ID="<<tid<<endl;
     fflush(stderr);
     fflush(stdout);
@@ -2385,7 +2268,7 @@ void RunThread(XsltExecutable * executable, int tid, const std::string filename)
         cerr << "XsltExecutable is nullptr" << endl;
     }
 
-    (   SaxonProcessor::sxn_environ->jvm)->DetachCurrentThread();
+   // (   SaxonProcessor::sxn_environ->jvm)->DetachCurrentThread();
 
 }
 
@@ -2402,10 +2285,7 @@ void testThreads (SaxonProcessor * processor, Xslt30Processor * trans, sResultCo
 
     for (int i = 0; i < s.size(); i++) {
 
-        XsltExecutable * executable = trans->compileFromFile("../data/q12.xsl");
-        if(executable == nullptr) {
-            continue;
-        }
+        XsltExecutable * executable = trans->compileFromFile("q12.xsl");
             threads.push_back(std::thread(RunThread, executable, i, s[i]));
 
     }
@@ -2421,25 +2301,20 @@ void testThreads (SaxonProcessor * processor, Xslt30Processor * trans, sResultCo
 int main(int argc, char* argv[]) {
 
 
-    char * cwd = nullptr;
+    const char * cwd = nullptr;
     if(argc > 0) {
 	cwd = argv[1];
     }
 
     SaxonProcessor *processor = new SaxonProcessor(true);
-    //processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/lib/saxon-license.lic");
+    processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/local/lib/saxon-license.lic");
     cout << "Test: Xslt30Processor with Saxon version=" << processor->version() << endl << endl;
-
-
+    
     char buff[FILENAME_MAX]; //create string buffer to hold path
     GetCurrentDir( buff, FILENAME_MAX );
     cout<<"CWD = "<< buff<<endl;
-    if(cwd == nullptr) {
-        cwd = (char *)malloc(strlen(buff)+1);
-        strcpy(cwd, buff);
-    }
     if(cwd != nullptr) {
-   	 processor->setcwd(cwd); //set to the current working directory
+   	 processor->setcwd(cwd);//"/Users/ond1/work/development/git/saxon-dev/saxondev/src/main/c/samples/cppTests"); //set to the current working directory
     } else {
         processor->setcwd(buff);
     }
@@ -2483,14 +2358,6 @@ int main(int argc, char* argv[]) {
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
-    exampleTransformToFile(processor, trans, sresult);
-
-    cout<<endl<<"============================================================="<<endl<<endl;
-
-    exampleTransformToString(processor, trans, sresult);
-
-    cout<<endl<<"============================================================="<<endl<<endl;
-
     exampleSimple3(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
@@ -2527,7 +2394,7 @@ int main(int argc, char* argv[]) {
     testTransformToString3(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
-
+	
     testTransformFromstring(processor, trans, sresult);
 
 
@@ -2624,7 +2491,7 @@ int main(int argc, char* argv[]) {
 
 
     //Available in PE and EE
-    testTransformToStringExtensionFunc(cwd, processor, trans, sresult);
+    //testTransformToStringExtensionFunc(processor, trans);
 
 
 

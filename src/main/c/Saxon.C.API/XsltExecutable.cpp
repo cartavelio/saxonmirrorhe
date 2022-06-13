@@ -127,7 +127,6 @@ void XsltExecutable::setGlobalContextFromFile(const char *ifile) {
 }
 
 void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
-    SaxonProcessor::attachCurrentThread();
     if(selection != nullptr) {
         SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
         selection = nullptr;
@@ -146,7 +145,6 @@ void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
 
 
 void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
-    SaxonProcessor::attachCurrentThread();
     if(selection != nullptr) {
         SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
         selection = nullptr;
@@ -218,7 +216,6 @@ void XsltExecutable::setInitialTemplateParameters(std::map<std::string, XdmValue
 }
 
 void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
-    SaxonProcessor::attachCurrentThread();
     if(flag) {
         resultDocumentMap.clear();
         if(saxonResultDocObj != nullptr) {
@@ -270,7 +267,8 @@ void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
 
 
 std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
-        SaxonProcessor::attachCurrentThread();
+
+
         if(saxonResultDocObj) {
             static jmethodID getresultID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(resultDocumentClass,
                                                                                                       "getResultDocuments",
@@ -286,10 +284,12 @@ std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
             } else {
                 jobjectArray results = (jobjectArray) (
                         SaxonProcessor::sxn_environ->env->CallObjectMethod(saxonResultDocObj, getresultID));
+
                 jobjectArray resultUris = (jobjectArray) (
                         SaxonProcessor::sxn_environ->env->CallObjectMethod(saxonResultDocObj, getresult_uriID));
+
                 if(!results || !resultUris ) {
-                    return resultDocumentMap;
+                return resultDocumentMap;
                 }
 
                 int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
@@ -302,6 +302,7 @@ std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
                                                      "net/sf/saxon/s9api/XdmArray");
 
                 if (sizex > 0) {
+
                     for (int p = 0; p < sizex; ++p) {
                         jobject resulti = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(results, p);
                         jobject resultURIsi = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(resultUris, p);
@@ -313,6 +314,7 @@ std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
                         XdmValue * value= nullptr;
                         XdmItem * xdmItem = nullptr;
                         if(rawResultsFlag) {
+
                             value = new XdmValue();
 
                             if(SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, atomicValueClass)           == JNI_TRUE) {
@@ -342,12 +344,15 @@ std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
 
                             }
 
+
+
                         } else {
                             value = new XdmValue();
                             value->addXdmItem(new XdmNode(resulti));
                             SaxonProcessor::sxn_environ->env->DeleteLocalRef(resulti);
 
                         }
+
                         resultDocumentMap[str] = value;
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(resulti);
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(resultURIsi);
@@ -446,7 +451,6 @@ void XsltExecutable::clearParameters(bool delValues) {
 }
 
 void XsltExecutable::clearProperties() {
-    SaxonProcessor::attachCurrentThread();
     properties.clear();
     if(selection != nullptr) {
             SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
@@ -467,7 +471,6 @@ std::map<std::string, std::string> &XsltExecutable::getProperties() {
 }
 
 void XsltExecutable::exceptionClear() {
-    SaxonProcessor::attachCurrentThread();
     SaxonProcessor::sxn_environ->env->ExceptionClear();
 }
 
@@ -479,7 +482,7 @@ void XsltExecutable::setcwd(const char *dir) {
 
 
 void XsltExecutable::exportStylesheet(const char *filename) {
-    SaxonProcessor::attachCurrentThread();
+
 
     static jmethodID exportmID = nullptr;
 
@@ -501,7 +504,7 @@ void XsltExecutable::exportStylesheet(const char *filename) {
 }
 
 void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
-    SaxonProcessor::attachCurrentThread();
+
     if (selection == nullptr) {
         std::cerr
                 << "Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionFile."
@@ -562,7 +565,6 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 }
 
 const char *XsltExecutable::applyTemplatesReturningString() {
-    SaxonProcessor::attachCurrentThread();
 
     if (selection == nullptr) {
         std::cerr
@@ -620,7 +622,6 @@ const char *XsltExecutable::applyTemplatesReturningString() {
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.stringArray);
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.objectArray);
         }
-
         if (result) {
             jboolean isCopy = false;
             jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
@@ -642,7 +643,14 @@ const char *XsltExecutable::applyTemplatesReturningString() {
 }
 
 XdmValue *XsltExecutable::applyTemplatesReturningValue() {
-    SaxonProcessor::attachCurrentThread();
+
+   /* if (selection == nullptr) {
+        std::cerr
+                << "Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionFile."
+                << std::endl;
+        return nullptr;
+    }*/
+
 
     static jmethodID atsvmID = nullptr;
     if (atsvmID == nullptr) {
@@ -751,7 +759,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
 void XsltExecutable::callFunctionReturningFile(const char *functionName, XdmValue **arguments, int argument_length,
                                                const char *outfile) {
 
-    SaxonProcessor::attachCurrentThread();
+
     static jmethodID afmID = nullptr;
 
     if (afmID == nullptr) {
@@ -823,7 +831,7 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName, XdmValu
 const char *
 XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue **arguments, int argument_length) {
 
-    SaxonProcessor::attachCurrentThread();
+
     static jmethodID afsmID = nullptr;
 
     if(afsmID == nullptr) {
@@ -899,7 +907,7 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
 XdmValue *
 XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **arguments, int argument_length) {
 
-    SaxonProcessor::attachCurrentThread();
+
     static jmethodID cfvmID = nullptr;
     if (cfvmID == nullptr) {
         cfvmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
@@ -1006,7 +1014,7 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
 
 void XsltExecutable::callTemplateReturningFile(const char *templateName, const char *outfile) {
 
-    SaxonProcessor::attachCurrentThread();
+
     static jmethodID ctmID = nullptr;
 
     if(ctmID == nullptr) {
@@ -1064,7 +1072,7 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName, const c
 
 
 const char * XsltExecutable::callTemplateReturningString(const char *templateName) {
-    SaxonProcessor::attachCurrentThread();
+
     jmethodID ctsmID = nullptr;
 
 	if(exceptionOccurred()) {
@@ -1154,7 +1162,8 @@ const char * XsltExecutable::callTemplateReturningString(const char *templateNam
 }
 
 XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
-    SaxonProcessor::attachCurrentThread();
+
+
     static jmethodID ctsvmID = nullptr;
     if (ctsvmID == nullptr) {
         ctsvmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
@@ -1201,7 +1210,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
                                                                                           comboArrays.objectArray));
 
          if(!result) {
-            std::cerr<<"Error found in callTemplateReturningValue"<<std::endl;
+            std::cerr<<"Error found in calltemplateReturningValue"<<std::endl;
             SaxonProcessor::sxn_environ->env->ExceptionDescribe();
          }
 
@@ -1263,7 +1272,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
 
 
 XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
-    SaxonProcessor::attachCurrentThread();
+
     if (sourcefile == nullptr) {
 
         return nullptr;
@@ -1278,7 +1287,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
                                                                                  "(Ljava/lang/String;Lnet/sf/saxon/option/cpp/Xslt30Processor;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmValue;");
     }
     if (!tfvMID) {
-        std::cerr << "Error: " << getDllname() << ".transformToValue" << " not found\n"
+        std::cerr << "Error: " << getDllname() << ".transformtoValue" << " not found\n"
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
@@ -1368,7 +1377,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
 
 void XsltExecutable::transformFileToFile(const char *source, const char *outputfile) {
 
-    SaxonProcessor::attachCurrentThread();
+
     static jmethodID tffMID = nullptr;
 
     if (tffMID == nullptr) {
@@ -1424,7 +1433,6 @@ void XsltExecutable::transformFileToFile(const char *source, const char *outputf
 
 
 void XsltExecutable::setSaveXslMessage(bool create, const char * filename) {
-    SaxonProcessor::attachCurrentThread();
     if (create) {
 
         static jmethodID messageID =   nullptr;
@@ -1501,7 +1509,7 @@ XdmValue * XsltExecutable::getXslMessages(){
 
 const char *XsltExecutable::transformFileToString(const char *source) {
 
-    SaxonProcessor::attachCurrentThread();
+
     static jmethodID tftMID = tftMID;
     if (tftMID == nullptr) {
         tftMID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
@@ -1601,7 +1609,6 @@ void XsltExecutable::transformToFile(XdmNode *source) {
 
 
 SaxonApiException *XsltExecutable::getException() {
-    SaxonProcessor::attachCurrentThread();
     return SaxonProcessor::checkForExceptionCPP(SaxonProcessor::sxn_environ->env, cppClass, nullptr);
 }
 

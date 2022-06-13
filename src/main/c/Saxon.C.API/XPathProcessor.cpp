@@ -22,7 +22,7 @@ XPathProcessor::XPathProcessor() {
 
 XPathProcessor::XPathProcessor(SaxonProcessor* p, std::string curr) {
 	proc = p;
-    SaxonProcessor::attachCurrentThread();
+
 	/*
 	 * Look for class.
 	 */
@@ -64,7 +64,6 @@ XPathProcessor::XPathProcessor(SaxonProcessor* p, std::string curr) {
 
 
 XPathProcessor::~XPathProcessor(){
-    SaxonProcessor::attachCurrentThread();
     clearProperties();
     clearParameters();
 
@@ -74,7 +73,7 @@ XPathProcessor::~XPathProcessor(){
 }
 
 XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
-    SaxonProcessor::attachCurrentThread();
+
   	if (xpathStr == nullptr) {
 		std::cerr << "Error:: XPath string cannot be empty or nullptr" << std::endl;
 	return nullptr;
@@ -178,7 +177,7 @@ return nullptr;
 }
 
 XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
-    SaxonProcessor::attachCurrentThread();
+
 	if (xpathStr == nullptr) {
 		std::cerr << "Error:: XPath string cannot be empty or nullptr" << std::endl;
 	     return nullptr;
@@ -311,7 +310,7 @@ void XPathProcessor::setContextFile(const char * filename) {
 
 
 void XPathProcessor::declareNamespace(const char *prefix, const char * uri){
-    SaxonProcessor::attachCurrentThread();
+
         if (uri == nullptr) {
 		return;
         }
@@ -335,7 +334,7 @@ void XPathProcessor::declareNamespace(const char *prefix, const char * uri){
 
 
 void XPathProcessor::declareVariable(const char * name){
-    SaxonProcessor::attachCurrentThread();
+
     if (name == nullptr) {
 		return;
     }
@@ -386,7 +385,6 @@ void XPathProcessor::importSchemaNamespace(const char* uri){
 
 
 void XPathProcessor::setBaseURI(const char * uriStr) {
-    SaxonProcessor::attachCurrentThread();
 	if (uriStr == nullptr) {
 		std::cerr << "Error:: XPath string cannot be empty or nullptr" << std::endl;
 	     return;
@@ -408,7 +406,6 @@ if (!mID) {
 }
 
 bool XPathProcessor::effectiveBooleanValue(const char * xpathStr) {
-    SaxonProcessor::attachCurrentThread();
 	if (xpathStr == nullptr) {
 		std::cerr << "Error:: XPath string cannot be empty or nullptr" << std::endl;
 	     return false;
@@ -555,7 +552,6 @@ std::map<std::string,std::string>& XPathProcessor::getProperties(){
 }
 
 void XPathProcessor::exceptionClear(){
-    SaxonProcessor::attachCurrentThread();
     SaxonProcessor::sxn_environ->env->ExceptionClear();
     if(exception != nullptr) {
         delete exception;

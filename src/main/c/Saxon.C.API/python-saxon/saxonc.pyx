@@ -189,14 +189,6 @@ cdef class PySaxonProcessor:
             return ustring
 
     @property
-    def attach_current_thread(self):
-        self.thisptr.attachCurrentThread()
-
-    @property
-    def detach_current_thread(self):
-        self.thisptr.detachCurrentThread()
-
-    @property
     def cwd(self):
         """
         cwd Property represents the current working directory
@@ -244,7 +236,7 @@ cdef class PySaxonProcessor:
         cdef char * c_value_str_ = NULL
         '''make_c_str(value)'''
         py_value_string = value.encode('UTF-8') if value is not None else None
-        c_value_str_ = py_value_string if value is not None else ""
+        c_value_str = py_value_string if value is not None else ""
         self.thisptr.setConfigurationProperty(c_str_, c_value_str_)
         
     def clear_configuration_properties(self):
@@ -448,7 +440,6 @@ cdef class PySaxonProcessor:
         cdef PyXdmMap mvalue_
         cdef PyXdmFunctionItem fvalue_
         cdef PyXdmValue value_
-
         for x in range(len_):
           if isinstance(values[x], PyXdmValue):
             value_ = values[x]
@@ -1686,14 +1677,15 @@ cdef class PyXsltExecutable:
         transform_to_string(self, **kwds)
         Execute transformation to string.
         Args:
-            **kwds: Possible arguments: source_file (str) or xdm_node (PyXdmNode). Other allowed argument: base_output_uri (str)
-            which is used for for resolving relative URIs in the href attribute of the xsl:result-document instruction.
+            **kwds: Possible arguments: source_file (str) or xdm_node (PyXdmNode). Other allowed argument: stylesheet_file (str)
+                                        and base_output_uri (str) which is used for for resolving relative URIs in the href
+                                        attribute of the xsl:result-document instruction.
         Example:
-            1) result = executable.transform_to_string(source_file="cat.xml")
-            2) executable.set_initial_match_selection(file_name="cat.xml")\r
-               result = executable.transform_to_string(stylesheet_file="test1.xsl", xdm_node= node)
+            1) result = xsltproc.transform_to_string(source_file="cat.xml")
+            2) xsltproc.set_source("cat.xml")\r
+               result = xsltproc.transform_to_string(stylesheet_file="test1.xsl", xdm_node= node)
             3) node = saxon_proc.parse_xml(xml_text="<in/>")\r
-               result = executable.transform_to_string(xdm_node= node)
+               result = xsltproc.transform_to_string(xdm_node= node)
         """
         cdef char * c_sourcefile = NULL
         cdef char * c_stylesheet = NULL
@@ -1734,16 +1726,16 @@ cdef class PyXsltExecutable:
         transform_to_file(self, **kwds)
         Execute transformation to a file. It is possible to specify the as an argument or using the set_output_file method.
         Args:
-            **kwds: Possible optional arguments: source_file (str) or xdm_node (PyXdmNode). Other allowed argument: output_file (str)
+            **kwds: Possible optional arguments: source_file (str) or xdm_node (PyXdmNode). Other allowed argument: stylesheet_file (str), output_file (str)
                                                  and base_output_uri (str) which is used for for resolving relative URIs in the href attribute of the
                                                  xsl:result-document instruction.
         Example:
-            1) executable.transform_to_file(source_file="cat.xml", stylesheet_file="test1.xsl", output_file="result.xml")
-            2) executable.set_source("cat.xml")\r
-               executable.set_output_file("result.xml")\r
-               executable.transform_to_file(stylesheet_file="test1.xsl")
+            1) xsltproc.transform_to_file(source_file="cat.xml", stylesheet_file="test1.xsl", output_file="result.xml")
+            2) xsltproc.set_source("cat.xml")\r
+               xsltproc.setoutput_file("result.xml")\r
+               xsltproc.transform_to_file(stylesheet_file="test1.xsl")
             3) node = saxon_proc.parse_xml(xml_text="<in/>")\r
-               executable.transform_to_file(output_file="result.xml", stylesheet_file="test1.xsl", xdm_node= node)
+               xsltproc.transform_to_file(output_file="result.xml", stylesheet_file="test1.xsl", xdm_node= node)
         """
         cdef char * c_sourcefile = NULL
         cdef char * c_outputfile = NULL
@@ -1803,9 +1795,6 @@ cdef class PyXsltExecutable:
         cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
-        cdef PyXdmMap mval = None
-        cdef PyXdmArray aaval = None
-        cdef PyXdmFunctionItem fval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
         xdmValue = self.thisxptr.transformFileToValue(c_sourcefile)
         if xdmValue is NULL:
@@ -1814,28 +1803,11 @@ cdef class PyXsltExecutable:
         if type_== 4:
             aval = PyXdmAtomicValue()
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
-            aval.thisvptr.incrementRefCount()
             return aval
         elif type_ == 3:
             nval = PyXdmNode()
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
-            nval.thisvptr.incrementRefCount()
             return nval
-        elif type_ == 5:
-            fval = PyXdmFunctionItem()
-            fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
-            fval.thisvptr.incrementRefCount()
-            return fval
-        elif type_ == 6:
-            mval = PyXdmMap()
-            mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
-            mval.thisvptr.incrementRefCount()
-            return mval
-        elif type_ == 7:
-            aaval = PyXdmArray()
-            aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
-            aaval.thisvptr.incrementRefCount()
-            return aaval
         else:
             val = PyXdmValue()
             val.thisvptr = xdmValue
@@ -1847,18 +1819,17 @@ cdef class PyXsltExecutable:
         apply_templates_returning_value(self, **kwds)
         Invoke the stylesheet by applying templates to a supplied input sequence, Saving the results as an XdmValue.
         Args:
-            **kwds: Possible optional arguments: source_file (str) or xdm_value (PyXdmValue). Other allowed argument:
-                                                 base_output_uri (str) which is used for resolving relative URIs in the href attribute of
+            **kwds: Possible optional arguments: source_file (str) or xdm_value (PyXdmValue). Other allowed argument: stylesheet_file (str) and
+                                                 base_output_uri (str) which is used for for resolving relative URIs in the href attribute of
                                                  the xsl:result-document instruction.
         Returns:
             PyXdmValue: Result of the transformation as an PyXdmValue object
         Example:
-            1) executable = trans.compile_stylesheet(stylesheet_file="test1.xsl")
-               executable.set_initial_match_selection(file_name="cat.xml")\r
-               node = executable.apply_templates_returning_value()
-            2) executable = trans.compile_stylesheet(stylesheet_file="test1.xsl")
-			   executable.set_initial_match_selection(file_name="cat.xml")\r
-               node = executable.apply_templates_returning_value()
+            1) xsltproc.set_initial_match_selection(file_name="cat.xml")\r
+               node = xsltproc.apply_templates_returning_value(stylesheet_file="test1.xsl")
+            2) xsltproc.compile_stylesheet(stylesheet_file="test1.xsl")
+			   xsltproc.set_initial_match_selection(file_name="cat.xml")\r
+               node = xsltproc.apply_templates_returning_value()
         """
         cdef const char * c_sourcefile = NULL
         cdef PyXdmValue value_ = None
@@ -1883,9 +1854,6 @@ cdef class PyXsltExecutable:
         cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
-        cdef PyXdmMap mval = None
-        cdef PyXdmArray aaval = None
-        cdef PyXdmFunctionItem fval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
         xdmValue = self.thisxptr.applyTemplatesReturningValue()
         if xdmValue is NULL:
@@ -1899,21 +1867,6 @@ cdef class PyXsltExecutable:
             nval = PyXdmNode()
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
             return nval
-        elif type_ == 5:
-            fval = PyXdmFunctionItem()
-            fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
-            fval.thisvptr.incrementRefCount()
-            return fval
-        elif type_ == 6:
-            mval = PyXdmMap()
-            mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
-            mval.thisvptr.incrementRefCount()
-            return mval
-        elif type_ == 7:
-            aaval = PyXdmArray()
-            aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
-            aaval.thisvptr.incrementRefCount()
-            return aaval
         else:
             val = PyXdmValue()
             val.thisvptr = xdmValue
@@ -1923,15 +1876,14 @@ cdef class PyXsltExecutable:
         apply_templates_returning_string(self, **kwds)
         Invoke the stylesheet by applying templates to a supplied input sequence, Saving the results as a str.
         Args:
-            **kwds: Possible optional arguments: source_file (str) or xdm_value (PyXdmValue). Other allowed argument:
-                                                 base_output_uri (str) which is used for resolving relative URIs in the href attribute of
+            **kwds: Possible optional arguments: source_file (str) or xdm_value (PyXdmValue). Other allowed argument: stylesheet_file (str) and
+                                                 base_output_uri (str) which is used for for resolving relative URIs in the href attribute of
                                                  the xsl:result-document instruction
         Returns:
             str: Result of the transformation as str
         Example:
-            1) executable = trans.compile_stylesheet(stylesheet_file="test1.xsl")
-               executable.set_initial_match_selection(file_name="cat.xml")\r
-               content = executable.apply_templates_returning_str()
+            1) xsltproc.set_initial_match_selection(file_name="cat.xml")\r
+               content = xsltproc.apply_templates_returning_str(stylesheet_file="test1.xsl")
 			   print(content)
         """
         cdef const char * c_sourcefile = NULL
@@ -1964,14 +1916,13 @@ cdef class PyXsltExecutable:
         results to file.
         Args:
             **kwds: Possible optional arguments: source_file (str) or xdm_value (PyXdmValue).
-            Other allowed argument: The required argument output_file (str) and
-            base_output_uri (str) which is used for resolving relative URIs in the href attribute of
+            Other allowed argument: stylesheet_file (str) and the required argument output_file (str),
+            base_output_uri (str) which is used for for resolving relative URIs in the href attribute of
             the xsl:result-document instruction.
 
         Example:
-            1) executable = trans.compile_stylesheet(stylesheet_file="test1.xsl")
-               executable.set_initial_match_selection(file_name="cat.xml")
-               content = executable.apply_templates_returning_file(output_file="result.xml")
+            1) xsltproc.set_initial_match_selection(file_name="cat.xml")\r
+               content = xsltproc.apply_templates_returning_file(stylesheet_file="test1.xsl", output_file="result.xml")
 			   print(content)
         """
         cdef const char * c_sourcefile = NULL
@@ -2048,9 +1999,6 @@ cdef class PyXsltExecutable:
         cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
-        cdef PyXdmMap mval = None
-        cdef PyXdmArray aaval = None
-        cdef PyXdmFunctionItem fval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
         xdmValue = self.thisxptr.callTemplateReturningValue(c_templateName)
         if xdmValue is NULL:
@@ -2064,21 +2012,6 @@ cdef class PyXsltExecutable:
             nval = PyXdmNode()
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
             return nval
-        elif type_ == 5:
-            fval = PyXdmFunctionItem()
-            fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
-            fval.thisvptr.incrementRefCount()
-            return fval
-        elif type_ == 6:
-            mval = PyXdmMap()
-            mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
-            mval.thisvptr.incrementRefCount()
-            return mval
-        elif type_ == 7:
-            aaval = PyXdmArray()
-            aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
-            aaval.thisvptr.incrementRefCount()
-            return aaval
         else:
             val = PyXdmValue()
             val.thisvptr = xdmValue
@@ -2234,9 +2167,6 @@ cdef class PyXsltExecutable:
         cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
-        cdef PyXdmMap mval = None
-        cdef PyXdmArray aaval = None
-        cdef PyXdmFunctionItem fval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
         xdmValue = self.thisxptr.callFunctionReturningValue(c_functionName, argumentV, len(args))
         if xdmValue is NULL:
@@ -2250,21 +2180,6 @@ cdef class PyXsltExecutable:
           nval = PyXdmNode()
           nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
           return nval
-        elif type_ == 5:
-            fval = PyXdmFunctionItem()
-            fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
-            fval.thisvptr.incrementRefCount()
-            return fval
-        elif type_ == 6:
-            mval = PyXdmMap()
-            mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
-            mval.thisvptr.incrementRefCount()
-            return mval
-        elif type_ == 7:
-            aaval = PyXdmArray()
-            aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
-            aaval.thisvptr.incrementRefCount()
-            return aaval
         else:
           val = PyXdmValue()
           val.thisvptr = xdmValue
@@ -2857,9 +2772,6 @@ cdef class PyXPathProcessor:
         """
         cdef PyXdmNode val = None
         cdef PyXdmAtomicValue aval = None
-        cdef PyXdmMap mval = None
-        cdef PyXdmArray aaval = None
-        cdef PyXdmFunctionItem fval = None
         cdef const char * c_xpath = NULL
         '''make_c_str(xpath_str)'''
         py_s_string = xpath_str.encode('UTF-8') if xpath_str is not None else None
@@ -3463,9 +3375,7 @@ cdef class PyXdmValue:
         Args:
             value (PyXdmItem): The PyXdmItem object
         """
-        if value is not None:
-            self.thisvptr.addXdmItem(value.derivedptr)
-
+        self.thisvptr.addXdmItem(value.derivedptr)
      @property
      def head(self):
         """
@@ -3545,21 +3455,6 @@ cdef class PyXdmValue:
                 nval = PyXdmNode()
                 nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmItem
                 return nval
-            elif type_ == 5:
-                fval = PyXdmFunctionItem()
-                fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmItem
-                fval.thisvptr.incrementRefCount()
-                return fval
-            elif type_ == 6:
-                mval = PyXdmMap()
-                mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmItem
-                mval.thisvptr.incrementRefCount()
-                return mval
-            elif type_ == 7:
-                aaval = PyXdmArray()
-                aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmItem
-                aaval.thisvptr.incrementRefCount()
-                return aaval
             else:
                 ival = PyXdmItem()
                 ival.thisvptr = xdmItem
@@ -3619,7 +3514,6 @@ cdef class PyXdmValueIterator:
        raise StopIteration
 
 
-
 cdef class PyXdmItem(PyXdmValue):
      """The class XdmItem represents an item in a sequence, as defined by the XDM data model.
      An item is either an atomic value or a node."""
@@ -3664,51 +3558,6 @@ cdef class PyXdmItem(PyXdmValue):
             bool: Check of is atomic value
         """
         return self.derivedptr.isAtomic()
-
-     @property
-     def is_node(self):
-        """
-        is_atomic(self)
-        Property to check if the current PyXdmItem is a node value
-
-        Returns:
-            bool: Check for node value
-        """
-        return self.derivedptr.isNode()
-
-     @property
-     def is_function(self):
-        """
-        is_atomic(self)
-        Property to check if the current PyXdmItem is a function value
-
-        Returns:
-            bool: Check of is atomic value
-        """
-        return self.derivedptr.isFunction()
-
-     @property
-     def is_map(self):
-        """
-        is_map(self)
-        Property to check if the current PyXdmItem is a map value
-
-        Returns:
-            bool: Check for map value
-        """
-        return self.derivedptr.isMap()
-
-     @property
-     def is_array(self):
-        """
-        is_array(self)
-        Property to check if the current PyXdmItem is an XdmArray value
-
-        Returns:
-            bool: Check for array value
-        """
-        return self.derivedptr.isArray()
-
      def get_node_value(self):
         """
         get_node_value(self)
@@ -4347,10 +4196,6 @@ cdef class PyXdmMap(PyXdmFunctionItem):
              else:
                  return None
 
-     def __iter__(self):
-        ''' Returns the Iterator object of PyXdmMap'''
-        return iter(self.keys())
-
 
      def put(self, PyXdmAtomicValue key, PyXdmValue  value):
          """
@@ -4402,19 +4247,19 @@ cdef class PyXdmMap(PyXdmFunctionItem):
          """
          keys(self)
          Keys in the XdmMap
-         :return: list of PyXdmAtomicValues
+         :return: list of XdmValues
          """
          """TODO: memory management for the array returned from C++"""
          cdef list p_values = []
-         cdef saxoncClasses.XdmAtomicValue **c_values
-         cdef PyXdmAtomicValue val = None
+         cdef saxoncClasses.XdmValue **c_values
          cdef int count, i
+         cdef PyXdmNode val = None
          count = self.derivedmmptr.mapSize()
          if count > 0:
-             c_values = self.derivedmmptr.keys()
+             n = self.derivedmmptr.keys()
              for i in range(count):
-                 val = PyXdmAtomicValue()
-                 val.derivedaptr = val.derivedptr = val.thisvptr = <saxoncClasses.XdmAtomicValue *>c_values[i]
+                 val = PyXdmValue()
+                 val.thisvptr = n[i]
                  val.thisvptr.incrementRefCount()
                  p_values.append(val)
          return p_values
@@ -4537,10 +4382,6 @@ cdef class PyXdmArray(PyXdmFunctionItem):
         return make_py_str(self.derivedaaptr.toString())
      def __str__(self):
         return make_py_str(self.derivedaaptr.toString())
-
-     def __iter__(self):
-        ''' Returns the Iterator object of PyXdmArray'''
-        return iter(self.as_list())
 
      @property
      def array_length(self):
