@@ -1216,7 +1216,8 @@ public class PackageLoaderHE implements IPackageLoader {
             pat.setLocation(makeLocation(element));
             pat.setRetainedStaticContext(makeRetainedStaticContext(element));
             if (pat instanceof GeneralNodePattern) {
-                addCompletionAction(((GeneralNodePattern) pat)::makeTopNodeEquivalent);
+                addCompletionAction(() -> ((GeneralNodePattern) pat).makeTopNodeEquivalent());
+                // Written this way for C# transpiler
             }
             return pat;
         }
