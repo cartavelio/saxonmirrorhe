@@ -18,10 +18,10 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 public final class Version {
 
     private static final int MAJOR_VERSION = 11;
-    private static final int MINOR_VERSION = 2;
-    private static final int BUILD = 21706; //mmddhh  BEWARE: a leading 0 means octal.
+    private static final int MINOR_VERSION = 3;
+    private static final int BUILD = 32100; //mmddhh  BEWARE: a leading 0 means octal.
     private static final String MAJOR_RELEASE_DATE = "2021-10-05";
-    private static final String MINOR_RELEASE_DATE = "2022-02-17";
+    private static final String MINOR_RELEASE_DATE = "2022-03-21";
 
     private Version() {
         // class is never instantiated
