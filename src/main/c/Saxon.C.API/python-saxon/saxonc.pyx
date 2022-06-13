@@ -3455,6 +3455,21 @@ cdef class PyXdmValue:
                 nval = PyXdmNode()
                 nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmItem
                 return nval
+            elif type_ == 5:
+                fval = PyXdmFunctionItem()
+                fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmItem
+                fval.thisvptr.incrementRefCount()
+                return fval
+            elif type_ == 6:
+                mval = PyXdmMap()
+                mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmItem
+                mval.thisvptr.incrementRefCount()
+                return mval
+            elif type_ == 7:
+                aaval = PyXdmArray()
+                aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmItem
+                aaval.thisvptr.incrementRefCount()
+                return aaval
             else:
                 ival = PyXdmItem()
                 ival.thisvptr = xdmItem
@@ -3512,6 +3527,7 @@ cdef class PyXdmValueIterator:
            return result
        # End of Iteration
        raise StopIteration
+
 
 
 cdef class PyXdmItem(PyXdmValue):
@@ -4196,6 +4212,10 @@ cdef class PyXdmMap(PyXdmFunctionItem):
              else:
                  return None
 
+     def __iter__(self):
+        ''' Returns the Iterator object of PyXdmMap'''
+        return iter(self.keys())
+
 
      def put(self, PyXdmAtomicValue key, PyXdmValue  value):
          """
@@ -4247,19 +4267,19 @@ cdef class PyXdmMap(PyXdmFunctionItem):
          """
          keys(self)
          Keys in the XdmMap
-         :return: list of XdmValues
+         :return: list of PyXdmAtomicValues
          """
          """TODO: memory management for the array returned from C++"""
          cdef list p_values = []
-         cdef saxoncClasses.XdmValue **c_values
+         cdef saxoncClasses.XdmAtomicValue **c_values
+         cdef PyXdmAtomicValue val = None
          cdef int count, i
-         cdef PyXdmNode val = None
          count = self.derivedmmptr.mapSize()
          if count > 0:
-             n = self.derivedmmptr.keys()
+             c_values = self.derivedmmptr.keys()
              for i in range(count):
-                 val = PyXdmValue()
-                 val.thisvptr = n[i]
+                 val = PyXdmAtomicValue()
+                 val.derivedaptr = val.derivedptr = val.thisvptr = <saxoncClasses.XdmAtomicValue *>c_values[i]
                  val.thisvptr.incrementRefCount()
                  p_values.append(val)
          return p_values
@@ -4382,6 +4402,10 @@ cdef class PyXdmArray(PyXdmFunctionItem):
         return make_py_str(self.derivedaaptr.toString())
      def __str__(self):
         return make_py_str(self.derivedaaptr.toString())
+
+     def __iter__(self):
+        ''' Returns the Iterator object of PyXdmArray'''
+        return iter(self.as_list())
 
      @property
      def array_length(self):
