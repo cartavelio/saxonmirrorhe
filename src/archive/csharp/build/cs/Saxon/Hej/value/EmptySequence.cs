@@ -49,14 +49,9 @@ namespace Saxon.Hej.value {
             return this;
         }
     
-        /* Expanding default method materialize from interface GroundedValue */
+        /* Expanding default method materialize from interface Sequence */
         public Saxon.Hej.om.GroundedValue materialize() {
-            return this;
-        }
-
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
+            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
         }
 
         /* Expanding default method toShortString from interface GroundedValue */
@@ -82,6 +77,11 @@ namespace Saxon.Hej.value {
                 chain = chain.addAll(val.asIterable());
             }
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
     }

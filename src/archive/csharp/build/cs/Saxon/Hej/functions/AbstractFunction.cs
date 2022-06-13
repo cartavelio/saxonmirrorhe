@@ -46,6 +46,51 @@ namespace Saxon.Hej.functions {
             return getDescription();
         }
     
+        /* Expanding default method reduce from interface Item */
+        public virtual Saxon.Hej.om.GroundedValue reduce() {
+            return this;
+        }
+
+        /* Expanding default method materialize from interface Sequence */
+        public virtual Saxon.Hej.om.GroundedValue materialize() {
+            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+        }
+
+        /* Expanding default method asIterable from interface GroundedValue */
+        public virtual System.Collections.Generic.IEnumerable<Saxon.Hej.om.Item> asIterable() {
+            return new Saxon.Hej.om.GroundedValueAsIterable(this);
+        }
+
+        /* Expanding default method containsNode from interface GroundedValue */
+        public virtual bool containsNode(Saxon.Hej.om.NodeInfo sought) {
+            return Saxon.Hej.expr.SingletonIntersectExpression.containsNode(iterate(), sought);
+        }
+
+        /* Expanding default method concatenate from interface GroundedValue */
+        public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
+            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+            chain = chain.addAll(asIterable());
+            foreach (Saxon.Hej.om.GroundedValue val in others) {
+                chain = chain.addAll(val.asIterable());
+            }
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
+        }
+
+        /* Expanding default method isSequenceVariadic from interface Function */
+        public virtual bool isSequenceVariadic() {
+            return false;
+        }
+
+        /* Expanding default method getGenre from interface Function */
+        public virtual Saxon.Hej.om.Genre getGenre() {
+            return Saxon.Hej.om.Genre.FUNCTION;
+        }
+
         /* Expanding default method head from interface Item */
         public virtual Saxon.Hej.om.Item head() {
             return this;
@@ -80,59 +125,9 @@ namespace Saxon.Hej.functions {
             return new Saxon.Hej.tree.iter.SingletonIterator(this);
         }
 
-        /* Expanding default method reduce from interface GroundedValue */
-        public virtual Saxon.Hej.om.GroundedValue reduce() {
-            return this;
-        }
-
         /* Expanding default method isStreamed from interface Item */
         public virtual bool isStreamed() {
             return false;
-        }
-
-        /* Expanding default method isSequenceVariadic from interface Function */
-        public virtual bool isSequenceVariadic() {
-            return false;
-        }
-
-        /* Expanding default method getGenre from interface Function */
-        public virtual Saxon.Hej.om.Genre getGenre() {
-            return Saxon.Hej.om.Genre.FUNCTION;
-        }
-
-        /* Expanding default method materialize from interface GroundedValue */
-        public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return this;
-        }
-
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
-        }
-
-        /* Expanding default method asIterable from interface GroundedValue */
-        public virtual System.Collections.Generic.IEnumerable<Saxon.Hej.om.Item> asIterable() {
-            return new Saxon.Hej.om.GroundedValueAsIterable(this);
-        }
-
-        /* Expanding default method containsNode from interface GroundedValue */
-        public virtual bool containsNode(Saxon.Hej.om.NodeInfo sought) {
-            return Saxon.Hej.expr.SingletonIntersectExpression.containsNode(iterate(), sought);
-        }
-
-        /* Expanding default method concatenate from interface GroundedValue */
-        public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
-            chain = chain.addAll(asIterable());
-            foreach (Saxon.Hej.om.GroundedValue val in others) {
-                chain = chain.addAll(val.asIterable());
-            }
-            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
-        }
-
-        /* Creating stub method call to satisfy interface Callable */
-        public virtual Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext arg1, Saxon.Hej.om.Sequence[] arg2) {
-            throw new System.NotImplementedException();
         }
 
         /* Creating stub method getFunctionItemType to satisfy interface Function */
@@ -152,6 +147,11 @@ namespace Saxon.Hej.functions {
 
         /* Creating stub method getDescription to satisfy interface Function */
         public virtual string getDescription() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method call to satisfy interface Callable */
+        public virtual Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext arg1, Saxon.Hej.om.Sequence[] arg2) {
             throw new System.NotImplementedException();
         }
 

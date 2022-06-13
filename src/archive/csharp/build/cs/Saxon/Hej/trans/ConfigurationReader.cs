@@ -125,7 +125,7 @@ namespace Saxon.Hej.trans {
                     }
                     packageLibrary = new Saxon.Hej.trans.packages.PackageLibrary(targetConfig.getDefaultXsltCompilerInfo());
                     string licenseLoc = atts.getValue("licenseFileLocation");
-                    if (((licenseLoc != null) && !(edition.Equals("HE")))) {
+                    if ((((licenseLoc != null) && !(edition.Equals("HE"))) && !(targetConfig.isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION)))) {
                         string @base = getSystemId();
                         try {
                             System.Uri absoluteLoc = Saxon.Hej.functions.ResolveURI.makeAbsolute(licenseLoc, @base);
