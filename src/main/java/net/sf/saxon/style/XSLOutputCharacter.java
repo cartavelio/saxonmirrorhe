@@ -63,11 +63,13 @@ public class XSLOutputCharacter extends StyleElement {
         }
         if (codepoint == -1) {
             reportAbsence("character");
+            codepoint = 256; // for error recovery
             return;
         }
 
         if (replacementString == null) {
             reportAbsence("string");
+            codepoint = 256; // for error recovery
         }
 
     }
