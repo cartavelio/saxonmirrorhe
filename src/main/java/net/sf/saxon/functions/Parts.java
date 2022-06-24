@@ -457,7 +457,7 @@ public class Parts extends SystemFunction implements Callable {
                         String value = tok.substring(eq + 1);
                         params.initialAppend(keyword, new StringValue(value));
                     } else {
-                        params.initialAppend(tok, BooleanValue.TRUE);
+                        params.initialAppend(tok, EmptySequence.getInstance());
                     }
                 }
                 dict.initialPut("queryParams", params);
