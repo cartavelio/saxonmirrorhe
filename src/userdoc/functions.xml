@@ -6701,8 +6701,8 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></samp>
         <p>Converts a binary value to a string, given its encoding.</p>
       </description>
       <signatures>
-        <proto return-type="xs:string">
-          <arg name="input" type="xs:hexBinary" desc="The binary input value"/>
+        <proto return-type="xs:string?">
+          <arg name="input" type="xs:hexBinary?" desc="The binary input value"/>
           <arg name="encoding" type="xs:string" desc="The character encoding"/>
         </proto>
       </signatures>
@@ -6716,6 +6716,7 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></samp>
             character encoding (for example <code>UTF8</code>). It interprets the contents of the
             hexBinary value as a sequence of bytes representing a character string in a particular
             encoding, and returns the corresponding string.</p>
+          <p>If the first argument is an empty sequence, the function returns an empty sequence.</p>
         </div>
       </details>
       <see-also namespace="http://saxon.sf.net/" name="string-to-hexBinary"/>
