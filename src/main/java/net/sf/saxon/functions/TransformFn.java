@@ -26,6 +26,7 @@ import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.StylesheetCache;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -913,6 +914,12 @@ public class TransformFn extends SystemFunction implements Callable {
         protected XPathContext context;
         protected HashTrieMap resultMap = new HashTrieMap();
 
+        /**
+         * Factory method to construct a Deliverer for the chosen delivery format
+         * @param processor the Saxon processor
+         * @param deliveryFormat the chosen delivery format
+         * @return an appropriate Deliverer
+         */
         public static Deliverer makeDeliverer(Processor processor, String deliveryFormat) {
             switch (deliveryFormat) {
                 case "document":
@@ -926,22 +933,53 @@ public class TransformFn extends SystemFunction implements Callable {
             }
         }
 
+        /**
+         * Supply the Transformer used for the transformation invoked by fn:transform
+         * @param transformer the Transformer
+         */
+
         public final void setTransformer(Xslt30Transformer transformer) {
             this.transformer = transformer;
         }
+
+        /**
+         * Supply the key that will be used to identify the principal output document (either
+         * the base output URI, if available, or the string "output")
+         * @param key the key used in the result map to identify the principal output document.
+         */
 
         public final void setPrincipalResultKey(String key) {
             this.principalResultKey = key;
         }
 
+        /**
+         * Supply the base output URI
+         * @param uri the base output URI
+         */
+
         public final void setBaseOutputUri(String uri) {
             this.baseOutputUri = uri;
         }
+
+        /**
+         * Supply the function used to post-process results
+         * @param postProcessor the post-processing function, as supplied in the post-processor option,
+         *                      or an identity function otherwise
+         * @param context the context used for evaluating the postprocessing function
+         */
 
         public void setPostProcessor(Function postProcessor, XPathContext context) {
             this.postProcessor = postProcessor;
             this.context = context;
         }
+
+        /**
+         * Helper methods for subclasses to get an absolute URI
+         * @param href a relative URI
+         * @param baseUri the base URI
+         * @return an absolute URI formed by resolving the relative URI against the base
+         * @throws XPathException if URI resolution fails
+         */
 
         protected URI getAbsoluteUri(String href, String baseUri) throws XPathException {
             URI absolute;
@@ -1082,7 +1120,7 @@ public class TransformFn extends SystemFunction implements Callable {
      */
 
     private static class DocumentDeliverer extends Deliverer {
-        private final Map<String, TreeInfo> results = new ConcurrentHashMap<>();
+        private final Map<String, GroundedValue> results = new ConcurrentHashMap<>();
         private final XdmDestination destination = new XdmDestination();
 
         public DocumentDeliverer() {
@@ -1105,8 +1143,13 @@ public class TransformFn extends SystemFunction implements Callable {
             XdmDestination destination = new XdmDestination();
             destination.setDestinationBaseURI(absolute);
             destination.onClose(() -> {
-                XdmNode root = destination.getXdmNode();
-                results.put(absolute.toASCIIString(), root.getUnderlyingValue().getTreeInfo());
+                try {
+                    XdmNode root = destination.getXdmNode();
+                    GroundedValue result = postProcess(absolute.toASCIIString(), root.getUnderlyingValue());
+                    results.put(absolute.toASCIIString(), result);
+                } catch (XPathException e) {
+                    throw new UncheckedXPathException(e);
+                }
             });
             PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
             return destination.getReceiver(pipe, properties);
@@ -1114,10 +1157,10 @@ public class TransformFn extends SystemFunction implements Callable {
 
         @Override
         public MapItem populateResultMap(MapItem resultMap) {
-            for (Map.Entry<String, TreeInfo> entry : results.entrySet()) {
+            for (Map.Entry<String, GroundedValue> entry : results.entrySet()) {
                 String uri = entry.getKey();
                 resultMap = resultMap.addEntry(new StringValue(uri),
-                                               entry.getValue().getRootNode());
+                                               entry.getValue());
             }
             return resultMap;
         }
@@ -1129,8 +1172,7 @@ public class TransformFn extends SystemFunction implements Callable {
 
     private static class SerializedDeliverer extends Deliverer {
         private final Processor processor;
-        private final Map<String, String> results = new ConcurrentHashMap<>();
-        private final Map<String, StringWriter> workInProgress = new ConcurrentHashMap<>();
+        private final Map<String, GroundedValue> results = new ConcurrentHashMap<>();
         private StringWriter primaryWriter;
 
         public SerializedDeliverer(Processor processor) {
@@ -1164,7 +1206,14 @@ public class TransformFn extends SystemFunction implements Callable {
             Serializer serializer = makeSerializer(processor, null);
             serializer.setCharacterMap(properties.getCharacterMapIndex());
             serializer.setOutputWriter(writer);
-            serializer.onClose(() -> results.put(absolute.toASCIIString(), writer.toString()));
+            serializer.onClose(() -> {
+                try {
+                    GroundedValue result = postProcess(absolute.toASCIIString(), new StringValue(writer.toString()));
+                    results.put(absolute.toASCIIString(), result);
+                } catch (XPathException e) {
+                    throw new UncheckedXPathException(e);
+                }
+            });
             try {
                 PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
                 Receiver out = serializer.getReceiver(pipe, properties);
@@ -1177,17 +1226,17 @@ public class TransformFn extends SystemFunction implements Callable {
 
         @Override
         public MapItem populateResultMap(MapItem resultMap) {
-            for (Map.Entry<String, String> entry : results.entrySet()) {
+            for (Map.Entry<String, GroundedValue> entry : results.entrySet()) {
                 String uri = entry.getKey();
                 resultMap = resultMap.addEntry(new StringValue(uri),
-                                               new StringValue(entry.getValue()));
+                                               entry.getValue());
             }
             return resultMap;
         }
     }
 
     private static class RawDeliverer extends Deliverer {
-        private final Map<String, XdmValue> results = new ConcurrentHashMap<>();
+        private final Map<String, GroundedValue> results = new ConcurrentHashMap<>();
         private final RawDestination primaryDestination = new RawDestination();
 
         public RawDeliverer() {}
@@ -1208,8 +1257,13 @@ public class TransformFn extends SystemFunction implements Callable {
             URI absolute = getAbsoluteUri(href, baseUri);
             RawDestination destination = new RawDestination();
             destination.onClose(() -> {
-                destination.close();
-                results.put(absolute.toASCIIString(), destination.getXdmValue());
+                try {
+                    destination.close();
+                    GroundedValue result = postProcess(absolute.toASCIIString(), destination.getXdmValue().getUnderlyingValue());
+                    results.put(absolute.toASCIIString(), result);
+                } catch (XPathException e) {
+                    throw new UncheckedXPathException(e);
+                }
             });
             PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
             return destination.getReceiver(pipe, properties);
@@ -1217,10 +1271,10 @@ public class TransformFn extends SystemFunction implements Callable {
 
         @Override
         public MapItem populateResultMap(MapItem resultMap) {
-            for (Map.Entry<String, XdmValue> entry : results.entrySet()) {
+            for (Map.Entry<String, GroundedValue> entry : results.entrySet()) {
                 String uri = entry.getKey();
                 resultMap = resultMap.addEntry(new StringValue(uri),
-                                               entry.getValue().getUnderlyingValue());
+                                               entry.getValue());
             }
             return resultMap;
         }
