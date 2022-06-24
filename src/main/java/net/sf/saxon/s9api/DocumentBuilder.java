@@ -151,7 +151,7 @@ public class DocumentBuilder {
      * is supplied, then schema validation does not take place.
      * <p>This option requires the schema-aware version of the Saxon product (Saxon-EE).</p>
      * <p>The supplied <code>SchemaValidator</code> is not actually used directly when a document is built
-     * using {@link #parse(File, Destination){ or {@link #parse(Source, Destination)}}
+     * using {@link #parse(File, Destination)} or {@link #parse(Source, Destination)}
      * (the {@link SchemaValidator#validate(Source)}
      * method is never called). Rather, some of the properties of the <code>SchemaValidator</code> are used to control
      * how schema validation is performed by the <code>DocumentBuilder</code>. The particular properties
