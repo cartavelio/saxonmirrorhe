@@ -117,6 +117,8 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
 
         if (accumulator.getAccumulatorName() == null) {
             reportAbsence("name");
+            // recovery: bug 5585
+            accumulator.setAccumulatorName(new StructuredQName("anon", NamespaceConstant.ANONYMOUS, "acc" + hashCode()));
         }
 
     }
