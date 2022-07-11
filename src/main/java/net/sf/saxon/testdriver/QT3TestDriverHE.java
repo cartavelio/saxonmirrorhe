@@ -798,6 +798,8 @@ public class QT3TestDriverHE extends TestDriver {
             assertXpc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
             assertXpc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
             assertXpc.declareNamespace("j", NamespaceConstant.FN);
+            assertXpc.declareNamespace("file", "http://expath.org/ns/file");
+            assertXpc.declareNamespace("bin", "http://expath.org/ns/binary");
             assertXpc.declareVariable(new QName("result"));
             assertXpc.setBaseURI(assertion.getBaseURI());
 
