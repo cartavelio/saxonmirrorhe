@@ -86,7 +86,8 @@ public class StandardUnparsedTextResolver
         if (resolved instanceof StreamSource) {
             return getReaderFromStreamSource((StreamSource)resolved, encoding, config, debug);
         } else {
-            throw new XPathException("Resolver for unparsed-text() returned non-StreamSource");
+            throw new XPathException("Resolver for unparsed-text() returned unrecognized Source ("
+                                             + resolved.getClass().getName() + ")");
         }
     }
 

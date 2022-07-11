@@ -106,6 +106,7 @@ public class XsltCompiler {
         return processor;
     }
 
+    //#if CSHARP==false
     /**
      * Set the URIResolver to be used during stylesheet compilation. This interface is
      * retained for backwards compatibility reasons. The supplied <code>URIResolver</code>
@@ -121,6 +122,25 @@ public class XsltCompiler {
         compilerInfo.setResourceResolver(
                 new ResourceResolverWrappingURIResolver(resolver));
     }
+
+    /**
+     * Get the URIResolver to be used during stylesheet compilation.
+     *
+     * @return the URIResolver used during stylesheet compilation. Returns null if no user-supplied
+     * URIResolver has been set.
+     * @deprecated since 11.1 - use a <code>ResourceResolver</code> instead
+     */
+
+    public URIResolver getURIResolver() {
+        ResourceResolver rr = compilerInfo.getResourceResolver();
+        if (rr instanceof ResourceResolverWrappingURIResolver) {
+            return ((ResourceResolverWrappingURIResolver) rr).getWrappedURIResolver();
+        } else {
+            return null;
+        }
+    }
+
+    //#endif
 
     /**
      * Set the <code>ResourceResolver</code> to be used during stylesheet compilation.
@@ -169,23 +189,6 @@ public class XsltCompiler {
 
     public void clearParameters() {
         compilerInfo.clearParameters();
-    }
-
-    /**
-     * Get the URIResolver to be used during stylesheet compilation.
-     *
-     * @return the URIResolver used during stylesheet compilation. Returns null if no user-supplied
-     * URIResolver has been set.
-     * @deprecated since 11.1 - use a <code>ResourceResolver</code> instead
-     */
-
-    public URIResolver getURIResolver() {
-        ResourceResolver rr = compilerInfo.getResourceResolver();
-        if (rr instanceof ResourceResolverWrappingURIResolver) {
-            return ((ResourceResolverWrappingURIResolver)rr).getWrappedURIResolver();
-        } else {
-            return null;
-        }
     }
 
     /**

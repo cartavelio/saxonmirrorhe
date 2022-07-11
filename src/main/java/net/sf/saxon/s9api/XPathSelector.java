@@ -122,7 +122,7 @@ public class XPathSelector implements Iterable<XdmItem> {
      * Set an object that will be used to resolve URIs used in
      * fn:doc() and related functions.
      *
-     * @param resolver An object that implements the URIResolver interface, or null.
+     * @param resolver An object that implements the ResourceResolver interface, or null.
      * @since 9.4
      */
 
@@ -142,7 +142,7 @@ public class XPathSelector implements Iterable<XdmItem> {
         return dynamicContext.getResourceResolver();
     }
 
-
+    //#if CSHARP==false
     /**
      * Set an object that will be used to resolve URIs used in
      * fn:doc() and related functions.
@@ -170,6 +170,7 @@ public class XPathSelector implements Iterable<XdmItem> {
             return null;
         }
     }
+    //#endif
 
     /**
      * Set an object that will be used to resolve URIs used in

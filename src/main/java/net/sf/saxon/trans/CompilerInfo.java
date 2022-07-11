@@ -152,6 +152,7 @@ public class CompilerInfo {
         return optimizerOptions.isSet(OptimizerOptions.JIT);
     }
 
+    //#if CSHARP==false
     /**
      * Set the URI Resolver to be used in this compilation episode.
      *
@@ -166,9 +167,26 @@ public class CompilerInfo {
     }
 
     /**
-     * Set the URI Resolver to be used in this compilation episode.
+     * Get the URI Resolver being used in this compilation episode.
      *
-     * @param resolver The URIResolver to be used. This is used to dereference URIs encountered in constructs
+     * @return resolver The URIResolver in use. This is used to dereference URIs encountered in constructs
+     * such as xsl:include, xsl:import, and xsl:import-schema.
+     * @since 8.7
+     */
+
+    public URIResolver getURIResolver() {
+        if (resourceResolver instanceof ResourceResolverWrappingURIResolver) {
+            return ((ResourceResolverWrappingURIResolver) resourceResolver).getWrappedURIResolver();
+        } else {
+            return null;
+        }
+    }
+    //#endif
+
+    /**
+     * Set the ResourceResolver to be used in this compilation episode.
+     *
+     * @param resolver The ResourceResolver to be used. This is used to dereference URIs encountered in constructs
      *                 such as xsl:include, xsl:import, and xsl:import-schema.
      * @since 8.7
      */
@@ -362,22 +380,6 @@ public class CompilerInfo {
 
     public boolean isGenerateByteCode() {
         return optimizerOptions.isSet(OptimizerOptions.BYTE_CODE);
-    }
-
-    /**
-     * Get the URI Resolver being used in this compilation episode.
-     *
-     * @return resolver The URIResolver in use. This is used to dereference URIs encountered in constructs
-     * such as xsl:include, xsl:import, and xsl:import-schema.
-     * @since 8.7
-     */
-
-    public URIResolver getURIResolver() {
-        if (resourceResolver instanceof ResourceResolverWrappingURIResolver) {
-            return ((ResourceResolverWrappingURIResolver)resourceResolver).getWrappedURIResolver();
-        } else {
-            return null;
-        }
     }
 
     /**
