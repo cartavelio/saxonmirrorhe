@@ -4793,12 +4793,13 @@ public class Configuration implements SourceResolver, NotationSet {
                     getDefaultXsltCompilerInfo().setErrorListener(
                             (ErrorListener) instantiateClassName(name, value, ErrorListener.class));
                     break;
-                //#endif
+
 
                 case FeatureCode.XSLT_STATIC_URI_RESOLVER_CLASS:
                     getDefaultXsltCompilerInfo().setURIResolver(
                             (URIResolver) instantiateClassName(name, value, URIResolver.class));
                     break;
+                //#endif
 
                 case FeatureCode.XSLT_VERSION:
                     if (!"3.0".equals(value)) {
