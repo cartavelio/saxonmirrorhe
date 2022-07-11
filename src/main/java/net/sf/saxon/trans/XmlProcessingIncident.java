@@ -7,9 +7,12 @@
 
 package net.sf.saxon.trans;
 
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.QName;
@@ -221,7 +224,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
 
     @Override
     public Location getLocation() {
-        return locator;
+        return locator == null ? Loc.NONE : locator;
     }
 
     public void setLocation(Location loc) {
