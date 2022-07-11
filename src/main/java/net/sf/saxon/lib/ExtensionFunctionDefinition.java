@@ -150,16 +150,18 @@ public abstract class ExtensionFunctionDefinition {
      * @return a function item corresponding to this extension function
      */
 
-    public final Function asFunction() {
-        return new ExtensionFunction(this);
+    public final Function asFunction(int arity) {
+        return new ExtensionFunction(this, arity);
     }
 
     private static class ExtensionFunction extends AbstractFunction {
 
         private final ExtensionFunctionDefinition definition;
+        private final int arity;
 
-        public ExtensionFunction(ExtensionFunctionDefinition definition) {
+        public ExtensionFunction(ExtensionFunctionDefinition definition, int arity) {
             this.definition = definition;
+            this.arity = arity;
         }
 
 
@@ -173,6 +175,11 @@ public abstract class ExtensionFunctionDefinition {
          */
         @Override
         public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
+            if (args.length != arity) {
+                // can happen on a dynamic call
+                throw new XPathException("Wrong number of arguments in call to " + definition.getFunctionQName().getDisplayName(),
+                                         "XPTY0004");
+            }
             return definition.makeCallExpression().call(context, args);
         }
 
@@ -205,7 +212,7 @@ public abstract class ExtensionFunctionDefinition {
          */
         @Override
         public int getArity() {
-            return definition.getArgumentTypes().length;
+            return this.arity;
         }
 
         /**

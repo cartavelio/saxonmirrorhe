@@ -101,7 +101,7 @@ public class IntegratedFunctionLibrary implements FunctionLibrary {
             return null;
         }
         try {
-            return defn.asFunction();
+            return defn.asFunction(functionName.getArity());
 //            ExtensionFunctionCall f = defn.makeCallExpression();
 //            FunctionItemType type = new SpecificFunctionType(
 //                    defn.getArgumentTypes(), defn.getResultType(defn.getArgumentTypes()));
