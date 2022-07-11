@@ -113,7 +113,7 @@ public class TestXdmFunction {
     public void testExtensionFunctionDefinitionAsFunction() {
         try {
             ExtensionFunctionDefinition sqrt = new TestIntegratedFunctions.SqrtFunction();
-            XdmFunctionItem fi = new XdmFunctionItem(sqrt.asFunction());
+            XdmFunctionItem fi = new XdmFunctionItem(sqrt.asFunction(1));
             Processor proc = new Processor(true);
             XQueryCompiler compiler = proc.newXQueryCompiler();
             XQueryExecutable exec = compiler.compile("declare variable $f as function(xs:double) as xs:double external; $f(4)");
