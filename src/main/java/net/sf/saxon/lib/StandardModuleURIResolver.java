@@ -13,6 +13,7 @@ import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -148,8 +149,19 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
         return null;
     }
 
-    private StreamSource toStreamSource(Source src) {
-        return (StreamSource)src; // TODO: handle SAXSource.
+    private StreamSource toStreamSource(Source src) throws XPathException {
+        if (src instanceof StreamSource) {
+            return (StreamSource) src;
+        //#if CSHARP==false
+        } else if (src instanceof SAXSource) {
+            // not recommended but it can happen
+            return ResourceResolverWrappingURIResolver.convertToStreamSource((SAXSource) src);
+        //#endif
+        } else {
+            XPathException se = new XPathException("Resource resolver returned non-StreamSource for XQuery module", "XQST0059");
+            se.setIsStaticError(true);
+            throw se;
+        }
     }
 
     /**
@@ -168,7 +180,9 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
         rr.nature = ResourceRequest.XQUERY_NATURE;
         try {
             rr.uri = ResolveURI.makeAbsolute(rr.relativeUri, baseURI).toString();
-            return (StreamSource) rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+            Source src = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+            return src==null ? null : toStreamSource(src);
+
         } catch (URISyntaxException err) {
             XPathException se = new XPathException("Cannot resolve relative URI " + rr.relativeUri, err);
             se.setErrorCode("XQST0059");
@@ -178,97 +192,5 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
     }
 
 
-//    /**
-//     * Get a StreamSource object representing the source of a query, given its URI.
-//     * This method attempts to discover the encoding by reading any HTTP headers.
-//     * If the encoding can be determined, it returns a StreamSource containing a Reader that
-//     * performs the required decoding. Otherwise, it returns a StreamSource containing an
-//     * InputSource, leaving the caller to sort out encoding problems.
-//     *
-//     * @param absoluteURI the absolute URI of the source query
-//     * @return a StreamSource containing a Reader or InputSource, as well as a systemID representing
-//     *         the base URI of the query.
-//     * @throws XPathException if the URIs are invalid or cannot be resolved or dereferenced, or
-//     *                        if any I/O error occurs
-//     */
-//
-//    /*@NotNull*/
-//    protected StreamSource getQuerySource(URI absoluteURI)
-//            throws XPathException {
-//
-//        String encoding = null;
-//        try {
-//            InputStream is = null;
-//            if ("classpath".equals(absoluteURI.getScheme())) {
-//                String path = absoluteURI.getPath();
-//                if (config != null) {
-//                    is = config.getDynamicLoader().getResourceAsStream(path);
-//                }
-//                if (is == null) {
-//                    XPathException se = new XPathException("Cannot locate module " + path + " on class path");
-//                    se.setErrorCode("XQST0059");
-//                    se.setIsStaticError(true);
-//                    throw se;
-//                }
-//            } else {
-//                URLConnection connection = Loader.urlConnection(absoluteURI.toURL());
-//                is = connection.getInputStream();
-//
-//                // Get any external (HTTP) encoding label.
-//                String contentType;
-//
-//                // The file:// URL scheme gives no useful information...
-//                if (!"file".equals(connection.getURL().getProtocol())) {
-//
-//                    // Use the contentType from the HTTP header if available
-//                    contentType = connection.getContentType();
-//
-//                    if (contentType != null) {
-//                        int pos = contentType.indexOf("charset");
-//                        if (pos >= 0) {
-//                            pos = contentType.indexOf('=', pos + 7);
-//                            if (pos >= 0) {
-//                                contentType = contentType.substring(pos + 1);
-//                            }
-//                            if ((pos = contentType.indexOf(';')) > 0) {
-//                                contentType = contentType.substring(0, pos);
-//                            }
-//
-//                            // attributes can have comment fields (RFC 822)
-//                            if ((pos = contentType.indexOf('(')) > 0) {
-//                                contentType = contentType.substring(0, pos);
-//                            }
-//                            // ... and values may be quoted
-//                            if ((pos = contentType.indexOf('"')) > 0) {
-//                                contentType = contentType.substring(pos + 1,
-//                                    contentType.indexOf('"', pos + 2));
-//                            }
-//                            encoding = contentType.trim();
-//                        }
-//                    }
-//                }
-//            }
-//
-//            if (!is.markSupported()) {
-//                is = new BufferedInputStream(is);
-//            }
-//
-//
-//            StreamSource ss = new StreamSource();
-//            if (encoding == null) {
-//                ss.setInputStream(is);
-//            } else {
-//                ss.setReader(new InputStreamReader(is, encoding));
-//            }
-//            ss.setSystemId(absoluteURI.toString());
-//            return ss;
-//        } catch (IOException err) {
-//            XPathException se = new XPathException(err);
-//            se.setErrorCode("XQST0059");
-//            se.setIsStaticError(true);
-//            throw se;
-//        }
-//
-//    }
 }
 

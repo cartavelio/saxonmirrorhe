@@ -71,27 +71,31 @@ public class ResourceResolverWrappingURIResolver implements ResourceResolver {
                          && ((SAXSource) resolved).getInputSource() != null) {
                 // bug 5582. When unparsed text is requested, the resource resolver
                 // shouldn't return a SAXSource, but a legacy URIResolver may do so
-                InputSource is = ((SAXSource) resolved).getInputSource();
-
-                StreamSource ss = new StreamSource();
-                ss.setInputStream(is.getByteStream());
-                ss.setReader(is.getCharacterStream());
-                ss.setSystemId(is.getSystemId());
-                ss.setPublicId(is.getPublicId());
-                if (is.getEncoding() != null && is.getByteStream() != null && is.getCharacterStream() == null) {
-                    try {
-                        ss.setReader(new InputStreamReader(is.getByteStream(), is.getEncoding()));
-                    } catch (UnsupportedEncodingException e) {
-                        // no action, we may fail later
-                    }
-                }
-                resolved = ss;
+                resolved = convertToStreamSource((SAXSource) resolved);
             }
             //#endif
             return resolved;
         } catch (TransformerException e) {
             throw XPathException.makeXPathException(e);
         }
+    }
+
+    public static StreamSource convertToStreamSource(SAXSource resolved) {
+        InputSource is = resolved.getInputSource();
+
+        StreamSource ss = new StreamSource();
+        ss.setInputStream(is.getByteStream());
+        ss.setReader(is.getCharacterStream());
+        ss.setSystemId(is.getSystemId());
+        ss.setPublicId(is.getPublicId());
+        if (is.getEncoding() != null && is.getByteStream() != null && is.getCharacterStream() == null) {
+            try {
+                ss.setReader(new InputStreamReader(is.getByteStream(), is.getEncoding()));
+            } catch (UnsupportedEncodingException e) {
+                // no action, we may fail later
+            }
+        }
+        return ss;
     }
 
     public URIResolver getWrappedURIResolver() {
