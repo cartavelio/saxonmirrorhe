@@ -179,7 +179,7 @@ struct xsltExecutable_object {
 
 
 #define PHP_SAXON_EXTNAME  "saxonc"
-#define PHP_SAXON_EXTVER   "11.3"
+#define PHP_SAXON_EXTVER   "11.4"
 
 /*
  * Class:     com_saxonica_functions_extfn_PhpCall_PhpFunctionCall

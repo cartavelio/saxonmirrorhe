@@ -24,8 +24,8 @@
 
 //#define DEBUG //remove
 //#define MEM_DEBUG //remove
-#define CVERSION "11.3"
-#define CVERSION_API_NO 1130
+#define CVERSION "11.4"
+#define CVERSION_API_NO 1140
 
 
 

@@ -218,6 +218,7 @@
     } else if (exceptionOccurred()) {
         createException();
     }
+    return nullptr;
   }
 
 
@@ -244,7 +245,7 @@
     }
 
 
-
+        return nullptr;
    }
 
 
