@@ -11,6 +11,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Converter;
+import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.NumericValue;
@@ -72,7 +73,11 @@ public abstract class RangeIterator implements GroundedIterator {
             if (!val.isWholeNumber()) {
                 return false;
             }
-            intVal = Converter.DecimalToInteger.INSTANCE.convert(val);
+            try {
+                intVal = (IntegerValue)Converter.NumericToInteger.INSTANCE.convert(val).asAtomic();
+            } catch (ValidationException e) {
+                return false;
+            }
         }
         try {
             return intVal.compareTo(getMin()) >= 0
