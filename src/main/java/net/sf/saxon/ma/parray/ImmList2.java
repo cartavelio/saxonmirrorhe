@@ -122,11 +122,11 @@ public class ImmList2<E> extends ImmList<E> {
 
     private static final int THRESHOLD = 3;
 
-    private static String showBalance(ImmList list, int depth) {
+    private static String showBalance(ImmList<?> list, int depth) {
         if (depth == 0 || !(list instanceof ImmList2)) {
             return "" + list.size();
         } else {
-            return "(" + showBalance(((ImmList2)list).left, depth-1) + "," + showBalance(((ImmList2) list).right, depth-1)  + ")";
+            return "(" + showBalance(((ImmList2<?>)list).left, depth-1) + "," + showBalance(((ImmList2<?>) list).right, depth-1)  + ")";
         }
     }
 
@@ -143,9 +143,9 @@ public class ImmList2<E> extends ImmList<E> {
         //System.err.println("Rebalance " + size() + " - " + showBalance(this, 3));
         if (size() > THRESHOLD) {
             if (l2 instanceof ImmList2 && l2.size() > THRESHOLD * r2.size()) {
-                return new ImmList2<>(((ImmList2<E>) l2).left, new ImmList2<>(((ImmList2<E>) l2).right, r2));
+                return new ImmList2<>(((ImmList2<E>) l2).left, (new ImmList2<>(((ImmList2<E>) l2).right, r2)).rebalance()).rebalance();
             } else if (r2 instanceof ImmList2 && r2.size() > THRESHOLD * l2.size()) {
-                return new ImmList2<>(new ImmList2<>(l2, ((ImmList2<E>) r2).left), ((ImmList2<E>) r2).right);
+                return new ImmList2<>((new ImmList2<>(l2, ((ImmList2<E>) r2).left).rebalance()), ((ImmList2<E>) r2).right).rebalance();
             } else {
                 return this;
             }
