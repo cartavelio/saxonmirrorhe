@@ -80,6 +80,42 @@ public class ZenoChainTest {
     }
 
     @Test
+    public void testReplace() {
+        ZenoChain<Integer> chain = new ZenoChain<>();
+        for (int i = 0; i < 2000; i++) {
+            chain = chain.add(i);
+            assertEquals(i + 1, chain.size());
+        }
+        assertEquals("(1024,512,256,128,64,16)", chain.showMetrics());
+        for (int i = 0; i < 2000; i++) {
+            chain = chain.replace(i, chain.get(i) + 2);
+        }
+        assertEquals("(1024,512,256,128,64,16)", chain.showMetrics());
+        for (int i = 0; i < 2000; i++) {
+            assertEquals(chain.get(i), i+2);
+        }
+    }
+
+    @Test
+    public void testRemove() {
+        ZenoChain<Integer> chain = new ZenoChain<>();
+        for (int i = 0; i < 2000; i++) {
+            chain = chain.add(i);
+            assertEquals(i + 1, chain.size());
+        }
+        assertEquals("(1024,512,256,128,64,16)", chain.showMetrics());
+        chain = chain.remove(300);
+        chain = chain.remove(1200);
+        chain = chain.remove(0);
+        chain = chain.remove(chain.size() - 1);
+        assertEquals(1996, chain.size());
+        assertEquals(1, chain.get(0));
+        assertEquals(302, chain.get(300));
+        assertEquals(1503, chain.get(1500));
+        assertEquals("(1022,511,256,128,64,15)", chain.showMetrics());
+    }
+
+    @Test
     public void testTail() {
         ZenoChain<Integer> chain = new ZenoChain<>();
         for (int i = 0; i < 2000; i++) {
