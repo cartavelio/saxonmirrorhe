@@ -448,7 +448,8 @@ public final class EvaluateInstr extends Expression {
             expr = tc.staticTypeCheck(expr, requiredType, role, visitor);
             ItemType contextItemType = Type.ITEM_TYPE;
             expr = ExpressionTool.resolveCallsToCurrentFunction(expr);
-            ContextItemStaticInfo cit = config.makeContextItemStaticInfo(contextItemType, context.getContextItem() == null);
+            ContextItemStaticInfo cit = ContextItemStaticInfo.DEFAULT;    // Bug 5626
+            //ContextItemStaticInfo cit = config.makeContextItemStaticInfo(contextItemType, context.getContextItem() == null);
             expr = expr.typeCheck(visitor, cit).optimize(visitor, cit);
             slotMap = env.getStackFrameMap();
             ExpressionTool.allocateSlots(expr, slotMap.getNumberOfVariables(), slotMap);
