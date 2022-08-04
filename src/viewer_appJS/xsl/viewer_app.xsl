@@ -26,8 +26,11 @@
     <xsl:param name="product" select="'Saxon'" as="xs:string"/>
     <xsl:param name="SEFbuildDate" select="'2020-08-24'" as="xs:string" static="yes"/>
     <xsl:param name="showStatusMessage" select="false()" as="xs:boolean"/>
-  
-    <xsl:variable name="location" select="resolve-uri('doc', ixsl:location())"/>
+    
+    <xsl:variable name="current-location" select="ixsl:location()"/>
+    <xsl:variable name="base-location" select="if (contains($current-location, '#')) then
+        substring-before($current-location, '#') else $current-location"/>
+    <xsl:variable name="location" select="resolve-uri('doc', $base-location)"/>
     <xsl:variable name="implement-path" select="concat($location, '/implement.xml')"/>
     
     <xsl:variable name="jd-path" select="resolve-uri('javadoc-xml/javadoc-tree.xml', $location)"/>
