@@ -295,7 +295,7 @@ public class TestXQueryNative {
         Configuration config = Configuration.newConfiguration();
         config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, true);
         StaticQueryContext sqc = config.newStaticQueryContext();
-        String testDir = configTest.getDataDir();
+        String testDir = configTest.getXMarkDir();
         sqc.setBaseURI(testDir);
         //sqc.declareDefaultCollation("");
         DynamicQueryContext dqc = new DynamicQueryContext(config);
@@ -319,7 +319,7 @@ public class TestXQueryNative {
         Configuration config = Configuration.newConfiguration();
         config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, true);
         StaticQueryContext sqc = config.newStaticQueryContext();
-        String testDir = configTest.getDataDir();
+        String testDir = configTest.getXMarkDir();
         sqc.setBaseURI(testDir);
         //sqc.declareDefaultCollation("");
         DynamicQueryContext dqc = new DynamicQueryContext(config);
