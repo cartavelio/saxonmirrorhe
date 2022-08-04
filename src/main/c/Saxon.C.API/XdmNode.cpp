@@ -418,10 +418,6 @@ return this;}
 		}
 		jobjectArray results = (jobjectArray)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID, 
 		value));
-		/*std::cerr<<"xdmNode c++ - cp1"<<std::endl;
-		if(!results) {
-		            std::cerr<<"xdmNode c++ - cp2 - null found"<<std::endl;
-		}  */
 		int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
 		childCount = sizex;	
 		childreni =  new XdmNode*[sizex];

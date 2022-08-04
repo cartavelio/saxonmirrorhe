@@ -48,7 +48,6 @@ bool XdmItem::isArray(){
 
 
 XdmItem * XdmItem::getHead(){
-     std::cerr<<std::endl<<"XdmItem-getHead:"<<std::endl;
 return this;}
 
   XdmItem * XdmItem::itemAt(int n){

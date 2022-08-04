@@ -225,9 +225,6 @@ XdmItem * XdmValue::getHead() {
 }
 
 jobject XdmValue::getUnderlyingValue() {
-#ifdef DEBUG
-	std::cerr<<std::endl<<"XdmValue-getUnderlyingValue:"<<std::endl;
-#endif
 	if (jValues == nullptr) {
 		int i;
 		JNIEnv *env = SaxonProcessor::sxn_environ->env;
@@ -239,9 +236,6 @@ jobject XdmValue::getUnderlyingValue() {
 			"net/sf/saxon/s9api/XdmItem");
 		jobjectArray jValuesi = (jobjectArray)env->NewObjectArray((jint)count, objectClass, 0);
 
-          #ifdef DEBUG
-          	std::cerr<<std::endl<<"XdmValue-getUnderlyingValue cp0"<<std::endl;
-          #endif
 		for (i = 0; i < count; i++) {
 			env->SetObjectArrayElement(jValuesi, i, values[i]->getUnderlyingValue());
 		}
