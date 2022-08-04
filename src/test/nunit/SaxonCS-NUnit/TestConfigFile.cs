@@ -53,7 +53,7 @@ namespace SaxonCS_NUnit {
                 // Phase 1: should pick up license file from build directory
                 string existingLicenseFileLocation =
                     Environment.GetEnvironmentVariable("SAXON_LICENSE_DIR") + "/saxon-license.lic";
-                string newLicenseLocation = ConfigTest.DATA_DIR.Replace("src/test/testdata", "build/license") + "copied-license.text";
+                string newLicenseLocation = ConfigTest.DATA_DIR + "sandpit/license/copied-license.text";
                 File.Copy(existingLicenseFileLocation, newLicenseLocation, true);
                 Uri address = new Uri(ConfigTest.DataDirUri, "config-with-link-to-license-file.config");
                 Stream configFile = new WebClient().OpenRead(address);
@@ -74,7 +74,7 @@ namespace SaxonCS_NUnit {
                 }
                 catch (Exception e) {
                     Assert.That(e.Message.Contains("Failed to process license"));
-                    Assert.That(e.Message.Contains("build/license/copied-license.text"));
+                    Assert.That(e.Message.Contains("sandpit/license/copied-license.text"));
                 }
                 
             }
