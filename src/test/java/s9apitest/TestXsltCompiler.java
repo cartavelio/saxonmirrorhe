@@ -1127,6 +1127,40 @@ public class TestXsltCompiler {
             assertEquals("true", result4.attribute("b"));
             assertEquals("true", result4.attribute("c"));
 
+            XsltCompiler comp5 = proc.newXsltCompiler();
+            comp5.setParameter(new QName("import-a-schema"), new XdmAtomicValue(false));
+            comp5.setTargetEdition("JS");
+            XsltExecutable exec5 = comp5.compile(new StreamSource(new StringReader(xsl)));
+            Xslt30Transformer trans5 = exec5.load30();
+            XdmNode result5 = (XdmNode) trans5.callTemplate(null);
+            assertEquals("false", result5.attribute("a"));
+            assertEquals("false", result5.attribute("b"));
+            assertEquals("false", result5.attribute("c"));
+
+            comp5.setTargetEdition("HE");
+            exec5 = comp5.compile(new StreamSource(new StringReader(xsl)));
+            trans5 = exec5.load30();
+            result5 = (XdmNode) trans5.callTemplate(null);
+            assertEquals("false", result5.attribute("a"));
+            assertEquals("false", result5.attribute("b"));
+            assertEquals("false", result5.attribute("c"));
+
+            comp5.setTargetEdition("PE");
+            exec5 = comp5.compile(new StreamSource(new StringReader(xsl)));
+            trans5 = exec5.load30();
+            result5 = (XdmNode) trans5.callTemplate(null);
+            assertEquals("false", result5.attribute("a"));
+            assertEquals("false", result5.attribute("b"));
+            assertEquals("false", result5.attribute("c"));
+
+            comp5.setTargetEdition("EE");
+            exec5 = comp5.compile(new StreamSource(new StringReader(xsl)));
+            trans5 = exec5.load30();
+            result5 = (XdmNode) trans5.callTemplate(null);
+            assertEquals("true", result5.attribute("a"));
+            assertEquals("true", result5.attribute("b"));
+            assertEquals("true", result5.attribute("c"));
+
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail(e.getMessage());
