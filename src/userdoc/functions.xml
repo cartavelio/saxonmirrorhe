@@ -4045,7 +4045,8 @@
           may be different if a SEF file compiled using one Saxon release is executed under another. Evaluation
           is always at compile-time if the function call appears in a static expression (for example in <code>[xsl:]use-when</code>).
           Where the function call appears in a dynamic expression (for example in <code>&lt;xsl:if test="...."></code>),
-          it may be evaluated statically if the argument is a string literal. You can force run-time execution
+          it may be evaluated statically if the argument is a string literal, but only if the stylesheet
+          is not being compiled for execution in a different target environment. You can force run-time execution
           by declaring the property name as the default
           value of a stylesheet parameter (for example <code>&lt;xsl:param name="p" select="'xsl:product-version'"/></code>)
           and invoking the function as <code>system-property($p)</code>.</p>
