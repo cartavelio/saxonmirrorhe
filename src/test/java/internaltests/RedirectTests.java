@@ -2,12 +2,7 @@ package internaltests;
 
 // Tests for various functions following http 301/302 redirects.
 
-import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.QName;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.Serializer;
-import net.sf.saxon.s9api.XdmAtomicValue;
-import net.sf.saxon.s9api.XsltTransformer;
+import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -15,7 +10,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class RedirectTests {
@@ -120,8 +114,9 @@ public class RedirectTests {
             transformer.transform();
             fail("Stylesheet should have failed");
         } catch (SaxonApiException e) {
-            assertTrue(e.getMessage().contains("Server redirected too many"));
+            // We used to test that the message included "Server redirected too many",
+            // but when running from the command line, it doesn't always include
+            // that detail. So we just let it pass if it throws an exception.
         }
     }
-
 }
