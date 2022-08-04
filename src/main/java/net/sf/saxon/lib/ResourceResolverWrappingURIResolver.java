@@ -61,9 +61,10 @@ public class ResourceResolverWrappingURIResolver implements ResourceResolver {
             // same URI as the requested URI, then it didn't do anything. Return
             // null so the caller can try something else (including just loading
             // the document from the original request URI, if it wants).
-            if (request.uri != null && request.uri.equals(resolved.getSystemId())) {
-                return null;
-            }
+            // MHK: see discussion in bug 5582. Note also, 'resolved' can be null.
+//            if (request.uri != null && request.uri.equals(resolved.getSystemId())) {
+//                return null;
+//            }
 
             //#if CSHARP==false
             if (ResourceRequest.TEXT_NATURE.equals(request.nature)
