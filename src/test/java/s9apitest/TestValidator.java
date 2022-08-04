@@ -1703,5 +1703,20 @@ public class TestValidator {
         }
     }
 
+    @Test
+    public void testSchemaForXslt30viaSchemaCompiler() {
+        // This should use the resolver mechanism to load the schema locally
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager schemaManager = proc.getSchemaManager();
+            schemaManager.load(new StreamSource("https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd"));
+            SchemaValidator validator = schemaManager.newSchemaValidator();
+            validator.validate(new StreamSource(new File(configTest.getDataDir(), "books.xsl")));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            fail();
+        }
+    }
+
 }
 
