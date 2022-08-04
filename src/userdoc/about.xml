@@ -629,7 +629,7 @@
                      <p><span class="nowrap">saxon-he-11.#.jar</span></p>
                   </td>
                  <td>
-                   <p>5.1Mb</p>
+                   <p>4.9Mb</p>
                  </td>
                   <td>
                      <p>SaxonJ Home Edition. Contains all the software in SaxonJ-HE, except as noted
@@ -642,7 +642,7 @@
                      <p><span class="nowrap">saxon-pe-11.#.jar</span></p>
                   </td>
                  <td>
-                   <p>6Mb</p>
+                   <p>5.6Mb</p>
                  </td>
                   <td>
                      <p>SaxonJ Professional Edition. Contains all the software in SaxonJ-PE, except as
@@ -655,7 +655,7 @@
                      <p><span class="nowrap">saxon-ee-11.#.jar</span></p>
                   </td>
                  <td>
-                   <p>8.1Mb</p>
+                   <p>7.8Mb</p>
                  </td>
                   <td>
                      <p>SaxonJ Enterprise Edition. Contains all the software in SaxonJ-EE, except as
@@ -671,7 +671,7 @@
                    <p><span class="nowrap">saxon-xqj-11.#.jar</span></p>
                 </td>
                 <td>
-                  <p>100Kb</p>
+                  <p>102Kb</p>
                 </td>
                 <td>
                   <p>Support for the XQJ (XQuery for Java) API. Provided as a separate JAR file in Saxon-HE
@@ -687,7 +687,7 @@
                      <p><span class="nowrap">saxon-sql-11.#.jar</span></p>
                   </td>
                  <td>
-                   <p>74Kb</p>
+                   <p>63Kb</p>
                  </td>
                   <td>
                      <p>Supports XSLT and XPath extensions for accessing and updating a relational database
@@ -703,7 +703,7 @@
                      <p><span class="nowrap">saxon-he-test-11.#.jar</span></p>
                   </td>
                  <td>
-                   <p>127Kb</p>
+                   <p>132Kb</p>
                  </td>
                   <td>
                      <p>Test drivers for running the W3C test suites for XSLT and XQuery against
@@ -720,7 +720,7 @@
                      <p><span class="nowrap">saxon-pe-test-11.#.jar</span></p>
                   </td>
                  <td>
-                   <p>176Kb</p>
+                   <p>137Kb</p>
                  </td>
                   <td>
                      <p>Test drivers for running the W3C test suites for XSLT and XQuery
@@ -735,7 +735,7 @@
                    <p><span class="nowrap">saxon-ee-test-11.#.jar</span></p>
                 </td>
                 <td>
-                  <p>215Kb</p>
+                  <p>225Kb</p>
                 </td>
                 <td>
                   <p>Test drivers for running the W3C test suites for XSLT, XQuery, and XSD
@@ -778,6 +778,7 @@
                 <td>
                   <p>JLine 2: an open source library supporting interactive command-line applications,
                   including content completion and command history. This is used by the Gizmo utility.</p>
+                   <p><i>Note: Saxon does not work with JLine 3.</i></p>
                 </td>
                 <td><p>HE, PE, EE</p></td>
               </tr>
@@ -828,6 +829,10 @@
             issued with the Saxon product, and an unversioned form (<code>lib/jline.jar</code>) which
             is designed to make it easy to replace the issued version with a compatible maintenance
             release should this become necessary (see below).</p>
+         
+         <aside><p>This mechanism won't work if you move the Saxon JAR file;
+            it requires the <code>xmlresolver</code> and <code>jline</code> JARs to be in the same directory
+            as the Saxon JAR file.</p></aside>
 
          <p>The classpath is written as a list of filenames. These will either be the names of
             directories (folders) that contain relevant classes, or the names of JAR files

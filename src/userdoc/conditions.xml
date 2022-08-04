@@ -146,8 +146,9 @@
         <a href="http://javaparser.org" class="bodylink">javaparser</a> library.</p></li>
       <li><p>Additional Saxonica-owned code written in C#, to provide a C# API and to integrate with .NET
       components such as the <code>System.Xml.XmlReader</code> parser.</p></li>
-      <li><p>Third party libraries referenced by means of <code>nuget</code> dependencies. These libraries are not distributed
-      with the SaxonCS product, but are downloaded automatically as part of the installation process. The relevant libraries are:</p>
+      <li><p>Third party libraries referenced by means of <code>nuget</code> dependencies. These libraries are 
+        downloaded automatically as part of the installation process; in addition, they are bundled into the
+        platform-specific executables issued with the product. The relevant libraries are:</p>
       <ul>
         <li>HtmlAgilityPack</li>
         <li>ICU4N</li>
@@ -163,6 +164,8 @@
         <li>Singulink.Numerics.BigIntegerExtensions</li>
         <li>System.Collections.Immutable</li>
       </ul>
+        <p>For the specific licensing conditions attached to each of these libraries, please see the
+        relevant data in <code>nuget</code>.</p>
       </li>
     </ol>
   </div>
