@@ -1149,8 +1149,6 @@ cdef class PyXslt30Processor:
             2) xsltproc.set_source("cat.xml")\r
                xsltproc.setoutput_file("result.xml")\r
                xsltproc.transform_to_file(stylesheet_file="test1.xsl")
-            3) node = saxon_proc.parse_xml(xml_text="<in/>")\r
-               xsltproc.transform_to_file(output_file="result.xml", stylesheet_file="test1.xsl", xdm_node= node)
         """
         cdef char * c_sourcefile = NULL
         cdef char * c_outputfile = NULL
