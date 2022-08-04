@@ -42,6 +42,12 @@ public:
     */
     XPathProcessor(SaxonProcessor* proc, std::string cwd="");
 
+    /**
+    * XPathProcessor copy constructor.
+    * @param other - XPathProcessor
+    */
+    XPathProcessor(const XPathProcessor &other);
+
     //! Set the static base URI for XPath expressions compiled using this XPathCompiler.
     /**
      * The base URI is part of the static context, and is used to resolve any relative URIs appearing within an XPath

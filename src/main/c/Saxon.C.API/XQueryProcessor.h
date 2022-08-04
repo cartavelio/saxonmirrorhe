@@ -38,7 +38,7 @@ public:
 
     /**
       * XQueryProcessor copy constructor.
-      * @param other - XsltProcessor
+      * @param other - XQueryProcessor
     */
     XQueryProcessor(const XQueryProcessor &other);
 

@@ -21,30 +21,32 @@ XPathProcessor::XPathProcessor() {
 }
 
 XPathProcessor::XPathProcessor(SaxonProcessor* p, std::string curr) {
-	proc = p;
+    proc = p;
     SaxonProcessor::attachCurrentThread();
-	/*
-	 * Look for class.
-	 */
-	cppClass = lookForClass(SaxonProcessor::sxn_environ->env,
-			"net/sf/saxon/option/cpp/XPathProcessor");
-	if ((proc->proc) == nullptr) {
-		std::cerr << "Processor is nullptr" << std::endl;
-	}
+    /*
+     * Look for class.
+     */
+    cppClass = lookForClass(SaxonProcessor::sxn_environ->env,
+                            "net/sf/saxon/option/cpp/XPathProcessor");
+    if ((proc->proc) == nullptr) {
+        std::cerr << "Processor is nullptr" << std::endl;
+    }
 
     jobject tempcppXP = createSaxonProcessor2(SaxonProcessor::sxn_environ->env, cppClass,
-			"(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);
+                                              "(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);
 
 
-    if(tempcppXP) {
+    if (tempcppXP) {
         cppXP = SaxonProcessor::sxn_environ->env->NewGlobalRef(tempcppXP);
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(tempcppXP);
 
     } else {
-        std::cerr<<"Error: Failed to create the XPathProcessor internal object"<<std::endl;
+        std::cerr << "Error: Failed to create the XPathProcessor internal object" << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
         return;
     }
+
+
 
 
 
@@ -60,6 +62,34 @@ XPathProcessor::XPathProcessor(SaxonProcessor* p, std::string curr) {
 		cwdXP = curr;
 	}
 
+}
+
+
+
+XPathProcessor::XPathProcessor(const XPathProcessor &other) {
+    cwdXP = other.cwdXP;
+    proc = other.proc;
+    cppClass = other.cppClass;
+    cppXP = SaxonProcessor::sxn_environ->env->NewGlobalRef(other.cppXP);
+
+    std::map<std::string, XdmValue*>::const_iterator paramIter = other.parameters.begin();
+    while(paramIter != other.parameters.end())
+    {
+
+        XdmValue * valuei = paramIter->second;
+        if(valuei == nullptr) {
+
+        } else {
+            parameters[paramIter->first] = new XdmValue(*(valuei));
+        }
+        paramIter++;
+    }
+
+    std::map<std::string, std::string>::const_iterator propIter = other.properties.begin();
+    while (propIter != other.properties.end()) {
+        properties[propIter->first] = propIter->second;
+        propIter++;
+    }
 }
 
 
