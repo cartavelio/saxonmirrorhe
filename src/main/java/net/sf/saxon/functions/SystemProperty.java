@@ -46,7 +46,8 @@ public class SystemProperty extends SystemFunction implements Callable {
      */
     @Override
     public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments) throws XPathException {
-        if (arguments[0] instanceof StringLiteral) {
+        if (arguments[0] instanceof StringLiteral &&
+                visitor.getTargetEdition().equals(visitor.getConfiguration().getEditionCode())) {
             try {
                 String name = ((StringLiteral) arguments[0]).stringify();
                 StructuredQName qName = StructuredQName.fromLexicalQName(name,
@@ -94,27 +95,7 @@ public class SystemProperty extends SystemFunction implements Callable {
             throw new XPathException("Invalid system property name. " + err.getMessage(), "XTDE1390", context);
         }
     }
-
-    private boolean allowsEarlyEvaluation(Sequence[] arguments, XPathContext context) throws XPathException {
-        String name = arguments[0].head().getStringValue();
-        try {
-            StructuredQName qName = StructuredQName.fromLexicalQName(name,
-                                                                     false, true,
-                                                                     getRetainedStaticContext());
-            String uri = qName.getURI();
-            String local = qName.getLocalPart();
-            return uri.equals(NamespaceConstant.XSLT) &&
-                    (local.equals("version") || local.equals("vendor") ||
-                            local.equals("vendor-url") || local.equals("product-name") ||
-                            local.equals("product-version") || local.equals("supports-backwards-compatibility") ||
-                            local.equals("xpath-version") || local.equals("xsd-version"));
-
-        } catch (XPathException err) {
-            throw new XPathException("Invalid system property name. " + err.getMessage(), "XTDE1390", context);
-        }
-
-    }
-
+    
     public static String yesOrNo(boolean whatever) {
         return whatever ? "yes" : "no";
     }
