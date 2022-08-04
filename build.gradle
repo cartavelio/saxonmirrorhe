@@ -1365,6 +1365,7 @@ task eejTests(
     // This is (should be!) the same logic as ConfigTest.DATA_DIR
     String testdata = System.getenv("SAXON_TEST_DATA") ?: "${projectDir}/src/test/testdata"
     mkdir "${testdata}/sandpit/welch-ser/out"
+    mkdir "${testdata}/sandpit/license"
   }
 
   // By default, run all the tests
