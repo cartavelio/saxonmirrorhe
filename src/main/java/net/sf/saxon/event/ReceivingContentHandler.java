@@ -391,6 +391,10 @@ public class ReceivingContentHandler
     private AttributeMap makeAttributeMap(Attributes atts, Location location) throws SAXException {
         boolean isAttributes2 = atts instanceof Attributes2;
         int length = atts.getLength();
+        if (length == 0) {
+            return EmptyAttributeMap.getInstance();
+        }
+        location = location.saveLocation(); // bug #5607
         List<AttributeInfo> list = new ArrayList<>(atts.getLength());
         for (int a=0; a<length; a++) {
             int properties = ReceiverOption.NAMESPACE_OK;
