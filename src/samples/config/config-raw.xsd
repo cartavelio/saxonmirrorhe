@@ -142,7 +142,7 @@
       <xs:attribute name="strictStreamability" use="optional" type="xs:boolean"/>
       <xs:attribute name="styleParser" use="optional" type="c:javaClassNameType"/>
       <xs:attribute name="version" use="optional" type="xs:decimal"/>
-      <xs:attribute name="versionWarning" use="optional" type="xs:boolean"/>
+      <xs:attribute name="versionWarning" use="optional" type="xs:boolean"/>  <!-- now ignored -->
     </xs:complexType>
   </xs:element>
 
