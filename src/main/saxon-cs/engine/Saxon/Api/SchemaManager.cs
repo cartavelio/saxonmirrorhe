@@ -155,6 +155,8 @@ namespace Saxon.Api {
         /// to the cache.
         /// </summary>
         /// <remarks>
+        /// <para>The supplied URI is resolved, where possible, using the configuration-level
+        /// resource resolver. The <c>SchemaResolver</c> is <emph>not</emph> used.</para>
         /// The document located via the URI is parsed using the <c>System.Xml</c> parser.
         /// </remarks>
         /// <param name="uri">The URI identifying the location where the schema document can be
