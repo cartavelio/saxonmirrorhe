@@ -149,7 +149,7 @@ public class XsltExecutable {
      * @param destination the destination for the XML document containing the diagnostic representation
      *                    of the compiled stylesheet. The stream will be closed when writing has finished.
      * @param target the target environment. The only value currently recognized is "JS",
-     *               which exports the package for running under Saxon-JS 2.0.
+     *               which exports the package for running under SaxonJS 2.
      * @throws SaxonApiException if an error is detected
      * @since 9.7
      */

@@ -311,9 +311,6 @@ public class Accumulator extends Actor {
      */
 
     public void export(final ExpressionPresenter out, Map<Component, Integer> componentIdMap) throws XPathException {
-//        if ("JS".equals(out.getOption("target"))) {
-//            throw new XPathException("xsl:accumulator is not supported in Saxon-JS", SaxonErrorCode.SXJS0001);
-//        }
         out.startElement("accumulator");
         out.emitAttribute("name", getObjectName());
         out.emitAttribute("line", getLineNumber() + "");

@@ -88,7 +88,7 @@ public class UnionQNameTest implements QNameTest {
      * as the body of a JS function in which the argument name "q" is an
      * XdmQName object holding the name. The XdmQName object has properties
      * uri and local.
-     * @param targetVersion the version of Saxon-JS being targeted
+     * @param targetVersion the version of SaxonJS being targeted
      */
     @Override
     public String generateJavaScriptNameTest(int targetVersion) {
