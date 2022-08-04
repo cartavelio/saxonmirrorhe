@@ -231,7 +231,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
                 }
                 SerializationProperties sProps = new SerializationProperties(props, cmi);
                 QueryResult.serialize(node, new StreamResult(sw), sProps);
-                emit(sw.toString().trim());
+                emit(sw.toString());
                 break;
         }
     }
