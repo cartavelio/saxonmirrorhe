@@ -11,6 +11,8 @@ clone_expath_cg.onlyIf {
   !file("${buildDir}/expath-cg").exists()
 }
 
+
+
 // ============================================================
 
 task documentation(
@@ -238,7 +240,7 @@ task product_jeljavadoc(
                "-docletpath", cp,
                "-source", "1.8"] + packages.keySet()
   }
-    
+
   doLast {
     exec {
       commandLine command
@@ -381,7 +383,7 @@ task gen_doc(
   description: "Collects up, generates and copies the documentation source into the canonical location"
 ) {
   // Just a place to hang dependencies
-}  
+}
 
 task copy_userdoc_sources(
   type: Copy,
@@ -468,7 +470,7 @@ task gen_xslt_element_reference(
   dependsOn: ["gen_xslt_element_reference_preprocess"],
   description: "Generate the XSLT Element reference documentation"
 ) {
-  inputs.file "${buildDir}/userdoc/tmp/xsl-elements-expanded.xml" 
+  inputs.file "${buildDir}/userdoc/tmp/xsl-elements-expanded.xml"
   inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
   outputs.file "${buildDir}/userdoc/src/xsl-elements.xml"
   classpath = configurations.documentation
@@ -497,7 +499,7 @@ task element_doc() {
       "-o:${buildDir}/userdoc/src/extensions/${target}.xml"
   }
   element_doc.dependsOn t
-}  
+}
 
 // Different from preceding because it doesn't go in extensions ¯\_(ツ)_/¯
 ["sql-extension"].each { target ->
@@ -515,7 +517,7 @@ task element_doc() {
       "-o:${buildDir}/userdoc/src/${target}.xml"
   }
   element_doc.dependsOn t
-}  
+}
 
 task expath_doc() {
   // Just a place to hang dependencies
@@ -970,6 +972,10 @@ task saxonc_docbuild_container() {
 }
 
 task saxonc_doc_setup(dependsOn: ["saxonc_docbuild_container"]) {
+  def release = "ee"
+  def Release = "Ee"
+  def RELEASE = release.toUpperCase()
+
   inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
   outputs.files  fileTree(dir: "${buildDir}/docbuild/Saxon.C.API")
   doFirst {
@@ -977,6 +983,7 @@ task saxonc_doc_setup(dependsOn: ["saxonc_docbuild_container"]) {
       into "${buildDir}/docbuild/Saxon.C.API"
       from "${projectDir}/src/main/c/Saxon.C.API"
       exclude 'Doxyfile'
+      exclude 'SaxonCGlue.c'
     }
   }
   doLast {
@@ -985,10 +992,20 @@ task saxonc_doc_setup(dependsOn: ["saxonc_docbuild_container"]) {
       from "${projectDir}/src/main/c/Saxon.C.API"
       include 'Doxyfile'
       filter { line ->
-        line.replace('@@VERSION@@', saxonVersion)
+        line.replaceAll('@@VERSION@@', saxonVersion)
           .replace('@@LOGO@@', '/img/saxonica_logo.gif')
           .replace('@@SOURCES@@', '/src')
           .replace('@@OUTPUT@@', '/build/docbuild/documentation')
+      }
+    }
+    copy {
+      into "${buildDir}/docbuild/Saxon.C.API"
+      from "${projectDir}/src/main/c/Saxon.C.API"
+      include "SaxonCGlue.c"
+      filter { line ->
+        line.replaceAll("@@VERSION@@", saxonVersion)
+                .replaceAll("@@release@@", "ee")
+                .replaceAll("@@RELEASE@@", "EE")
       }
     }
   }
