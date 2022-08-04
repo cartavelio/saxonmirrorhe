@@ -17,7 +17,6 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.StringValue;
@@ -228,15 +227,13 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                 } else if (parts[0].equals("")) {
                     // Need to choose an arbitrary prefix
                     // First see if the requested namespace is declared in the stylesheet
-                    AxisIterator iter = iterateAxis(AxisInfo.NAMESPACE);
-                    NodeInfo ns;
-                    while ((ns = iter.next()) != null) {
-                        if (ns.getUnicodeStringValue().equals(nsuri)) {
-                            parts[0] = ns.getLocalPart();
+                    for (NamespaceBinding nb : getAllNamespaces()) {
+                        if (nb.getURI().equals(nsuri)) {
+                            parts[0] = nb.getPrefix();
                             break;
                         }
                     }
-                    // Otherwise see the URI is known to the namepool
+                    // Otherwise, see if the URI is known to the namePool
                     if (parts[0].equals("")) {
                         String p = getNamePool().suggestPrefixForURI(
                                 ((StringLiteral) namespace).stringify());
