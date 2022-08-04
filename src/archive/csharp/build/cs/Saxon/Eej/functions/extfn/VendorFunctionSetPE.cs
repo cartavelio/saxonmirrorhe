@@ -19,7 +19,7 @@ namespace Saxon.Eej.functions.extfn {
             register("analyze-uri", 1, typeof(Saxon.Eej.functions.extfn.AnalyzeUri), analyzeUriResult, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
             register("array-member", 1, typeof(Saxon.Hej.functions.ParcelFn), Saxon.Hej.ma.Parcel.TYPE, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null);
             register("base64Binary-to-octets", 1, typeof(Saxon.Eej.functions.extfn.VendorFunctionSetPE.Base64BinaryToOctets), Saxon.Hej.type.BuiltInAtomicType.INTEGER, STAR, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null);
-            register("base64Binary-to-string", 2, typeof(Saxon.Eej.functions.extfn.VendorFunctionSetPE.Base64BinaryToString), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
+            register("base64Binary-to-string", 2, typeof(Saxon.Eej.functions.extfn.VendorFunctionSetPE.Base64BinaryToString), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
             register("characters", 1, typeof(Saxon.Eej.functions.extfn.CharactersFn), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
             register("column-number", 0, typeof(Saxon.Hej.functions.ContextItemAccessorFunction), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, (CITEM|LATE));
             register("column-number", 1, typeof(Saxon.Eej.functions.extfn.VendorFunctionSetPE.ColumnNumber), Saxon.Hej.type.BuiltInAtomicType.INTEGER, OPT, 0).arg(0, Saxon.Hej.pattern.AnyNodeTest.getInstance(), OPT, EMPTY);
@@ -46,7 +46,7 @@ namespace Saxon.Eej.functions.extfn {
             register("group-starting", 2, typeof(Saxon.Eej.functions.extfn.GroupStarting), Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, STAR, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, EMPTY).arg(1, predicate, ONE, EMPTY);
             register("has-same-nodes", 2, typeof(Saxon.Eej.functions.extfn.VendorFunctionSetPE.HasSameNodes), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.pattern.AnyNodeTest.getInstance(), STAR, null).arg(1, Saxon.Hej.pattern.AnyNodeTest.getInstance(), STAR, null);
             register("hexBinary-to-octets", 1, typeof(Saxon.Eej.functions.extfn.VendorFunctionSetPE.HexBinaryToOctets), Saxon.Hej.type.BuiltInAtomicType.INTEGER, STAR, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.HEX_BINARY, ONE, null);
-            register("hexBinary-to-string", 2, typeof(Saxon.Eej.functions.extfn.VendorFunctionSetPE.HexBinaryToString), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.HEX_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
+            register("hexBinary-to-string", 2, typeof(Saxon.Eej.functions.extfn.VendorFunctionSetPE.HexBinaryToString), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.HEX_BINARY, OPT, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
             register("highest", 1, typeof(Saxon.Eej.functions.extfn.HighestOrLowest), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, EMPTY);
             register("highest", 2, typeof(Saxon.Eej.functions.extfn.HighestOrLowest), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, EMPTY).arg(1, orderKey, ONE, null);
             register("index", 2, typeof(Saxon.Eej.functions.extfn.Index), Saxon.Hej.ma.map.MapType.getInstance(), ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, EMPTY).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), ONE, EMPTY);
@@ -149,6 +149,9 @@ namespace Saxon.Eej.functions.extfn {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 try {
                     Saxon.Hej.value.Base64BinaryValue @in = (Saxon.Hej.value.Base64BinaryValue)(arguments[0].head());
+                    if ((@in == null)) {
+                        return Saxon.Hej.value.EmptySequence.getInstance();
+                    }
                     byte[] bytes = @in.getBinaryValue();
                     string encoding = arguments[1].head().getStringValue();
                     return decodeString(context, bytes, normalizeEncodingName(encoding));
@@ -271,6 +274,9 @@ namespace Saxon.Eej.functions.extfn {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 try {
                     Saxon.Hej.value.HexBinaryValue @in = (Saxon.Hej.value.HexBinaryValue)(arguments[0].head());
+                    if ((@in == null)) {
+                        return Saxon.Hej.value.EmptySequence.getInstance();
+                    }
                     byte[] bytes = @in.getBinaryValue();
                     string encoding = arguments[1].head().getStringValue();
                     return decodeString(context, bytes, normalizeEncodingName(encoding));

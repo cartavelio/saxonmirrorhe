@@ -27,7 +27,7 @@ namespace Saxon.Hej.lib {
             if ((resolved is Saxon.Ejavax.xml.transform.stream.StreamSource)) {
                 return getReaderFromStreamSource((Saxon.Ejavax.xml.transform.stream.StreamSource)(resolved), encoding, config, debug);
             } else {
-                throw new Saxon.Hej.trans.XPathException("Resolver for unparsed-text() returned non-StreamSource");
+                throw new Saxon.Hej.trans.XPathException((("Resolver for unparsed-text() returned unrecognized Source ("+resolved.GetType().Name)+")"));
             }
         }
         public static System.IO.TextReader getReaderFromStreamSource(Saxon.Ejavax.xml.transform.stream.StreamSource source, string encoding, Saxon.Hej.Configuration config, bool debug) {

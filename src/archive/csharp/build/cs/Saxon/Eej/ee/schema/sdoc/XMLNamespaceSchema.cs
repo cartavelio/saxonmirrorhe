@@ -17,7 +17,9 @@ namespace Saxon.Eej.ee.schema.sdoc {
             lengthFacet.setNumericValue(0);
             facetList.Add(lengthFacet);
             zls.setFacetList(facetList);
-            members.Add(new Saxon.Eej.ee.schema.TypeReference(zls.getFingerprint(), config, null));
+            Saxon.Eej.ee.schema.TypeReference zlsRef = new Saxon.Eej.ee.schema.TypeReference(zls.getFingerprint(), config, null);
+            zlsRef.setTarget(zls);
+            members.Add(zlsRef);
             Saxon.Eej.ee.schema.UserUnionType u = new Saxon.Eej.ee.schema.UserUnionType(config);
             u.setMemberTypeReferences(members);
             u.setTypeName(Saxon.Hej.om.StandardNames.getStructuredQName(Saxon.Hej.om.StandardNames.XML_LANG_TYPE), Saxon.Hej.om.StandardNames.XML_LANG_TYPE);

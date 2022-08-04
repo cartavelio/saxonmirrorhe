@@ -62,7 +62,7 @@ namespace Saxon.Hej.style {
                 } else {
                     if ((local.Equals("range-key") && uri.Equals(Saxon.Hej.lib.NamespaceConstant.SAXON))) {
                         if (Saxon.Hej.Version.platform.isDotNet()) {
-                            compileError("saxon:range-key is not supported in Saxon-CS");
+                            compileError("saxon:range-key is not supported in SaxonCS");
                         }
                         rangeKey = processBooleanAttribute("range-key", value);
                     } else {

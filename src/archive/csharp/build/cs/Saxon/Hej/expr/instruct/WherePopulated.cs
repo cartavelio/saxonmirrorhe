@@ -47,7 +47,18 @@ namespace Saxon.Hej.expr.instruct {
                     if ((item is Saxon.Hej.ma.map.MapItem)) {
                         return ((Saxon.Hej.ma.map.MapItem)(item)).isEmpty();
                     } else {
-                        return false;
+                        if ((item is Saxon.Hej.ma.arrays.ArrayItem)) {
+                            foreach (Saxon.Hej.om.GroundedValue value in ((Saxon.Hej.ma.arrays.ArrayItem)(item)).members()) {
+                                foreach (Saxon.Hej.om.Item it in value.asIterable()) {
+                                    if (!(isDeemedEmpty(it))) {
+                                        return false;
+                                    }
+                                }
+                            }
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
                 }
             }

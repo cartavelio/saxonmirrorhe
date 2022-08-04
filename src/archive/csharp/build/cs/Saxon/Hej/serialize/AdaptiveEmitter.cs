@@ -147,13 +147,13 @@ namespace Saxon.Hej.serialize {
               case Saxon.Hej.type.Type.ATTRIBUTE:
                 emit(node.getDisplayName());
                 emit("=\"");
-                emit(node.getUnicodeStringValue());
+                emit(escapeAttributeValue(node.getStringValue()));
                 emit("\"");
                 break ;
               case Saxon.Hej.type.Type.NAMESPACE:
                 emit((node.getLocalPart().Length==0 ? "xmlns" : ("xmlns:"+node.getLocalPart())));
                 emit("=\"");
-                emit(node.getUnicodeStringValue());
+                emit(escapeAttributeValue(node.getStringValue()));
                 emit("\"");
                 break ;
               default:
@@ -172,9 +172,42 @@ namespace Saxon.Hej.serialize {
                 }
                 Saxon.Hej.serialize.SerializationProperties sProps = new Saxon.Hej.serialize.SerializationProperties(props, cmi);
                 Saxon.Hej.query.QueryResult.serialize(node, new Saxon.Ejavax.xml.transform.stream.StreamResult(sw), sProps);
-                emit(sw.ToString().Trim());
+                emit(sw.ToString());
                 break ;
             }
+        }
+        private string escapeAttributeValue(string value) {
+            Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder((value.Length*2));
+            for (int i = 0; (i<value.Length); i++) {
+                char c = value[i];
+                switch (c) {
+                  case '\r':
+                    sb.append("&#xD;");
+                    break ;
+                  case '\t':
+                    sb.append("&#x9;");
+                    break ;
+                  case '\n':
+                    sb.append("&#xA;");
+                    break ;
+                  case '&':
+                    sb.append("&amp;");
+                    break ;
+                  case '<':
+                    sb.append("&lt;");
+                    break ;
+                  case '>':
+                    sb.append("&gt;");
+                    break ;
+                  case '"':
+                    sb.append("&quot;");
+                    break ;
+                  default:
+                    sb.append(c);
+                    break ;
+                }
+            }
+            return sb.ToString();
         }
         private void serializeArray(Saxon.Hej.ma.arrays.ArrayItem array) {
             emit("[");

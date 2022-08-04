@@ -253,6 +253,11 @@ namespace Saxon.Eej.ee.stream.adjunct {
             /*134*/Saxon.Eej.ee.stream.Streamability.setPostureAndSweep(co, /*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(proxy));
             return new Saxon.Eej.ee.stream.feed.FeedMakerDelegate((watchManager, @out, context) => new Saxon.Eej.ee.stream.feed.BufferingFeed(getExpression(), @out, context));
         }
+        public static string genId(Saxon.Hej.om.NodeInfo node) {
+            Saxon.Ejava.lang.StringBuilder buffer = new Saxon.Ejava.lang.StringBuilder(16);
+            node.generateId(buffer);
+            return buffer.ToString();
+        }
     
         private class Inner_StreamingAdjunct_114 : Saxon.Eej.ee.stream.adjunct.StreamingAdjunct {
             public Inner_StreamingAdjunct_114(Saxon.Eej.ee.stream.StreamInstr stream) {

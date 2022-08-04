@@ -60,7 +60,11 @@ namespace Saxon.Eej.functions.extfn {
                 transformer.setApplyFunctionConversionRulesToExternalVariables(true);
                 transformer.initializeController(@params);
                 transformer.applyTemplates(source, new Saxon.Hej.@event.TreeReceiver(builder));
-                return builder.getCurrentRoot();
+                Saxon.Hej.om.NodeInfo result = builder.getCurrentRoot();
+                if ((result == null)) {
+                    return Saxon.Hej.value.EmptySequence.getInstance();
+                }
+                return result;
             } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
                 throw Saxon.Hej.trans.XPathException.makeXPathException(e);
             }

@@ -15,6 +15,7 @@ namespace Saxon.Eej.ee.trans {
             if ((state == PRECONDITION_UNKNOWN)) {
                 bool b = testPrecondition(matcher);
                 matcher.setPreconditionState(slotNumber, b);
+                return b;
             }
             return (state == PRECONDITION_TRUE);
         }

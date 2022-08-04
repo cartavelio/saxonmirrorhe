@@ -112,6 +112,9 @@ namespace Saxon.Hej.regex {
             }
             return flags;
         }
+        public bool isPlatformNative() {
+            return true;
+        }
     
     }
 }

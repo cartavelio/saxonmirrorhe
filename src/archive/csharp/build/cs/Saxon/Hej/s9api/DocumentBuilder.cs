@@ -89,6 +89,10 @@ namespace Saxon.Hej.s9api {
                 if ((schemaValidator.getDocumentElementType() != null)) {
                     options.setTopLevelType(schemaValidator.getDocumentElementType());
                 }
+                options.setUseXsiSchemaLocation(schemaValidator.isUseXsiSchemaLocation());
+                options.setExpandAttributeDefaults(schemaValidator.isExpandAttributeDefaults());
+                options.setValidationParams(schemaValidator.getValidationParameters());
+                options.setInvalidityHandler(schemaValidator.getInvalidityHandler());
             }
             if ((treeModel != null)) {
                 options.setModel(treeModel);

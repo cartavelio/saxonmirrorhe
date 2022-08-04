@@ -14,6 +14,9 @@ namespace Saxon.Hej.expr {
             }
             return new Saxon.Hej.expr.RangeExpression(((Saxon.Hej.expr.RangeExpression)(lhs)).getStartExpression(), rhs, ((Saxon.Hej.expr.RangeExpression)(lhs)).getEndExpression());
         }
+        public bool isDefaultedStep() {
+            return defaultedStep;
+        }
         public RangeExpression(Saxon.Hej.expr.Expression start, Saxon.Hej.expr.Expression end) : this (start, new Saxon.Hej.expr.Literal(Saxon.Hej.value.Int64Value.PLUS_ONE), end) {
             defaultedStep = true;
         }

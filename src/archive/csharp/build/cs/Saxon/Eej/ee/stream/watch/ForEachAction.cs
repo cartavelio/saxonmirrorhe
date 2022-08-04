@@ -4,7 +4,7 @@ using System.Linq;
 namespace Saxon.Eej.ee.stream.watch {
     public class ForEachAction : Saxon.Eej.ee.stream.feed.ItemFeed {
         protected internal Saxon.Hej.expr.XPathContext bodyContext;
-        private readonly Saxon.Eej.ee.stream.watch.WatchManager watchManager;
+        protected internal readonly Saxon.Eej.ee.stream.watch.WatchManager watchManager;
         private readonly Saxon.Hej.expr.Expression action;
         private Saxon.Eej.ee.stream.Inversion inversion;
         private readonly bool actionIsConsuming;

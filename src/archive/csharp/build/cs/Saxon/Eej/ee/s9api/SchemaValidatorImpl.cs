@@ -94,6 +94,13 @@ namespace Saxon.Eej.ee.s9api {
             Saxon.Hej.om.GroundedValue value = suppliedParams.get(name.GetStructuredQName());
             return ((value == null) ? null : Saxon.Api.XdmValue.Wrap(value));
         }
+        public override Saxon.Hej.type.ValidationParams getValidationParameters() {
+            try {
+                return convertParams(suppliedParams, processor.getUnderlyingConfiguration().getDeclaredSchemaParameters());
+            } catch (Saxon.Hej.trans.XPathException e) {
+                throw new Saxon.Api.SaxonApiException(e);
+            }
+        }
         public void setThreadCount(int tc) {
             threadCount = tc;
         }
@@ -175,10 +182,12 @@ namespace Saxon.Eej.ee.s9api {
         protected internal Saxon.Hej.type.ValidationParams convertParams(Saxon.Hej.expr.instruct.GlobalParameterSet suppliedParams, System.Collections.Generic.ICollection<Saxon.Hej.expr.instruct.GlobalParam> declaredParams) {
             Saxon.Hej.type.ValidationParams vp = new Saxon.Hej.type.ValidationParams();
             Saxon.Hej.expr.XPathContext context = new Saxon.Hej.Controller(processor.getUnderlyingConfiguration()).newXPathContext();
-            foreach (Saxon.Hej.expr.instruct.GlobalParam cp in declaredParams) {
-                Saxon.Hej.om.GroundedValue value = suppliedParams.convertParameterValue(cp.getVariableQName(), cp.getRequiredType(), true, context);
-                if ((value != null)) {
-                    Saxon.Impl.Helpers.MapUtils.Put(vp, cp.getVariableQName(), value);
+            if ((declaredParams != null)) {
+                foreach (Saxon.Hej.expr.instruct.GlobalParam cp in declaredParams) {
+                    Saxon.Hej.om.GroundedValue value = suppliedParams.convertParameterValue(cp.getVariableQName(), cp.getRequiredType(), true, context);
+                    if ((value != null)) {
+                        Saxon.Impl.Helpers.MapUtils.Put(vp, cp.getVariableQName(), value);
+                    }
                 }
             }
             return vp;

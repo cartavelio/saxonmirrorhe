@@ -150,7 +150,7 @@ namespace Saxon.Hej.style {
                 timer.report("validate");
             }
             Saxon.Ejava.util.Properties props = gatherOutputProperties(null);
-            props.setProperty(Saxon.Hej.lib.SaxonOutputKeys.STYLESHEET_VERSION, (getStylesheetPackage().getHostLanguageVersion()+""));
+            props.setProperty(Saxon.Hej.lib.SaxonOutputKeys.STYLESHEET_VERSION, (top.getEffectiveVersion()+""));
             getStylesheetPackage().setDefaultOutputProperties(props);
             System.Collections.Generic.HashSet<Saxon.Hej.om.StructuredQName> outputNames = new System.Collections.Generic.HashSet<Saxon.Hej.om.StructuredQName>(5);
             foreach (Saxon.Hej.style.ComponentDeclaration outputDecl in topLevel) {

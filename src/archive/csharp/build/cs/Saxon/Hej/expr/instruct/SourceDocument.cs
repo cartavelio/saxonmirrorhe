@@ -76,7 +76,7 @@ namespace Saxon.Hej.expr.instruct {
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = (Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions());
             if (("JS".Equals(options.target) && (options.targetVersion == 1))) {
-                throw new Saxon.Hej.trans.XPathException("xsl:source-document is not supported in Saxon-JS 1.*", Saxon.Hej.trans.SaxonErrorCode.SXJS0001);
+                throw new Saxon.Hej.trans.XPathException("xsl:source-document is not supported in SaxonJS 1.*", Saxon.Hej.trans.SaxonErrorCode.SXJS0001);
             }
             @out.startElement(getExportTag(), this);
             int validation = parseOptions.getSchemaValidationMode();

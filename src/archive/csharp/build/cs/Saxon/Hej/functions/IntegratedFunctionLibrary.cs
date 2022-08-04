@@ -27,7 +27,7 @@ namespace Saxon.Hej.functions {
                 return null;
             }
             try {
-                return defn.asFunction();
+                return defn.asFunction(functionName.getArity());
             } catch (System.Exception err) {
                 throw new Saxon.Hej.trans.XPathException(("Failed to create call to extension function "+functionName.getComponentName().getDisplayName()), err);
             }

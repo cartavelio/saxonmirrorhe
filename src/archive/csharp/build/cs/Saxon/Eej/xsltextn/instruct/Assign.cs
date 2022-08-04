@@ -53,7 +53,7 @@ namespace Saxon.Eej.xsltextn.instruct {
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             if ("JS".Equals(((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions())).target)) {
-                throw new Saxon.Hej.trans.XPathException("Export failure: Saxon-JS does not implement saxon:assign");
+                throw new Saxon.Hej.trans.XPathException("Export failure: SaxonJS does not implement saxon:assign");
             }
             @out.startElement("assign", this);
             @out.emitAttribute("name", binding.getVariableQName());

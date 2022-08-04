@@ -107,18 +107,20 @@ namespace Saxon.Hej.functions {
             }
             return base.getSpecialProperties(arguments);
         }
-        private bool isElementAvailable(string lexicalName, string edition, Saxon.Hej.expr.XPathContext context) {
+        private bool isElementAvailable(string lexicalName, string targetEdition, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.om.StructuredQName qName = getElementName(lexicalName);
             if (qName.hasURI(Saxon.Hej.lib.NamespaceConstant.XSLT)) {
                 int fp = context.getConfiguration().getNamePool().getFingerprint(Saxon.Hej.lib.NamespaceConstant.XSLT, qName.getLocalPart());
                 int xsltVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-                bool known = ((xsltVersion == 40) ? isXslt40Element(fp) : isXslt30Element(fp));
                 if ((fp == Saxon.Hej.om.StandardNames.XSL_EVALUATE)) {
-                    known = (known && !(context.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.DISABLE_XSL_EVALUATE)));
+                    return !(context.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.DISABLE_XSL_EVALUATE));
                 }
-                return known;
+                if ((fp == Saxon.Hej.om.StandardNames.XSL_IMPORT_SCHEMA)) {
+                    return (context.getConfiguration().isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION) && targetEdition.Equals("EE"));
+                }
+                return ((xsltVersion == 40) ? isXslt40Element(fp) : isXslt30Element(fp));
             } else {
-                if ((qName.hasURI(Saxon.Hej.lib.NamespaceConstant.IXSL) && !(edition.Equals("JS")))) {
+                if ((qName.hasURI(Saxon.Hej.lib.NamespaceConstant.IXSL) && !(targetEdition.Equals("JS")))) {
                     return false;
                 }
             }

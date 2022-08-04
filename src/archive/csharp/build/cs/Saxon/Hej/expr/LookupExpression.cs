@@ -218,10 +218,11 @@ namespace Saxon.Hej.expr {
                             {
                                 Saxon.Hej.expr.MappingFunction arrayAccess = Saxon.Hej.expr.SequenceMapper.of(index => {
                                     if ((index is Saxon.Hej.value.IntegerValue)) {
-                                        Saxon.Hej.om.GroundedValue member = ((Saxon.Hej.ma.arrays.ArrayItem)(baseItem)).get(((int)(((Saxon.Hej.value.IntegerValue)(index)).longValue())-1));
+                                        int subscript = (Saxon.Hej.ma.arrays.ArrayFunctionSet.checkSubscript((Saxon.Hej.value.IntegerValue)(index), ((Saxon.Hej.ma.arrays.ArrayItem)(baseItem)).arrayLength())-1);
+                                        Saxon.Hej.om.GroundedValue member = ((Saxon.Hej.ma.arrays.ArrayItem)(baseItem)).get(subscript);
                                         return member.iterate();
                                     } else {
-                                        Saxon.Hej.trans.XPathException exception = new Saxon.Hej.trans.XPathException((("An item on the LHS of the '?' operator is an array, but a value on the RHS of the operator ("+baseItem.toShortString())+") is not an integer"), "XPTY0004");
+                                        Saxon.Hej.trans.XPathException exception = new Saxon.Hej.trans.XPathException((((("An item on the LHS of the '?' operator ("+getLhsExpression().toShortString())+") is an array, but a value on the RHS of the operator (")+baseItem.toShortString())+") is not an integer"), "XPTY0004");
                                         exception.setIsTypeError(true);
                                         exception.setLocation(getLocation());
                                         exception.setFailingExpression(this);

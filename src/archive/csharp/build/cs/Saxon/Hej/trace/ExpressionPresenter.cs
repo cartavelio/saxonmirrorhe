@@ -21,6 +21,9 @@ namespace Saxon.Hej.trace {
         }
         public ExpressionPresenter(Saxon.Hej.Configuration config, Saxon.Ejavax.xml.transform.stream.StreamResult @out) : this (config, @out, false) {
         }
+        public ExpressionPresenter(Saxon.Hej.@event.Builder builder) : this () {
+            init(builder.getConfiguration(), builder, false);
+        }
         public ExpressionPresenter(Saxon.Hej.Configuration config, Saxon.Ejavax.xml.transform.stream.StreamResult @out, bool checksum)  {
             init(config, @out, checksum);
         }

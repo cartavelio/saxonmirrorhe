@@ -283,7 +283,7 @@ namespace Saxon.Hej.functions {
                             string value = tok.Substring((eq+1));
                             @params.initialAppend(keyword, new Saxon.Hej.value.StringValue(value));
                         } else {
-                            @params.initialAppend(tok, Saxon.Hej.value.BooleanValue.TRUE);
+                            @params.initialAppend(tok, Saxon.Hej.value.EmptySequence.getInstance());
                         }
                     }
                     dict.initialPut("queryParams", @params);

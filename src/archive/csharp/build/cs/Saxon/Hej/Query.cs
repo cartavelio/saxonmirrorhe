@@ -238,8 +238,7 @@ namespace Saxon.Hej {
                             if (outputFile.isDirectory()) {
                                 quit("Output is a directory", 2);
                             }
-                            createFileIfNecessary(outputFile);
-                            serializer = processor.newSerializer(new System.IO.FileStream(outputFile.getPath(), System.IO.FileMode.Create));
+                            serializer = processor.newSerializer(outputFile);
                         } else {
                             serializer = processor.newSerializer(System.Console.Out);
                         }

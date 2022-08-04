@@ -63,11 +63,12 @@ namespace Saxon.Hej.serialize {
             this.characterMap = map;
         }
         public void writeKey(string key) {
+            bool oneLiner = oneLinerStack.Peek();
             conditionalComma(false);
             emit('"');
             emit(escape(key));
             emit("\":");
-            if (isIndenting) {
+            if ((isIndenting && !(oneLiner))) {
                 emit(" ");
             }
             afterKey = true;
@@ -152,12 +153,16 @@ namespace Saxon.Hej.serialize {
         }
         private void conditionalComma(bool opening) {
             bool wasFirst = first;
-            bool actuallyIndenting = ((isIndenting && (level != 0)) && !(oneLinerStack.Peek()));
+            bool oneLiner = (!((oneLinerStack.Count==0)) && oneLinerStack.Peek());
+            bool actuallyIndenting = ((isIndenting && (level != 0)) && !(oneLiner));
             if (first) {
                 first = false;
             } else {
                 if (!(afterKey)) {
                     emit(',');
+                    if ((oneLiner && isIndenting)) {
+                        emit(' ');
+                    }
                 }
             }
             if (((wasFirst && afterKey))) {

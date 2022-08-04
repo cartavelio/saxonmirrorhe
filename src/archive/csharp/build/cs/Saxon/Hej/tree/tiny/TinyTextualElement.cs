@@ -46,7 +46,11 @@ namespace Saxon.Hej.tree.tiny {
             if ((((copyOptions&Saxon.Hej.om.CopyOptions.ALL_NAMESPACES)) != 0)) {
                 namespaces = getAllNamespaces();
             } else {
-                namespaces = Saxon.Hej.om.NamespaceMap.emptyMap();
+                if (!(getURI().Length==0)) {
+                    namespaces = Saxon.Hej.om.NamespaceMap.of(getPrefix(), getURI());
+                } else {
+                    namespaces = Saxon.Hej.om.NamespaceMap.emptyMap();
+                }
             }
             receiver.startElement(Saxon.Hej.om.NameOfNode.makeName(this), type, Saxon.Hej.om.EmptyAttributeMap.getInstance(), namespaces, location, Saxon.Hej.@event.ReceiverOption.NONE);
             receiver.characters(getUnicodeStringValue(), location, Saxon.Hej.@event.ReceiverOption.NONE);
@@ -291,7 +295,7 @@ namespace Saxon.Hej.tree.tiny {
 
             /* Expanding default method iterate from interface Item */
             public virtual Saxon.Hej.om.SequenceIterator iterate() {
-                return new Saxon.Hej.tree.iter.SingletonIterator(this);
+                return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
             }
 
             /* Expanding default method reduce from interface GroundedValue */

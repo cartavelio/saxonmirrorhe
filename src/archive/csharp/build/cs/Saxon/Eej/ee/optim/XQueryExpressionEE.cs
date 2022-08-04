@@ -162,9 +162,14 @@ namespace Saxon.Eej.ee.optim {
             Saxon.Hej.expr.XPathContextMajor context = controller.newXPathContext();
             Saxon.Hej.@event.PipelineConfiguration pipe = controller.makePipelineConfiguration();
             pipe.setHostLanguage(Saxon.Api.HostLanguage.XQUERY);
-            Saxon.Hej.lib.SerializerFactory sf = context.getConfiguration().getSerializerFactory();
-            Saxon.Ejava.util.Properties actualProperties = validateOutputProperties(controller, outputProperties);
-            Saxon.Hej.@event.Receiver receiver = sf.getReceiver(result, new Saxon.Hej.serialize.SerializationProperties(actualProperties), pipe);
+            Saxon.Hej.@event.Receiver receiver;
+            if ((result is Saxon.Hej.@event.Receiver)) {
+                receiver = (Saxon.Hej.@event.Receiver)(result);
+            } else {
+                Saxon.Hej.lib.SerializerFactory sf = context.getConfiguration().getSerializerFactory();
+                Saxon.Ejava.util.Properties actualProperties = validateOutputProperties(controller, outputProperties);
+                receiver = sf.getReceiver(result, new Saxon.Hej.serialize.SerializationProperties(actualProperties), pipe);
+            }
             receiver.open();
             Saxon.Eej.ee.stream.watch.WatchManager wm = new Saxon.Eej.ee.stream.watch.WatchManager(pipe);
             wm.setXPathContext(context);

@@ -29,7 +29,7 @@ namespace Saxon.Hej.expr.parser {
             int opt = 0;
             if (flags.StartsWith("-")) {
                 opt = -1;
-                for (int i = 0; (i<flags.Length); i++) {
+                for (int i = 1; (i<flags.Length); i++) {
                     char c = flags[i];
                     opt &= ~(decodeFlag(c));
                 }

@@ -105,6 +105,7 @@ namespace Saxon.Hej.lib {
                         emitter.setPipelineConfiguration(pipe);
                         if ((uWriter == null)) {
                             uWriter = expandedResult.obtainUnicodeWriter();
+                            emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                         }
                         emitter.setUnicodeWriter(uWriter);
                         target = createHTMLSerializer(emitter, @params, pipe);
@@ -117,6 +118,7 @@ namespace Saxon.Hej.lib {
                         if ((uWriter == null)) {
                             System.Diagnostics.Debug.Assert((expandedResult != null));
                             uWriter = expandedResult.obtainUnicodeWriter();
+                            emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                         }
                         emitter.setUnicodeWriter(uWriter);
                         target = createXMLSerializer((Saxon.Hej.serialize.XMLEmitter)(emitter), @params);
@@ -129,6 +131,7 @@ namespace Saxon.Hej.lib {
                         if ((uWriter == null)) {
                             System.Diagnostics.Debug.Assert((expandedResult != null));
                             uWriter = expandedResult.obtainUnicodeWriter();
+                            emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                         }
                         emitter.setUnicodeWriter(uWriter);
                         target = createXHTMLSerializer(emitter, @params, pipe);
@@ -141,6 +144,7 @@ namespace Saxon.Hej.lib {
                         if ((uWriter == null)) {
                             System.Diagnostics.Debug.Assert((expandedResult != null));
                             uWriter = expandedResult.obtainUnicodeWriter();
+                            emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                         }
                         emitter.setUnicodeWriter(uWriter);
                         target = createTextSerializer(emitter, @params);
@@ -194,6 +198,7 @@ namespace Saxon.Hej.lib {
                                 if ((uWriter == null)) {
                                     System.Diagnostics.Debug.Assert((expandedResult != null));
                                     uWriter = expandedResult.obtainUnicodeWriter();
+                                    emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                                 }
                                 emitter.setUnicodeWriter(uWriter);
                                 target = @params.makeSequenceNormalizer(emitter);

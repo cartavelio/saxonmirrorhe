@@ -43,10 +43,12 @@ namespace Saxon.Hej.style {
             }
             if ((codepoint == -1)) {
                 reportAbsence("character");
+                codepoint = 256;
                 return ;
             }
             if ((replacementString == null)) {
                 reportAbsence("string");
+                codepoint = 256;
             }
         }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {

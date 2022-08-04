@@ -10,9 +10,8 @@ namespace Saxon.Hej.pattern {
         public GeneralNodePattern(Saxon.Hej.expr.Expression expr, Saxon.Hej.pattern.NodeTest itemType)  {
             equivalentExpr = expr;
             this.itemType = itemType;
-            makeTopNodeEquivalent();
         }
-        private void makeTopNodeEquivalent() {
+        public void makeTopNodeEquivalent() {
             if ((equivalentExpr is Saxon.Hej.expr.SlashExpression)) {
                 Saxon.Hej.expr.Expression head = ((Saxon.Hej.expr.SlashExpression)(equivalentExpr)).getFirstStep();
                 if ((Saxon.Hej.expr.parser.ExpressionTool.getAxisNavigation(head) == Saxon.Hej.om.AxisInfo.CHILD)) {
@@ -45,6 +44,7 @@ namespace Saxon.Hej.pattern {
         public override Saxon.Hej.pattern.Pattern typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
             Saxon.Hej.expr.parser.ContextItemStaticInfo cit = new Saxon.Hej.expr.parser.ContextItemStaticInfo(Saxon.Hej.pattern.AnyNodeTest.getInstance(), false);
             equivalentExpr = equivalentExpr.typeCheck(visitor, cit);
+            makeTopNodeEquivalent();
             return this;
         }
         public override Saxon.Hej.pattern.Pattern optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
@@ -162,6 +162,7 @@ namespace Saxon.Hej.pattern {
             Saxon.Hej.pattern.GeneralNodePattern n = new Saxon.Hej.pattern.GeneralNodePattern(equivalentExpr.copy(rebindings), itemType);
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, n);
             n.setOriginalText(getOriginalText());
+            n.topNodeEquivalent = ((topNodeEquivalent == null) ? null : topNodeEquivalent.copy(rebindings));
             return n;
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter presenter) {

@@ -134,6 +134,92 @@ namespace Saxon.Hej.ma.zeno {
             }
             throw new System.IndexOutOfRangeException((("Index "+n)+" is too large"));
         }
+        public Saxon.Hej.ma.zeno.ZenoChain<T> replace(int n, T value) {
+            if ((n<0)) {
+                throw new System.IndexOutOfRangeException((("Index "+n)+" is negative"));
+            }
+            int offset = 0;
+            System.Collections.Generic.List<System.Collections.Generic.List<T>> masterList2 = new System.Collections.Generic.List<System.Collections.Generic.List<T>>(masterList.Count);
+            bool done = false;
+            foreach (System.Collections.Generic.List<T> segment in masterList) {
+                if ((((offset+segment.Count)>n) && !(done))) {
+                    System.Collections.Generic.List<T> replacementSegment = new System.Collections.Generic.List<T>(segment.Count);
+                    Saxon.Impl.Helpers.ListUtils.AddAll(replacementSegment, Saxon.Impl.Helpers.ListUtils.SubList(segment, 0, (n-offset)));
+                    replacementSegment.Add(value);
+                    Saxon.Impl.Helpers.ListUtils.AddAll(replacementSegment, Saxon.Impl.Helpers.ListUtils.SubList(segment, ((n-offset)+1), segment.Count));
+                    masterList2.Add(replacementSegment);
+                    done = true;
+                } else {
+                    masterList2.Add(segment);
+                }
+                offset += segment.Count;
+            }
+            if (!(done)) {
+                throw new System.IndexOutOfRangeException((("Index "+n)+" is too large"));
+            }
+            return new Saxon.Hej.ma.zeno.ZenoChain<T>(masterList2);
+        }
+        public Saxon.Hej.ma.zeno.ZenoChain<T> remove(int n) {
+            if ((n<0)) {
+                throw new System.IndexOutOfRangeException((("Index "+n)+" is negative"));
+            }
+            int offset = 0;
+            System.Collections.Generic.List<System.Collections.Generic.List<T>> masterList2 = new System.Collections.Generic.List<System.Collections.Generic.List<T>>(masterList.Count);
+            bool done = false;
+            foreach (System.Collections.Generic.List<T> segment in masterList) {
+                if ((((offset+segment.Count)>n) && !(done))) {
+                    if ((segment.Count>1)) {
+                        System.Collections.Generic.List<T> replacementSegment = new System.Collections.Generic.List<T>((segment.Count-1));
+                        Saxon.Impl.Helpers.ListUtils.AddAll(replacementSegment, Saxon.Impl.Helpers.ListUtils.SubList(segment, 0, (n-offset)));
+                        Saxon.Impl.Helpers.ListUtils.AddAll(replacementSegment, Saxon.Impl.Helpers.ListUtils.SubList(segment, ((n-offset)+1), segment.Count));
+                        masterList2.Add(replacementSegment);
+                    }
+                    done = true;
+                } else {
+                    masterList2.Add(segment);
+                }
+                offset += segment.Count;
+            }
+            if (!(done)) {
+                throw new System.IndexOutOfRangeException((("Index "+n)+" is too large"));
+            }
+            return new Saxon.Hej.ma.zeno.ZenoChain<T>(masterList2);
+        }
+        public Saxon.Hej.ma.zeno.ZenoChain<T> insert(int n, T value) {
+            if ((n<0)) {
+                throw new System.IndexOutOfRangeException((("Index "+n)+" is negative"));
+            }
+            if ((n == 0)) {
+                return prepend(value);
+            }
+            int length = size();
+            if ((n == length)) {
+                return add(value);
+            }
+            if ((n>length)) {
+                throw new System.IndexOutOfRangeException((("Index "+n)+" is too large"));
+            }
+            int offset = 0;
+            System.Collections.Generic.List<System.Collections.Generic.List<T>> masterList2 = new System.Collections.Generic.List<System.Collections.Generic.List<T>>(masterList.Count);
+            bool done = false;
+            foreach (System.Collections.Generic.List<T> segment in masterList) {
+                if ((((offset+segment.Count)>n) && !(done))) {
+                    System.Collections.Generic.List<T> replacementSegment = new System.Collections.Generic.List<T>((segment.Count+1));
+                    Saxon.Impl.Helpers.ListUtils.AddAll(replacementSegment, Saxon.Impl.Helpers.ListUtils.SubList(segment, 0, (n-offset)));
+                    replacementSegment.Add(value);
+                    Saxon.Impl.Helpers.ListUtils.AddAll(replacementSegment, Saxon.Impl.Helpers.ListUtils.SubList(segment, (n-offset), segment.Count));
+                    masterList2.Add(replacementSegment);
+                    done = true;
+                } else {
+                    masterList2.Add(segment);
+                }
+                offset += segment.Count;
+            }
+            if (!(done)) {
+                throw new System.IndexOutOfRangeException((("Index "+n)+" is too large"));
+            }
+            return new Saxon.Hej.ma.zeno.ZenoChain<T>(masterList2);
+        }
         public Saxon.Hej.ma.zeno.ZenoChain<T> subList(int start, int end) {
             if (((start<0) || (start>end))) {
                 throw new System.IndexOutOfRangeException("start position for subList is out of range");

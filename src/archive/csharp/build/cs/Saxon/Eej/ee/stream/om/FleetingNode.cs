@@ -50,7 +50,14 @@ namespace Saxon.Eej.ee.stream.om {
             } else {
                 if ((other is Saxon.Eej.ee.stream.om.FleetingNode)) {
                     Saxon.Eej.ee.stream.om.FleetingNode fn = (Saxon.Eej.ee.stream.om.FleetingNode)(other);
-                    return (((((((getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE) && (fn.getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE)) && (getParent() == fn.getParent())) && getURI().Equals(fn.getURI())) && getLocalPart().Equals(fn.getLocalPart()))) || (((((getNodeKind() == Saxon.Hej.type.Type.NAMESPACE) && (fn.getNodeKind() == Saxon.Hej.type.Type.NAMESPACE)) && (getParent() == fn.getParent())) && getLocalPart().Equals(fn.getLocalPart()))));
+                    switch (getNodeKind()) {
+                      case Saxon.Hej.type.Type.ATTRIBUTE:
+                        return (((getNodeKind() == fn.getNodeKind()) && (getParent() == fn.getParent())) && getNodeName().Equals(fn.getNodeName()));
+                      case Saxon.Hej.type.Type.NAMESPACE:
+                        return (((getNodeKind() == fn.getNodeKind()) && (getParent() == fn.getParent())) && getLocalPart().Equals(fn.getLocalPart()));
+                      default:
+                        return false;
+                    }
                 } else {
                     return false;
                 }
@@ -89,17 +96,14 @@ namespace Saxon.Eej.ee.stream.om {
                         return compareOrder(other.getParent());
                     }
                 }
-                if (Saxon.Hej.tree.util.Navigator.isAncestorOrSelf(this, other)) {
-                    return -1;
-                }
-                if (Saxon.Hej.tree.util.Navigator.isAncestorOrSelf(other, this)) {
-                    return +(1);
-                }
-                throw new Saxon.Ejava.lang.IllegalStateException();
+                return getNodeNumber().CompareTo(((Saxon.Eej.ee.stream.om.FleetingNode)(other)).getNodeNumber());
               case Saxon.Hej.type.Type.COMMENT:
               case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
               case Saxon.Hej.type.Type.TEXT:
-                return +(1);
+                if (((other.getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE) || (other.getNodeKind() == Saxon.Hej.type.Type.NAMESPACE))) {
+                    return compareOrder(other.getParent());
+                }
+                return getNodeNumber().CompareTo(((Saxon.Eej.ee.stream.om.FleetingNode)(other)).getNodeNumber());
               case Saxon.Hej.type.Type.ATTRIBUTE:
                 if ((other.getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE)) {
                     if (getParent().Equals(other.getParent())) {
@@ -296,7 +300,7 @@ namespace Saxon.Eej.ee.stream.om {
 
         /* Expanding default method iterate from interface Item */
         public virtual Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingletonIterator(this);
+            return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
         }
 
         /* Expanding default method reduce from interface GroundedValue */

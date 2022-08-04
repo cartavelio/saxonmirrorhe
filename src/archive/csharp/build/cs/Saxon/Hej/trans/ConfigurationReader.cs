@@ -314,7 +314,7 @@ namespace Saxon.Hej.trans {
             string value = props.getProperty(attributeName);
             if ((value != null)) {
                 if (!(checkPlatform(flags))) {
-                    error(props.getProperty("#element"), attributeName, value, (("Property "+attributeName)+" is not available in Saxon-CS"));
+                    error(props.getProperty("#element"), attributeName, value, (("Property "+attributeName)+" is not available in SaxonCS"));
                     return ;
                 }
                 try {

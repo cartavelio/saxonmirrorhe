@@ -120,7 +120,7 @@ namespace Saxon.Hej.value {
             return (((typeLabel+"(\"")+this.getUnicodeStringValue())+"\")");
         }
         public Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingleAtomicIterator(this);
+            return (Saxon.Hej.tree.iter.SingleAtomicIterator)(Saxon.Hej.tree.iter.SingleAtomicIterator.makeIterator(this));
         }
         public System.Collections.Generic.IEnumerator<Saxon.Hej.value.AtomicValue> GetEnumerator() {
             return new Saxon.Hej.tree.jiter.MonoIterator<Saxon.Hej.value.AtomicValue>(this);

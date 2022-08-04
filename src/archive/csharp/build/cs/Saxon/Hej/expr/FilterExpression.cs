@@ -113,6 +113,12 @@ namespace Saxon.Hej.expr {
             return this;
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
+            if ((visitor.isOptimizeForStreaming() && (getSelectExpression() is Saxon.Hej.expr.GlobalVariableReference))) {
+                visitor.setOptimizeForStreaming(false);
+                Saxon.Hej.expr.Expression eOpt = optimize(visitor, contextItemType);
+                visitor.setOptimizeForStreaming(true);
+                return eOpt;
+            }
             Saxon.Hej.Configuration config = visitor.getConfiguration();
             Saxon.Hej.expr.parser.Optimizer opt = visitor.obtainOptimizer();
             bool tracing = config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.TRACE_OPTIMIZER_DECISIONS);

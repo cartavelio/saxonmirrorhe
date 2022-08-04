@@ -412,7 +412,7 @@ namespace Saxon.Hej.value {
         }
         public override void checkValidInJavascript() {
             if (((year<=0) || (year>9999))) {
-                throw new Saxon.Hej.trans.XPathException("Year out of range for Saxon-JS", "FODT0001");
+                throw new Saxon.Hej.trans.XPathException("Year out of range for SaxonJS", "FODT0001");
             }
         }
         public Saxon.Hej.value.DateTimeValue adjustToUTC(int implicitTimezone) {

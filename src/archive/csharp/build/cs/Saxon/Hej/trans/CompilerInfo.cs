@@ -65,9 +65,6 @@ namespace Saxon.Hej.trans {
         public bool isJustInTimeCompilation() {
             return optimizerOptions.isSet(Saxon.Hej.expr.parser.OptimizerOptions.JIT);
         }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            resourceResolver = new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(resolver);
-        }
         public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
             resourceResolver = resolver;
         }
@@ -119,13 +116,6 @@ namespace Saxon.Hej.trans {
         }
         public bool isGenerateByteCode() {
             return optimizerOptions.isSet(Saxon.Hej.expr.parser.OptimizerOptions.BYTE_CODE);
-        }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            if ((resourceResolver is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
-                return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(resourceResolver)).getWrappedURIResolver();
-            } else {
-                return null;
-            }
         }
         public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
             return resourceResolver;

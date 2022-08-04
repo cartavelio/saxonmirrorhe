@@ -5,7 +5,8 @@ namespace Saxon.Hej.tree.iter {
     public class SingletonIterator : Saxon.Hej.om.SequenceIterator, Saxon.Hej.tree.iter.ReversibleIterator, Saxon.Hej.expr.LastPositionFinder, Saxon.Hej.tree.iter.GroundedIterator, Saxon.Hej.tree.iter.LookaheadIterator {
         private readonly Saxon.Hej.om.Item item;
         internal bool gone = false;
-        public SingletonIterator(Saxon.Hej.om.Item value)  {
+        protected internal SingletonIterator(Saxon.Hej.om.Item value)  {
+            System.Diagnostics.Debug.Assert((value != null));
             this.item = value;
         }
         public static Saxon.Hej.om.SequenceIterator makeIterator(Saxon.Hej.om.Item item) {
@@ -14,10 +15,6 @@ namespace Saxon.Hej.tree.iter {
             } else {
                 return new Saxon.Hej.tree.iter.SingletonIterator(item);
             }
-        }
-        public static Saxon.Hej.tree.iter.SingletonIterator rawIterator(Saxon.Hej.om.Item item) {
-            System.Diagnostics.Debug.Assert((item != null));
-            return new Saxon.Hej.tree.iter.SingletonIterator(item);
         }
         public bool supportsHasNext() {
             return true;
@@ -49,11 +46,7 @@ namespace Saxon.Hej.tree.iter {
             return item;
         }
         public Saxon.Hej.om.GroundedValue materialize() {
-            if ((item != null)) {
-                return item;
-            } else {
-                return Saxon.Hej.value.EmptySequence.getInstance();
-            }
+            return item;
         }
         public Saxon.Hej.om.GroundedValue getResidue() {
             if (gone) {

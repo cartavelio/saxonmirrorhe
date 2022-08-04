@@ -194,7 +194,7 @@ namespace Saxon.Hej.style {
                     }
                     mode.getActivePart().setExplicitProperty(f, normalizedAtt, decl.getPrecedence());
                     if ((mode.isMustBeTyped() && System.Text.RegularExpressions.Regex.IsMatch(getContainingPackage().getTargetEdition(), "JS\\d?"))) {
-                        compileWarning("In Saxon-JS, all data is untyped", "XTTE3110");
+                        compileWarning("In SaxonJS, all data is untyped", "XTTE3110");
                     }
                 } else {
                     if ((f.Equals("use-accumulators") && (accumulators != null))) {

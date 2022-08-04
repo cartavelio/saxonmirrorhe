@@ -17,9 +17,6 @@ namespace Saxon.Hej.s9api {
         public Saxon.Hej.s9api.Processor getProcessor() {
             return processor;
         }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            compilerInfo.setResourceResolver(new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(resolver));
-        }
         public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
             compilerInfo.setResourceResolver(resolver);
         }
@@ -32,14 +29,6 @@ namespace Saxon.Hej.s9api {
         }
         public void clearParameters() {
             compilerInfo.clearParameters();
-        }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            Saxon.Hej.lib.JJ_ResourceResolver rr = compilerInfo.getResourceResolver();
-            if ((rr is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
-                return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(rr)).getWrappedURIResolver();
-            } else {
-                return null;
-            }
         }
         public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
             return compilerInfo.getResourceResolver();

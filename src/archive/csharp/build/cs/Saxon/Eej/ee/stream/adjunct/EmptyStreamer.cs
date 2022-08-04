@@ -4,31 +4,36 @@ using System.Linq;
 namespace Saxon.Eej.ee.stream.adjunct {
     public class EmptyStreamer : Saxon.Eej.ee.stream.adjunct.InspectionAdjunct, Saxon.Eej.ee.stream.feed.FeedMaker {
         public Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
-            return new Inner_ExistenceFeed_1(this, getExpression(), @out, context);
+            return new Saxon.Eej.ee.stream.adjunct.EmptyStreamer.EmptyExistenceFeed(getExpression(), @out, context, watchManager);
         }
-    
-        private class Inner_ExistenceFeed_1 : Saxon.Eej.ee.stream.feed.ExistenceFeed {
-            private readonly EmptyStreamer outerInstance;
-            public Inner_ExistenceFeed_1(EmptyStreamer outerInstance, /*AB*/Saxon.Hej.expr.Expression arg1, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg2, /*AA*/Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
-                this.outerInstance = outerInstance;
-                found = false;
+        private class EmptyExistenceFeed : Saxon.Eej.ee.stream.feed.ExistenceFeed {
+            internal bool found = false;
+            internal bool closed = false;
+            internal Saxon.Eej.ee.stream.watch.WatchManager watchManager;
+            protected internal EmptyExistenceFeed(Saxon.Hej.expr.Expression exp, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context, Saxon.Eej.ee.stream.watch.WatchManager watchManager) : base (exp, result, context) {
+                this.watchManager = watchManager;
             }
-            internal bool found;
             public override void action() {
-                if (!(/*field*/found)) {
-                    /*superMethod*/getNextOutputter().append(Saxon.Hej.value.BooleanValue.FALSE);
-                    /*superMethod*/getNextOutputter().close();
-                    /*field*/found = true;
-                    /*superMethod*/getTerminator().terminate();
+                if (!(found)) {
+                    getNextOutputter().append(Saxon.Hej.value.BooleanValue.FALSE);
+                    found = true;
+                    if (watchManager.allowsEarlyExit()) {
+                        closed = true;
+                        getNextOutputter().close();
+                        getTerminator().terminate();
+                    }
                 }
             }
             public override void close() {
-                if (!(/*field*/found)) {
-                    /*superMethod*/getNextOutputter().append(Saxon.Hej.value.BooleanValue.TRUE);
-                    /*superMethod*/getNextOutputter().close();
+                if (!(found)) {
+                    getNextOutputter().append(Saxon.Hej.value.BooleanValue.TRUE);
+                }
+                if (!(closed)) {
+                    getNextOutputter().close();
                 }
             }
+        
         }
-
+    
     }
 }

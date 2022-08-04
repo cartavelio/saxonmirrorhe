@@ -251,7 +251,7 @@ namespace Saxon.Eej.ee.validate {
                         Saxon.Eej.ee.stream.Inversion inversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(a.getCondition().getInternalExpression(), false);
                         Saxon.Eej.ee.stream.feed.ItemFeed assertionResultHandler = new Saxon.Eej.ee.validate.ValidationStack.AssertionResultHandler(this, a, elemName, context);
                         assertionResultHandler.setPipelineConfiguration(pipe);
-                        Saxon.Eej.ee.stream.feed.ItemFeed booleanCapture = new Saxon.Eej.ee.stream.adjunct.BooleanFnFeed.Positive(null, assertionResultHandler, context);
+                        Saxon.Eej.ee.stream.feed.ItemFeed booleanCapture = new Saxon.Eej.ee.stream.adjunct.BooleanFnFeed.Positive(watchManager, null, assertionResultHandler, context);
                         Saxon.Eej.ee.stream.watch.Trigger assertionWatch = inversion.getWatch(watchManager, booleanCapture, context);
                         watchManager.addWatch(assertionWatch, true);
                         watchManager.restartElement(assertionWatch);

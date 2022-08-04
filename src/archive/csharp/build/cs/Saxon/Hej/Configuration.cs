@@ -265,10 +265,6 @@ namespace Saxon.Hej {
         }
         public Saxon.Hej.lib.JJ_ResourceResolver makeResourceResolver(string className) {
             System.Object obj = dynamicLoader.getInstance(className, null);
-            if ((obj is Saxon.Ejavax.xml.transform.URIResolver)) {
-                getLogger().warning("From Saxon 11.1, the value of the -r option should be a ResourceResolver, not a URIResolver");
-                obj = new Saxon.Hej.lib.ResourceResolverWrappingURIResolver((Saxon.Ejavax.xml.transform.URIResolver)(obj));
-            }
             if ((obj is Saxon.Hej.lib.JJ_ResourceResolver)) {
                 return (Saxon.Hej.lib.JJ_ResourceResolver)(obj);
             }
@@ -1110,7 +1106,7 @@ namespace Saxon.Hej {
                 return (Saxon.Hej.lib.ActiveSource)(source);
             }
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
-                return new Inner_ActiveSource_433(this, source, config);
+                return new Inner_ActiveSource_429(this, source, config);
             }
             Saxon.Hej.lib.ActiveSource activeSource = Saxon.Hej.Version.platform.resolveSource(source, config);
             if ((activeSource != null)) {
@@ -1451,10 +1447,6 @@ namespace Saxon.Hej {
                       case Saxon.Hej.lib.FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS:
                         setUnparsedTextURIResolver((Saxon.Hej.lib.UnparsedTextURIResolver)(instantiateClassName(name, value, typeof(Saxon.Hej.lib.UnparsedTextURIResolver))));
                         break ;
-                      case Saxon.Hej.lib.FeatureCode.URI_RESOLVER_CLASS:
-                        Saxon.Ejavax.xml.transform.URIResolver u = (Saxon.Ejavax.xml.transform.URIResolver)(instantiateClassName(name, value, typeof(Saxon.Ejavax.xml.transform.URIResolver)));
-                        setResourceResolver(new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(u));
-                        break ;
                       case Saxon.Hej.lib.FeatureCode.USE_XSI_SCHEMA_LOCATION:
                         defaultParseOptions.setUseXsiSchemaLocation(requireBoolean(name, value));
                         break ;
@@ -1564,9 +1556,6 @@ namespace Saxon.Hej {
                         }
                       case Saxon.Hej.lib.FeatureCode.XSLT_SCHEMA_AWARE:
                         getDefaultXsltCompilerInfo().setSchemaAware(requireBoolean(name, value));
-                        break ;
-                      case Saxon.Hej.lib.FeatureCode.XSLT_STATIC_URI_RESOLVER_CLASS:
-                        getDefaultXsltCompilerInfo().setURIResolver((Saxon.Ejavax.xml.transform.URIResolver)(instantiateClassName(name, value, typeof(Saxon.Ejavax.xml.transform.URIResolver))));
                         break ;
                       case Saxon.Hej.lib.FeatureCode.XSLT_VERSION:
                         if (!("3.0".Equals(value))) {
@@ -1774,12 +1763,6 @@ namespace Saxon.Hej {
                 return getUnparsedTextURIResolver();
               case Saxon.Hej.lib.FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS:
                 return getUnparsedTextURIResolver().GetType().Name;
-              case Saxon.Hej.lib.FeatureCode.URI_RESOLVER_CLASS:
-                if ((getResourceResolver() is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
-                    return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(getResourceResolver())).GetType().Name;
-                } else {
-                    return null;
-                }
               case Saxon.Hej.lib.FeatureCode.USE_XSI_SCHEMA_LOCATION:
                 return defaultParseOptions.isUseXsiSchemaLocation();
               case Saxon.Hej.lib.FeatureCode.VALIDATION_COMMENTS:
@@ -1828,8 +1811,6 @@ namespace Saxon.Hej {
                 return getDefaultXsltCompilerInfo().getDefaultInitialTemplate().getClarkName();
               case Saxon.Hej.lib.FeatureCode.XSLT_SCHEMA_AWARE:
                 return getDefaultXsltCompilerInfo().isSchemaAware();
-              case Saxon.Hej.lib.FeatureCode.XSLT_STATIC_URI_RESOLVER_CLASS:
-                return null;
               case Saxon.Hej.lib.FeatureCode.XSLT_VERSION:
                 return 30;
               case Saxon.Hej.lib.FeatureCode.RESOURCE_RESOLVER:
@@ -1891,9 +1872,9 @@ namespace Saxon.Hej {
             return label;
         }
     
-        private class Inner_ActiveSource_433 : Saxon.Hej.lib.ActiveSource {
+        private class Inner_ActiveSource_429 : Saxon.Hej.lib.ActiveSource {
             private readonly Configuration outerInstance;
-            public Inner_ActiveSource_433(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
+            public Inner_ActiveSource_429(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
                 this.outerInstance = outerInstance;
                 this.source = source;
                 this.config = config;

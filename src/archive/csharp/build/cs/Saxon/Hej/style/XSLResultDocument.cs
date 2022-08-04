@@ -184,7 +184,7 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.om.NodeInfo first = ((/*1430*/Saxon.Hej.om.NodeInfo)kids.next());
                 if ((first is Saxon.Hej.style.LiteralResultElement)) {
                     if ((first.getURI().Equals(Saxon.Hej.lib.NamespaceConstant.XHTML) && first.getLocalPart().Equals("html"))) {
-                        method = ((getEffectiveVersion() == 10) ? "xml" : "xhtml");
+                        method = "xhtml";
                     } else {
                         if ((Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(first.getLocalPart(), "html") && first.getURI().Length==0)) {
                             method = "html";

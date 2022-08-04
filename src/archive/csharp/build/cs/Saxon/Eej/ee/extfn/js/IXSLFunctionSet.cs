@@ -39,7 +39,7 @@ namespace Saxon.Eej.ee.extfn.js {
         }
         public class Stub : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] args) {
-                throw new Saxon.Hej.trans.XPathException((("ixsl:"+getDetails().name.getLocalPart())+" is available only in Saxon-JS"));
+                throw new Saxon.Hej.trans.XPathException((("ixsl:"+getDetails().name.getLocalPart())+" is available only in SaxonJS"));
             }
         
         }

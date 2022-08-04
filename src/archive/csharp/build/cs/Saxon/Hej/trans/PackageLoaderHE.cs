@@ -2728,6 +2728,9 @@ namespace Saxon.Hej.trans {
                 Saxon.Hej.pattern.Pattern pat = /*Delegate.loadFrom()*/loader(this, element);
                 pat.setLocation(makeLocation(element));
                 pat.setRetainedStaticContext(makeRetainedStaticContext(element));
+                if ((pat is Saxon.Hej.pattern.GeneralNodePattern)) {
+                    addCompletionAction(() => ((Saxon.Hej.pattern.GeneralNodePattern)(pat)).makeTopNodeEquivalent());
+                }
                 return pat;
             }
         }

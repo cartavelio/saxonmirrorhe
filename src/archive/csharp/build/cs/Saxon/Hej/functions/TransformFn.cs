@@ -869,7 +869,7 @@ namespace Saxon.Hej.functions {
 
         }
         private class DocumentDeliverer : Saxon.Hej.functions.TransformFn.Deliverer {
-            private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.om.TreeInfo> results = new System.Collections.Concurrent.ConcurrentDictionary<string, Saxon.Hej.om.TreeInfo>();
+            private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> results = new System.Collections.Concurrent.ConcurrentDictionary<string, Saxon.Hej.om.GroundedValue>();
             private readonly Saxon.Hej.s9api.XdmDestination destination = new Saxon.Hej.s9api.XdmDestination();
             public DocumentDeliverer()  {
             }
@@ -885,16 +885,21 @@ namespace Saxon.Hej.functions {
                 Saxon.Hej.s9api.XdmDestination destination = new Saxon.Hej.s9api.XdmDestination();
                 destination.setDestinationBaseURI(absolute);
                 destination.onClose(() => {
-                    Saxon.Api.XdmNode root = destination.getXdmNode();
-                    Saxon.Impl.Helpers.MapUtils.Put(results, absolute.OriginalString, ((Saxon.Hej.om.NodeInfo)root.Unwrap()).getTreeInfo());
+                    try {
+                        Saxon.Api.XdmNode root = destination.getXdmNode();
+                        Saxon.Hej.om.GroundedValue result = postProcess(absolute.OriginalString, ((Saxon.Hej.om.NodeInfo)root.Unwrap()));
+                        Saxon.Impl.Helpers.MapUtils.Put(results, absolute.OriginalString, result);
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        throw new Saxon.Hej.trans.UncheckedXPathException(e);
+                    }
                 } );
                 Saxon.Hej.@event.PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
                 return destination.getReceiver(pipe, properties);
             }
             public override Saxon.Hej.ma.map.MapItem populateResultMap(Saxon.Hej.ma.map.MapItem resultMap) {
-                foreach (System.Collections.Generic.KeyValuePair<string,Saxon.Hej.om.TreeInfo> entry in results) {
+                foreach (System.Collections.Generic.KeyValuePair<string,Saxon.Hej.om.GroundedValue> entry in results) {
                     string uri = entry.Key;
-                    resultMap = resultMap.addEntry(new Saxon.Hej.value.StringValue(uri), entry.Value.getRootNode());
+                    resultMap = resultMap.addEntry(new Saxon.Hej.value.StringValue(uri), entry.Value);
                 }
                 return resultMap;
             }
@@ -902,8 +907,7 @@ namespace Saxon.Hej.functions {
         }
         private class SerializedDeliverer : Saxon.Hej.functions.TransformFn.Deliverer {
             private readonly Saxon.Hej.s9api.Processor processor;
-            private readonly System.Collections.Generic.IDictionary<string,string> results = new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
-            private readonly System.Collections.Generic.IDictionary<string,System.IO.StringWriter> workInProgress = new System.Collections.Concurrent.ConcurrentDictionary<string, System.IO.StringWriter>();
+            private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> results = new System.Collections.Concurrent.ConcurrentDictionary<string, Saxon.Hej.om.GroundedValue>();
             private System.IO.StringWriter primaryWriter;
             public SerializedDeliverer(Saxon.Hej.s9api.Processor processor)  {
                 this.processor = processor;
@@ -930,7 +934,14 @@ namespace Saxon.Hej.functions {
                 Saxon.Hej.s9api.Serializer serializer = makeSerializer(processor, null);
                 serializer.setCharacterMap(properties.getCharacterMapIndex());
                 serializer.setOutputWriter(writer);
-                serializer.onClose(() => Saxon.Impl.Helpers.MapUtils.Put(results, absolute.OriginalString, writer.ToString()));
+                serializer.onClose(() => {
+                    try {
+                        Saxon.Hej.om.GroundedValue result = postProcess(absolute.OriginalString, new Saxon.Hej.value.StringValue(writer.ToString()));
+                        Saxon.Impl.Helpers.MapUtils.Put(results, absolute.OriginalString, result);
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        throw new Saxon.Hej.trans.UncheckedXPathException(e);
+                    }
+                } );
                 try {
                     Saxon.Hej.@event.PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
                     Saxon.Hej.@event.Receiver @out = serializer.getReceiver(pipe, properties);
@@ -941,16 +952,16 @@ namespace Saxon.Hej.functions {
                 }
             }
             public override Saxon.Hej.ma.map.MapItem populateResultMap(Saxon.Hej.ma.map.MapItem resultMap) {
-                foreach (System.Collections.Generic.KeyValuePair<string,string> entry in results) {
+                foreach (System.Collections.Generic.KeyValuePair<string,Saxon.Hej.om.GroundedValue> entry in results) {
                     string uri = entry.Key;
-                    resultMap = resultMap.addEntry(new Saxon.Hej.value.StringValue(uri), new Saxon.Hej.value.StringValue(entry.Value));
+                    resultMap = resultMap.addEntry(new Saxon.Hej.value.StringValue(uri), entry.Value);
                 }
                 return resultMap;
             }
         
         }
         private class RawDeliverer : Saxon.Hej.functions.TransformFn.Deliverer {
-            private readonly System.Collections.Generic.IDictionary<string,Saxon.Api.XdmValue> results = new System.Collections.Concurrent.ConcurrentDictionary<string, Saxon.Api.XdmValue>();
+            private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> results = new System.Collections.Concurrent.ConcurrentDictionary<string, Saxon.Hej.om.GroundedValue>();
             private readonly Saxon.Hej.s9api.RawDestination primaryDestination = new Saxon.Hej.s9api.RawDestination();
             public RawDeliverer()  {
             }
@@ -965,16 +976,21 @@ namespace Saxon.Hej.functions {
                 System.Uri absolute = getAbsoluteUri(href, baseUri);
                 Saxon.Hej.s9api.RawDestination destination = new Saxon.Hej.s9api.RawDestination();
                 destination.onClose(() => {
-                    destination.close();
-                    Saxon.Impl.Helpers.MapUtils.Put(results, absolute.OriginalString, destination.getXdmValue());
+                    try {
+                        destination.close();
+                        Saxon.Hej.om.GroundedValue result = postProcess(absolute.OriginalString, ((Saxon.Hej.om.GroundedValue)destination.getXdmValue().Unwrap()));
+                        Saxon.Impl.Helpers.MapUtils.Put(results, absolute.OriginalString, result);
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        throw new Saxon.Hej.trans.UncheckedXPathException(e);
+                    }
                 } );
                 Saxon.Hej.@event.PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
                 return destination.getReceiver(pipe, properties);
             }
             public override Saxon.Hej.ma.map.MapItem populateResultMap(Saxon.Hej.ma.map.MapItem resultMap) {
-                foreach (System.Collections.Generic.KeyValuePair<string,Saxon.Api.XdmValue> entry in results) {
+                foreach (System.Collections.Generic.KeyValuePair<string,Saxon.Hej.om.GroundedValue> entry in results) {
                     string uri = entry.Key;
-                    resultMap = resultMap.addEntry(new Saxon.Hej.value.StringValue(uri), ((Saxon.Hej.om.GroundedValue)entry.Value.Unwrap()));
+                    resultMap = resultMap.addEntry(new Saxon.Hej.value.StringValue(uri), entry.Value);
                 }
                 return resultMap;
             }

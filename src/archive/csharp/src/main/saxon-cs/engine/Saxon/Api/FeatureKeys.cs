@@ -283,8 +283,16 @@ public abstract class FeatureKeys
     /// </summary>
     /// <remarks>
     ///            <para>If set at stylesheet compile time, the feature is statically disabled. If set at 
-    ///                run-time it is dynamically disabled. (These terms are defined in the XSLT 3.0 spec.) 
-    ///                The feature is always disabled (statically) in Saxon-HE.</para>
+    ///                run-time it is dynamically disabled. (These terms are defined in the XSLT 3.0 spec.)
+    ///                By default, the feature is enabled.</para>
+    ///            <para><i>The XSLT 3.0 specification requires conformant processors to provide a way of
+    ///                disabling <code>xsl:evaluate</code>. This shouldn't be taken as meaning that 
+    ///                <code>xsl:evaluate</code> poses particular security risks. The main reason for disabling it
+    ///                is if you want to carry out static analysis or inspection of stylesheet code to see what 
+    ///                features it uses. But if you're doing such inspection, it's not difficult to check that
+    ///                <code>xsl:evaluate</code> is only being used to execute trusted code. Note also that
+    ///                <code>fn:transform()</code> can similarly be used to execute dynamically-constructed code,
+    ///                and there is no switch to disable that function.</i></para>
     ///        
     /// </remarks>
 
@@ -762,7 +770,7 @@ public abstract class FeatureKeys
 
     /// <summary><para>At one time this property controlled how recoverable errors were handled
     ///            (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
-    ///                specification, so the property is no longer used.</para>
+    ///            specification, so the property is now deprecated.</para>
     /// </summary>
 
     public const string RECOVERY_POLICY = 
@@ -773,7 +781,7 @@ public abstract class FeatureKeys
 
     /// <summary><para>At one time this property controlled how recoverable errors were handled
     ///                (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
-    ///                specification, so the property is no longer used.</para>
+    ///                specification, so the property is now deprecated.</para>
     /// </summary>
 
     public const string RECOVERY_POLICY_NAME = 

@@ -47,7 +47,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                             }
                         }
                     }
-                    return new Saxon.Eej.ee.stream.watch.Trigger(new Saxon.Hej.pattern.NodeTestPattern(Saxon.Hej.type.ErrorType.getInstance()), new Saxon.Eej.ee.stream.feed.FilteringFeed(@out, context, Saxon.Eej.ee.stream.feed.FilteringFeed.OpaqueFilter), context);
+                    return new Saxon.Eej.ee.stream.watch.Trigger(new Saxon.Hej.pattern.NodeTestPattern(Saxon.Hej.type.ErrorType.getInstance()), new Saxon.Eej.ee.stream.feed.FilteringFeed(watchManager, @out, context, Saxon.Eej.ee.stream.feed.FilteringFeed.OpaqueFilter), context);
                 } ;
             } else {
                 return null;
@@ -82,7 +82,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             }
             public Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
                 Saxon.Eej.ee.stream.feed.ItemFeed action = new Saxon.Eej.ee.stream.adjunct.ChooseAdjunct.ItemFeedForConsumingCondition(expression, consumingCondition, @out, context);
-                return new Saxon.Eej.ee.stream.adjunct.BooleanFnFeed.Positive(expression, action, context);
+                return new Saxon.Eej.ee.stream.adjunct.BooleanFnFeed.Positive(watchManager, expression, action, context);
             }
         
         }

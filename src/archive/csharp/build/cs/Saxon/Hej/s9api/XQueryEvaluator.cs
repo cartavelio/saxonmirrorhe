@@ -60,17 +60,6 @@ namespace Saxon.Hej.s9api {
             }
             return Saxon.Api.XdmValue.Wrap(oval);
         }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            context.setResourceResolver(new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(resolver));
-        }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            Saxon.Hej.lib.JJ_ResourceResolver rr = context.getResourceResolver();
-            if ((rr is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
-                return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(rr)).getWrappedURIResolver();
-            } else {
-                return null;
-            }
-        }
         public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
             context.setResourceResolver(resolver);
         }
@@ -149,9 +138,9 @@ namespace Saxon.Hej.s9api {
                 config.getLogger().info(("Processing streamed input "+systemId));
             }
             try {
-                Saxon.Hej.serialize.SerializationProperties @params = expression.getExecutable().getPrimarySerializationProperties();
-                Saxon.Hej.@event.Receiver receiver = destination.getReceiver(config.makePipelineConfiguration(), @params);
+                Saxon.Hej.@event.Receiver receiver = getDestinationReceiver(destination);
                 expression.runStreamed(context, source, receiver, null);
+                destination.closeAndNotify();
             } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
                 throw new Saxon.Api.SaxonApiException(e);
             }

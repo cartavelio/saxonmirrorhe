@@ -163,11 +163,9 @@ namespace Saxon.Hej.style {
                             parts[0] = "";
                         } else {
                             if (parts[0].Equals("")) {
-                                Saxon.Hej.tree.iter.AxisIterator iter = iterateAxis(Saxon.Hej.om.AxisInfo.NAMESPACE);
-                                Saxon.Hej.om.NodeInfo ns;
-                                while (((ns = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next())) != null)) {
-                                    if (ns.getUnicodeStringValue().Equals(nsuri)) {
-                                        parts[0] = ns.getLocalPart();
+                                foreach (Saxon.Hej.om.NamespaceBinding nb in getAllNamespaces()) {
+                                    if (nb.getURI().Equals(nsuri)) {
+                                        parts[0] = nb.getPrefix();
                                         break ;
                                     }
                                 }

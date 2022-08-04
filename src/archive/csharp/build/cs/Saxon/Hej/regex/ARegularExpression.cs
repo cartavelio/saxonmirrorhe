@@ -79,6 +79,9 @@ namespace Saxon.Hej.regex {
         public string getFlags() {
             return rawFlags;
         }
+        public bool isPlatformNative() {
+            return false;
+        }
     
     }
 }

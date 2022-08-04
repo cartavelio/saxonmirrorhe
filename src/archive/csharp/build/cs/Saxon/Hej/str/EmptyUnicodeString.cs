@@ -35,7 +35,7 @@ namespace Saxon.Hej.str {
             return -1;
         }
         public override long indexOf(Saxon.Hej.str.UnicodeString other, long from) {
-            return -1;
+            return ((other.isEmpty() && (from == 0)) ? 0 : -1);
         }
         public override bool isEmpty() {
             return true;

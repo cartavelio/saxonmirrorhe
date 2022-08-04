@@ -245,6 +245,42 @@ namespace Saxon.Hej.expr {
                     comparisonCardinality = Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.ONE_TO_ONE;
                 }
             }
+            if ((@operator == Saxon.Hej.expr.parser.Token.EQUALS)) {
+                if (((getLhsExpression() is Saxon.Hej.expr.RangeExpression) && ((Saxon.Hej.expr.RangeExpression)(getLhsExpression())).isDefaultedStep())) {
+                    Saxon.Hej.expr.Expression min = ((Saxon.Hej.expr.RangeExpression)(getLhsExpression())).getStartExpression();
+                    Saxon.Hej.expr.Expression max = ((Saxon.Hej.expr.RangeExpression)(getLhsExpression())).getEndExpression();
+                    Saxon.Hej.expr.IntegerRangeTest ir = new Saxon.Hej.expr.IntegerRangeTest(getRhsExpression(), min, max);
+                    Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ir);
+                    return ir;
+                }
+                if (((getRhsExpression() is Saxon.Hej.expr.RangeExpression) && ((Saxon.Hej.expr.RangeExpression)(getRhsExpression())).isDefaultedStep())) {
+                    Saxon.Hej.expr.Expression min = ((Saxon.Hej.expr.RangeExpression)(getRhsExpression())).getStartExpression();
+                    Saxon.Hej.expr.Expression max = ((Saxon.Hej.expr.RangeExpression)(getRhsExpression())).getEndExpression();
+                    Saxon.Hej.expr.IntegerRangeTest ir = new Saxon.Hej.expr.IntegerRangeTest(getLhsExpression(), min, max);
+                    Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ir);
+                    return ir;
+                }
+                if ((getLhsExpression() is Saxon.Hej.expr.Literal)) {
+                    Saxon.Hej.om.GroundedValue value0 = ((Saxon.Hej.expr.Literal)(getLhsExpression())).getGroundedValue();
+                    if (((value0 is Saxon.Hej.value.IntegerRange) && (((Saxon.Hej.value.IntegerRange)(value0)).getStep() == 1))) {
+                        long min = ((Saxon.Hej.value.IntegerRange)(value0)).getStart();
+                        long max = ((Saxon.Hej.value.IntegerRange)(value0)).getEnd();
+                        Saxon.Hej.expr.IntegerRangeTest ir = new Saxon.Hej.expr.IntegerRangeTest(getRhsExpression(), Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.makeIntegerValue(min), this), Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.makeIntegerValue(max), this));
+                        Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ir);
+                        return ir;
+                    }
+                }
+                if ((getRhsExpression() is Saxon.Hej.expr.Literal)) {
+                    Saxon.Hej.om.GroundedValue value1 = ((Saxon.Hej.expr.Literal)(getRhsExpression())).getGroundedValue();
+                    if (((value1 is Saxon.Hej.value.IntegerRange) && (((Saxon.Hej.value.IntegerRange)(value1)).getStep() == 1))) {
+                        long min = ((Saxon.Hej.value.IntegerRange)(value1)).getStart();
+                        long max = ((Saxon.Hej.value.IntegerRange)(value1)).getEnd();
+                        Saxon.Hej.expr.IntegerRangeTest ir = new Saxon.Hej.expr.IntegerRangeTest(getLhsExpression(), Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.makeIntegerValue(min), this), Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.makeIntegerValue(max), this));
+                        Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ir);
+                        return ir;
+                    }
+                }
+            }
             if (((((@operator != Saxon.Hej.expr.parser.Token.EQUALS) && (@operator != Saxon.Hej.expr.parser.Token.NE)) && (((comparisonCardinality == Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_MANY) || ((comparisonCardinality == Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_ONE) && ((manyOperandIsLiftable() || manyOperandIsRangeExpression())))))) && ((Saxon.Hej.type.NumericType.isNumericType(t0) || Saxon.Hej.type.NumericType.isNumericType(t1))))) {
                 Saxon.Hej.expr.ValueComparison vc;
                 switch (@operator) {

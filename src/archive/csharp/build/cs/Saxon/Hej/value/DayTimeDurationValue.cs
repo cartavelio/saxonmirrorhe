@@ -161,8 +161,8 @@ namespace Saxon.Hej.value {
             return new Saxon.Hej.value.DayTimeDurationValue(0, 0, 0, (nanoseconds/1_000_000_000L), (int)(((nanoseconds%1_000_000_000L))));
         }
         public override Saxon.Hej.value.DurationValue multiply(long factor) {
-            if (((System.Math.Abs(factor)<0x7fff_ffff) && (System.Math.Abs(_seconds)<0x7fff_ffff))) {
-                return new Saxon.Hej.value.DayTimeDurationValue(0, 0, 0, ((_seconds*factor)*((_negative ? -1 : 1))), (int)((((_nanoseconds*factor)*((_negative ? -1 : 1))))));
+            if ((((System.Math.Abs(factor)<0x7fff_ffff) && (System.Math.Abs(_seconds)<0x7fff_ffff)) && (_nanoseconds == 0))) {
+                return new Saxon.Hej.value.DayTimeDurationValue(0, 0, 0, ((_seconds*factor)*((_negative ? -1 : 1))), 0);
             } else {
                 return multiply(Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(factor));
             }

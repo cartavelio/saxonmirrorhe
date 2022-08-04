@@ -11,7 +11,7 @@ namespace Saxon.Eej.ee.validate {
             return new Saxon.Hej.value.StringValue(new string(value));
         }
         public Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingleAtomicIterator(((/*1430*/Saxon.Hej.value.StringValue)head()));
+            return Saxon.Hej.tree.iter.SingleAtomicIterator.makeIterator(((/*1430*/Saxon.Hej.value.StringValue)head()));
         }
         public Saxon.Hej.om.Item itemAt(int n) {
             return ((n == 0) ? ((/*1430*/Saxon.Hej.value.StringValue)head()) : null);

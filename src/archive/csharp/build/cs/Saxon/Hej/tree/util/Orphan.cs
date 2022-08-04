@@ -298,7 +298,7 @@ namespace Saxon.Hej.tree.util {
 
         /* Expanding default method iterate from interface Item */
         public Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingletonIterator(this);
+            return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
         }
 
         /* Expanding default method reduce from interface GroundedValue */

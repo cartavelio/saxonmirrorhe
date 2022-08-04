@@ -2690,10 +2690,10 @@ namespace Saxon.Hej.expr.parser {
             return null;
         }
         private static string diagnoseCallToJavaMethod(Saxon.Hej.Configuration config) {
-            return "Reflexive calls to external Java methods are not available under Saxon-CS";
+            return "Reflexive calls to external Java methods are not available under SaxonCS";
         }
         private static string diagnoseCallToCliMethod(Saxon.Hej.Configuration config) {
-            return "Reflexive calls to external .NET methods are not available under Saxon-CS";
+            return "Reflexive calls to external .NET methods are not available under SaxonCS";
         }
         protected internal Saxon.Hej.om.StructuredQName resolveFunctionName(string fname) {
             if (scanOnly) {

@@ -45,6 +45,7 @@ namespace Saxon.Hej.style {
             }
             if ((accumulator.getAccumulatorName() == null)) {
                 reportAbsence("name");
+                accumulator.setAccumulatorName(new Saxon.Hej.om.StructuredQName("anon", Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, ("acc"+GetHashCode())));
             }
         }
         protected internal override void prepareAttributes() {

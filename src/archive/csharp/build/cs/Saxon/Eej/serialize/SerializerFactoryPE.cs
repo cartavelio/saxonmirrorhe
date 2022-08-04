@@ -15,6 +15,7 @@ namespace Saxon.Eej.serialize {
                     emitter.setUnicodeWriter(((Saxon.Hej.serialize.UnicodeWriterResult)(result)).getUnicodeWriter());
                 } else {
                     emitter.setUnicodeWriter(expandedResult.obtainUnicodeWriter());
+                    emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                 }
                 props.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.OMIT_XML_DECLARATION, "yes");
                 emitter.setOutputProperties(props);
@@ -40,6 +41,7 @@ namespace Saxon.Eej.serialize {
                                 emitter.setUnicodeWriter(((Saxon.Hej.serialize.UnicodeWriterResult)(result)).getUnicodeWriter());
                             } else {
                                 emitter.setUnicodeWriter(expandedResult.obtainUnicodeWriter());
+                                emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                             }
                             props.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.OMIT_XML_DECLARATION, "yes");
                             emitter.setOutputProperties(props);

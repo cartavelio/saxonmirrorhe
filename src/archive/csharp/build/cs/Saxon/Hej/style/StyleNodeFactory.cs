@@ -85,11 +85,12 @@ namespace Saxon.Hej.style {
                 string localname = elemName.getLocalPart();
                 Saxon.Hej.style.StyleElement temp = null;
                 if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.XSLT)) {
+                    int processorVersion = compilation.getCompilerInfo().getXsltVersion();
                     if ((parent is Saxon.Hej.style.XSLStylesheet)) {
-                        if ((((Saxon.Hej.style.XSLStylesheet)(parent)).getEffectiveVersion()<=20)) {
+                        if ((((Saxon.Hej.style.XSLStylesheet)(parent)).getEffectiveVersion()<=processorVersion)) {
                             temp = new Saxon.Hej.style.AbsentExtensionElement();
                             temp.setCompilation(compilation);
-                            temp.setValidationError(new Saxon.Hej.trans.XmlProcessingIncident("Unknown top-level XSLT declaration"), Saxon.Hej.style.StyleElement.OnFailure.REPORT_UNLESS_FORWARDS_COMPATIBLE);
+                            temp.setValidationError(new Saxon.Hej.trans.XmlProcessingIncident(("Unknown top-level XSLT declaration "+elemName.getDisplayName())), Saxon.Hej.style.StyleElement.OnFailure.REPORT_UNLESS_FORWARDS_COMPATIBLE);
                         }
                     } else {
                         temp = new Saxon.Hej.style.AbsentExtensionElement();
@@ -97,11 +98,7 @@ namespace Saxon.Hej.style {
                         temp.setLocation(baseURI, lineNumber, columnNumber);
                         temp.setCompilation(compilation);
                         temp.processStandardAttributes("");
-                        if ((temp.getEffectiveVersion()>20)) {
-                            temp.setValidationError(new Saxon.Hej.trans.XmlProcessingIncident("Unknown XSLT instruction"), Saxon.Hej.style.StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
-                        } else {
-                            temp.setValidationError(new Saxon.Hej.trans.XmlProcessingIncident("Unknown XSLT instruction"), Saxon.Hej.style.StyleElement.OnFailure.REPORT_IF_INSTANTIATED);
-                        }
+                        temp.setValidationError(new Saxon.Hej.trans.XmlProcessingIncident(("Unknown XSLT instruction "+elemName.getDisplayName()), "XTSE0010"), ((temp.getEffectiveVersion()>processorVersion) ? Saxon.Hej.style.StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE : Saxon.Hej.style.StyleElement.OnFailure.REPORT_ALWAYS));
                     }
                 }
                 if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.SAXON)) {
@@ -127,23 +124,17 @@ namespace Saxon.Hej.style {
                 temp.processStandardAttributes(Saxon.Hej.lib.NamespaceConstant.XSLT);
                 Saxon.Hej.trans.XmlProcessingIncident reason;
                 System.Type actualClass;
-                if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.XSLT)) {
-                    reason = new Saxon.Hej.trans.XmlProcessingIncident(("Unknown XSLT element: "+Saxon.Hej.trans.Err.wrap(localname, Saxon.Hej.trans.Err.ELEMENT)), "XTSE0010");
+                if ((temp.isExtensionNamespace(uri) && !(toplevel))) {
                     actualClass = typeof(Saxon.Hej.style.AbsentExtensionElement);
-                    temp.setValidationError(reason, Saxon.Hej.style.StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
-                } else {
-                    if ((temp.isExtensionNamespace(uri) && !(toplevel))) {
-                        actualClass = typeof(Saxon.Hej.style.AbsentExtensionElement);
-                        if (Saxon.Hej.lib.NamespaceConstant.isReserved(uri)) {
-                            reason = new Saxon.Hej.trans.XmlProcessingIncident("Cannot use a reserved namespace for extension instructions", "XTSE0800");
-                            temp.setValidationError(reason, Saxon.Hej.style.StyleElement.OnFailure.REPORT_ALWAYS);
-                        } else {
-                            reason = new Saxon.Hej.trans.XmlProcessingIncident(("Unknown extension instruction "+Saxon.Hej.trans.Err.wrap(elemName.getDisplayName(), Saxon.Hej.trans.Err.ELEMENT)), "XTDE1450");
-                            temp.setValidationError(reason, Saxon.Hej.style.StyleElement.OnFailure.REPORT_DYNAMICALLY_UNLESS_FALLBACK_AVAILABLE);
-                        }
+                    if (Saxon.Hej.lib.NamespaceConstant.isReserved(uri)) {
+                        reason = new Saxon.Hej.trans.XmlProcessingIncident("Cannot use a reserved namespace for extension instructions", "XTSE0800");
+                        temp.setValidationError(reason, Saxon.Hej.style.StyleElement.OnFailure.REPORT_ALWAYS);
                     } else {
-                        actualClass = typeof(Saxon.Hej.style.LiteralResultElement);
+                        reason = new Saxon.Hej.trans.XmlProcessingIncident(("Unknown extension instruction "+Saxon.Hej.trans.Err.wrap(elemName.getDisplayName(), Saxon.Hej.trans.Err.ELEMENT)), "XTDE1450");
+                        temp.setValidationError(reason, Saxon.Hej.style.StyleElement.OnFailure.REPORT_DYNAMICALLY_UNLESS_FALLBACK_AVAILABLE);
                     }
+                } else {
+                    actualClass = typeof(Saxon.Hej.style.LiteralResultElement);
                 }
                 Saxon.Hej.style.StyleElement node;
                 if (actualClass.Equals(assumedClass)) {

@@ -363,12 +363,27 @@ namespace Saxon.Eej.functions.extfn {
         public class BinaryPackInteger : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 Saxon.Hej.value.IntegerValue value = (Saxon.Hej.value.IntegerValue)(arguments[0].head());
-                int length = (int)(((Saxon.Hej.value.IntegerValue)(arguments[1].head())).longValue());
-                if ((length<0)) {
+                int requestedLength = (int)(((Saxon.Hej.value.IntegerValue)(arguments[1].head())).longValue());
+                if ((requestedLength<0)) {
                     error("Requested length of integer packing is negative", ERROR_NEGATIVE_SIZE);
                 }
                 System.Numerics.BigInteger big = value.asBigInteger();
-                return packBytes(big.ToByteArray(isUnsigned: false, isBigEndian: true), length, endianness(arguments, 2), (Saxon.Impl.Helpers.BigIntegerUtils.Signum(big) == -1));
+                byte[] @in = big.ToByteArray(isUnsigned: false, isBigEndian: true);
+                byte[] result = new byte[requestedLength];
+                if ((Saxon.Impl.Helpers.BigIntegerUtils.Signum(big) == -1)) {
+                    Saxon.Ejava.util.Arrays.fill(result, (byte)(255));
+                }
+                int suppliedLength = @in.Length;
+                if (endianness(arguments, 2)) {
+                    int bytesToCopy = System.Math.Min(suppliedLength, requestedLength);
+                    Saxon.Ejava.lang.System.arraycopy(@in, (suppliedLength-bytesToCopy), result, (requestedLength-bytesToCopy), bytesToCopy);
+                } else {
+                    int i = 0;
+                    while (((i<requestedLength) && (suppliedLength>0))) {
+                        result[i++] = @in[--suppliedLength];
+                    }
+                }
+                return one(result);
             }
         
         }
@@ -760,36 +775,6 @@ namespace Saxon.Eej.functions.extfn {
                 while ((length-->0)) {
                     result[i++] = (byte)(((@in&unchecked((int)0xff))));
                     @in >>= 8;
-                }
-            }
-            return one(result);
-        }
-        private static Saxon.Hej.value.Base64BinaryValue packBytes(byte[] @in, int length, bool big) {
-            return packBytes(@in, length, big, false);
-        }
-        private static Saxon.Hej.value.Base64BinaryValue packBytes(byte[] @in, int length, bool big, bool negative) {
-            byte[] result = new byte[length];
-            int len = @in.Length;
-            int i;
-            if (big) {
-                i = len;
-                while (((length>0) && (i>0))) {
-                    result[--length] = @in[--i];
-                }
-                if (negative) {
-                    while ((length>0)) {
-                        result[--length] = (byte)((255));
-                    }
-                }
-            } else {
-                i = 0;
-                while (((length-->0) && (len>0))) {
-                    result[i++] = @in[--len];
-                }
-                if (negative) {
-                    while ((length>0)) {
-                        result[i++] = (byte)((255));
-                    }
                 }
             }
             return one(result);

@@ -526,7 +526,7 @@ namespace Saxon.Hej.style {
             if (contextItemType.Equals(Saxon.Hej.type.ErrorType.getInstance())) {
                 contextItemType = Saxon.Hej.type.AnyItemType.getInstance();
             }
-            cisi = config.makeContextItemStaticInfo(contextItemType, false);
+            cisi = config.makeContextItemStaticInfo(contextItemType, mayOmitContextItem);
             body = refineTemplateBody(body, cisi);
             bool first = true;
             foreach (System.Collections.Generic.KeyValuePair<Saxon.Hej.om.StructuredQName,Saxon.Hej.expr.instruct.TemplateRule> kvp in compiledTemplateRules) {
@@ -637,7 +637,7 @@ namespace Saxon.Hej.style {
                             throw;
                         }
                         if ((match2 != match1)) {
-                            Saxon.Hej.expr.parser.ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(Saxon.Hej.type.AnyItemType.getInstance(), false);
+                            Saxon.Hej.expr.parser.ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(Saxon.Hej.type.AnyItemType.getInstance(), mayOmitContextItem);
                             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(match, match2);
                             match2.setOriginalText(match.ToString());
                             match2 = match2.typeCheck(visitor, info);
@@ -748,7 +748,7 @@ namespace Saxon.Hej.style {
             }
             if ((match != null)) {
                 Saxon.Hej.type.ItemType contextItemType = getContextItemTypeForTemplateRule();
-                Saxon.Hej.expr.parser.ContextItemStaticInfo cisi = config.makeContextItemStaticInfo(contextItemType, false);
+                Saxon.Hej.expr.parser.ContextItemStaticInfo cisi = config.makeContextItemStaticInfo(contextItemType, mayOmitContextItem);
                 cisi.setContextPostureStriding();
                 Saxon.Hej.expr.parser.ExpressionVisitor visitor = makeExpressionVisitor();
                 match.resetLocalStaticProperties();
@@ -768,7 +768,7 @@ namespace Saxon.Hej.style {
                                 allocateLocalSlots(templateRuleBody);
                                 foreach (Saxon.Hej.trans.rules.Rule r in compiledTemplateRule.getRules()) {
                                     Saxon.Hej.pattern.Pattern match = r.getPattern();
-                                    Saxon.Hej.expr.parser.ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(match.getItemType(), false);
+                                    Saxon.Hej.expr.parser.ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(match.getItemType(), mayOmitContextItem);
                                     info.setContextPostureStriding();
                                     Saxon.Hej.pattern.Pattern m2 = match.optimize(visitor, info);
                                     if ((compiledTemplateRules.Count>1)) {

@@ -183,9 +183,6 @@ namespace Saxon.Hej.style {
                 int slot = slotManager.allocateSlotNumber(var.getVariableQName());
                 var.setPackageData(this);
                 var.setBinderySlotNumber(slot);
-                if ((c.getVisibility() != Saxon.Hej.trans.Visibility.HIDDEN)) {
-                    addGlobalVariable(var);
-                }
             }
         }
         public void addComponent(Saxon.Hej.expr.Component component) {

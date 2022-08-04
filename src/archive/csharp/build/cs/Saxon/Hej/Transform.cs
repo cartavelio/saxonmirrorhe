@@ -518,7 +518,9 @@ namespace Saxon.Hej {
                         sheet.explain(@out);
                     }
                     if (export) {
-                        sheet.export(new System.IO.FileStream(exportOutputFileName, System.IO.FileMode.OpenOrCreate));
+                        Saxon.Ejava.io.File sef = new Saxon.Ejava.io.File(exportOutputFileName);
+                        Saxon.Hej.Query.createFileIfNecessary(sef);
+                        sheet.export(new System.IO.FileStream(sef.getPath(), System.IO.FileMode.Create));
                         if (showTime) {
                             config.getLogger().info(("Stylesheet exported to: "+new Saxon.Ejava.io.File(exportOutputFileName).getAbsolutePath()));
                         }

@@ -108,20 +108,20 @@ namespace Saxon.Hej.trans {
             }
             return !(allOutputDestinations.Contains(uri));
         }}
-        public void addUnavailableOutputDestination(Saxon.Hej.om.DocumentKey uri) {
+        public void addUnavailableOutputDestination(Saxon.Hej.om.DocumentKey uri) { lock(this) {
             if ((allOutputDestinations == null)) {
                 allOutputDestinations = new System.Collections.Generic.HashSet<Saxon.Hej.om.DocumentKey>(20);
             }
             allOutputDestinations.Add(uri);
-        }
-        public void removeUnavailableOutputDestination(Saxon.Hej.om.DocumentKey uri) {
+        }}
+        public void removeUnavailableOutputDestination(Saxon.Hej.om.DocumentKey uri) { lock(this) {
             if ((allOutputDestinations != null)) {
                 allOutputDestinations.Remove(uri);
             }
-        }
-        public bool isUnusedOutputDestination(Saxon.Hej.om.DocumentKey uri) {
+        }}
+        public bool isUnusedOutputDestination(Saxon.Hej.om.DocumentKey uri) { lock(this) {
             return ((allOutputDestinations == null) || !(allOutputDestinations.Contains(uri)));
-        }
+        }}
         public void setInitialTemplateParameters(System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.om.Sequence> @params, bool tunnel) {
             if (tunnel) {
                 this.initialTemplateTunnelParams = @params;

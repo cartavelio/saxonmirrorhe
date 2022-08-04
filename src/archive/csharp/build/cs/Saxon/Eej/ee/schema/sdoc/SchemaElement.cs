@@ -161,8 +161,12 @@ namespace Saxon.Eej.ee.schema.sdoc {
             } catch (Saxon.Hej.type.SchemaException e2) {
                 throw new Saxon.Ejava.lang.IllegalStateException((("Schema document contains no xs:schema element. "+"Problem occurred while reporting error: ")+e2.Message));
             }
+            Saxon.Hej.trans.XmlProcessingIncident incident = new Saxon.Hej.trans.XmlProcessingIncident(err, Saxon.Hej.trans.SaxonErrorCode.SXSQ0001, this);
             if ((reporter != null)) {
-                reporter.report(new Saxon.Hej.trans.XmlProcessingIncident(err, Saxon.Hej.trans.SaxonErrorCode.SXSQ0001, this));
+                reporter.report(incident);
+            }
+            if ((incident.getTerminationMessage() != null)) {
+                throw new Saxon.Hej.type.SchemaException(incident.getTerminationMessage());
             }
         }
         protected internal void error(Saxon.Hej.type.SchemaException exception) {
@@ -173,7 +177,11 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 throw new Saxon.Ejava.lang.IllegalStateException((("Schema document contains no xs:schema element. "+"Problem occurred while reporting error: ")+exception.Message));
             }
             if ((reporter != null)) {
-                reporter.report(new Saxon.Hej.trans.XmlProcessingException(exception));
+                Saxon.Hej.trans.XmlProcessingException incident = new Saxon.Hej.trans.XmlProcessingException(exception);
+                reporter.report(incident);
+                if ((incident.getTerminationMessage() != null)) {
+                    throw new Saxon.Hej.type.SchemaException(incident.getTerminationMessage());
+                }
             } else {
                 throw exception;
             }
@@ -182,6 +190,9 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Hej.trans.XmlProcessingIncident exception = ((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(err, Saxon.Hej.trans.SaxonErrorCode.SXWN9018, this).asWarning());
             Saxon.Hej.lib.ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
             reporter.report(exception);
+            if ((exception.getTerminationMessage() != null)) {
+                throw new Saxon.Hej.type.SchemaException(exception.getTerminationMessage());
+            }
         }
         protected internal int getFingerprint(string name, int option) {
             Saxon.Hej.om.StructuredQName qname = getComponentName(name, option);

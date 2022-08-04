@@ -118,7 +118,7 @@ namespace Saxon.Hej.functions.hof {
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = (Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions());
             if (("JS".Equals(options.target) && (options.targetVersion == 1))) {
-                throw new Saxon.Hej.trans.XPathException("Higher-order functions are not available in Saxon-JS v1.*", "XTSE3540", getLocation());
+                throw new Saxon.Hej.trans.XPathException("Higher-order functions are not available in SaxonJS v1.*", "XTSE3540", getLocation());
             }
             if ((nominalTarget.getDeclaringComponent() == null)) {
                 @out.startElement("inlineFn");

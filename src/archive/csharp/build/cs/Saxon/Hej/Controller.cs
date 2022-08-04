@@ -138,14 +138,12 @@ namespace Saxon.Hej {
             return new Saxon.Hej.@event.SequenceCollector(pipe, size);
         }
         public Saxon.Hej.@event.PipelineConfiguration makePipelineConfiguration() {
-            Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
-            pipe.getParseOptions().setSchemaValidationMode(validationMode);
-            pipe.getParseOptions().setErrorReporter(errorReporter);
+            Saxon.Hej.@event.PipelineConfiguration pipe = new Saxon.Hej.@event.PipelineConfiguration(getConfiguration());
             pipe.setController(this);
-            Saxon.Hej.expr.instruct.Executable executable = getExecutable();
-            if ((executable != null)) {
-                pipe.setHostLanguage(executable.getHostLanguage());
-            }
+            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(getConfiguration().getParseOptions());
+            options.setSchemaValidationMode(validationMode);
+            options.setErrorReporter(errorReporter);
+            pipe.setParseOptions(options);
             return pipe;
         }
         public void setErrorReporter(Saxon.Hej.lib.ErrorReporter reporter) {

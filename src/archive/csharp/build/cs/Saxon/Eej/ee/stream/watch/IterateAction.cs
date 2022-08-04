@@ -43,7 +43,9 @@ namespace Saxon.Eej.ee.stream.watch {
             Saxon.Hej.expr.TailCallLoop.TailCallInfo tail = cm.getTailCallInfo();
             if ((tail is Saxon.Hej.expr.instruct.BreakInstr)) {
                 broken = true;
-                terminator.terminate();
+                if (getWatchManager().allowsEarlyExit()) {
+                    terminator.terminate();
+                }
             }
         }
         public override void close() {
