@@ -274,5 +274,12 @@ namespace SaxonCS_NUnit {
                 Assert.Fail();
             }
         }
+        
+        [Test]
+        public void testDecimalDivide() {
+            Processor p = new();
+            XdmValue result = p.NewXPathCompiler().Compile("1 div 7").Load().Evaluate();
+            Assert.AreEqual(((XdmAtomicValue)result).StringValue, "0.142857142857142857");
+        }
     }
 }
