@@ -67,6 +67,7 @@ public class TimingTraceListener implements TraceListener {
 
     private final Map<Traceable, Integer> recursionDepth = new HashMap<>();
     private HostLanguage lang = HostLanguage.XSLT;
+    private int nestingDepth = 0;
 
     /**
      * Set the PrintStream to which the output will be written.
@@ -86,9 +87,11 @@ public class TimingTraceListener implements TraceListener {
 
     @Override
     public void open(/*@NotNull*/ Controller controller) {
-        config = controller.getConfiguration();
-        lang = controller.getExecutable().getHostLanguage();
-        t_total = System.nanoTime();
+        if (nestingDepth++ == 0) { // bug 5681: nested transformations using fn:transform
+            config = controller.getConfiguration();
+            lang = controller.getExecutable().getHostLanguage();
+            t_total = System.nanoTime();
+        }
     }
 
     /**
@@ -97,61 +100,63 @@ public class TimingTraceListener implements TraceListener {
 
     @Override
     public void close() {
-        t_total = System.nanoTime() - t_total;
-        runs++;
-        try {
-            PreparedStylesheet sheet = this.getStyleSheet();
-            XsltController controller = sheet.newController();
+        if (--nestingDepth == 0) {
+            t_total = System.nanoTime() - t_total;
+            runs++;
+            try {
+                PreparedStylesheet sheet = this.getStyleSheet();
+                XsltController controller = sheet.newController();
 
-            SerializationProperties props = new SerializationProperties();
-            props.setProperty("method", "html");
-            props.setProperty("indent", "yes");
-            controller.setTraceListener(null);
-            TransformerReceiver tr = new TransformerReceiver(controller);
-            controller.initializeController(new GlobalParameterSet());
-            tr.open();
-            Receiver result = config.getSerializerFactory().getReceiver(out.asStreamResult(), props, controller.makePipelineConfiguration());
-            tr.setDestination(result);
+                SerializationProperties props = new SerializationProperties();
+                props.setProperty("method", "html");
+                props.setProperty("indent", "yes");
+                controller.setTraceListener(null);
+                TransformerReceiver tr = new TransformerReceiver(controller);
+                controller.initializeController(new GlobalParameterSet());
+                tr.open();
+                Receiver result = config.getSerializerFactory().getReceiver(out.asStreamResult(), props, controller.makePipelineConfiguration());
+                tr.setDestination(result);
 
-            Push push = new PushToReceiver(tr);
-            Document doc = push.document(true);
-            Element trace = doc.element("trace")
-                    .attribute("t-total", Double.toString((double) t_total / 1000000));
-            for (ComponentMetrics ins : instructMap.values()) {
-                Element fn = trace.element("fn");
-                String name;
-                if (ins.component.getObjectName() != null) {
-                    name = ins.component.getObjectName().getDisplayName();
-                    fn.attribute("name", name);
-                } else {
-                    if (ins.properties.get("name") != null) {
-                        name = ins.properties.get("name").toString();
+                Push push = new PushToReceiver(tr);
+                Document doc = push.document(true);
+                Element trace = doc.element("trace")
+                        .attribute("t-total", Double.toString((double) t_total / 1000000));
+                for (ComponentMetrics ins : instructMap.values()) {
+                    Element fn = trace.element("fn");
+                    String name;
+                    if (ins.component.getObjectName() != null) {
+                        name = ins.component.getObjectName().getDisplayName();
                         fn.attribute("name", name);
+                    } else {
+                        if (ins.properties.get("name") != null) {
+                            name = ins.properties.get("name").toString();
+                            fn.attribute("name", name);
+                        }
                     }
+                    if (ins.properties.get("match") != null) {
+                        name = ins.properties.get("match").toString();
+                        fn.attribute("match", name);
+                    }
+                    if (ins.properties.get("mode") != null) {
+                        name = ins.properties.get("mode").toString();
+                        fn.attribute("mode", name);
+                    }
+                    fn.attribute("construct", ins.component.getTracingTag())
+                            .attribute("file", ins.component.getLocation().getSystemId())
+                            .attribute("count", Long.toString(ins.count / runs))
+                            .attribute("t-sum-net", Double.toString((double) ins.net / runs / 1000000))
+                            .attribute("t-avg-net", Double.toString(ins.net / (double) ins.count / 1000000))
+                            .attribute("t-sum", Double.toString((double) ins.gross / runs / 1000000))
+                            .attribute("t-avg", Double.toString(ins.gross / (double) ins.count / 1000000))
+                            .attribute("line", Long.toString(ins.component.getLocation().getLineNumber()))
+                            .close();
                 }
-                if (ins.properties.get("match") != null) {
-                    name = ins.properties.get("match").toString();
-                    fn.attribute("match", name);
-                }
-                if (ins.properties.get("mode") != null) {
-                    name = ins.properties.get("mode").toString();
-                    fn.attribute("mode", name);
-                }
-                fn.attribute("construct", ins.component.getTracingTag())
-                        .attribute("file", ins.component.getLocation().getSystemId())
-                        .attribute("count", Long.toString(ins.count/ runs))
-                        .attribute("t-sum-net", Double.toString((double) ins.net / runs / 1000000))
-                        .attribute("t-avg-net", Double.toString(ins.net / (double) ins.count / 1000000))
-                        .attribute("t-sum", Double.toString((double) ins.gross / runs / 1000000))
-                        .attribute("t-avg", Double.toString(ins.gross / (double) ins.count / 1000000))
-                        .attribute("line", Long.toString(ins.component.getLocation().getLineNumber()))
-                        .close();
+                doc.close();
+            } catch (TransformerException e) {
+                System.err.println("Unable to transform timing profile information: " + e.getMessage());
+            } catch (SaxonApiException e) {
+                System.err.println("Unable to generate timing profile information: " + e.getMessage());
             }
-            doc.close();
-        } catch (TransformerException e) {
-            System.err.println("Unable to transform timing profile information: " + e.getMessage());
-        } catch (SaxonApiException e) {
-            System.err.println("Unable to generate timing profile information: " + e.getMessage());
         }
     }
 

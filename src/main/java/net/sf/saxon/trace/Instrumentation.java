@@ -46,6 +46,15 @@ public class Instrumentation {
         }
     }
 
+    //#if CSHARP==false
+    public static String callStack() {
+        StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
+        return stacktrace[3].getClassName() + "." + stacktrace[3].getMethodName() +
+                " from " + stacktrace[4].getClassName() + "." + stacktrace[4].getMethodName() +
+                " from " + stacktrace[5].getClassName() + "." + stacktrace[5].getMethodName();
+    }
+    //#endif
+
     public static void reset() {
         counters.clear();
     }

@@ -17,7 +17,10 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UniStringConsumer;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -31,10 +34,10 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static net.sf.saxon.event.RegularSequenceChecker.State.CONTENT;
-import static net.sf.saxon.event.RegularSequenceChecker.State.START_TAG;
+import static net.sf.saxon.event.RegularSequenceChecker.State.FINAL;
 import static net.sf.saxon.event.RegularSequenceChecker.State.INITIAL;
 import static net.sf.saxon.event.RegularSequenceChecker.State.OPEN;
-import static net.sf.saxon.event.RegularSequenceChecker.State.FINAL;
+import static net.sf.saxon.event.RegularSequenceChecker.State.START_TAG;
 
 /**
  * This class is used for generating complex content, that is, the content of an

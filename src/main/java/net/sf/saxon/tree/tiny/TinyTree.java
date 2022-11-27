@@ -17,7 +17,10 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.linked.SystemIdMap;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AnyURIValue;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.*;
 
 import java.util.*;
@@ -178,7 +181,6 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
     public TinyTree(/*@NotNull*/ Configuration config, Statistics statistics) {
         super(config);
-        //Instrumentation.count("TinyTree instances");
 
         int nodes = (int) statistics.getAverageNodes() + 1;
         int attributes = (int) statistics.getAverageAttributes() + 1;
@@ -226,7 +228,6 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         if (nodeKind.length < numberOfNodes + needed) {
             //System.err.println("Number of nodes = " + numberOfNodes);
             int k = kind == Type.STOPPER ? numberOfNodes + 1 : Math.max(numberOfNodes * 2, numberOfNodes + needed);
-
             nodeKind = Arrays.copyOf(nodeKind, k);
             next = Arrays.copyOf(next, k);
             depth = Arrays.copyOf(depth, k);

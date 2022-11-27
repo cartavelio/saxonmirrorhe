@@ -368,7 +368,11 @@ public final class LargeTextBuffer {
     }
 
     public int length() {
-        return completeSegments.size()*SEGLEN + (lastSegment == null ? 0 : lastSegmentLength);
+        if (lastSegment == null) {
+            return (completeSegments.size() - 1) * SEGLEN + lastSegmentLength;
+        } else {
+            return completeSegments.size() * SEGLEN + lastSegmentLength;
+        }
     }
 
     /**
