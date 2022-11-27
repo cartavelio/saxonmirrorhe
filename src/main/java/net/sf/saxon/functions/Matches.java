@@ -58,10 +58,9 @@ public class Matches extends RegexFunction {
                     regex.getUnicodeStringValue(), flags.toString(), lang, null);
 
         } catch (XPathException err) {
-            XPathException de = new XPathException(err);
-            de.maybeSetErrorCode("FORX0002");
-            de.setXPathContext(context);
-            throw de;
+            err.maybeSetErrorCode("FORX0002");
+            err.maybeSetContext(context);
+            throw err;
         }
         return re.containsMatch(input.getUnicodeStringValue());
     }
