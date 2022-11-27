@@ -615,6 +615,7 @@ namespace TestDriver {
             SysCollGen.Dictionary<Uri, Encoding> encodings;
             SysCollGen.Dictionary<Uri, Func<TextResource>> resources;
             private Configuration config;
+            private StandardUnparsedTextResolver fallbackResolver = new StandardUnparsedTextResolver();
 
             public TestUnparsedTextURIResolver(SysCollGen.Dictionary<Uri, Encoding> encodings,
                 SysCollGen.Dictionary<Uri, Func<TextResource>> resources,
@@ -648,13 +649,8 @@ namespace TestDriver {
                     }
                 }
                 else {
-                    if (encoding == null) {
-                        encoding = Encoding.UTF8;
-                    }
-
-                    return null;
-                    // TextReader reader = new StandardUnparsedTextResolver(config).resolve(absoluteURI, encoding.WebName, config);
-                    // return new TextResource(reader, absoluteURI);
+                    System.IO.TextReader reader = fallbackResolver.resolve(absoluteURI, encoding==null ? null : encoding.WebName, config);
+                    return new TextResource(reader, absoluteURI);
                 }
 
             }
