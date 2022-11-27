@@ -811,7 +811,7 @@ public final class Tokenizer {
                         int newlines = 0;
                         while (true) {
                             if (j >= inputLength) {
-                                throw new XPathException("Unclosed string template in expression");
+                                throw new XPathException("Unclosed string constructor in expression");
                             }
                             if (input.charAt(j) == '\n') {
                                 newlines++;
@@ -824,7 +824,8 @@ public final class Tokenizer {
                             } else if (input.charAt(j) == ']' && j + 2 < inputLength
                                     && input.charAt(j + 1) == '`' && input.charAt(j + 2) == '`') {
                                 nextToken = Token.STRING_LITERAL_BACKTICKED;
-                                // Can't return STRING_LITERAL because it's not accepted everywhere that a string literal is
+                                // Can't return STRING_LITERAL because it's not accepted everywhere that a string literal is, and
+                                // because it doesn't get unescaped (bug 5647)
                                 nextTokenValue = input.substring(inputOffset, j);
                                 inputOffset = j + 3;
                                 incrementLineNumber(newlines);
