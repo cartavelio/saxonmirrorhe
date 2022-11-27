@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Saxon.Ejava.lang;
 using Math = System.Math;
 
@@ -133,7 +134,21 @@ namespace Saxon.Impl.Helpers {
             }
         }
 
+        /// <summary>
+        /// Parse a string as a double - emulation of java.lang.Double.parseDouble()
+        /// </summary>
+
+        public static double ParseDouble(string str) {
+            try {
+                return System.Double.Parse(str, CultureInfo.InvariantCulture);
+            }
+            catch (FormatException e) {
+                throw new NumberFormatException(e.Message);
+            }
+        }
     }
+    
+   
 }
 
-// Copyright (c) 2021 Saxonica Limited
+// Copyright (c) 2021-22 Saxonica Limited
