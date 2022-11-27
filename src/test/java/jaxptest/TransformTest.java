@@ -110,6 +110,7 @@ public class TransformTest  {
         }
     }
 
+    @Test
     public void testStreamingTransformerHandler() {
         try {
             String xsl =
