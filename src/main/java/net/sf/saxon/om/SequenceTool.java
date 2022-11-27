@@ -501,7 +501,13 @@ public class SequenceTool {
      */
 
     public static void process(Sequence value, Outputter output, Location locationId) throws XPathException {
-        supply(value.iterate(), (ItemConsumer<? super Item>) it -> output.append(it, locationId, ReceiverOption.ALL_NAMESPACES));
+        try {
+            supply(value.iterate(), (ItemConsumer<? super Item>) it -> output.append(it, locationId, ReceiverOption.ALL_NAMESPACES));
+        } catch (UncheckedXPathException e) {
+            XPathException xpe = e.getXPathException();
+            xpe.maybeSetLocation(locationId);
+            throw xpe;
+        }
     }
 
     /**
