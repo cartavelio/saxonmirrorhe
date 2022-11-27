@@ -430,7 +430,6 @@
     enableAssertions="false"
     initialMode=""
     initialTemplate=""
-    messageEmitter=""
     outputUriResolver=""
     resultDocumentThreads="10"
     schemaAware="false"
