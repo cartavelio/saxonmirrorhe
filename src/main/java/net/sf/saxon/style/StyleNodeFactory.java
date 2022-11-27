@@ -125,7 +125,7 @@ public class StyleNodeFactory implements NodeFactory {
         if ((e instanceof XSLStylesheet || e instanceof XSLPackage) && parent.getNodeKind() != Type.DOCUMENT) {
             e = new AbsentExtensionElement();
             final XmlProcessingIncident reason =
-                    new XmlProcessingIncident(elemName.getDisplayName() + " can only appear at the outermost level", "XTSE0010");
+                    new XmlProcessingIncident(elemName.getDisplayName() + " can only appear at the outermost level", "XTSE0010", e);
             e.setValidationError(reason, StyleElement.OnFailure.REPORT_ALWAYS);
         }
 
