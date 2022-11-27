@@ -443,6 +443,11 @@ public class AtomicSequenceConverter extends UnaryExpression {
         return "convert";
     }
 
+    @Override
+    public String toString() {
+        return "convertTo_" + getRequiredItemType().toString() + "(" + getBaseExpression().toString() + ")";
+    }
+    
     /**
      * Diagnostic print of expression structure. The abstract expression tree
      * is written to the supplied output destination.
