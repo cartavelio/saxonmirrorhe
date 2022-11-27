@@ -7,7 +7,7 @@ namespace Saxon.Ejava.lang {
         }
 
         public long totalMemory() {
-            return 0L;
+            return GC.GetTotalMemory(false);
         }
         
         public long freeMemory() {
