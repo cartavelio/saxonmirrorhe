@@ -280,15 +280,19 @@ public class TryCatch extends Expression {
         c1.createThreadManager();
         c1.setErrorReporter(new FilteringErrorReporter(c.getErrorReporter(), catchClauses));
         try {
-            // Need to do eager iteration of the first argument to flush any errors out
-            Sequence v = ExpressionTool.eagerEvaluate(tryOp.getChildExpression(), c1);
-            c1.waitForChildThreads();
-            // check for xsl:break within xsl:try - test iterate-035
-            TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
-            if (tci instanceof BreakInstr) {
-                ((BreakInstr)tci).markContext(c);
+            try {
+                // Need to do eager iteration of the first argument to flush any errors out
+                Sequence v = ExpressionTool.eagerEvaluate(tryOp.getChildExpression(), c1);
+                c1.waitForChildThreads();
+                // check for xsl:break within xsl:try - test iterate-035
+                TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
+                if (tci instanceof BreakInstr) {
+                    ((BreakInstr)tci).markContext(c);
+                }
+                return v.iterate();
+            } catch (UncheckedXPathException ue) {
+                throw ue.getXPathException();
             }
-            return v.iterate();
         } catch (XPathException err) {
             if (err.isGlobalError()) {
                 err.setIsGlobalError(false);
@@ -333,16 +337,20 @@ public class TryCatch extends Expression {
             o2.setPipelineConfiguration(pipe);
         }
         try {
-            tryOp.getChildExpression().process(o2, c1);
-            c1.waitForChildThreads();
-            //context.setReceiver(original);
-            // check for xsl:break within xsl:try - test iterate-035
-            TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
-            if (tci instanceof BreakInstr) {
-                ((BreakInstr) tci).markContext(context);
-            }
-            if (rollbackOutput) {
-                ((OutputterEventBuffer)o2).replay(output);
+            try {
+                tryOp.getChildExpression().process(o2, c1);
+                c1.waitForChildThreads();
+                //context.setReceiver(original);
+                // check for xsl:break within xsl:try - test iterate-035
+                TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
+                if (tci instanceof BreakInstr) {
+                    ((BreakInstr) tci).markContext(context);
+                }
+                if (rollbackOutput) {
+                    ((OutputterEventBuffer)o2).replay(output);
+                }
+            } catch (UncheckedXPathException ue) {
+                throw ue.getXPathException();
             }
         } catch (XPathException err) {
             if (err.isGlobalError()) {
