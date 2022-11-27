@@ -1004,11 +1004,6 @@ net/sf/saxon/ma/map/RangeKey.class
 net/sf/saxon/ma/map/RecordTest.class
 net/sf/saxon/ma/map/SingleEntryMap.class
 net/sf/saxon/ma/map/TupleType.class
-net/sf/saxon/ma/parray/
-net/sf/saxon/ma/parray/ImmList.class
-net/sf/saxon/ma/parray/ImmList0.class
-net/sf/saxon/ma/parray/ImmList1.class
-net/sf/saxon/ma/parray/ImmList2.class
 net/sf/saxon/ma/trie/
 net/sf/saxon/ma/trie/ImmutableHashTrieMap.class
 net/sf/saxon/ma/trie/ImmutableList.class
