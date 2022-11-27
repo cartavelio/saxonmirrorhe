@@ -1210,6 +1210,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         alwaysOn.add("feature/disabling_output_escaping");
         alwaysOn.add("feature/serialization");
         alwaysOn.add("feature/namespace_axis");
+        alwaysOn.add("feature/higher_order_functions");
         alwaysOn.add("feature/dtd");
         alwaysOn.add("feature/built_in_derived_types");
         alwaysOn.add("feature/remote_http");
@@ -1235,11 +1236,8 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         needsEE.add("feature/streaming");
         needsEE.add("feature/schema_aware");
         needsEE.add("feature/Saxon-EE");
-        //needsEE.add("feature/XSD_1.1");
-
-
         needsEE.add("feature/xquery_invocation");
-        needsEE.add("feature/higher_order_functions");
+
 
         alwaysOn.add("detect_accumulator_cycles");
     }
