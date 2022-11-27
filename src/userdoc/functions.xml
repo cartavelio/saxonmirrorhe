@@ -2289,6 +2289,14 @@
           or Saxon-EE.</p>
         <p>For the effect of the option <code>liberal=true()</code>, see <a class="bodylink code"
           href="/functions/fn/parse-json">parse-json()</a>.</p>
+
+          <p>The Saxon implementation also offers an additional option: `'number-parser' : xs:decimal#1` causes number
+            values in the source JSON to be delivered as `xs:decimal` values rather than `xs:double`. This is useful
+            where the values require higher precision than `xs:double` retains. It is also possible to return the string
+            value as written using the option `'number-parser' : xs:string#1`. In general, the value of the option is 
+            any function that takes as input the string value as written, and that delivers an atomic value containing
+            the desired representation of the number.</p>
+        
       </status>
       <saxon-edition>ALL 9.7</saxon-edition>
       <description>
@@ -2348,7 +2356,14 @@
           <in-spec>xslt30</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>The Saxon implementation offers an additional option: `'number-parser' : xs:decimal#1` causes number
+          values in the source JSON to be delivered as `xs:decimal` values rather than `xs:double`. This is useful
+        where the values require higher precision than `xs:double` retains. It is also possible to return the string
+        value as written using the option `'number-parser' : xs:string#1`. In general, the value of the option is 
+        any function that takes as input the string value as written, and that delivers an atomic value containing
+        the desired representation of the number.</p>
+      </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
         <p>Returns the nodes that match a supplied key value. See <a class="bodylink code"
