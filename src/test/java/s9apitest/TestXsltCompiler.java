@@ -1167,6 +1167,70 @@ public class TestXsltCompiler {
         }
     }
 
+    @Test
+    public void testBug5721() {
+        // This concerns reordering of predicates
+        try {
+            Processor proc = new Processor(true);
+
+            String xml = "<root>\n"
+                    + "    <test>\n"
+                    + "        <LieferscheinNummer_1>1</LieferscheinNummer_1>\n"
+                    + "        <LieferscheinNummer_2>0</LieferscheinNummer_2>\n"
+                    + "    </test>\n"
+                    + "    <test>\n"
+                    + "        <LieferscheinNummer_1>2</LieferscheinNummer_1>\n"
+                    + "        <LieferscheinNummer_2/>\n"
+                    + "    </test>\n"
+                    + "</root>";
+            XdmNode doc = proc.newDocumentBuilder().build(new StreamSource(new StringReader(xml)));
+
+            String xsl = "<xsl:stylesheet xmlns=\"http://www.w3.org/2005/xpath-functions\" exclude-result-prefixes=\"#all\" version=\"3.0\" xmlns:saxon=\"http://saxon.sf.net/\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:f=\"http://aimtec.cz/EDI\" xmlns:aim=\"http://aimtec.cz/INT/mappingDescription\">\n"
+                    + "    <xsl:output encoding=\"UTF-8\" indent=\"no\" method=\"xml\"/>\n"
+                    + "\n"
+                    + "    <xsl:template match=\"root\">\n"
+                    + "        <test>\n"
+                    + "            <!-- Filter in order: name - content - numeric value -->\n"
+                    + "            <xsl:for-each select=\"test/*[contains(name(), 'LieferscheinNummer')][. != ''][. != 0]\">\n"
+                    + "                <number>\n"
+                    + "                    <xsl:value-of select=\".\"/>\n"
+                    + "                </number>\n"
+                    + "            </xsl:for-each>\n"
+                    + "        </test>\n"
+                    + "    </xsl:template>\n"
+                    + "</xsl:stylesheet>";
+
+
+            try {
+                // Fails due to predicate reordering
+                XsltCompiler comp = proc.newXsltCompiler();
+                XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
+                Xslt30Transformer trans = exec.load30();
+                XdmNode result = (XdmNode) trans.applyTemplates(doc);
+                fail("Unexpected success");
+            } catch (SaxonApiException err) {
+                assertEquals("FORG0001", err.getErrorCode().getLocalName());
+            }
+            try {
+                // Succeeds when predicate reordering is suppressed
+                proc.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, "-p");
+                XsltCompiler comp = proc.newXsltCompiler();
+                XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
+                Xslt30Transformer trans = exec.load30();
+                XdmNode result = (XdmNode) trans.applyTemplates(doc);
+                assertTrue(result.toString().contains("<number>1</number>"));
+                assertTrue(result.toString().contains("<number>2</number>"));
+            } catch (SaxonApiException err) {
+                fail("Unexpected failure " + err.getMessage());
+            }
+
+
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
 
 }
 
