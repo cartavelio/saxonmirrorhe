@@ -225,9 +225,10 @@
             </td>
             <td>
                <p>Supplies a list of source documents to be validated. Each document is validated
-                  using the same options. The value is a list of filenames separated by semicolons.
+                  using the same options. The value is a list of filenames separated by semicolons (on Windows)
+                  or by colons (on Linux and MacOS).
                   It is also possible to specify the names of source documents as arguments without
-                  any preceding option flag; in this case shell wildcards can be used. A filename
+                  any preceding option flag; in this case shell wildcards ("globs") can be used. A filename
                   can be specified as "<code>-</code>" to read the source document from standard
                   input, in which case the base URI is taken from that of the current directory.</p>
                <p>
@@ -299,8 +300,11 @@
             </td>
             <td>
                <p>Indicates that the name of the source document and schema document are supplied as
-                  URIs; otherwise they are taken as filenames, unless they start with "http:" or
-                  "file:", in which case they they are taken as URLs.</p>
+                  URIs; otherwise they are taken as filenames, unless they start with "http:", "https:",
+                  "file:", or "classpath:", in which case they they are taken as URLs.</p>
+               <p>In addition, when this option is specified, multiple URIs supplied in the <code>-s</code>
+                  option must be separated by whitespace rather than by the usual file separator (colon or semicolon).
+                  To achieve this, the list of names needs to be in quotes.</p>
             </td>
          </tr>
          <tr>
@@ -370,6 +374,8 @@
                is substantially faster. In addition, an SCM file may contain an embedded license key, in which
                case it is possible to use it for validation using a Saxon-EE configuration that does not have its
                own license.</p>
+               <p>NOTE: semicolon is used as the separator here on all platforms (Windows, Linux, MacOS). This will
+               change in a future release to use the same rules as the <code>-s</code> option.</p>
             </td>
          </tr>
          <tr>
