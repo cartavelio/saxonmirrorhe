@@ -200,6 +200,7 @@ public class JsonReceiver implements Receiver {
                     .accept(BMPString.of(base));
         }
         String local = elemName.getLocalPart();
+        checkParent(local, parent);
         switch (local) {
             case "array":
                 if (indenting) {
@@ -221,7 +222,6 @@ public class JsonReceiver implements Receiver {
                 keyChecker.push(new HashSet<>());
                 break;
             case "null":
-                checkParent(local, parent);
                 output.accept(BMPString.of("null"));
                 atStart = false;
                 break;
@@ -235,12 +235,10 @@ public class JsonReceiver implements Receiver {
                                                          escaped + ") is not a valid xs:boolean", ERR_INPUT);
                     }
                 }
-                checkParent(local, parent);
                 atStart = false;
                 break;
             case "boolean":
             case "number":
-                checkParent(local, parent);
                 atStart = false;
                 break;
             default:
