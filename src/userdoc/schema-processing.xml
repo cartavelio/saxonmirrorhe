@@ -338,9 +338,8 @@
                <p>-xi:(on|off)</p>
             </td>
             <td>
-               <p>Apply XInclude processing to all source XML documents (but not to schema documents). 
-                  This currently only works when documents are parsed using the
-                  Xerces parser, which is the default in JDK 1.5 and later.</p>
+               <p>Apply XInclude processing to all XML documents (both source documents and schema documents). 
+                  This relies on XInclude support in the XML parser.</p>
             </td>
          </tr>
          <tr class="javaonly">
