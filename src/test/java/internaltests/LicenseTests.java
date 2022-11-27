@@ -62,13 +62,14 @@ public class LicenseTests {
 
         proc = new Processor(true);
         compiler = proc.newXsltCompiler();
+        compiler.setJustInTimeCompilation(false);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             XsltExecutable exec = compiler.compile(new StreamSource(new StringReader(xsl)));
             exec.export(baos);
         } catch (SaxonApiException err) {
-            fail();
             err.printStackTrace();
+            fail();
         }
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         config = new ProfessionalConfiguration();
@@ -114,13 +115,14 @@ public class LicenseTests {
         }
         compiler = proc.newXsltCompiler();
         compiler.setSchemaAware(true);
+        compiler.setJustInTimeCompilation(false);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             XsltExecutable exec = compiler.compile(new StreamSource(new StringReader(xsl)));
             exec.export(baos);
         } catch (SaxonApiException err) {
-            fail();
             err.printStackTrace();
+            fail();
         }
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         config = new EnterpriseConfiguration();
