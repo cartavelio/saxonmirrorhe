@@ -1230,7 +1230,6 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         alwaysOn.add("feature/HTML5");
 
         needsPE.add("feature/Saxon-PE");
-        needsPE.add("feature/dynamic_evaluation");
 
         needsEE.add("languages_for_numbering");
         needsEE.add("feature/streaming");
@@ -1317,6 +1316,19 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                             });
                         }
                         return true;
+                    }
+                    case "dynamic_evaluation": {
+                        boolean on = !inverse;
+                        if (!on) {
+                            final boolean old = env.processor.getConfigurationProperty(Feature.DISABLE_XSL_EVALUATE);
+                            env.processor.setConfigurationProperty(Feature.DISABLE_XSL_EVALUATE, true);
+                            env.resetActions.add(new Environment.ResetAction() {
+                                @Override
+                                public void reset(Environment env) {
+                                    env.processor.setConfigurationProperty(Feature.DISABLE_XSL_EVALUATE, old);
+                                }
+                            });
+                        }
                     }
                     case "higher_order_functions":
                         return !inverse;
