@@ -106,6 +106,7 @@ public class LoopLifter {
     }
 
     private void gatherInfo(Expression exp, int level, int loopLevel, boolean multiThreaded) {
+        //System.err.println("LOOPINFO + " + level + " " + exp.toShortString());
         ExpInfo info = new ExpInfo();
         info.expression = exp;
         info.loopLevel = loopLevel;
