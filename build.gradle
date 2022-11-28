@@ -774,34 +774,62 @@ task record_branch(
   }
 }
 
-task hejCompile(
-  type: JavaCompile,
-  dependsOn: ["hej_preprocess"],
-  description: "Compile HE for production"
-) {
-  classpath = configurations.compileClasspath
-  source hej_preprocess.outputs
-  destinationDirectory = new File("${buildDir}/classes/hej")
+def hejConfigJava = project.file("${projectDir}/src/main/java/net/sf/saxon/Configuration.java")
+def pejConfigJava = project.file("${projectDir}/src/main/java/com/saxonica/config/ProfessionalConfiguration.java")
+def eejConfigJava = project.file("${projectDir}/src/main/java/com/saxonica/config/EnterpriseConfiguration.java")
+
+if (hejConfigJava.exists()) {
+  task hejCompile(
+    type: JavaCompile,
+    dependsOn: ["hej_preprocess"],
+    description: "Compile HE for production"
+  ) {
+    classpath = configurations.compileClasspath
+    source hej_preprocess.outputs
+    destinationDirectory = new File("${buildDir}/classes/hej")
+  }
+} else {
+  task hejCompile() {
+    doLast {
+      throw new GradleException("Cannot build HE from this repository")
+    }
+  }
 }
 
-task pejCompile(
-  type: JavaCompile,
-  dependsOn: ["pej_preprocess"],
-  description: "Compile PE for production"
-) {
-  classpath = configurations.compileClasspath
-  source pej_preprocess.outputs
-  destinationDirectory = new File("${buildDir}/classes/pej")
+if (pejConfigJava.exists()) {
+  task pejCompile(
+    type: JavaCompile,
+    dependsOn: ["pej_preprocess"],
+    description: "Compile PE for production"
+  ) {
+    classpath = configurations.compileClasspath
+    source pej_preprocess.outputs
+    destinationDirectory = new File("${buildDir}/classes/pej")
+  }
+} else {
+  task pejCompile() {
+    doLast {
+      throw new GradleException("Cannot build PE from this repository")
+    }
+  }
 }
 
-task eejCompile(
-  type: JavaCompile,
-  dependsOn: ["eej_preprocess"],
-  description: "Compile EE for Saxon/Java"
-) {
-  classpath = configurations.compileClasspath + configurations.jarjarAsm
-  source eej_preprocess.outputs
-  destinationDirectory = new File("${buildDir}/classes/eej")
+if (eejConfigJava.exists()) {
+  task eejCompile(
+    type: JavaCompile,
+    dependsOn: ["eej_preprocess"],
+    description: "Compile EE for Saxon/Java"
+  ) {
+    classpath = configurations.compileClasspath + configurations.jarjarAsm
+    source eej_preprocess.outputs
+    destinationDirectory = new File("${buildDir}/classes/eej")
+  }
+} else {
+  task eejCompile() {
+    doLast {
+      throw new GradleException("Cannot build EE from this repository")
+    }
+  }
 }
 
 // ============================================================
@@ -1034,20 +1062,35 @@ task eej_MetaInf(
 
 // ============================================================
 
-task compile_function_library(dependsOn: ["eejCompile", "processResources"]) {
-  // Chicken, meet egg. We need to build the compiler to compile the
-  // stylesheet to provide function implementations for SaxonJ
-  inputs.files fileTree("${projectDir}/src/main/xslt")
-  outputs.files "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
-  doLast {
-    javaexec {
-      classpath = configurations.productTests + project.files(file("${buildDir}/classes/eej"))
-      mainClass = "com.saxonica.Transform"
-      args "-xsl:src/main/xslt/function-library.xsl",
-        "-export:${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml",
-        "-target:HE", "-nogo", "--allowSyntaxExtensions:on"
+if (eejConfigJava.exists()) {
+  task compile_function_library(dependsOn: ["eejCompile", "processResources"]) {
+    // Chicken, meet egg. We need to build the compiler to compile the
+    // stylesheet to provide function implementations for SaxonJ
+    inputs.files fileTree("${projectDir}/src/main/xslt")
+    outputs.files "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
+    doLast {
+      javaexec {
+        classpath = configurations.productTests + project.files(file("${buildDir}/classes/eej"))
+        mainClass = "com.saxonica.Transform"
+        args "-xsl:src/main/xslt/function-library.xsl",
+          "-export:${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml",
+          "-target:HE", "-nogo", "--allowSyntaxExtensions:on"
+      }
     }
   }
+} else {
+  task compile_function_library(
+    type: Copy,
+    dependsOn: ["processResources"]
+  ) {
+    doLast {
+      println("Copying pre-build SEF file")
+    }
+    // We can't build the EE compiler here, so just copy the SEF file
+    into "${buildDir}/resources/main/net/sf/saxon/data/sef"
+    from "${projectDir}/src/main/xslt"
+    include "function-library.sef.xml"
+  }    
 }
 
 // ============================================================
