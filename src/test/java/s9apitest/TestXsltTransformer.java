@@ -154,6 +154,8 @@ public class TestXsltTransformer {
             trans.setDestination(serializer);
             trans.transform();
 
+            assertEquals(trans.getInitialContextNode().getNodeName().getLocalName(), "e"); // Bug 5750
+
             String result = os.toString();
             assertFalse(result.contains("errorA"), "matched root");
             assertTrue(result.contains("[]"), "matched e");
