@@ -414,6 +414,18 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
          <br/><code>[Service]<br/>
          Environment="SAXONC_HOME=/usr/lib”</code></li>
       </ul>
+      
+      <div id="php8" class="note">
+         <h3>Building with PHP8</h3>
+         <p>The SaxonC PHP extension is built for PHP7. To instead build with PHP8, it is necessary
+            to replace various files in the <code>Saxon-C-API/</code> directory. These have not yet
+            been made available in a SaxonC 11 maintenance release, but they are available to
+            download as a zip from the Saxonica community website at: <a
+               href="https://saxonica.plan.io/attachments/63525">https://saxonica.plan.io/attachments/63525</a>.
+            All files in the zip should be copied to the <code>Saxon-C-API/</code> directory; note
+            that this includes replacing the config.m4 file. Then run the installation steps as
+            above.</p>
+      </div>
 
       <div id="php5" class="note">
         <h3>Building with PHP5</h3>
