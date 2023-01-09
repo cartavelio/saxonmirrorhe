@@ -63,6 +63,22 @@ namespace SaxonCS_NUnit {
             }
         }
         
+        [Test]
+        public void testMagicUri() {
+            try {
+                Processor processor = new (true);
+                XPathCompiler xpc = processor.NewXPathCompiler();
+                // This is a special URI that can be used to check that the xmlresolver is present and correct
+                XPathExecutable exec = xpc.Compile("doc-available('https://xmlresolver.org/data/resolver/succeeded/test/check.xml')");
+                XPathSelector s = exec.Load();
+                XdmValue val = s.Evaluate();
+                Assert.That(val is XdmAtomicValue);
+                Assert.That(((XdmAtomicValue)val).AsBoolean);
+            } catch (Exception ex) {
+                Assert.Fail();
+            }
+        }
+        
         private class MyResolver : CatalogResourceResolver {
             private readonly CatalogResourceResolver resolver;
         
