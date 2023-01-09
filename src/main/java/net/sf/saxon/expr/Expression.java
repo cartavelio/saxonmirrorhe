@@ -755,7 +755,8 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      */
 
     public UType getStaticUType(UType contextItemType) {
-        return UType.ANY;
+        //return UType.ANY;
+        return getItemType().getUType();
     }
 
     /**
