@@ -4932,7 +4932,7 @@ public class XQueryParser extends XPathParser {
      * to identify pseudo-XML character and entity references
      *
      * @param token the string as written (or as returned by the tokenizer)
-     * @param doUnescaping if true, XML escape sequences (`&#xHH;`, etc) are
+     * @param doUnescaping if true, XML escape sequences (`&amp;#xHH;`, etc) are
      *                     recognized and expanded.
      * @return The string value of the string literal, after dereferencing entity and
      * character references
