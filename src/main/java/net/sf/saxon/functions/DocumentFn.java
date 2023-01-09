@@ -417,7 +417,7 @@ public class DocumentFn extends SystemFunction implements Callable {
             request.uri = href;
         }
         request.nature = ResourceRequest.XML_NATURE;
-        request.purpose = "source document";
+        request.purpose = ResourceRequest.ANY_PURPOSE;
         try {
             return request.resolve(resolver, config.getResourceResolver(), new DirectResourceResolver(config));
         } catch (XPathException err) {
@@ -613,7 +613,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                 request.uri = documentKey.getAbsoluteURI();
                 request.streamable = true;
                 request.nature = ResourceRequest.XML_NATURE;
-                request.purpose = "source document";
+                request.purpose = ResourceRequest.ANY_PURPOSE;
 
                 source = request.resolve(context.getResourceResolver(),
                                                 config.getResourceResolver(),
