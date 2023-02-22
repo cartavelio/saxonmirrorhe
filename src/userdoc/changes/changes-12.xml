@@ -123,7 +123,9 @@
         more efficient comparison - equality testing is the dominant operation on namespace URIs.</p>
         
         <p>Interfaces affected include <code>NodeInfo</code>, <code>Receiver</code>, <code>StructuredQName</code>,
-        <code>NodeName</code>, <code>XPathStaticContext</code>, <code>AttributeMap</code>, and <code>NamespaceMap</code>.</p>
+        <code>NodeName</code>, <code>XPathStaticContext</code>, <code>AttributeMap</code>, and <code>NamespaceMap</code>.
+        In some cases the old interface has been retained for compatibility, but use of a <code>NamespaceUri</code>
+        is preferred.</p>
         
         <p>The change may affect the handling of namespace URIs containing spaces (this is an area that has never been
         well defined in the W3C specifications, and is best avoided).</p>
@@ -147,6 +149,11 @@
     </category>
     
     <category name="extensions">
+        
+        <p>The Saxon extension functions <code>saxon:evaluate</code>, <code>saxon:eval</code>, <code>saxon:expression</code>
+             have been dropped. (The function <code>saxon:evaluate-node</code> was dropped in Saxon 10). 
+            The same effect (and more) can be achieved
+        using the standard XSLT 3.0 instruction <code>xsl:evaluate</code>.</p>
         
        
  
