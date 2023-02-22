@@ -3,6 +3,7 @@
 /buildSrc/build/
 /buildSrc/.gradle/
 /out/
+/extra/lib/
 java_*.hprof
 /.idea/
 /src/test/testdata/temp/
