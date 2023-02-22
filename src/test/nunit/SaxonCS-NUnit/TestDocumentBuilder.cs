@@ -7,6 +7,7 @@ using Saxon.Api;
 using NUnit.Framework;
 using System.Collections;
 using System.Net;
+using System.Text;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.functions;
 
@@ -18,8 +19,8 @@ namespace SaxonCS_NUnit {
     class TestDocumentBuilder {
         [Test]
         public void TestSourceDTDValidation() {
-            String validXML = "<!DOCTYPE a [<!ELEMENT a EMPTY>]><a/>";
-            String invalidXML = "<!DOCTYPE a [<!ELEMENT a (b+)>]><a/>";
+            string validXML = "<!DOCTYPE a [<!ELEMENT a EMPTY>]><a/>";
+            string invalidXML = "<!DOCTYPE a [<!ELEMENT a (b+)>]><a/>";
             DocumentBuilder builder =  new Processor().NewDocumentBuilder();
             builder.BaseUri = new Uri("http://www.example.com");
             builder.DtdValidation = true;
@@ -678,6 +679,60 @@ namespace SaxonCS_NUnit {
                 var executable = compiler.Compile(s);
                 return executable;
             }
+        }
+
+        private long buildDocWithElements(TreeModel model, int count) {
+            long mem = GC.GetTotalMemory(true);
+            StringBuilder sb = new StringBuilder("<doc>");
+            for (int i = 0; i < count; i++) {
+                sb.Append("<a>x</a>");
+            }
+            sb.Append("</doc>");
+            Processor proc = new Processor();
+            DocumentBuilder db = proc.NewDocumentBuilder();
+            db.TreeModel = model;
+            XdmNode doc = db.Build(new StringReader(sb.ToString()));
+            sb = null;
+            //Console.WriteLine("Memory: " + model + " " + count + " elements = " + (GC.GetTotalMemory(true) - mem));
+            return (GC.GetTotalMemory(true) - mem);
+        }
+        
+        private long buildDocWithAttributes(TreeModel model, int count) {
+            long mem = GC.GetTotalMemory(true);
+            StringBuilder sb = new StringBuilder("<doc>");
+            for (int i = 0; i < count; i++) {
+                sb.Append("<a b='x'/>");
+            }
+            sb.Append("</doc>");
+            Processor proc = new Processor();
+            DocumentBuilder db = proc.NewDocumentBuilder();
+            db.TreeModel = model;
+            XdmNode doc = db.Build(new StringReader(sb.ToString()));
+            sb = null;
+            //Console.WriteLine("Memory: " + model + " " + count + " attributes = " + (GC.GetTotalMemory(true) - mem));
+            return GC.GetTotalMemory(true) - mem;
+        }
+
+        [Test]
+        public void TestMemoryUsed() {
+            double tolerance = 1.1; 
+            // The specific numbers were obtained on SaxonCS 11.1 on 2022-01-16; we tolerate a slightly higher number
+            long m1 = buildDocWithElements(TreeModel.TinyTree, 10000); 
+            Assert.That(m1 <= 991784 * tolerance);
+            long m2 = buildDocWithElements(TreeModel.TinyTree, 20000);
+            Assert.That(m2 <= 1378720 * tolerance);
+            long m3 = buildDocWithAttributes(TreeModel.TinyTree, 10000);
+            Assert.That(m3 <= 1176448 * tolerance);
+            long m4 = buildDocWithAttributes(TreeModel.TinyTree, 20000);
+            Assert.That(m4 <= 2272928 * tolerance);
+            long m5 = buildDocWithElements(TreeModel.LinkedTree, 10000);
+            Assert.That(m5 <= 3103088 * tolerance);
+            long m6 = buildDocWithElements(TreeModel.LinkedTree, 20000);
+            Assert.That(m6 <= 6144024 * tolerance);
+            long m7 = buildDocWithAttributes(TreeModel.LinkedTree, 10000);
+            Assert.That(m7 <= 4478992 * tolerance);
+            long m8 = buildDocWithAttributes(TreeModel.LinkedTree, 20000);
+            Assert.That(m8 <= 8863616 * tolerance);
         }
 
         
