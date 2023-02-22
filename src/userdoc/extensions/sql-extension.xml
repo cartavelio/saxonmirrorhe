@@ -2,7 +2,7 @@
 <article id="sql-extension" title="Saxon SQL Extension">
    <h1>Saxon SQL Extension</h1>
    
-   <p class="csonly">Not available in Saxon-CS.</p>
+   <p class="csonly">Not available in SaxonCS.</p>
 
    <div class="javaonly">
    <aside>Requires Saxon-PE or Saxon-EE. </aside>

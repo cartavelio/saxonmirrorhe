@@ -7,11 +7,11 @@
     required <dfn>notices</dfn> for open-source <dfn>components</dfn> that have been incorporated
     into Saxon, and acknowledgments of contributors.</p>
 
-  <p>This documentation relates both to the open source Saxon-HE product and to the commercial
-    products (Saxon-PE, Saxon-EE, Saxon-CS). The conditions of use are of course different in the two cases;
+  <p>This documentation relates both to the open source SaxonJ-HE product and to the commercial
+    products (SaxonJ-PE, SaxonJ-EE, SaxonCS). The conditions of use are of course different in the two cases;
     there are also differences in the third-party components that are included.</p>
 
-  <p>The information in this section applies to both the Java and .NET versions of Saxon, unless
+  <p>The information in this section applies to both SaxonJ and SaxonCS, unless
     otherwise specified.</p>
   
   <p>The source code of Saxon can be considered for <dfn>licensing</dfn> purposes as having four
@@ -48,7 +48,7 @@
         to be published; this is satisfied by inclusion of the relevant notices in this documentation
         and also in the <code>notices</code> directory of the issued product. In many cases the relevant
         license also requires any modifications to source code to be published; Saxonica satisfies the
-        requirement by issuing the source code of Saxon-HE, which includes all such modifications.</p>
+        requirement by issuing the source code of SaxonJ-HE, which includes all such modifications.</p>
     </li>
     <li><p><i>Category D</i> code is proprietary (non-open-source) code developed and owned by Saxonica.
     This is made available to a small number of selected integration partners under the terms of a custom 
@@ -57,9 +57,9 @@
 
   
   <div class="javaonly">
-  <h2 class="subtitle">Saxon-HE</h2>
+  <h2 class="subtitle">SaxonJ-HE</h2>
   
-  <p>The open-source Saxon-HE product is made available under the <dfn>Mozilla Public License</dfn>
+  <p>The open-source SaxonJ-HE product is made available under the <dfn>Mozilla Public License</dfn>
     (the "License"). Prior to Saxon 9.5 MPL Version 1.0 was used; from 9.5 onwards, MPL Version 2.0
     is used. You may not use the software except as permitted by the License. You may obtain a copy
     of the License at <a href="http://www.mozilla.org/MPL/" class="bodylink"
@@ -70,7 +70,7 @@
     redistribute the source code under a different license. The reason for this is the difficulty of
     obtaining the consent of all past contributors to the code.</p>
   
-  <p>Saxon-HE is built from code in categories A, B, and C above. This code is published and is available
+  <p>SaxonJ-HE is built from code in categories A, B, and C above. This code is published and is available
   for use under the terms of the license. Most users will never need access to source code, but for those
   who do, it is published in two forms:</p>
   
@@ -85,7 +85,7 @@
     to build from the preprocessed source published on SourceForge.</p></li>
     <li><p>For every release, a ZIP file containing Saxon-HE source is published on the SourceForge site
     (project name Saxon). A typical file name is <code>saxon-source-11.0.zip</code>. The is the source
-    code after preprocessing to extract the code needed for building Saxon-HE, and it is possible to compile
+    code after preprocessing to extract the code needed for building SaxonJ-HE, and it is possible to compile
     it simply by dropping it into the source directory structure for an IDE such as Eclipse or IntelliJ, 
     provided all the required third-party libraries are present on the classpath.</p></li>
   </ul>
@@ -95,7 +95,7 @@
   is supplied in a suitable form, and if a contribution agreement is signed.</p>
  
   
-  <p>Saxon-HE includes a separate JAR file, <code>saxon-xqj-11.x.jar</code>, which contains Saxon's
+  <p>SaxonJ-HE includes a separate JAR file, <code>saxon-xqj-11.x.jar</code>, which contains Saxon's
     support for the XQJ interface, a standard API for access to XQuery engines from Java. In
     previous Saxon releases this was made available as part of the main JAR file. It has been
     decoupled because it has been pointed out that the license under which Oracle distributes XQJ is
@@ -103,8 +103,8 @@
     specifically, it does not allow modifications, and it does not allow redistribution except as
     part of a product that satisfies all the compatibility tests. Saxon satisfies these conditions,
     but some users are only prepared to use code that conforms to OSI-approved licenses. If you fall
-    into this category, please delete the <code>saxon-xqj-11.x.jar</code> file. (In Saxon-PE and
-    Saxon-EE, the XQJ components are delivered as part of the main Saxon JAR file.)</p>
+    into this category, please delete the <code>saxon-xqj-11.x.jar</code> file. (In SaxonJ-PE and
+    SaxonJ-EE, the XQJ components are delivered as part of the main Saxon JAR file.)</p>
   
   <aside><p>Although Saxonica complies with all the terms of the XQJ license, Saxonica takes
     the view that implementing the published XQJ API does not actually require a license (a view
@@ -112,7 +112,7 @@
   </div>
 
   <div class="javaonly">
-  <h2 class="subtitle">Saxon-EE and Saxon-PE on Java</h2>
+  <h2 class="subtitle">SaxonJ-EE and SaxonJ-PE</h2>
       <p>The Enterprise and Professional editions of Saxon are commercial products released under the
         terms and conditions published at <a href="http://www.saxonica.com/license/paid-license.pdf"
           class="bodylink">http://www.saxonica.com/license/paid-license.pdf</a>.</p>
@@ -125,17 +125,17 @@
         components gives you additional rights, which are described above.</p>
   </div>
   <div class="csonly">
-  <h2 class="subtitle">Saxon-CS</h2>
-    <p>Saxon-CS is a commercial Saxonica product built from the following components:</p>
+  <h2 class="subtitle">SaxonCS</h2>
+    <p>SaxonCS is a commercial Saxonica product built from the following components:</p>
     
     <ol>
-      <li><p>The Java source code of Saxon-EE (see above), converted to C# using a Saxonica-produced transpiler.
+      <li><p>The Java source code of SaxonJ-EE (see above), converted to C# using a Saxonica-produced transpiler.
         The transpiler is written largely in XSLT 3.0, but also makes use of the open-source 
         <a href="http://javaparser.org" class="bodylink">javaparser</a> library.</p></li>
       <li><p>Additional Saxonica-owned code written in C#, to provide a C# API and to integrate with .NET
       components such as the <code>System.Xml.XmlReader</code> parser.</p></li>
       <li><p>Third party libraries referenced by means of <code>nuget</code> dependencies. These libraries are not distributed
-      with the Saxon product, but are downloaded automatically as part of the installation process. The relevant libraries are:</p>
+      with the SaxonCS product, but are downloaded automatically as part of the installation process. The relevant libraries are:</p>
       <ul>
         <li>HtmlAgilityPack</li>
         <li>ICU4N</li>
@@ -159,28 +159,28 @@
   <div class="javaonly">
   <h2 class="subtitle">The Saxon SQL extension</h2>
     <p>The <a href="/sql-extension" class="bodylink">Saxon SQL extension</a> is available as an
-    open-source plug-in to Saxon-PE or Saxon-EE (on the Java platform only, not available on the
-    .NET platform). It will not run with Saxon-HE because it relies on XSLT element extensibility, a
-    feature not available in Saxon-HE. However, the code of the SQL extension itself is open-source
+    open-source plug-in to SaxonJ-PE or SaxonJ-EE (on the Java platform only, not available on the
+    .NET platform). It will not run with SaxonJ-HE because it relies on XSLT element extensibility, a
+    feature not available in SaxonJ-HE. However, the code of the SQL extension itself is open-source
     and is issued under the Mozilla Public License, meaning that you are free to extend it and
-    customize it to your needs, even though it requires Saxon-PE or Saxon-EE to run.</p>
+    customize it to your needs, even though it requires SaxonJ-PE or SaxonJ-EE to run.</p>
   </div>
 
   <h2 class="subtitle">EXSLT extensions</h2>
 
   <p class="javaonly">A substantial number of extension functions defined in <a href="http://www.exslt.org/"
-      class="bodylink">EXSLT</a> are available as an open-source plug-in to Saxon-PE or Saxon-EE.
+      class="bodylink">EXSLT</a> are available as an open-source plug-in to SaxonJ-PE or SaxonJ-EE.
     Although not shipped with Saxon-HE, the code of the these extension functions itself
     is open-source and is issued under the Mozilla Public License 2.0, meaning that you are free to
-    extend it and customize it to your needs, even though it requires Saxon-PE or Saxon-EE to run.
+    extend it and customize it to your needs, even though it requires SaxonJ-PE or SaxonJ-EE to run.
     (See <a href="/extensions/functions/exslt">EXSLT extensions</a> for more information on the
     functions available.)</p>
   
-  <p class="csonly">In Saxon-CS, just two <a href="http://www.exslt.org/"
+  <p class="csonly">In SaxonCS, just two <a href="http://www.exslt.org/"
     class="bodylink">EXSLT</a> extension functions are available, both in namespace <code>http://exslt.org/common</code>:
   specifically the <code>node-set()</code> and <code>object-type()</code> extensions. Although these serve no useful
   purpose with XSLT 2.0 and later versions, they have been implemented because they are widely used in XSLT 1.0 stylesheets.
-  The implementation is under the same license conditions as the rest of Saxon-CS.</p>
+  The implementation is under the same license conditions as the rest of SaxonCS.</p>
 
   <p>Note: this does not apply to implementations of the <a href="http://www.expath.org/"
       class="bodylink">EXPath</a> extension functions, which since Saxon 9.6 are implemented in code
@@ -190,20 +190,20 @@
   <h2 class="subtitle">Redistribution</h2>
 
   <div class="javaonly">
-      <p><b>Redistribution</b> of Saxon-HE is freely permitted under the terms of the Mozilla Public
+      <p><b>Redistribution</b> of SaxonJ-HE is freely permitted under the terms of the Mozilla Public
       License 2.0. Note that this requires inclusion of all the necessary notices. If any source code
       changes are made, the license requires that they be published (or at any rate, made available to
       your users); but you are not required to publish the source of your own application code if it
       is in separate modules.</p>
   
-    <p>If you produce a product that includes or requires Saxon-HE, please refer to it prominently as
+    <p>If you produce a product that includes or requires SaxonJ-HE, please refer to it prominently as
       "The Saxon XSLT and XQuery Processor from Saxonica Limited", and include the URL of the home
       page, which is at <a href="http://www.saxonica.com/" class="bodylink"
         >http://www.saxonica.com/</a>. As a courtesy, please take reasonable steps to ensure that your
       users know that they are running Saxon.</p>
   </div>
 
-  <p>Redistribution of commercial Saxonica products (Saxon-PE, -EE, -CS) as a component of a commercial application is possible
+  <p>Redistribution of commercial Saxonica products (SaxonJ-PE, SaxonJ-EE, SaxonCS) as a component of a commercial application is possible
     under commercial terms; prices are published in the Saxonica online store, and a specimen
     contract will be supplied on request.</p>
 
@@ -212,7 +212,7 @@
     <div><h1>Contributions</h1>
 
 
-    <p>This page lists third-party contributors to the <i>Category A</i> source code of Saxon-HE, as defined
+    <p>This page lists third-party contributors to the <i>Category A</i> source code of SaxonJ-HE, as defined
       above. This list is provided for information and to publicly thank these contributors for
       their work; inclusion does not imply that the contributor has any rights, responsibilities, or
       liabilities in respect of the code.</p>
@@ -780,7 +780,7 @@
         </td>
         <td>
           <p>Package <code>com.saxonica.functions.trie</code>, classes <code>ImmutableMap</code> and
-              <code>ImmutableHashTrieMap</code>. Used in the Java product only (Saxon-CS uses
+              <code>ImmutableHashTrieMap</code>. Used in the Java product only (SaxonCS uses
           the class <code>ImmutableDictionary</code> from the Nuget package <code>System.Collections.Immutable</code>).</p>
         </td>
       </tr>
@@ -830,7 +830,7 @@
     <p>This page describes <i>Category C</i> components as defined above: components that are
       redistributed with Saxon in binary form, without source-level alteration.</p>
     
-    <p class="csonly">Saxon-CS uses a number of third-party components that would fall into
+    <p class="csonly">SaxonCS uses a number of third-party components that would fall into
     this category, but they are referenced via Nuget dependencies rather than being distributed
     with the Saxon product.</p>
     
@@ -843,7 +843,7 @@
     
     <p>See http://asm.ow2.org/</p>
     
-    <p>Saxon-EE, on Java, includes the ASM bytecode generation library. The code is
+    <p>SaxonJ-EE, includes the ASM bytecode generation library. The code is
       issued without modification, except that on .NET it is cross-compiled to .NET IL form. </p>
     
     <p>The license can be found at http://asm.ow2.org/license.html</p>
@@ -877,7 +877,7 @@
     
     <p>See <a href="http://site.icu-project.org//">http://site.icu-project.org//</a></p>
     
-    <p>Saxon-EE, on Java, includes portions of the International Components for
+    <p>SaxonJ-EE includes portions of the International Components for
       Unicode library, principally to support use of the Unicode Collation Algorithm, and localization
       features such as formatting of numbers and dates.</p>
     

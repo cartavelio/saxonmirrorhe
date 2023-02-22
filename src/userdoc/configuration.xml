@@ -206,7 +206,7 @@
       <section id="config-dotnet" title="Configuration using Saxon.Api (C#)" class="csonly">
          <h1>Configuration using Saxon.Api (C#)</h1>
 
-         <p>In the Saxon.Api interface in Saxon-CS, the root API object is the <a class="cslink" href="Saxon.Api.Processor">Saxon.Api.Processor</a> object.
+         <p>In the Saxon.Api interface in SaxonCS, the root API object is the <a class="cslink" href="Saxon.Api.Processor">Saxon.Api.Processor</a> object.
             This is a wrapper around a <code>Saxon.Hej.Configuration</code> object, which should not normally be used directly (though it's exposed
             as public, just in case you need to). There are two ways to set configuration properties:</p>
             

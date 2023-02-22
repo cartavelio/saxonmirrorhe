@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="saxon-cs" title="Saxon-CS" class="csonly">
-   <h1>Saxon-CS</h1>
+<article id="saxon-cs" title="SaxonCS" class="csonly">
+   <h1>SaxonCS</h1>
       
-      <p>Saxon-CS is a new product that implements nearly all the functionality of the Java
+      <p>SaxonCS is a new product that implements nearly all the functionality of the Java
       product, but running on .NET Core.</p>
    
-      <p>Features of Saxon-CS are covered throughout this documentation in the appropriate places.
-      This chapter focuses on the areas where Saxon-CS differs from the Java product, and where
+      <p>Features of SaxonCS are covered throughout this documentation in the appropriate places.
+      This chapter focuses on the areas where SaxonCS differs from the Java product, and where
       it differs from the older Saxon/.NET product.</p>
    
       <p>Saxon/.NET was produced by translating the Java bytecode
@@ -14,7 +14,7 @@
       with .NET Core, which Microsoft has indicated represents the future direction for
       .NET, so a different approach was needed. Saxon/.NET will not be developed beyond the 10.x release.</p>
    
-      <p>Saxon-CS is built by converting the Java source code of the Java product
+      <p>SaxonCS is built by converting the Java source code of the Java product
       directly to C# source code. The translation is done by a purpose-written transpiler
       written largely in XSLT. This is not a one-off conversion or a fork: the C# code is regenerated
       after every change made to the Java source.</p>
@@ -22,7 +22,7 @@
       
  
  
-   <p>The initial release of Saxon-CS corresponds in functionality to Saxon-EE on Java, and requires a license key that
+   <p>The initial release of SaxonCS corresponds in functionality to Saxon-EE on Java, and requires a license key that
       enables Saxon-EE capability.</p>
          
          
@@ -59,7 +59,7 @@ full specifications are available in the <a href="/dotnetdoc" class="bodylink">.
       <p>A new API has been developed providing access to XSLT, XQuery, XPath, and XML Schema processing on the .NET
 platform. This is available from any .NET-supported language, although the examples are all expressed in C# terms.</p>
       
-      <aside>The Saxon-CS API follows the overall structure of the older .NET API very closely, but it is not 100% compatible.
+      <aside>The SaxonCS API follows the overall structure of the older .NET API very closely, but it is not 100% compatible.
       The opportunity has been taken to modernize the design to take advantage of newer C# language features such as
       delegates and lambda expressions.</aside>
 
@@ -242,11 +242,11 @@ need to mix use of the .NET API with the internal classes converted from the ori
          </tbody>
       </table>
    </section>
-   <section id="xmlparsing" title="XML Parsing in Saxon-CS" class="csonly">
-      <h1>XML Parsing in Saxon-CS</h1>
+   <section id="xmlparsing" title="XML Parsing in SaxonCS" class="csonly">
+      <h1>XML Parsing in SaxonCS</h1>
       
 
-      <p>XML parsing in Saxon-CS is delegated to
+      <p>XML parsing in SaxonCS is delegated to
          the <code>System.Xml</code> parser supplied with the .NET platform.</p>
       
       <p>The Microsoft parser has some limitations:</p>
@@ -294,7 +294,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
             application has other parts that are DOM-based.</p></li>
             <li><p>The DOM can be <i>wrapped</i> as a Saxon tree. This avoids the cost
             and memory overhead of copying the tree, but the result is slower to navigate.</p></li>
-            <li><p><i>(Saxon-CS does not currently offer the Domino model, which is a hybrid
+            <li><p><i>(SaxonCS does not currently offer the Domino model, which is a hybrid
             between copying and wrapping: it uses the DOM as supplied, but adds indexes for fast
             searching.)</i></p></li>
          </ul></li>
@@ -316,14 +316,14 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <code>HtmlDocument</code> node, from which XPath navigation is possible.</p>
       
       <aside>Because a different HTML parser is used, the results will not necessarily be the same
-      as when <code>saxon:parse-html()</code> is used on the Java platform.</aside>
+      as when <code>saxon:parse-html()</code> is used with SaxonJ.</aside>
       
       <p>Normal HTML elements (such as <code>&lt;p&gt;</code>, <code>&lt;div&gt;</code>, etc) are delivered
       as element nodes whose local name is in lower-case, with the XHTML namespace URI.</p>
    </section>
    <section id="saxon-cs-extension-functions" title="Writing Extension Functions" class="csonly">
       <h1>Writing Extension Functions</h1>
-      <p>Reflexive extension functions are not available in Saxon-CS.</p>
+      <p>Reflexive extension functions are not available in SaxonCS.</p>
       <p>There are two interfaces that allow extension functions to be written: a simple interface where the function
       is written as a lambda expression, and a richer interface that gives access to the static and dynamic processing
       context of the function call. Both interfaces are described at 
@@ -377,7 +377,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <h2>Restrictions and Changes Relative to Saxon-EE 10 on .NET</h2>
       
       <p>The only supported parser is the Microsoft System.Xml parser. (Saxon 10 on .NET also worked with
-         a port of Apache Xerces.) See <a href="../xmlparsing" class="bodylink">XML Parsing in Saxon-CS</a>.</p>
+         a port of Apache Xerces.) See <a href="../xmlparsing" class="bodylink">XML Parsing in SaxonCS</a>.</p>
       
       
       
