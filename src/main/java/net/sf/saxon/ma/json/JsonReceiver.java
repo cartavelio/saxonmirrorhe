@@ -417,6 +417,13 @@ public class JsonReceiver implements Receiver {
 
     @Override
     public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
+        if (!stack.empty() && !Whitespace.isAllWhite(chars)) {
+            NodeName element = stack.peek();
+            String local = element.getLocalPart();
+            if (local.equals("map") || local.equals("array")) {
+                throw new XPathException("xml-to-json: Element " + local + " must have no text content", ERR_INPUT);
+            }
+        }
         textBuffer.append(chars);
     }
 
