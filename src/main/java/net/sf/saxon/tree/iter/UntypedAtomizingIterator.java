@@ -80,7 +80,7 @@ public class UntypedAtomizingIterator implements SequenceIterator,
 
     @Override
     public boolean supportsHasNext() {
-        return true;
+        return base instanceof LookaheadIterator && ((LookaheadIterator) base).supportsHasNext();
     }
 
     @Override

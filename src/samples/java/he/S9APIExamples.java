@@ -649,12 +649,13 @@ public class S9APIExamples {
             StreamSource styleSource = new StreamSource(reader, "http://localhost/string");
             XsltExecutable templates = compiler.compile(styleSource);
             Xslt30Transformer transformer = templates.load30();
-            transformer.setMessageListener(
-                    (content, errorCode, terminate, locator) -> {
-                        System.err.println("MESSAGE terminate=" + (terminate ? "yes" : "no") + " at " + new Date());
+            transformer.setMessageHandler(
+                    message -> {
+                        Location locator = message.getLocation();
+                        System.err.println("MESSAGE terminate=" + (message.isTerminate() ? "yes" : "no") + " at " + new Date());
                         System.err.println("From instruction at line " + locator.getLineNumber() +
                                 " of " + locator.getSystemId());
-                        System.err.println(">>" + content.getStringValue());
+                        System.err.println(">>" + message.getContent().getStringValue());
                     }
             );
             Serializer out = processor.newSerializer(System.out);
