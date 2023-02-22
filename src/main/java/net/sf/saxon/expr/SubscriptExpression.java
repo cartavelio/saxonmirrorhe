@@ -11,12 +11,10 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.MemoSequence;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.value.NumericValue;
 
 /**
@@ -166,7 +164,7 @@ public class SubscriptExpression extends SingleItemFilter {
             } else if (iter instanceof MemoSequence.ProgressiveIterator) {
                 MemoSequence mem = ((MemoSequence.ProgressiveIterator)iter).getMemoSequence();
                 item = mem.itemAt(intindex - 1);
-            } else if (iter.getProperties().contains(SequenceIterator.Property.GROUNDED)) {
+            } else if (iter.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
                 GroundedValue value = iter.materialize();
                 item = value.itemAt(intindex - 1);
             } else {

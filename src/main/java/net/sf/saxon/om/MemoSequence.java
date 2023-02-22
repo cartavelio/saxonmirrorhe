@@ -9,10 +9,7 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ArrayIterator;
-import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.GroundedIterator;
-import net.sf.saxon.tree.iter.SingletonIterator;
+import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -331,15 +328,15 @@ public class MemoSequence implements Sequence {
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link Property#GROUNDED} and {@link Property#LAST_POSITION_FINDER}. It is always
+         *         properties such as {@link SequenceIteratorProperty#GROUNDED} and {@link SequenceIteratorProperty#LAST_POSITION_FINDER}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          */
 
         @Override
-        public EnumSet<Property> getProperties() {
+        public EnumSet<SequenceIteratorProperty> getProperties() {
             // bug 1740 shows that it is better to report the iterator as grounded even though this
             // may trigger eager evaluation of the underlying sequence.
-            return EnumSet.of(Property.GROUNDED, Property.LAST_POSITION_FINDER);
+            return EnumSet.of(SequenceIteratorProperty.GROUNDED, SequenceIteratorProperty.LAST_POSITION_FINDER);
         }
     }
 

@@ -35,7 +35,7 @@ public class ForEach extends Instruction implements ContextMappingFunction, Cont
     protected Operand actionOp;
     protected Operand separatorOp;
     protected Operand threadsOp;
-    protected boolean isInstruction;
+    protected boolean _isInstruction;
 
     /**
      * Create an xsl:for-each instruction
@@ -85,7 +85,7 @@ public class ForEach extends Instruction implements ContextMappingFunction, Cont
      */
 
     public void setInstruction(boolean inst) {
-        isInstruction = inst;
+        _isInstruction = inst;
     }
 
     /**
@@ -97,7 +97,7 @@ public class ForEach extends Instruction implements ContextMappingFunction, Cont
 
     @Override
     public boolean isInstruction() {
-        return isInstruction;
+        return _isInstruction;
     }
 
 

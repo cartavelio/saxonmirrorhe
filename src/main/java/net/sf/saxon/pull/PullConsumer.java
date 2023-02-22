@@ -39,7 +39,7 @@ public class PullConsumer {
 
     public void consume() throws XPathException {
         while (true) {
-            if (in.next() == PullProvider.Event.END_OF_INPUT) {
+            if (in.next() == PullEvent.END_OF_INPUT) {
                 return;
             }
         }

@@ -27,7 +27,7 @@ public interface TwineConsumer {
      * @param len   the number of characters (codepoints, one byte per character) to be copied
      */
 
-    public void append8(byte[] bytes, int start, int len);
+    void append8(byte[] bytes, int start, int len);
 
     /**
      * Append an array (or part of an array) of 16-bit characters to the content
@@ -38,7 +38,7 @@ public interface TwineConsumer {
      * @param len   the number of characters (codepoints, two bytes per character) to be copied
      */
 
-    public void append16(char[] chars, int start, int len);
+    void append16(char[] chars, int start, int len);
 
     /**
      * Append an array (or part of an array) of 24-bit characters to the content
@@ -49,13 +49,13 @@ public interface TwineConsumer {
      * @param len   the number of characters (codepoints, three bytes per character) to be copied
      */
 
-    public void append24(byte[] bytes, int start, int len);
+    void append24(byte[] bytes, int start, int len);
 
     /**
      * Append a sequence of codepoints supplied as an iterator
      * @param codePoints iterator over the codepoints to be delivered
      */
 
-    public void append(IntIterator codePoints);
+    void append(IntIterator codePoints);
 }
 

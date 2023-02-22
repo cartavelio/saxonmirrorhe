@@ -7,9 +7,7 @@
 
 package net.sf.saxon.expr.sort;
 
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.QNameValue;
 
 /**
  * Marker interface to identify an object that acts as a surrogate for an atomic value, with the property
@@ -31,9 +29,4 @@ public interface AtomicMatchKey {
 
     AtomicValue asAtomic();
 
-    /**
-     * A match key for use in situations where NaN = NaN
-     */
-
-    AtomicMatchKey NaN_MATCH_KEY = new QNameValue("", NamespaceConstant.SAXON, "+NaN+");
 }

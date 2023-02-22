@@ -212,11 +212,11 @@ public class XsltExecutable {
     public class ParameterDetails {
 
         private final SequenceType type;
-        private final boolean isRequired;
+        private final boolean required;
 
         protected ParameterDetails(SequenceType type, boolean isRequired) {
             this.type = type;
-            this.isRequired = isRequired;
+            this.required = isRequired;
         }
 
         /**
@@ -257,7 +257,7 @@ public class XsltExecutable {
          */
 
         public boolean isRequired() {
-            return this.isRequired;
+            return this.required;
         }
     }
 

@@ -36,7 +36,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
 
     private final StructuredQName targetName;
     private AttributeSet target;
-    private final boolean isDeclaredStreamable;
+    private final boolean declaredStreamable;
     private int bindingSlot = -1;
 
     /**
@@ -47,7 +47,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
 
     public UseAttributeSet(StructuredQName name, boolean streamable) {
         this.targetName = name;
-        this.isDeclaredStreamable = streamable;
+        this.declaredStreamable = streamable;
     }
 
     @Override
@@ -138,7 +138,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
     }
 
     public boolean isDeclaredStreamable() {
-        return isDeclaredStreamable;
+        return declaredStreamable;
     }
 
     /**
@@ -247,7 +247,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        UseAttributeSet ua = new UseAttributeSet(targetName, isDeclaredStreamable);
+        UseAttributeSet ua = new UseAttributeSet(targetName, declaredStreamable);
         ua.setTarget(target);
         ua.setBindingSlot(bindingSlot);
         return ua;

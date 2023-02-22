@@ -160,7 +160,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
                 } catch (Exception err) {
                     throw new IllegalStateException(message);
                 }
-                child.setParentExpression(Expression.this);
+                child.setParentExpression(this);
             }
             if (child.getRetainedStaticContext() == null) {
                 child.setRetainedStaticContext(getRetainedStaticContext());
@@ -250,7 +250,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     public void restoreParentPointers() {
         for (Operand o : operands()) {
             Expression child = o.getChildExpression();
-            child.setParentExpression(Expression.this);
+            child.setParentExpression(this);
             child.restoreParentPointers();
         }
     }
@@ -364,7 +364,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     /*@NotNull*/
     public Expression simplify() throws XPathException {
         simplifyChildren();
-        return Expression.this;
+        return this;
     }
 
     /**
@@ -527,7 +527,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     public Expression typeCheck(ExpressionVisitor visitor,
                                 ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
-        return Expression.this;
+        return this;
     }
 
     /**
@@ -597,7 +597,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
             optimizeChildren(visitor, contextInfo);
             visitor.decrementDepth();
         }
-        return Expression.this;
+        return this;
     }
 
     /**
@@ -677,7 +677,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      */
 
     public Expression unordered(boolean retainAllNodes, boolean forStreaming) throws XPathException {
-        return Expression.this;
+        return this;
     }
 
     /**
@@ -1106,16 +1106,16 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
 //                }
 //            }
 //        }
-        child.setParentExpression(Expression.this);
+        child.setParentExpression(this);
 
         if (child.retainedStaticContext == null) {
             child.retainedStaticContext = retainedStaticContext;
         }
 
         if (getLocation() == null || getLocation() == Loc.NONE) {
-            ExpressionTool.copyLocationInfo(child, Expression.this);
+            ExpressionTool.copyLocationInfo(child, this);
         } else if (child.getLocation() == null || child.getLocation() == Loc.NONE) {
-            ExpressionTool.copyLocationInfo(Expression.this, child);
+            ExpressionTool.copyLocationInfo(this, child);
         }
         resetLocalStaticProperties();
     }
@@ -1398,10 +1398,10 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
         ItemType type = getItemType();
         if (((getDependencies() & StaticProperty.DEPENDS_ON_NON_DOCUMENT_FOCUS) == 0) &&
                 (type instanceof NodeTest || this instanceof VariableReference)) {
-            return new NodeSetPattern(Expression.this);
+            return new NodeSetPattern(this);
         }
         if (isCallOn(KeyFn.class) || isCallOn(SuperId.class)) {
-            return new NodeSetPattern(Expression.this);
+            return new NodeSetPattern(this);
         }
         throw new XPathException("Cannot convert the expression {" + this + "} to a pattern");
     }
@@ -1420,7 +1420,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
             return slotsUsed;
         }
         IntHashSet slots = new IntHashSet(10);
-        gatherSlotsUsed(Expression.this, slots);
+        gatherSlotsUsed(this, slots);
         slotsUsed = new int[slots.size()];
         int i = 0;
         IntIterator iter = slots.iterator();
@@ -1491,7 +1491,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     /*@Nullable*/
     public Object getProperty(String name) {
         if (name.equals("expression")) {
-            return Expression.this.getLocation();
+            return getLocation();
         } else {
             return null;
         }
@@ -1532,12 +1532,12 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
 
     /*@Nullable*/
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, /*@Nullable*/ PathMap.PathMapNodeSet pathMapNodeSet) {
-        boolean dependsOnFocus = ExpressionTool.dependsOnFocus(Expression.this);
+        boolean dependsOnFocus = ExpressionTool.dependsOnFocus(this);
         PathMap.PathMapNodeSet attachmentPoint;
         if (pathMapNodeSet == null) {
             if (dependsOnFocus) {
                 ContextItemExpression cie = new ContextItemExpression();
-                ExpressionTool.copyLocationInfo(Expression.this, cie);
+                ExpressionTool.copyLocationInfo(this, cie);
                 pathMapNodeSet = new PathMap.PathMapNodeSet(pathMap.makeNewRoot(cie));
             }
             attachmentPoint = pathMapNodeSet;
@@ -1574,7 +1574,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      */
 
     public boolean isSubtreeExpression() {
-        if (ExpressionTool.dependsOnFocus(Expression.this)) {
+        if (ExpressionTool.dependsOnFocus(this)) {
             if ((getIntrinsicDependencies() & StaticProperty.DEPENDS_ON_FOCUS) != 0) {
                 return false;
             } else {
@@ -1591,7 +1591,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     }
 
     public void setEvaluationMethod(int method) {
-        Expression.this.evaluationMethod = method;
+        this.evaluationMethod = method;
     }
 
     public int getEvaluationMethod() {
@@ -1696,7 +1696,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      */
     @Override
     public int identityHashCode() {
-        return System.identityHashCode(Expression.this.getLocation());
+        return System.identityHashCode(getLocation());
     }
 
     /**

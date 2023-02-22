@@ -460,7 +460,7 @@ public class ReceivingContentHandler
             }
             list.add(new AttributeInfo(attCode, typeCode, value, location, properties));
         }
-        return AttributeMap.fromList(list);
+        return SequenceTool.attributeMapFromList(list);
     }
 
     /**

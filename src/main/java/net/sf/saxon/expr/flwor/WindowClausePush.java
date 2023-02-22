@@ -192,7 +192,7 @@ public class WindowClausePush extends TuplePush {
                     context.setLocalVariable(binding.getLocalSlotNumber(), WindowClause.makeValue(earliestWindow.endPreviousItem));
                 }
                 destination.processTuple(context);
-                earliestWindow.isDespatched = true;
+                earliestWindow.despatched = true;
             }
 
         } // and loop round to see if there's another finished window that we can despatch

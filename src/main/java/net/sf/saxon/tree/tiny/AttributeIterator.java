@@ -12,6 +12,7 @@ import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
@@ -110,15 +111,15 @@ final class AttributeIterator implements AxisIterator, AtomizedValueIterator {
      * Get properties of this iterator.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-     *         and {@link Property#LOOKAHEAD}. It is always
+     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
      *         acceptable to return the value {@code EnumSet.noneOf(Property.class)},
      *         indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.ATOMIZING);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.ATOMIZING);
     }
 }
 

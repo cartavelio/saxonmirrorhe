@@ -18,6 +18,7 @@ import net.sf.saxon.trace.ContextStackIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.value.DateTimeValue;
 
 import javax.xml.transform.URIResolver;
@@ -255,7 +256,7 @@ public class XPathContextMinor implements XPathContext {
 
     @Override
     public final boolean isAtLast() throws XPathException {
-        if (currentIterator.getProperties().contains(SequenceIterator.Property.LOOKAHEAD)) {
+        if (currentIterator.getProperties().contains(SequenceIteratorProperty.LOOKAHEAD)) {
             return !((LookaheadIterator) currentIterator).hasNext();
         }
         return currentIterator.position() == getLast();

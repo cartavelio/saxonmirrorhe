@@ -197,11 +197,10 @@ public class Compilation {
                     throw new XPathException("There is a cycle of package dependencies involving " + buffer, "XTSE3005");
                 }
             }
-            StylesheetPackage used;
             try {
                 List<VersionedPackageName> disallowed = new ArrayList<>(usingPackages);
                 disallowed.add(details.nameAndVersion);
-                used = library.obtainLoadedPackage(details, disallowed);
+                library.obtainLoadedPackage(details, disallowed);
             } catch (XPathException err) {
                 if (!err.hasBeenReported()) {
                     reportError(err);

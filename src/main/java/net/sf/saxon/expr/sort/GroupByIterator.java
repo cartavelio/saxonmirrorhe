@@ -11,11 +11,13 @@ import com.saxonica.ee.stream.ManualGroupIterator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.DistinctValues;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
@@ -119,7 +121,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
                 }
                 AtomicMatchKey comparisonKey;
                 if (key.isNaN()) {
-                    comparisonKey = AtomicMatchKey.NaN_MATCH_KEY;
+                    comparisonKey = DistinctValues.NaN_MATCH_KEY;
                 } else {
                     comparisonKey = key.getXPathComparable(false, collator, implicitTimezone);
                 }
@@ -174,7 +176,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
                 compositeKey.add(key);
                 AtomicMatchKey comparisonKey;
                 if (key.isNaN()) {
-                    comparisonKey = AtomicMatchKey.NaN_MATCH_KEY;
+                    comparisonKey = DistinctValues.NaN_MATCH_KEY;
                 } else {
                     comparisonKey = key.getXPathComparable(false, collator, implicitTimezone);
                 }
@@ -261,15 +263,15 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-     *         and {@link Property#LOOKAHEAD}. It is always
+     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LOOKAHEAD, Property.LAST_POSITION_FINDER);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER);
     }
 
     /**

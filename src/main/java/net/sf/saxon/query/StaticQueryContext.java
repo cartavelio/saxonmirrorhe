@@ -75,7 +75,7 @@ public class StaticQueryContext {
     /*@Nullable*/ private ModuleURIResolver moduleURIResolver;
     private ErrorReporter errorReporter = new StandardErrorReporter();
     /*@Nullable*/ private CodeInjector codeInjector;
-    private boolean isUpdating = false;
+    private boolean updating = false;
     private String defaultCollationName;
     private Location moduleLocation;
     private OptimizerOptions optimizerOptions;
@@ -178,7 +178,7 @@ public class StaticQueryContext {
         moduleURIResolver = c.moduleURIResolver;
         errorReporter = c.errorReporter;
         codeInjector = c.codeInjector;
-        isUpdating = c.isUpdating;
+        updating = c.updating;
         optimizerOptions = c.optimizerOptions;
     }
 
@@ -202,7 +202,7 @@ public class StaticQueryContext {
         moduleURIResolver = null;
         defaultCollationName = config.getDefaultCollationName();
         clearNamespaces();
-        isUpdating = false;
+        updating = false;
         optimizerOptions = config.getOptimizerOptions();
 
     }
@@ -425,7 +425,7 @@ public class StaticQueryContext {
      */
 
     public boolean isUpdating() {
-        return isUpdating;
+        return updating;
     }
 
     /**
@@ -560,7 +560,7 @@ public class StaticQueryContext {
 
     /*@NotNull*/
     public XQueryExpression compileQuery(/*@NotNull*/ String query) throws XPathException {
-        XQueryParser qp = (XQueryParser) config.newExpressionParser("XQ", isUpdating, languageVersion);
+        XQueryParser qp = (XQueryParser) config.newExpressionParser("XQ", updating, languageVersion);
         if (codeInjector != null) {
             qp.setCodeInjector(codeInjector);
         } else if (config.isCompileWithTracing()) {
@@ -1157,7 +1157,7 @@ public class StaticQueryContext {
      */
 
     public void setUpdatingEnabled(boolean updating) {
-        isUpdating = updating;
+        this.updating = updating;
     }
 
     /**
@@ -1170,7 +1170,7 @@ public class StaticQueryContext {
      */
 
     public boolean isUpdatingEnabled() {
-        return isUpdating;
+        return updating;
     }
 
 }

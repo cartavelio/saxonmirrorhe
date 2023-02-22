@@ -561,7 +561,7 @@ public class StandardErrorReporter
      */
 
     protected void outputStackTrace(Logger out, XPathContext context) {
-        printStackTrace(context, out, stackTraceDetail);
+        logStackTrace(context, out, stackTraceDetail);
     }
 
 

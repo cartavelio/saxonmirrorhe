@@ -512,7 +512,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          * Add details for options parameters (only applies to one argument, the function is expected to know which)
          */
 
-        public Entry optionDetails(OptionsParameter details) {
+        public Entry setOptionDetails(OptionsParameter details) {
             this.optionDetails = details;
             return this;
         }

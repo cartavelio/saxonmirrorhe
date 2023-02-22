@@ -144,6 +144,7 @@ public final class FloatValue extends NumericValue {
      * @see NumericValue#hashCode
      */
 
+    @Override
     public int hashCode() {
         if (value > Integer.MIN_VALUE && value < Integer.MAX_VALUE) {
             return (int) value;

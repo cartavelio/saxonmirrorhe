@@ -8,7 +8,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AtomizingIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.io.Closeable;
@@ -72,8 +72,8 @@ public interface SequenceIterator extends Closeable {
      * Get properties of this iterator.
      *
      * @return the properties of this iterator. This will be some combination of
-     * properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-     * and {@link Property#LOOKAHEAD}. It is always
+     * properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+     * and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
      * acceptable to return the default value {@code EnumSet.noneOf(Property.class)},
      * indicating that there are no known special properties.
      * It is acceptable (though unusual) for the properties of the iterator to change depending
@@ -81,46 +81,8 @@ public interface SequenceIterator extends Closeable {
      * @since 8.6. Default implementation added in 9.9.
      */
 
-    default EnumSet<Property> getProperties() {
-        return EnumSet.noneOf(Property.class);
-    }
-
-    enum Property {
-
-        /**
-         * Property value: the iterator is "grounded". This means that (a) the
-         * iterator must be an instance of {@link net.sf.saxon.tree.iter.GroundedIterator}, and (b) the
-         * implementation of the materialize() method must be efficient (in particular,
-         * it should not involve the creation of new objects)
-         */
-
-        GROUNDED,
-
-        /**
-         * Property value: the iterator knows the number of items that it will deliver.
-         * This means that (a) the iterator must be an instance of {@link net.sf.saxon.expr.LastPositionFinder},
-         * and (b) the implementation of the getLastPosition() method must be efficient (in particular,
-         * it should take constant time, rather than time proportional to the length of the sequence)
-         */
-
-        LAST_POSITION_FINDER,
-
-        /**
-         * Property value: the iterator knows whether there are more items still to come. This means
-         * that (a) the iterator must be an instance of {@link net.sf.saxon.tree.iter.LookaheadIterator}, and (b) the
-         * implementation of the hasNext() method must be efficient (more efficient than the client doing
-         * it)
-         */
-
-        LOOKAHEAD,
-
-        /**
-         * Property value: the iterator can deliver an atomized result. This means that the iterator
-         * must be an instance of {@link AtomizingIterator}.
-         */
-
-        ATOMIZING
-
+    default EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.noneOf(SequenceIteratorProperty.class);
     }
 
     /**

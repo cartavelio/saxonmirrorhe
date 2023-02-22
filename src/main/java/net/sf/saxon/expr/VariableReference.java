@@ -252,7 +252,7 @@ public abstract class VariableReference extends Expression implements BindingRef
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         if (binding instanceof LetExpression &&
                 ((LetExpression)binding).getSequence() instanceof Literal &&
-                !((LetExpression) binding).isIndexedVariable) {
+                !((LetExpression) binding).indexedVariable) {
             Expression val = ((LetExpression) binding).getSequence();
             Optimizer.trace(visitor.getConfiguration(), "Replaced variable " + getDisplayName() + " by its value", val);
             binding = null;
@@ -579,13 +579,13 @@ public abstract class VariableReference extends Expression implements BindingRef
             err.printStackTrace();
             String msg = "Internal error: no value for variable $" + getDisplayName() +
                     " at line " + getLocation().getLineNumber() + (getLocation().getSystemId() == null ? "" : " of " + getLocation().getSystemId());
-            new StandardDiagnostics().printStackTrace(c, c.getConfiguration().getLogger(), 2);
+            new StandardDiagnostics().logStackTrace(c, c.getConfiguration().getLogger(), 2);
             throw new AssertionError(msg);
         } catch (AssertionError err) {
             err.printStackTrace();
             String msg = err.getMessage() + ". Variable reference $" + getDisplayName() +
                     " at line " + getLocation().getLineNumber() + (getLocation().getSystemId() == null ? "" : " of " + getLocation().getSystemId());
-            new StandardDiagnostics().printStackTrace(c, c.getConfiguration().getLogger(), 2);
+            new StandardDiagnostics().logStackTrace(c, c.getConfiguration().getLogger(), 2);
             throw new AssertionError(msg);
         }
     }

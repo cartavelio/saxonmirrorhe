@@ -73,7 +73,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         register("merge", 2, MapMerge.class, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
-                .optionDetails(mergeOptionDetails);
+                .setOptionDetails(mergeOptionDetails);
 
         register("entry", 2, MapEntry.class, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)

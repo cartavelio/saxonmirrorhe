@@ -10,14 +10,12 @@ package net.sf.saxon.expr.sort;
 import com.saxonica.ee.stream.ManualGroupIterator;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.AtomicArray;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ExternalObject;
@@ -34,7 +32,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
 
     private final SequenceIterator baseItr;
     private ObjectValue<ItemWithMergeKeys> currenti = null;
-    private ObjectValue<ItemWithMergeKeys> next;
+    private ObjectValue<ItemWithMergeKeys> nextItem;
     private List<Item> currentMembers;
     private Map<String, List<Item>> currentSourceMembers;
     private final ItemOrderComparer comparer;
@@ -47,9 +45,9 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
             SequenceIterator p1,
             ItemOrderComparer comp, LastPositionFinder lpf) throws XPathException {
         this.baseItr = p1;
-        next = (ObjectValue<ItemWithMergeKeys>)p1.next();
-        if (next != null) {
-            compositeMergeKey = ((ItemWithMergeKeys) ((ObjectValue) next).getObject()).sortKeyValues;
+        nextItem = (ObjectValue<ItemWithMergeKeys>)p1.next();
+        if (nextItem != null) {
+            compositeMergeKey = ((ItemWithMergeKeys) ((ObjectValue) nextItem).getObject()).sortKeyValues;
         }
         this.comparer = comp;
         this.lastPositionFinder = lpf;
@@ -83,7 +81,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
         while (true) {
             ObjectValue<ItemWithMergeKeys> nextCandidate = (ObjectValue<ItemWithMergeKeys>)baseItr.next();
             if (nextCandidate == null) {
-                next = null;
+                nextItem = null;
                 return;
             }
 
@@ -103,7 +101,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
                             "Merge input for source " + source + " is not ordered according to merge key, detected at key value: " +
                                     Arrays.toString(keys.toArray()), "XTDE2220");
                 } else {
-                    next = nextCandidate;
+                    nextItem = nextCandidate;
                     return;
                 }
             } catch (ClassCastException e) {
@@ -118,19 +116,19 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
 
     @Override
     public boolean hasNext() {
-        return next != null;
+        return nextItem != null;
     }
 
     @Override
     public Item next() throws XPathException {
-        if (next == null) {
+        if (nextItem == null) {
             currenti = null;
             position = -1;
             return null;
         }
-        currenti = next;
+        currenti = nextItem;
         position++;
-        compositeMergeKey = ((ItemWithMergeKeys) ((ExternalObject) next).getObject()).sortKeyValues;
+        compositeMergeKey = ((ItemWithMergeKeys) ((ExternalObject) nextItem).getObject()).sortKeyValues;
         advance();
         return currenti.getObject().baseItem;
     }
@@ -146,8 +144,8 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     }
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LOOKAHEAD, Property.LAST_POSITION_FINDER);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER);
     }
 
     @Override

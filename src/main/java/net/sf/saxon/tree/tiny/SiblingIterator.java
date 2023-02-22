@@ -10,6 +10,7 @@ package net.sf.saxon.tree.tiny;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AtomizedValueIterator;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -221,8 +222,8 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
     }
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LOOKAHEAD, Property.ATOMIZING);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.ATOMIZING);
     }
 
 }

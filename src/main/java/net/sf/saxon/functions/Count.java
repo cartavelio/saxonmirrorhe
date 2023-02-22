@@ -13,6 +13,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
@@ -53,7 +54,7 @@ public class Count extends SystemFunction {
      */
 
     public static int count(/*@NotNull*/ SequenceIterator iter) throws XPathException {
-        if (iter.getProperties().contains(SequenceIterator.Property.LAST_POSITION_FINDER)) {
+        if (iter.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
             return ((LastPositionFinder) iter).getLength();
         } else {
             int n = 0;

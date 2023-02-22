@@ -26,10 +26,10 @@ import java.util.List;
 public interface UnfailingPullProvider extends PullProvider {
 
     @Override
-    Event next() throws XPathException;
+    PullEvent next() throws XPathException;
 
     @Override
-    Event current();
+    PullEvent current();
 
     @Override
     AttributeMap getAttributes();
@@ -38,7 +38,7 @@ public interface UnfailingPullProvider extends PullProvider {
     NamespaceBinding[] getNamespaceDeclarations();
 
     @Override
-    Event skipToMatchingEnd();
+    PullEvent skipToMatchingEnd();
 
     @Override
     void close();

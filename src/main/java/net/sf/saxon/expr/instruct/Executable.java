@@ -75,7 +75,7 @@ public class Executable {
     /*@Nullable*/ private HashMap<StructuredQName, Properties> outputDeclarations = null;
 
     // a boolean, true if the executable represents a stylesheet that uses xsl:result-document
-    private boolean createsSecondaryResult = false;
+    private boolean _createsSecondaryResult = false;
 
     // a boolean, indicates that the executable is schema-aware. This will true by default only
     // if it statically imports a schema. If the executable is not schema-aware, then
@@ -528,7 +528,7 @@ public class Executable {
      */
 
     public void setCreatesSecondaryResult(boolean flag) {
-        createsSecondaryResult = flag;
+        _createsSecondaryResult = flag;
     }
 
     /**
@@ -539,7 +539,7 @@ public class Executable {
      */
 
     public boolean createsSecondaryResult() {
-        return createsSecondaryResult;
+        return _createsSecondaryResult;
     }
 
     /**

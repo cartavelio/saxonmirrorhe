@@ -16,6 +16,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
+import net.sf.saxon.regex.RegexMatchHandler;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.EmptyUniString;
 import net.sf.saxon.str.UnicodeString;
@@ -124,7 +125,7 @@ public class AnalyzeStringFn extends RegexFunction {
             if (iter.isMatching()) {
                 out.startElement(matchName, matchType, Loc.NONE, ReceiverOption.NONE);
                 out.startContent();
-                iter.processMatchingSubstring(new RegexIterator.MatchHandler() {
+                iter.processMatchingSubstring(new RegexMatchHandler() {
                     @Override
                     public void characters(CodePoints s) throws XPathException {
                         out.characters(s, Loc.NONE, ReceiverOption.NONE);

@@ -113,8 +113,8 @@ public class TypeChecker {
             if (reqItemType == null || suppliedItemType == null) {
                 throw new NullPointerException();
             }
-            Affinity relation = th.relationship(reqItemType, suppliedItemType);
-            itemTypeOK = relation == Affinity.SAME_TYPE || relation == Affinity.SUBSUMES;
+            Affinity affinity = th.relationship(reqItemType, suppliedItemType);
+            itemTypeOK = affinity == Affinity.SAME_TYPE || affinity == Affinity.SUBSUMES;
         }
 
 
@@ -520,8 +520,8 @@ public class TypeChecker {
         // NOTE: we don't currently do any static inference regarding the content type
         if (!itemTypeOK) {
             suppliedItemType = exp.getItemType();
-            Affinity relation = th.relationship(reqItemType, suppliedItemType);
-            itemTypeOK = relation == SAME_TYPE || relation == SUBSUMES;
+            Affinity affinity = th.relationship(reqItemType, suppliedItemType);
+            itemTypeOK = affinity == SAME_TYPE || affinity == SUBSUMES;
         }
 
         // If both the cardinality and item type are statically OK, return now.

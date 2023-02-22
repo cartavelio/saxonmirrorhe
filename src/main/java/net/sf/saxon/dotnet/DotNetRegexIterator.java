@@ -15,6 +15,8 @@ import cli.System.Text.RegularExpressions.Regex;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.regex.RegexMatchHandler;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.regex.ARegexIterator;
 import net.sf.saxon.regex.RegexIterator;
@@ -39,8 +41,8 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
     private final Regex pattern;      // the regex against which the string is matched
     private final IEnumerator matcher;    // the Matcher object that does the matching, and holds the state
     private Match match;        // the current match
-    private String current;     // the string most recently returned by the iterator
-    private String next;        // if the last string was a matching string, null; otherwise the next substring
+    private String currentString;     // the string most recently returned by the iterator
+    private String nextString;        // if the last string was a matching string, null; otherwise the next substring
     //        matched by the regex
     private int prevEnd = 0;    // the position in the input string of the end of the last match or non-match
 
@@ -59,7 +61,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
         theString = string;
         this.pattern = pattern;
         matcher = pattern.Matches(string).GetEnumerator();
-        next = null;
+        nextString = null;
     }
 
     @Override
@@ -77,7 +79,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
 
     @Override
     public StringItem next() {
-        if (next == null && prevEnd >= 0) {
+        if (nextString == null && prevEnd >= 0) {
             // we've returned a match (or we're at the start), so find the next match
             if (matcher.MoveNext()) {
                 match = (Match) matcher.get_Current();
@@ -85,22 +87,22 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
                 int end = match.get_Index() + match.get_Length();
                 if (prevEnd == start) {
                     // there's no intervening non-matching string to return
-                    next = null;
-                    current = theString.substring(start, end);
+                    nextString = null;
+                    currentString = theString.substring(start, end);
                     prevEnd = end;
                 } else {
                     // return the non-matching substring first
-                    current = theString.substring(prevEnd, start);
-                    next = theString.substring(start, end);
+                    currentString = theString.substring(prevEnd, start);
+                    nextString = theString.substring(start, end);
                 }
             } else {
                 // there are no more regex matches, we must return the final non-matching text if any
                 if (prevEnd < theString.length()) {
-                    current = theString.substring(prevEnd);
-                    next = null;
+                    currentString = theString.substring(prevEnd);
+                    nextString = null;
                 } else {
                     // this really is the end...
-                    current = null;
+                    currentString = null;
                     prevEnd = -1;
                     return null;
                 }
@@ -109,15 +111,15 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
         } else {
             // we've returned a non-match, so now return the match that follows it, if there is one
             if (prevEnd >= 0) {
-                current = next;
-                next = null;
+                currentString = nextString;
+                nextString = null;
                 prevEnd = match.get_Index() + match.get_Length();
             } else {
-                current = null;
+                currentString = null;
                 return null;
             }
         }
-        return StringItem.makeStringValue(current);
+        return StringItem.makeStringValue(currentString);
     }
 
     /**
@@ -127,7 +129,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     public Item current() {
-        return StringItem.makeStringValue(current);
+        return StringItem.makeStringValue(currentString);
     }
 
     /**
@@ -137,8 +139,8 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LAST_POSITION_FINDER);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER);
     }
 
     /**
@@ -151,7 +153,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
 
     @Override
     public boolean isMatching() {
-        return next == null && prevEnd >= 0;
+        return nextString == null && prevEnd >= 0;
     }
 
     /**
@@ -190,11 +192,11 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public void processMatchingSubstring(MatchHandler action) throws XPathException {
+    public void processMatchingSubstring(RegexMatchHandler action) throws XPathException {
         GroupCollection groups = match.get_Groups();
         int c = groups.get_Count();
         if (c == 0) {
-            action.characters(StringView.of(current));
+            action.characters(StringView.of(currentString));
         } else {
             // Create a map from positions in the string to lists of actions.
             // The "actions" in each list are: +N: start group N; -N: end group N.
@@ -259,8 +261,8 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
 
 
             }
-            StringBuilder buff = new StringBuilder(current.length());
-            for (int k = 0; k < current.length() + 1; k++) {
+            StringBuilder buff = new StringBuilder(currentString.length());
+            for (int k = 0; k < currentString.length() + 1; k++) {
                 List<Integer> events = actions.get(k);
                 if (events != null) {
                     if (buff.length() > 0) {
@@ -275,8 +277,8 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
                         }
                     }
                 }
-                if (k < current.length()) {
-                    buff.append(current.charAt(k));
+                if (k < currentString.length()) {
+                    buff.append(currentString.charAt(k));
                 }
             }
             if (buff.length() > 0) {

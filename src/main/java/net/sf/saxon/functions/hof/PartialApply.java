@@ -89,11 +89,11 @@ public class PartialApply extends Expression {
             if (op != null) {
                 Expression arg = op.getChildExpression();
                 if (baseType instanceof SpecificFunctionType && i < ((SpecificFunctionType) baseType).getArity()) {
-                    RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "saxon:call", i);
+                    RoleDiagnostic argRole = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "saxon:call", i);
                     SequenceType requiredArgType = ((SpecificFunctionType) baseType).getArgumentTypes()[i];
                     argTypes[i] = requiredArgType;
                     Expression a3 = tc.staticTypeCheck(
-                            arg, requiredArgType, role, visitor);
+                            arg, requiredArgType, argRole, visitor);
                     if (a3 != arg) {
                         op.setChildExpression(a3);
                     }

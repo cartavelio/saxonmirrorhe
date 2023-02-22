@@ -10,14 +10,12 @@ package net.sf.saxon.expr.sort;
 import net.sf.saxon.expr.ErrorIterator;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.FocusTrackingIterator;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -107,7 +105,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
      * next(). It is used only when there is an explicit need to tell if we
      * are at the last element.
      * <p>This method must not be called unless the result of getProperties() on the iterator
-     * includes the bit setting {@link Property#LOOKAHEAD}</p>
+     * includes the bit setting {@link SequenceIteratorProperty#LOOKAHEAD}</p>
      *
      * @return true if there are more items in the sequence
      */
@@ -172,15 +170,15 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-     *         and {@link Property#LOOKAHEAD}. It is always
+     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LAST_POSITION_FINDER);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER);
     }
 
     /**
@@ -191,7 +189,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
 
     protected void buildArray() throws XPathException {
         int allocated;
-        if (base.getProperties().contains(Property.LAST_POSITION_FINDER)) {
+        if (base.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
             allocated = ((LastPositionFinder) base).getLength();
         } else {
             allocated = 100;

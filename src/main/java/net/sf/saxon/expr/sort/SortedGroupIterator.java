@@ -14,6 +14,7 @@ import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.Arrays;
 
@@ -45,7 +46,7 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
     @Override
     protected void buildArray() throws XPathException {
         int allocated;
-        if (base.getProperties().contains(Property.LAST_POSITION_FINDER)) {
+        if (base.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
             allocated = ((LastPositionFinder) base).getLength();
         } else {
             allocated = 100;

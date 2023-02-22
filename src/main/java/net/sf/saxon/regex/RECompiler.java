@@ -770,8 +770,8 @@ public class RECompiler {
 
         UnicodeBuilder ub = new UnicodeBuilder();
 
-        atomLoop:
-
+        // Avoid "break loop" construct to allow conversion to C#
+        boolean breakAtomLoop = false;
         while (idx < len) {
             // Is there a next char?
             if ((idx + 1) < len) {
@@ -797,9 +797,13 @@ public class RECompiler {
                         // If the next character is a quantifier operator and our atom is non-empty, the
                         // current character should bind to the quantifier operator rather than the atom
                         if (lenAtom != 0) {
-                            break atomLoop;
+                            breakAtomLoop = true;
+                            break;
                         }
                 }
+            }
+            if (breakAtomLoop) {
+                break;
             }
 
             // Switch on current char
@@ -810,7 +814,8 @@ public class RECompiler {
                 case '(':
                 case ')':
                 case '|':
-                    break atomLoop;
+                    breakAtomLoop = true;
+                    break;
 
                 case '{':
                 case '?':
@@ -822,11 +827,13 @@ public class RECompiler {
                         // No atom before quantifier
                         syntaxError("No expression before quantifier");
                     }
-                    break atomLoop;
+                    breakAtomLoop = true;
+                    break;
 
                 case '}':
                     syntaxError("Unescaped right curly brace");
-                    break atomLoop;
+                    breakAtomLoop = true;
+                    break;
 
                 case '\\': {
                     // Get the escaped character (advances input automatically)
@@ -837,7 +844,8 @@ public class RECompiler {
                     if (!(charClass instanceof IntValuePredicate)) {
                         // Not a simple escape, so backup to where we were before the escape.
                         idx = idxBeforeEscape;
-                        break atomLoop;
+                        breakAtomLoop = true;
+                        break;
                     }
 
                     // Add escaped char to atom
@@ -849,7 +857,8 @@ public class RECompiler {
                 case '^':
                 case '$':
                     if (isXPath) {
-                        break atomLoop;
+                        breakAtomLoop = true;
+                        break;
                     }
                     // else fall through ($ is not a metacharacter in XSD)
 
@@ -860,6 +869,9 @@ public class RECompiler {
                     ub.append(pattern.codePointAt(index));
                     lenAtom++;
                     break;
+            }
+            if (breakAtomLoop) {
+                break;
             }
         }
 
@@ -1186,9 +1198,9 @@ public class RECompiler {
     private static Operation makeSequence(Operation o1, Operation o2) {
         if (o1 instanceof Operation.OpSequence) {
             if (o2 instanceof Operation.OpSequence) {
-                List<Operation> l1 = ((Operation.OpSequence)o1).getOperations();
-                List<Operation> l2 = ((Operation.OpSequence)o2).getOperations();
-                l1.addAll(l2);
+                List<Operation> list1 = ((Operation.OpSequence)o1).getOperations();
+                List<Operation> list2 = ((Operation.OpSequence)o2).getOperations();
+                list1.addAll(list2);
                 return o1;
             }
             List<Operation> l1 = ((Operation.OpSequence)o1).getOperations();

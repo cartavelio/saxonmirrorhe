@@ -40,7 +40,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
 
     private final Operand[] conditionOps;
     private final Operand[] actionOps;
-    private boolean isInstruction;
+    private boolean _isInstruction;
 
 
     // The class implements both xsl:choose and xsl:if. There is a list of boolean
@@ -116,7 +116,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
      */
 
     public void setInstruction(boolean inst) {
-        isInstruction = inst;
+        _isInstruction = inst;
     }
 
     /**
@@ -128,7 +128,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
 
     @Override
     public boolean isInstruction() {
-        return isInstruction;
+        return _isInstruction;
     }
 
 

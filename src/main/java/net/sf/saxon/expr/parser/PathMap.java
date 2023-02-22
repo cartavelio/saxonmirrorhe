@@ -55,7 +55,7 @@ public class PathMap {
         List<PathMapArc> arcs;
         private boolean returnable;
         private boolean atomized;
-        private boolean hasUnknownDependencies;
+        private boolean _hasUnknownDependencies;
 
         /**
          * Create a node in the PathMap (initially with no arcs)
@@ -187,7 +187,7 @@ public class PathMap {
          */
 
         public void setHasUnknownDependencies() {
-            hasUnknownDependencies = true;
+            _hasUnknownDependencies = true;
         }
 
         /**
@@ -198,7 +198,7 @@ public class PathMap {
          */
 
         public boolean hasUnknownDependencies() {
-            return hasUnknownDependencies;
+            return _hasUnknownDependencies;
         }
 
         /**

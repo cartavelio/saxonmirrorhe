@@ -378,8 +378,8 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
         // fix up references from XPath expressions to variables and functions, for static typing
 
-        for (ComponentDeclaration decl : topLevel) {
-            StyleElement inst = decl.getSourceElement();
+        for (ComponentDeclaration topLevelDecl : topLevel) {
+            StyleElement inst = topLevelDecl.getSourceElement();
             if (!inst.isActionCompleted(StyleElement.ACTION_FIXUP)) {
                 inst.setActionCompleted(StyleElement.ACTION_FIXUP);
                 inst.fixupReferences();
@@ -394,8 +394,6 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         // Validate the whole package (i.e. with included and imported stylesheet modules)
 
         XSLPackage top = (XSLPackage) getStylesheetElement();
-        //setInputTypeAnnotations(top.getInputTypeAnnotationsAttribute());
-        ComponentDeclaration decl = new ComponentDeclaration(this, top);
         if (!top.isActionCompleted(StyleElement.ACTION_VALIDATE)) {
             top.setActionCompleted(StyleElement.ACTION_VALIDATE);
             top.validate(null);
@@ -887,10 +885,10 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             List<ComponentDeclaration> entries = new ArrayList<>();
             Set<XSLAttributeSet> elements = new HashSet<>();
             for (int i = entry.getValue().size() - 1; i >= 0; i--) {
-                ComponentDeclaration decl = entry.getValue().get(i);
-                XSLAttributeSet src = (XSLAttributeSet) decl.getSourceElement();
+                ComponentDeclaration attSetDecl = entry.getValue().get(i);
+                XSLAttributeSet src = (XSLAttributeSet) attSetDecl.getSourceElement();
                 if (!elements.contains(src)) {
-                    entries.add(0, decl);
+                    entries.add(0, attSetDecl);
                     elements.add(src);
                 }
             }
@@ -1566,32 +1564,38 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 }
             }
             if (!matched && component.getVisibilityProvenance() == VisibilityProvenance.DEFAULTED) {
-                // Look for a matching wildcard
-                partialWildcardSearch:
-                for (XSLExpose exposure : exposeDeclarations) {
-                    for (ComponentTest test : exposure.getWildcardComponentTests()) {
-                        if (test.isPartialWildcard() && test.matches(component.getActor())) {
-                            component.setVisibility(exposure.getVisibility(), VisibilityProvenance.EXPOSED);
-                            matched = true;
-                            break partialWildcardSearch;
-                        }
-                    }
-                }
+                matched = lookForMatchingWildcard(exposeDeclarations, component, matched);
                 if (!matched) {
-                    anyWildcardSearch:
-                    for (XSLExpose exposure : exposeDeclarations) {
-                        for (ComponentTest test : exposure.getWildcardComponentTests()) {
-                            if (test.matches(component.getActor())) {
-                                component.setVisibility(exposure.getVisibility(), VisibilityProvenance.EXPOSED);
-                                break anyWildcardSearch;
-                            }
-                        }
-                    }
+                    lookForAnyWildcard(exposeDeclarations, component);
                 }
 
             }
 
         }
+    }
+
+    private void lookForAnyWildcard(List<XSLExpose> exposeDeclarations, Component component) throws XPathException {
+        for (XSLExpose exposure : exposeDeclarations) {
+            for (ComponentTest test : exposure.getWildcardComponentTests()) {
+                if (test.matches(component.getActor())) {
+                    component.setVisibility(exposure.getVisibility(), VisibilityProvenance.EXPOSED);
+                    return;
+                }
+            }
+        }
+    }
+
+    private boolean lookForMatchingWildcard(List<XSLExpose> exposeDeclarations, Component component, boolean matched) throws XPathException {
+        // Look for a matching wildcard
+        for (XSLExpose exposure : exposeDeclarations) {
+            for (ComponentTest test : exposure.getWildcardComponentTests()) {
+                if (test.isPartialWildcard() && test.matches(component.getActor())) {
+                    component.setVisibility(exposure.getVisibility(), VisibilityProvenance.EXPOSED);
+                    return true;
+                }
+            }
+        }
+        return matched;
     }
 
 
