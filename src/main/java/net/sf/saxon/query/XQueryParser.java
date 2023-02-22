@@ -2280,6 +2280,8 @@ public class XQueryParser extends XPathParser {
                 setLocation(clause, t.currentTokenStartOffset);
                 clause.setRepeated(containsLoopingClause(clauseList));
                 clauseList.add(clause);
+            } else if (isKeyword("trace")) {
+                parseTraceClause(flwor, clauseList);
             } else if (isKeyword("stable") || isKeyword("order")) {
                 // we read the "stable" keyword but ignore it; Saxon ordering is always stable
                 if (isKeyword("stable")) {
@@ -2586,6 +2588,25 @@ public class XQueryParser extends XPathParser {
         LocalVariableBinding v = new LocalVariableBinding(varQName, type);
         clause.setRangeVariable(v);
         declareRangeVariable(v);
+    }
+
+    /**
+     * Parse a TraceClause. This is a Saxon extension
+     * <p>
+     * [44] TraceClause ::= "trace" Expr
+     * </p>
+     *
+     * @param clauseList - the components of the parsed TraceClause are appended to the
+     *                   supplied list
+     * @throws XPathException in the event of a syntax error
+     */
+    private void parseTraceClause(FLWORExpression flwor, List<Clause> clauseList) throws XPathException {
+        DiagnosticClause clause = new DiagnosticClause();
+        setLocation(clause, t.currentTokenStartOffset);
+        clause.setRepeated(containsLoopingClause(clauseList));
+        clauseList.add(clause);
+        nextToken();
+        clause.initSequence(flwor, parseExpression());
     }
 
     /**
