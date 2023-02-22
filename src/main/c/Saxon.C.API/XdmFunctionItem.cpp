@@ -3,6 +3,9 @@
 
 #include "XdmFunctionItem.h"
 
+#include "XdmArray.h"
+#include "XdmMap.h"
+
 #ifdef MEM_DEBUG
 #define new new(__FILE__, __LINE__)
 #endif
@@ -21,7 +24,7 @@
     }
 
     const char* XdmFunctionItem::getName(){
-          if(fname.empty()) {
+          if(fname == nullptr) {
               allocFn fn = operator new;
               fname = j_getFunctionName(SaxonProcessor::sxn_environ->thread,(void *)fn, (void *)value);
               return fname;
@@ -49,21 +52,16 @@
              return nullptr;
         }
 
-        int64_t result = j_getSystemFunction(SaxonProcessor::sxn_environ->thread, (void *)processor->procRef, name, arity);
+        int64_t result = j_getSystemFunction(SaxonProcessor::sxn_environ->thread, (void *)processor->procRef, (char *)name, arity);
                 if(result) {
-                       xdmFunctionItem * functionItem = new XdmFunctionItem(result);
+                       XdmFunctionItem * functionItem = new XdmFunctionItem(result);
                        return functionItem;
-
-                } else {
-                       return nullptr;
 
                 }
 
-        }
+
 
         return nullptr;
-
-
 
     }
 
@@ -74,16 +72,16 @@
           }
 
           int64_t argumentJArrayRef = SaxonProcessor::createJArray(arguments, argument_length);
-          if(argumentJArray == -1 && argument_length > 0) {
+          if(argumentJArrayRef == -1 && argument_length > 0) {
             std::cerr << "Error in XdmFunctionItem.call when converting arguments -   nullptr arguments found." << std::endl;
             return nullptr;
           }
            int64_t results = j_xdmFunctionItem_call(SaxonProcessor::sxn_environ->thread, (void *)processor->procRef, (void *)value, (argumentJArrayRef == -1 ? (void *) nullptr: (void *)argumentJArrayRef));
-           if(argumentJArray != -1) {
+           if(argumentJArrayRef != -1) {
                j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)argumentJArrayRef);
                argumentJArrayRef = -1;
            }
-           if(result > 0) {
+           if(results > 0) {
                XdmValue * value = nullptr;
                int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results);
                XdmItem * xdmItem = nullptr;
@@ -131,7 +129,7 @@
 
                return value;
            } else if(results == -2){
-               exception = new SaxonApiException();
+               //TODO exception = new SaxonApiException();
            }
 
 

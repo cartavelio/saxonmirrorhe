@@ -420,7 +420,7 @@ void SaxonProcessor::applyConfigurationProperties() {
 
 
 int64_t SaxonProcessor::createJArray(XdmValue **values, int length) {
-    if (size > 0) {
+    if (length > 0) {
         int64_t processorDataRef = createProcessorDataWithCapacity(SaxonProcessor::sxn_environ->thread, length);
 
 

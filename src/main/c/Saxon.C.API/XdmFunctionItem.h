@@ -12,10 +12,13 @@
 #include "XdmItem.h"
 #include "XdmAtomicValue.h"
 #include "XdmNode.h"
+
 #include <string>
 
 #include <stdlib.h>
 #include <string.h>
+
+
 
 /**
  * The class XdmFunctionItem represents a function item
@@ -49,8 +52,8 @@ public:
      * Destructor for XdmFunctionItem
      */
     virtual ~XdmFunctionItem(){
-        if(!fname.empty()) {
-            fname.clear();
+        if(fname != nullptr) {
+            delete fname;
         }
     }
 
