@@ -12,6 +12,7 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -29,7 +30,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
 
     private transient QueryModule importingModule;
     private final XQueryFunctionLibrary baseLibrary;
-    private final HashSet<String> namespaces = new HashSet<>(5);
+    private final HashSet<NamespaceUri> namespaces = new HashSet<>(5);
 
     /**
      * Create an imported function library
@@ -49,7 +50,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
      * @param namespace the imported namespace
      */
 
-    public void addImportedNamespace(String namespace) {
+    public void addImportedNamespace(NamespaceUri namespace) {
         namespaces.add(namespace);
     }
 
@@ -81,7 +82,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
     @Override
     public Expression bind(/*@NotNull*/ SymbolicName.F symbolicName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
         final StructuredQName functionName = symbolicName.getComponentName();
-        final String uri = functionName.getURI();
+        final NamespaceUri uri = functionName.getURI();
         RetainedStaticContext rsc = new RetainedStaticContext(env);
         for (Expression arg : staticArgs) {
             if (arg.getLocalRetainedStaticContext() == null) {
@@ -104,7 +105,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
     /*@Nullable*/
     @Override
     public XQueryFunction getDeclaration(/*@NotNull*/ StructuredQName functionName, int staticArgs) {
-        String uri = functionName.getURI();
+        NamespaceUri uri = functionName.getURI();
         if (namespaces.contains(uri)) {
             return baseLibrary.getDeclaration(functionName, staticArgs);
         } else {
@@ -124,7 +125,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
     @Override
     public FunctionLibrary copy() {
         ImportedFunctionLibrary lib = new ImportedFunctionLibrary(importingModule, baseLibrary);
-        for (String ns : namespaces) {
+        for (NamespaceUri ns : namespaces) {
             lib.addImportedNamespace(ns);
         }
         return lib;

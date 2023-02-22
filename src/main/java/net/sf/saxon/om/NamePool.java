@@ -7,7 +7,6 @@
 
 package net.sf.saxon.om;
 
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,7 +74,7 @@ public final class NamePool {
 
     // A map containing suggested prefixes for particular URIs
 
-    private final ConcurrentHashMap<String, String> suggestedPrefixes = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<NamespaceUri, String> suggestedPrefixes = new ConcurrentHashMap<>();
 
 
 
@@ -95,7 +94,7 @@ public final class NamePool {
      * @param prefix the suggested prefix
      */
 
-    public void suggestPrefix(String prefix, String uri) {
+    public void suggestPrefix(String prefix, NamespaceUri uri) {
         suggestedPrefixes.put(uri, prefix);
     }
 
@@ -147,8 +146,8 @@ public final class NamePool {
      * @return a prefix that has previously been associated with this URI, if available; otherwise null
      */
 
-    public String suggestPrefixForURI(String uri) {
-        if (uri.equals(NamespaceConstant.XML)) {
+    public String suggestPrefixForURI(NamespaceUri uri) {
+        if (uri.equals(NamespaceUri.XML)) {
             return "xml";
         }
         return suggestedPrefixes.get(uri);
@@ -164,8 +163,8 @@ public final class NamePool {
      * for the same name with a prefix equal to "".
      */
     
-    public synchronized int allocateFingerprint(String uri, String local) {
-        if (NamespaceConstant.isReserved(uri) || NamespaceConstant.SAXON.equals(uri)) {
+    public synchronized int allocateFingerprint(NamespaceUri uri, String local) {
+        if (NamespaceUri.isReserved(uri) || NamespaceUri.SAXON.equals(uri)) {
             int fp = StandardNames.getFingerprint(uri, local);
             if (fp != -1) {
                 return fp;
@@ -205,7 +204,7 @@ public final class NamePool {
      */
 
     /*@NotNull*/
-    public String getURI(int nameCode) {
+    public NamespaceUri getURI(int nameCode) {
         int fp = nameCode & FP_MASK;
         if ((fp & USER_DEFINED_MASK) == 0) {
             return StandardNames.getURI(fp);
@@ -268,20 +267,20 @@ public final class NamePool {
      */
 
     public int allocateClarkName(String expandedName) {
-        String namespace;
+        NamespaceUri namespace;
         String localName;
         if (expandedName.charAt(0) == '{') {
             int closeBrace = expandedName.indexOf('}');
             if (closeBrace < 0) {
                 throw new IllegalArgumentException("No closing '}' in Clark name");
             }
-            namespace = expandedName.substring(1, closeBrace);
+            namespace = NamespaceUri.of(expandedName.substring(1, closeBrace));
             if (closeBrace == expandedName.length()) {
                 throw new IllegalArgumentException("Missing local part in Clark name");
             }
             localName = expandedName.substring(closeBrace + 1);
         } else {
-            namespace = "";
+            namespace = NamespaceUri.NULL;
             localName = expandedName;
         }
 
@@ -299,10 +298,10 @@ public final class NamePool {
      * @return the integer fingerprint, or -1 if this is not found in the name pool
      */
 
-    public int getFingerprint(String uri, String localName) {
+    public int getFingerprint(NamespaceUri uri, String localName) {
         // A read-only version of allocate()
 
-        if (NamespaceConstant.isReserved(uri) || uri.equals(NamespaceConstant.SAXON)) {
+        if (NamespaceUri.isReserved(uri) || uri.equals(NamespaceUri.SAXON)) {
             int fp = StandardNames.getFingerprint(uri, localName);
             if (fp != -1) {
                 return fp;

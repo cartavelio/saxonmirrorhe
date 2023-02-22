@@ -21,7 +21,6 @@ import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.lib.Logger;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
@@ -1240,7 +1239,7 @@ public class ExpressionTool {
                 // replace non-trivial (different-focus) calls to current by a variable reference
                 LetExpression let = new LetExpression();
                 let.setVariableQName(
-                        new StructuredQName("vv", NamespaceConstant.SAXON_GENERATED_VARIABLE, "current" + exp.hashCode()));
+                        new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "current" + exp.hashCode()));
                 let.setRequiredType(SequenceType.SINGLE_ITEM);
                 let.setSequence(new CurrentItemExpression());
                 replaceCallsToCurrent(exp, let);
@@ -1546,7 +1545,7 @@ public class ExpressionTool {
                             (StaticProperty.DEPENDS_ON_CONTEXT_ITEM | StaticProperty.DEPENDS_ON_CONTEXT_DOCUMENT)) != 0) {
             LetExpression let = new LetExpression();
             let.setVariableQName(
-                    new StructuredQName("saxon", NamespaceConstant.SAXON, "dot" + exp.hashCode()));
+                    new StructuredQName("saxon", NamespaceUri.SAXON, "dot" + exp.hashCode()));
             let.setRequiredType(SequenceType.makeSequenceType(contextItemType, StaticProperty.EXACTLY_ONE));
             let.setSequence(new ContextItemExpression());
             let.setAction(exp);

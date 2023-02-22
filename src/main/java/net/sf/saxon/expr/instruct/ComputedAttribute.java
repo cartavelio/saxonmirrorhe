@@ -42,8 +42,6 @@ public final class ComputedAttribute extends AttributeCreator {
      *
      * @param attributeName    An expression to calculate the attribute name
      * @param namespace        An expression to calculate the attribute namespace
-     * @param nsContext        a NamespaceContext object containing the static namespace context of the
-     *                         stylesheet instruction
      * @param validationAction e.g. validation=strict, lax, strip, preserve
      * @param schemaType       Type against which the attribute must be validated. This must not be a namespace-sensitive
      *                         type; it is the caller's responsibility to check this.
@@ -222,7 +220,7 @@ public final class ComputedAttribute extends AttributeCreator {
                 if (val instanceof StringValue) {
                     String[] parts = NameChecker.checkQNameParts(val.getStringValue());
                     if (getNamespaceExp() == null) {
-                        String uri = getNamespaceResolver().getURIForPrefix(parts[0], false);
+                        NamespaceUri uri = getNamespaceResolver().getURIForPrefix(parts[0], false);
                         if (uri == null) {
                             XPathException se = new XPathException("Prefix " + parts[0] + " has not been declared");
                             if (isXSLT()) {
@@ -235,7 +233,7 @@ public final class ComputedAttribute extends AttributeCreator {
                                 throw se;
                             }
                         }
-                        setNamespace(new StringLiteral(uri));
+                        setNamespace(new StringLiteral(uri.toString()));
                     }
                 }
             } catch (XPathException e) {
@@ -332,7 +330,7 @@ public final class ComputedAttribute extends AttributeCreator {
 
         String prefix;
         String localName;
-        String uri = null;
+        NamespaceUri uri = null;
 
         if (nameValue instanceof StringValue) {
             // this will always be the case in XSLT
@@ -399,7 +397,7 @@ public final class ComputedAttribute extends AttributeCreator {
                         // If the prefix is a duplicate, a different one will be substituted
                     }
                 }
-                if (uri.equals(NamespaceConstant.XML) != "xml".equals(prefix)) {
+                if (uri.equals(NamespaceUri.XML) != "xml".equals(prefix)) {
                     String message;
                     if ("xml".equals(prefix)) {
                         message = "When the prefix is 'xml', the namespace URI must be " + NamespaceConstant.XML;
@@ -425,7 +423,7 @@ public final class ComputedAttribute extends AttributeCreator {
 
         if (getNamespaceExp() == null && uri == null) {
             if (prefix.isEmpty()) {
-                uri = "";
+                uri = NamespaceUri.NULL;
             } else {
                 uri = getRetainedStaticContext().getURIForPrefix(prefix, false);
                 if (uri == null) {
@@ -439,10 +437,10 @@ public final class ComputedAttribute extends AttributeCreator {
             if (uri == null) {
                 // generate a name using the supplied namespace URI
                 if (getNamespaceExp() instanceof StringLiteral) {
-                    uri = ((StringLiteral) getNamespaceExp()).stringify();
+                    uri = NamespaceUri.of(((StringLiteral) getNamespaceExp()).stringify());
                 } else {
-                    uri = getNamespaceExp().evaluateAsString(context).toString();
-                    if (!StandardURIChecker.getInstance().isValidURI(uri)) {
+                    uri = NamespaceUri.of(getNamespaceExp().evaluateAsString(context).toString());
+                    if (!StandardURIChecker.getInstance().isValidURI(uri.toString())) {
                         XPathException de = new XPathException("The value of the namespace attribute must be a valid URI", "XTDE0865", this.getLocation());
                         throw dynamicError(getLocation(), de, context);
                     }
@@ -466,7 +464,7 @@ public final class ComputedAttribute extends AttributeCreator {
             }
         }
 
-        if (uri.equals(NamespaceConstant.XMLNS)) {
+        if (uri.equals(NamespaceUri.XMLNS)) {
             String errorCode = isXSLT() ? "XTDE0865" : "XQDY0044";
             XPathException err = new XPathException("Cannot create attribute in namespace " + uri, errorCode, this.getLocation());
             throw dynamicError(getLocation(), err, context);

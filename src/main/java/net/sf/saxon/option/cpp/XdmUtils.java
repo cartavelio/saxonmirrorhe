@@ -7,7 +7,7 @@
 
 package net.sf.saxon.option.cpp;
 
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
@@ -35,7 +35,7 @@ public class XdmUtils {
 
     public static QName getTypeName(String typeStr) {
 
-        int fp = StandardNames.getFingerprint(NamespaceConstant.SCHEMA, typeStr);
+        int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
 
         BuiltInAtomicType typei = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
         StructuredQName sname = typei.getTypeName();
@@ -182,7 +182,7 @@ public class XdmUtils {
      *
      */
     public static String getEQName(QName qname) {
-        String uri = qname.getNamespaceURI();
+        String uri = qname.getNamespaceURI().toString();
         if (uri.length() == 0) {
             return qname.getLocalName();
         } else {

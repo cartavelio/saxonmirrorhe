@@ -21,6 +21,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
@@ -52,7 +53,7 @@ public class SystemProperty extends SystemFunction implements Callable {
                 StructuredQName qName = StructuredQName.fromLexicalQName(name,
                                                                          false, true,
                                                                          getRetainedStaticContext());
-                if (qName.hasURI(NamespaceConstant.XSLT)) {
+                if (qName.hasURI(NamespaceUri.XSLT)) {
                     String local = qName.getLocalPart();
                     if (local.equals("version") || local.equals("vendor") ||
                                 local.equals("vendor-url") || local.equals("product-name") ||
@@ -88,7 +89,7 @@ public class SystemProperty extends SystemFunction implements Callable {
                     getRetainedStaticContext());
 
             return new StringValue(getProperty(
-                        qName.getURI(), qName.getLocalPart(), getRetainedStaticContext()));
+                        qName.getURI().toString(), qName.getLocalPart(), getRetainedStaticContext()));
 
         } catch (XPathException err) {
             throw new XPathException("Invalid system property name. " + err.getMessage(), "XTDE1390", context);
@@ -101,7 +102,7 @@ public class SystemProperty extends SystemFunction implements Callable {
             StructuredQName qName = StructuredQName.fromLexicalQName(name,
                                                                      false, true,
                                                                      getRetainedStaticContext());
-            String uri = qName.getURI();
+            String uri = qName.getURI().toString();
             String local = qName.getLocalPart();
             return uri.equals(NamespaceConstant.XSLT) &&
                     (local.equals("version") || local.equals("vendor") ||

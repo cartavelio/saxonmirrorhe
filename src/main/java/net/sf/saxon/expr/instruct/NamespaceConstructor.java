@@ -152,7 +152,7 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
         String uri = value.toString();
         checkPrefixAndUri(prefix, uri, context);
 
-        output.namespace(prefix, uri, ReceiverOption.REJECT_DUPLICATES);
+        output.namespace(prefix, NamespaceUri.of(uri), ReceiverOption.REJECT_DUPLICATES);
     }
 
 

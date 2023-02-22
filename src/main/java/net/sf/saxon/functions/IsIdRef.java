@@ -10,11 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ExtensionFunctionCall;
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
@@ -29,7 +25,7 @@ import net.sf.saxon.value.SequenceType;
 public class IsIdRef extends ExtensionFunctionDefinition {
 
     private static final StructuredQName qName =
-            new StructuredQName("", NamespaceConstant.SAXON, "is-idref");
+            new StructuredQName("", NamespaceUri.SAXON, "is-idref");
 
     /**
      * Get the function name, as a QName

@@ -18,6 +18,7 @@ import net.sf.saxon.functions.NormalizeSpace_1;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StandardNames;
@@ -279,8 +280,8 @@ public final class FixedAttribute extends AttributeCreator {
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("att", this);
         out.emitAttribute("name", nodeName.getDisplayName());
-        if (!nodeName.getStructuredQName().hasURI("")) {
-            out.emitAttribute("nsuri", nodeName.getStructuredQName().getURI());
+        if (!nodeName.getStructuredQName().hasURI(NamespaceUri.NULL)) {
+            out.emitAttribute("nsuri", nodeName.getStructuredQName().getURI().toString());
         }
         if (getValidationAction() != Validation.SKIP && getValidationAction() != Validation.BY_TYPE) {
             out.emitAttribute("validation", Validation.describe(getValidationAction()));

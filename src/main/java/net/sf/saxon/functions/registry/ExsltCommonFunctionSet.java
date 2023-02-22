@@ -9,8 +9,8 @@ package net.sf.saxon.functions.registry;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.pattern.AnyNodeTest;
@@ -45,8 +45,8 @@ public class ExsltCommonFunctionSet extends BuiltInFunctionSet {
     }
 
     @Override
-    public String getNamespace() {
-        return NamespaceConstant.EXSLT_COMMON;
+    public NamespaceUri getNamespace() {
+        return NamespaceUri.EXSLT_COMMON;
     }
 
     @Override

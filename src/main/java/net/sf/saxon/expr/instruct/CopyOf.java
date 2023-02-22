@@ -13,7 +13,6 @@ import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.AccumulatorManager;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
@@ -603,7 +602,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     SchemaType type = schemaType;
                     if (type == null && (validation == Validation.STRICT || validation == Validation.LAX)) {
                         // Bug 3062
-                        String xsitype = item.getAttributeValue(NamespaceConstant.SCHEMA_INSTANCE, "type");
+                        String xsitype = item.getAttributeValue(NamespaceUri.SCHEMA_INSTANCE, "type");
                         if (xsitype != null) {
                             StructuredQName typeName;
                             try {
@@ -682,7 +681,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
 
             case Type.NAMESPACE:
                 try {
-                    out.namespace(item.getLocalPart(), item.getStringValue(), ReceiverOption.NONE);
+                    out.namespace(item.getLocalPart(), NamespaceUri.of(item.getStringValue()), ReceiverOption.NONE);
                 } catch (NoOpenStartTagException err) {
                     XPathException e = new XPathException(err.getMessage());
                     e.setXPathContext(context);
@@ -730,7 +729,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         // validate{} expression in XQuery. XQuery says nothing about the base URI of a node that results
         // from a validate{} expression, so until it does, we might as well use the same logic.
         String newBaseUri;
-        String xmlBase = source.getAttributeValue(NamespaceConstant.XML, "base");
+        String xmlBase = source.getAttributeValue(NamespaceUri.XML, "base");
         if (xmlBase != null) {
             try {
                 URI xmlBaseUri = new URI(xmlBase);

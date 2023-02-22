@@ -9,6 +9,7 @@ package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.GenericTreeInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.NodeTest;
@@ -217,8 +218,8 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      */
 
     @Override
-    public String getURI() {
-        return "";
+    public NamespaceUri getNamespaceUri() {
+        return NamespaceUri.NULL;
     }
 
     /**

@@ -82,14 +82,14 @@ public class SQLQuery extends ExtensionInstruction {
     protected void prepareAttributes() {
         // Attributes for SQL-statement
         AttributeMap atts = attributes();
-        AttributeInfo dbCol = atts.get("", "column");
+        AttributeInfo dbCol = atts.get(NamespaceUri.NULL, "column");
         if (dbCol == null) {
             reportAbsence("column");
         } else {
             column = makeAttributeValueTemplate(dbCol.getValue(), dbCol);
         }
 
-        AttributeInfo dbTab = atts.get("", "table");
+        AttributeInfo dbTab = atts.get(NamespaceUri.NULL, "table");
         if (dbTab == null) {
             reportAbsence("table");
             table = new StringLiteral("saxon-dummy-table");
@@ -97,14 +97,14 @@ public class SQLQuery extends ExtensionInstruction {
             table = makeAttributeValueTemplate(dbTab.getValue(), dbTab);
         }
 
-        AttributeInfo dbWhere = atts.get("", "where");
+        AttributeInfo dbWhere = atts.get(NamespaceUri.NULL, "where");
         if (dbWhere == null) {
             where = new StringLiteral(StringValue.EMPTY_STRING);
         } else {
             where = makeAttributeValueTemplate(dbWhere.getValue(), dbWhere);
         }
 
-        AttributeInfo connectAtt = atts.get("", "connection");
+        AttributeInfo connectAtt = atts.get(NamespaceUri.NULL, "connection");
         if (connectAtt == null) {
             reportAbsence("connection");
         } else {
@@ -113,7 +113,7 @@ public class SQLQuery extends ExtensionInstruction {
 
         // Atributes for row & column element names
 
-        rowTag = getAttributeValue("", "row-tag");
+        rowTag = getAttributeValue(NamespaceUri.NULL, "row-tag");
         if (rowTag == null) {
             rowTag = "#auto";
         }
@@ -121,7 +121,7 @@ public class SQLQuery extends ExtensionInstruction {
             compileError("row-tag must not contain a colon");
         }
 
-        colTag = getAttributeValue("", "column-tag");
+        colTag = getAttributeValue(NamespaceUri.NULL, "column-tag");
         if (colTag == null) {
             colTag = "#auto";
         }
@@ -129,7 +129,7 @@ public class SQLQuery extends ExtensionInstruction {
             compileError("column-tag must be a valid NCName");
         }
         // Attribute output-escaping
-        String disableAtt = getAttributeValue("", "disable-output-escaping");
+        String disableAtt = getAttributeValue(NamespaceUri.NULL, "disable-output-escaping");
         if (disableAtt != null) {
             switch (disableAtt) {
                 case "yes":

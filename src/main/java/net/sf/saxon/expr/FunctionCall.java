@@ -9,7 +9,6 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -456,7 +455,7 @@ public abstract class FunctionCall extends Expression {
         String f;
         if (fName == null) {
             f = "$anonymousFunction";
-        } else if (fName.hasURI(NamespaceConstant.FN)) {
+        } else if (fName.hasURI(NamespaceUri.FN)) {
             f = fName.getLocalPart();
         } else {
             f = fName.getEQName();

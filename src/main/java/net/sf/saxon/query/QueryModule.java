@@ -48,8 +48,8 @@ public class QueryModule implements StaticContext {
     private final QueryModule topModule;
     private URI locationURI;
     private String baseURI;
-    private String moduleNamespace; // null only if moduleIsMainModule is false
-    private HashMap<String, String> explicitPrologNamespaces;
+    private NamespaceUri moduleNamespace; // null only if moduleIsMainModule is false
+    private HashMap<String, NamespaceUri> explicitPrologNamespaces;
     private IndexedStack<NamespaceBinding> activeNamespaces;  // The namespace bindings declared in element constructors
     private HashMap<StructuredQName, GlobalVariable> variables;
     // global variables declared in this module
@@ -57,8 +57,8 @@ public class QueryModule implements StaticContext {
     // all global variables defined in library modules
     // defined only on the top-level module
     private HashMap<StructuredQName, UndeclaredVariable> undeclaredVariables;
-    private HashSet<String> importedSchemata;    // The schema target namespaces imported into this module
-    private HashMap<String, HashSet<String>> loadedSchemata;
+    private HashSet<NamespaceUri> importedSchemata;    // The schema target namespaces imported into this module
+    private HashMap<NamespaceUri, HashSet<String>> loadedSchemata;
     // For the top-level module only, all imported schemas for all modules,
     // Key is the targetNamespace, value is the set of absolutized location URIs
     private Executable executable;
@@ -70,12 +70,12 @@ public class QueryModule implements StaticContext {
     private int localFunctionLibraryNr;
     private int importedFunctionLibraryNr;
     private int unboundFunctionLibraryNr;
-    private Set<String> importedModuleNamespaces;
+    private Set<NamespaceUri> importedModuleNamespaces;
     private boolean inheritNamespaces = true;
     private boolean preserveNamespaces = true;
     private int constructionMode = Validation.PRESERVE;
-    private String defaultFunctionNamespace;
-    private String defaultElementNamespace;
+    private NamespaceUri defaultFunctionNamespace;
+    private NamespaceUri defaultElementNamespace;
     private boolean preserveSpace = false;
     private boolean defaultEmptyLeast = true;
     private String defaultCollationName;
@@ -226,7 +226,7 @@ public class QueryModule implements StaticContext {
     /*@NotNull*/
     public static QueryModule makeQueryModule(
             String baseURI, /*@NotNull*/ Executable executable, /*@NotNull*/ QueryModule importer,
-            String query, String namespaceURI) throws XPathException {
+            String query, NamespaceUri namespaceURI) throws XPathException {
         Objects.requireNonNull(baseURI, "Base URI of XQuery module must not be null");
         Configuration config = executable.getConfiguration();
         QueryModule module = new QueryModule(config, importer);
@@ -254,7 +254,7 @@ public class QueryModule implements StaticContext {
 
         qp.parseLibraryModule(query, module);
 
-        String namespace = module.getModuleNamespace();
+        NamespaceUri namespace = module.getModuleNamespace();
         if (namespace == null) {
             XPathException err = new XPathException("Imported module must be a library module");
             err.setErrorCode("XQST0059");
@@ -587,7 +587,7 @@ public class QueryModule implements StaticContext {
      * @param uri the URI of the imported namespace.
      */
 
-    public void addImportedNamespace(String uri) {
+    public void addImportedNamespace(NamespaceUri uri) {
         if (importedModuleNamespaces == null) {
             importedModuleNamespaces = new HashSet<>(5);
         }
@@ -603,7 +603,7 @@ public class QueryModule implements StaticContext {
      * @return true if the schema for the namespace has been imported
      */
 
-    public boolean importsNamespace(String uri) {
+    public boolean importsNamespace(NamespaceUri uri) {
         return importedModuleNamespaces != null &&
                 importedModuleNamespaces.contains(uri);
     }
@@ -678,7 +678,7 @@ public class QueryModule implements StaticContext {
      *            for a main module, not for a library module.
      */
 
-    public void setModuleNamespace(/*@Nullable*/ String uri) {
+    public void setModuleNamespace(/*@Nullable*/ NamespaceUri uri) {
         moduleNamespace = uri;
     }
 
@@ -690,7 +690,7 @@ public class QueryModule implements StaticContext {
      */
 
     /*@Nullable*/
-    public String getModuleNamespace() {
+    public NamespaceUri getModuleNamespace() {
         return moduleNamespace;
     }
 
@@ -954,8 +954,8 @@ public class QueryModule implements StaticContext {
     public Expression bindVariable(/*@NotNull*/ StructuredQName qName) throws XPathException {
         GlobalVariable var = variables.get(qName);
         if (var == null) {
-            String uri = qName.getURI();
-            if ((uri.equals("") && isMainModule()) || uri.equals(moduleNamespace) || importsNamespace(uri)) {
+            NamespaceUri uri = qName.getURI();
+            if ((uri.equals(NamespaceUri.NULL) && isMainModule()) || uri.equals(moduleNamespace) || importsNamespace(uri)) {
                 QueryModule main = getTopLevelModule();
                 var = main.libraryVariables.get(qName);
                 if (var == null) {
@@ -1144,7 +1144,7 @@ public class QueryModule implements StaticContext {
      * @since 8.4
      */
 
-    public UserFunction getUserDefinedFunction(String uri, String localName, int arity) {
+    public UserFunction getUserDefinedFunction(NamespaceUri uri, String localName, int arity) {
         return globalFunctionLibrary.getUserDefinedFunction(uri, localName, arity);
     }
 
@@ -1162,7 +1162,7 @@ public class QueryModule implements StaticContext {
             StructuredQName qName = uv.getVariableQName();
             GlobalVariable var = variables.get(qName);
             if (var == null) {
-                String uri = qName.getURI();
+                NamespaceUri uri = qName.getURI();
                 if (importsNamespace(uri)) {
                     QueryModule main = getTopLevelModule();
                     var = main.libraryVariables.get(qName);
@@ -1199,12 +1199,12 @@ public class QueryModule implements StaticContext {
      * @since 8.4
      */
 
-    public void addImportedSchema(String targetNamespace, String baseURI, /*@NotNull*/ List<String> locationURIs) {
+    public void addImportedSchema(NamespaceUri targetNamespace, String baseURI, /*@NotNull*/ List<String> locationURIs) {
         if (importedSchemata == null) {
             importedSchemata = new HashSet<>(5);
         }
         importedSchemata.add(targetNamespace);
-        HashMap<String, HashSet<String>> loadedSchemata = getTopLevelModule().loadedSchemata;
+        HashMap<NamespaceUri, HashSet<String>> loadedSchemata = getTopLevelModule().loadedSchemata;
         if (loadedSchemata == null) {
             loadedSchemata = new HashMap<>(5);
             getTopLevelModule().loadedSchemata = loadedSchemata;
@@ -1234,7 +1234,7 @@ public class QueryModule implements StaticContext {
      */
 
     @Override
-    public boolean isImportedSchema(String namespace) {
+    public boolean isImportedSchema(NamespaceUri namespace) {
         return importedSchemata != null && importedSchemata.contains(namespace);
     }
 
@@ -1246,7 +1246,7 @@ public class QueryModule implements StaticContext {
 
     /*@Nullable*/
     @Override
-    public Set<String> getImportedSchemaNamespaces() {
+    public Set<NamespaceUri> getImportedSchemaNamespaces() {
         if (importedSchemata == null) {
             return Collections.emptySet();
         } else {
@@ -1329,14 +1329,14 @@ public class QueryModule implements StaticContext {
      *          if the declaration is invalid
      */
 
-    public void declarePrologNamespace(/*@Nullable*/ String prefix, /*@Nullable*/ String uri) throws XPathException {
+    public void declarePrologNamespace(String prefix, NamespaceUri uri) throws XPathException {
         if (prefix == null) {
             throw new NullPointerException("Null prefix supplied to declarePrologNamespace()");
         }
         if (uri == null) {
             throw new NullPointerException("Null namespace URI supplied to declarePrologNamespace()");
         }
-        if (prefix.equals("xml") != uri.equals(NamespaceConstant.XML)) {
+        if (prefix.equals("xml") != uri.equals(NamespaceUri.XML)) {
             XPathException err = new XPathException("Invalid declaration of the XML namespace");
             err.setErrorCode("XQST0070");
             err.setIsStaticError(true);
@@ -1364,7 +1364,7 @@ public class QueryModule implements StaticContext {
      * @param uri    the namespace URI
      */
 
-    public void declareActiveNamespace(/*@Nullable*/ String prefix, /*@Nullable*/ String uri) {
+    public void declareActiveNamespace(/*@Nullable*/ String prefix, /*@Nullable*/ NamespaceUri uri) {
         if (prefix == null) {
             throw new NullPointerException("Null prefix supplied to declareActiveNamespace()");
         }
@@ -1383,7 +1383,7 @@ public class QueryModule implements StaticContext {
      * It is NOT called when an XML 1.1-style namespace undeclaration is encountered.
      * <p>This method is intended for internal use only.</p>
      *
-     * @see #declareActiveNamespace(String, String)
+     * @see #declareActiveNamespace(String, NamespaceUri)
      */
 
     public void undeclareNamespace() {
@@ -1413,7 +1413,7 @@ public class QueryModule implements StaticContext {
              *         The "null namespace" is represented by the pseudo-URI "".
              */
             @Override
-            public String getURIForPrefix(String prefix, boolean useDefault) {
+            public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
                 return checkURIForPrefix(prefix);
             }
 
@@ -1444,13 +1444,13 @@ public class QueryModule implements StaticContext {
      */
 
     /*@Nullable*/
-    public String checkURIForPrefix(/*@NotNull*/ String prefix) {
+    public NamespaceUri checkURIForPrefix(/*@NotNull*/ String prefix) {
         // Search the active namespaces first, then the passive ones.
         if (activeNamespaces != null) {
             for (int i = activeNamespaces.size() - 1; i >= 0; i--) {
                 if (activeNamespaces.get(i).getPrefix().equals(prefix)) {
-                    String ns = activeNamespaces.get(i).getURI();
-                    if (ns.equals("") && !prefix.equals("")) {
+                    NamespaceUri ns = activeNamespaces.get(i).getURI();
+                    if (ns.isEmpty() && !prefix.equals("")) {
                         // the namespace is undeclared
                         return null;
                     }
@@ -1461,7 +1461,7 @@ public class QueryModule implements StaticContext {
         if (prefix.isEmpty()) {
             return defaultElementNamespace;
         }
-        String uri = explicitPrologNamespaces.get(prefix);
+        NamespaceUri uri = explicitPrologNamespaces.get(prefix);
         if (uri != null) {
             // A zero-length URI means the prefix was undeclared in the prolog, and we mustn't look elsewhere
             return uri.isEmpty() ? null : uri;
@@ -1487,7 +1487,7 @@ public class QueryModule implements StaticContext {
 
     /*@Nullable*/
     @Override
-    public String getDefaultElementNamespace() {
+    public NamespaceUri getDefaultElementNamespace() {
         return checkURIForPrefix("");
     }
 
@@ -1497,7 +1497,7 @@ public class QueryModule implements StaticContext {
      * @param uri the default namespace for elements and types
      */
 
-    public void setDefaultElementNamespace(String uri) {
+    public void setDefaultElementNamespace(NamespaceUri uri) {
         defaultElementNamespace = uri;
     }
 
@@ -1508,7 +1508,7 @@ public class QueryModule implements StaticContext {
      */
 
     @Override
-    public String getDefaultFunctionNamespace() {
+    public NamespaceUri getDefaultFunctionNamespace() {
         return defaultFunctionNamespace;
     }
 
@@ -1518,7 +1518,7 @@ public class QueryModule implements StaticContext {
      * @param uri the default namespace for functions
      */
 
-    public void setDefaultFunctionNamespace(String uri) {
+    public void setDefaultFunctionNamespace(NamespaceUri uri) {
         defaultFunctionNamespace = uri;
     }
 
@@ -1593,12 +1593,12 @@ public class QueryModule implements StaticContext {
     public NamespaceResolver getNamespaceResolver() {
         NamespaceMap result = NamespaceMap.emptyMap();
 
-        HashMap<String, String> userDeclaredNamespaces = userQueryContext.getUserDeclaredNamespaces();
+        HashMap<String, NamespaceUri> userDeclaredNamespaces = userQueryContext.getUserDeclaredNamespaces();
 
-        for (Map.Entry<String, String> e : userDeclaredNamespaces.entrySet()) {
+        for (Map.Entry<String, NamespaceUri> e : userDeclaredNamespaces.entrySet()) {
             result = result.put(e.getKey(), e.getValue());
         }
-        for (Map.Entry<String, String> e : explicitPrologNamespaces.entrySet()) {
+        for (Map.Entry<String, NamespaceUri> e : explicitPrologNamespaces.entrySet()) {
             result = result.put(e.getKey(), e.getValue());
         }
         if (!defaultElementNamespace.isEmpty()) {

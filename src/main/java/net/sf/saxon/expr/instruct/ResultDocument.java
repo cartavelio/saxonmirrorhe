@@ -629,7 +629,7 @@ public class ResultDocument extends Instruction
                     err.setXPathContext(context);
                     throw err;
                 }
-                String uri = nsResolver.getURIForPrefix(parts[0], false);
+                NamespaceUri uri = nsResolver.getURIForPrefix(parts[0], false);
                 if (uri == null) {
                     XPathException err = new XPathException("The namespace prefix in the format name " + format + " is undeclared");
                     err.maybeSetLocation(getFormatExpression().getLocation());
@@ -673,14 +673,14 @@ public class ResultDocument extends Instruction
             for (Map.Entry<StructuredQName, Operand> entry : serializationAttributes.entrySet()) {
                 String value = entry.getValue().getChildExpression().evaluateAsString(context).toString();
                 String lname = entry.getKey().getLocalPart();
-                String uri = entry.getKey().getURI();
+                NamespaceUri uri = entry.getKey().getURI();
                 try {
                     setSerializationProperty(computedLocalProps, uri, lname, value, nsResolver, false, config);
                 } catch (XPathException e) {
                     e.setErrorCode("XTDE0030");
                     e.maybeSetLocation(getLocation());
                     e.maybeSetContext(context);
-                    if (NamespaceConstant.SAXON.equals(e.getErrorCodeNamespace()) &&
+                    if (NamespaceUri.SAXON.equals(e.getErrorCodeNamespace()) &&
                             "SXWN".equals(e.getErrorCodeLocalPart().substring(0, 4))) {
                         XmlProcessingException ee = new XmlProcessingException(e);
                         ee.setWarning(true);
@@ -734,7 +734,7 @@ public class ResultDocument extends Instruction
      * @throws XPathException if any serialization property has an invalid value
      */
 
-    public static void setSerializationProperty(Properties details, String uri, String lname,
+    public static void setSerializationProperty(Properties details, NamespaceUri uri, String lname,
                                                 String value, /*@Nullable*/ NamespaceResolver nsResolver,
                                                 boolean prevalidated, Configuration config)
             throws XPathException {
@@ -743,7 +743,7 @@ public class ResultDocument extends Instruction
         if (!uri.isEmpty()) {
             clarkName = "{" + uri + "}" + lname;
         }
-        if (uri.isEmpty() || NamespaceConstant.SAXON.equals(uri)) {
+        if (uri.isEmpty() || NamespaceUri.SAXON.equals(uri)) {
             switch (clarkName) {
                 case "method":
                     value = Whitespace.trim(value);
@@ -768,14 +768,14 @@ public class ResultDocument extends Instruction
                                 err.setIsStaticError(true);
                                 throw err;
                             } else if (nsResolver != null) {
-                                String muri = nsResolver.getURIForPrefix(prefix, false);
+                                NamespaceUri muri = nsResolver.getURIForPrefix(prefix, false);
                                 if (muri == null) {
                                     XPathException err = new XPathException("Namespace prefix '" + prefix + "' has not been declared");
                                     err.setErrorCode("SEPM0016");
                                     err.setIsStaticError(true);
                                     throw err;
                                 }
-                                details.setProperty(OutputKeys.METHOD, '{' + muri + '}' + parts[1]);
+                                details.setProperty(OutputKeys.METHOD, '{' + muri.toString() + '}' + parts[1]);
                             } else {
                                 details.setProperty(OutputKeys.METHOD, value);
                             }
@@ -835,7 +835,7 @@ public class ResultDocument extends Instruction
             }
         } else {
             // properties in user-defined namespaces
-            details.setProperty('{' + uri + '}' + lname, value);
+            details.setProperty('{' + uri.toString() + '}' + lname, value);
         }
 
     }
@@ -920,7 +920,7 @@ public class ResultDocument extends Instruction
     public static void processXslOutputElement(NodeInfo element, Properties props, XPathContext c) throws XPathException {
         NamespaceResolver resolver = element.getAllNamespaces();
         for (AttributeInfo att : element.attributes()) {
-            String uri = att.getNodeName().getURI();
+            NamespaceUri uri = att.getNodeName().getURI();
             String local = att.getNodeName().getLocalPart();
             String val = Whitespace.trim(att.getValue());
             setSerializationProperty(props, uri, local, val, resolver, false, c.getConfiguration());

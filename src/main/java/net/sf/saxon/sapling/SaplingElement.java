@@ -90,7 +90,7 @@ public class SaplingElement extends SaplingNode {
         Objects.requireNonNull(name);
         reversedChildren = emptyNodeList();
         nodeName = name.getStructuredQName();
-        if (!nodeName.getPrefix().isEmpty() && nodeName.hasURI("")) {
+        if (!nodeName.getPrefix().isEmpty() && nodeName.hasURI(NamespaceUri.NULL)) {
             throw new IllegalArgumentException("No namespace URI for prefixed element name: " + name);
         }
         namespaces = NamespaceMap.of(nodeName.getPrefix(), nodeName.getURI());
@@ -176,7 +176,7 @@ public class SaplingElement extends SaplingNode {
      */
 
     public SaplingElement withAttr(String name, String value) {
-        return withAttribute(new StructuredQName("", "", name), value);
+        return withAttribute(new StructuredQName("", NamespaceUri.NULL, name), value);
     }
 
     /**
@@ -194,10 +194,10 @@ public class SaplingElement extends SaplingNode {
 
     public SaplingElement withAttr(QName name, String value) {
         StructuredQName attName = name.getStructuredQName();
-        if (attName.getPrefix().isEmpty() && !attName.hasURI("")) {
+        if (attName.getPrefix().isEmpty() && !attName.hasURI(NamespaceUri.NULL)) {
             throw new IllegalArgumentException("An attribute whose name is in a namespace must have a prefix");
         }
-        withNamespace(attName.getPrefix(), attName.getURI());
+        withNamespace(attName.getPrefix(), attName.getURI().toString());
         return withAttribute(attName, value);
     }
 
@@ -225,16 +225,17 @@ public class SaplingElement extends SaplingNode {
                 throw new IllegalArgumentException("Cannot bind non-empty prefix to empty URI");
             }
         }
-        String existingURI = namespaces.getURI(prefix);
+        NamespaceUri existingURI = namespaces.getURI(prefix);
+        NamespaceUri newURI = NamespaceUri.of(uri);
         if (existingURI != null) {
-            if (existingURI.equals(uri)) {
+            if (existingURI.equals(newURI)) {
                 return this;
             } else {
                 throw new IllegalStateException("Inconsistent namespace bindings for prefix '" + prefix + "'");
             }
         }
         SaplingElement e2 = copy();
-        e2.namespaces = namespaces.put(prefix, uri);
+        e2.namespaces = namespaces.put(prefix, newURI);
         return e2;
     }
 
@@ -243,7 +244,7 @@ public class SaplingElement extends SaplingNode {
         final Configuration config = receiver.getPipelineConfiguration().getConfiguration();
         final NamePool namePool = config.getNamePool();
         NamespaceMap ns = namespaces;
-        if (!nodeName.hasURI("")) {
+        if (!nodeName.hasURI(NamespaceUri.NULL)) {
             ns = ns.put(nodeName.getPrefix(), nodeName.getURI());
         }
         AttributeMap atts = EmptyAttributeMap.getInstance();
@@ -251,7 +252,7 @@ public class SaplingElement extends SaplingNode {
             StructuredQName qName = attribute.getKey();
             atts = atts.put(new AttributeInfo(new FingerprintedQName(qName, namePool), BuiltInAtomicType.UNTYPED_ATOMIC,
                                               attribute.getValue(), Loc.NONE, ReceiverOption.NONE));
-            if (!qName.hasURI("")) {
+            if (!qName.hasURI(NamespaceUri.NULL)) {
                 ns = ns.put(qName.getPrefix(), qName.getURI());
             }
         }

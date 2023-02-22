@@ -12,7 +12,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.trans.XPathException;
@@ -55,7 +54,7 @@ public class Error extends SystemFunction implements Callable {
             qname = errorCode;
         }
         if (qname == null) {
-            qname = new QNameValue("err", NamespaceConstant.ERR,
+            qname = new QNameValue("err", NamespaceUri.ERR,
                     getArity() == 1 ? "FOTY0004" : "FOER0000",
                     BuiltInAtomicType.QNAME, false);
         }
@@ -74,18 +73,18 @@ public class Error extends SystemFunction implements Callable {
                 Item root = errorObject.head();
                 if ((root instanceof NodeInfo) && ((NodeInfo) root).getNodeKind() == Type.DOCUMENT) {
                     AxisIterator iter = ((NodeInfo) root).iterateAxis(AxisInfo.CHILD,
-                            new NameTest(Type.ELEMENT, "", "error", context.getConfiguration().getNamePool()));
+                            new NameTest(Type.ELEMENT, NamespaceUri.NULL, "error", context.getConfiguration().getNamePool()));
                     NodeInfo errorElement = iter.next();
                     if (errorElement != null) {
-                        String module = errorElement.getAttributeValue("", "module");
-                        String lineVal = errorElement.getAttributeValue("", "line");
+                        String module = errorElement.getAttributeValue(NamespaceUri.NULL, "module");
+                        String lineVal = errorElement.getAttributeValue(NamespaceUri.NULL, "line");
                         int line;
                         try {
                             line = lineVal == null ? -1 : Integer.parseInt(lineVal);
                         } catch (NumberFormatException ex) {
                             line = -1;
                         }
-                        String columnVal = errorElement.getAttributeValue("", "column");
+                        String columnVal = errorElement.getAttributeValue(NamespaceUri.NULL, "column");
                         int col;
                         try {
                             col = columnVal == null ? -1 : Integer.parseInt(columnVal);
@@ -117,7 +116,7 @@ public class Error extends SystemFunction implements Callable {
                 // than complaining specifically about the missing error code
                 QNameValue arg0 = (QNameValue)arguments[0].head();
                 if (arg0 == null) {
-                    arg0 = new QNameValue("err", NamespaceConstant.ERR, "FOER0000");
+                    arg0 = new QNameValue("err", NamespaceUri.ERR, "FOER0000");
                 }
                 return error(context, arg0, null, null);
             case 2:

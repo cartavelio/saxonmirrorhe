@@ -16,10 +16,10 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.NodeSetPattern;
 import net.sf.saxon.pattern.Pattern;
@@ -522,7 +522,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
      */
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        if (getFunctionName().hasURI(NamespaceConstant.FN)) {
+        if (getFunctionName().hasURI(NamespaceUri.FN)) {
             out.startElement("fn", this);
             final String localPart = getFunctionName().getLocalPart();
             out.emitAttribute("name", localPart);

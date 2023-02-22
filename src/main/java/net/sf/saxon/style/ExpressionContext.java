@@ -10,7 +10,6 @@ package net.sf.saxon.style;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
@@ -18,9 +17,9 @@ import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.AttributeLocation;
@@ -226,7 +225,7 @@ public class ExpressionContext implements StaticContext {
     public Expression bindVariable(StructuredQName qName) throws XPathException {
         SourceBinding sourceBinding = element.bindVariable(qName);
         if (sourceBinding == null) {
-            if (qName.hasURI(NamespaceConstant.XSLT) && qName.getLocalPart().equals("original")) {
+            if (qName.hasURI(NamespaceUri.XSLT) && qName.getLocalPart().equals("original")) {
                 element.getXslOriginal(StandardNames.XSL_VARIABLE);
                 return new GlobalVariableReference(qName);
             }
@@ -250,7 +249,7 @@ public class ExpressionContext implements StaticContext {
                 return vref;
             }
             // it might be an implicit error variable in try/catch
-            if (getXPathVersion() >= 30 && qName.hasURI(NamespaceConstant.ERR)) {
+            if (getXPathVersion() >= 30 && qName.hasURI(NamespaceUri.ERR)) {
                 AxisIterator catchers = element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF,
                                                             new NameTest(Type.ELEMENT, StandardNames.XSL_CATCH, element.getNamePool()));
                 StyleElement catcher = (StyleElement) catchers.next();
@@ -330,7 +329,7 @@ public class ExpressionContext implements StaticContext {
      */
 
     @Override
-    public String getDefaultElementNamespace() {
+    public NamespaceUri getDefaultElementNamespace() {
         return element.getDefaultXPathNamespace();
     }
 
@@ -339,8 +338,8 @@ public class ExpressionContext implements StaticContext {
      */
 
     @Override
-    public String getDefaultFunctionNamespace() {
-        return NamespaceConstant.FN;
+    public NamespaceUri getDefaultFunctionNamespace() {
+        return NamespaceUri.FN;
     }
 
     /**
@@ -365,7 +364,7 @@ public class ExpressionContext implements StaticContext {
     public int getXPathVersion() {
         if (element.getEffectiveVersion() == 40
                 || element.getCompilation().getCompilerInfo().getXsltVersion() == 40
-                || (attributeName != null && attributeName.hasURI(NamespaceConstant.SAXON))) {
+                || (attributeName != null && attributeName.hasURI(NamespaceUri.SAXON))) {
             return 40;
         } else {
             return getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
@@ -380,7 +379,7 @@ public class ExpressionContext implements StaticContext {
      */
 
     @Override
-    public boolean isImportedSchema(String namespace) {
+    public boolean isImportedSchema(NamespaceUri namespace) {
         //if (Configuration.USE_PACKAGE_BINDING) {
         return element.getPrincipalStylesheetModule().isImportedSchema(namespace);
         //} else {
@@ -395,7 +394,7 @@ public class ExpressionContext implements StaticContext {
      */
 
     @Override
-    public Set<String> getImportedSchemaNamespaces() {
+    public Set<NamespaceUri> getImportedSchemaNamespaces() {
         return element.getPrincipalStylesheetModule().getImportedSchemaTable();
     }
 

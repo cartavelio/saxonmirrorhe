@@ -13,6 +13,7 @@ import net.sf.saxon.expr.SimpleExpression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
@@ -34,7 +35,7 @@ public class SQLClose extends ExtensionInstruction {
 
     @Override
     protected void prepareAttributes() {
-        AttributeInfo connectAtt = attributes().get("", "connection");
+        AttributeInfo connectAtt = attributes().get(NamespaceUri.NULL, "connection");
         if (connectAtt == null) {
             reportAbsence("connection");
         } else {

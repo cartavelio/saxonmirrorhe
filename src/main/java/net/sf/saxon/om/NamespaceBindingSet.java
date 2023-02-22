@@ -12,6 +12,6 @@ package net.sf.saxon.om;
  */
 public interface NamespaceBindingSet extends Iterable<NamespaceBinding> {
 
-    String getURI(String prefix);
+    NamespaceUri getURI(String prefix);
 }
 

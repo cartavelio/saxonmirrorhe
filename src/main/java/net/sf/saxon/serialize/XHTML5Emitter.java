@@ -8,7 +8,7 @@
 
 package net.sf.saxon.serialize;
 
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringConstants;
@@ -72,8 +72,8 @@ public class XHTML5Emitter extends XMLEmitter {
 
 
     private boolean isRecognizedHtmlElement(NodeName name) {
-        return name.hasURI(NamespaceConstant.XHTML) ||
-                name.hasURI("") && html5Elements.contains(name.getLocalPart().toLowerCase());
+        return name.hasURI(NamespaceUri.XHTML) ||
+                name.hasURI(NamespaceUri.NULL) && html5Elements.contains(name.getLocalPart().toLowerCase());
 
     }
 

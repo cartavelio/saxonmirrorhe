@@ -9,11 +9,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.Token;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
@@ -54,7 +50,7 @@ public class XSLSwitch extends XSLChooseOrSwitch {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         LetExpression var = new LetExpression();
-        var.setVariableQName(new StructuredQName("vv", NamespaceConstant.SAXON_GENERATED_VARIABLE, "v" + hashCode()));
+        var.setVariableQName(new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "v" + hashCode()));
         var.setSequence(select);
         var.setRequiredType(SequenceType.SINGLE_ATOMIC);  // TODO type coercion
         switchVar = var;

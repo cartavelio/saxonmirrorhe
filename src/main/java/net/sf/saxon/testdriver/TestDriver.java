@@ -12,6 +12,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Steps;
@@ -763,8 +764,8 @@ public abstract class TestDriver {
 
     protected void copySchemaNamespaces(Environment env, XPathCompiler testXpc) {
         Configuration config = env.xpathCompiler.getProcessor().getUnderlyingConfiguration();
-        for (String s : config.getImportedNamespaces()) {
-            testXpc.importSchemaNamespace(s);
+        for (NamespaceUri s : config.getImportedNamespaces()) {
+            testXpc.importSchemaNamespace(s.toString());
         }
     }
 

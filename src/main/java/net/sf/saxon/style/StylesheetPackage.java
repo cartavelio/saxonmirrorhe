@@ -18,6 +18,7 @@ import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.om.Action;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeTest;
@@ -66,7 +67,7 @@ public class StylesheetPackage extends PackageData {
     protected Map<StructuredQName, Properties> namedOutputProperties = new HashMap<>(4);
 
     // table of imported schemas. The members of this set are strings holding the target namespace.
-    protected Set<String> schemaIndex = new HashSet<>(10);
+    protected Set<NamespaceUri> schemaIndex = new HashSet<>(10);
 
     private FunctionLibraryList functionLibrary;
     private XQueryFunctionLibrary queryFunctions;
@@ -414,7 +415,7 @@ public class StylesheetPackage extends PackageData {
      * @return the set of imported namespaces
      */
 
-    public Set<String> getSchemaNamespaces() {
+    public Set<NamespaceUri> getSchemaNamespaces() {
         return schemaIndex;
     }
 

@@ -14,10 +14,7 @@ import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.FunctionAnnotationHandler;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
@@ -629,14 +626,14 @@ public class TypeHierarchy {
                         Affinity assertionRelationship = SAME_TYPE;
                         AnnotationList first = ((FunctionItemType) t1).getAnnotationAssertions();
                         AnnotationList second = ((FunctionItemType) t2).getAnnotationAssertions();
-                        Set<String> namespaces = new HashSet<>();
+                        Set<NamespaceUri> namespaces = new HashSet<>();
                         for (Annotation a : first) {
                             namespaces.add(a.getAnnotationQName().getURI());
                         }
                         for (Annotation a : second) {
                             namespaces.add(a.getAnnotationQName().getURI());
                         }
-                        for (String ns : namespaces) {
+                        for (NamespaceUri ns : namespaces) {
                             FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ns);
                             if (handler != null) {
                                 Affinity localRel = SAME_TYPE;

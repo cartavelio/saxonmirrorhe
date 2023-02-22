@@ -13,6 +13,7 @@ import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.sxpath.AbstractStaticContext;
 import net.sf.saxon.trans.XPathException;
@@ -141,15 +142,15 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
      */
 
     @Override
-    public String getURIForPrefix(/*@NotNull*/ String prefix, boolean useDefault) {
+    public NamespaceUri getURIForPrefix(/*@NotNull*/ String prefix, boolean useDefault) {
         if (prefix.isEmpty()) {
             if (useDefault) {
                 return getDefaultElementNamespace();
             } else {
-                return NamespaceConstant.NULL;
+                return NamespaceUri.NULL;
             }
         } else {
-            return namespaceContext.getNamespaceURI(prefix);
+            return NamespaceUri.of(namespaceContext.getNamespaceURI(prefix));
         }
     }
 
@@ -222,10 +223,11 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
      *
      * @return true if schema components for the given namespace have been imported into the
      *         schema-aware configuration
+     * @param namespace
      */
 
     @Override
-    public boolean isImportedSchema(String namespace) {
+    public boolean isImportedSchema(NamespaceUri namespace) {
         return getConfiguration().isSchemaAvailable(namespace);
     }
 
@@ -236,7 +238,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
      */
 
     @Override
-    public Set<String> getImportedSchemaNamespaces() {
+    public Set<NamespaceUri> getImportedSchemaNamespaces() {
         return getConfiguration().getImportedNamespaces();
     }
 
@@ -321,8 +323,22 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
 
         /*@Nullable*/
         @Override
-        public String getURIForPrefix(String prefix, boolean useDefault) {
-            return getNamespaceURI(prefix);
+        public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
+            if (prefix == null) {
+                throw new IllegalArgumentException("prefix");
+            } else if (prefix.equals(XMLConstants.DEFAULT_NS_PREFIX)) {
+                return NamespaceUri.NULL; //XMLConstants.NULL_NS_URI;
+            } else if (prefix.equals("xml")) {
+                return NamespaceUri.XML;
+            } else if (prefix.equals("xs")) {
+                return NamespaceUri.SCHEMA;
+            } else if (prefix.equals("xsi")) {
+                return NamespaceUri.SCHEMA_INSTANCE;
+            } else if (prefix.equals("saxon")) {
+                return NamespaceUri.SAXON;
+            } else {
+                return null;
+            }
         }
     }
 

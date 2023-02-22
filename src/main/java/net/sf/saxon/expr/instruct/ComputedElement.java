@@ -181,14 +181,14 @@ public class ComputedElement extends ElementCreator {
                     String[] parts = NameChecker.checkQNameParts(val.getStringValue());
                     if (getNamespaceExp() == null) {
                         String prefix = parts[0];
-                        String uri = getNamespaceResolver().getURIForPrefix(prefix, true);
+                        NamespaceUri uri = getNamespaceResolver().getURIForPrefix(prefix, true);
                         if (uri == null) {
                             XPathException se = new XPathException("Prefix " + prefix + " has not been declared");
                             se.setErrorCode("XPST0081");
                             se.setIsStaticError(true);
                             throw se;
                         }
-                        setNamespaceExp(new StringLiteral(uri));
+                        setNamespaceExp(new StringLiteral(uri.toString()));
                     }
                 }
             } catch (XPathException e) {
@@ -290,7 +290,7 @@ public class ComputedElement extends ElementCreator {
 
         String prefix;
         String localName;
-        String uri = null;
+        NamespaceUri uri = null;
 
         // name needs to be evaluated at run-time
         AtomicValue nameValue = (AtomicValue) getNameExp().evaluateItem(context);
@@ -360,10 +360,10 @@ public class ComputedElement extends ElementCreator {
         } else {
             if (uri == null) {
                 if (getNamespaceExp() instanceof StringLiteral) {
-                    uri = ((StringLiteral) getNamespaceExp()).stringify();
+                    uri = NamespaceUri.of(((StringLiteral) getNamespaceExp()).stringify());
                 } else {
-                    uri = getNamespaceExp().evaluateAsString(context).toString();
-                    if (!StandardURIChecker.getInstance().isValidURI(uri)) {
+                    uri = NamespaceUri.of(getNamespaceExp().evaluateAsString(context).toString());
+                    if (!StandardURIChecker.getInstance().isValidURI(uri.toString())) {
                         XPathException de = new XPathException(
                             "The value of the namespace attribute must be a valid URI", "XTDE0835", getLocation());
                         throw dynamicError(getLocation(), de, context);
@@ -380,12 +380,12 @@ public class ComputedElement extends ElementCreator {
                 prefix = "x-xmlns";
             }
         }
-        if (uri.equals(NamespaceConstant.XMLNS)) {
+        if (uri.equals(NamespaceUri.XMLNS)) {
             String errorCode = isXSLT() ? "XTDE0835" : "XQDY0096";
             XPathException err = new XPathException("Cannot create element in namespace " + uri, errorCode, getLocation());
             throw dynamicError(getLocation(), err, context);
         }
-        if (uri.equals(NamespaceConstant.XML) != prefix.equals("xml")) {
+        if (uri.equals(NamespaceUri.XML) != prefix.equals("xml")) {
             String message;
             if (prefix.equals("xml")) {
                 message = "When the prefix is 'xml', the namespace URI must be " + NamespaceConstant.XML;

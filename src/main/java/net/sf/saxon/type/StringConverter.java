@@ -10,6 +10,7 @@ package net.sf.saxon.type;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.QNameException;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.str.UnicodeString;
@@ -855,7 +856,7 @@ public abstract class StringConverter extends Converter {
             }
             try {
                 String[] parts = NameChecker.getQNameParts(Whitespace.trim(input.toString()));
-                String uri = nsResolver.getURIForPrefix(parts[0], true);
+                NamespaceUri uri = nsResolver.getURIForPrefix(parts[0], true);
                 if (uri == null) {
                     ValidationFailure failure = new ValidationFailure("Namespace prefix " +
                                                                               Err.wrap(parts[0]) + " has not been declared");
@@ -903,13 +904,14 @@ public abstract class StringConverter extends Converter {
             }
             try {
                 String[] parts = NameChecker.getQNameParts(Whitespace.trim(input.toString()));
-                String uri = getNamespaceResolver().getURIForPrefix(parts[0], true);
+                NamespaceUri uri = getNamespaceResolver().getURIForPrefix(parts[0], true);
                 if (uri == null) {
                     return new ValidationFailure("Namespace prefix " + Err.wrap(parts[0]) + " has not been declared");
                 }
                 // This check added in 9.3. The XSLT spec says that this check should not be performed during
                 // validation. However, this appears to be based on an incorrect assumption: see spec bug 6952
                 if (!getConversionRules().isDeclaredNotation(uri, parts[1])) {
+                    System.err.println(getConversionRules().isDeclaredNotation(uri, parts[1]));
                     return new ValidationFailure("Notation {" + uri + "}" + parts[1] + " is not declared in the schema");
                 }
                 return new NotationValue(parts[0], uri, parts[1], false);

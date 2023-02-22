@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
@@ -141,7 +142,7 @@ public interface StaticContext {
      * @return the default namespace, or {@link NamespaceConstant#NULL} for the non-namespace
      */
 
-    String getDefaultElementNamespace();
+    NamespaceUri getDefaultElementNamespace();
 
     /**
      * Get the matching policy for unprefixed element names in axis steps. This is a Saxon extension.
@@ -163,7 +164,7 @@ public interface StaticContext {
      * @return the default namespace for function names
      */
 
-    String getDefaultFunctionNamespace();
+    NamespaceUri getDefaultFunctionNamespace();
 
     /**
      * Determine whether backwards compatibility mode is used
@@ -185,7 +186,7 @@ public interface StaticContext {
      * @return true if the given namespace has been imported
      */
 
-    boolean isImportedSchema(String namespace);
+    boolean isImportedSchema(NamespaceUri namespace);
 
     /**
      * Get the set of imported schemas
@@ -194,7 +195,7 @@ public interface StaticContext {
      *         using the zero-length string to denote the "null" namespace.
      */
 
-    Set<String> getImportedSchemaNamespaces();
+    Set<NamespaceUri> getImportedSchemaNamespaces();
 
     /**
      * Get a namespace resolver to resolve the namespaces declared in this static context.

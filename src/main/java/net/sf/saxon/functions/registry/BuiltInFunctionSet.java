@@ -16,8 +16,8 @@ import net.sf.saxon.functions.Concat;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
@@ -101,7 +101,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
 
     public final void importFunctionSet(net.sf.saxon.functions.registry.BuiltInFunctionSet importee) {
         if (!importee.getNamespace().equals(getNamespace())) {
-            throw new IllegalArgumentException(importee.getNamespace());
+            throw new IllegalArgumentException(importee.getNamespace().toString());
         }
         functionTable.putAll(importee.functionTable);
         sequenceVariadicFunctions.putAll(importee.sequenceVariadicFunctions);
@@ -235,7 +235,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     public SystemFunction makeFunction(String name, int arity) throws XPathException {
         net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry entry = getFunctionDetails(name, arity);
         if (entry == null) {
-            String diagName = getNamespace().equals(NamespaceConstant.FN) ?
+            String diagName = getNamespace().equals(NamespaceUri.FN) ?
                     "System function " + name :
                     "Function Q{" + getNamespace() + "}" + name;
             if (getFunctionDetails(name, -1) == null) {
@@ -448,8 +448,8 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      * namespace URI.
      */
 
-    public String getNamespace() {
-        return NamespaceConstant.FN;
+    public NamespaceUri getNamespace() {
+        return NamespaceUri.FN;
     }
 
     /**

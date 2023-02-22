@@ -67,7 +67,7 @@ public class NamespaceDifferencer extends ProxyReceiver {
         currentElement = elemName;
         NamespaceMap parentMap = namespaceStack.peek();
         namespaceStack.push(namespaces);
-        NamespaceMap delta = getDifferences(namespaces, parentMap, currentElement.hasURI(""));
+        NamespaceMap delta = getDifferences(namespaces, parentMap, currentElement.hasURI(NamespaceUri.NULL));
         nextReceiver.startElement(elemName, type, attributes, delta, location, properties);
 
     }
@@ -82,7 +82,7 @@ public class NamespaceDifferencer extends ProxyReceiver {
         if (thisMap != parentMap) {
             NamespaceMap delta = NamespaceDeltaMap.emptyMap();
             for (NamespaceBinding nb : thisMap) {
-                String parentUri = parentMap.getURI(nb.getPrefix());
+                NamespaceUri parentUri = parentMap.getURI(nb.getPrefix());
                 if (parentUri == null) {
                     delta = delta.put(nb.getPrefix(), nb.getURI());
                 } else if (!parentUri.equals(nb.getURI())) {
@@ -92,7 +92,7 @@ public class NamespaceDifferencer extends ProxyReceiver {
             if (undeclareNamespaces) {
                 for (NamespaceBinding nb : parentMap) {
                     if (thisMap.getURI(nb.getPrefix()) == null) {
-                        delta = delta.put(nb.getPrefix(), "");
+                        delta = delta.put(nb.getPrefix(), NamespaceUri.NULL);
                     }
                 }
             } else {
@@ -100,7 +100,7 @@ public class NamespaceDifferencer extends ProxyReceiver {
                 // See also bug 4696, test
                 if (!parentMap.getDefaultNamespace().isEmpty() &&
                         thisMap.getDefaultNamespace().isEmpty()) {
-                    delta = delta.put("", "");
+                    delta = delta.put("", NamespaceUri.NULL);
                 }
             }
             return delta;

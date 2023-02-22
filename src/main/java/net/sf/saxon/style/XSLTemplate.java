@@ -18,7 +18,6 @@ import net.sf.saxon.expr.instruct.TemplateRule;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.HostLanguage;
@@ -179,7 +178,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
         if (getObjectName() == null) {
             // allow for forwards references
-            String nameAtt = getAttributeValue("", "name");
+            String nameAtt = getAttributeValue(NamespaceUri.NULL, "name");
             if (nameAtt != null) {
                 setObjectName(makeQName(nameAtt, null, "name"));
             }
@@ -303,7 +302,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 asAtt = att.getValue();
             } else if (f.equals("visibility")) {
                 visibilityAtt = Whitespace.trim(att.getValue());
-            } else if (name.hasURI(NamespaceConstant.SAXON)) {
+            } else if (name.hasURI(NamespaceUri.SAXON)) {
                 isExtensionAttributeAllowed(name.getDisplayName());
                 if (name.getLocalPart().equals("as")) {
                     extraAsAtt = att.getValue();

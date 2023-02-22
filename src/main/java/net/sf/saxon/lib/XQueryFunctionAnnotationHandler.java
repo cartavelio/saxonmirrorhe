@@ -8,6 +8,7 @@
 
 package net.sf.saxon.lib;
 
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
@@ -101,8 +102,8 @@ public class XQueryFunctionAnnotationHandler implements FunctionAnnotationHandle
      */
 
     @Override
-    public String getAssertionNamespace() {
-        return "http://www.w3.org/2012/xquery";
+    public NamespaceUri getAssertionNamespace() {
+        return NamespaceUri.of("http://www.w3.org/2012/xquery");
     }
 
     /**

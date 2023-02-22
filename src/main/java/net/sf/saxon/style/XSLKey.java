@@ -16,7 +16,6 @@ import net.sf.saxon.expr.instruct.CallTemplate;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.CodepointCollator;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTestPattern;
@@ -107,9 +106,9 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
             String value = att.getValue();
-            String uri = attName.getURI();
+            NamespaceUri uri = attName.getURI();
             String local = attName.getLocalPart();
-            if ("".equals(uri)) {
+            if (uri.isEmpty()) {
                 switch (local) {
                     case "name":
                         nameAtt = Whitespace.trim(value);
@@ -131,7 +130,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
                         checkUnknownAttribute(attName);
                         break;
                 }
-            } else if (local.equals("range-key") && uri.equals(NamespaceConstant.SAXON)) {
+            } else if (local.equals("range-key") && uri.equals(NamespaceUri.SAXON)) {
                 if (Version.platform.isDotNet()) {
                     compileError("saxon:range-key is not supported in Saxon-CS");
                 }
@@ -164,7 +163,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
         //We use null to mean "not yet evaluated"
         if (getObjectName() == null) {
             // allow for forwards references
-            String nameAtt = getAttributeValue("", "name");
+            String nameAtt = getAttributeValue(NamespaceUri.NULL, "name");
             if (nameAtt != null) {
                 setObjectName(makeQName(nameAtt, null, "name"));
             }

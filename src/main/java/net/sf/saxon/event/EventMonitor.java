@@ -8,6 +8,7 @@
 
 package net.sf.saxon.event;
 
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeName;
@@ -59,7 +60,7 @@ public class EventMonitor extends Outputter {
     }
 
     @Override
-    public void namespace(String prefix, String uri, int properties) throws XPathException {
+    public void namespace(String prefix, NamespaceUri uri, int properties) throws XPathException {
         written = true;
         next.namespace(prefix, uri, properties);
     }

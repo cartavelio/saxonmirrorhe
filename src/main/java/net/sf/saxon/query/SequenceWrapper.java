@@ -12,7 +12,6 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.event.SequenceReceiver;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
@@ -33,7 +32,7 @@ import net.sf.saxon.value.ObjectValue;
 
 public class SequenceWrapper extends SequenceReceiver {
 
-    public static final String RESULT_NS = QueryResult.RESULT_NS;
+    public static final NamespaceUri RESULT_NS = NamespaceUri.of(QueryResult.RESULT_NS);
 
     private final ComplexContentOutputter out;
     private int depth = 0;
@@ -79,8 +78,8 @@ public class SequenceWrapper extends SequenceReceiver {
         out.startElement(name, Untyped.getInstance(),
                          Loc.NONE,
                          ReceiverOption.NONE);
-        out.namespace("xs", NamespaceConstant.SCHEMA, ReceiverOption.NONE);
-        out.namespace("xsi", NamespaceConstant.SCHEMA_INSTANCE, ReceiverOption.NONE);
+        out.namespace("xs", NamespaceUri.SCHEMA, ReceiverOption.NONE);
+        out.namespace("xsi", NamespaceUri.SCHEMA_INSTANCE, ReceiverOption.NONE);
         out.startContent();
     }
 
@@ -109,7 +108,7 @@ public class SequenceWrapper extends SequenceReceiver {
         resultMapKey = new FingerprintedQName("result", RESULT_NS, "map-key");
         resultMapValue = new FingerprintedQName("result", RESULT_NS, "map-value");
         resultExternalValue = new FingerprintedQName("result", RESULT_NS, "external-object");
-        xsiType = new FingerprintedQName("xsi", NamespaceConstant.SCHEMA_INSTANCE, "type");
+        xsiType = new FingerprintedQName("xsi", NamespaceUri.SCHEMA_INSTANCE, "type");
 
         out.open();
         out.startDocument(ReceiverOption.NONE);
@@ -229,7 +228,7 @@ public class SequenceWrapper extends SequenceReceiver {
             StructuredQName name = type.getStructuredQName();
             String prefix = name.getPrefix();
             String localName = name.getLocalPart();
-            String uri = name.getURI();
+            NamespaceUri uri = name.getURI();
             if (prefix.isEmpty()) {
                 prefix = pool.suggestPrefixForURI(uri);
                 if (prefix == null) {
@@ -248,7 +247,7 @@ public class SequenceWrapper extends SequenceReceiver {
             if (kind == Type.ATTRIBUTE) {
                 attribute(NameOfNode.makeName(node), (SimpleType)node.getSchemaType(), node.getStringValue(), Loc.NONE, 0);
             } else if (kind == Type.NAMESPACE) {
-                namespace(new NamespaceBinding(node.getLocalPart(), node.getStringValue()), 0);
+                namespace(new NamespaceBinding(node.getLocalPart(), NamespaceUri.of(node.getStringValue())), 0);
             } else {
                 ((NodeInfo) item).copy(this, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, locationId);
             }
@@ -344,7 +343,7 @@ public class SequenceWrapper extends SequenceReceiver {
         AttributeMap atts = SingletonAttributeMap.of(new AttributeInfo(
             attName, typeCode, value.toString(), locationId, properties));
         NamespaceMap ns = NamespaceMap.emptyMap();
-        if (!attName.hasURI("")) {
+        if (!attName.hasURI(NamespaceUri.NULL)) {
             ns = ns.put(attName.getPrefix(), attName.getURI());
         }
         out.startElement(resultAttribute, Untyped.getInstance(), atts, ns, Loc.NONE, 0);

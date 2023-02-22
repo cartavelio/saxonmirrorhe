@@ -520,8 +520,8 @@ public class Environment implements ResourceResolver {
             int colon = varName.indexOf(':');
             if (colon >= 0) {
                 NamespaceResolver resolver = param.getUnderlyingNode().getAllNamespaces();
-                String namespace = resolver.getURIForPrefix(varName.substring(0, colon), false);
-                varQName = new QName(namespace, varName);
+                NamespaceUri namespace = resolver.getURIForPrefix(varName.substring(0, colon), false);
+                varQName = new QName(namespace.toString(), varName);
             } else {
                 varQName = new QName(varName);
             }
@@ -548,14 +548,14 @@ public class Environment implements ResourceResolver {
             StructuredQName formatQName = null;
             if (formatName != null) {
                 if (formatName.indexOf(':') < 0) {
-                    formatQName = new StructuredQName("", "", formatName);
+                    formatQName = new StructuredQName("", NamespaceUri.NULL, formatName);
                 } else {
                     try {
                         formatQName = StructuredQName.fromLexicalQName((formatName), false, true,
                                                                        decimalFormat.getUnderlyingNode().getAllNamespaces());
                     } catch (XPathException e) {
                         driver.println("**** Invalid QName as decimal-format name");
-                        formatQName = new StructuredQName("", "", "error-name");
+                        formatQName = new StructuredQName("", NamespaceUri.NULL, "error-name");
                     }
                 }
                 environment.paramDecimalDeclarations.append("declare decimal-format " + formatQName.getEQName() + " ");

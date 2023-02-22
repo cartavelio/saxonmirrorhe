@@ -50,7 +50,7 @@ public interface AttributeMap extends Iterable<AttributeInfo> {
      * @return the required attribute if it exists
      */
 
-    default AttributeInfo get(String uri, String local) {
+    default AttributeInfo get(NamespaceUri uri, String local) {
         for (AttributeInfo att : this) {
             NodeName attName = att.getNodeName();
             if (attName.getLocalPart().equals(local) && attName.hasURI(uri)) {
@@ -78,7 +78,7 @@ public interface AttributeMap extends Iterable<AttributeInfo> {
      * @return the value of the required attribute if it exists, or null otherwise
      */
 
-    default String getValue(String uri, String local) {
+    default String getValue(NamespaceUri uri, String local) {
         AttributeInfo att = get(uri, local);
         return att==null ? null : att.getValue();
     }
@@ -92,7 +92,7 @@ public interface AttributeMap extends Iterable<AttributeInfo> {
      */
 
     default String getValue(String local) {
-        AttributeInfo att = get("", local);
+        AttributeInfo att = get(NamespaceUri.NULL, local);
         return att == null ? null : att.getValue();
     }
 

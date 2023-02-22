@@ -14,6 +14,7 @@ import net.sf.saxon.expr.sort.LFUCache;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathEvaluator;
 import net.sf.saxon.sxpath.XPathExpression;
@@ -297,7 +298,7 @@ public class XPathCompiler {
         if (cache != null) {
             cache.clear();
         }
-        env.declareNamespace(prefix, uri);
+        env.declareNamespace(prefix, NamespaceUri.of(uri));
     }
 
     /**
@@ -319,7 +320,7 @@ public class XPathCompiler {
         if (cache != null) {
             cache.clear();
         }
-        env.getImportedSchemaNamespaces().add(uri);
+        env.getImportedSchemaNamespaces().add(NamespaceUri.of(uri));
         env.setSchemaAware(true);
     }
 

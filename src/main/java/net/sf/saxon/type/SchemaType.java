@@ -9,6 +9,7 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
@@ -44,7 +45,7 @@ public interface SchemaType extends SchemaComponent {
      */
 
     /*@Nullable*/
-    String getTargetNamespace();
+    NamespaceUri getTargetNamespace();
 
     /**
      * Get the fingerprint of the name of this type

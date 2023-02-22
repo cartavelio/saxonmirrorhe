@@ -13,7 +13,6 @@ import net.sf.saxon.functions.FoldingFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.UnparcelFn;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
@@ -168,8 +167,8 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     }
 
     @Override
-    public String getNamespace() {
-        return NamespaceConstant.ARRAY_FUNCTIONS;
+    public NamespaceUri getNamespace() {
+        return NamespaceUri.ARRAY_FUNCTIONS;
     }
 
     @Override

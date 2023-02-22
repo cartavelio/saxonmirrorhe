@@ -31,7 +31,7 @@ public class NameTest extends NodeTest implements QNameTest {
     private final int fingerprint;
     private final UType uType;
     private final NamePool namePool;
-    /*@Nullable*/ private String uri = null;  // the URI corresponding to the fingerprint - computed lazily
+    /*@Nullable*/ private NamespaceUri uri = null;  // the URI corresponding to the fingerprint - computed lazily
     /*@Nullable*/ private String localName = null; //the local name corresponding to the fingerprint - computed lazily
 
     /**
@@ -45,7 +45,7 @@ public class NameTest extends NodeTest implements QNameTest {
      * @since 9.0
      */
 
-    public NameTest(int nodeKind, String uri, String localName, NamePool namePool) {
+    public NameTest(int nodeKind, NamespaceUri uri, String localName, NamePool namePool) {
         this.uri = uri;
         this.localName = localName;
         this.nodeKind = nodeKind;
@@ -178,7 +178,7 @@ public class NameTest extends NodeTest implements QNameTest {
             return node.getFingerprint() == fingerprint;
         } else {
             computeUriAndLocal();
-            return localName.equals(node.getLocalPart()) && uri.equals(node.getURI());
+            return localName.equals(node.getLocalPart()) && uri.equals(node.getNamespaceUri());
         }
     }
 
@@ -261,7 +261,7 @@ public class NameTest extends NodeTest implements QNameTest {
      * @return the namespace URI (using "" for the "null namepace")
      */
 
-    public String getNamespaceURI() {
+    public NamespaceUri getNamespaceURI() {
         computeUriAndLocal();
         return uri;
     }
@@ -339,7 +339,7 @@ public class NameTest extends NodeTest implements QNameTest {
     @Override
     public String generateJavaScriptNameTest(int targetVersion) {
         computeUriAndLocal();
-        return "q.uri==='" + ExpressionPresenter.jsEscape(uri) + "'&&q.local==='" + localName + "'";
+        return "q.uri==='" + ExpressionPresenter.jsEscape(uri.toString()) + "'&&q.local==='" + localName + "'";
     }
 
     /**

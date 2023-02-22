@@ -8,6 +8,7 @@
 package net.sf.saxon.tree.util;
 
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 
 import java.util.ArrayList;
@@ -21,9 +22,9 @@ import java.util.Iterator;
 public class NamespaceResolverWithDefault implements NamespaceResolver {
 
     private final NamespaceResolver baseResolver;
-    private final String defaultNamespace;
+    private final NamespaceUri defaultNamespace;
 
-    public NamespaceResolverWithDefault(NamespaceResolver base, String defaultNamespace) {
+    public NamespaceResolverWithDefault(NamespaceResolver base, NamespaceUri defaultNamespace) {
         this.baseResolver = base;
         this.defaultNamespace = defaultNamespace;
     }
@@ -43,7 +44,7 @@ public class NamespaceResolverWithDefault implements NamespaceResolver {
 
     /*@Nullable*/
     @Override
-    public String getURIForPrefix(/*@NotNull*/ String prefix, boolean useDefault) {
+    public NamespaceUri getURIForPrefix(/*@NotNull*/ String prefix, boolean useDefault) {
         if (useDefault && prefix.isEmpty()) {
             return defaultNamespace;
         } else {

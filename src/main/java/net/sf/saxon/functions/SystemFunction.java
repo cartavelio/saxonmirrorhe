@@ -11,7 +11,6 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
@@ -20,7 +19,10 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.IntegerValue;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -478,7 +480,7 @@ public abstract class SystemFunction extends AbstractFunction {
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("fnRef");
         StructuredQName qName = getFunctionName();
-        String name = qName.hasURI(NamespaceConstant.FN) ? qName.getLocalPart() : qName.getEQName();
+        String name = qName.hasURI(NamespaceUri.FN) ? qName.getLocalPart() : qName.getEQName();
         out.emitAttribute("name", name);
         out.emitAttribute("arity", getArity() + "");
         if ((getDetails().properties & BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT) != 0) {

@@ -341,7 +341,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         /*register("namespace-uri", 1, NamespaceUri_1.class, BuiltInAtomicType.ANY_URI, ONE, 0)
                 .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING); */
 
-        register("namespace-uri", 1, NamespaceUri_1::new, BuiltInAtomicType.ANY_URI, ONE, 0)
+        register("namespace-uri", 1, NamespaceUriFn_1::new, BuiltInAtomicType.ANY_URI, ONE, 0)
                 .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING);
 
         register("namespace-uri-for-prefix", 2, NamespaceForPrefix::new, BuiltInAtomicType.ANY_URI, OPT, 0)

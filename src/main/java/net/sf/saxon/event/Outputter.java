@@ -141,7 +141,7 @@ public abstract class Outputter implements Receiver {
     /**
      * Notify the start of an element. This version of <code>startElement()</code> must be followed
      * by calls on {@link #attribute(NodeName, SimpleType, String, Location, int)} and
-     * {@link #namespace(String, String, int)} to supply the attributes and namespaces; these calls
+     * {@link #namespace(String, NamespaceUri, int)} to supply the attributes and namespaces; these calls
      * may be terminated by a call on {@link #startContent()} but this is not mandatory.
      *
      * @param elemName   the name of the element.
@@ -203,11 +203,11 @@ public abstract class Outputter implements Receiver {
      * in a single call.
      */
 
-    abstract public void namespace(String prefix, String namespaceUri, int properties) throws XPathException;
+    abstract public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException;
 
     /**
      * Output a set of namespace bindings. This should have the same effect as outputting the
-     * namespace bindings individually using {@link #namespace(String, String, int)}, but it
+     * namespace bindings individually using {@link #namespace(String, NamespaceUri, int)}, but it
      * may be more efficient. It is used only when copying an element node together with
      * all its namespaces, so less checking is needed that the namespaces form a consistent
      * and complete set

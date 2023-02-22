@@ -13,6 +13,7 @@ import net.sf.saxon.functions.*;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -187,7 +188,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 key = SystemFunction.makeFunction("data", getRetainedStaticContext(), 1);
             }
             SymbolicName.F delegate =
-                    new SymbolicName.F(new StructuredQName("", "http://ns.saxonica.com/xpath-functions", "mhk_highest"), 4);
+                    new SymbolicName.F(new StructuredQName("", NamespaceUri.of("http://ns.saxonica.com/xpath-functions"), "mhk_highest"), 4);
 
             Sequence[] args = new Sequence[4];
             args[0] = input.materialize();

@@ -179,7 +179,7 @@ public class CheckSumFilter extends ProxyReceiver {
 
     private int hash(NodeName n, int sequence) {
         //System.err.println("hash(" + n.getLocalPart() + ") " + hash(n.getLocalPart(), sequence) + "/" + hash(n.getURI(), sequence));
-        return hash(n.getLocalPart(), sequence) ^ hash(n.getURI(), sequence);
+        return hash(n.getLocalPart(), sequence) ^ hash(n.getURI().toString(), sequence);
     }
 }
 

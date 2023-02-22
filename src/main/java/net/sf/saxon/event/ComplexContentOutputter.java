@@ -9,7 +9,6 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.ma.arrays.ArrayItem;
@@ -17,7 +16,10 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UniStringConsumer;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -31,10 +33,10 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static net.sf.saxon.event.RegularSequenceChecker.State.CONTENT;
-import static net.sf.saxon.event.RegularSequenceChecker.State.START_TAG;
+import static net.sf.saxon.event.RegularSequenceChecker.State.FINAL;
 import static net.sf.saxon.event.RegularSequenceChecker.State.INITIAL;
 import static net.sf.saxon.event.RegularSequenceChecker.State.OPEN;
-import static net.sf.saxon.event.RegularSequenceChecker.State.FINAL;
+import static net.sf.saxon.event.RegularSequenceChecker.State.START_TAG;
 
 /**
  * This class is used for generating complex content, that is, the content of an
@@ -309,7 +311,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      */
 
     @Override
-    public void namespace(String prefix, String namespaceUri, int properties)
+    public void namespace(String prefix, NamespaceUri namespaceUri, int properties)
             throws XPathException {
         Objects.requireNonNull(prefix);
         Objects.requireNonNull(namespaceUri);
@@ -329,7 +331,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
             // itself is in the null namespace, as the resulting element could not be serialized
 
             if (prefix.isEmpty() && !namespaceUri.isEmpty()) {
-                if (pendingStartTag.hasURI("")) {
+                if (pendingStartTag.hasURI(NamespaceUri.NULL)) {
                     XPathException err = new XPathException("Cannot output a namespace node for the default namespace ("
                                                                     + namespaceUri + ") when the element is in no namespace");
                     err.setErrorCode(hostLanguage == HostLanguage.XSLT ? "XTDE0440" : "XQDY0102");
@@ -341,7 +343,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
             if (rejectDuplicates) {
 
                 // Handle declarations whose prefix is duplicated for this element.
-                String uri = pendingNSMap.getURI(prefix);
+                NamespaceUri uri = pendingNSMap.getURI(prefix);
                 if (uri != null && !uri.equals(namespaceUri)) {
                     XPathException err = new XPathException(
                             "Cannot create two namespace nodes with the same prefix "
@@ -358,7 +360,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
             Orphan orphan = new Orphan(getConfiguration());
             orphan.setNodeKind(Type.NAMESPACE);
             orphan.setNodeName(new NoNamespaceName(prefix));
-            orphan.setStringValue(StringView.tidy(namespaceUri));
+            orphan.setStringValue(namespaceUri.toUnicodeString());
             nextReceiver.append(orphan, Loc.NONE, properties);
         }
         previousAtomic = false;
@@ -367,7 +369,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
 
     /**
      * Output a set of namespace bindings. This should have the same effect as outputting the
-     * namespace bindings individually using {@link #namespace(String, String, int)}, but it
+     * namespace bindings individually using {@link Outputter#namespace(String, NamespaceUri, int)}, but it
      * may be more efficient. It is used only when copying an element node together with
      * all its namespaces, so less checking is needed that the namespaces form a consistent
      * and complete set
@@ -471,7 +473,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      * Notify the start of an element. This version of the method supplies all attributes and
      * namespaces and implicitly invokes {@link #startContent()}, which means it cannot be followed
      * by further calls on {@link Outputter#attribute(NodeName, SimpleType, String, Location, int)} or
-     * {@link #namespace} to define further attributes and namespaces.
+     * {@link Outputter#namespace} to define further attributes and namespaces.
      *
      * <p>This version of the method does not perform namespace fixup for prefixes used in the element
      * name or attribute names; it is assumed that these prefixes are declared within the namespace map,
@@ -503,7 +505,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         }
         currentLevelIsDocument[level] = false;
 
-        if (elemName.hasURI("") && !namespaces.getDefaultNamespace().isEmpty()) {
+        if (elemName.hasURI(NamespaceUri.NULL) && !namespaces.getDefaultNamespace().isEmpty()) {
             namespaces = namespaces.remove("");
         }
 
@@ -549,11 +551,11 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
 
     private NodeName checkProposedPrefix(NodeName nodeName, int seq) {
         String nodePrefix = nodeName.getPrefix();
-        String nodeURI = nodeName.getURI();
+        NamespaceUri nodeURI = nodeName.getURI();
         if (nodeURI.isEmpty()) {
             return nodeName;
         } else {
-            String uri = pendingNSMap.getURI(nodePrefix);
+            NamespaceUri uri = pendingNSMap.getURI(nodePrefix);
             if (uri == null) {
                 pendingNSMap = pendingNSMap.put(nodePrefix, nodeURI);
                 return nodeName;
@@ -580,8 +582,8 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      * @return a prefix to use in place of the one originally proposed
      */
 
-    private String getSubstitutePrefix(String prefix, String uri, int seq) {
-        if (uri.equals(NamespaceConstant.XML)) {
+    private String getSubstitutePrefix(String prefix, NamespaceUri uri, int seq) {
+        if (uri.equals(NamespaceUri.XML)) {
             return "xml";
         }
         return prefix + '_' + seq;
@@ -755,7 +757,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
 
         for (int a = 0; a < pendingAttributes.size(); a++) {
             NodeName oldName = pendingAttributes.get(a).getNodeName();
-            if (!oldName.hasURI("")) {    // non-null prefix
+            if (!oldName.hasURI(NamespaceUri.NULL)) {    // non-null prefix
                 NodeName newName = checkProposedPrefix(oldName, a + 1);
                 if (newName != oldName) {
                     AttributeInfo newInfo = pendingAttributes.get(a).withNodeName(newName);
@@ -769,7 +771,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
             pendingNSMap = inherited.putAll(pendingNSMap);
         }
 
-        if (pendingStartTag.hasURI("") && !pendingNSMap.getDefaultNamespace().isEmpty()) {
+        if (pendingStartTag.hasURI(NamespaceUri.NULL) && !pendingNSMap.getDefaultNamespace().isEmpty()) {
             pendingNSMap = pendingNSMap.remove("");
         }
 
@@ -873,7 +875,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
                             break;
 
                         case Type.NAMESPACE:
-                            namespace(node.getLocalPart(), node.getStringValue(), ReceiverOption.NONE);
+                            namespace(node.getLocalPart(), NamespaceUri.of(node.getStringValue()), ReceiverOption.NONE);
                             break;
 
                         case Type.DOCUMENT:

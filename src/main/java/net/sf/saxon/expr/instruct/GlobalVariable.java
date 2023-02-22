@@ -12,11 +12,7 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.s9api.HostLanguage;
@@ -656,12 +652,12 @@ public class GlobalVariable extends Actor
                 return result;
             } catch (UncheckedXPathException unxe) {
                 XPathException xe = unxe.getXPathException();
-                if (!getVariableQName().hasURI(NamespaceConstant.SAXON_GENERATED_VARIABLE)) {
+                if (!getVariableQName().hasURI(NamespaceUri.SAXON_GENERATED_VARIABLE)) {
                     xe.setIsGlobalError(true);
                 }
                 throw xe;
             } catch (XPathException e) {
-                if (!getVariableQName().hasURI(NamespaceConstant.SAXON_GENERATED_VARIABLE)) {
+                if (!getVariableQName().hasURI(NamespaceUri.SAXON_GENERATED_VARIABLE)) {
                     e.setIsGlobalError(true);
                 }
                 throw e;
@@ -851,7 +847,7 @@ public class GlobalVariable extends Actor
      */
 
     public String getDescription() {
-        if (variableQName.hasURI(NamespaceConstant.SAXON_GENERATED_VARIABLE)) {
+        if (variableQName.hasURI(NamespaceUri.SAXON_GENERATED_VARIABLE)) {
             return "optimizer-generated global variable select=\"" + getBody().toShortString() + '"';
         } else {
             return "global variable " + getVariableQName().getDisplayName();

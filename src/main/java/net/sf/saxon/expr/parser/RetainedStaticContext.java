@@ -14,6 +14,7 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.XPathException;
 
@@ -37,8 +38,8 @@ public class RetainedStaticContext implements NamespaceResolver {
     private String staticBaseUriString;
     private String defaultCollationName;
     private NamespaceResolver namespaces;
-    private String defaultFunctionNamespace = NamespaceConstant.FN;
-    private String defaultElementNamespace;
+    private NamespaceUri defaultFunctionNamespace = NamespaceUri.FN;
+    private NamespaceUri defaultElementNamespace;
     private DecimalFormatManager decimalFormatManager;
     private boolean backwardsCompatibility;
 
@@ -189,7 +190,7 @@ public class RetainedStaticContext implements NamespaceResolver {
      * @return the default namespace for functions
      */
 
-    public String getDefaultFunctionNamespace() {
+    public NamespaceUri getDefaultFunctionNamespace() {
         return defaultFunctionNamespace;
     }
 
@@ -199,7 +200,7 @@ public class RetainedStaticContext implements NamespaceResolver {
      * @param defaultFunctionNamespace the default namespace for functions
      */
 
-    public void setDefaultFunctionNamespace(String defaultFunctionNamespace) {
+    public void setDefaultFunctionNamespace(NamespaceUri defaultFunctionNamespace) {
         this.defaultFunctionNamespace = defaultFunctionNamespace;
     }
 
@@ -209,8 +210,8 @@ public class RetainedStaticContext implements NamespaceResolver {
      * @return the default namespace for elements and types. Return "" if the default is "no namespace"
      */
 
-    public String getDefaultElementNamespace() {
-        return defaultElementNamespace == null ? "" : defaultElementNamespace;
+    public NamespaceUri getDefaultElementNamespace() {
+        return defaultElementNamespace == null ? NamespaceUri.NULL : defaultElementNamespace;
     }
 
     /**
@@ -219,7 +220,7 @@ public class RetainedStaticContext implements NamespaceResolver {
      * @param ns the default namespace for elements and types.
      */
 
-    public void setDefaultElementNamespace(String ns) {
+    public void setDefaultElementNamespace(NamespaceUri ns) {
         defaultElementNamespace = ns;
     }
 
@@ -258,7 +259,7 @@ public class RetainedStaticContext implements NamespaceResolver {
      * @param uri    the namespace URI
      */
 
-    public void declareNamespace(String prefix, String uri) {
+    public void declareNamespace(String prefix, NamespaceUri uri) {
         if (namespaces instanceof NamespaceMap) {
             namespaces = ((NamespaceMap) namespaces).put(prefix, uri);
         } else {
@@ -281,7 +282,7 @@ public class RetainedStaticContext implements NamespaceResolver {
      * The "null namespace" is represented by the pseudo-URI "".
      */
     @Override
-    public String getURIForPrefix(String prefix, boolean useDefault) {
+    public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
         return namespaces.getURIForPrefix(prefix, useDefault);
     }
 

@@ -61,13 +61,13 @@ import java.util.*;
 
 public abstract class StyleElement extends ElementImpl {
 
-    /*@Nullable*/ protected String[] extensionNamespaces = null;        // a list of URIs
-    private String[] excludedNamespaces = null;           // a list of URIs
+    /*@Nullable*/ protected NamespaceUri[] extensionNamespaces = null;        // a list of URIs
+    private NamespaceUri[] excludedNamespaces = null;           // a list of URIs
     protected int version = -1;                 // the effective version of this element
     protected ExpressionContext staticContext = null;
     protected XmlProcessingIncident validationError = null;
     protected OnFailure reportingCircumstances = OnFailure.REPORT_ALWAYS;
-    protected String defaultXPathNamespace = null;
+    protected NamespaceUri defaultXPathNamespace = null;
     protected String defaultCollationName = null;
     protected StructuredQName defaultMode;
     protected boolean expandText = false;
@@ -255,7 +255,7 @@ public abstract class StyleElement extends ElementImpl {
      */
 
     public Visibility getVisibility() {
-        String vis = getAttributeValue("", "visibility");
+        String vis = getAttributeValue(NamespaceUri.NULL, "visibility");
         if (vis == null) {
             return Visibility.PRIVATE;
         } else {
@@ -271,7 +271,7 @@ public abstract class StyleElement extends ElementImpl {
      */
 
     public Visibility getDeclaredVisibility() {
-        String vis = getAttributeValue("", "visibility");
+        String vis = getAttributeValue(NamespaceUri.NULL, "visibility");
         if (vis == null) {
             return Visibility.UNDEFINED;
         } else {
@@ -387,10 +387,10 @@ public abstract class StyleElement extends ElementImpl {
                 e.setLocator(new AttributeLocation(this, StructuredQName.fromEQName((attributeName))));
             }
             compileError(e);
-            qName = new StructuredQName("saxon", NamespaceConstant.SAXON, "error-name");
+            qName = new StructuredQName("saxon", NamespaceUri.SAXON, "error-name");
         }
-        if (NamespaceConstant.isReserved(qName.getURI())) {
-            if (qName.hasURI(NamespaceConstant.XSLT)) {
+        if (NamespaceUri.isReserved(qName.getURI())) {
+            if (qName.hasURI(NamespaceUri.XSLT)) {
                 if (qName.getLocalPart().equals("initial-template")
                         && (this instanceof XSLTemplate || this instanceof XSLCallTemplate)) {
                     return qName;
@@ -405,7 +405,7 @@ public abstract class StyleElement extends ElementImpl {
             XmlProcessingIncident err = new XmlProcessingIncident("Namespace prefix " +
                                                       qName.getPrefix() + " refers to a reserved namespace", "XTSE0080");
             compileError(err);
-            qName = new StructuredQName("saxon", NamespaceConstant.SAXON, "error-name");
+            qName = new StructuredQName("saxon", NamespaceUri.SAXON, "error-name");
         }
         return qName;
     }
@@ -582,7 +582,7 @@ public abstract class StyleElement extends ElementImpl {
      *                  or NamespaceConstant.XSLT to find them in the XSLT namespace
      */
 
-    public void processStandardAttributes(String namespace) {
+    public void processStandardAttributes(NamespaceUri namespace) {
         processExtensionElementAttribute(namespace);
         processExcludedNamespaces(namespace);
         processVersionAttribute(namespace);
@@ -621,7 +621,7 @@ public abstract class StyleElement extends ElementImpl {
 
     protected void checkUnknownAttribute(NodeName nc) {
 
-        String attributeURI = nc.getURI();
+        NamespaceUri attributeURI = nc.getURI();
         String clarkName = nc.getStructuredQName().getClarkName();
 
         if (forwardsCompatibleModeIsEnabled()) {
@@ -632,7 +632,7 @@ public abstract class StyleElement extends ElementImpl {
         // allow xsl:extension-element-prefixes etc on an extension element
 
         if (isInstruction() &&
-                attributeURI.equals(NamespaceConstant.XSLT) &&
+                attributeURI.equals(NamespaceUri.XSLT) &&
                 !isInXsltNamespace() &&
                 (clarkName.endsWith("}default-collation") ||
                          clarkName.endsWith("}default-mode") ||
@@ -661,11 +661,11 @@ public abstract class StyleElement extends ElementImpl {
             return;
         }
 
-        if ("".equals(attributeURI) || NamespaceConstant.XSLT.equals(attributeURI)) {
+        if (attributeURI.isEmpty() || NamespaceUri.XSLT.equals(attributeURI)) {
             compileErrorInAttribute("Attribute " + Err.wrap(nc.getDisplayName(), Err.ATTRIBUTE) +
                                             " is not allowed on element " + Err.wrap(getDisplayName(), Err.ELEMENT),
                                     "XTSE0090", clarkName);
-        } else if (NamespaceConstant.SAXON.equals(attributeURI)) {
+        } else if (NamespaceUri.SAXON.equals(attributeURI)) {
             compileWarning("Unrecognized attribute in Saxon namespace: " + nc.getDisplayName(), "XTSE0090");
         }
     }
@@ -737,7 +737,7 @@ public abstract class StyleElement extends ElementImpl {
 
     Pattern makePattern(String pattern, String attributeName) {
         try {
-            StaticContext env = getStaticContext(new StructuredQName("", "", attributeName));
+            StaticContext env = getStaticContext(new StructuredQName("", NamespaceUri.NULL, attributeName));
             Pattern p = Pattern.make(pattern, env, getCompilation().getPackageData());
             p.setLocation(allocateLocation());
             return p;
@@ -893,11 +893,11 @@ public abstract class StyleElement extends ElementImpl {
      * Process a saxon:as extension attribute
      * @param sequenceType the value of the attribute
      * @return the corresponding sequence type
-     * @throws XPathException
+     * @throws XPathException if bad things happen
      */
     SequenceType makeExtendedSequenceType(String sequenceType)
             throws XPathException {
-        ExpressionContext env = getStaticContext(new StructuredQName("saxon", NamespaceConstant.SAXON, "as"));
+        ExpressionContext env = getStaticContext(new StructuredQName("saxon", NamespaceUri.SAXON, "as"));
         XPathParser parser =
                 getConfiguration().newExpressionParser("XP", false);
         QNameParser qp = new QNameParser(env.getNamespaceResolver())
@@ -914,7 +914,7 @@ public abstract class StyleElement extends ElementImpl {
      * @param ns the namespace URI of the attribute - either the XSLT namespace or "" for the null namespace
      */
 
-    void processExtensionElementAttribute(String ns) {
+    void processExtensionElementAttribute(NamespaceUri ns) {
         String ext = getAttributeValue(ns, "extension-element-prefixes");
         if (ext != null) {
             // go round twice, once to count the values and next to add them to the array
@@ -924,7 +924,7 @@ public abstract class StyleElement extends ElementImpl {
                 st1.nextToken();
                 count++;
             }
-            extensionNamespaces = new String[count];
+            extensionNamespaces = new NamespaceUri[count];
             count = 0;
             StringTokenizer st2 = new StringTokenizer(ext, " \t\n\r", false);
             while (st2.hasMoreTokens()) {
@@ -932,11 +932,11 @@ public abstract class StyleElement extends ElementImpl {
                 if ("#default".equals(s)) {
                     s = "";
                 }
-                String uri = getURIForPrefix(s, false);
+                NamespaceUri uri = getURIForPrefix(s, false);
                 if (uri == null) {
                     extensionNamespaces = null;
                     compileError("Namespace prefix " + s + " is undeclared", "XTSE1430");
-                } else if (NamespaceConstant.isReserved(uri)) {
+                } else if (NamespaceUri.isReserved(uri)) {
                     compileError("Namespace " + uri + " is reserved: it cannot be used for extension instructions " +
                                            "(perhaps exclude-result-prefixes was intended).",
                                    "XTSE0085");
@@ -954,15 +954,15 @@ public abstract class StyleElement extends ElementImpl {
      * @param ns the namespace URI of the attribute required, either the XSLT namespace or ""
      */
 
-    void processExcludedNamespaces(String ns) {
+    void processExcludedNamespaces(NamespaceUri ns) {
         String ext = getAttributeValue(ns, "exclude-result-prefixes");
         if (ext != null) {
             if ("#all".equals(Whitespace.trim(ext))) {
-                List<String> excluded = new ArrayList<>();
+                List<NamespaceUri> excluded = new ArrayList<>();
                 for (NamespaceBinding binding : getAllNamespaces()) {
                     excluded.add(binding.getURI());
                 }
-                excludedNamespaces = excluded.toArray(new String[0]);
+                excludedNamespaces = excluded.toArray(new NamespaceUri[0]);
             } else {
                 // go round twice, once to count the values and next to add them to the array
                 int count = 0;
@@ -971,7 +971,7 @@ public abstract class StyleElement extends ElementImpl {
                     st1.nextToken();
                     count++;
                 }
-                excludedNamespaces = new String[count];
+                excludedNamespaces = new NamespaceUri[count];
                 count = 0;
                 StringTokenizer st2 = new StringTokenizer(ext, " \t\n\r", false);
                 while (st2.hasMoreTokens()) {
@@ -981,7 +981,7 @@ public abstract class StyleElement extends ElementImpl {
                     } else if ("#all".equals(s)) {
                         compileError("In exclude-result-prefixes, cannot mix #all with other values", "XTSE0020");
                     }
-                    String uri = getURIForPrefix(s, true);
+                    NamespaceUri uri = getURIForPrefix(s, true);
                     if (uri == null) {
                         excludedNamespaces = null;
                         compileError("Namespace prefix " + s + " is not declared", "XTSE0808");
@@ -1003,7 +1003,7 @@ public abstract class StyleElement extends ElementImpl {
      * @param ns the namespace URI of the attribute required, either the XSLT namespace or ""
      */
 
-    protected void processVersionAttribute(String ns) {
+    protected void processVersionAttribute(NamespaceUri ns) {
         String v = Whitespace.trim(getAttributeValue(ns, "version"));
         if (v != null) {
             ConversionResult val = BigDecimalValue.makeDecimalValue(v, true);
@@ -1110,7 +1110,7 @@ public abstract class StyleElement extends ElementImpl {
      */
 
     void processDefaultCollationAttribute() {
-        String ns = isInXsltNamespace() ? "" : NamespaceConstant.XSLT;
+        NamespaceUri ns = isInXsltNamespace() ? NamespaceUri.NULL : NamespaceUri.XSLT;
         String v = getAttributeValue(ns, "default-collation");
         StringBuilder reasons = new StringBuilder();
         if (v != null) {
@@ -1207,7 +1207,7 @@ public abstract class StyleElement extends ElementImpl {
      */
 
     void processDefaultMode() {
-        String ns = isInXsltNamespace() ? "" : NamespaceConstant.XSLT;
+        NamespaceUri ns = isInXsltNamespace() ? NamespaceUri.NULL : NamespaceUri.XSLT;
         String v = getAttributeValue(ns, "default-mode");
         if (v != null) {
             if (v.equals("#unnamed")) {
@@ -1264,11 +1264,11 @@ public abstract class StyleElement extends ElementImpl {
      * @return true if this namespace is defined on this element as an extension element namespace
      */
 
-    private boolean definesExtensionElement(String uri) {
+    private boolean definesExtensionElement(NamespaceUri uri) {
         if (extensionNamespaces == null) {
             return false;
         }
-        for (String extensionNamespace : extensionNamespaces) {
+        for (NamespaceUri extensionNamespace : extensionNamespaces) {
             if (extensionNamespace.equals(uri)) {
                 return true;
             }
@@ -1284,7 +1284,7 @@ public abstract class StyleElement extends ElementImpl {
      * @return true if the URI is an extension element namespace URI
      */
 
-    public boolean isExtensionNamespace(String uri) {
+    public boolean isExtensionNamespace(NamespaceUri uri) {
         NodeInfo anc = this;
         while (anc instanceof StyleElement) {
             if (((StyleElement) anc).definesExtensionElement(uri)) {
@@ -1303,11 +1303,11 @@ public abstract class StyleElement extends ElementImpl {
      * @return true if the namespace is excluded by virtue of an [xsl:]exclude-result-prefixes attribute
      */
 
-    private boolean definesExcludedNamespace(String uri) {
+    private boolean definesExcludedNamespace(NamespaceUri uri) {
         if (excludedNamespaces == null) {
             return false;
         }
-        for (String excludedNamespace : excludedNamespaces) {
+        for (NamespaceUri excludedNamespace : excludedNamespaces) {
             if (excludedNamespace.equals(uri)) {
                 return true;
             }
@@ -1325,8 +1325,8 @@ public abstract class StyleElement extends ElementImpl {
      * on this element or on an ancestor element
      */
 
-    boolean isExcludedNamespace(String uri) {
-        if (uri.equals(NamespaceConstant.XSLT) || uri.equals(NamespaceConstant.XML)) {
+    boolean isExcludedNamespace(NamespaceUri uri) {
+        if (uri.equals(NamespaceUri.XSLT) || uri.equals(NamespaceUri.XML)) {
             return true;
         }
         if (isExtensionNamespace(uri)) {
@@ -1348,10 +1348,10 @@ public abstract class StyleElement extends ElementImpl {
      * @param ns the namespace URI of the attribute required  (the default namespace or the XSLT namespace.)
      */
 
-    void processDefaultXPathNamespaceAttribute(String ns) {
+    void processDefaultXPathNamespaceAttribute(NamespaceUri ns) {
         String v = getAttributeValue(ns, "xpath-default-namespace");
         if (v != null) {
-            defaultXPathNamespace = v;
+            defaultXPathNamespace = NamespaceUri.of(v);
         }
     }
 
@@ -1362,10 +1362,10 @@ public abstract class StyleElement extends ElementImpl {
      * Return {@link NamespaceConstant#NULL} for the non-namespace
      */
 
-    public String getDefaultXPathNamespace() {
+    public NamespaceUri getDefaultXPathNamespace() {
         NodeInfo anc = this;
         while (anc instanceof StyleElement) {
-            String x = ((StyleElement) anc).defaultXPathNamespace;
+            NamespaceUri x = ((StyleElement) anc).defaultXPathNamespace;
             if (x != null) {
                 return x;
             }
@@ -1380,7 +1380,7 @@ public abstract class StyleElement extends ElementImpl {
      * @param ns the namespace URI of the attribute required  (the default namespace or the XSLT namespace.)
      */
 
-    void processExpandTextAttribute(String ns) {
+    void processExpandTextAttribute(NamespaceUri ns) {
         String v = getAttributeValue(ns, "expand-text");
         if (v != null) {
             expandText = processBooleanAttribute("expand-text", v);
@@ -1396,7 +1396,7 @@ public abstract class StyleElement extends ElementImpl {
      * @param ns the namespace URI of the attribute required  (the default namespace or the XSLT namespace.)
      */
 
-    void processDefaultValidationAttribute(String ns) {
+    void processDefaultValidationAttribute(NamespaceUri ns) {
         String v = getAttributeValue(ns, "default-validation");
         if (v != null) {
             int val = Validation.getCode(v);
@@ -1429,7 +1429,7 @@ public abstract class StyleElement extends ElementImpl {
 
     public SchemaType getSchemaType(String typeAtt) {
         try {
-            String uri;
+            NamespaceUri uri;
             String lname;
             if (typeAtt.startsWith("Q{")) {
                 StructuredQName q = makeQName(typeAtt, "XTSE1520", "type");
@@ -1449,7 +1449,7 @@ public abstract class StyleElement extends ElementImpl {
                     }
                 }
             }
-            if (uri.equals(NamespaceConstant.SCHEMA)) {
+            if (uri.equals(NamespaceUri.SCHEMA)) {
                 SchemaType t = BuiltInType.getSchemaTypeByLocalName(lname);
                 if (t == null) {
                     compileError("Unknown built-in type " + typeAtt, "XTSE1520");

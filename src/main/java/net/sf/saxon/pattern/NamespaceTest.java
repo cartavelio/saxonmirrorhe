@@ -27,9 +27,9 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
     private final NamePool namePool;
     private final int nodeKind;
     private final UType uType;
-    private final String uri;
+    private final NamespaceUri uri;
 
-    public NamespaceTest(NamePool pool, int nodeKind, String uri) {
+    public NamespaceTest(NamePool pool, int nodeKind, NamespaceUri uri) {
         namePool = pool;
         this.nodeKind = nodeKind;
         this.uri = uri;
@@ -117,7 +117,7 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
 
     @Override
     public boolean test(NodeInfo node) {
-        return node.getNodeKind() == nodeKind && node.getURI().equals(uri);
+        return node.getNodeKind() == nodeKind && node.getNamespaceUri().equals(uri);
     }
 
     /**
@@ -159,7 +159,7 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
      * @return the namespace URI matched by this NamespaceTest
      */
 
-    public String getNamespaceURI() {
+    public NamespaceUri getNamespaceURI() {
         return uri;
     }
 
@@ -217,7 +217,7 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
 
     @Override
     public String generateJavaScriptNameTest(int targetVersion) {
-        return "q.uri==='" + ExpressionPresenter.jsEscape(uri) + "'";
+        return "q.uri==='" + ExpressionPresenter.jsEscape(uri.toString()) + "'";
     }
 
     /**

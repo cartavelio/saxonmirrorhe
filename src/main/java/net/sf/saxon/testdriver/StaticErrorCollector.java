@@ -7,8 +7,8 @@
 
 package net.sf.saxon.testdriver;
 
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardErrorReporter;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.XmlProcessingError;
 
@@ -54,8 +54,8 @@ public class StaticErrorCollector extends StandardErrorReporter {
         String code;
         QName errorCode = exception.getErrorCode();
         if (errorCode != null) {
-            String ns = errorCode.getNamespaceURI();
-            if (ns != null && !NamespaceConstant.ERR.equals(ns)) {
+            NamespaceUri ns = errorCode.getNamespaceURI();
+            if (ns != null && !NamespaceUri.ERR.equals(ns)) {
                 code = errorCode.getLocalName();
             } else {
                 code = errorCode.getEQName();

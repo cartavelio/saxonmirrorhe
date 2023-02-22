@@ -13,8 +13,8 @@ import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.Number_1;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -213,7 +213,7 @@ public class ArithmeticExpression10 extends ArithmeticExpression implements Call
 
         LetExpression let = new LetExpression();
         let.setRequiredType(SequenceType.OPTIONAL_ATOMIC);
-        let.setVariableQName(new StructuredQName("nn", NamespaceConstant.SAXON, "nn" + let.hashCode()));
+        let.setVariableQName(new StructuredQName("nn", NamespaceUri.SAXON, "nn" + let.hashCode()));
         let.setSequence(operand);
 
         LocalVariableReference var = new LocalVariableReference(let);

@@ -78,8 +78,8 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
 
     @Override
-    public String getTargetNamespace() {
-        return NamespaceConstant.SCHEMA;
+    public NamespaceUri getTargetNamespace() {
+        return NamespaceUri.SCHEMA;
     }
 
     /**
@@ -234,7 +234,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
     @Override
     public StructuredQName getTypeName() {
-        return new StructuredQName("xs", NamespaceConstant.SCHEMA, "error");
+        return new StructuredQName("xs", NamespaceUri.SCHEMA, "error");
     }
 
     /**
@@ -664,7 +664,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
     @Override
     public StructuredQName getStructuredQName() {
-        return new StructuredQName("xs", NamespaceConstant.SCHEMA, "error");
+        return new StructuredQName("xs", NamespaceUri.SCHEMA, "error");
     }
 
     /**

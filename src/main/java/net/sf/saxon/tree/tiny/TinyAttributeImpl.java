@@ -184,16 +184,16 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
      */
 
     @Override
-    public String getURI() {
+    public NamespaceUri getNamespaceUri() {
         int code = tree.attCode[nodeNr];
         if (!NamePool.isPrefixed(code)) {
-            return "";
+            return NamespaceUri.NULL;
         }
         return tree.getNamePool().getURI(code);
     }
 
     @Override
-    public boolean hasURI(String ns) {
+    public boolean hasURI(NamespaceUri ns) {
         int code = tree.attCode[nodeNr];
         if (!NamePool.isPrefixed(code)) {
             return ns.isEmpty();

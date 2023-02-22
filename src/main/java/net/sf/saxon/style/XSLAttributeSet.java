@@ -146,7 +146,7 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
 
         if (nameAtt == null) {
             reportAbsence("name");
-            setObjectName(new StructuredQName("", "", "attribute-set-error-name"));
+            setObjectName(new StructuredQName("", NamespaceUri.NULL, "attribute-set-error-name"));
             return;
         }
 

@@ -9,7 +9,6 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -97,7 +96,7 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
     @CSharpModifiers(code={"public", "override"})
     public Expression makeFunctionCall(Expression[] arguments) {
         Expression arg = new ContextItemExpression();
-        if (getFunctionName().hasURI(NamespaceConstant.SAXON)) {
+        if (getFunctionName().hasURI(NamespaceUri.SAXON)) {
             BuiltInFunctionSet.Entry entry = getDetails();
             try {
                 return entry.functionSet.makeFunction(entry.name.getLocalPart(), 1).makeFunctionCall(arg);

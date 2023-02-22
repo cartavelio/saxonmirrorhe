@@ -9,6 +9,7 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.QNameException;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
@@ -41,7 +42,7 @@ public class QNameFn extends SystemFunction {
                 err.setErrorCode("FOCA0002");
                 throw err;
             }
-            return new QNameValue(parts[0], uri, parts[1], BuiltInAtomicType.QNAME, true);
+            return new QNameValue(parts[0], NamespaceUri.of(uri), parts[1], BuiltInAtomicType.QNAME, true);
         } catch (QNameException e) {
             throw new XPathException(e.getMessage(), "FOCA0002");
         } catch (XPathException err) {

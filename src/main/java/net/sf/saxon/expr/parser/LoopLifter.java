@@ -12,7 +12,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.ConditionalInstruction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.UType;
@@ -283,7 +283,7 @@ public class LoopLifter {
         assert oldOperand != null;
 
         LetExpression let = new LetExpression();
-        let.setVariableQName(new StructuredQName("vv", NamespaceConstant.SAXON_GENERATED_VARIABLE, "v" + sequence++));
+        let.setVariableQName(new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "v" + sequence++));
         SequenceType type = SequenceType.makeSequenceType(child.getItemType(), child.getCardinality());
         let.setRequiredType(type);
         ExpressionTool.copyLocationInfo(child, let);

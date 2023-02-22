@@ -12,6 +12,7 @@ import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ModuleURIResolver;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -404,7 +405,7 @@ public class XQueryCompiler {
      */
 
     public void declareNamespace(String prefix, String uri) {
-        staticQueryContext.declareNamespace(prefix, uri);
+        staticQueryContext.declareNamespace(prefix, NamespaceUri.of(uri));
     }
 
     /**

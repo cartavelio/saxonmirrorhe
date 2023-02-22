@@ -123,8 +123,8 @@ public class QNameParser {
      *                        changed on return depending on the caller's requirements.
      */
 
-    public StructuredQName parse(String lexicalName, String defaultNS) throws XPathException {
-        lexicalName = Whitespace.trim(lexicalName).toString();
+    public StructuredQName parse(String lexicalName, NamespaceUri defaultNS) throws XPathException {
+        lexicalName = Whitespace.trim(lexicalName);
         if (acceptEQName && lexicalName.length() >= 4 &&
                 lexicalName.charAt(0) == 'Q' && lexicalName.charAt(1) == '{') {
             int endBrace = lexicalName.indexOf('}');
@@ -145,7 +145,7 @@ public class QNameParser {
             }
             String local = lexicalName.substring(endBrace + 1);
             checkLocalName(local);
-            return new StructuredQName("", uri, local);
+            return new StructuredQName("", NamespaceUri.of(uri), local);
         }
         try {
             String[] parts = NameChecker.getQNameParts(lexicalName);
@@ -153,7 +153,7 @@ public class QNameParser {
             if (parts[0].isEmpty()) {
                 return new StructuredQName("", defaultNS, parts[1]);
             }
-            String uri = resolver.getURIForPrefix(parts[0], false);
+            NamespaceUri uri = resolver.getURIForPrefix(parts[0], false);
             if (uri == null) {
                 throw new XPathException("Namespace prefix '" + parts[0] + "' has not been declared", errorOnUnresolvedPrefix);
             }

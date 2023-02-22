@@ -20,6 +20,7 @@ import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.push.Push;
@@ -242,7 +243,7 @@ public class TimingTraceListener implements TraceListener {
         InputStream in = getStylesheetInputStream();
         StreamSource ss = new StreamSource(in, "profile.xsl");
         CompilerInfo info = config.getDefaultXsltCompilerInfo();
-        info.setParameter(new StructuredQName("", "", "lang"),
+        info.setParameter(new StructuredQName("", NamespaceUri.NULL, "lang"),
                           StringValue.bmp(this.lang == HostLanguage.XSLT ? "XSLT" : "XQuery"));
         return Compilation.compileSingletonPackage(config, info, ss);
     }

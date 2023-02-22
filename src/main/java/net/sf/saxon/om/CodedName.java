@@ -42,7 +42,7 @@ public class CodedName implements NodeName {
      * @return the URI. Returns the empty string to represent the no-namespace
      */
     @Override
-    public String getURI() {
+    public NamespaceUri getURI() {
         return pool.getURI(fingerprint);
     }
 
@@ -88,7 +88,7 @@ public class CodedName implements NodeName {
      * @return true if the name is in the specified namespace
      */
     @Override
-    public boolean hasURI(String ns) {
+    public boolean hasURI(NamespaceUri ns) {
         return pool.getStructuredQName(fingerprint).hasURI(ns);
     }
 

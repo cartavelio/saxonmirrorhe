@@ -12,6 +12,7 @@ import net.sf.saxon.expr.ComponentBinding;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamePool;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.rules.BuiltInRuleSet;
@@ -142,8 +143,8 @@ public class CompoundMode extends Mode {
      * @return the set of all namespace URIs of names explicitly matched by rules in this mode
      */
     @Override
-    public Set<String> getExplicitNamespaces(NamePool pool) {
-        HashSet<String> r = new HashSet<String>();
+    public Set<NamespaceUri> getExplicitNamespaces(NamePool pool) {
+        HashSet<NamespaceUri> r = new HashSet<>();
         r.addAll(base.getExplicitNamespaces(pool));
         r.addAll(overrides.getExplicitNamespaces(pool));
         return r;
@@ -159,7 +160,7 @@ public class CompoundMode extends Mode {
     public void allocateAllBindingSlots(final StylesheetPackage pack) {
         if (!bindingSlotsAllocated) {
             List<ComponentBinding> baseBindings = base.getDeclaringComponent().getComponentBindings();
-            List<ComponentBinding> newBindings = new ArrayList<ComponentBinding>(baseBindings);
+            List<ComponentBinding> newBindings = new ArrayList<>(baseBindings);
             Component comp = getDeclaringComponent();
             comp.setComponentBindings(newBindings);
             SimpleMode.forceAllocateAllBindingSlots(pack, overrides, newBindings);

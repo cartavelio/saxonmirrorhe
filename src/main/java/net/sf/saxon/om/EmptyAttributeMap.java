@@ -41,7 +41,7 @@ public class EmptyAttributeMap implements AttributeMap {
     }
 
     @Override
-    public AttributeInfo get(String uri, String local) {
+    public AttributeInfo get(NamespaceUri uri, String local) {
         return null;
     }
 

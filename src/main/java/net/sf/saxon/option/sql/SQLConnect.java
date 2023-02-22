@@ -10,10 +10,7 @@ package net.sf.saxon.option.sql;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.ExtensionInstruction;
@@ -50,7 +47,7 @@ public class SQLConnect extends ExtensionInstruction {
         // Get mandatory database attribute
 
         AttributeMap atts = attributes();
-        AttributeInfo dbAtt = atts.get("", "database");
+        AttributeInfo dbAtt = atts.get(NamespaceUri.NULL, "database");
         String dbName = "";
         if (dbAtt == null) {
             reportAbsence("database");
@@ -61,7 +58,7 @@ public class SQLConnect extends ExtensionInstruction {
 
         // Get driver attribute
 
-        AttributeInfo dbDriver = atts.get("", "driver");
+        AttributeInfo dbDriver = atts.get(NamespaceUri.NULL, "driver");
         String dbDriverName = null;
         if (dbDriver == null) {
             if (dbName.length() > 9 && dbName.substring(0, 9).equals("jdbc:odbc")) {
@@ -80,7 +77,7 @@ public class SQLConnect extends ExtensionInstruction {
 
         // Get user attribute
 
-        AttributeInfo dbUser = atts.get("", "user");
+        AttributeInfo dbUser = atts.get(NamespaceUri.NULL, "user");
         String dbUserName = null;
         if (dbUser == null) {
             reportAbsence("user");
@@ -91,7 +88,7 @@ public class SQLConnect extends ExtensionInstruction {
 
         // Get password attribute
 
-        AttributeInfo dbPass = atts.get("", "password");
+        AttributeInfo dbPass = atts.get(NamespaceUri.NULL, "password");
         String dbPassword = null;
         if (dbPass == null) {
             reportAbsence("password");
@@ -102,7 +99,7 @@ public class SQLConnect extends ExtensionInstruction {
 
         // Get auto-commit attribute
 
-        AttributeInfo dbAutoCommit = atts.get("", "auto-commit");
+        AttributeInfo dbAutoCommit = atts.get(NamespaceUri.NULL, "auto-commit");
         if (dbAutoCommit != null) {
             String dbAuto = dbAutoCommit.getValue();
             autoCommit =  makeAttributeValueTemplate(dbAuto, dbAutoCommit);

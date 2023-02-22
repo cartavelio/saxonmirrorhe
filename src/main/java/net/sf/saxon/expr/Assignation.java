@@ -369,7 +369,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
     public String getVariableEQName() {
         if (variableName == null) {
             return "Q{http://ns.saxonica.com/anonymous-var}var" + computeHashCode();
-        } else if (variableName.hasURI("")) {
+        } else if (variableName.hasURI(NamespaceUri.NULL)) {
             return variableName.getLocalPart();
         } else {
             return variableName.getEQName();

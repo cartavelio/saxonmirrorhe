@@ -11,7 +11,6 @@ import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
@@ -103,9 +102,9 @@ public class MetaTagAdjuster extends ProxyReceiver {
                 return false;
             }
             if (htmlVersion == 5) {
-                return name.hasURI("") || name.hasURI(NamespaceConstant.XHTML);
+                return name.hasURI(NamespaceUri.NULL) || name.hasURI(NamespaceUri.XHTML);
             } else {
-                return name.hasURI(NamespaceConstant.XHTML);
+                return name.hasURI(NamespaceUri.XHTML);
             }
         } else {
             return name.getLocalPart().equalsIgnoreCase(local);
@@ -146,7 +145,7 @@ public class MetaTagAdjuster extends ProxyReceiver {
         nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
         if (seekingHead && matchesName(elemName, "head")) {
             String headPrefix = elemName.getPrefix();
-            String headURI = elemName.getURI();
+            NamespaceUri headURI = elemName.getURI();
             FingerprintedQName metaCode = new FingerprintedQName(headPrefix, headURI, "meta");
             AttributeMap atts = EmptyAttributeMap.getInstance();
             atts = atts.put(new AttributeInfo(new NoNamespaceName("http-equiv"),

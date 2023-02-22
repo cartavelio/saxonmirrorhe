@@ -156,7 +156,7 @@ public class XSLItemType extends StyleElement {
     private static class TypeAliasContext extends ExpressionContext {
 
         public TypeAliasContext(XSLItemType declaration) {
-            super(declaration, new StructuredQName("", "", "as"));
+            super(declaration, new StructuredQName("", NamespaceUri.NULL, "as"));
         }
 
         /**

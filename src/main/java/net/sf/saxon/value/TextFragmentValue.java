@@ -256,8 +256,8 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
     /*@NotNull*/
     @Override
-    public String getURI() {
-        return "";
+    public NamespaceUri getNamespaceUri() {
+        return NamespaceUri.NULL;
     }
 
     /**
@@ -388,7 +388,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
      * @since 9.4
      */
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         return null;
     }
 
@@ -731,8 +731,8 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
         /*@NotNull*/
         @Override
-        public String getURI() {
-            return "";
+        public NamespaceUri getNamespaceUri() {
+            return NamespaceUri.NULL;
         }
 
         /**
@@ -785,7 +785,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
          * @since 9.4
          */
         @Override
-        public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+        public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
             return null;
         }
 

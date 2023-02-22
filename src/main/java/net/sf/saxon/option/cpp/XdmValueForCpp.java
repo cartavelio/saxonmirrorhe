@@ -8,7 +8,7 @@
 package net.sf.saxon.option.cpp;
 
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -44,7 +44,7 @@ public class XdmValueForCpp {
 
     public XdmValueForCpp(String typeStr, String valueStr) throws Exception {
 
-        int fp = StandardNames.getFingerprint(NamespaceConstant.SCHEMA, typeStr);
+        int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
 
         type = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
         ConversionRules rules = new ConversionRules();
@@ -103,7 +103,7 @@ public class XdmValueForCpp {
 
     public static QName getTypeName(String typeStr) {
 
-        int fp = StandardNames.getFingerprint(NamespaceConstant.SCHEMA, typeStr);
+        int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
 
         BuiltInAtomicType typei = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
         return new QName(typei.getTypeName());

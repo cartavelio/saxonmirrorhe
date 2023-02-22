@@ -10,14 +10,14 @@ package net.sf.saxon;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.instruct.*;
-import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.functions.ExecutableFunctionLibrary;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.OutputURIResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.StylesheetPackage;
@@ -27,7 +27,10 @@ import net.sf.saxon.trans.rules.RuleManager;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * This <b>PreparedStylesheet</b> class represents a Stylesheet that has been
@@ -361,8 +364,8 @@ public class PreparedStylesheet extends Executable {
 
     public void explain(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("stylesheet");
-        presenter.namespace("fn", NamespaceConstant.FN);
-        presenter.namespace("xs", NamespaceConstant.SCHEMA);
+        presenter.namespace("fn", NamespaceUri.FN);
+        presenter.namespace("xs", NamespaceUri.SCHEMA);
         explainGlobalVariables(presenter);
         ruleManager.explainTemplateRules(presenter);
         explainNamedTemplates(presenter);

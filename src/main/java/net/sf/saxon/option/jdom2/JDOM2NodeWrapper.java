@@ -7,11 +7,7 @@
 
 package net.sf.saxon.option.jdom2;
 
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -319,14 +315,14 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      */
 
     @Override
-    public String getURI() {
+    public NamespaceUri getNamespaceUri() {
         switch (nodeKind) {
             case Type.ELEMENT:
-                return ((Element) node).getNamespaceURI();
+                return NamespaceUri.of(((Element) node).getNamespaceURI());
             case Type.ATTRIBUTE:
-                return ((Attribute) node).getNamespaceURI();
+                return NamespaceUri.of(((Attribute) node).getNamespaceURI());
             default:
-                return "";
+                return NamespaceUri.NULL;
         }
     }
 
@@ -545,12 +541,12 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 
 
     @Override
-    public String getAttributeValue(String uri, String local) {
+    public String getAttributeValue(NamespaceUri uri, String local) {
         if (nodeKind == Type.ELEMENT) {
             return ((Element) node).getAttributeValue(local,
-                    (uri.equals(NamespaceConstant.XML) ?
+                    (uri.equals(NamespaceUri.XML) ?
                             Namespace.XML_NAMESPACE :
-                            Namespace.getNamespace(uri)));
+                            Namespace.getNamespace(uri.toString())));
             // JDOM doesn't allow getNamespace() on the XML namespace URI
         }
         return null;
@@ -623,11 +619,11 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             String prefix = ns.getPrefix();
             String uri = ns.getURI();
             if (!(prefix.isEmpty() && uri.isEmpty())) {
-                bindings.add(new NamespaceBinding(prefix, uri));
+                bindings.add(new NamespaceBinding(prefix, NamespaceUri.of(uri)));
             }
             if (!addl.isEmpty()) {
                 for (Namespace ns2 : addl) {
-                    bindings.add(new NamespaceBinding(ns2.getPrefix(), ns2.getURI()));
+                    bindings.add(new NamespaceBinding(ns2.getPrefix(), NamespaceUri.of(ns2.getURI())));
                 }
             }
             return bindings.toArray(NamespaceBinding.EMPTY_ARRAY);
@@ -660,10 +656,10 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                 Namespace ns = elem.getNamespace();
                 String prefix = ns.getPrefix();
                 String uri = ns.getURI();
-                nsMap = nsMap.bind(prefix, uri);
+                nsMap = nsMap.bind(prefix, NamespaceUri.of(uri));
                 if (!addl.isEmpty()) {
                     for (Namespace ns2 : addl) {
-                        nsMap = nsMap.bind(ns2.getPrefix(), ns2.getURI());
+                        nsMap = nsMap.bind(ns2.getPrefix(), NamespaceUri.of(ns2.getURI()));
                     }
                 }
                 return inScopeNamespaces = nsMap;

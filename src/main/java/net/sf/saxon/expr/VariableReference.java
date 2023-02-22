@@ -676,7 +676,7 @@ public abstract class VariableReference extends Expression implements BindingRef
     public String getEQName() {
         if (binding != null) {
             StructuredQName q = binding.getVariableQName();
-            if (q.hasURI("")) {
+            if (q.hasURI(NamespaceUri.NULL)) {
                 return q.getLocalPart();
             } else {
                 return q.getEQName();

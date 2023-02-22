@@ -169,9 +169,9 @@ public class XSLElement extends StyleElement {
                 return null;
             }
 
-            String nsuri = null;
+            NamespaceUri nsuri = null;
             if (namespace instanceof StringLiteral) {
-                nsuri = ((StringLiteral) namespace).stringify();
+                nsuri = NamespaceUri.of(((StringLiteral) namespace).stringify());
                 if (nsuri.isEmpty()) {
                     parts[0] = "";
                 }

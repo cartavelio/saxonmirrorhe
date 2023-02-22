@@ -75,7 +75,7 @@ public class PathMaintainer extends ProxyReceiver {
         for (AbsolutePath.PathElement pe : path) {
             fsb.append('/');
             if (useURIs) {
-                String uri = pe.getName().getURI();
+                NamespaceUri uri = pe.getName().getURI();
                 if (!uri.isEmpty()) {
                     fsb.append('"');
                     fsb.append(uri);

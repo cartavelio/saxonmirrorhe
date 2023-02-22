@@ -275,7 +275,7 @@ public class Parts extends SystemFunction implements Callable {
         );
         register(BuiltInAtomicType.QNAME, "namespace-uri", SequenceType.OPTIONAL_STRING,
                  a -> {
-                     String uri = ((QNameValue) a).getStructuredQName().getURI();
+                     String uri = ((QNameValue) a).getStructuredQName().getURI().toString();
                      return uri.isEmpty()
                              ? EmptyIterator.ofAtomic()
                              : SingletonIterator.makeIterator(new StringValue(uri, BuiltInAtomicType.ANY_URI));

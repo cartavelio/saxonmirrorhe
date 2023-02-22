@@ -9,6 +9,7 @@ package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
@@ -154,9 +155,9 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
      */
 
     @Override
-    public String getURI() {
+    public NamespaceUri getNamespaceUri() {
         String uri = ((OMElement) node).getNamespaceURI();
-        return uri == null ? "" : uri;
+        return NamespaceUri.of(uri);
     }
 
     /**
@@ -203,7 +204,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
         if (!((OMElement) node).getAllAttributes().hasNext()) {
             return EmptyIterator.ofNodes();
         } else if (nodeTest instanceof NameTest) {
-            String uri = ((NameTest) nodeTest).getNamespaceURI();
+            String uri = ((NameTest) nodeTest).getNamespaceURI().toString();
             String local = ((NameTest) nodeTest).getLocalPart();
             OMAttribute att = ((OMElement) node).getAttribute(new QName(uri, local));
             if (att == null) {
@@ -247,8 +248,8 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
      */
 
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
-        return ((OMElement) node).getAttributeValue(new javax.xml.namespace.QName(uri, local, ""));
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
+        return ((OMElement) node).getAttributeValue(new javax.xml.namespace.QName(uri.toString(), local, ""));
     }
 
     /**
@@ -284,7 +285,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
         List<NamespaceBinding> list = new ArrayList<>();
         for (Iterator iter = elem.getAllDeclaredNamespaces(); iter.hasNext(); ) {
             OMNamespace ns = (OMNamespace) iter.next();
-            NamespaceBinding nb = new NamespaceBinding(ns.getPrefix(), ns.getNamespaceURI());
+            NamespaceBinding nb = new NamespaceBinding(ns.getPrefix(), NamespaceUri.of(ns.getNamespaceURI()));
             list.add(nb);
         }
         NamespaceBinding[] array = new NamespaceBinding[list.size()];
@@ -314,7 +315,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
                 OMElement elem = (OMElement) node;
                 for (Iterator iter = elem.getAllDeclaredNamespaces(); iter.hasNext(); ) {
                     OMNamespace ns = (OMNamespace) iter.next();
-                    nsMap = nsMap.bind(ns.getPrefix(), ns.getNamespaceURI());
+                    nsMap = nsMap.bind(ns.getPrefix(), NamespaceUri.of(ns.getNamespaceURI()));
                 }
                 return inScopeNamespaces = nsMap;
             }

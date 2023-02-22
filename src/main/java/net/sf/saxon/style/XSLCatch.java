@@ -121,7 +121,7 @@ public class XSLCatch extends StyleElement {
                     result.add(AnyNodeTest.getInstance());
                 }
                 String prefix = s.substring(0, s.length() - 2);
-                String uri = getURIForPrefix(prefix, false);
+                NamespaceUri uri = getURIForPrefix(prefix, false);
                 nt = new NamespaceTest(
                         getNamePool(),
                         Type.ELEMENT,
@@ -141,12 +141,12 @@ public class XSLCatch extends StyleElement {
             } else {
                 String prefix;
                 String localName;
-                String uri;
+                NamespaceUri uri;
                 try {
                     String[] parts = NameChecker.getQNameParts(s);
                     prefix = parts[0];
                     if (parts[0].equals("")) {
-                        uri = "";
+                        uri = NamespaceUri.NULL;
                     } else {
                         uri = getURIForPrefix(prefix, false);
                         if (uri == null) {

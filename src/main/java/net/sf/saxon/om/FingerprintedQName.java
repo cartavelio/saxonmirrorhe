@@ -18,16 +18,16 @@ public class FingerprintedQName implements NodeName {
     private final StructuredQName qName;
     private int fingerprint = -1;
 
-    public FingerprintedQName(String prefix, String uri, String localName) {
+    public FingerprintedQName(String prefix, NamespaceUri uri, String localName) {
         qName = new StructuredQName(prefix, uri, localName);
     }
 
-    public FingerprintedQName(String prefix, String uri, String localName, int fingerprint) {
+    public FingerprintedQName(String prefix, NamespaceUri uri, String localName, int fingerprint) {
         qName = new StructuredQName(prefix, uri, localName);
         this.fingerprint = fingerprint;
     }
 
-    public FingerprintedQName(String prefix, String uri, String localName, NamePool pool) {
+    public FingerprintedQName(String prefix, NamespaceUri uri, String localName, NamePool pool) {
         qName = new StructuredQName(prefix, uri, localName);
         this.fingerprint = pool.allocateFingerprint(uri, localName);
     }
@@ -68,7 +68,7 @@ public class FingerprintedQName implements NodeName {
             namespace = "";
             localName = expandedName;
         }
-        return new FingerprintedQName("", namespace, localName);
+        return new FingerprintedQName("", NamespaceUri.of(namespace), localName);
     }
 
     /**
@@ -97,7 +97,7 @@ public class FingerprintedQName implements NodeName {
             namespace = "";
             localName = expandedName;
         }
-        return new FingerprintedQName("", namespace, localName);
+        return new FingerprintedQName("", NamespaceUri.of(namespace), localName);
     }
 
 
@@ -164,7 +164,7 @@ public class FingerprintedQName implements NodeName {
      * @return the URI. Returns the empty string to represent the no-namespace
      */
     @Override
-    public String getURI() {
+    public NamespaceUri getURI() {
         return qName.getURI();
     }
 
@@ -195,7 +195,7 @@ public class FingerprintedQName implements NodeName {
      * @return true if the name is in the specified namespace
      */
     @Override
-    public boolean hasURI(String ns) {
+    public boolean hasURI(NamespaceUri ns) {
         return qName.hasURI(ns);
     }
 

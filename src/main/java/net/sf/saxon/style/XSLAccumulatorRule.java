@@ -8,8 +8,10 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -60,7 +62,7 @@ public class XSLAccumulatorRule extends StyleElement {
                         checkUnknownAttribute(attName);
                         break;
                 }
-            } else if (attName.hasURI(NamespaceConstant.SAXON)) {
+            } else if (attName.hasURI(NamespaceUri.SAXON)) {
                 if (isExtensionAttributeAllowed(attName.getDisplayName())) {
                     if (attName.getLocalPart().equals("capture")) {
                         capture = processBooleanAttribute("saxon:capture", value);
@@ -131,9 +133,9 @@ public class XSLAccumulatorRule extends StyleElement {
 
     @Override
     protected SourceBinding hasImplicitBinding(StructuredQName name) {
-        if (name.getLocalPart().equals("value") && name.hasURI("")) {
+        if (name.getLocalPart().equals("value") && name.hasURI(NamespaceUri.NULL)) {
             SourceBinding sb = new SourceBinding(this);
-            sb.setVariableQName(new StructuredQName("", "", "value"));
+            sb.setVariableQName(new StructuredQName("", NamespaceUri.NULL, "value"));
             assert getParent() != null;
             sb.setDeclaredType(((XSLAccumulator)getParent()).getResultType());
             sb.setProperty(SourceBinding.BindingProperty.IMPLICITLY_DECLARED, true);

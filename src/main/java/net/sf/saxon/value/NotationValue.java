@@ -10,6 +10,7 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
@@ -34,7 +35,7 @@ public final class NotationValue extends QualifiedNameValue {
      * @throws XPathException if an error is detected
      */
 
-    public NotationValue(String prefix, String uri, String localName, boolean check) throws XPathException {
+    public NotationValue(String prefix, NamespaceUri uri, String localName, boolean check) throws XPathException {
         super(new StructuredQName(prefix, uri, localName), BuiltInAtomicType.NOTATION);
         if (check && !NameChecker.isValidNCName(localName)) {
             XPathException err = new XPathException("Malformed local name in NOTATION: '" + localName + '\'');
@@ -42,12 +43,15 @@ public final class NotationValue extends QualifiedNameValue {
             throw err;
         }
         prefix = prefix == null ? "" : prefix;
-        uri = uri == null ? "" : uri;
         if (check && uri.isEmpty() && prefix.length() != 0) {
             XPathException err = new XPathException("NOTATION has null namespace but non-empty prefix");
             err.setErrorCode("FOCA0002");
             throw err;
         }
+    }
+
+    public NotationValue(String prefix, String uri, String localName, boolean check) throws XPathException {
+        this(prefix, NamespaceUri.of(uri), localName, check);
     }
 
     /**
@@ -59,7 +63,7 @@ public final class NotationValue extends QualifiedNameValue {
      * @param localName The local part of the QName
      */
 
-    public NotationValue(String prefix, String uri, String localName) {
+    public NotationValue(String prefix, NamespaceUri uri, String localName) {
         super(new StructuredQName(prefix, uri, localName), BuiltInAtomicType.NOTATION);
     }
 
@@ -73,7 +77,7 @@ public final class NotationValue extends QualifiedNameValue {
      * @param typeLabel A type derived from xs:NOTATION to be used for the new value
      */
 
-    public NotationValue(String prefix, String uri, String localName, AtomicType typeLabel) {
+    public NotationValue(String prefix, NamespaceUri uri, String localName, AtomicType typeLabel) {
         super(new StructuredQName(prefix, uri, localName), typeLabel);
     }
 

@@ -12,7 +12,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -120,7 +120,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
 
     private static UseAttributeSet makeUseAttributeSet(StructuredQName name, StyleElement instruction) throws XPathException {
         AttributeSet target;
-        if (name.hasURI(NamespaceConstant.XSLT) && name.getLocalPart().equals("original")) {
+        if (name.hasURI(NamespaceUri.XSLT) && name.getLocalPart().equals("original")) {
             target = (AttributeSet) instruction.getXslOriginal(StandardNames.XSL_ATTRIBUTE_SET);
         } else {
             Component invokee = instruction.getContainingPackage().getComponent(new SymbolicName(StandardNames.XSL_ATTRIBUTE_SET, name));

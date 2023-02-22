@@ -167,7 +167,7 @@ public class StaxBridge implements PullProvider {
                     for (int i = 0; i < n; i++) {
                         String prefix = reader.getNamespacePrefix(i);
                         String uri = reader.getNamespaceURI(i);
-                        nsMap = nsMap.bind(prefix==null ? "" : prefix, uri==null ? "" : uri);
+                        nsMap = nsMap.bind(prefix==null ? "" : prefix, NamespaceUri.of(uri==null ? "" : uri));
                     }
                     namespaceStack.push(nsMap);
 
@@ -180,7 +180,7 @@ public class StaxBridge implements PullProvider {
                         for (int i=0; i<attCount; i++) {
                             QName name = reader.getAttributeName(i);
                             FingerprintedQName fName = new FingerprintedQName(
-                                    name.getPrefix(), name.getNamespaceURI(), name.getLocalPart(), pool);
+                                    name.getPrefix(), NamespaceUri.of(name.getNamespaceURI()), name.getLocalPart(), pool);
                             String value = reader.getAttributeValue(i);
                             AttributeInfo att = new AttributeInfo(fName, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, 0);
                             attList.add(att);
@@ -334,7 +334,7 @@ public class StaxBridge implements PullProvider {
                 if (uri == null) {
                     uri = "";
                 }
-                bindings[i] = new NamespaceBinding(prefix, uri);
+                bindings[i] = new NamespaceBinding(prefix, NamespaceUri.of(uri));
             }
             return bindings;
         }
@@ -412,11 +412,11 @@ public class StaxBridge implements PullProvider {
     public NodeName getNodeName() {
         if (currentEvent == PullEvent.START_ELEMENT || currentEvent == PullEvent.END_ELEMENT) {
             String local = reader.getLocalName();
-            String uri = reader.getNamespaceURI();
+            NamespaceUri uri = NamespaceUri.of(reader.getNamespaceURI());
             // We keep a cache indexed by local name, on the assumption that most of the time, a given
             // local name will only ever be used with the same prefix and URI
             NodeName cached = nameCache.get(local);
-            if (cached != null && cached.hasURI(uri == null ? "": uri) && cached.getPrefix().equals(reader.getPrefix())) {
+            if (cached != null && cached.hasURI(uri) && cached.getPrefix().equals(reader.getPrefix())) {
                 return cached;
             } else {
                 int fp = namePool.allocateFingerprint(uri, local);

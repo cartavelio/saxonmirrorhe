@@ -26,7 +26,6 @@ import net.sf.saxon.expr.parser.Optimizer;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.AccumulatorFn;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.Pattern;
@@ -107,7 +106,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
                 accumulator.setDeclaredStreamable(false);
                 boolean streamable = processStreamableAtt(value);
                 accumulator.setDeclaredStreamable(streamable);
-            } else if (attName.hasURI(NamespaceConstant.SAXON) && attName.getLocalPart().equals("trace")) {
+            } else if (attName.hasURI(NamespaceUri.SAXON) && attName.getLocalPart().equals("trace")) {
                 if (isExtensionAttributeAllowed(attName.getDisplayName())) {
                     accumulator.setTracing(processBooleanAttribute("saxon:trace", value));
                 }
@@ -144,7 +143,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
                 } catch (XPathException e) {
                     compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "as");
                 }
-            } else if (attName.hasURI(NamespaceConstant.SAXON) && attName.getLocalPart().equals("trace")) {
+            } else if (attName.hasURI(NamespaceUri.SAXON) && attName.getLocalPart().equals("trace")) {
                 if (isExtensionAttributeAllowed(attName.getDisplayName())) {
                     accumulator.setTracing(processBooleanAttribute("saxon:trace", value));
                 }
@@ -205,7 +204,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
                     () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
             newValueExp = config.getTypeChecker(false).staticTypeCheck(newValueExp, accumulator.getType(), role, visitor);
             newValueExp = newValueExp.optimize(visitor, getConfiguration().makeContextItemStaticInfo(pattern.getItemType(), false));
-            slotManager.allocateSlotNumber(new StructuredQName("", "", "value"));
+            slotManager.allocateSlotNumber(new StructuredQName("", NamespaceUri.NULL, "value"));
             ExpressionTool.allocateSlots(newValueExp, 1, slotManager);
             boolean isPreDescent = !rule.isPostDescent();
             SimpleMode mode = isPreDescent ? accumulator.getPreDescentRules() : accumulator.getPostDescentRules();
@@ -246,9 +245,9 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
     public StructuredQName getObjectName() {
         StructuredQName qn = super.getObjectName();
         if (qn == null) {
-            String nameAtt = Whitespace.trim(getAttributeValue("", "name"));
+            String nameAtt = Whitespace.trim(getAttributeValue(NamespaceUri.NULL, "name"));
             if (nameAtt == null) {
-                return new StructuredQName("saxon", NamespaceConstant.SAXON, "badly-named-accumulator" + generateId());
+                return new StructuredQName("saxon", NamespaceUri.SAXON, "badly-named-accumulator" + generateId());
             }
             qn = makeQName(nameAtt, null, "name");
             setObjectName(qn);

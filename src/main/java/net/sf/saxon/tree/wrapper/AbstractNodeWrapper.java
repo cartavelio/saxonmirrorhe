@@ -8,7 +8,6 @@
 package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodePredicate;
@@ -162,7 +161,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
         }
         // Look for an xml:base attribute
         while (n != null) {
-            String xmlbase = n.getAttributeValue(NamespaceConstant.XML, "base");
+            String xmlbase = n.getAttributeValue(NamespaceUri.XML, "base");
             if (xmlbase != null) {
                 return xmlbase;
             }
@@ -238,7 +237,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
     @Override
     @CSharpModifiers(code = {"public", "virtual"})
-    public String getAttributeValue(String uri, String local) {
+    public String getAttributeValue(NamespaceUri uri, String local) {
         return null;
     }
 

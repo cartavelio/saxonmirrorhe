@@ -19,15 +19,15 @@ import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.functions.registry.XPath20FunctionSet;
 import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.DecimalFormatManager;
-import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.KeyManager;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 
@@ -52,8 +52,8 @@ public abstract class AbstractStaticContext implements StaticContext {
     private Location containingLocation = Loc.NONE;
     private String defaultCollationName;
     private FunctionLibraryList libraryList = new FunctionLibraryList();
-    private String defaultFunctionNamespace = NamespaceConstant.FN;
-    private String defaultElementNamespace = NamespaceConstant.NULL;
+    private NamespaceUri defaultFunctionNamespace = NamespaceUri.FN;
+    private NamespaceUri defaultElementNamespace = NamespaceUri.NULL;
     private boolean backwardsCompatible = false;
     private int xpathLanguageLevel = 31;
     protected boolean usingDefaultFunctionLibrary;
@@ -330,7 +330,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      */
 
     @Override
-    public String getDefaultElementNamespace() {
+    public NamespaceUri getDefaultElementNamespace() {
         return defaultElementNamespace;
     }
 
@@ -341,7 +341,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      *            The value "" (or NamespaceConstant.NULL) represents the non-namespace
      */
 
-    public void setDefaultElementNamespace(String uri) {
+    public void setDefaultElementNamespace(NamespaceUri uri) {
         defaultElementNamespace = uri;
     }
 
@@ -352,7 +352,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      *            The value "" (or NamespaceConstant.NULL) represents the non-namespace
      */
 
-    public void setDefaultFunctionNamespace(String uri) {
+    public void setDefaultFunctionNamespace(NamespaceUri uri) {
         defaultFunctionNamespace = uri;
     }
 
@@ -364,7 +364,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      */
 
     @Override
-    public String getDefaultFunctionNamespace() {
+    public NamespaceUri getDefaultFunctionNamespace() {
         return defaultFunctionNamespace;
     }
 

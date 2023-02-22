@@ -39,14 +39,14 @@ public class SQLInsert extends ExtensionInstruction {
     @Override
     protected void prepareAttributes() {
 
-        table = attributes().getValue("", "table");
+        table = attributes().getValue(NamespaceUri.NULL, "table");
         // TODO: allow table to be an AVT
         if (table == null) {
             reportAbsence("table");
         }
         table = SQLConnect.quoteSqlName(table);
 
-        AttributeInfo connectAtt = attributes().get("", "connection");
+        AttributeInfo connectAtt = attributes().get(NamespaceUri.NULL, "connection");
         if (connectAtt == null) {
             reportAbsence("connection");
         } else {

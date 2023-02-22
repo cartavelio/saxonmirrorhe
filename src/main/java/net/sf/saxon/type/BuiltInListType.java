@@ -30,10 +30,10 @@ public class BuiltInListType implements ListType {
 
     private final int fingerprint;
 
-    public static BuiltInListType ENTITIES = makeListType(NamespaceConstant.SCHEMA, "ENTITIES");
-    public static BuiltInListType IDREFS = makeListType(NamespaceConstant.SCHEMA, "IDREFS");
-    public static BuiltInListType NMTOKENS = makeListType(NamespaceConstant.SCHEMA, "NMTOKENS");
-    public static BuiltInListType ANY_URIS = makeListType(NamespaceConstant.SCHEMA_INSTANCE, "anonymous_schemaLocationType");
+    public static BuiltInListType ENTITIES = makeListType(NamespaceUri.SCHEMA, "ENTITIES");
+    public static BuiltInListType IDREFS = makeListType(NamespaceUri.SCHEMA, "IDREFS");
+    public static BuiltInListType NMTOKENS = makeListType(NamespaceUri.SCHEMA, "NMTOKENS");
+    public static BuiltInListType ANY_URIS = makeListType(NamespaceUri.SCHEMA_INSTANCE, "anonymous_schemaLocationType");
 
     /**
      * Determine whether this is a built-in type or a user-defined type
@@ -228,8 +228,8 @@ public class BuiltInListType implements ListType {
      */
 
     @Override
-    public String getTargetNamespace() {
-        return NamespaceConstant.SCHEMA;
+    public NamespaceUri getTargetNamespace() {
+        return NamespaceUri.SCHEMA;
     }
 
     /**
@@ -413,7 +413,7 @@ public class BuiltInListType implements ListType {
      */
     @Override
     public StructuredQName getStructuredQName() {
-        return new StructuredQName("xs", NamespaceConstant.SCHEMA, getLocalName());
+        return new StructuredQName("xs", NamespaceUri.SCHEMA, getLocalName());
     }
 
     /**
@@ -505,7 +505,7 @@ public class BuiltInListType implements ListType {
     }
 
     /*@NotNull*/
-    private static BuiltInListType makeListType(String namespace, String lname) {
+    private static BuiltInListType makeListType(NamespaceUri namespace, String lname) {
         BuiltInListType t = new BuiltInListType(StandardNames.getFingerprint(namespace, lname));
         BuiltInType.register(t.getFingerprint(), t);
         return t;

@@ -426,7 +426,7 @@ public class EnumerationType implements AtomicType {
      * of an anonymous type, and in the case of a global type defined in a no-namespace schema.
      */
     @Override
-    public String getTargetNamespace() {
+    public NamespaceUri getTargetNamespace() {
         return null;
     }
 

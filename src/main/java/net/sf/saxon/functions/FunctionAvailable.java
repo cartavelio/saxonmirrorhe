@@ -11,11 +11,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.QNameParser;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.SymbolicName;
@@ -101,8 +97,7 @@ public class FunctionAvailable extends SystemFunction {
         try {
             if (NameChecker.isValidNCName(StringTool.codePoints(lexicalName))) {
                 // we're in XSLT, where the default namespace for functions can't be changed
-                String uri = NamespaceConstant.FN;
-                qName = new StructuredQName("", uri, lexicalName);
+                qName = new StructuredQName("", NamespaceUri.FN, lexicalName);
             } else {
                 qName = StructuredQName.fromLexicalQName(lexicalName,
                         false, true,

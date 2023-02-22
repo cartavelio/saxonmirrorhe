@@ -13,7 +13,6 @@ import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
@@ -92,7 +91,7 @@ public class XSLSourceDocument extends StyleElement {
                 useAccumulatorsAtt = Whitespace.trim(value);
             } else if (f.equals("streamable")) {
                 streaming = processStreamableAtt(value);
-            } else if (attName.hasURI(NamespaceConstant.SAXON)) {
+            } else if (attName.hasURI(NamespaceUri.SAXON)) {
                 isExtensionAttributeAllowed(attName.getDisplayName());
                 String local = attName.getLocalPart();
                 switch (local) {

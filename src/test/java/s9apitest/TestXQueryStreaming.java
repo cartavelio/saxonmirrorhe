@@ -284,6 +284,30 @@ public class TestXQueryStreaming {
         }
     }
 
+    /**
+     * Bug 5569
+     */
+    @Test
+    public void testStreamedSerialization() {
+        try {
+            String uri = "file:///" + configTest.getDataDir() + "books.xml";
+            String query = "/BOOKLIST/BOOKS/ITEM/string-join(*, '|')";
+            Processor proc = new Processor(true);
+            XQueryCompiler xQueryCompiler = proc.newXQueryCompiler();
+            xQueryCompiler.setStreaming(true);
+            XQueryExecutable xqueryExecutable = xQueryCompiler.compile(query);
+            XQueryEvaluator xqueryEvaluator = xqueryExecutable.load();
+            StringWriter writer = new StringWriter();
+            Serializer destination = proc.newSerializer(writer);
+            destination.setOutputProperty(Serializer.Property.METHOD, "text");
+            destination.setOutputProperty(Serializer.Property.ITEM_SEPARATOR, "+");
+            xqueryEvaluator.runStreamed(new StreamSource(uri), destination);
+            assertTrue(writer.toString().contains("352|8.3 5.7 1.1|6.1+Wuthering Heights|Charlotte Brontë|Penguin Classics"));
+        } catch (Exception err) {
+            fail();
+        }
+    }
+
 
 }
 

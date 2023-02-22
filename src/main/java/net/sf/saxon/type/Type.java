@@ -272,7 +272,7 @@ public abstract class Type {
      */
 
     /*@Nullable*/
-    public static ItemType getBuiltInItemType(String namespace, String localName) {
+    public static ItemType getBuiltInItemType(NamespaceUri namespace, String localName) {
         SchemaType t = BuiltInType.getSchemaType(
                 StandardNames.getFingerprint(namespace, localName));
         if (t instanceof ItemType) {
@@ -291,7 +291,7 @@ public abstract class Type {
      */
 
     /*@Nullable*/
-    public static SimpleType getBuiltInSimpleType(String namespace, String localName) {
+    public static SimpleType getBuiltInSimpleType(NamespaceUri namespace, String localName) {
         SchemaType t = BuiltInType.getSchemaType(
                 StandardNames.getFingerprint(namespace, localName));
         if (t instanceof SimpleType && ((SimpleType) t).isBuiltInType()) {

@@ -9,12 +9,10 @@ package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.s9api.Location;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.type.SchemaType;
 import org.apache.axiom.om.*;
 
@@ -105,15 +103,15 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
                              Location location, int properties) throws XPathException {
         flush();
         String local = elemName.getLocalPart();
-        String uri = elemName.getURI();
+        NamespaceUri uri = elemName.getURI();
         String prefix = elemName.getPrefix();
         if (ancestors.isEmpty()) {
             startDocument(ReceiverOption.NONE);
             implicitDocumentNode = true;
         }
         OMElement element;
-        if (uri.length() != 0) {
-            OMNamespace ns = factory.createOMNamespace(uri, prefix);
+        if (!uri.isEmpty()) {
+            OMNamespace ns = factory.createOMNamespace(uri.toString(), prefix);
             element = factory.createOMElement(local, ns);
         } else {
             element = factory.createOMElement(local, null);
@@ -131,13 +129,13 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
             NamespaceBinding[] declarations = namespaces.getDifferences(parentNamespaces, false);
             for (NamespaceBinding ns : declarations) {
                 String nsprefix = ns.getPrefix();
-                String nsuri = ns.getURI();
+                NamespaceUri nsuri = ns.getURI();
                 if (nsprefix.equals("")) {
-                    element.declareDefaultNamespace(nsuri);
-                } else if (nsuri.equals("")) {
+                    element.declareDefaultNamespace(nsuri.toString());
+                } else if (nsuri.isEmpty()) {
                     // ignore namespace undeclarations - Axiom can't handle them
                 } else {
-                    OMNamespace ons = factory.createOMNamespace(nsuri, nsprefix);
+                    OMNamespace ons = factory.createOMNamespace(nsuri.toString(), nsprefix);
                     element.declareNamespace(ons);
                 }
             }
@@ -147,11 +145,11 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
         for (AttributeInfo att : attributes) {
             NodeName nameCode = att.getNodeName();
             String attlocal = nameCode.getLocalPart();
-            String atturi = nameCode.getURI();
+            NamespaceUri atturi = nameCode.getURI();
             String attprefix = nameCode.getPrefix();
-            OMNamespace ns = atturi.isEmpty() ? null : factory.createOMNamespace(atturi, attprefix);
+            OMNamespace ns = atturi.isEmpty() ? null : factory.createOMNamespace(atturi.toString(), attprefix);
             OMAttribute attr = factory.createOMAttribute(attlocal, ns, att.getValue());
-            if (ReceiverOption.contains(properties, ReceiverOption.IS_ID) || (attlocal.equals("id") && atturi.equals(NamespaceConstant.XML))) {
+            if (ReceiverOption.contains(properties, ReceiverOption.IS_ID) || (attlocal.equals("id") && atturi.equals(NamespaceUri.XML))) {
                 attr.setAttributeType("ID");
             } else if (ReceiverOption.contains(properties, ReceiverOption.IS_IDREF)) {
                 attr.setAttributeType("IDREF");

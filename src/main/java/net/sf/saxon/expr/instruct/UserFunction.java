@@ -14,7 +14,6 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.query.AnnotationList;
@@ -107,7 +106,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
     @Override
     public String getDescription() {
         StructuredQName name = getFunctionName();
-        if (name.hasURI(NamespaceConstant.ANONYMOUS)) {
+        if (name.hasURI(NamespaceUri.ANONYMOUS)) {
             boolean first = true;
              StringBuilder sb = new StringBuilder("function(");
              for (UserFunctionParameter param : getParameterDefinitions()) {

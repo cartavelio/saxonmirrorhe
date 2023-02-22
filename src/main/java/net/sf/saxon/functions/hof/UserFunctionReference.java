@@ -16,7 +16,6 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.AbstractFunction;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.style.StylesheetPackage;
@@ -62,7 +61,7 @@ public class UserFunctionReference extends Expression
     @Override
     public Expression simplify() throws XPathException {
         // if this is an inline function, simplify the body of that function now
-        if (nominalTarget.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS) && typeCheckCounter == 0) {
+        if (nominalTarget.getFunctionName().hasURI(NamespaceUri.ANONYMOUS) && typeCheckCounter == 0) {
             // Prevent recursive simplification
             typeCheckCounter++;
             nominalTarget.setBody(nominalTarget.getBody().simplify());
@@ -94,7 +93,7 @@ public class UserFunctionReference extends Expression
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         // if this is an inline function, typecheck that function now
         //System.err.println("typeCheck " + this);
-        if (nominalTarget.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS) && typeCheckCounter == 0) {
+        if (nominalTarget.getFunctionName().hasURI(NamespaceUri.ANONYMOUS) && typeCheckCounter == 0) {
             // Prevent recursive type-checking: test case -s:misc-HigherOrderFunctions -t:xqhof2
             typeCheckCounter++;
             nominalTarget.typeCheck(visitor);
@@ -122,7 +121,7 @@ public class UserFunctionReference extends Expression
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         // if this is an inline function, optimize that function now
         //System.err.println("optimize " + this);
-        if (nominalTarget.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS) && optimizeCounter == 0) {
+        if (nominalTarget.getFunctionName().hasURI(NamespaceUri.ANONYMOUS) && optimizeCounter == 0) {
             // Prevent recursive optimization: test case -s:misc-HigherOrderFunctions -t:xqhof2 ; and bug #5054
             optimizeCounter++;
             Expression o;

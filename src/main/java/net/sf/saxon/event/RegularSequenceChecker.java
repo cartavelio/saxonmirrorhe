@@ -328,7 +328,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
      * These constraints are not all enforced by this class.
      * </p>
      *  @param elemName  the name of the element. If the name is in a namespace (non-empty namespace URI)
-     *                  then the {@link Outputter#namespace(String, String, int)} event must include
+     *                  then the {@link Outputter#namespace(String, NamespaceUri, int)} event must include
      *                  a binding for the relevant prefix (or absence of a prefix) to the relevant URI.
      * @param type the type annotation of the element.
      * @param attributes the attributes of the element
@@ -348,7 +348,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
 
             String prefix = elemName.getPrefix();
             if (prefix.isEmpty()) {
-                String declaredDefaultUri = namespaces.getDefaultNamespace();
+                NamespaceUri declaredDefaultUri = namespaces.getDefaultNamespace();
                 if (!declaredDefaultUri.equals(elemName.getURI())) {
                     throw new IllegalStateException("URI of element Q{" + elemName.getURI() +
                                                             "}" + elemName.getLocalPart() +
@@ -356,7 +356,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
                                                             + declaredDefaultUri + "}");
                 }
             } else {
-                String declaredUri = namespaces.getURI(prefix);
+                NamespaceUri declaredUri = namespaces.getURI(prefix);
                 if (declaredUri == null) {
                     throw new IllegalStateException("Prefix " + prefix + " has not been declared");
                 } else if (!declaredUri.equals(elemName.getURI())) {
@@ -367,7 +367,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
                 NodeName name = att.getNodeName();
                 if (!name.getURI().isEmpty()) {
                     String attPrefix = name.getPrefix();
-                    String declaredUri = namespaces.getURI(attPrefix);
+                    NamespaceUri declaredUri = namespaces.getURI(attPrefix);
                     if (declaredUri == null) {
                         throw new IllegalStateException("Prefix " + attPrefix + " has not been declared for attribute " + att.getNodeName().getDisplayName());
                     } else if (!declaredUri.equals(name.getURI())) {

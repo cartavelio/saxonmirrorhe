@@ -4,9 +4,9 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XdmDestination;
@@ -29,13 +29,13 @@ public class NamespaceMapTest {
     public void testIncrementalAdd() {
         try {
             NamespaceMap map = NamespaceMap.emptyMap();
-            map = map.put("xml", NamespaceConstant.XML);
-            map = map.put("xsl", NamespaceConstant.XSLT);
-            map = map.put("saxon", NamespaceConstant.SAXON);
-            assertEquals(NamespaceConstant.SAXON, map.getURI("saxon"));
-            assertEquals(NamespaceConstant.XSLT, map.getURI("xsl"));
-            map = map.put("xsl", NamespaceConstant.MAP_FUNCTIONS);
-            assertEquals(NamespaceConstant.MAP_FUNCTIONS, map.getURI("xsl"));
+            map = map.put("xml", NamespaceUri.XML);
+            map = map.put("xsl", NamespaceUri.XSLT);
+            map = map.put("saxon", NamespaceUri.SAXON);
+            assertEquals(NamespaceUri.SAXON, map.getURI("saxon"));
+            assertEquals(NamespaceUri.XSLT, map.getURI("xsl"));
+            map = map.put("xsl", NamespaceUri.MAP_FUNCTIONS);
+            assertEquals(NamespaceUri.MAP_FUNCTIONS, map.getURI("xsl"));
         } catch (Exception err) {
             err.printStackTrace();
             fail(err.getMessage());
@@ -46,14 +46,14 @@ public class NamespaceMapTest {
     public void testIncrementalRemove() {
         try {
             NamespaceMap map = NamespaceMap.emptyMap();
-            map = map.put("xsl", NamespaceConstant.XSLT);
-            map = map.put("xml", NamespaceConstant.XML);
-            map = map.put("saxon", NamespaceConstant.SAXON);
-            assertEquals(NamespaceConstant.SAXON, map.getURI("saxon"));
-            assertEquals(NamespaceConstant.XSLT, map.getURI("xsl"));
-            map = map.put("xsl", "");
+            map = map.put("xsl", NamespaceUri.XSLT);
+            map = map.put("xml", NamespaceUri.XML);
+            map = map.put("saxon", NamespaceUri.SAXON);
+            assertEquals(NamespaceUri.SAXON, map.getURI("saxon"));
+            assertEquals(NamespaceUri.XSLT, map.getURI("xsl"));
+            map = map.put("xsl", NamespaceUri.NULL);
             assertNull(map.getURI("xsl"));
-            assertEquals(NamespaceConstant.SAXON, map.getURI("saxon"));
+            assertEquals(NamespaceUri.SAXON, map.getURI("saxon"));
             map = map.put("saxon", null);
             assertNull(map.getURI("saxon"));
         } catch (Exception err) {
@@ -65,21 +65,21 @@ public class NamespaceMapTest {
     @Test
     public void testMerge() {
         NamespaceMap map1 = NamespaceMap.emptyMap();
-        map1 = map1.put("xml", NamespaceConstant.XML);
-        map1 = map1.put("xsl", NamespaceConstant.XSLT);
-        map1 = map1.put("saxon", NamespaceConstant.SAXON);
+        map1 = map1.put("xml", NamespaceUri.XML);
+        map1 = map1.put("xsl", NamespaceUri.XSLT);
+        map1 = map1.put("saxon", NamespaceUri.SAXON);
 
         NamespaceMap map2 = NamespaceMap.emptyMap();
-        map2 = map2.put("xsl", NamespaceConstant.XSLT);
-        map2 = map2.put("saxon", NamespaceConstant.IXSL);
-        map2 = map2.put("array", NamespaceConstant.ARRAY_FUNCTIONS);
+        map2 = map2.put("xsl", NamespaceUri.XSLT);
+        map2 = map2.put("saxon", NamespaceUri.IXSL);
+        map2 = map2.put("array", NamespaceUri.ARRAY_FUNCTIONS);
 
         NamespaceMap map3 = map1.putAll(map2);
         assertEquals(3, map3.size());
-        assertEquals(NamespaceConstant.XML, map3.getURI("xml"));
-        assertEquals(NamespaceConstant.XSLT, map3.getURI("xsl"));
-        assertEquals(NamespaceConstant.IXSL, map3.getURI("saxon"));
-        assertEquals(NamespaceConstant.ARRAY_FUNCTIONS, map3.getURI("array"));
+        assertEquals(NamespaceUri.XML, map3.getURI("xml"));
+        assertEquals(NamespaceUri.XSLT, map3.getURI("xsl"));
+        assertEquals(NamespaceUri.IXSL, map3.getURI("saxon"));
+        assertEquals(NamespaceUri.ARRAY_FUNCTIONS, map3.getURI("array"));
         assertNull(map3.getURI(""));
     }
 
@@ -104,8 +104,8 @@ public class NamespaceMapTest {
 
             Location location = Loc.NONE;
 
-            FingerprintedQName attrName = new FingerprintedQName("ex", "http://example.com/", "foo");
-            FingerprintedQName elemName = new FingerprintedQName("", "", "doc");
+            FingerprintedQName attrName = new FingerprintedQName("ex", NamespaceUri.of("http://example.com/"), "foo");
+            FingerprintedQName elemName = new FingerprintedQName("", NamespaceUri.NULL, "doc");
 
             Outputter out = (Outputter) receiver;
             out.startElement(elemName, BuiltInAtomicType.UNTYPED_ATOMIC, location, ReceiverOption.NONE);

@@ -19,6 +19,7 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.sxpath.IndependentContext;
@@ -46,7 +47,7 @@ public class TestXPathErrorCode {
 	static NamespaceResolver voidNamespaceResolver = new NamespaceResolver() {
 
 		@Override
-        public String getURIForPrefix(String prefix, boolean useDefault) {
+        public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
 			return null;
 		}
 

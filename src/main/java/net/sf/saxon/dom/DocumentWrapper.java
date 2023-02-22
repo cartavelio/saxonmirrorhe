@@ -9,9 +9,9 @@ package net.sf.saxon.dom;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.GenericTreeInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -133,7 +133,7 @@ public class DocumentWrapper extends GenericTreeInfo {
                 AxisIterator iter = getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
                 NodeInfo e;
                 while ((e = iter.next()) != null) {
-                    String xmlId = e.getAttributeValue(NamespaceConstant.XML, "id");
+                    String xmlId = e.getAttributeValue(NamespaceUri.XML, "id");
                     if (xmlId != null) {
                         idIndex.put(xmlId, e);
                     }

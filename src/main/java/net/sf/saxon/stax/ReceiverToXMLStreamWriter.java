@@ -97,31 +97,31 @@ public class ReceiverToXMLStreamWriter implements Receiver {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
         String local = elemName.getLocalPart();
-        String uri = elemName.getURI();
+        NamespaceUri uri = elemName.getURI();
         String prefix = elemName.getPrefix();
         try {
-            if (prefix.equals("") && uri.equals("")) {
+            if (prefix.equals("") && uri.equals(NamespaceUri.NULL)) {
                 writer.writeStartElement(local);
             } else if (prefix.equals("")) {
-                writer.writeStartElement(prefix, local, uri);
+                writer.writeStartElement(prefix, local, uri.toString());
             } else {
-                writer.writeStartElement(prefix, local, uri);
+                writer.writeStartElement(prefix, local, uri.toString());
             }
             for (NamespaceBinding ns : namespaces) {
-                writer.writeNamespace(ns.getPrefix(), ns.getURI());
+                writer.writeNamespace(ns.getPrefix(), ns.getURI().toString());
             }
             for (AttributeInfo att : attributes) {
                 NodeName attName = att.getNodeName();
                 String attLocal = attName.getLocalPart();
-                String attUri = attName.getURI();
+                NamespaceUri attUri = attName.getURI();
                 String attPrefix = attName.getPrefix();
                 String value = att.getValue();
-                if (attPrefix.equals("") && attUri.equals("")) {
+                if (attPrefix.equals("") && attUri.equals(NamespaceUri.NULL)) {
                     writer.writeAttribute(attLocal, value);
-                } else if (attPrefix.equals("") & !attUri.equals("")) {
-                    writer.writeAttribute(attUri, attLocal, value);
+                } else if (attPrefix.equals("") & !attUri.equals(NamespaceUri.NULL)) {
+                    writer.writeAttribute(attUri.toString(), attLocal, value);
                 } else {
-                    writer.writeAttribute(attPrefix, attUri, attLocal, value);
+                    writer.writeAttribute(attPrefix, attUri.toString(), attLocal, value);
                 }
             }
         } catch (XMLStreamException e) {

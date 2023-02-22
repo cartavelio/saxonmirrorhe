@@ -7,12 +7,14 @@
 
 package net.sf.saxon.serialize;
 
-import net.sf.saxon.event.*;
-import net.sf.saxon.s9api.Location;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.event.EventBuffer;
+import net.sf.saxon.event.ProxyReceiver;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -132,10 +134,10 @@ public class UncommittedSerializer extends ProxyReceiver {
             throws XPathException {
         if (!committed) {
             String name = elemName.getLocalPart();
-            String uri = elemName.getURI();
+            NamespaceUri uri = elemName.getURI();
             if (name.equalsIgnoreCase("html") && uri.isEmpty()) {
                 switchToMethod("html");
-            } else if (name.equals("html") && uri.equals(NamespaceConstant.XHTML)) {
+            } else if (name.equals("html") && uri.equals(NamespaceUri.XHTML)) {
                 String version = this.properties.getProperties().getProperty(SaxonOutputKeys.STYLESHEET_VERSION);
                 if ("10".equals(version)) {
                     switchToMethod("xml");

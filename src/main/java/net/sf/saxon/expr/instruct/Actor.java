@@ -11,7 +11,7 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
@@ -172,7 +172,7 @@ public abstract class Actor implements ExpressionOwner, Location {
         }
 
         Component target = pack.getComponent(name);
-        if (target == null && name.getComponentName().hasURI(NamespaceConstant.XSLT) &&
+        if (target == null && name.getComponentName().hasURI(NamespaceUri.XSLT) &&
                 name.getComponentName().getLocalPart().equals("original")) {
             target = pack.getOverriddenComponent(getSymbolicName());
         }

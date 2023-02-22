@@ -11,10 +11,7 @@ import com.saxonica.ee.schema.UserComplexType;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashSet;
 
@@ -76,8 +73,8 @@ public enum AnyType implements ComplexType {
      */
 
     @Override
-    public String getTargetNamespace() {
-        return NamespaceConstant.SCHEMA;
+    public NamespaceUri getTargetNamespace() {
+        return NamespaceUri.SCHEMA;
     }
 
     /**
@@ -380,7 +377,7 @@ public enum AnyType implements ComplexType {
         return QNAME;
     }
 
-    public static final StructuredQName QNAME = new StructuredQName("xs", NamespaceConstant.SCHEMA, "anyType");
+    public static final StructuredQName QNAME = new StructuredQName("xs", NamespaceUri.SCHEMA, "anyType");
 
     /**
      * Get a description of this type for use in diagnostics

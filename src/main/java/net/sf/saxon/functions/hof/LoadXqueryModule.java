@@ -18,10 +18,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ModuleURIResolver;
 import net.sf.saxon.lib.StandardModuleURIResolver;
 import net.sf.saxon.ma.map.*;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.query.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -109,7 +106,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             }
         }
 
-        String moduleUri = args[0].head().getStringValue();
+        NamespaceUri moduleUri = NamespaceUri.of(args[0].head().getStringValue());
         if (moduleUri.isEmpty()) {
             throw new XPathException("First argument of fn:load-xquery-module() must not be a zero length string", "FOQM0001");
         }
@@ -139,9 +136,9 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         StreamSource[] streamSources;
         try {
             String[] hints = locationHints.toArray(new String[0]);
-            streamSources = staticQueryContext.getModuleURIResolver().resolve(moduleUri, baseURI, hints);
+            streamSources = staticQueryContext.getModuleURIResolver().resolve(moduleUri.toString(), baseURI, hints);
             if (streamSources == null) {
-                streamSources = new StandardModuleURIResolver(config).resolve(moduleUri, baseURI, hints);
+                streamSources = new StandardModuleURIResolver(config).resolve(moduleUri.toString(), baseURI, hints);
             }
         } catch (XPathException e) {
             e.maybeSetErrorCode("FOQM0002");

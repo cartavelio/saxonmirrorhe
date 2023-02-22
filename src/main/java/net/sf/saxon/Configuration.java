@@ -198,7 +198,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private Comparator<String> mediaQueryEvaluator;
     private final Map<String, String> fileExtensions = new HashMap<>();
     private final Map<String, ResourceFactory> resourceFactoryMapping = new HashMap<>();
-    private final Map<String, FunctionAnnotationHandler> functionAnnotationHandlers = new HashMap<>();
+    private final Map<NamespaceUri, FunctionAnnotationHandler> functionAnnotationHandlers = new HashMap<>();
     protected int byteCodeThreshold = 100;
     private int regexBacktrackingLimit = 10000000;
 
@@ -2052,7 +2052,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * been registered
      */
 
-    public FunctionAnnotationHandler getFunctionAnnotationHandler(String namespace) {
+    public FunctionAnnotationHandler getFunctionAnnotationHandler(NamespaceUri namespace) {
         return functionAnnotationHandlers.get(namespace);
     }
 
@@ -2927,7 +2927,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     /*@Nullable*/
-    public String readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, /*@Nullable*/ String expected)
+    public NamespaceUri readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, /*@Nullable*/ NamespaceUri expected)
             throws SchemaException {
         needEnterpriseEdition();
         return null;
@@ -2944,7 +2944,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws net.sf.saxon.type.SchemaException if an error occurs
      */
 
-    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, String expected)
+    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, NamespaceUri expected)
             throws SchemaException {
         needEnterpriseEdition();
     }
@@ -2964,7 +2964,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     /*@Nullable*/
-    public String readInlineSchema(NodeInfo root, String expected, ErrorReporter errorReporter)
+    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
             throws SchemaException {
         needEnterpriseEdition();
         return null;
@@ -3015,7 +3015,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param namespace the namespace. Currently built-in schemas are available for the XML and FN namespaces
      */
 
-    public void addSchemaForBuiltInNamespace(String namespace) {
+    public void addSchemaForBuiltInNamespace(NamespaceUri namespace) {
         // no action
     }
 
@@ -3027,7 +3027,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return true if the schema for this namespace is available, false if not.
      */
 
-    public boolean isSchemaAvailable(String targetNamespace) {
+    public boolean isSchemaAvailable(NamespaceUri targetNamespace) {
         return false;
     }
 
@@ -3050,7 +3050,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * String objects
      */
 
-    public Set<String> getImportedNamespaces() {
+    public Set<NamespaceUri> getImportedNamespaces() {
         return Collections.emptySet();
     }
 
@@ -3063,7 +3063,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param namespace the namespace URI of the components to be sealed
      */
 
-    public void sealNamespace(String namespace) {
+    public void sealNamespace(NamespaceUri namespace) {
         //
     }
 
@@ -3181,7 +3181,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /*@Nullable*/
     public SchemaType getSchemaType(StructuredQName name) {
-        if (name.hasURI(NamespaceConstant.SCHEMA)) {
+        if (name.hasURI(NamespaceUri.SCHEMA)) {
              return BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
         }
         return null;
@@ -3208,7 +3208,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     @Override
-    public boolean isDeclaredNotation(String uri, String local) {
+    public boolean isDeclaredNotation(NamespaceUri uri, String local) {
         return false;
     }
 
@@ -4663,11 +4663,11 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
 
                 case FeatureCode.XQUERY_DEFAULT_ELEMENT_NAMESPACE:
-                    getDefaultStaticQueryContext().setDefaultElementNamespace(value.toString());
+                    getDefaultStaticQueryContext().setDefaultElementNamespace(NamespaceUri.of(value.toString()));
                     break;
 
                 case FeatureCode.XQUERY_DEFAULT_FUNCTION_NAMESPACE:
-                    getDefaultStaticQueryContext().setDefaultFunctionNamespace(value.toString());
+                    getDefaultStaticQueryContext().setDefaultFunctionNamespace(NamespaceUri.of(value.toString()));
                     break;
 
                 case FeatureCode.XQUERY_EMPTY_LEAST:

@@ -8,6 +8,7 @@
 package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.om.NamespaceBinding;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -210,8 +211,8 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      */
 
     @Override
-    public String getURI() {
-        return "";
+    public NamespaceUri getNamespaceUri() {
+        return NamespaceUri.NULL;
     }
 
     /**

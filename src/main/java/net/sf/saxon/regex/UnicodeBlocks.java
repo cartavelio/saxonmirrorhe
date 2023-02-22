@@ -11,10 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AllElementsSpaceStrippingRule;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
@@ -88,17 +85,18 @@ public class UnicodeBlocks {
             throw new RESyntaxException("Failed to process unicodeBlocks.xml: " + e.getMessage());
         }
 
-        AxisIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, "", "block", config.getNamePool()));
+        AxisIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT,
+                                                          new NameTest(Type.ELEMENT, NamespaceUri.NULL, "block", config.getNamePool()));
         while (true) {
             NodeInfo item = iter.next();
             if (item == null) {
                 break;
             }
-            String blockName = normalizeBlockName(item.getAttributeValue("", "name"));
+            String blockName = normalizeBlockName(item.getAttributeValue(NamespaceUri.NULL, "name"));
             IntSet range = null;
             for (NodeInfo rangeElement : item.children(NodeKindTest.ELEMENT)) {
-                int from = Integer.parseInt(rangeElement.getAttributeValue("", "from").substring(2), 16);
-                int to = Integer.parseInt(rangeElement.getAttributeValue("", "to").substring(2), 16);
+                int from = Integer.parseInt(rangeElement.getAttributeValue(NamespaceUri.NULL, "from").substring(2), 16);
+                int to = Integer.parseInt(rangeElement.getAttributeValue(NamespaceUri.NULL, "to").substring(2), 16);
                 IntSet cr = new IntBlockSet(from, to);
                 if (range == null) {
                     range = cr;

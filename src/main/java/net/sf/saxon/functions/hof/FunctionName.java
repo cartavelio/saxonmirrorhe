@@ -9,8 +9,8 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
@@ -40,7 +40,7 @@ public class FunctionName extends SystemFunction {
         StructuredQName name = f.getFunctionName();
         if (name == null) {
             return EmptySequence.getInstance();
-        } else if (name.hasURI(NamespaceConstant.ANONYMOUS)) {
+        } else if (name.hasURI(NamespaceUri.ANONYMOUS)) {
             // Used for inline functions
             return EmptySequence.getInstance();
         } else {

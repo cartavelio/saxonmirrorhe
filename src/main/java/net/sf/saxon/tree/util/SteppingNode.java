@@ -8,6 +8,7 @@
 package net.sf.saxon.tree.util;
 
 
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 
 /**
@@ -63,7 +64,7 @@ public interface SteppingNode extends NodeInfo {
      *         within the subtree being navigated
      */
 
-    SteppingNode getSuccessorElement(SteppingNode anchor, String uri, String local);
+    SteppingNode getSuccessorElement(SteppingNode anchor, NamespaceUri uri, String local);
 
 }
 

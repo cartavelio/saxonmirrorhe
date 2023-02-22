@@ -329,9 +329,9 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
      */
 
     @Override
-    public String getURI() {
+    public NamespaceUri getNamespaceUri() {
         String uri = node.getNamespaceURI();
-        return uri == null ? "" : uri;
+        return NamespaceUri.of(uri);
     }
 
     /**
@@ -448,7 +448,7 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
      */
 
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         return null;
     }
 

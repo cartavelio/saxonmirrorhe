@@ -194,7 +194,7 @@ public class DOMSender {
             if (useDefaultNS) {
                 String uri = getUriForPrefix("");
                 if (!uri.isEmpty()) {
-                    return new FingerprintedQName("", uri, name);
+                    return new FingerprintedQName("", NamespaceUri.of(uri), name);
                 }
             }
             return new NoNamespaceName(name);
@@ -204,7 +204,7 @@ public class DOMSender {
             if (uri == null) {
                 throw new IllegalStateException("Prefix " + prefix + " is not bound to any namespace");
             }
-            return new FingerprintedQName(prefix, uri, name.substring(colon+1));
+            return new FingerprintedQName(prefix, NamespaceUri.of(uri), name.substring(colon+1));
         }
     }
 
@@ -337,8 +337,8 @@ public class DOMSender {
         if (prefix.equals("xml")) {
             return NamespaceConstant.XML;
         }
-        String uri = namespaces.peek().getURI(prefix);
-        return uri==null ? "" : uri;
+        NamespaceUri uri = namespaces.peek().getURI(prefix);
+        return uri==null ? "" : uri.toString();
     }
 
     /**
@@ -364,7 +364,7 @@ public class DOMSender {
             if (uri == null) {
                 uri = "";
             }
-            result = result.put(prefix, uri);
+            result = result.put(prefix, NamespaceUri.of(uri));
         } catch (Throwable err) {
             // it must be a level 1 DOM
         }
@@ -382,16 +382,16 @@ public class DOMSender {
             boolean possibleNamespace = attname.startsWith("xmlns");
             if (possibleNamespace && attname.length() == 5) {
                 String uri = att.getValue();
-                result = result.put("", uri);
+                result = result.put("", NamespaceUri.of(uri));
             } else if (possibleNamespace && attname.startsWith("xmlns:")) {
                 String prefix = attname.substring(6);
                 String uri = att.getValue();
-                result = result.put(prefix, uri);
+                result = result.put(prefix, NamespaceUri.of(uri));
             } else if (attname.indexOf(':') >= 0) {
                 try {
                     String prefix = att.getPrefix();
                     String uri = att.getNamespaceURI();
-                    result = result.put(prefix, uri);
+                    result = result.put(prefix, NamespaceUri.of(uri));
                 } catch (Throwable err) {
                     // it must be a level 1 DOM
                 }

@@ -81,7 +81,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
                 compileError("For attribute 'tunnel' within an " + getParent().getDisplayName() +
                         " parameter, the only permitted value is 'no'", "XTSE0020");
             }
-            if (getParent() instanceof XSLFunction && getAttributeValue("", "required") != null) {
+            if (getParent() instanceof XSLFunction && getAttributeValue(NamespaceUri.NULL, "required") != null) {
                 if (!sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
                     compileError("For attribute 'required' within an " + getParent().getDisplayName() +
                         " parameter, the only permitted value is 'yes'", "XTSE0020");

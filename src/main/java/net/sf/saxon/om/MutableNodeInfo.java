@@ -150,12 +150,11 @@ public interface MutableNodeInfo extends NodeInfo {
      * Add a namespace node from this node. The namespaces of its descendant nodes are unaffected.
      * The method has no effect on non-element nodes. If there is an existing namespace using this
      * prefix, the method throws an exception.
-     *
-     * @param prefix the namespace prefix.
+     *  @param prefix the namespace prefix.
      * @param uri the corresponding namespace URI
      */
 
-    default void addNamespace(String prefix, String uri) {
+    default void addNamespace(String prefix, NamespaceUri uri) {
         // default: no action
     }
 

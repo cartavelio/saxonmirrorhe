@@ -13,7 +13,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -228,12 +227,12 @@ public class NamespaceNode implements NodeInfo {
 
     @Override
     public UnicodeString getUnicodeStringValue() {
-        return StringView.tidy(nsBinding.getURI());
+        return nsBinding.getURI().toUnicodeString();
     }
 
     @Override
     public String getStringValue() {
-        return nsBinding.getURI();
+        return nsBinding.getURI().toString();
     }
 
     /**
@@ -268,7 +267,8 @@ public class NamespaceNode implements NodeInfo {
             if (nsBinding.getPrefix().isEmpty()) {
                 return -1;
             } else {
-                fingerprint = element.getConfiguration().getNamePool().allocateFingerprint("", nsBinding.getPrefix());
+                fingerprint = element.getConfiguration().getNamePool().allocateFingerprint(
+                        NamespaceUri.NULL, nsBinding.getPrefix());
             }
         }
         return fingerprint;
@@ -296,8 +296,8 @@ public class NamespaceNode implements NodeInfo {
 
     /*@NotNull*/
     @Override
-    public String getURI() {
-        return "";
+    public NamespaceUri getNamespaceUri() {
+        return NamespaceUri.NULL;
     }
 
     /**
@@ -447,7 +447,7 @@ public class NamespaceNode implements NodeInfo {
      * @since 9.4
      */
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         return null;
     }
 

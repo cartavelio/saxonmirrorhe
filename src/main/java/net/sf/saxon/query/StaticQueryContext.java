@@ -18,6 +18,7 @@ import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NamePool;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
@@ -68,13 +69,13 @@ public class StaticQueryContext {
     private Configuration config;
     private NamePool namePool;
     private String baseURI;
-    private HashMap<String, String> userDeclaredNamespaces;
+    private HashMap<String, NamespaceUri> userDeclaredNamespaces;
     /*@Nullable*/ private Set<GlobalVariable> userDeclaredVariables;
     private boolean inheritNamespaces = true;
     private boolean preserveNamespaces = true;
     private int constructionMode = Validation.PRESERVE;
-    private String defaultFunctionNamespace = NamespaceConstant.FN;
-    /*@Nullable*/ private String defaultElementNamespace = NamespaceConstant.NULL;
+    private NamespaceUri defaultFunctionNamespace = NamespaceUri.FN;
+    /*@Nullable*/ private NamespaceUri defaultElementNamespace = NamespaceUri.NULL;
     private ItemType requiredContextItemType = AnyItemType.getInstance();
     private boolean preserveSpace = false;
     private boolean defaultEmptyLeast = true;
@@ -193,8 +194,8 @@ public class StaticQueryContext {
         preserveSpace = false;
         defaultEmptyLeast = true;
         requiredContextItemType = AnyItemType.getInstance();
-        defaultFunctionNamespace = NamespaceConstant.FN;
-        defaultElementNamespace = NamespaceConstant.NULL;
+        defaultFunctionNamespace = NamespaceUri.FN;
+        defaultElementNamespace = NamespaceUri.NULL;
         moduleURIResolver = null;
         defaultCollationName = config.getDefaultCollationName();
         clearNamespaces();
@@ -689,7 +690,7 @@ public class StaticQueryContext {
      */
 
     /*@Nullable*/
-    public QueryLibrary getCompiledLibrary(String namespace) {
+    public QueryLibrary getCompiledLibrary(NamespaceUri namespace) {
         return null;
     }
 
@@ -715,17 +716,17 @@ public class StaticQueryContext {
      * @since 9.0
      */
 
-    public void declareNamespace( /*@Nullable*/ String prefix, /*@Nullable*/ String uri) {
+    public void declareNamespace(String prefix, NamespaceUri uri) {
         if (prefix == null) {
             throw new NullPointerException("Null prefix supplied to declareNamespace()");
         }
         if (uri == null) {
             throw new NullPointerException("Null namespace URI supplied to declareNamespace()");
         }
-        if (prefix.equals("xml") != uri.equals(NamespaceConstant.XML)) {
+        if (prefix.equals("xml") != uri.equals(NamespaceUri.XML)) {
             throw new IllegalArgumentException("Misdeclaration of XML namespace");
         }
-        if (prefix.equals("xmlns") || uri.equals(NamespaceConstant.XMLNS)) {
+        if (prefix.equals("xmlns") || uri.equals(NamespaceUri.XMLNS)) {
             throw new IllegalArgumentException("Misdeclaration of xmlns namespace");
         }
         if (prefix.isEmpty()) {
@@ -747,14 +748,14 @@ public class StaticQueryContext {
 
     public void clearNamespaces() {
         userDeclaredNamespaces.clear();
-        declareNamespace("xml", NamespaceConstant.XML);
-        declareNamespace("xs", NamespaceConstant.SCHEMA);
-        declareNamespace("xsi", NamespaceConstant.SCHEMA_INSTANCE);
-        declareNamespace("fn", NamespaceConstant.FN);
-        declareNamespace("local", NamespaceConstant.LOCAL);
-        declareNamespace("err", NamespaceConstant.ERR);
-        declareNamespace("saxon", NamespaceConstant.SAXON);
-        declareNamespace("", "");
+        declareNamespace("xml", NamespaceUri.XML);
+        declareNamespace("xs", NamespaceUri.SCHEMA);
+        declareNamespace("xsi", NamespaceUri.SCHEMA_INSTANCE);
+        declareNamespace("fn", NamespaceUri.FN);
+        declareNamespace("local", NamespaceUri.LOCAL);
+        declareNamespace("err", NamespaceUri.ERR);
+        declareNamespace("saxon", NamespaceUri.SAXON);
+        declareNamespace("", NamespaceUri.NULL);
 
     }
 
@@ -764,7 +765,7 @@ public class StaticQueryContext {
      * @return the user-declared namespaces
      */
 
-    protected HashMap<String, String> getUserDeclaredNamespaces() {
+    protected HashMap<String, NamespaceUri> getUserDeclaredNamespaces() {
         return userDeclaredNamespaces;
     }
 
@@ -789,7 +790,7 @@ public class StaticQueryContext {
      *         null to indicate that the prefix has not been declared
      */
 
-    public String getNamespaceForPrefix(String prefix) {
+    public NamespaceUri getNamespaceForPrefix(String prefix) {
         return userDeclaredNamespaces.get(prefix);
     }
 
@@ -800,7 +801,7 @@ public class StaticQueryContext {
      * @since 8.4
      */
 
-    public String getDefaultFunctionNamespace() {
+    public NamespaceUri getDefaultFunctionNamespace() {
         return defaultFunctionNamespace;
     }
 
@@ -811,7 +812,7 @@ public class StaticQueryContext {
      * @since 8.4
      */
 
-    public void setDefaultFunctionNamespace(String defaultFunctionNamespace) {
+    public void setDefaultFunctionNamespace(NamespaceUri defaultFunctionNamespace) {
         this.defaultFunctionNamespace = defaultFunctionNamespace;
     }
 
@@ -822,7 +823,7 @@ public class StaticQueryContext {
      * @since 8.4
      */
 
-    public void setDefaultElementNamespace(String uri) {
+    public void setDefaultElementNamespace(NamespaceUri uri) {
         defaultElementNamespace = uri;
         declareNamespace("", uri);
     }
@@ -835,7 +836,7 @@ public class StaticQueryContext {
      */
 
     /*@Nullable*/
-    public String getDefaultElementNamespace() {
+    public NamespaceUri getDefaultElementNamespace() {
         return defaultElementNamespace;
     }
 

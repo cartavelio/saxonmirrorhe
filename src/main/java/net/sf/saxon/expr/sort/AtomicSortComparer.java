@@ -9,6 +9,7 @@ package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -229,7 +230,7 @@ public class AtomicSortComparer implements AtomicComparer {
             // The logic here is to choose a value that compares equal to itself but not equal to any other
             // value. We use StructuredQName because it has a simple equals() method.
 
-            return new QNameValue("saxon", "http://saxon.sf.net/collation-key", "NaN");
+            return new QNameValue("saxon", NamespaceUri.of("http://saxon.sf.net/collation-key"), "NaN");
         }
 
         //@Override

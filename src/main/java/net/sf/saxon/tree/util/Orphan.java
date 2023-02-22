@@ -400,9 +400,9 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     @Override
-    public String getURI() {
+    public NamespaceUri getNamespaceUri() {
         if (nodeName == null) {
-            return "";
+            return NamespaceUri.NULL;
         } else {
             return nodeName.getURI();
         }
@@ -530,7 +530,7 @@ public final class Orphan implements MutableNodeInfo {
      * @since 9.4
      */
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         return null;
     }
 

@@ -11,6 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
@@ -394,7 +395,7 @@ public class XPathException extends TransformerException {
 
     public void setErrorCode(/*@Nullable*/ String code) {
         if (code != null) {
-            errorCode = new StructuredQName("err", NamespaceConstant.ERR, code);
+            errorCode = new StructuredQName("err", NamespaceUri.ERR, code);
         }
     }
 
@@ -408,7 +409,7 @@ public class XPathException extends TransformerException {
 
     public void maybeSetErrorCode(/*@Nullable*/ String code) {
         if (errorCode == null && code != null) {
-            errorCode = new StructuredQName("err", NamespaceConstant.ERR, code);
+            errorCode = new StructuredQName("err", NamespaceUri.ERR, code);
         }
     }
 
@@ -451,7 +452,7 @@ public class XPathException extends TransformerException {
      */
 
     /*@Nullable*/
-    public String getErrorCodeNamespace() {
+    public NamespaceUri getErrorCodeNamespace() {
         return errorCode == null ? null : errorCode.getURI();
     }
 
@@ -537,7 +538,7 @@ public class XPathException extends TransformerException {
             return true;
         }
         StructuredQName err = errorCode;
-        if (err != null && err.hasURI(NamespaceConstant.ERR)) {
+        if (err != null && err.hasURI(NamespaceUri.ERR)) {
             String local = err.getLocalPart();
             return local.equals("XTDE1260") ||
                     local.equals("XTDE1280") ||

@@ -184,7 +184,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
      */
 
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         int a = tree.alpha[nodeNr];
         if (a < 0) {
             return null;
@@ -326,7 +326,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                             }
                         } else {
                             addAttributeNamespaces = true;
-                            String uri = pool.getURI(nameCode);
+                            NamespaceUri uri = pool.getURI(nameCode);
                             if (!uri.isEmpty()) {
                                 namespaces = NamespaceMap.of(prefix, uri);
                             }
@@ -536,43 +536,14 @@ public class TinyElementImpl extends TinyParentNodeImpl {
      */
 
     /*@Nullable*/
-    public String getURIForPrefix(/*@Nullable*/ String prefix, boolean useDefault) {
-        if (!useDefault && (prefix == null || prefix.isEmpty())) {
-            return "";
-        }
-        int ns = tree.beta[nodeNr]; // by convention
-        NamespaceMap map = tree.namespaceMaps[ns];
-        return map.getURIForPrefix(prefix, useDefault);
-//        if (ns > 0) {
-//            while (ns < tree.numberOfNamespaces &&
-//                    tree.namespaceParent[ns] == nodeNr) {
-//                NamespaceBinding nscode = tree.namespaceBinding[ns];
-//                if (nscode.getPrefix().equals(prefix)) {
-//                    String uri = nscode.getURI();
-//                    if (uri.isEmpty()) {
-//                        // this is a namespace undeclaration, so the prefix is not in scope
-//                        if (prefix.isEmpty()) {
-//                            // the namespace xmlns="" is always in scope
-//                            return "";
-//                        } else {
-//                            return null;
-//                        }
-//                    } else {
-//                        return uri;
-//                    }
-//                }
-//                ns++;
-//            }
+//    public NamespaceUri getURIForPrefix(/*@Nullable*/ String prefix, boolean useDefault) {
+//        if (!useDefault && (prefix == null || prefix.isEmpty())) {
+//            return "";
 //        }
-//
-//        // now search the namespaces defined on the ancestor nodes.
-//
-//        NodeInfo parent = getParent();
-//        if (parent instanceof NamespaceResolver) {
-//            return ((NamespaceResolver) parent).getURIForPrefix(prefix, useDefault);
-//        }
-//        return null;
-    }
+//        int ns = tree.beta[nodeNr]; // by convention
+//        NamespaceMap map = tree.namespaceMaps[ns];
+//        return map.getURIForPrefix(prefix, useDefault);
+//    }
 
     /**
      * Determine whether this node has the is-id property

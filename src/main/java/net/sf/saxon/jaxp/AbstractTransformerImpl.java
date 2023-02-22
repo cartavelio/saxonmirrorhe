@@ -14,8 +14,8 @@ import net.sf.saxon.expr.JPConverter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.str.StringView;
@@ -111,7 +111,7 @@ abstract class AbstractTransformerImpl extends IdentityTransformer {
             Properties localOutputProperties = getLocalOutputProperties();
             for (String key : localOutputProperties.stringPropertyNames()) {
                 QName propertyName = QName.fromClarkName(key);
-                if (!(propertyName.getNamespaceURI().equals(NamespaceConstant.SAXON) && propertyName.getLocalName().equals("next-in-chain"))) {
+                if (!(propertyName.getNamespaceURI().equals(NamespaceUri.SAXON) && propertyName.getLocalName().equals("next-in-chain"))) {
                     ((Serializer) destination).setOutputProperty(QName.fromClarkName(key),
                                                                  localOutputProperties.getProperty(key));
                 }

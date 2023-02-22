@@ -10,6 +10,7 @@ package net.sf.saxon.query;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.FunctionAnnotationHandler;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 
@@ -53,8 +54,8 @@ public class AnnotationList implements Iterable<Annotation> {
      */
 
     public void check(Configuration config, String where) throws XPathException {
-        Map<String, List<Annotation>> map = groupByNamespace();
-        for (Map.Entry<String, List<Annotation>> entry : map.entrySet()) {
+        Map<NamespaceUri, List<Annotation>> map = groupByNamespace();
+        for (Map.Entry<NamespaceUri, List<Annotation>> entry : map.entrySet()) {
             FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(entry.getKey());
             if (handler != null) {
                 handler.check(new AnnotationList(entry.getValue()), where);
@@ -62,10 +63,10 @@ public class AnnotationList implements Iterable<Annotation> {
         }
     }
 
-    private Map<String, List<Annotation>> groupByNamespace() {
-        Map<String, List<Annotation>> result = new HashMap<>();
+    private Map<NamespaceUri, List<Annotation>> groupByNamespace() {
+        Map<NamespaceUri, List<Annotation>> result = new HashMap<>();
         for (Annotation ann : list) {
-            String ns = ann.getAnnotationQName().getURI();
+            NamespaceUri ns = ann.getAnnotationQName().getURI();
             if (result.containsKey(ns)) {
                 result.get(ns).add(ann);
             } else {
@@ -84,7 +85,7 @@ public class AnnotationList implements Iterable<Annotation> {
      * annotation names have the required namespace
      */
 
-    public AnnotationList filterByNamespace(String ns) {
+    public AnnotationList filterByNamespace(NamespaceUri ns) {
         List<Annotation> out = new ArrayList<>();
         for (Annotation ann : list) {
             if (ann.getAnnotationQName().hasURI(ns)) {

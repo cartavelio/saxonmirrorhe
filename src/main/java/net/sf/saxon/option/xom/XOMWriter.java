@@ -126,14 +126,14 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
                              Location location, int properties) throws XPathException {
         flush();
         String qname = elemName.getDisplayName();
-        String uri = elemName.getURI();
+        NamespaceUri uri = elemName.getURI();
         Element element;
         if (ancestors.isEmpty()) {
             startDocument(ReceiverOption.NONE);
             implicitDocumentNode = true;
         }
         if (ancestors.size() == 1) {
-            element = nodeFactory.makeRootElement(qname, uri);
+            element = nodeFactory.makeRootElement(qname, uri.toString());
             document.setRootElement(element);
             // At this point, any other children of the document node must be reinserted before the root element
             int c = document.getChildCount();
@@ -148,7 +148,7 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
                 }
             }
         } else {
-            element = nodeFactory.startMakingElement(qname, uri);
+            element = nodeFactory.startMakingElement(qname, uri.toString());
         }
         if (element == null) {
             throw new XPathException("XOM node factory returned null");
@@ -160,7 +160,7 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
             NamespaceBinding[] declarations = namespaces.getDifferences(parentNamespaces, false);
             for (NamespaceBinding ns : declarations) {
                 String nsprefix = ns.getPrefix();
-                String nsuri = ns.getURI();
+                String nsuri = ns.getURI().toString();
                 try {
                     element.addNamespaceDeclaration(nsprefix, nsuri);
                 } catch (MalformedURIException e) {
@@ -172,10 +172,10 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
 
         for (AttributeInfo att : attributes) {
             String attqname = att.getNodeName().getDisplayName();
-            String atturi = att.getNodeName().getURI();
+            NamespaceUri atturi = att.getNodeName().getURI();
             Nodes nodes;
             try {
-                nodes = nodeFactory.makeAttribute(attqname, atturi, att.getValue(), Attribute.Type.CDATA);
+                nodes = nodeFactory.makeAttribute(attqname, atturi.toString(), att.getValue(), Attribute.Type.CDATA);
             } catch (nu.xom.IllegalNameException e) {
                 // e.g. invalid value for xml:id attribute, QT3 test fn-doc-31
                 throw new XPathException(e.getMessage());

@@ -7,11 +7,7 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.SpaceStrippingRule;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -133,7 +129,7 @@ public class Stripper extends ProxyReceiver {
         }
         stripStack[top] = preserve;
 
-        String xmlSpace = attributes.getValue(NamespaceConstant.XML, "space");
+        String xmlSpace = attributes.getValue(NamespaceUri.XML, "space");
         if (xmlSpace != null) {
             if (Whitespace.trim(xmlSpace).equals("preserve")) {
                 stripStack[top] |= PRESERVE_PARENT;

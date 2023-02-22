@@ -16,7 +16,6 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
@@ -94,16 +93,16 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
         for (AttributeInfo att : atts) {
             NodeName name = att.getNodeName();
-            String uri = name.getURI();
+            NamespaceUri uri = name.getURI();
             String local = name.getLocalPart();
-            if ("".equals(uri)) {
+            if (uri.isEmpty()) {
                 switch (local) {
                     case "name":
                         nameAtt = Whitespace.trim(att.getValue());
                         assert nameAtt != null;
                         StructuredQName functionName = makeQName(nameAtt, null, "name");
-                        if (functionName.hasURI("")) {
-                            functionName = new StructuredQName("saxon", NamespaceConstant.SAXON, functionName.getLocalPart());
+                        if (functionName.hasURI(NamespaceUri.NULL)) {
+                            functionName = new StructuredQName("saxon", NamespaceUri.SAXON, functionName.getLocalPart());
                             compileError("Function name must be in a namespace", "XTSE0740");
                         }
                         setObjectName(functionName);
@@ -155,7 +154,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                         checkUnknownAttribute(name);
                         break;
                 }
-            } else if (uri.equals(NamespaceConstant.SAXON)) {
+            } else if (uri.equals(NamespaceUri.SAXON)) {
                 if (isExtensionAttributeAllowed(att.getNodeName().getDisplayName())) {
                     if (local.equals("memo-function")) {
                         compileWarning("saxon:memo-function is deprecated: use cache='yes'", SaxonErrorCode.SXWN9014);
@@ -269,9 +268,9 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     public StructuredQName getObjectName() {
         StructuredQName qn = super.getObjectName();
         if (qn == null) {
-            nameAtt = Whitespace.trim(getAttributeValue("", "name"));
+            nameAtt = Whitespace.trim(getAttributeValue(NamespaceUri.NULL, "name"));
             if (nameAtt == null) {
-                return new StructuredQName("saxon", NamespaceConstant.SAXON, "badly-named-function" + generateId());
+                return new StructuredQName("saxon", NamespaceUri.SAXON, "badly-named-function" + generateId());
             }
             qn = makeQName(nameAtt, null, "name");
             setObjectName(qn);
@@ -307,7 +306,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     @Override
     public Visibility getVisibility() {
         if (visibility == Visibility.UNDEFINED) {
-            String vAtt = getAttributeValue("", "visibility");
+            String vAtt = getAttributeValue(NamespaceUri.NULL, "visibility");
             return vAtt == null ? Visibility.PRIVATE : interpretVisibilityValue(Whitespace.trim(vAtt), "");
         }
         return visibility;
@@ -530,7 +529,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     public SequenceType getResultType() {
         if (resultType == null) {
             // may be handling a forwards reference - see hof-038
-            String asAtt = getAttributeValue("", "as");
+            String asAtt = getAttributeValue(NamespaceUri.NULL, "as");
             if (asAtt != null) {
                 try {
                     resultType = makeSequenceType(asAtt);
@@ -644,7 +643,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             fn.setDeterminism(determinism);
             List<Annotation> annotations = new ArrayList<>();
             if (memoFunction) {
-                annotations.add(new Annotation(new StructuredQName("saxon", NamespaceConstant.SAXON, "memo-function")));
+                annotations.add(new Annotation(new StructuredQName("saxon", NamespaceUri.SAXON, "memo-function")));
             }
             fn.setAnnotations(new AnnotationList(annotations));
             fn.setOverrideExtensionFunction(overrideExtensionFunction);

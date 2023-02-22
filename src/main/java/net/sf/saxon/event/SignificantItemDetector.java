@@ -73,7 +73,7 @@ public class SignificantItemDetector extends ProxyOutputter {
      * Notify a namespace binding.
      */
     @Override
-    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+    public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
         start();
         getNextOutputter().namespace(prefix, namespaceUri, properties);
     }

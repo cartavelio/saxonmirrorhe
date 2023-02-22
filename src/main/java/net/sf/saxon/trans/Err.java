@@ -239,6 +239,10 @@ public class Err {
         }
     }
 
+    public static String abbreviateURI(NamespaceUri uri) {
+        return abbreviateURI(uri.toString());
+    }
+
     public static String abbreviateEQName(String eqName) {
         try {
             if (eqName.startsWith("{")) {

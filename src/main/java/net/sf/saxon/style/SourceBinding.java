@@ -13,7 +13,6 @@ import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.XmlProcessingError;
@@ -110,7 +109,7 @@ public class SourceBinding {
                 staticAtt = Whitespace.trim(att.getValue());
             } else if (f.equals("visibility") && permittedAttributes.contains(BindingProperty.VISIBILITY)) {
                 visibilityAtt = Whitespace.trim(att.getValue());
-            } else if (NamespaceConstant.SAXON.equals(attName.getURI())) {
+            } else if (NamespaceUri.SAXON.equals(attName.getURI())) {
                 if (sourceElement.isExtensionAttributeAllowed(attName.getDisplayName())) {
                     if (attName.getLocalPart().equals("assignable") && permittedAttributes.contains(BindingProperty.ASSIGNABLE)) {
                         assignableAtt = Whitespace.trim(att.getValue());
@@ -215,7 +214,7 @@ public class SourceBinding {
                 String tunnelAtt = Whitespace.trim(att.getValue());
                 boolean tunnel = sourceElement.processBooleanAttribute("tunnel", tunnelAtt);
                 setProperty(BindingProperty.TUNNEL, tunnel);
-            } else if (NamespaceConstant.SAXON.equals(attName.getURI())) {
+            } else if (NamespaceUri.SAXON.equals(attName.getURI())) {
                 if (attName.getLocalPart().equals("as")) {
                     extraAsAtt = att.getValue();
                 }
@@ -322,7 +321,7 @@ public class SourceBinding {
      */
 
     private StructuredQName errorName() {
-        return new StructuredQName("saxon", NamespaceConstant.SAXON, "error-variable-name");
+        return new StructuredQName("saxon", NamespaceUri.SAXON, "error-variable-name");
     }
 
     /**
@@ -443,7 +442,7 @@ public class SourceBinding {
 
     public StructuredQName getVariableQName() {
         if (name == null) {
-            processVariableName(sourceElement.getAttributeValue("", "name"));
+            processVariableName(sourceElement.getAttributeValue(NamespaceUri.NULL, "name"));
         }
         return name;
     }
@@ -552,7 +551,7 @@ public class SourceBinding {
     public SequenceType getDeclaredType() {
         if (declaredType == null) {
             // may be handling a forwards reference - see hof-038
-            String asAtt = sourceElement.getAttributeValue("", "as");
+            String asAtt = sourceElement.getAttributeValue(NamespaceUri.NULL, "as");
             if (asAtt == null) {
                 return null;
             } else {

@@ -10,6 +10,7 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.str.StringView;
@@ -54,7 +55,7 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
      */
 
     /*@Nullable*/
-    public static AtomicValue makeQName(String prefix, String uri, String local,
+    public static AtomicValue makeQName(String prefix, NamespaceUri uri, String local,
                                         /*@NotNull*/ AtomicType targetType, UnicodeString lexicalForm, ConversionRules rules)
             throws XPathException {
 
@@ -126,7 +127,7 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
      */
 
     /*@NotNull*/
-    public final String getNamespaceURI() {
+    public final NamespaceUri getNamespaceURI() {
         return qName.getURI();
     }
 

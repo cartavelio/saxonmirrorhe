@@ -19,7 +19,6 @@ import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
@@ -60,10 +59,10 @@ public final class EvaluateInstr extends Expression {
     private Operand namespaceContextOp;
     private Operand schemaAwareOp;
     private Operand optionsOp;
-    private Set<String> importedSchemaNamespaces = new HashSet<>();
+    private Set<NamespaceUri> importedSchemaNamespaces = new HashSet<>();
     private WithParam[] actualParams;
     private Operand dynamicParamsOp;
-    private String defaultXPathNamespace = null;
+    private NamespaceUri defaultXPathNamespace = null;
 
 
     /**
@@ -109,7 +108,7 @@ public final class EvaluateInstr extends Expression {
         setActualParams(params);
     }
 
-    public void setDefaultXPathNamespace(String defaultXPathNamespace) {
+    public void setDefaultXPathNamespace(NamespaceUri defaultXPathNamespace) {
         this.defaultXPathNamespace = defaultXPathNamespace;
     }
 
@@ -131,7 +130,7 @@ public final class EvaluateInstr extends Expression {
      * @param ns the namespace to be imported ("" for the non-namespace)
      */
 
-    public void importSchemaNamespace(String ns) {
+    public void importSchemaNamespace(NamespaceUri ns) {
         if (importedSchemaNamespaces == null) {
             importedSchemaNamespaces = new HashSet<>();
         }
@@ -376,7 +375,7 @@ public final class EvaluateInstr extends Expression {
             FunctionLibraryList libraryList0 = ((StylesheetPackage)getRetainedStaticContext().getPackageData()).getFunctionLibrary();
             FunctionLibraryList libraryList1 = new FunctionLibraryList();
             for (FunctionLibrary lib : libraryList0.getLibraryList()) {
-                if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet)lib).getNamespace().equals(NamespaceConstant.FN)) {
+                if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet)lib).getNamespace().equals(NamespaceUri.FN)) {
                     // Exclude XSLT-defined functions
                     libraryList1.addFunctionLibrary(version == 40 ? XPath40FunctionSet.getInstance() : XPath31FunctionSet.getInstance());
                 } else if (lib instanceof StylesheetFunctionLibrary || lib instanceof ExecutableFunctionLibrary) {
@@ -530,7 +529,7 @@ public final class EvaluateInstr extends Expression {
         }
         if (importedSchemaNamespaces != null && !importedSchemaNamespaces.isEmpty()) {
             StringBuilder buff = new StringBuilder(256);
-            for (String s : importedSchemaNamespaces) {
+            for (NamespaceUri s : importedSchemaNamespaces) {
                 buff.append(s.isEmpty() ? "##" : s);
                 buff.append(' ');
             }
@@ -538,7 +537,7 @@ public final class EvaluateInstr extends Expression {
             out.emitAttribute("schNS", buff.toString());
         }
         if(defaultXPathNamespace != null) {
-            out.emitAttribute("dxns", defaultXPathNamespace);
+            out.emitAttribute("dxns", defaultXPathNamespace.toString());
         }
         out.setChildRole("xpath");
         getXpath().export(out);
