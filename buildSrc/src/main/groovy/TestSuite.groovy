@@ -3,6 +3,7 @@ import org.gradle.api.Task
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.JavaExec
+import org.gradle.internal.os.OperatingSystem;
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
@@ -226,6 +227,11 @@ class TestSuite {
       t.dependsOn testTask
     }
 
+    t = project.tasks.findByName("all_${options['platform']}_test_suites")
+    if (t) {
+      t.dependsOn testTask
+    }
+
     t = project.tasks.findByName("all_${options['product']}_test_suites")
     if (t) {
       t.dependsOn testTask
@@ -340,6 +346,11 @@ class TestSuite {
     }
 
     Task t = project.tasks.findByName("all_test_suites")
+    if (t) {
+      t.dependsOn run
+    }
+
+    t = project.tasks.findByName("all_${options['platform']}_test_suites")
     if (t) {
       t.dependsOn run
     }
@@ -467,6 +478,11 @@ class TestSuite {
     }
 
     Task t = project.tasks.findByName("all_test_suites")
+    if (t) {
+      t.dependsOn testTask
+    }
+
+    t = project.tasks.findByName("all_${options['platform']}_test_suites")
     if (t) {
       t.dependsOn testTask
     }
@@ -620,6 +636,8 @@ class TestSuite {
     def results = [:]
     def total = 0
     def pass = 0
+    def fail = 0
+    def other = 0
 
     summary.keySet().each { key ->
       def result = summary[key]
@@ -632,11 +650,20 @@ class TestSuite {
         total += 1
         if (result == "pass") {
           pass += 1
+        } else if (result == "fail") {
+          fail += 1
+        } else {
+          other += 1
         }
       }
     }
 
-    println("Summary: ${results}")
+    def os = "???"
+    if (OperatingSystem.current().isLinux()) { os = "Lin" }
+    if (OperatingSystem.current().isWindows()) { os = "Win" }
+    if (OperatingSystem.current().isMacOsX()) { os = "Mac" }
+
+    println("Summary ${options['name']} (${os}): ${pass} pass, ${fail} fail, ${other} other")
 
     // HACK
     def passing = "████████████████████████████████████████████████████████████████████████"
@@ -644,7 +671,7 @@ class TestSuite {
     def barlen = passing.length()
 
     def passperc = pass / total
-    def perc = sprintf("%3.1f", passperc * 100.0)
+    def perc = sprintf("%4.2f", passperc * 100.0)
 
     def passcount = Math.floor(passperc * barlen).intValue()
     def failcount = barlen - passcount

@@ -340,6 +340,20 @@ project.task("all_test_suites") {
   }
 }
 
+project.task("all_java_test_suites") {
+  description "Runs all Java the test suites"
+  doLast {
+    testSuite.checkAccumulatedFailures()
+  }
+}
+
+project.task("all_dotnet_test_suites") {
+  description "Runs all DotNet the test suites"
+  doLast {
+    testSuite.checkAccumulatedFailures()
+  }
+}
+
 testSuiteMatrix.keySet().findAll { !it.startsWith("_") }.each { product ->
   def suites = testSuiteMatrix[product]
   def g1opt = ["product": product]
