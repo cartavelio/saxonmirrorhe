@@ -2189,7 +2189,7 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
     cout << endl << "Test: testCatalog" << endl;
     bool trace = false;
     proc->setcwd(cwd);
-    proc->setCatalog("../data/catalog.xml");
+    proc->setCatalog("../datax/catalog.xml");
     if (proc->exceptionOccurred()) {
         const char *message = proc->getErrorMessage();
         if(message != nullptr) {
