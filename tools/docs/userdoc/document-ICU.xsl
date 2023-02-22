@@ -458,7 +458,7 @@
         <section id="ICU-numbering" title="Supported ICU Numbering Schemes">
           <h2>Supported ICU Numbering Schemes</h2>
           <aside>Since Saxon 9.8, the ICU library is updated from version 57.1 to 59.1; which brings
-            Unicode 9.0 support.</aside>
+            Unicode 9.0 support. Since Saxon 10.7, the library is updated to version 59.2.</aside>
           <p>The names of the numbering schemes and the codes to be used for them (ICU
             version:{icuN:getICUVersion()}) are shown in the following table, with those whose
             derivation differs from the standard rule (first-letter of each word) marked '*':</p>
