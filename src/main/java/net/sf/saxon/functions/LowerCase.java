@@ -7,11 +7,18 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.StringElaborator;
+import net.sf.saxon.expr.elab.StringEvaluator;
+import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.ToLower;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.StringValue;
 
 
@@ -43,7 +50,53 @@ public class LowerCase extends ScalarSystemFunction {
      */
     @Override
     public Elaborator getElaborator() {
-        return new UpperCase.ForceCaseFnElaborator();
+        return new LowerCaseFnElaborator();
+    }
+
+    public static class LowerCaseFnElaborator extends StringElaborator {
+
+        public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final Expression arg = fnc.getArg(0);
+            final UnicodeStringEvaluator argEval = arg.makeElaborator().elaborateForUnicodeString(false);
+            return context -> {
+                UnicodeString s0 = argEval.eval(context);
+                if (s0 == null) {
+                    return handleNullUnicodeString(zeroLengthWhenAbsent);
+                }
+                return ToLower.toLower(s0);
+            };
+        }
+
+        @CSharpReplaceBody(code = "return elaborateForStringAlternative(zeroLengthWhenAbsent);")
+        public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final Expression arg = fnc.getArg(0);
+            final StringEvaluator argEval = arg.makeElaborator().elaborateForString(false);
+            return context -> {
+                String s0 = argEval.eval(context);
+                if (s0 == null) {
+                    return handleNullString(zeroLengthWhenAbsent);
+                }
+                return s0.toLowerCase();
+            };
+        }
+
+        //#if CSHARP==true
+        public StringEvaluator elaborateForStringAlternative(boolean zeroLengthWhenAbsent) {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final Expression arg = fnc.getArg(0);
+            final UnicodeStringEvaluator argEval = arg.makeElaborator().elaborateForUnicodeString(false);
+            return context -> {
+                UnicodeString s0 = argEval.eval(context);
+                if (s0 == null) {
+                    return zeroLengthWhenAbsent ? "" : null;
+                }
+                return ToLower.toLower(s0).toString();
+            };
+        }
+        //#endif
+
     }
 
 }
