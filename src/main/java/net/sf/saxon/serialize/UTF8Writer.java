@@ -144,7 +144,6 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
         // All right; can just loop it nice and easy now:
         len += off; // len will now be the end of input buffer
 
-        output_loop:
         while (off < len) {
             /* First, let's ensure we can output at least 4 bytes
              * (longest UTF-8 encoded codepoint):
@@ -166,15 +165,20 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
                     maxInCount = maxOutCount;
                 }
                 maxInCount += off;
+                boolean continueOuter = false;
                 while (true) {
                     if (off >= maxInCount) { // done with max. ascii seq
-                        continue output_loop;
+                        continueOuter = true;
+                        break;
                     }
                     c = cbuf[off++];
                     if (c >= 0x80) {
                         break;
                     }
                     outBuf[outPtr++] = (byte) c;
+                }
+                if (continueOuter) {
+                    continue;
                 }
             }
 
@@ -223,7 +227,6 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
         // All right; can just loop it nice and easy now:
         len += off; // len will now be the end of input buffer
 
-        output_loop:
         while (off < len) {
             /* First, let's ensure we can output at least 4 bytes
              * (longest UTF-8 encoded codepoint):
@@ -245,15 +248,20 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
                     maxInCount = maxOutCount;
                 }
                 maxInCount += off;
+                boolean continueOuter = false;
                 while (true) {
                     if (off >= maxInCount) { // done with max. ascii seq
-                        continue output_loop;
+                        continueOuter = true;
+                        break;
                     }
                     c = bytes[off++]&0xff;
                     if (c >= 0x80) {
                         break;
                     }
                     outBuf[outPtr++] = (byte) c;
+                }
+                if (continueOuter) {
+                    continue;
                 }
             }
 
@@ -476,7 +484,6 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
         // All right; can just loop it nice and easy now:
         len += off; // len will now be the end of input buffer
 
-        output_loop:
         while (off < len) {
             // First, let's ensure we can output at least 4 bytes
             // (longest UTF-8 encoded codepoint):
@@ -497,15 +504,20 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
                     maxInCount = maxOutCount;
                 }
                 maxInCount += off;
+                boolean continueOuter = false;
                 while (true) {
                     if (off >= maxInCount) { // done with max. ascii seq
-                        continue output_loop;
+                        continueOuter = true;
+                        break;
                     }
                     c = str.charAt(off++);
                     if (c >= 0x80) {
                         break;
                     }
                     outBuf[outPtr++] = (byte) c;
+                }
+                if (continueOuter) {
+                    continue;
                 }
             }
 

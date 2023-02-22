@@ -12,6 +12,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.SchemaComparable;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -71,7 +72,7 @@ public enum EmptyAtomicSequence implements AtomicSequence {
      * @return a Comparable that follows XML Schema comparison rules
      */
     @Override
-    public Comparable getSchemaComparable() {
+    public SchemaComparable getSchemaComparable() {
         return null;
     }
 

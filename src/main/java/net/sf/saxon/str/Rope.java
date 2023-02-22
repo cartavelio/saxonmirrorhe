@@ -27,8 +27,8 @@ public class Rope extends UnicodeString {
 
     private final UnicodeString left;
     private final UnicodeString right;
-    private final long length; // length of the string in characters
-    private final int depth;
+    private final long _length; // length of the string in characters
+    private final int _depth;
 
     public static UnicodeString makeRope(UnicodeString left, UnicodeString right) {
         if (left instanceof Rope && ((Rope)left).right.length() + right.length() < 1024) {
@@ -40,12 +40,12 @@ public class Rope extends UnicodeString {
     private Rope(UnicodeString left, UnicodeString right) {
         this.left = left;
         this.right = right;
-        this.length = left.length() + right.length();
-        this.depth = Math.max(depth(left), depth(right)) + 1;
+        this._length = left.length() + right.length();
+        this._depth = Math.max(depth(left), depth(right)) + 1;
     }
 
     private static int depth(UnicodeString string) {
-        return string instanceof Rope ? ((Rope)string).depth : 0;
+        return string instanceof Rope ? ((Rope)string)._depth : 0;
     }
 
 //    private int depth() {
@@ -59,24 +59,24 @@ public class Rope extends UnicodeString {
     @Override
     public int codePointAt(long index) {
         if (index < 0) {
-            throw outOfBounds(index, length);
+            throw outOfBounds(index, _length);
         } else if (index < left.length()) {
             return left.codePointAt(index);
-        } else if (index < length) {
+        } else if (index < _length) {
             return right.codePointAt(index - left.length());
         } else {
-            throw outOfBounds(index, length);
+            throw outOfBounds(index, _length);
         }
     }
 
     @Override
     public long length() {
-        return length;
+        return _length;
     }
 
     @Override
     public boolean isEmpty() {
-        return length == 0;
+        return _length == 0;
     }
 
     /**
@@ -129,7 +129,7 @@ public class Rope extends UnicodeString {
         if (other.isEmpty()) {
             return 0;
         }
-        if (other.length() > length - from) {
+        if (other.length() > _length - from) {
             return -1;
         }
         if (from + other.length() < left.length()) {
@@ -167,10 +167,10 @@ public class Rope extends UnicodeString {
      */
     @Override
     public UnicodeString substring(long start, long end) {
-        if (start < 0 || start > length) {
-            throw outOfBounds(start, length);
-        } else if (end < start || end > length) {
-            throw outOfBounds(end, length);
+        if (start < 0 || start > _length) {
+            throw outOfBounds(start, _length);
+        } else if (end < start || end > _length) {
+            throw outOfBounds(end, _length);
         }
         if (start < left.length()) {
             if (end <= left.length()) {
@@ -197,10 +197,10 @@ public class Rope extends UnicodeString {
     @Override
     public void supplyContent(LargeTextBuffer consumer, long start, long len) {
         long end = start + len;
-        if (start < 0 || start >= length) {
-            throw outOfBounds(start, length);
-        } else if (end < start || end > length) {
-            throw outOfBounds(end, length);
+        if (start < 0 || start >= _length) {
+            throw outOfBounds(start, _length);
+        } else if (end < start || end > _length) {
+            throw outOfBounds(end, _length);
         }
         if (start < left.length()) {
             if (end <= left.length()) {
@@ -245,7 +245,7 @@ public class Rope extends UnicodeString {
      */
     @Override
     public UnicodeString economize() {
-        if (length < 256 || (length < 8192 && left.getWidth() == right.getWidth())) {
+        if (_length < 256 || (_length < 8192 && left.getWidth() == right.getWidth())) {
             UnicodeBuilder builder = new UnicodeBuilder();
             writeToBuilder(this, builder);
             return builder.toUnicodeString();
@@ -299,7 +299,7 @@ public class Rope extends UnicodeString {
         if (right.isEmpty()) {
             return left;
         }
-        if (depth > 64) {
+        if (_depth > 64) {
             List<UnicodeString> leaves = new ArrayList<>();
             gatherLeaves(this, leaves);
             //System.err.println("Before balance depth=" + depth + " length=" + length + " segments=" + leaves.size());

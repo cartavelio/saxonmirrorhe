@@ -31,7 +31,7 @@ import net.sf.saxon.value.SequenceType;
 /**
  * Interface supported by different implementations of an XDM map item
  */
-public interface MapItem extends Function {
+public abstract class MapItem implements Function {
 
     /**
      * Get an entry from the Map
@@ -39,7 +39,7 @@ public interface MapItem extends Function {
      * @return the value associated with the given key, or null if the key is not present in the map.
      */
 
-    GroundedValue get(AtomicValue key);
+    abstract public GroundedValue get(AtomicValue key);
 
     /**
      * Get the size of the map
@@ -47,7 +47,7 @@ public interface MapItem extends Function {
      * @return the number of keys/entries present in this map
      */
 
-    int size();
+    abstract public int size();
 
     /**
      * Ask whether the map is empty
@@ -55,7 +55,9 @@ public interface MapItem extends Function {
      * @return true if and only if the size of the map is zero
      */
 
-    boolean isEmpty();
+    public boolean isEmpty() {
+        return size() == 0;
+    }
 
     /**
      * Get the set of all key values in the map.
@@ -63,14 +65,14 @@ public interface MapItem extends Function {
      * @return a set containing all the key values present in the map, in unpredictable order
      */
 
-    AtomicIterator<? extends AtomicValue> keys();
+    abstract public AtomicIterator<? extends AtomicValue> keys();
 
     /**
      * Get the set of all key-value pairs in the map
      * @return an iterable containing all the key-value pairs
      */
 
-    Iterable<KeyValuePair> keyValuePairs();
+    abstract public Iterable<KeyValuePair> keyValuePairs();
 
     /**
      * Create a new map containing the existing entries in the map plus an additional entry,
@@ -82,7 +84,7 @@ public interface MapItem extends Function {
      * @return the new map containing the additional entry
      */
 
-    MapItem addEntry(AtomicValue key, GroundedValue value);
+    abstract public MapItem addEntry(AtomicValue key, GroundedValue value);
 
     /**
      * Remove an entry from the map
@@ -93,7 +95,7 @@ public interface MapItem extends Function {
      *         unchanged if the specified key was not present
      */
 
-    MapItem remove(AtomicValue key);
+    abstract public MapItem remove(AtomicValue key);
 
     /**
      * Ask whether the map conforms to a given map type
@@ -102,7 +104,7 @@ public interface MapItem extends Function {
      * @param th the type hierarchy cache for the configuration
      * @return true if the map conforms to the required type
      */
-    boolean conforms(AtomicType keyType, SequenceType valueType, TypeHierarchy th);
+    abstract public boolean conforms(AtomicType keyType, SequenceType valueType, TypeHierarchy th);
 
     /**
      * Get the type of the map. This method is used largely for diagnostics, to report
@@ -110,7 +112,7 @@ public interface MapItem extends Function {
      * @return the type of this map
      */
 
-    ItemType getItemType(TypeHierarchy th);
+    abstract public ItemType getItemType(TypeHierarchy th);
 
     /**
      * Get the lowest common item type of the keys in the map
@@ -119,7 +121,7 @@ public interface MapItem extends Function {
      *         empty, return UType.VOID
      */
 
-    UType getKeyUType();
+    abstract public UType getKeyUType();
 
     /**
      * Provide a short string showing the contents of the item, suitable
@@ -128,7 +130,7 @@ public interface MapItem extends Function {
      * @return a depiction of the item suitable for use in error messages
      */
     @Override
-    default String toShortString() {
+    public String toShortString() {
         StringBuilder sb = new StringBuilder();
         sb.append("map{");
         int size = size();
@@ -157,7 +159,7 @@ public interface MapItem extends Function {
      * @return the genre: specifically, Map.
      */
     @Override
-    default Genre getGenre() {
+    public Genre getGenre() {
         return Genre.MAP;
     }
 
@@ -167,7 +169,7 @@ public interface MapItem extends Function {
      * @return false (it is not an array)
      */
     @Override
-    default boolean isArray() {
+    public boolean isArray() {
         return false;
     }
 
@@ -177,7 +179,7 @@ public interface MapItem extends Function {
      * @return true (it is a map)
      */
     @Override
-    default boolean isMap() {
+    public boolean isMap() {
         return true;
     }
 
@@ -189,7 +191,7 @@ public interface MapItem extends Function {
      */
 
     @Override
-    default AnnotationList getAnnotations() {
+    public AnnotationList getAnnotations() {
         return AnnotationList.EMPTY;
     }
 
@@ -200,7 +202,7 @@ public interface MapItem extends Function {
      * @throws XPathException if atomization is not allowed for this kind of item
      */
     @Override
-    default AtomicSequence atomize() throws XPathException {
+    public AtomicSequence atomize() throws XPathException {
         throw new XPathException("Cannot atomize a map (" + toShortString() + ")", "FOTY0013");
     }
 
@@ -288,7 +290,7 @@ public interface MapItem extends Function {
      * @return an array of OperandRole objects, one for each argument
      */
     @Override
-    default OperandRole[] getOperandRoles() {
+    public OperandRole[] getOperandRoles() {
         return new OperandRole[]{OperandRole.SINGLE_ATOMIC};
     }
 
@@ -300,7 +302,7 @@ public interface MapItem extends Function {
      * @return the function item's type
      */
     @Override
-    default FunctionItemType getFunctionItemType(/*@Nullable*/) {
+    public FunctionItemType getFunctionItemType(/*@Nullable*/) {
         return MapType.ANY_MAP_TYPE;
     }
 
@@ -310,7 +312,7 @@ public interface MapItem extends Function {
      * @return the function name, or null for an anonymous inline function
      */
     @Override
-    default StructuredQName getFunctionName() {
+    public StructuredQName getFunctionName() {
         return null;
     }
 
@@ -322,7 +324,7 @@ public interface MapItem extends Function {
      * @return a description of the function for use in error messages
      */
     @Override
-    default String getDescription() {
+    public String getDescription() {
         return "map";
     }
 
@@ -332,7 +334,7 @@ public interface MapItem extends Function {
      * @return the number of arguments in the function signature
      */
     @Override
-    default int getArity() {
+    public int getArity() {
         return 1;
     }
 
@@ -345,7 +347,7 @@ public interface MapItem extends Function {
      * not be the same as the caller's context)
      */
     @Override
-    default XPathContext makeNewContext(XPathContext callingContext, ContextOriginator originator) {
+    public XPathContext makeNewContext(XPathContext callingContext, ContextOriginator originator) {
         return callingContext;
     }
 
@@ -359,7 +361,7 @@ public interface MapItem extends Function {
      *                        the supplied argument
      */
     @Override
-    default Sequence call(XPathContext context, Sequence[] args) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
         AtomicValue key = (AtomicValue) args[0].head();
         Sequence value = get(key);
         if (value == null) {
@@ -382,7 +384,7 @@ public interface MapItem extends Function {
      * @since 8.4
      */
     @Override
-    default UnicodeString getUnicodeStringValue() {
+    public UnicodeString getUnicodeStringValue() {
         throw new UnsupportedOperationException("A map has no string value");
     }
 
@@ -403,7 +405,7 @@ public interface MapItem extends Function {
      *                        an element with complex content
      * @since 8.4
      */
-    default SequenceIterator getTypedValue() throws XPathException {
+    public SequenceIterator getTypedValue() throws XPathException {
         throw new XPathException("A map has no typed value");
     }
 
@@ -414,7 +416,7 @@ public interface MapItem extends Function {
      * @param other the other function item
      */
     @Override
-    default boolean deepEquals(Function other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
+    public boolean deepEquals(Function other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
             AtomicIterator<?> keys = keys();
@@ -438,12 +440,12 @@ public interface MapItem extends Function {
 
     /*@Nullable*/
     @Override
-    default MapItem itemAt(int n) {
+    public MapItem itemAt(int n) {
         return n == 0 ? this : null;
     }
 
     @Override
-    default boolean effectiveBooleanValue() throws XPathException {
+    public boolean effectiveBooleanValue() throws XPathException {
         throw new XPathException("A map item has no effective boolean value");
     }
 
@@ -472,7 +474,7 @@ public interface MapItem extends Function {
      * Export information about this function item to the export() or explain() output
      */
     @Override
-    default void export(ExpressionPresenter out) throws XPathException {
+    public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("map");
         out.emitAttribute("size", "" + size());
         for (KeyValuePair kvp : keyValuePairs()) {
@@ -483,7 +485,7 @@ public interface MapItem extends Function {
     }
 
     @Override
-    default boolean isTrustedResultType() {
+    public boolean isTrustedResultType() {
         return true;
     }
 

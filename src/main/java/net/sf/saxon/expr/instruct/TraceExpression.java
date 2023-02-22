@@ -15,7 +15,6 @@ import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 
@@ -26,7 +25,7 @@ import java.util.Iterator;
  * A wrapper expression used to trace expressions in XSLT and XQuery.
  */
 
-public class TraceExpression extends Instruction implements Traceable {
+public class TraceExpression extends Instruction {
 
     private final Operand baseOp;
     private HashMap<String, Object> properties = new HashMap<>(10);

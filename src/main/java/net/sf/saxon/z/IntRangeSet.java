@@ -18,7 +18,7 @@ import java.util.Arrays;
  *
  * @author Michael Kay
  */
-public class IntRangeSet implements IntSet {
+public class IntRangeSet extends IntSet {
 
     // The array of start points, which will always be sorted
     private int[] startPoints;
@@ -33,7 +33,7 @@ public class IntRangeSet implements IntSet {
     private int hashCode = -1;
 
     // The number of items in the set
-    private int size = 0;
+    private int count = 0;
 
     /**
      * Create an empty set
@@ -42,7 +42,7 @@ public class IntRangeSet implements IntSet {
         startPoints = new int[4];
         endPoints = new int[4];
         used = 0;
-        size = 0;
+        count = 0;
         hashCode = -1;
     }
 
@@ -80,7 +80,7 @@ public class IntRangeSet implements IntSet {
         this.endPoints = endPoints;
         used = startPoints.length;
         for (int i = 0; i < used; i++) {
-            size += (endPoints[i] - startPoints[i] + 1);
+            count += (endPoints[i] - startPoints[i] + 1);
         }
     }
 
@@ -102,7 +102,7 @@ public class IntRangeSet implements IntSet {
         System.arraycopy(endPoints, 0, s.endPoints, 0, endPoints.length);
         //s.endPoints = Arrays.copyOf(endPoints, endPoints.length);
         s.used = used;
-        s.size = size;
+        s.count = count;
         return s;
     }
 
@@ -118,12 +118,12 @@ public class IntRangeSet implements IntSet {
 
     @Override
     public int size() {
-        return size;
+        return count;
     }
 
     @Override
     public boolean isEmpty() {
-        return size == 0;
+        return count == 0;
     }
 
     @Override
@@ -171,7 +171,7 @@ public class IntRangeSet implements IntSet {
             ensureCapacity(1);
             startPoints[used - 1] = value;
             endPoints[used - 1] = value;
-            size++;
+            count++;
             return true;
         }
         if (value > endPoints[used - 1]) {
@@ -182,7 +182,7 @@ public class IntRangeSet implements IntSet {
                 startPoints[used - 1] = value;
                 endPoints[used - 1] = value;
             }
-            size++;
+            count++;
             return true;
         }
         if (value < startPoints[0]) {
@@ -195,7 +195,7 @@ public class IntRangeSet implements IntSet {
                 startPoints[0] = value;
                 endPoints[0] = value;
             }
-            size++;
+            count++;
             return true;
         }
         int i = 0;
@@ -225,7 +225,7 @@ public class IntRangeSet implements IntSet {
             } else {
                 endPoints[i]++;
             }
-            size++;
+            count++;
             return true;
         } else if (startPoints[i] - 1 == value) {
             if (value == endPoints[i - 1] + 1) {
@@ -237,7 +237,7 @@ public class IntRangeSet implements IntSet {
             } else {
                 startPoints[i]--;
             }
-            size++;
+            count++;
             return true;
         } else {
             if (value > endPoints[i]) {
@@ -252,7 +252,7 @@ public class IntRangeSet implements IntSet {
             }
             startPoints[i] = value;
             endPoints[i] = value;
-            size++;
+            count++;
             return true;
         }
     }
@@ -342,7 +342,7 @@ public class IntRangeSet implements IntSet {
             ensureCapacity(1);
             startPoints[used - 1] = low;
             endPoints[used - 1] = high;
-            size += (high - low + 1);
+            count += (high - low + 1);
         } else if (low > endPoints[used - 1]) {
             if (low == endPoints[used - 1] + 1) {
                 endPoints[used - 1] = high;
@@ -351,7 +351,7 @@ public class IntRangeSet implements IntSet {
                 startPoints[used - 1] = low;
                 endPoints[used - 1] = high;
             }
-            size += (high - low + 1);
+            count += (high - low + 1);
         } else if (high < startPoints[0]) {
             ensureCapacity(used + 1);
             System.arraycopy(startPoints, 0, startPoints, 1, used - 1);
@@ -417,7 +417,7 @@ public class IntRangeSet implements IntSet {
         @Override
         public boolean hasNext() {
             if (i < 0) {
-                return size > 0;
+                return count > 0;
             } else {
                 return current < endPoints[used - 1];
             }

@@ -31,12 +31,12 @@ public class XmlProcessingIncident implements XmlProcessingError {
     private String errorCode;
     private Throwable cause;
     private Location locator = null;
-    private boolean isWarning;
-    private boolean isTypeError;
+    private boolean _isWarning;
+    private boolean _isTypeError;
     private String fatalErrorMessage;
-    private boolean hasBeenReported = false;
+    private boolean _hasBeenReported = false;
     private HostLanguage hostLanguage;
-    private boolean isStaticError;
+    private boolean _isStaticError;
 
     /**
      * Create an XmlProcessingIncident
@@ -53,7 +53,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
         this.message = message;
         setErrorCodeAsEQName(errorCode);
         this.locator = location;
-        this.isWarning = false;
+        this._isWarning = false;
     }
 
     /**
@@ -84,16 +84,16 @@ public class XmlProcessingIncident implements XmlProcessingError {
         message = exception.getMessage();
         errorCode = exception.getErrorCodeQName().getEQName();
         locator = exception.getLocator();
-        this.isWarning = isWarning;
+        this._isWarning = isWarning;
     }
 
     public void setWarning(boolean warning) {
-        isWarning = warning;
+        _isWarning = warning;
     }
 
     @Override
     public XmlProcessingIncident asWarning() {
-        isWarning = true;
+        _isWarning = true;
         return this;
     }
 
@@ -130,7 +130,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
 
     @Override
     public boolean isAlreadyReported() {
-        return hasBeenReported;
+        return _hasBeenReported;
     }
 
     /**
@@ -140,7 +140,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
 
     @Override
     public void setAlreadyReported(boolean reported) {
-        this.hasBeenReported = reported;
+        this._hasBeenReported = reported;
     }
 
     @Override
@@ -154,20 +154,20 @@ public class XmlProcessingIncident implements XmlProcessingError {
 
     @Override
     public boolean isTypeError() {
-        return isTypeError;
+        return _isTypeError;
     }
 
     public void setTypeError(boolean isTypeError) {
-        this.isTypeError = isTypeError;
+        this._isTypeError = isTypeError;
     }
 
     @Override
     public boolean isStaticError() {
-        return isStaticError;
+        return _isStaticError;
     }
 
     public void setStaticError(boolean isStaticError) {
-        this.isStaticError = isStaticError;
+        this._isStaticError = isStaticError;
     }
 
 
@@ -278,7 +278,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
      */
     @Override
     public boolean isWarning() {
-        return isWarning;
+        return _isWarning;
     }
 
     /**

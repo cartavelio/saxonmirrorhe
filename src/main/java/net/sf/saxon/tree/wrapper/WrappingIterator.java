@@ -7,7 +7,6 @@
 
 package net.sf.saxon.tree.wrapper;
 
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.tree.iter.AxisIterator;
 
@@ -23,7 +22,7 @@ public class WrappingIterator implements AxisIterator {
 
     AxisIterator base;
     VirtualNode parent;
-    /*@Nullable*/ NodeInfo current;
+    /*@Nullable*/ NodeInfo _current;
     boolean atomizing = false;
     WrappingFunction wrappingFunction;
 
@@ -45,18 +44,21 @@ public class WrappingIterator implements AxisIterator {
     /*@Nullable*/
     @Override
     public NodeInfo next() {
-        Item n = base.next();
-        if (n instanceof NodeInfo && !atomizing) {
-            current = wrappingFunction.makeWrapper((NodeInfo) n, parent);
-        } else {
-            current = (NodeInfo) n;
+        NodeInfo n = base.next();
+        if (n == null) {
+            return _current = null;
         }
-        return current;
+        if (atomizing) {
+            _current = n;
+        } else {
+            _current = wrappingFunction.makeWrapper(n, parent);
+        }
+        return _current;
     }
 
     /*@Nullable*/
     public NodeInfo current() {
-        return current;
+        return _current;
     }
 
     @Override

@@ -22,7 +22,7 @@ import java.util.Arrays;
  * A value of type xs:hexBinary
  */
 
-public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Comparable {
+public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Comparable<HexBinaryValue> {
 
     private final byte[] binaryValue;
 
@@ -180,25 +180,32 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Compa
 
     /**
      * Support XML Schema comparison semantics
+     * @return
      */
 
     /*@NotNull*/
     @Override
-    public Comparable<HexBinaryComparable> getSchemaComparable() {
-        return new HexBinaryComparable();
+    public SchemaComparable getSchemaComparable() {
+        return new HexBinaryComparable(this);
     }
 
-    private class HexBinaryComparable implements Comparable<HexBinaryComparable> {
+    private static class HexBinaryComparable implements SchemaComparable {
+
+        private final HexBinaryValue value;
+
+        public HexBinaryComparable(HexBinaryValue value) {
+            this.value = value;
+        }
 
         /*@NotNull*/
         public HexBinaryValue getHexBinaryValue() {
-            return HexBinaryValue.this;
+            return value;
         }
 
         @Override
-        public int compareTo(/*@NotNull*/ HexBinaryComparable o) {
-            if (Arrays.equals(getHexBinaryValue().binaryValue,
-                            o.getHexBinaryValue().binaryValue)) {
+        public int compareTo(SchemaComparable o) {
+            if (o instanceof HexBinaryComparable
+                    && Arrays.equals(getHexBinaryValue().binaryValue, ((HexBinaryComparable)o).value.binaryValue)) {
                 return 0;
             } else {
                 return SequenceTool.INDETERMINATE_ORDERING;
@@ -210,7 +217,7 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Compa
         }
 
         public int hashCode() {
-            return HexBinaryValue.this.hashCode();
+            return value.hashCode();
         }
     }
 
@@ -251,8 +258,8 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Compa
     }
 
     @Override
-    public int compareTo(Object o) {
-        byte[] other = ((HexBinaryValue)o).binaryValue;
+    public int compareTo(HexBinaryValue o) {
+        byte[] other = o.binaryValue;
         int len0 = binaryValue.length;
         int len1 = other.length;
         int shorter = java.lang.Math.min(len0, len1);

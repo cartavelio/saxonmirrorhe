@@ -13,7 +13,7 @@ package net.sf.saxon.z;
  *
  * @author Michael Kay
  */
-public class IntBlockSet implements IntSet {
+public class IntBlockSet extends IntSet {
 
     private final int startPoint;
     private final int endPoint;

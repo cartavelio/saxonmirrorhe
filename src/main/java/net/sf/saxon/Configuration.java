@@ -3168,8 +3168,8 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return an iterator over the types that are derived from the given type by extension
      */
 
-    public Iterator<? extends SchemaType> getExtensionsOfType(SchemaType type) {
-        return Collections.emptyIterator();
+    public Iterable<? extends SchemaType> getExtensionsOfType(SchemaType type) {
+        return Collections.emptyList();
     }
 
     /**
@@ -3595,7 +3595,9 @@ public class Configuration implements SourceResolver, NotationSet {
 
     public java.util.function.Function<SequenceIterator, FocusTrackingIterator> getFocusTrackerFactory(
             Executable exec, boolean multithreaded) {
-        return FocusTrackingIterator::new;
+        //noinspection Convert2MethodRef
+        //Written this way for Java-C# conversion
+        return iter -> new FocusTrackingIterator(iter);
     }
 
     /**
@@ -4543,11 +4545,11 @@ public class Configuration implements SourceResolver, NotationSet {
                             (OutputURIResolver) instantiateClassName(name, value, OutputURIResolver.class));
                     break;
 
-                case FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS:
+                case FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS: {
                     boolean b = requireBoolean(name, value);
                     getSystemURIResolver().setRecognizeQueryParameters(b);
                     break;
-
+                }
                 case FeatureCode.RECOVERY_POLICY:
                     // Obsolete: no action
                     break;

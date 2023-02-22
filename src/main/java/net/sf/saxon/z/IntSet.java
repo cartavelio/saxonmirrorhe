@@ -10,7 +10,7 @@ package net.sf.saxon.z;
 /**
  * A set of integers represented as int values
  */
-public interface IntSet {
+public abstract class IntSet {
 
     /**
      * Create a copy of this IntSet that leaves the original unchanged.
@@ -20,7 +20,7 @@ public interface IntSet {
      *         object.
      */
 
-    IntSet copy();
+    abstract public IntSet copy();
 
     /**
      * Create a copy of this IntSet that contains the same set of integers.
@@ -29,20 +29,20 @@ public interface IntSet {
      *         same class as the original. It will always be a mutable object
      */
 
-    IntSet mutableCopy();
+    abstract public IntSet mutableCopy();
 
     /**
      * Ask whether the set permits in-situ modifications using add() and remove()
      */
 
-    default boolean isMutable() {
+    public boolean isMutable() {
         return true;
     }
 
     /**
      * Clear the contents of the IntSet (making it an empty set)
      */
-    void clear();
+    abstract public void clear();
 
     /**
      * Get the number of integers in the set
@@ -50,7 +50,7 @@ public interface IntSet {
      * @return the size of the set
      */
 
-    int size();
+    abstract public int size();
 
     /**
      * Determine if the set is empty
@@ -58,7 +58,7 @@ public interface IntSet {
      * @return true if the set is empty, false if not
      */
 
-    boolean isEmpty();
+    abstract public boolean isEmpty();
 
     /**
      * Determine whether a particular integer is present in the set
@@ -67,7 +67,7 @@ public interface IntSet {
      * @return true if value is present in the set, false if not
      */
 
-    boolean contains(int value);
+    abstract public boolean contains(int value);
 
     /**
      * Remove an integer from the set
@@ -76,7 +76,7 @@ public interface IntSet {
      * @return true if the integer was present in the set, false if it was not present
      */
 
-    boolean remove(int value);
+    abstract public boolean remove(int value);
 
     /**
      * Add an integer to the set
@@ -85,7 +85,7 @@ public interface IntSet {
      * @return true if the integer was added, false if it was already present
      */
 
-    boolean add(int value);
+    abstract public boolean add(int value);
 
     /**
      * Get an iterator over the values
@@ -93,7 +93,7 @@ public interface IntSet {
      * @return an iterator over the integers in the set
      */
 
-    IntIterator iterator();
+    abstract public IntIterator iterator();
 
     /**
      * Test if this set is a superset of another set
@@ -102,7 +102,7 @@ public interface IntSet {
      * @return true if every item in the other set is also in this set
      */
 
-    default boolean containsAll(IntSet other) {
+    public boolean containsAll(IntSet other) {
         if (other == IntUniversalSet.getInstance() || (other instanceof IntComplementSet)) {
             return false;
         }
@@ -122,7 +122,7 @@ public interface IntSet {
      * @return the union of the two sets
      */
 
-    default IntSet union(IntSet other) {
+    public IntSet union(IntSet other) {
         if (other == IntUniversalSet.getInstance()) {
             return other;
         }
@@ -154,7 +154,7 @@ public interface IntSet {
      * @return the intersection of the two sets
      */
 
-    default IntSet intersect(IntSet other) {
+    public IntSet intersect(IntSet other) {
         if (this.isEmpty() || other.isEmpty()) {
             return IntEmptySet.getInstance();
         }
@@ -178,7 +178,7 @@ public interface IntSet {
      */
 
 
-    default IntSet except(IntSet other) {
+    public IntSet except(IntSet other) {
         IntHashSet n = new IntHashSet(size());
         IntIterator it = iterator();
         while (it.hasNext()) {

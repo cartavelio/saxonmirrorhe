@@ -29,34 +29,34 @@ public class AdjacentTextNodeMergingIterator implements LookaheadIterator {
     // but Java doesn't allow both an upper and a lower bound
 
     private final SequenceIterator base;
-    private Item next;
+    private Item _next;
 
     public AdjacentTextNodeMergingIterator(SequenceIterator base) throws XPathException {
         this.base = base;
-        next = base.next();
+        _next = base.next();
     }
 
     @Override
     public boolean hasNext() {
-        return next != null;
+        return _next != null;
     }
 
     /*@Nullable*/
     @Override
     public Item next() throws XPathException {
-        Item current = next;
+        Item current = _next;
         if (current == null) {
             return null;
         }
-        next = base.next();
+        _next = base.next();
 
         if (AdjacentTextNodeMerger.isTextNode(current)) {
             UnicodeBuilder ub = new UnicodeBuilder();
             ub.append(current.getUnicodeStringValue());
-            while (AdjacentTextNodeMerger.isTextNode(next)) {
-                ub.append(next.getUnicodeStringValue() /*.toString() */);
+            while (AdjacentTextNodeMerger.isTextNode(_next)) {
+                ub.append(_next.getUnicodeStringValue() /*.toString() */);
                 // NOTE: toString() shouldn't be necessary - added 2011-05-05 for bug workaround; removed again 2011-07-14
-                next = base.next();
+                _next = base.next();
             }
             if (ub.isEmpty()) {
                 return next();

@@ -31,7 +31,8 @@ public class UnknownResource implements Resource {
     private final Configuration config;
     private final AbstractResourceCollection.InputDetails details;
 
-    public static final ResourceFactory FACTORY = UnknownResource::new;
+    @SuppressWarnings("Convert2MethodRef")  // for Java-C# conversion
+    public static final ResourceFactory FACTORY = (config, details) -> new UnknownResource(config, details);
 
     public UnknownResource(Configuration config, AbstractResourceCollection.InputDetails details) {
         this.config = config;

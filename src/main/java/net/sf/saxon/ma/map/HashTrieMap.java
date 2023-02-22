@@ -26,7 +26,7 @@ import java.util.Iterator;
 /**
  * An immutable map. This implementation, which uses a hash trie, was introduced in Saxon 9.6
  */
-public class HashTrieMap implements MapItem {
+public class HashTrieMap extends MapItem {
 
     // The underlying trie holds key-value pairs, but these do not correspond directly
     // to the key value pairs in the XDM map. Instead, the key in the trie is an AtomicMatchKey

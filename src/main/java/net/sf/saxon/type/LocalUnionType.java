@@ -89,11 +89,6 @@ public class LocalUnionType implements PlainType, UnionType {
         return true;
     }
 
-    @Override
-    public boolean isTrueItemType() {
-        return true;
-    }
-
     /**
      * Get the SequenceType that most accurately describes the result of casting a value to this union type
      *

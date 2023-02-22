@@ -17,7 +17,28 @@ import net.sf.saxon.z.IntSet;
 /**
  * Interface supported by different implementations of an XDM array item
  */
-public interface ArrayItem extends Function {
+public abstract class ArrayItem implements Function {
+
+    /**
+     * Ask whether this function item is an array
+     *
+     * @return true if this function item is an array, otherwise false
+     */
+
+    public final boolean isArray() {
+        return true;
+    }
+
+
+    /**
+     * Ask whether this function item is a map
+     *
+     * @return false (it is not a map)
+     */
+    @Override
+    public final boolean isMap() {
+        return false;
+    }
 
     /**
      * Get a member of the array
@@ -27,7 +48,7 @@ public interface ArrayItem extends Function {
      * @throws IndexOutOfBoundsException if the index is out of range
      */
 
-    GroundedValue get(int index);
+    public abstract GroundedValue get(int index);
 
     /**
      * Replace a member of the array
@@ -38,7 +59,7 @@ public interface ArrayItem extends Function {
      * @throws IndexOutOfBoundsException if the index is out of range
      */
 
-    ArrayItem put(int index, GroundedValue newValue);
+    public abstract ArrayItem put(int index, GroundedValue newValue);
 
     /**
      * Get the number of members in the array
@@ -48,7 +69,7 @@ public interface ArrayItem extends Function {
      * @return the number of members in this array.
      */
 
-    int arrayLength();
+    public abstract int arrayLength();
 
     /**
      * Ask whether the array is empty
@@ -56,14 +77,16 @@ public interface ArrayItem extends Function {
      * @return true if and only if the size of the array is zero
      */
 
-    boolean isEmpty();
+    public boolean isEmpty() {
+        return arrayLength() == 0;
+    }
 
     /**
      * Get the list of all members of the array
      * @return an iterator over the members of the array
      */
 
-    Iterable<GroundedValue> members();
+    public abstract Iterable<GroundedValue> members();
 
     /**
      * Concatenate this array with another
@@ -72,7 +95,7 @@ public interface ArrayItem extends Function {
      * containing first the members of this array, and then the members of the other array
      */
 
-    ArrayItem concat(ArrayItem other);
+    public abstract ArrayItem concat(ArrayItem other);
 
     /**
      * Remove a member from the array
@@ -83,7 +106,7 @@ public interface ArrayItem extends Function {
      * @throws IndexOutOfBoundsException if index is out of range
      */
 
-    ArrayItem remove(int index);
+    public abstract ArrayItem remove(int index);
 
     /**
      * Remove zero or more members from the array
@@ -94,7 +117,7 @@ public interface ArrayItem extends Function {
      * @throws IndexOutOfBoundsException if any of the positions is out of range
      */
 
-    ArrayItem removeSeveral(IntSet positions);
+    public abstract ArrayItem removeSeveral(IntSet positions);
 
     /**
      * Get a sub-array given a start and end position
@@ -105,7 +128,7 @@ public interface ArrayItem extends Function {
      * @throws IndexOutOfBoundsException if start, or start+end, is out of range
      */
 
-    ArrayItem subArray(int start, int end);
+    public abstract ArrayItem subArray(int start, int end);
 
     /**
      * Insert a new member into an array
@@ -115,7 +138,7 @@ public interface ArrayItem extends Function {
      * @return a new array item with the new member inserted
      */
 
-    ArrayItem insert(int position, GroundedValue member);
+    public abstract ArrayItem insert(int position, GroundedValue member);
 
     /**
      * Get the lowest common item type of the members of the array
@@ -123,7 +146,7 @@ public interface ArrayItem extends Function {
      * @return the most specific type to which all the members belong.
      */
 
-    SequenceType getMemberType(TypeHierarchy th);
+    public abstract SequenceType getMemberType(TypeHierarchy th);
 
     /**
      * Provide a short string showing the contents of the item, suitable
@@ -132,7 +155,7 @@ public interface ArrayItem extends Function {
      * @return a depiction of the item suitable for use in error messages
      */
     @Override
-    default String toShortString() {
+    public String toShortString() {
         StringBuilder sb = new StringBuilder();
         sb.append("array{");
         int count = 0;
@@ -154,7 +177,7 @@ public interface ArrayItem extends Function {
      * @return the genre: specifically, {@link Genre#ARRAY}.
      */
     @Override
-    default Genre getGenre() {
+    public final Genre getGenre() {
         return Genre.ARRAY;
     }
     

@@ -10,6 +10,7 @@ package net.sf.saxon.om;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.SchemaComparable;
 
 /**
  * Interface representing a sequence of atomic values. This is often used to represent the
@@ -75,7 +76,7 @@ public interface AtomicSequence extends GroundedValue, Iterable<AtomicValue> {
      * @return a Comparable that follows XML Schema comparison rules
      */
 
-    Comparable<?> getSchemaComparable();
+    SchemaComparable getSchemaComparable();
 
     /**
      * Get a string representation of the sequence. The is the space-separated concatenation of the result of

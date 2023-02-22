@@ -123,7 +123,8 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
 
                 s.setPipelineConfiguration(b.getPipelineConfiguration());
 
-                options.addFilter(OuterElementStripper::new);
+                //noinspection Convert2MethodRef
+                options.addFilter(receiver -> new OuterElementStripper(receiver));  // Done this way for Java-C# conversion
 
                 try {
                     Sender.send(source, s, options);

@@ -77,7 +77,7 @@ public class IntersectionEnumeration implements SequenceIterator {
             } else if (c > 0) {
                 nextNode2 = next(e2);
             } else {            // keys are equal
-                NodeInfo current = nextNode2;    // which is the same as nextNode1
+                NodeInfo current = nextNode2;    // which is the same as next1
                 nextNode2 = next(e2);
                 nextNode1 = next(e1);
                 return current;

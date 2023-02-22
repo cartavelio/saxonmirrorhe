@@ -349,21 +349,18 @@ public final class AxisExpression extends Expression {
                                         "better to omit the '/text()' step",
                                 getLocation());
                     } else if (axis == AxisInfo.ATTRIBUTE) {
-                        Iterator extensions = config.getExtensionsOfType(contentType);
                         boolean found = false;
                         if (targetfp == -1) {
-                            while (extensions.hasNext()) {
-                                ComplexType extension = (ComplexType) extensions.next();
-                                if (extension.allowsAttributes()) {
+                            for (SchemaType extension : config.getExtensionsOfType(contentType)) {
+                                if (((ComplexType)extension).allowsAttributes()) {
                                     found = true;
                                     break;
                                 }
                             }
                         } else {
-                            while (extensions.hasNext()) {
-                                ComplexType extension = (ComplexType) extensions.next();
+                            for (SchemaType extension : config.getExtensionsOfType(contentType)) {
                                 try {
-                                    if (extension.getAttributeUseType(targetName) != null) {
+                                    if (((ComplexType)extension).getAttributeUseType(targetName) != null) {
                                         found = true;
                                         break;
                                     }
@@ -401,9 +398,8 @@ public final class AxisExpression extends Expression {
                 return Literal.makeEmptySequence();
             } else if (((ComplexType) contentType).isEmptyContent() &&
                     (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF)) {
-                for (Iterator iter = config.getExtensionsOfType(contentType); iter.hasNext(); ) {
-                    ComplexType extension = (ComplexType) iter.next();
-                    if (!extension.isEmptyContent()) {
+                for (SchemaType extension : config.getExtensionsOfType(contentType)) {
+                    if (!((ComplexType)extension).isEmptyContent()) {
                         return this;
                     }
                 }

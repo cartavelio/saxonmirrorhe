@@ -94,19 +94,19 @@ public class Numberer_frBE extends AbstractNumberer {
     private String toWords(long number, boolean terminal) {
         if (number == 0) {
             return "Z\u00e9ro";
-        } else if (number >= 1000000000000000000l) {
-            long rem = number % 1000000000000000000l;
-            long n = number / 1000000000000000000l;
+        } else if (number >= 1000000000000000000L) {
+            long rem = number % 1000000000000000000L;
+            long n = number / 1000000000000000000L;
             String s = (n == 1 ? "Un" : toWords(n, true));
             return s + " quintillion" + (n > 1 ? "s" : "") + (rem == 0 ? "" : " " + toWords(rem, LOWER_CASE, terminal));
-        } else if (number >= 1000000000000000l) {
-            long rem = number % 1000000000000000l;
-            long n = number / 1000000000000000l;
+        } else if (number >= 1000000000000000L) {
+            long rem = number % 1000000000000000L;
+            long n = number / 1000000000000000L;
             String s = (n == 1 ? "Un" : toWords(n, true));
             return s + " quatrillion" + (n > 1 ? "s" : "") + (rem == 0 ? "" : " " + toWords(rem, LOWER_CASE, terminal));
-        } else if (number >= 1000000000000l) {
-            long rem = number % 1000000000000l;
-            long n = number / 1000000000000l;
+        } else if (number >= 1000000000000L) {
+            long rem = number % 1000000000000L;
+            long n = number / 1000000000000L;
             String s = (n == 1 ? "Un" : toWords(n, true));
             return s + " trillion" + (n > 1 ? "s" : "") + (rem == 0 ? "" : " " + toWords(rem, LOWER_CASE, terminal));
         } else if (number >= 1000000000) {

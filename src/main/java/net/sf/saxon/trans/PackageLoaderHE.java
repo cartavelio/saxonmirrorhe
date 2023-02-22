@@ -2689,21 +2689,17 @@ public class PackageLoaderHE implements IPackageLoader {
                     StructuredQName name = StructuredQName.fromEQName((token));
                     accNameList.add(name);
                 }
-                loader.addCompletionAction(new Action() {
-                    final StylesheetPackage pack = loader.getPackStack().peek();
-
-                    @Override
-                    public void doAction() {
-                        Set<Accumulator> list = new HashSet<>();
-                        for (StructuredQName sn : accNameList) {
-                            for (Accumulator test : pack.getAccumulatorRegistry().getAllAccumulators()) {
-                                if (test.getAccumulatorName().equals(sn)) {
-                                    list.add(test);
-                                }
+                final StylesheetPackage pack = loader.getPackStack().peek();
+                loader.addCompletionAction(() -> {
+                    Set<Accumulator> accList = new HashSet<>();
+                    for (StructuredQName sn : accNameList) {
+                        for (Accumulator test : pack.getAccumulatorRegistry().getAllAccumulators()) {
+                            if (test.getAccumulatorName().equals(sn)) {
+                                accList.add(test);
                             }
                         }
-                        ms.accumulators = list;
                     }
+                    ms.accumulators = accList;
                 });
                 Expression forEachItem = loader.getExpressionWithRole(msElem, "forEachItem");
                 if (forEachItem != null) {

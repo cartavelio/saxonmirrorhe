@@ -10,7 +10,7 @@ package net.sf.saxon.z;
 /**
  * An immutable integer set containing no integers
  */
-public class IntEmptySet implements IntSet {
+public class IntEmptySet extends IntSet {
 
     private static final IntEmptySet THE_INSTANCE = new IntEmptySet();
 
@@ -70,17 +70,19 @@ public class IntEmptySet implements IntSet {
 
     @Override
     public IntIterator iterator() {
-        return new IntIterator() {
-            @Override
-            public boolean hasNext() {
-                return false;
-            }
+        return new EmptyIntIterator();
+    }
 
-            @Override
-            public int next() {
-                return Integer.MIN_VALUE;
-            }
-        };
+    private static class EmptyIntIterator implements IntIterator {
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public int next() {
+            return Integer.MIN_VALUE;
+        }
     }
 
     @Override

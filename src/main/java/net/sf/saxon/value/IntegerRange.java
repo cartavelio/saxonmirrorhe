@@ -188,7 +188,7 @@ public class IntegerRange implements AtomicSequence {
      * @return a Comparable that follows XML Schema comparison rules
      */
     @Override
-    public Comparable getSchemaComparable() {
+    public SchemaComparable getSchemaComparable() {
         try {
             return new AtomicArray(iterate()).getSchemaComparable();
         } catch (XPathException err) {
@@ -242,60 +242,66 @@ public class IntegerRange implements AtomicSequence {
 
     /**
      * Return a Java iterator over the atomic sequence.
-     *
      * @return an Iterator.
      */
 
     @Override
     public Iterator<AtomicValue> iterator() {
-        return new Iterator<AtomicValue>() {
+        return new IntegerRangeIterator(this);
+    }
 
-            long current = start;
+    private static class IntegerRangeIterator implements Iterator<AtomicValue> {
+        private IntegerRange range;
+        private long current;
 
-            /**
-             * Returns <tt>true</tt> if the iteration has more elements. (In other
-             * words, returns <tt>true</tt> if <tt>next</tt> would return an element
-             * rather than throwing an exception.)
-             *
-             * @return <tt>true</tt> if the iterator has more elements.
-             */
-            @Override
-            public boolean hasNext() {
-                return current <= end;
-            }
+        private IntegerRangeIterator(IntegerRange range) {
+            this.range = range;
+            current = range.start;
+        }
 
-            /**
-             * Removes from the underlying collection the last element returned by the
-             * iterator (optional operation).  This method can be called only once per
-             * call to <tt>next</tt>.  The behavior of an iterator is unspecified if
-             * the underlying collection is modified while the iteration is in
-             * progress in any way other than by calling this method.
-             *
-             * @throws UnsupportedOperationException if the <tt>remove</tt>
-             *                                       operation is not supported by this Iterator.
-             * @throws IllegalStateException         if the <tt>next</tt> method has not
-             *                                       yet been called, or the <tt>remove</tt> method has already
-             *                                       been called after the last call to the <tt>next</tt>
-             *                                       method.
-             */
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+        /**
+         * Returns <tt>true</tt> if the iteration has more elements. (In other
+         * words, returns <tt>true</tt> if <tt>next</tt> would return an element
+         * rather than throwing an exception.)
+         *
+         * @return <tt>true</tt> if the iterator has more elements.
+         */
+        @Override
+        public boolean hasNext() {
+            return current <= range.end;
+        }
 
-            /**
-             * Returns the next element in the iteration.
-             *
-             * @return the next element in the iteration.
-             * @throws java.util.NoSuchElementException
-             *          iteration has no more elements.
-             */
-            @Override
-            public IntegerValue next() {
-                return new Int64Value(current++);
+        /**
+         * Removes from the underlying collection the last element returned by the
+         * iterator (optional operation).  This method can be called only once per
+         * call to <tt>next</tt>.  The behavior of an iterator is unspecified if
+         * the underlying collection is modified while the iteration is in
+         * progress in any way other than by calling this method.
+         *
+         * @throws UnsupportedOperationException if the <tt>remove</tt>
+         *                                       operation is not supported by this Iterator.
+         * @throws IllegalStateException         if the <tt>next</tt> method has not
+         *                                       yet been called, or the <tt>remove</tt> method has already
+         *                                       been called after the last call to the <tt>next</tt>
+         *                                       method.
+         */
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
 
-            }
-        };
+        /**
+         * Returns the next element in the iteration.
+         *
+         * @return the next element in the iteration.
+         * @throws java.util.NoSuchElementException
+         *          iteration has no more elements.
+         */
+        @Override
+        public IntegerValue next() {
+            return new Int64Value(current++);
+
+        }
     }
 }
 

@@ -10,7 +10,7 @@ package net.sf.saxon.z;
 /**
  * An immutable integer set containing all int values except those in an excluded set
  */
-public class IntComplementSet implements IntSet {
+public class IntComplementSet extends IntSet {
 
     private final IntSet exclusions;
 

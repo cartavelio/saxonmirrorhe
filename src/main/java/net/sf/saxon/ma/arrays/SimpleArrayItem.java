@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * A simple implementation of XDM array items, in which the array is backed by a Java List.
  */
-public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
+public class SimpleArrayItem extends AbstractArrayItem {
 
     /**
      * Static constant value representing an empty array
@@ -32,7 +32,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
     public static final SimpleArrayItem EMPTY_ARRAY =
             new SimpleArrayItem(new ArrayList<>());
 
-    private final List<GroundedValue> members;
+    private final List<GroundedValue> _members;
     private boolean knownToBeGrounded = false;
 
     /**
@@ -42,7 +42,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      */
 
     public SimpleArrayItem(List<GroundedValue> members) {
-        this.members = members;
+        this._members = members;
     }
 
     /**
@@ -85,35 +85,14 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
     public void makeGrounded() throws XPathException {
         if (!knownToBeGrounded) {
             synchronized(this) {
-                for (int i=0; i<members.size(); i++) {
-                    members.set(i, ((Sequence) members.get(i)).materialize());
+                for (int i = 0; i< _members.size(); i++) {
+                    _members.set(i, ((Sequence) _members.get(i)).materialize());
                 }
                 knownToBeGrounded = true;
             }
         }
     }
-
-
-    /**
-     * Ask whether this function item is an array
-     *
-     * @return true (it is an array)
-     */
-    @Override
-    public boolean isArray() {
-        return true;
-    }
-
-    /**
-     * Ask whether this function item is a map
-     *
-     * @return false (it is not a map)
-     */
-    @Override
-    public boolean isMap() {
-        return false;
-    }
-
+    
     /**
      * Get the function annotations (as defined in XQuery). Returns an empty
      * list if there are no function annotations.
@@ -137,7 +116,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
 
     @Override
     public GroundedValue get(int index) {
-        return members.get(index);
+        return _members.get(index);
     }
 
     /**
@@ -162,7 +141,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
 
     @Override
     public int arrayLength() {
-        return members.size();
+        return _members.size();
     }
 
     /**
@@ -173,7 +152,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
 
     @Override
     public boolean isEmpty() {
-        return members.isEmpty();
+        return _members.isEmpty();
     }
 
     /**
@@ -184,7 +163,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
 
     @Override
     public Iterable<GroundedValue> members() {
-        return members;
+        return _members;
     }
 
     /**
@@ -225,7 +204,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      */
     @Override
     public ArrayItem subArray(int start, int end) {
-        return new SimpleArrayItem(members.subList(start, end));
+        return new SimpleArrayItem(_members.subList(start, end));
     }
 
     /**
@@ -267,7 +246,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      */
 
     public List<GroundedValue> getMembers() {
-        return members;
+        return _members;
     }
 
     /**

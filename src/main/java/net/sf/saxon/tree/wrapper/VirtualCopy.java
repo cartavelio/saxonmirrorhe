@@ -681,7 +681,7 @@ public class VirtualCopy implements NodeInfo {
     }
 
     /**
-     * Return the public identifier for the current document event.
+     * Return the public identifier for the _current document event.
      * <p>The return value is the public identifier of the document
      * entity or of the external parsed entity in which the markup that
      * triggered the event appears.</p>

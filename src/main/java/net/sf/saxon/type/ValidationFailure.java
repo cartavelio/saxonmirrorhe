@@ -51,7 +51,7 @@ public class ValidationFailure
     private SchemaType schemaType;
     /*@Nullable*/ private StructuredQName errorCode;
     private ValidationException exception;
-    private boolean hasBeenReported;
+    private boolean errorHasBeenReported;
 
 
     /**
@@ -409,7 +409,7 @@ public class ValidationFailure
         } else {
             ve.setErrorCodeQName(errorCode);
         }
-        ve.setHasBeenReported(hasBeenReported);
+        ve.setHasBeenReported(errorHasBeenReported);
         exception = ve;
         return ve;
     }
@@ -433,11 +433,11 @@ public class ValidationFailure
     }
 
     public boolean hasBeenReported() {
-        return hasBeenReported;
+        return errorHasBeenReported;
     }
 
     public void setHasBeenReported(boolean reported) {
-        hasBeenReported = reported;
+        errorHasBeenReported = reported;
         if (exception != null) {
             exception.setHasBeenReported(reported);
         }

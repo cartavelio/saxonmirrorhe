@@ -177,7 +177,7 @@ public class TinyTextualElement extends TinyElementImpl {
     /*@Nullable*/
     public TinyTextualElementText getTextNode() {
         if (textNode == null) {
-            textNode = new TinyTextualElementText();
+            textNode = new TinyTextualElementText(this);
         }
         return textNode;
     }
@@ -186,7 +186,13 @@ public class TinyTextualElement extends TinyElementImpl {
      * Inner class representing the text node; this is created on demand
      */
 
-    public class TinyTextualElementText implements NodeInfo, SourceLocator {
+    public static class TinyTextualElementText implements NodeInfo, SourceLocator {
+
+        private final TinyTextualElement element;
+
+        public TinyTextualElementText(TinyTextualElement element) {
+            this.element = element;
+        }
 
         /**
          * Ask whether this NodeInfo implementation holds a fingerprint identifying the name of the
@@ -212,7 +218,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
         @Override
         public TreeInfo getTreeInfo() {
-            return TinyTextualElement.this.getTreeInfo();
+            return element.getTreeInfo();
         }
 
         /**
@@ -235,14 +241,13 @@ public class TinyTextualElement extends TinyElementImpl {
         }
 
         /**
-         * Get the value of the item as a CharSequence. This is in some cases more efficient than
-         * the version of the method that returns a String.
-         * @return
+         * Get the value of the item as a UnicodeString.
+         * @return the string value of the text node
          */
 
         @Override
         public UnicodeString getUnicodeStringValue() {
-            return TinyTextualElement.this.getUnicodeStringValue();
+            return element.getUnicodeStringValue();
         }
 
         /**
@@ -263,7 +268,7 @@ public class TinyTextualElement extends TinyElementImpl {
 
         @Override
         public void generateId(/*@NotNull*/ StringBuilder buffer) {
-            TinyTextualElement.this.generateId(buffer);
+            element.generateId(buffer);
             buffer.append("T");
         }
 
@@ -274,7 +279,7 @@ public class TinyTextualElement extends TinyElementImpl {
         /*@Nullable*/
         @Override
         public String getSystemId() {
-            return TinyTextualElement.this.getSystemId();
+            return element.getSystemId();
         }
 
         /**
@@ -284,7 +289,7 @@ public class TinyTextualElement extends TinyElementImpl {
 
         @Override
         public String getBaseURI() {
-            return TinyTextualElement.this.getBaseURI();
+            return element.getBaseURI();
         }
 
         /**
@@ -521,7 +526,7 @@ public class TinyTextualElement extends TinyElementImpl {
         public AxisIterator iterateAxis(int axisNumber) {
             switch (axisNumber) {
                 case AxisInfo.ANCESTOR:
-                    return TinyTextualElement.this.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
+                    return element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
 
                 case AxisInfo.PRECEDING_OR_ANCESTOR:
                     return new Navigator.PrecedingEnumeration(this, true);
@@ -620,7 +625,7 @@ public class TinyTextualElement extends TinyElementImpl {
         /*@NotNull*/
         @Override
         public NodeInfo getParent() {
-            return TinyTextualElement.this;
+            return element;
         }
 
         /**
@@ -632,7 +637,7 @@ public class TinyTextualElement extends TinyElementImpl {
         /*@NotNull*/
         @Override
         public NodeInfo getRoot() {
-            return getParent().getRoot();
+            return element.getRoot();
         }
 
         /**

@@ -17,7 +17,7 @@ import java.util.function.Predicate;
 abstract class TreeEnumeration implements AxisIterator, LookaheadIterator {
 
     protected NodeImpl start;
-    /*@Nullable*/ protected NodeImpl next;
+    /*@Nullable*/ protected NodeImpl nextNode;
     protected Predicate<? super NodeInfo> nodeTest;
     /*@Nullable*/ protected NodeImpl current = null;
     protected int position = 0;
@@ -32,7 +32,7 @@ abstract class TreeEnumeration implements AxisIterator, LookaheadIterator {
      */
 
     public TreeEnumeration(NodeImpl origin, Predicate<? super NodeInfo> nodeTest) {
-        next = origin;
+        nextNode = origin;
         start = origin;
         this.nodeTest = nodeTest;
     }
@@ -57,7 +57,7 @@ abstract class TreeEnumeration implements AxisIterator, LookaheadIterator {
     protected final void advance() {
         do {
             step();
-        } while (!conforms(next));
+        } while (!conforms(nextNode));
     }
 
     /**
@@ -78,7 +78,7 @@ abstract class TreeEnumeration implements AxisIterator, LookaheadIterator {
 
     @Override
     public boolean hasNext() {
-        return next != null;
+        return nextNode != null;
     }
 
 
@@ -89,12 +89,12 @@ abstract class TreeEnumeration implements AxisIterator, LookaheadIterator {
     /*@Nullable*/
     @Override
     public final NodeInfo next() {
-        if (next == null) {
+        if (nextNode == null) {
             current = null;
             position = -1;
             return null;
         } else {
-            current = next;
+            current = nextNode;
             position++;
             advance();
             return current;

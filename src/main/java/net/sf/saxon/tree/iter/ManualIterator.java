@@ -23,7 +23,7 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
         ReversibleIterator, LastPositionFinder, GroundedIterator, LookaheadIterator {
 
     private Item item;
-    private int position;
+    private int _position;
     private LastPositionFinder lastPositionFinder;
 
     /**
@@ -33,7 +33,7 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
 
     public ManualIterator() {
         item = null;
-        position = 0;
+        _position = 0;
     }
 
     /**
@@ -45,7 +45,7 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
 
     public ManualIterator(Item value, int position) {
         this.item = value;
-        this.position = position;
+        this._position = position;
     }
 
     /**
@@ -56,7 +56,7 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
 
     public ManualIterator(Item value) {
         this.item = value;
-        this.position = 1;
+        this._position = 1;
         this.lastPositionFinder = () -> 1;
     }
 
@@ -69,11 +69,11 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
     }
 
     public void incrementPosition() {
-        position++;
+        _position++;
     }
 
     public void setPosition(int position) {
-        this.position = position;
+        this._position = position;
     }
 
     /**
@@ -112,7 +112,7 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
      */
     @Override
     public int position() {
-        return position;
+        return _position;
     }
 
     @Override

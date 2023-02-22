@@ -23,7 +23,7 @@ import net.sf.saxon.tree.AttributeLocation;
 public class XmlProcessingException implements XmlProcessingError {
 
     private final XPathException exception;
-    private boolean isWarning;
+    private boolean _isWarning;
     private String fatalErrorMessage;
 
     /**
@@ -81,7 +81,7 @@ public class XmlProcessingException implements XmlProcessingError {
 
     @Override
     public boolean isWarning() {
-        return isWarning;
+        return _isWarning;
     }
 
     @Override
@@ -95,7 +95,7 @@ public class XmlProcessingException implements XmlProcessingError {
     }
 
     public void setWarning(boolean warning) {
-        isWarning = warning;
+        _isWarning = warning;
     }
 
     @Override

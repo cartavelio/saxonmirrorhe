@@ -313,17 +313,21 @@ public class Chain implements GroundedValue {
             // a Chain, then add it to the stack and repeat. If this Chain is exhausted, then pop it off the
             // stack and repeat.
 
-            outer:
             while (!stack.isEmpty()) {
                 ChainPosition cp = stack.peek();
-                GroundedValue gv;
+                GroundedValue gv = null;
+                boolean continueOuter = false;
                 do {
                     if (cp.offset >= cp.chain.children.size()) {
                         stack.pop();
-                        continue outer;
+                        continueOuter = true;
+                        break;
                     }
                     gv = cp.chain.children.get(cp.offset++);
                 } while (gv.getLength() <= 0);
+                if (continueOuter) {
+                    continue;
+                }
                 if (gv instanceof Chain) {
                     stack.push(new ChainPosition((Chain) gv, 0));
                 } else if (gv instanceof Item) {

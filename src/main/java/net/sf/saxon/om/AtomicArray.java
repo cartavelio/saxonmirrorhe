@@ -16,6 +16,7 @@ import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.value.SchemaComparable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -198,38 +199,48 @@ public class AtomicArray implements AtomicSequence {
      */
 
     @Override
-    public Comparable getSchemaComparable() {
+    public SchemaComparable getSchemaComparable() {
         if (content.size() == 1) {
             return content.get(0).getSchemaComparable();
         } else {
-            return new ValueSchemaComparable();
+            return new ValueSchemaComparable(this);
         }
     }
 
-    private class ValueSchemaComparable implements Comparable<ValueSchemaComparable> {
+    private static class ValueSchemaComparable implements SchemaComparable {
+
+        private final AtomicArray value;
+
+        public ValueSchemaComparable(AtomicArray value) {
+            this.value = value;
+        }
         public AtomicArray getValue() {
-            return AtomicArray.this;
+            return value;
         }
 
         @Override
-        public int compareTo(ValueSchemaComparable obj) {
-            UnfailingIterator iter1 = getValue().iterate();
-            UnfailingIterator iter2 = obj.getValue().iterate();
-            while (true) {
-                AtomicValue item1 = (AtomicValue) iter1.next();
-                AtomicValue item2 = (AtomicValue) iter2.next();
-                if (item1 == null && item2 == null) {
-                    return 0;
+        public int compareTo(SchemaComparable obj) {
+            if (obj instanceof ValueSchemaComparable) {
+                UnfailingIterator iter1 = getValue().iterate();
+                UnfailingIterator iter2 = ((ValueSchemaComparable)obj).getValue().iterate();
+                while (true) {
+                    AtomicValue item1 = (AtomicValue) iter1.next();
+                    AtomicValue item2 = (AtomicValue) iter2.next();
+                    if (item1 == null && item2 == null) {
+                        return 0;
+                    }
+                    if (item1 == null) {
+                        return -1;
+                    } else if (item2 == null) {
+                        return +1;
+                    }
+                    int c = item1.getSchemaComparable().compareTo(item2.getSchemaComparable());
+                    if (c != 0) {
+                        return c;
+                    }
                 }
-                if (item1 == null) {
-                    return -1;
-                } else if (item2 == null) {
-                    return +1;
-                }
-                int c = item1.getSchemaComparable().compareTo(item2.getSchemaComparable());
-                if (c != 0) {
-                    return c;
-                }
+            } else {
+                return SequenceTool.INDETERMINATE_ORDERING;
             }
         }
 
@@ -240,16 +251,14 @@ public class AtomicArray implements AtomicSequence {
 
         public int hashCode() {
             try {
-                int hash = 0x06639662;  // arbitrary seed
+                int hash = 0x06639662;  // arbitrary seed                     a
                 SequenceIterator iter = getValue().iterate();
                 while (true) {
                     Item item = iter.next();
                     if (item == null) {
                         return hash;
                     }
-                    if (item instanceof AtomicValue) {
-                        hash ^= ((AtomicValue) item).getSchemaComparable().hashCode();
-                    }
+                    hash ^= ((AtomicValue) item).getSchemaComparable().hashCode();
                 }
             } catch (XPathException e) {
                 return 0;

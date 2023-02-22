@@ -49,7 +49,7 @@ import java.util.*;
  */
 
 public final class DateTimeValue extends CalendarValue
-        implements Comparable, TemporalAccessor {
+        implements Comparable<DateTimeValue>, TemporalAccessor {
 
     private int year;       // the year as written, +1 for BC years
     private byte month;     // the month as written, range 1-12
@@ -1475,9 +1475,9 @@ public final class DateTimeValue extends CalendarValue
      */
 
     @Override
-    public int compareTo(Object v2) {
+    public int compareTo(DateTimeValue v2) {
         try {
-            return compareTo((DateTimeValue) v2, MISSING_TIMEZONE);
+            return compareTo(v2, MISSING_TIMEZONE);
         } catch (Exception err) {
             throw new ClassCastException("DateTime comparison requires access to implicit timezone");
         }
@@ -1485,27 +1485,32 @@ public final class DateTimeValue extends CalendarValue
 
     /*@NotNull*/
     @Override
-    public Comparable getSchemaComparable() {
-        return new DateTimeComparable();
+    public SchemaComparable getSchemaComparable() {
+        return new DateTimeComparable(this);
     }
 
     /**
      * DateTimeComparable is an object that implements the XML Schema rules for comparing date/time values
      */
 
-    private class DateTimeComparable implements Comparable {
+    private static class DateTimeComparable implements SchemaComparable {
+
+        private final DateTimeValue value;
+        public DateTimeComparable(DateTimeValue value) {
+            this.value = value;
+        }
 
         /*@NotNull*/
         private DateTimeValue asDateTimeValue() {
-            return DateTimeValue.this;
+            return value;
         }
 
         // Rules from XML Schema Part 2
         @Override
-        public int compareTo(/*@NotNull*/ Object o) {
+        public int compareTo(SchemaComparable o) {
             if (o instanceof DateTimeComparable) {
-                DateTimeValue dt0 = DateTimeValue.this;
-                DateTimeValue dt1 = ((DateTimeComparable) o).asDateTimeValue();
+                DateTimeValue dt0 = value;
+                DateTimeValue dt1 = ((DateTimeComparable) o).value;
                 if (dt0.hasTimezone()) {
                     if (dt1.hasTimezone()) {
                         dt0 = dt0.adjustTimezone(0);
@@ -1547,12 +1552,12 @@ public final class DateTimeValue extends CalendarValue
 
         public boolean equals(/*@NotNull*/ Object o) {
             return o instanceof DateTimeComparable &&
-                    DateTimeValue.this.hasTimezone() == ((DateTimeComparable) o).asDateTimeValue().hasTimezone() &&
-                    compareTo(o) == 0;
+                    value.hasTimezone() == ((DateTimeComparable) o).value.hasTimezone() &&
+                    compareTo((DateTimeComparable) o) == 0;
         }
 
         public int hashCode() {
-            DateTimeValue dt0 = adjustTimezone(0);
+            DateTimeValue dt0 = value.adjustTimezone(0);
             return (dt0.year << 20) ^ (dt0.month << 16) ^ (dt0.day << 11) ^
                     (dt0.hour << 7) ^ (dt0.minute << 2) ^ (dt0.second * 1_000_000_000 + dt0.nanosecond);
         }
@@ -1567,7 +1572,7 @@ public final class DateTimeValue extends CalendarValue
      */
 
     public boolean equals(Object o) {
-        return o instanceof DateTimeValue && compareTo(o) == 0;
+        return o instanceof DateTimeValue && compareTo((DateTimeValue)o) == 0;
     }
 
     /**

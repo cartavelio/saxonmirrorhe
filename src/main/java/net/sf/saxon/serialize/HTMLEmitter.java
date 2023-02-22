@@ -337,66 +337,66 @@ public abstract class HTMLEmitter extends XMLEmitter {
                 writer.write(chars.substring(segstart, i));
             }
 
-            final int c = codePoints[i];
-            if (c == 0) {
+            final int ch = codePoints[i];
+            if (ch == 0) {
                 // used to switch escaping on and off
                 disabled = !disabled;
             } else if (disabled) {
-                writeCodePoint(c);
-            } else if (c <= 127) {
+                writeCodePoint(ch);
+            } else if (ch <= 127) {
                 // handle a special ASCII character
                 if (inAttribute) {
-                    if (c == '<') {
+                    if (ch == '<') {
                         writer.writeCodePoint('<');      // not escaped
-                    } else if (c == '>') {
+                    } else if (ch == '>') {
                         writer.writeAscii(StringConstants.ESCAPE_GT);   // recommended for older browsers
-                    } else if (c == '&') {
+                    } else if (ch == '&') {
                         if (i + 1 < codePoints.length && codePoints[i + 1] == '{') {
                             writer.writeCodePoint('&');                   // not escaped if followed by '{'
                         } else {
                             writer.writeAscii(StringConstants.ESCAPE_AMP);
                         }
-                    } else if (c == '\"') {
+                    } else if (ch == '\"') {
                         writer.writeAscii(StringConstants.ESCAPE_QUOT);
-                    } else if (c == '\'') {
+                    } else if (ch == '\'') {
                         writer.writeAscii(StringConstants.ESCAPE_APOS);
-                    } else if (c == '\n') {
+                    } else if (ch == '\n') {
                         writer.writeAscii(StringConstants.ESCAPE_NL);
-                    } else if (c == '\t') {
+                    } else if (ch == '\t') {
                         writer.writeAscii(StringConstants.ESCAPE_TAB);
-                    } else if (c == '\r') {
+                    } else if (ch == '\r') {
                         writer.writeAscii(StringConstants.ESCAPE_CR);
                     }
                 } else {
-                    if (c == '<') {
+                    if (ch == '<') {
                         writer.writeAscii(StringConstants.ESCAPE_LT);
-                    } else if (c == '>') {
+                    } else if (ch == '>') {
                         writer.writeAscii(StringConstants.ESCAPE_GT);
-                    } else if (c == '&') {
+                    } else if (ch == '&') {
                         writer.writeAscii(StringConstants.ESCAPE_AMP);
-                    } else if (c == '\r') {
+                    } else if (ch == '\r') {
                         writer.writeAscii(StringConstants.ESCAPE_CR);
                     }
                 }
 
-            } else if (c < 160) {
+            } else if (ch < 160) {
                 if (rejectControlCharacters()) {
                     // these control characters are illegal in HTML
-                    XPathException err = new XPathException("Illegal HTML character: decimal " + c);
+                    XPathException err = new XPathException("Illegal HTML character: decimal " + ch);
                     err.setErrorCode("SERE0014");
                     throw err;
                 } else {
-                    characterReferenceGenerator.outputCharacterReference(c, writer);
+                    characterReferenceGenerator.outputCharacterReference(ch, writer);
                 }
 
-            } else if (c == 160) {
+            } else if (ch == 160) {
                 // always output NBSP as an entity reference
                 writer.writeAscii(StringConstants.ESCAPE_NBSP);
 
-            } else if (c > 65535 || escapeNonAscii || !characterSet.inCharset(c)) {
-                characterReferenceGenerator.outputCharacterReference(c, writer);
+            } else if (ch > 65535 || escapeNonAscii || !characterSet.inCharset(ch)) {
+                characterReferenceGenerator.outputCharacterReference(ch, writer);
             } else {
-                writer.writeCodePoint(c);
+                writer.writeCodePoint(ch);
             }
             segstart = ++i;
         }

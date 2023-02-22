@@ -19,23 +19,14 @@ import net.sf.saxon.z.IntHashSet;
 
 public interface ComplexType extends SchemaType {
 
-    int VARIETY_EMPTY = 0;
-    int VARIETY_SIMPLE = 1;
-    int VARIETY_ELEMENT_ONLY = 2;
-    int VARIETY_MIXED = 3;
-
-    int OPEN_CONTENT_ABSENT = 0;
-    int OPEN_CONTENT_NONE = 1;
-    int OPEN_CONTENT_INTERLEAVE = 2;
-    int OPEN_CONTENT_SUFFIX = 3;
-
     /**
      * Get the variety of this complex type. This will be one of the values
-     * {@link #VARIETY_EMPTY}, {@link #VARIETY_MIXED}, {@link #VARIETY_SIMPLE}, or
-     * {@link #VARIETY_ELEMENT_ONLY}
+     * {@link ComplexVariety#EMPTY}, {@link ComplexVariety#MIXED}, {@link ComplexVariety#SIMPLE}, or
+     * {@link ComplexVariety#ELEMENT_ONLY}
+     * @return the variety of the type
      */
 
-    int getVariety();
+    ComplexVariety getVariety();
 
     /**
      * Test whether this complex type has been marked as abstract. This corresponds to

@@ -28,15 +28,15 @@ import javax.xml.transform.TransformerException;
 
 public class XPathException extends TransformerException {
 
-    private boolean isTypeError = false;
-    private boolean isSyntaxError = false;
-    private boolean isStaticError = false;
-    private boolean isGlobalError = false;
+    private boolean _isTypeError = false;
+    private boolean _isSyntaxError = false;
+    private boolean _isStaticError = false;
+    private boolean _isGlobalError = false;
     private String hostLanguage = null;
     private StructuredQName errorCode;
     private Sequence errorObject;
     private Expression failingExpression;
-    private boolean hasBeenReported = false;
+    private boolean _hasBeenReported = false;
     transient XPathContext context;
     // declared transient because a compiled stylesheet might contain a "deferred action" dynamic error
     // and the EarlyEvaluationContext links back to the source stylesheet.
@@ -256,7 +256,7 @@ public class XPathException extends TransformerException {
      */
 
     public void setIsStaticError(boolean is) {
-        isStaticError = is;
+        _isStaticError = is;
     }
 
     /**
@@ -266,7 +266,7 @@ public class XPathException extends TransformerException {
      */
 
     public boolean isStaticError() {
-        return isStaticError;
+        return _isStaticError;
     }
 
     /**
@@ -277,9 +277,9 @@ public class XPathException extends TransformerException {
 
     public void setIsSyntaxError(boolean is) {
         if (is) {
-            isStaticError = true;
+            _isStaticError = true;
         }
-        isSyntaxError = is;
+        _isSyntaxError = is;
     }
 
     /**
@@ -289,7 +289,7 @@ public class XPathException extends TransformerException {
      */
 
     public boolean isSyntaxError() {
-        return isSyntaxError;
+        return _isSyntaxError;
     }
 
 
@@ -300,7 +300,7 @@ public class XPathException extends TransformerException {
      */
 
     public void setIsTypeError(boolean is) {
-        isTypeError = is;
+        _isTypeError = is;
     }
 
     /**
@@ -310,7 +310,7 @@ public class XPathException extends TransformerException {
      */
 
     public boolean isTypeError() {
-        return isTypeError;
+        return _isTypeError;
     }
 
     /**
@@ -322,7 +322,7 @@ public class XPathException extends TransformerException {
      */
 
     public void setIsGlobalError(boolean is) {
-        isGlobalError = is;
+        _isGlobalError = is;
     }
 
     /**
@@ -334,7 +334,7 @@ public class XPathException extends TransformerException {
      */
 
     public boolean isGlobalError() {
-        return isGlobalError;
+        return _isGlobalError;
     }
 
     /**
@@ -465,7 +465,7 @@ public class XPathException extends TransformerException {
      */
 
     public void setHasBeenReported(boolean reported) {
-        hasBeenReported = reported;
+        _hasBeenReported = reported;
     }
 
     /**
@@ -476,7 +476,7 @@ public class XPathException extends TransformerException {
      */
 
     public boolean hasBeenReported() {
-        return hasBeenReported;
+        return _hasBeenReported;
     }
 
     /**

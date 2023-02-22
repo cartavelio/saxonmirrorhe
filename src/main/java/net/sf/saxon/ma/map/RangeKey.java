@@ -36,7 +36,7 @@ import java.util.TreeMap;
  * <p>At present range keys are only available for string-valued keys using the Unicode codepoint collating sequence.</p>
  */
 
-public class RangeKey implements MapItem {
+public class RangeKey extends MapItem {
 
     private final UnicodeString min;
     private final UnicodeString max;
