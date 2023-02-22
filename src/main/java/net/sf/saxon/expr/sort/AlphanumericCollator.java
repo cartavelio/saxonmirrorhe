@@ -7,14 +7,16 @@
 
 package net.sf.saxon.expr.sort;
 
+import net.sf.saxon.functions.CollationKeyFn;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.RegexIterator;
-import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.StringValue;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 
 /**
@@ -131,20 +133,27 @@ public class AlphanumericCollator implements StringCollator {
 
     @Override
     public AtomicMatchKey getCollationKey(/*@NotNull*/ UnicodeString cs) {
-        // The string is normalized by removing leading zeros in a numeric component
-
-        UnicodeString sb = EmptyUnicodeString.getInstance();
+        // See bug 5049
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         RegexIterator iter = pattern.analyze(cs);
         for (StringValue sv; (sv = iter.next()) != null;) {
             if (iter.isMatching()) {
+                // numeric part
                 BigInteger n = new BigInteger(sv.getStringValue());
-                sb = sb.concat(BMPString.of(n.toString()));
+                byte[] bin = n.toByteArray();
+                int len = bin.length;
+                // Assume max length of numeric part 255
+                baos.write(0); // separator from previous alpha part
+                baos.write((byte)len);
+                baos.write(bin, 0, bin.length); // written this way to avoid checked exceptions
             } else {
-                AtomicMatchKey part = baseCollator.getCollationKey(sv.getUnicodeStringValue());
-                sb = sb.concat(((StringValue) part).getContent());
+                Base64BinaryValue b64 = CollationKeyFn.getCollationKey(sv.getUnicodeStringValue(), baseCollator);
+                final byte[] bin = b64.getBinaryValue();
+                baos.write(bin, 0, bin.length);
+
             }
         }
-        return sb;
+        return new Base64BinaryValue(baos.toByteArray());
     }
 
 }

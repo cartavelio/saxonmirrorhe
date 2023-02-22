@@ -22,7 +22,7 @@ import net.sf.saxon.value.StringValue;
 public class CollationKeyFn extends CollatingFunctionFixed {
 
 
-    private static Base64BinaryValue getCollationKey(UnicodeString s, StringCollator collator) {
+    public static Base64BinaryValue getCollationKey(UnicodeString s, StringCollator collator) {
         AtomicValue val = collator.getCollationKey(s).asAtomic();
         if (val instanceof Base64BinaryValue) {
             return (Base64BinaryValue) val;
