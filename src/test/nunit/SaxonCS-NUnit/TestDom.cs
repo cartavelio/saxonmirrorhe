@@ -38,8 +38,8 @@ namespace SaxonCS_NUnit {
         }
 
         /**
-     * Test that namespaces are copied OK by an identity transform
-     */
+         * Test that namespaces are copied OK by an identity transform
+         */
 
         [Test]
         public void testCopyNamespaces() {
