@@ -202,6 +202,7 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
                 } else {
                     logger.warning(message);
                 }
+                warningCount++;
             }
             warningsIssued.add(message);
         }
