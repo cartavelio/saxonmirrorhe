@@ -396,6 +396,7 @@ public class ReceivingContentHandler
             int properties = ReceiverOption.NAMESPACE_OK;
             String value = atts.getValue(a);
             String qname = atts.getQName(a);
+            String uri = atts.getURI(a);
             if (qname.startsWith("xmlns") && (qname.length() == 5 || qname.charAt(5) == ':')) {
                 // We normally configure the parser so that it doesn't notify namespaces as attributes.
                 // But when running as a TransformerHandler, we have no control over the feature settings
@@ -417,9 +418,8 @@ public class ReceivingContentHandler
                 // Bug 4996 - if the attribute originates from Xerces schema processing,
                 // and if the attribute is namespaced, then the prefix and namespace declaration
                 // may be missing. Although Xerces is getting this wrong, we attempt to repair the damage.
-                if (atts.getURI(a) != null && !"".equals(atts.getURI(a)) && qname.indexOf(':') < 0) {
+                if (uri != null && !uri.isEmpty() && qname.indexOf(':') < 0) {
                     // defaulted attribute has a URI but no prefix
-                    String uri = atts.getURI(a);
                     String trialPrefix = getConfiguration().getNamePool().suggestPrefixForURI(uri);
                     if (trialPrefix == null) {
                         String[] existingUris = currentNamespaceMap.getURIsAsArray();
@@ -430,7 +430,7 @@ public class ReceivingContentHandler
                         }
                     }
                     if (trialPrefix == null) {
-                        trialPrefix = "p" + Err.abbreviateURI(atts.getURI(a)).replace("/", "").replace("...", ".");
+                        trialPrefix = "p" + Err.abbreviateURI(uri).replace("/", "").replace("...", ".");
                         if (!NameChecker.isValidNCName(trialPrefix)) {
                             trialPrefix = "p" + "_" + qname;
                         }
@@ -444,7 +444,7 @@ public class ReceivingContentHandler
                 }
             }
 
-            NodeName attCode = getNodeName(atts.getURI(a), atts.getLocalName(a), qname);
+            NodeName attCode = getNodeName(uri, atts.getLocalName(a), qname);
             String type = atts.getType(a);
             SimpleType typeCode = BuiltInAtomicType.UNTYPED_ATOMIC;
             if (retainDTDAttributeTypes) {
