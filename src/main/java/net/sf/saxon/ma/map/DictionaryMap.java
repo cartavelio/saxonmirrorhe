@@ -60,6 +60,8 @@ public class DictionaryMap extends MapItem {
 
     /**
      * During initial construction of the map, append a value to a possibly existing key-value pair
+     * @param key the key
+     * @param value the corresponding value
      */
 
     public void initialAppend(String key, GroundedValue value) {

@@ -78,8 +78,9 @@ public class CommentImpl extends NodeImpl {
     /**
      * Set the system ID and line number
      *
-     * @param uri        the system identifier
-     * @param lineNumber the line number
+     * @param uri          the system identifier
+     * @param lineNumber   the line number
+     * @param columnNumber the column number
      */
 
     public void setLocation(String uri, int lineNumber, int columnNumber) {

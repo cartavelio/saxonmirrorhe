@@ -888,6 +888,14 @@ public abstract class NodeImpl
     }
 
 
+    /**
+     * Add a namespace binding (that is, a namespace node) to this element. This call has no effect if applied
+     * to a node other than an element.
+     *
+     * @param nscode The namespace binding to be added
+     * @param inherit true if the namespace is to be inherited by descendant elements
+     */
+
     @Override
     public void addNamespace(NamespaceBinding nscode, boolean inherit) {
         // implemented for element nodes only
