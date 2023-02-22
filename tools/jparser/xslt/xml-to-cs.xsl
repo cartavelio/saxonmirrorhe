@@ -7,6 +7,18 @@
    expand-text="yes"
    default-mode="xml-to-cs">
    
+   <!-- 
+      This stylesheet takes the XML file produced as the output of the javaParser
+      (representing a single Java source file), and converts it to C# syntax, which
+      is output as text in the principal result file.
+      
+      Some of the conversions needed require access to interface information from
+      other modules (for example default methods provided in interfaces), and this
+      is made available via a digest file.
+   -->
+   
+   <xsl:param name="digest" as="document-node(element(digest))" required="yes"/>
+   
    <xsl:output method="text"/>
    <xsl:strip-space elements="*"/>
    <xsl:variable name="NL" select="'&#xa;'" as="xs:string"/>
@@ -186,10 +198,18 @@
       <xsl:text>{{{$NL}</xsl:text>
       <xsl:apply-templates select="* except packageDeclaration">
          <xsl:with-param name="indent" select="1" tunnel="yes"/>
+         <xsl:with-param name="include-nested-interfaces" select="false()" tunnel="yes"/>
       </xsl:apply-templates>
       <xsl:text>}}</xsl:text>
+      
+      <!-- Process any nested interfaces as top-level interfaces -->
+      <!-- Note, we're not attempting to handle more than one level of nesting -->
+      <xsl:apply-templates select="types/type[@nodeType='ClassOrInterfaceDeclaration'][@isInterface='true']/members/member[@nodeType='ClassOrInterfaceDeclaration'][@isInterface='true']">
+         <xsl:with-param name="indent" select="1" tunnel="yes"/>
+         <xsl:with-param name="exclude-nested-interfaces" select="true()" tunnel="yes"/>
+      </xsl:apply-templates>
    </xsl:template>
-   
+
    <xsl:template match="packageDeclaration">
       <xsl:text>namespace {f:qualified-name(name)} </xsl:text>
    </xsl:template>
@@ -250,34 +270,44 @@
    
    <xsl:template name="classOrInterface">
       <xsl:param name="indent" as="xs:integer" tunnel="yes"/>
-      <xsl:text>{if (@isInterface='true') then 'interface' else 'class'} {name/@identifier}</xsl:text>
-      <xsl:apply-templates select="typeParameters"/>
-      <xsl:if test="extendedTypes/extendedType | implementedTypes/implementedType">
-         <xsl:text> : </xsl:text>
-         <xsl:for-each select="extendedTypes/extendedType, implementedTypes/implementedType">
-            <xsl:if test="position() ne 1">, </xsl:if>
-            <xsl:apply-templates select="."/>
-         </xsl:for-each>
-      </xsl:if>
-      <xsl:text> {{{$NL}</xsl:text>
-      <xsl:if test="members/member[@nodeType = 'InitializerDeclaration'][@isStatic = 'true']">
-         <xsl:call-template name="indent"/>
-         <xsl:text>{$NL}        static {name/@identifier}() {{</xsl:text>
-         <xsl:text>{$NL}</xsl:text>
-         <xsl:apply-templates select="members/member[@nodeType = 'InitializerDeclaration'][@isStatic = 'true']/*">
-            <xsl:with-param name="indent" select="$indent+2" tunnel="yes"/>
+      <xsl:param name="include-nested-interfaces" select="false()" tunnel="yes"/>
+      <xsl:assert test="@nodeType='ClassOrInterfaceDeclaration'"/>
+      <xsl:variable name="kind" select="if (@isInterface='true') then 'interface' else 'class'" as="xs:string"/>
+      <xsl:variable name="containing-interface" select="ancestor::*[@isInterface='true'][1]" as="element(*)?"/>
+      <xsl:if test="$kind = 'class' or $include-nested-interfaces or empty($containing-interface)">
+         <xsl:text>{$kind} {if (exists($containing-interface)) then ($containing-interface/name/@identifier || '_') else ''}{name/@identifier}</xsl:text>
+         <xsl:apply-templates select="typeParameters"/>
+         <xsl:if test="extendedTypes/extendedType | implementedTypes/implementedType">
+            <xsl:text> : </xsl:text>
+            <xsl:for-each select="extendedTypes/extendedType, implementedTypes/implementedType">
+               <xsl:if test="position() ne 1">, </xsl:if>
+               <xsl:apply-templates select="."/>
+            </xsl:for-each>
+         </xsl:if>
+         <xsl:text> {{{$NL}</xsl:text>
+         <xsl:if test="members/member[@nodeType = 'InitializerDeclaration'][@isStatic = 'true']">
+            <xsl:text>{$NL}</xsl:text>
+            <xsl:call-template name="indent-extra"/>
+            <xsl:text>static {name/@identifier}() {{</xsl:text>
+            <xsl:text>{$NL}</xsl:text>
+            <xsl:apply-templates select="members/member[@nodeType = 'InitializerDeclaration'][@isStatic = 'true']/*">
+               <xsl:with-param name="indent" select="$indent+2" tunnel="yes"/>
+            </xsl:apply-templates>
+            <xsl:call-template name="indent-extra"/>
+            <xsl:text>}}{$NL}</xsl:text>
+         </xsl:if>
+         <xsl:apply-templates select="members/member">
+            <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
          </xsl:apply-templates>
          <xsl:call-template name="indent"/>
-         <xsl:text>    }}{$NL}</xsl:text>
+         <xsl:apply-templates select=".//anonymousClassBody">
+            <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
+         </xsl:apply-templates>
+         <xsl:if test="not(@isInterface='true')">
+            <xsl:call-template name="expand-defaulted-methods"/>
+         </xsl:if>
+         <xsl:text>}}{$NL}</xsl:text>
       </xsl:if>
-      <xsl:apply-templates select="members/member">
-         <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
-      </xsl:apply-templates>
-      <xsl:call-template name="indent"/>
-      <xsl:apply-templates select=".//anonymousClassBody">
-         <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
-      </xsl:apply-templates>
-      <xsl:text>}}{$NL}</xsl:text>
    </xsl:template>
    
    <xsl:template match="*[@nodeType='ClassOrInterfaceDeclaration']">
@@ -318,11 +348,13 @@
    
    <xsl:template match="*[@nodeType='MethodDeclaration']">
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
+      <xsl:param name="expanding-defaults" select="false()" tunnel="yes" as="xs:boolean"/>
       <xsl:call-template name="indent"/>
+      <xsl:if test="body and $expanding-defaults and not(modifiers/modifier/@keyword[. = 'PUBLIC'])">public </xsl:if>
       <xsl:call-template name="modifiers"/>
       <!--<xsl:apply-templates select="typeParameters"/>-->
       <xsl:apply-templates select="type"/>
-      <xsl:text> {name/@identifier}(</xsl:text>
+      <xsl:text> {f:escapeSimpleName(name/@identifier)}(</xsl:text>
       <xsl:apply-templates select="parameters"/>
       <xsl:text>)</xsl:text>
       <!--<xsl:apply-templates select="thrownExceptions"/>-->
@@ -335,7 +367,7 @@
             <xsl:call-template name="indent"/>
             <xsl:text>}}}}{$NL}</xsl:text>
          </xsl:when>
-         <xsl:when test="body">
+         <xsl:when test="body and ($expanding-defaults or not(modifiers/modifier/@keyword[. = 'DEFAULT']))">
             <xsl:text> {{{$NL}</xsl:text>
             <xsl:apply-templates select="body/statements">
                <xsl:with-param name="indent" select="$indent + 1" tunnel="yes"/>
@@ -681,19 +713,24 @@
       </xsl:apply-templates>
       <xsl:text>;{$NL}</xsl:text>
    </xsl:template>
+   
+   <xsl:template match="*[@nodeType='TryStmt'][resources]" priority="20">
+      <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
+      <xsl:call-template name="indent"/>
+      <xsl:text>using (</xsl:text>
+      <xsl:apply-templates select="resources/*"/>
+      <xsl:text>) {{</xsl:text>
+      <xsl:next-match>
+         <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
+      </xsl:next-match>
+      <xsl:call-template name="indent"/>
+      <xsl:text>}}</xsl:text>
+   </xsl:template>
  
    <xsl:template match="*[@nodeType='TryStmt']">
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
       <xsl:call-template name="indent"/>
-      <xsl:choose>
-         <xsl:when test="resources">
-            <xsl:text>using (</xsl:text>
-            <xsl:apply-templates select="resources/*"/>
-            <xsl:text>) </xsl:text>
-         </xsl:when>
-         <xsl:otherwise>try </xsl:otherwise>
-      </xsl:choose>
-      <xsl:text>{{{$NL}</xsl:text>
+      <xsl:text>try {{{$NL}</xsl:text>
       <xsl:apply-templates select="tryBlock/statements">
          <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
       </xsl:apply-templates>
@@ -818,6 +855,14 @@
       <xsl:text>)</xsl:text>
    </xsl:template>
    
+   <xsl:template match="*[@nodeType='BinaryExpr'][@operator='UNSIGNED_RIGHT_SHIFT']" priority="20">
+      <xsl:text>Utils.unsignedRightShift(</xsl:text>
+      <xsl:apply-templates select="left"/>
+      <xsl:text>, </xsl:text>
+      <xsl:apply-templates select="right"/>
+      <xsl:text>)</xsl:text>
+   </xsl:template>
+   
    <xsl:template match="*[@nodeType='ConditionalExpr']">
       <xsl:text>(</xsl:text>
       <xsl:apply-templates select="condition"/>
@@ -825,6 +870,12 @@
       <xsl:apply-templates select="thenExpr"/>
       <xsl:text> : </xsl:text>
       <xsl:apply-templates select="elseExpr"/>
+      <xsl:text>)</xsl:text>
+   </xsl:template>
+   
+   <xsl:template match="*[@nodeType='CastExpr']/*[@nodeType='LambdaExpr']" priority="20">
+      <xsl:text>(</xsl:text>
+      <xsl:next-match/>
       <xsl:text>)</xsl:text>
    </xsl:template>
    
@@ -932,8 +983,14 @@
       </xsl:choose>
       <xsl:if test="(annotations/annotation/name/@identifier = 'Override' 
          or (../../name/@identifier = ('equals', 'hashCode', 'toString'))) 
-         and not(ancestor::type[@nodeType='ClassOrInterfaceDeclaration'][1]/@isInterface='true')">override </xsl:if>
+         and not(f:isInterfaceMember(.))">override </xsl:if>
+      <xsl:if test="annotations/annotation/name/@identifier = 'Virtual'">virtual </xsl:if>
    </xsl:template>
+   
+   <xsl:function name="f:isInterfaceMember" as="xs:boolean">
+      <xsl:param name="expr" as="element(*)"/>
+      <xsl:sequence select="$expr/ancestor::type[@nodeType='ClassOrInterfaceDeclaration'][1]/@isInterface='true'"/>
+   </xsl:function>
    
    <xsl:template match="modifier">
       <xsl:apply-templates select="@keyword"/>
@@ -951,8 +1008,13 @@
       <xsl:text>readonly </xsl:text>
    </xsl:template>
    
+   <xsl:template match="modifier[f:isInterfaceMember(.)]/@keyword[. = 'PUBLIC']" priority="10"/>
+   
    <xsl:template match="modifier/@keyword[. = 'TRANSIENT']" priority="10"/>
    <xsl:template match="modifier/@keyword[. = 'SYNCHRONIZED']" priority="10"/>
+   <xsl:template match="modifier/@keyword[. = 'DEFAULT']" priority="10"/>
+   
+   <xsl:template match="*[@nodeType=('ClassOrInterfaceDeclaration')]/modifiers/modifier/@keyword[. = 'STATIC']" priority="10"/>
    
    <xsl:template match="*[@nodeType=('ClassOrInterfaceDeclaration', 'MethodDeclaration')]/modifiers/modifier[@keyword = 'FINAL']" priority="20">
       <xsl:text>sealed </xsl:text>
@@ -1015,8 +1077,8 @@
    </xsl:template>
    
    <xsl:template match="typeArgument[superType]" priority="20">
-      <!--<xsl:text>? super </xsl:text>
-      <xsl:apply-templates select="superType"/>-->
+      <!--<xsl:text>? super </xsl:text>-->
+      <xsl:apply-templates select="superType"/>
    </xsl:template>
    
    <xsl:template match="typeArgument[@nodeType = 'WildcardType']" priority="10">
@@ -1077,7 +1139,23 @@
    
    <xsl:function name="f:allocateInnerClassName" as="xs:string">
       <xsl:param name="creationExpr" as="element(*)"/>
-      <xsl:text>Inner_{$creationExpr/type!tokenize(f:degenerify(@RESOLVED_TYPE), '\.')[last()]}_{generate-id($creationExpr)}</xsl:text>
+      <xsl:variable name="resolvedName" select="f:resolveTypeName($creationExpr/type)"/>
+      <xsl:text>Inner_{tokenize(f:degenerify($resolvedName), '\.')[last()]}_{generate-id($creationExpr)}</xsl:text>
+   </xsl:function>
+   
+   <xsl:function name="f:resolveTypeName">
+      <xsl:param name="type" as="element(type)"/>
+      <xsl:choose>
+         <xsl:when test="$type/@RESOLVED_TYPE">
+            <xsl:sequence select="$type/@RESOLVED_TYPE"/>
+         </xsl:when>
+         <xsl:when test="$type/@UNRESOLVED and exists($type//import[name/@identifier=$type/@UNRESOLVED])">
+            <xsl:sequence select="f:qualified-name($type//import[name/@identifier=$type/@UNRESOLVED]/name)"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:sequence select="$type/name/@identifier"/>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:function>
    
    <xsl:template match="anonymousClassBody">
@@ -1085,7 +1163,7 @@
       <xsl:variable name="allocatedName" as="xs:string" select="f:allocateInnerClassName(..)"/>
       <xsl:text>{$NL}</xsl:text>
       <xsl:call-template name="indent"/>
-      <xsl:text>private class {$allocatedName} : {../type/@RESOLVED_TYPE} {{{$NL}</xsl:text>
+      <xsl:text>private class {$allocatedName} : {f:escapeDottedName(f:resolveTypeName(../type))} {{{$NL}</xsl:text>
       <xsl:call-template name="indent-extra"/>
       <xsl:variable name="containingClass" select="ancestor::type[@nodeType='ClassOrInterfaceDeclaration'][1]/name/@identifier" as="xs:string"/>
       <xsl:text>private readonly {$containingClass} outerInstance;{$NL}</xsl:text>
@@ -1137,10 +1215,10 @@
    </xsl:template>
 
    <xsl:template match="*[@nodeType='ThisExpr']">
-      <xsl:if test="typeName">
+      <!--<xsl:if test="typeName">
          <xsl:apply-templates select="typeName"/>
          <xsl:text>.</xsl:text>
-      </xsl:if>
+      </xsl:if>-->
       <xsl:text>this</xsl:text>
    </xsl:template>
    
@@ -1218,6 +1296,48 @@
    <xsl:template match="*[@nodeType='NameExpr']">
       <xsl:apply-templates select="name"/>
    </xsl:template>
+   
+   <xsl:key name="digestClassKey" match="class | interface" 
+      use="string-join((ancestor::module/@package, ancestor-or-self::*[self::class or self::interface]/@name), '.')"/>
+   
+   <xsl:template name="expand-defaulted-methods">
+      <xsl:param name="indent" as="xs:integer" tunnel="yes" select="0"/>
+      <xsl:assert test="@nodeType='ClassOrInterfaceDeclaration'"/>
+      <xsl:variable name="thisClassName" as="xs:string" 
+         select="string-join((f:qualified-name(ancestor::root/packageDeclaration/name), ancestor-or-self::*[@nodeType='ClassOrInterfaceDeclaration']/name/@identifier), '.')"/>
+      <!--<xsl:message>Expanding default methods for {$thisClassName}</xsl:message>-->
+      <xsl:variable name="thisDigest" select="key('digestClassKey', $thisClassName, $digest)" as="element(*)?"/>
+      <xsl:choose>
+         <xsl:when test="empty($thisDigest)">
+            <!-- This shouldn't happen, but it does, with strange uses of nested inner classes -->
+            <xsl:message>No digest found for {$thisClassName}</xsl:message>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:variable name="defaults" select="f:gather-default-methods($thisDigest)" as="element(*)*"/>
+            <!--<xsl:message>Found {count($defaults)} default methods</xsl:message>-->
+            <xsl:for-each select="$defaults">
+               <xsl:if test="empty($thisDigest[@name = current()/@name])">
+                  <xsl:call-template name="indent-extra"/>
+                  <xsl:text>/* Expanding default method {@name} from interfaces */{$NL}</xsl:text>
+                  <xsl:apply-templates select="./default/*">
+                     <xsl:with-param name="expanding-defaults" as="xs:boolean" select="true()" tunnel="yes"/>
+                     <xsl:with-param name="indent" select="$indent+1"/>
+                  </xsl:apply-templates>
+               </xsl:if>        
+            </xsl:for-each>
+         </xsl:otherwise>
+      </xsl:choose>     
+   </xsl:template>
+   
+   <xsl:function name="f:gather-default-methods" as="element(*)*">
+      <xsl:param name="thisClass" as="element()?"/>
+      <xsl:for-each select="$thisClass/(implements | self::interface/extends)">
+         <xsl:variable name="interface" select="key('digestClassKey', @name)" as="element(*)?"/>
+         <!--<xsl:message>Processing interface {@name}</xsl:message>-->
+         <xsl:sequence select="$interface/method[default]"/>
+         <xsl:sequence select="f:gather-default-methods($interface)"/>
+      </xsl:for-each>
+   </xsl:function>
    
  
 </xsl:stylesheet>
