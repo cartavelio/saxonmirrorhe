@@ -24,7 +24,7 @@ void testxQuery1(SaxonProcessor * processor, XQueryProcessor * queryProc, sResul
     cout<<endl<<"Test testXQuery1:"<<endl;
     queryProc->clearParameters();
     queryProc->clearProperties();
-   queryProc->setProperty("s", "cat.xml");
+   queryProc->setProperty("s", "../data/cat.xml");
 
     queryProc->setProperty("qs", "<out>{count(/out/person)}</out>");
 
@@ -40,8 +40,6 @@ void testxQuery1(SaxonProcessor * processor, XQueryProcessor * queryProc, sResul
             SaxonApiException *exception = queryProc->getException();
             if(exception != nullptr) {
                 cerr << "Error: " << exception->getMessage() << endl;
-                delete exception;
-                exception = nullptr;
             }
             queryProc->exceptionClear();
         }
@@ -96,8 +94,6 @@ void testxQuery_ICU(SaxonProcessor * processor, XQueryProcessor * queryProc, sRe
             SaxonApiException *exception = queryProc->getException();
             if(exception != nullptr) {
                 cerr << "Error: " << exception->getMessage() << endl;
-                delete exception;
-                exception = nullptr;
             }
             queryProc->exceptionClear();
         }
@@ -144,7 +140,7 @@ void testXQueryError2(SaxonProcessor * processor, XQueryProcessor * queryProc, s
  cout<<endl<<"Test testXQueryError-test2:"<<endl;
 	queryProc->clearProperties();
 	queryProc->clearParameters();
-   queryProc->setProperty("s", "cat.xml");
+   queryProc->setProperty("s", "../data/cat.xml");
 
     queryProc->setProperty("qs", "<out>{count(/out/person)}<out>");
 
@@ -350,7 +346,7 @@ void testXQueryLineNumberError(XQueryProcessor * queryProc, sResultCount *sresul
  cout<<endl<<"Test testXQueryLineNumberError:"<<endl;
 	queryProc->clearProperties();
 	queryProc->clearParameters();
-   queryProc->setProperty("s", "cat.xml");
+   queryProc->setProperty("s", "../data/cat.xml");
 
     queryProc->setProperty("qs", "saxon:line-number((//person)[1])");
 
@@ -389,7 +385,7 @@ void testXQueryLineNumber(SaxonProcessor * processor, sResultCount *sresult){
 
     //queryProc->setQueryBaseURI(processor->getcwd());
 
-    queryProc->setProperty("s", "cat.xml");
+    queryProc->setProperty("s", "../data/cat.xml");
    queryProc->declareNamespace("saxon","http://saxon.sf.net/");
 
     queryProc->setProperty("qs", "saxon:line-number(doc('cat.xml')/out/person[1])"); ///out/person[1]
