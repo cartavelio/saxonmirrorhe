@@ -31,11 +31,6 @@ import java.util.Arrays;
  * a "minor context" only allows changes to the focus and the destination for push output.
  */
 
-//@CSharpInjectMembers(code = {
-//        "    public void setErrorReporter(System.Action<Saxon.Hej.s9api.XmlProcessingError> reporter) {"
-//                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
-//                + "    }"
-//})
 public class XPathContextMajor extends XPathContextMinor {
 
     private ParameterSet localParameters;
@@ -440,7 +435,9 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setCurrentMode(Component.M mode) {
-        firstProperty = new CurrentMode(mode, firstProperty);
+        if (mode != getCurrentMode()) {
+            firstProperty = new CurrentMode(mode, firstProperty);
+        }
     }
 
     /**
@@ -477,7 +474,9 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setCurrentTemplateRule(/*@Nullable*/ Rule rule) {
-        firstProperty = new CurrentTemplateRule(rule, firstProperty);
+        if (rule != getCurrentTemplateRule()) {
+            firstProperty = new CurrentTemplateRule(rule, firstProperty);
+        }
     }
 
     /**
@@ -506,7 +505,9 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setCurrentGroupIterator(GroupIterator iterator) {
-        firstProperty = new CurrentGroupIterator(iterator, firstProperty);
+        if (iterator != getCurrentGroupIterator()) {
+            firstProperty = new CurrentGroupIterator(iterator, firstProperty);
+        }
     }
 
     /**
@@ -536,7 +537,9 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setCurrentMergeGroupIterator(GroupIterator iterator) {
-        firstProperty = new CurrentMergeGroupIterator(iterator, firstProperty);
+        if (iterator != getCurrentMergeGroupIterator()) {
+            firstProperty = new CurrentMergeGroupIterator(iterator, firstProperty);
+        }
     }
 
     /**
@@ -566,7 +569,9 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setCurrentRegexIterator(RegexIterator currentRegexIterator) {
-        firstProperty = new CurrentRegexIterator(currentRegexIterator, firstProperty);
+        if (currentRegexIterator != getCurrentRegexIterator()) {
+            firstProperty = new CurrentRegexIterator(currentRegexIterator, firstProperty);
+        }
     }
 
     /**
@@ -618,7 +623,9 @@ public class XPathContextMajor extends XPathContextMinor {
     }
     
     public void setResourceResolver(ResourceResolver resolver) {
-        firstProperty = new CurrentResourceResolver(resolver, firstProperty);
+        if (resolver != getResourceResolver()) {
+            firstProperty = new CurrentResourceResolver(resolver, firstProperty);
+        }
     }
 
     /**
@@ -651,7 +658,9 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setErrorReporter(ErrorReporter reporter) {
-        firstProperty = new CurrentErrorReporter(reporter, firstProperty);
+        if (reporter != getErrorReporter()) {
+            firstProperty = new CurrentErrorReporter(reporter, firstProperty);
+        }
     }
 
     /**
@@ -682,7 +691,9 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setCurrentException(XPathException exception) {
-        this.firstProperty = new CurrentException(exception, firstProperty);
+        if (exception != getCurrentException()) {
+            this.firstProperty = new CurrentException(exception, firstProperty);
+        }
     }
 
     /**
@@ -759,6 +770,9 @@ public class XPathContextMajor extends XPathContextMinor {
 
     private abstract static class ContextProperty {
         public ContextProperty next;
+//        public ContextProperty() {
+//            Instrumentation.count(this.getClass().getName());
+//        }
     }
 
     private static class CurrentRegexIterator extends ContextProperty {
