@@ -13,6 +13,7 @@ import net.sf.saxon.functions.FoldingFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
@@ -541,11 +542,11 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         }
 
         public static Sequence toSequence(ArrayItem array) throws XPathException {
-            List<GroundedValue> results = new ArrayList<>();
-            for (Sequence seq : array.members()) {
-                results.add(seq.materialize());
+            ZenoSequence results = new ZenoSequence();
+            for (GroundedValue seq : array.members()) {
+                results.appendSequence(seq);
             }
-            return new Chain(results);
+            return results;
         }
     }
 

@@ -307,7 +307,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
     @Override
     public Visibility getVisibility() {
-        if (visibility == null) {
+        if (visibility == null || visibility == Visibility.UNDEFINED) {
             String vAtt = getAttributeValue("", "visibility");
             return vAtt == null ? Visibility.PRIVATE : interpretVisibilityValue(Whitespace.trim(vAtt), "");
         }

@@ -17,23 +17,35 @@ import javax.xml.transform.stax.StAXSource;
  * XMLEventReader)</p>
  */
 
-public class ActiveStAXSource extends StAXSource implements ActiveSource {
+public class ActiveStAXSource implements ActiveSource {
 
-    public ActiveStAXSource(XMLStreamReader reader) {
-        super(reader);
+    StAXSource underlyingSource;
+
+    public ActiveStAXSource(StAXSource source) {
+        this.underlyingSource = source;
     }
 
     public static ActiveStAXSource fromStAXSource(StAXSource source) throws XMLStreamException {
         if (source.getXMLStreamReader() != null) {
-            return new ActiveStAXSource(source.getXMLStreamReader());
+            return new ActiveStAXSource(source);
         } else {
             throw new XMLStreamException("Saxon can only handle a StAXSource that wraps an XMLStreamReader");
         }
     }
 
     @Override
+    public void setSystemId(String systemId) {
+        underlyingSource.setSystemId(systemId);
+    }
+
+    @Override
+    public String getSystemId() {
+        return underlyingSource.getSystemId();
+    }
+
+    @Override
     public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
-        XMLStreamReader reader = getXMLStreamReader();
+        XMLStreamReader reader = underlyingSource.getXMLStreamReader();
         if (reader == null) {
             throw new XPathException("Saxon can only handle a StAXSource that wraps an XMLStreamReader");
         }

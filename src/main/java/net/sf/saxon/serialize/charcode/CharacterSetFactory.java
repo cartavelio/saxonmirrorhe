@@ -8,6 +8,7 @@
 package net.sf.saxon.serialize.charcode;
 
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 
 import javax.xml.transform.OutputKeys;
 import java.nio.charset.Charset;
@@ -108,7 +109,7 @@ public class CharacterSetFactory {
                 return cs;
             }
 
-            //C#//return unknownEncoding(encoding);
+            CSharp.emitCode("return unknownEncoding(encoding);");
 
 //#if CSHARP==false
 

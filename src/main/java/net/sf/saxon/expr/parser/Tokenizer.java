@@ -9,6 +9,7 @@ package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
@@ -678,7 +679,7 @@ public final class Tokenizer {
                         nextToken = Token.DOT;
                         return;
                     }
-                    //C#//goto case '0';
+                    CSharp.emitCode("goto case '0';");
                     // otherwise drop through: we have a number starting with a decimal point
                 case '0':
                 case '1':
@@ -833,7 +834,7 @@ public final class Tokenizer {
                     }
                 case '\n':
                     incrementLineNumber();
-                    //C#//goto case ' ';
+                    CSharp.emitCode("goto case ' ';");
                     // fall through
                 case ' ':
                 case '\t':
@@ -877,13 +878,13 @@ public final class Tokenizer {
 
 
                     }
-                    //C#//goto default;
+                    CSharp.emitCode("goto default;");
                     /* else fall through */
                 default:
                     if (c < 0x80 && !Character.isLetter(c)) {
                         throw new XPathException("Invalid character '" + c + "' (x" + Integer.toHexString((int)c) + ") in expression");
                     }
-                    //C#//goto case '_';
+                    CSharp.emitCode("goto case '_';");
                     /* fall through */
                 case '_':
                     boolean foundColon = false;
@@ -935,7 +936,7 @@ public final class Tokenizer {
                                     nextToken = getBinaryOp(input.substring(nextTokenStartOffset, inputOffset));
                                     return;
                                 }
-                                //C#//goto case '_';
+                                CSharp.emitCode("goto case '_';");
                                 // else fall through
                             case '_':
                                 break;

@@ -149,7 +149,7 @@ public abstract class Sender {
      */
 
 
-    private static void sendDocumentInfo(NodeInfo top, Receiver receiver, Location location)
+    public static void sendDocumentInfo(NodeInfo top, Receiver receiver, Location location)
             throws XPathException {
         PipelineConfiguration pipe = receiver.getPipelineConfiguration();
         NamePool targetNamePool = pipe.getConfiguration().getNamePool();

@@ -3,6 +3,7 @@ package net.sf.saxon.resource;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceivingContentHandler;
+import net.sf.saxon.expr.number.Numberer_en;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -11,8 +12,11 @@ import org.xml.sax.*;
 
 import javax.xml.transform.sax.SAXSource;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ActiveSAXSource extends SAXSource implements ActiveSource  {
+
+    Consumer<XMLReader> parserPool;
 
     public ActiveSAXSource(XMLReader parser, InputSource source) {
         super(parser, source);
@@ -38,9 +42,19 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
         setSystemId(inputSource.getSystemId());
     }
 
+    /**
+     * Supply a mechanism to recycle the XMLReader after use
+     * @param parserPool a place to return the parser after parsing is complete
+     */
+
+    public void setParserPool(Consumer<XMLReader> parserPool) {
+        this.parserPool = parserPool;
+    }
+
     @Override
     public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
         try {
+            Logger logger = receiver.getPipelineConfiguration().getConfiguration().getLogger();
             XMLReader parser = getXMLReader();
             //System.err.println("Using parser " + parser.getClass());
             ReceivingContentHandler rch = new ReceivingContentHandler();
@@ -49,13 +63,20 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
             parser.setContentHandler(rch);
             parser.setDTDHandler(rch);
             parser.setProperty("http://xml.org/sax/properties/lexical-handler", rch);
-            if (options.getErrorHandler() != null) {
-                parser.setErrorHandler(parser.getErrorHandler());
-            } else if (options.getErrorReporter() != null) {
-                parser.setErrorHandler(new StandardErrorHandler(options.getErrorReporter()));
-            } else {
-                parser.setErrorHandler(new StandardErrorHandler(new StandardErrorReporter()));
+
+            ErrorHandler errorHandler = parser.getErrorHandler();
+            if (errorHandler == null) {
+                errorHandler = options.getErrorHandler();
+                if (errorHandler == null) {
+                    if (options.getErrorReporter() != null) {
+                        errorHandler = new StandardErrorHandler(options.getErrorReporter());
+                    } else {
+                        errorHandler = new StandardErrorHandler(new StandardErrorReporter());
+                    }
+                }
+                parser.setErrorHandler(errorHandler);
             }
+
             if (!options.isExpandAttributeDefaults()) {
                 try {
                     parser.setFeature("http://xml.org/sax/features/use-attributes2", true);
@@ -96,17 +117,15 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
                                 }
                             }
                         } else {
-                            parser.setFeature(entry.getKey(), entry.getValue());
+                            parser.setFeature(name, value);
                         }
                     } catch (SAXNotRecognizedException err) {
                         // No warning if switching a feature off doesn't work: bugs 2540 and 2551
                         if (entry.getValue()) {
-                            Logger logger = receiver.getPipelineConfiguration().getConfiguration().getLogger();
                             logger.warning(namedParser(parser) + " does not recognize the feature " + entry.getKey());
                         }
                     } catch (SAXNotSupportedException err) {
                         if (entry.getValue()) {
-                            Logger logger = receiver.getPipelineConfiguration().getConfiguration().getLogger();
                             logger.warning(namedParser(parser) + " does not support the feature " + entry.getKey());
                         }
                     }
@@ -118,10 +137,8 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
                     try {
                         parser.setProperty(entry.getKey(), entry.getValue());
                     } catch (SAXNotRecognizedException err) {
-                        Logger logger = receiver.getPipelineConfiguration().getConfiguration().getLogger();
                         logger.warning(namedParser(parser) + " does not recognize the property " + entry.getKey());
                     } catch (SAXNotSupportedException err) {
-                        Logger logger = receiver.getPipelineConfiguration().getConfiguration().getLogger();
                         logger.warning(namedParser(parser) + " does not support the property " + entry.getKey());
                     }
 
@@ -151,7 +168,32 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
                 }
             }
             //System.err.println("Parse " + getSystemId());
+            ///////////////////////////////
             parser.parse(getInputSource());
+            ///////////////////////////////
+            if (errorHandler instanceof StandardErrorHandler) {
+                int errs = ((StandardErrorHandler) errorHandler).getFatalErrorCount();
+                if (errs > 0) {
+                    throw new XPathException("The XML parser reported " + errs + (errs == 1 ? " error" : " errors"));
+                }
+                errs = ((StandardErrorHandler) errorHandler).getErrorCount();
+                if (errs > 0) {
+                    String message = "The XML parser reported " + new Numberer_en().toWords(errs).toLowerCase() +
+                            " validation error" + (errs == 1 ? "" : "s");
+                    if (dtdRecover) {
+                        message += ". Processing continues, because recovery from validation errors was requested";
+                        logger.warning(message);
+                    } else {
+                        throw new XPathException(message);
+                    }
+                }
+            }
+
+            if (parserPool != null) {
+                parserPool.accept(getXMLReader());
+            }
+        } catch (XPathException xpe) {
+            throw xpe;
         } catch (UncheckedXPathException uxpe) {
             throw new XPathException(uxpe);
         } catch (SAXException err) {

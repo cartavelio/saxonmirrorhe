@@ -734,8 +734,7 @@ public class CommandLineOptions {
             // take input from stdin
             //#if CSHARP == false
             if (useSAXSource) {
-                XMLReader parser = config.getSourceParser();
-                sourceInput = new SAXSource(parser, new InputSource(System.in));
+                sourceInput = new SAXSource(new InputSource(System.in));
             } else {
                 //#endif
                 sourceInput = new StreamSource(System.in);
@@ -779,7 +778,7 @@ public class CommandLineOptions {
                 //#if CSHARP == false
                 if (useSAXSource) {
                     InputSource eis = new InputSource(sourceFile.toURI().toString());
-                    sourceInput = new SAXSource(config.getSourceParser(), eis);
+                    sourceInput = new SAXSource(eis);
                 } else {
                     //#endif
                     sourceInput = new StreamSource(sourceFile.toURI().toString());

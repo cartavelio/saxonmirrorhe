@@ -17,6 +17,7 @@ import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.util.IndexedStack;
 
 import java.net.URI;
@@ -735,7 +736,7 @@ public class PathMap {
                         }
                         break;
                     } else {
-                        //C#//goto case net.sf.saxon.om.AxisInfo.ANCESTOR;
+                        CSharp.emitCode("goto case net.sf.saxon.om.AxisInfo.ANCESTOR;");
                         // fall through
                     }
 

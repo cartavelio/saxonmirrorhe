@@ -208,7 +208,8 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
      */
 
     public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
-        return IntPredicateLambda.of(nodeNr -> test(tree.getNode(nodeNr)));
+        return IntPredicateLambda.of(nodeNr -> tree.getNodeKind(nodeNr) != Type.PARENT_POINTER
+                                               && test(tree.getNode(nodeNr)));
     }
 
     /**

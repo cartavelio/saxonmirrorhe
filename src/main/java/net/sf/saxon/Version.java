@@ -8,6 +8,8 @@
 package net.sf.saxon;
 
 
+import net.sf.saxon.transpile.CSharp;
+
 /**
  * The Version class holds the SAXON version information.
  */
@@ -155,7 +157,7 @@ public final class Version {
     static {
 //#if DOTNET==true
         //#if CSHARP==true
-        //C#//  platform = new Saxon.Impl.Helpers.DotNetPlatform();
+        CSharp.emitCode("  platform = new Saxon.Impl.Helpers.DotNetPlatform();");
         //#else
             //#if EE==true || PE==true
             platform = new com.saxonica.config.DotNetPlatformPE();

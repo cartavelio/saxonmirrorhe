@@ -17,6 +17,7 @@ import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.ListIterator;
@@ -358,7 +359,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                         return false;
                     }
                 }
-                //C#//goto case net.sf.saxon.type.Type.DOCUMENT;
+                CSharp.emitCode("goto case net.sf.saxon.type.Type.DOCUMENT;");
                 // fall through
             case Type.DOCUMENT:
                 AxisIterator c1 = n1.iterateAxis(AxisInfo.CHILD);
@@ -437,7 +438,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                     explain(reporter, Type.displayTypeName(n1) + " names differ", flags, n1, n2);
                     return false;
                 }
-                //C#//goto case net.sf.saxon.type.Type.TEXT;
+                CSharp.emitCode("goto case net.sf.saxon.type.Type.TEXT;");
                 // drop through
             case Type.TEXT:
             case Type.COMMENT:

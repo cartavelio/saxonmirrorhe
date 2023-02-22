@@ -22,6 +22,7 @@ import net.sf.saxon.pattern.*;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashSet;
@@ -85,145 +86,149 @@ public class TypeHierarchy {
     public GroundedValue applyFunctionConversionRules(Sequence value, SequenceType requiredType, final RoleDiagnostic role, Location locator)
             throws XPathException {
 
-        GroundedValue groundedValue = value.materialize();
-        if (requiredType.matches(groundedValue, this)) {
-            return groundedValue;
-        }
-
-        ItemType suppliedItemType = SequenceTool.getItemType(value, this);
-
-        SequenceIterator iterator = groundedValue.iterate();
-        final ItemType requiredItemType = requiredType.getPrimaryType();
-
-        if (requiredItemType.isPlainType()) {
-
-            // step 1: apply atomization if necessary
-
-            if (!suppliedItemType.isPlainType()) {
-                try {
-                    iterator = Atomizer.getAtomizingIterator(iterator, false);
-                } catch (XPathException e) {
-                    ValidationFailure vf = new ValidationFailure(
-                            "Failed to atomize the " + role.getMessage() + ": " + e.getMessage());
-                    vf.setErrorCode("XPTY0117");
-                    throw vf.makeException();
-                }
-                suppliedItemType = suppliedItemType.getAtomizedItemType();
+        try {
+            GroundedValue groundedValue = value.materialize();
+            if (requiredType.matches(groundedValue, this)) {
+                return groundedValue;
             }
 
-            // step 2: convert untyped atomic values to target item type
+            ItemType suppliedItemType = SequenceTool.getItemType(value, this);
 
-            if (relationship(suppliedItemType, BuiltInAtomicType.UNTYPED_ATOMIC) != DISJOINT &&
-                    !isSubType(BuiltInAtomicType.UNTYPED_ATOMIC, requiredItemType)) {
-                final boolean nsSensitive = ((SimpleType) requiredItemType).isNamespaceSensitive();
-                ItemMappingFunction converter;
-                if (nsSensitive) {
-                    converter = ItemMapper.of(item -> {
-                        if (item instanceof AtomicValue && ((AtomicValue)item).isUntypedAtomic()) {
-                            ValidationFailure vf = new ValidationFailure(
-                                    "Failed to convert the " + role.getMessage() + ": " +
-                                    "Implicit conversion of untypedAtomic value to " + requiredItemType +
-                                            " is not allowed");
-                            vf.setErrorCode("XPTY0117");
-                            throw vf.makeException();
-                        } else {
-                            return item;
-                        }
-                    });
-                } else if (((SimpleType) requiredItemType).isUnionType()) {
-                    final ConversionRules rules = config.getConversionRules();
-                    converter = ItemMapper.of(item -> {
-                        if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
-                            try {
-                                return ((SimpleType) requiredItemType).getTypedValue(
-                                        item.getUnicodeStringValue(), null, rules).head();
-                            } catch (ValidationException ve) {
-                                ve.setErrorCode("XPTY0004");
-                                throw ve;
+            SequenceIterator iterator = groundedValue.iterate();
+            final ItemType requiredItemType = requiredType.getPrimaryType();
+
+            if (requiredItemType.isPlainType()) {
+
+                // step 1: apply atomization if necessary
+
+                if (!suppliedItemType.isPlainType()) {
+                    try {
+                        iterator = Atomizer.getAtomizingIterator(iterator, false);
+                    } catch (XPathException e) {
+                        ValidationFailure vf = new ValidationFailure(
+                                "Failed to atomize the " + role.getMessage() + ": " + e.getMessage());
+                        vf.setErrorCode("XPTY0117");
+                        throw vf.makeException();
+                    }
+                    suppliedItemType = suppliedItemType.getAtomizedItemType();
+                }
+
+                // step 2: convert untyped atomic values to target item type
+
+                if (relationship(suppliedItemType, BuiltInAtomicType.UNTYPED_ATOMIC) != DISJOINT &&
+                        !isSubType(BuiltInAtomicType.UNTYPED_ATOMIC, requiredItemType)) {
+                    final boolean nsSensitive = ((SimpleType) requiredItemType).isNamespaceSensitive();
+                    ItemMappingFunction converter;
+                    if (nsSensitive) {
+                        converter = ItemMapper.of(item -> {
+                            if (item instanceof AtomicValue && ((AtomicValue)item).isUntypedAtomic()) {
+                                ValidationFailure vf = new ValidationFailure(
+                                        "Failed to convert the " + role.getMessage() + ": " +
+                                        "Implicit conversion of untypedAtomic value to " + requiredItemType +
+                                                " is not allowed");
+                                vf.setErrorCode("XPTY0117");
+                                throw vf.makeException();
+                            } else {
+                                return item;
                             }
-                        } else {
-                            return item;
-                        }
-                    });
-                } else {
-                    converter = ItemMapper.of(item -> {
-                        if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
-                            return Converter.convert(
-                                    (StringItem) item, (AtomicType) requiredItemType, config.getConversionRules());
-                        } else {
-                            return item;
-                        }
-                    });
+                        });
+                    } else if (((SimpleType) requiredItemType).isUnionType()) {
+                        final ConversionRules rules = config.getConversionRules();
+                        converter = ItemMapper.of(item -> {
+                            if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
+                                try {
+                                    return ((SimpleType) requiredItemType).getTypedValue(
+                                            item.getUnicodeStringValue(), null, rules).head();
+                                } catch (ValidationException ve) {
+                                    ve.setErrorCode("XPTY0004");
+                                    throw ve;
+                                }
+                            } else {
+                                return item;
+                            }
+                        });
+                    } else {
+                        converter = ItemMapper.of(item -> {
+                            if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
+                                return Converter.convert(
+                                        (StringItem) item, (AtomicType) requiredItemType, config.getConversionRules());
+                            } else {
+                                return item;
+                            }
+                        });
+                    }
+                    iterator = new ItemMappingIterator(iterator, converter, true);
                 }
-                iterator = new ItemMappingIterator(iterator, converter, true);
+
+                // step 3: apply numeric promotion
+
+                if (requiredItemType.equals(BuiltInAtomicType.DOUBLE)) {
+                    ItemMappingFunction promoter = ItemMapper.of(item -> {
+                        if (item instanceof NumericValue) {
+                            return (DoubleValue) Converter.convert(
+                                    (NumericValue)item, BuiltInAtomicType.DOUBLE, config.getConversionRules()).asAtomic();
+                        } else {
+                            throw new XPathException(
+                                    "Failed to convert the " + role.getMessage() + ": " +
+                                    "Cannot promote non-numeric value to xs:double", "XPTY0004");
+                        }
+                    });
+                    iterator = new ItemMappingIterator(iterator, promoter, true);
+                } else if (requiredItemType.equals(BuiltInAtomicType.FLOAT)) {
+                    ItemMappingFunction promoter = ItemMapper.of(item -> {
+                        if (item instanceof DoubleValue) {
+                            throw new XPathException(
+                                    "Failed to convert the " + role.getMessage() + ": " +
+                                    "Cannot promote xs:double value to xs:float", "XPTY0004");
+                        } else if (item instanceof NumericValue) {
+                            return (FloatValue) Converter.convert(
+                                    (NumericValue)item, BuiltInAtomicType.FLOAT, config.getConversionRules()).asAtomic();
+                        } else {
+                            throw new XPathException(
+                                    "Failed to convert the " + role.getMessage() + ": " +
+                                    "Cannot promote non-numeric value to xs:float", "XPTY0004");
+                        }
+                    });
+                    iterator = new ItemMappingIterator(iterator, promoter, true);
+                }
+
+                // step 4: apply URI-to-string promotion
+
+                if (requiredItemType.equals(BuiltInAtomicType.STRING) &&
+                        relationship(suppliedItemType, BuiltInAtomicType.ANY_URI) != DISJOINT) {
+                    ItemMappingFunction promoter = ItemMapper.of(item -> {
+                        if (item instanceof AnyURIValue) {
+                            return ((AnyURIValue)item).convertToString();
+                        } else {
+                            return item;
+                        }
+                    });
+                    iterator = new ItemMappingIterator(iterator, promoter, true);
+                }
             }
 
-            // step 3: apply numeric promotion
+            // step 5: apply function coercion
 
-            if (requiredItemType.equals(BuiltInAtomicType.DOUBLE)) {
-                ItemMappingFunction promoter = ItemMapper.of(item -> {
-                    if (item instanceof NumericValue) {
-                        return (DoubleValue) Converter.convert(
-                                (NumericValue)item, BuiltInAtomicType.DOUBLE, config.getConversionRules()).asAtomic();
-                    } else {
-                        throw new XPathException(
-                                "Failed to convert the " + role.getMessage() + ": " +
-                                "Cannot promote non-numeric value to xs:double", "XPTY0004");
-                    }
-                });
-                iterator = new ItemMappingIterator(iterator, promoter, true);
-            } else if (requiredItemType.equals(BuiltInAtomicType.FLOAT)) {
-                ItemMappingFunction promoter = ItemMapper.of(item -> {
-                    if (item instanceof DoubleValue) {
-                        throw new XPathException(
-                                "Failed to convert the " + role.getMessage() + ": " +
-                                "Cannot promote xs:double value to xs:float", "XPTY0004");
-                    } else if (item instanceof NumericValue) {
-                        return (FloatValue) Converter.convert(
-                                (NumericValue)item, BuiltInAtomicType.FLOAT, config.getConversionRules()).asAtomic();
-                    } else {
-                        throw new XPathException(
-                                "Failed to convert the " + role.getMessage() + ": " +
-                                "Cannot promote non-numeric value to xs:float", "XPTY0004");
-                    }
-                });
-                iterator = new ItemMappingIterator(iterator, promoter, true);
+            iterator = applyFunctionCoercion(iterator, suppliedItemType, requiredItemType, locator);
+
+            // Add a check that the values conform to the required type
+
+            Affinity relation = relationship(suppliedItemType, requiredItemType);
+
+            if (!(relation == SAME_TYPE || relation == SUBSUMED_BY)) {
+                ItemTypeCheckingFunction itemChecker =
+                        new ItemTypeCheckingFunction(requiredItemType, role, locator, config);
+                iterator = new ItemMappingIterator(iterator, itemChecker, true);
             }
 
-            // step 4: apply URI-to-string promotion
-
-            if (requiredItemType.equals(BuiltInAtomicType.STRING) &&
-                    relationship(suppliedItemType, BuiltInAtomicType.ANY_URI) != DISJOINT) {
-                ItemMappingFunction promoter = ItemMapper.of(item -> {
-                    if (item instanceof AnyURIValue) {
-                        return ((AnyURIValue)item).convertToString();
-                    } else {
-                        return item;
-                    }
-                });
-                iterator = new ItemMappingIterator(iterator, promoter, true);
+            if (requiredType.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
+                iterator = new CardinalityCheckingIterator(iterator, requiredType.getCardinality(), role, locator);
             }
+
+            return SequenceTool.toGroundedValue(iterator);
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
-
-        // step 5: apply function coercion
-
-        iterator = applyFunctionCoercion(iterator, suppliedItemType, requiredItemType, locator);
-
-        // Add a check that the values conform to the required type
-
-        Affinity relation = relationship(suppliedItemType, requiredItemType);
-
-        if (!(relation == SAME_TYPE || relation == SUBSUMED_BY)) {
-            ItemTypeCheckingFunction itemChecker =
-                    new ItemTypeCheckingFunction(requiredItemType, role, locator, config);
-            iterator = new ItemMappingIterator(iterator, itemChecker, true);
-        }
-
-        if (requiredType.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
-            iterator = new CardinalityCheckingIterator(iterator, requiredType.getCardinality(), role, locator);
-        }
-
-        return SequenceTool.toGroundedValue(iterator);
 
     }
 

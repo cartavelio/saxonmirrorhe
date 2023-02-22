@@ -345,6 +345,9 @@ public class JavaPlatform implements Platform {
                     sourceParser.setEntityResolver(new StandardEntityResolver(config));
                 }
                 ((SAXSource) source).setXMLReader(sourceParser);
+                ActiveSAXSource activeSource = new ActiveSAXSource((SAXSource) source);
+                activeSource.setParserPool(config::reuseSourceParser);
+                return activeSource;
             }
             return new ActiveSAXSource((SAXSource)source);
         }

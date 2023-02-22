@@ -65,12 +65,12 @@ public class ImmList1<E> extends ImmList<E> {
 
     @Override
     public ImmList<E> append(E member) {
-        return new ImmList2<>(this, new ImmList1<>(member));
+        return new ImmList2<>(this, new ImmList1<>(member)).rebalance();
     }
 
     @Override
     public ImmList<E> appendList(ImmList<E> members) {
-        return new ImmList2<>(this, members);
+        return new ImmList2<>(this, members).rebalance();
     }
 
     @Override

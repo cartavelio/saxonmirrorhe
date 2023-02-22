@@ -10,8 +10,12 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.streams.XdmStream;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.*;
+import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.LookaheadIteratorImpl;
+import net.sf.saxon.tree.iter.SingletonIterator;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -75,11 +79,15 @@ public class XdmSequenceIterator<T extends XdmItem> implements Iterator<T> {
      */
     @Override
     public T next() {
-        Item it = base.next();
-        if (it == null) {
-            throw new NoSuchElementException();
-        } else {
-            return (T) XdmItem.wrapItem(it);
+        try {
+            Item it = base.next();
+            if (it == null) {
+                throw new NoSuchElementException();
+            } else {
+                return (T) XdmItem.wrapItem(it);
+            }
+        } catch (UncheckedXPathException e) {
+            throw new SaxonApiUncheckedException(e.getXPathException());
         }
     }
 

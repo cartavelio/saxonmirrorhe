@@ -18,6 +18,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
+import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
@@ -367,15 +368,15 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             Function fn = (Function) arguments[1].head();
-            List<GroundedValue> results = new ArrayList<>();
+            ZenoSequence results = new ZenoSequence();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 Sequence seq = dynamicCall(fn, context, new Sequence[]{pair.key, pair.value});
                 GroundedValue val = seq.materialize();
                 if (val.getLength() > 0) {
-                    results.add(val);
+                    results.appendSequence(val);
                 }
             }
-            return new Chain(results);
+            return results;
         }
     }
 
