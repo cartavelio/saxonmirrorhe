@@ -247,6 +247,24 @@ public class XPathCompiler {
     }
 
     /**
+     * Set the policy for matching unprefixed element names in XPath expressions
+     * @param policy the policy to be used
+     */
+
+    public void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy) {
+        env.setUnprefixedElementMatchingPolicy(policy);
+    }
+
+    /**
+     * Get the policy for matching unprefixed element names in XPath expressions
+     * @return the policy being used
+     */
+    
+    public UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy()  {
+        return env.getUnprefixedElementMatchingPolicy();
+    }
+
+    /**
      * Set the error reporter to be used for reporting static warnings during compilation.
      * By default, the {@link ErrorReporter} associated with the Saxon Configuration is used.
      * <p>Note that fatal static errors are always reported in the form
