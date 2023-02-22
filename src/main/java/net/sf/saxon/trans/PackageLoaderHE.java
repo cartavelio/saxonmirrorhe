@@ -287,7 +287,8 @@ public class PackageLoaderHE implements IPackageLoader {
         }
 
         FunctionLibraryList functionLibrary = new FunctionLibraryList();
-        functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(xsltVersion));
+        int libraryVersion = xsltVersion <= 31 ? 30 : 40;
+        functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(libraryVersion));
         addVendorFunctionLibrary(functionLibrary, config);
         functionLibrary.addFunctionLibrary(MapFunctionSet.getInstance());
         functionLibrary.addFunctionLibrary(ArrayFunctionSet.getInstance());
