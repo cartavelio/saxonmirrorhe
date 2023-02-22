@@ -143,15 +143,15 @@ public class ImmList2<E> extends ImmList<E> {
         //System.err.println("Rebalance " + size() + " - " + showBalance(this, 3));
         if (size() > THRESHOLD) {
             if (l2 instanceof ImmList2 && l2.size() > THRESHOLD * r2.size()) {
-                return new ImmList2<>(((ImmList2<E>) l2).left, new ImmList2<>(((ImmList2<E>) l2).right, r2));
+                return new ImmList2<>(((ImmList2<E>) l2).left, (new ImmList2<>(((ImmList2<E>) l2).right, r2)).rebalance()).rebalance();
             } else if (r2 instanceof ImmList2 && r2.size() > THRESHOLD * l2.size()) {
-                return new ImmList2<>(new ImmList2<>(l2, ((ImmList2<E>) r2).left), ((ImmList2<E>) r2).right);
+                return new ImmList2<>((new ImmList2<>(l2, ((ImmList2<E>) r2).left).rebalance()), ((ImmList2<E>) r2).right).rebalance();
             } else {
                 return this;
             }
         } else {
             return this;
-        } 
+        }
     }
 }
 
