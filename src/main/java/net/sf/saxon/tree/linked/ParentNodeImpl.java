@@ -15,7 +15,7 @@ import net.sf.saxon.om.CopyOptions;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -302,7 +302,7 @@ public abstract class ParentNodeImpl extends NodeImpl {
             next = next.getNextInDocument(this);
         }
         if (sb == null) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         return sb.toUnicodeString();
     }

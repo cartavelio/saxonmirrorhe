@@ -92,7 +92,7 @@ class Slice24 extends UnicodeString {
             throw new IndexOutOfBoundsException();
         }
         if (end == start) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         } else {
             return new Slice24(bytes, requireInt(start) + this.start, requireInt(end) + this.start);
         }

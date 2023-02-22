@@ -9,7 +9,7 @@ package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.value.AtomicValue;
@@ -77,7 +77,7 @@ public class TextComparer implements AtomicComparer {
     }
 
     private StringValue toStringValue(AtomicValue a) {
-        return new StringValue(a==null ? (UnicodeString) EmptyUniString.getInstance() : a.getUnicodeStringValue());
+        return new StringValue(a==null ? (UnicodeString) EmptyUnicodeString.getInstance() : a.getUnicodeStringValue());
     }
 
     /**

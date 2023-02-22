@@ -21,7 +21,7 @@ import net.sf.saxon.pattern.NodeSetPattern;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.Traceable;
@@ -916,7 +916,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
         Item o = evaluateItem(context);
         if (o == null) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         return o.getUnicodeStringValue();
     }

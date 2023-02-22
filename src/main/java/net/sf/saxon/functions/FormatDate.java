@@ -690,7 +690,7 @@ public class FormatDate extends SystemFunction implements Callable {
                 // military "local time"
                 return BMPString.of("J");
             } else {
-                return EmptyUniString.getInstance();
+                return EmptyUnicodeString.getInstance();
             }
         }
         if (format.isEmpty() && !widthModifier.isEmpty()) {

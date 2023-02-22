@@ -14,18 +14,18 @@ import java.util.function.IntPredicate;
 
 
 /**
- * {@code EmptyUniString} is a zero-length Unicode string
+ * A zero-length Unicode string
  */
 
-public final class EmptyUniString extends UnicodeString {
+public final class EmptyUnicodeString extends UnicodeString {
 
-    private final static EmptyUniString INSTANCE = new EmptyUniString();
+    private final static EmptyUnicodeString INSTANCE = new EmptyUnicodeString();
 
-    public static EmptyUniString getInstance() {
+    public static EmptyUnicodeString getInstance() {
         return INSTANCE;
     }
 
-    private EmptyUniString() {
+    private EmptyUnicodeString() {
     }
 
     /**

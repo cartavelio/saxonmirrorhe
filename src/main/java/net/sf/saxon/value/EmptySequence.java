@@ -10,7 +10,7 @@ package net.sf.saxon.value;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.EmptyIterator;
 
@@ -45,7 +45,7 @@ public final class EmptySequence implements GroundedValue {
 
     @Override
     public UnicodeString getUnicodeStringValue() {
-        return EmptyUniString.getInstance();
+        return EmptyUnicodeString.getInstance();
     }
 
     @Override

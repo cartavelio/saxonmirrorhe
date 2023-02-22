@@ -36,12 +36,12 @@ public class StringValue extends AtomicValue {
 
     protected UnicodeString content;
 
-    public static final StringValue EMPTY_STRING = new StringValue(EmptyUniString.getInstance());
+    public static final StringValue EMPTY_STRING = new StringValue(EmptyUnicodeString.getInstance());
     public static final StringValue SINGLE_SPACE = new StringValue(StringConstants.SINGLE_SPACE);
     public static final StringValue TRUE = new StringValue(StringConstants.TRUE);
     public static final StringValue FALSE = new StringValue(StringConstants.FALSE);
 
-    public static final StringValue ZERO_LENGTH_UNTYPED = new UntypedAtomicValue(EmptyUniString.getInstance());
+    public static final StringValue ZERO_LENGTH_UNTYPED = new UntypedAtomicValue(EmptyUnicodeString.getInstance());
 
 
     /**
@@ -49,7 +49,7 @@ public class StringValue extends AtomicValue {
      */
 
     protected StringValue() {
-        content = EmptyUniString.getInstance();
+        content = EmptyUnicodeString.getInstance();
         typeLabel = BuiltInAtomicType.STRING;
     }
 
@@ -151,6 +151,14 @@ public class StringValue extends AtomicValue {
             return StringValue.EMPTY_STRING;
         } else {
             return new StringValue(value.toString());
+        }
+    }
+
+    public static StringValue makeUStringValue(UnicodeString value) {
+        if (value == null || value.isEmpty()) {
+            return StringValue.EMPTY_STRING;
+        } else {
+            return new StringValue(value);
         }
     }
 

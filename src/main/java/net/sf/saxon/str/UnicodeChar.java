@@ -101,7 +101,7 @@ public class UnicodeChar extends UnicodeString {
         if (start == 0 && end == 1) {
             return this;
         } else {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
     }
 

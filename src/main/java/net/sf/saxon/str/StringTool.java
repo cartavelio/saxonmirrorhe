@@ -209,7 +209,7 @@ public class StringTool {
     public static UnicodeString compress(char[] in, int offset, int len, boolean compressWS) {
         //final int inlen = in.length;
         if (len == 0) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         int max = 255;
         int end = offset + len;

@@ -154,11 +154,11 @@ public class NumberFormatter {
             String s;
             if (o instanceof Long) {
                 long nr = (Long) o;
-                RegularGroupFormatter rgf = new RegularGroupFormatter(groupSize, groupSeparator, EmptyUniString.getInstance());
+                RegularGroupFormatter rgf = new RegularGroupFormatter(groupSize, groupSeparator, EmptyUnicodeString.getInstance());
                 s = numberer.format(nr, formatTokens.get(tok), rgf, letterValue, ordinal);
             } else if (o instanceof BigInteger) {
                 // Saxon bug 2071; test case number-0111
-                RegularGroupFormatter rgf = new RegularGroupFormatter(groupSize, groupSeparator, EmptyUniString.getInstance());
+                RegularGroupFormatter rgf = new RegularGroupFormatter(groupSize, groupSeparator, EmptyUnicodeString.getInstance());
                 s = rgf.format(o.toString());
                 s = translateDigits(s, formatTokens.get(tok));
             } else {

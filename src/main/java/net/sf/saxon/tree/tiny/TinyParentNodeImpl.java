@@ -7,7 +7,7 @@
 
 package net.sf.saxon.tree.tiny;
 
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.type.Type;
@@ -70,7 +70,7 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
             return TinyTextImpl.getStringValue(tree, nodeNr);
         } else if (next < tree.numberOfNodes) {    // bug 4445
             if (tree.depth[next] <= level) {
-                return EmptyUniString.getInstance();
+                return EmptyUnicodeString.getInstance();
             } else if (tree.nodeKind[next] == Type.TEXT && (next + 1 >= tree.numberOfNodes || tree.depth[next + 1] <= level)) {
                 return TinyTextImpl.getStringValue(tree, next);
             }
@@ -95,7 +95,7 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
             next++;
         }
         if (sb == null) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         return sb.toUnicodeString();
     }

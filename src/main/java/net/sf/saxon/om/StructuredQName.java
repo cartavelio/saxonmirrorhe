@@ -177,7 +177,7 @@ public class StructuredQName implements IdentityComparable {
             String local = eqName.substring(endBrace + 1);
             return new StructuredQName("", uri, local);
         } else {
-            return new StructuredQName("", "", eqName.toString());
+            return new StructuredQName("", "", eqName);
         }
     }
 

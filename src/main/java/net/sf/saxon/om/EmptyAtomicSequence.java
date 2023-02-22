@@ -7,7 +7,7 @@
 
 package net.sf.saxon.om;
 
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -58,12 +58,12 @@ public class EmptyAtomicSequence implements AtomicSequence {
      */
     @Override
     public UnicodeString getCanonicalLexicalRepresentation() {
-        return EmptyUniString.getInstance();
+        return EmptyUnicodeString.getInstance();
     }
 
     @Override
     public UnicodeString getUnicodeStringValue() {
-        return EmptyUniString.getInstance();
+        return EmptyUnicodeString.getInstance();
     }
 
     @Override
