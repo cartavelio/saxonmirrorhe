@@ -3,7 +3,7 @@
 //
 def csharpCompiler = null
 ["C:/Windows/Microsoft.net/Framework/${dotNetFrameworkVersion}/csc.exe",
- "z:/some/other/compiler/path"].each { csc ->
+ "/Library/Frameworks/Mono.framework/Versions/Current/Commands/csc"].each { csc ->
   // This only makes sense on Windows, so always using file:/// is ok
   if (csharpCompiler == null && pathExists(csc)) {
     csharpCompiler = csc
@@ -100,13 +100,13 @@ task hecs_featureKeys(
   description: "Construct the feature keys for HE"
 ) {
   inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
-  outputs.file "${projectDir}/src/main/csharp/api/Saxon.Api/Feature.cs"
-  outputs.file "${projectDir}/src/main/csharp/api/Saxon.Api/FeatureKeys.cs"
+  outputs.file "${projectDir}/src/main/saxon-cs/engine/Saxon/Api/Feature.cs"
+  outputs.file "${projectDir}/src/main/saxon-cs/engine/Saxon/Api/FeatureKeys.cs"
   classpath = configurations.preprocessor
   main = "net.sf.saxon.Transform"
   args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
-    "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToCSharp.xsl",
-    "-o:${projectDir}/src/main/csharp/api/Saxon.Api/establish-an-output-base-uri"
+    "-xsl:${projectDir}/tools/featureKeys/FeatureKeysForSaxonCS.xsl",
+    "-o:${projectDir}/src/main/saxon-cs/engine/Saxon/Api/establish-an-output-base-uri"
 }
 
 task hecs_setupPreprocess(
@@ -135,6 +135,7 @@ task hecs_setupPreprocess(
   exclude "net/sf/saxon/lib/ErrorReporterToListener.java"
   exclude "net/sf/saxon/lib/ExternalObjectModel.java"
   exclude "net/sf/saxon/lib/InvalidityHandlerWrappingErrorListener.java"
+  exclude "net/sf/saxon/lib/ResourceCollection.java"
   exclude "net/sf/saxon/lib/StandardEntityResolver.java"
   exclude "net/sf/saxon/lib/StandardErrorHandler.java"
   exclude "net/sf/saxon/lib/StandardErrorListener.java"
@@ -149,10 +150,10 @@ task hecs_setupPreprocess(
   exclude "net/sf/saxon/om/ZeroOrOne.java"
   exclude "net/sf/saxon/pull/NamespaceContextImpl.java"
   exclude "net/sf/saxon/pull/StaxBridge.java"
-  exclude "net/sf/saxon/resource/ActiveSAXSource.java"
-  exclude "net/sf/saxon/resource/ActiveStreamSource.java"
+  exclude "net/sf/saxon/resource/**"
   exclude "net/sf/saxon/s9api/DOMDestination.java"
   exclude "net/sf/saxon/s9api/Push.java"
+  exclude "net/sf/saxon/s9api/streams/**"
   exclude "net/sf/saxon/s9api/QName.java"
   exclude "net/sf/saxon/s9api/WhitespaceStrippingPolicy"
   exclude "net/sf/saxon/s9api/XdmExternalObject.java"
@@ -438,4 +439,93 @@ task eecs_sources(
     }
   }
 }
+
+  task hecs_dll(
+    dependsOn: ["generateCSharp"],
+    description: "Compile Saxon-CS DLL for HE"
+  ) {
+    inputs.files("${buildDir}/src/hecs")
+    outputs.file("${buildDir}/cs/bin/he/saxon-cs-${saxonMajorVersion}.${saxonMinorVersion}.dll")
+
+    doLast {
+      def args = [csharpCompiler,
+                  "-out:${buildDir}/cs/bin/he/saxon-cs-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+                  "-target:library", 
+                  "-doc:${buildDir}/cs/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
+                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      //fileTree(dir: "${buildDir}/n/bin/he",
+      //         include: "*.dll").each { dll ->
+      //  args += ["-reference:${dll}"]
+      //}
+      fileTree(dir: "${buildDir}/cs/net",
+               include: "**/*.cs").each { cs ->
+        args += [cs]
+      }
+      fileTree(dir: "${projectDir}/src/main/saxon-cs/engine",
+               include: "**/*.cs").each { cs ->
+        args += [cs]
+      }
+      fileTree(dir: "${projectDir}/src/main/saxon-cs/javaglue",
+               include: "**/*.cs").each { cs ->
+        args += [cs]
+      }
+
+      exec {
+        commandLine args
+      }
+    }
+  }
+
+  task hecs_exe_Transform(
+    dependsOn: ["hecs_dll"],
+    description: "Compile Transform.exe for Saxon-CS HE"
+  ) {
+    inputs.files("${buildDir}/src/hecs")
+    inputs.files("${buildDir}/cs/bin/he/saxon-cs-${saxonMajorVersion}.${saxonMinorVersion}.dll")
+    outputs.file("${buildDir}/cs/bin/he/Transform.exe")
+
+    doLast {
+      def args = [csharpCompiler,
+                  "-out:${buildDir}/cs/bin/he/Transform.exe",
+                  "-target:exe",
+                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      fileTree(dir: "${buildDir}/cs/bin/he",
+               include: "*.dll").each { dll ->
+        args += ["-reference:${dll}"]
+      }
+      args += ["${buildDir}/cs/csharp\\cmd\\Transform.cs",
+               "${buildDir}\\n\\csharp\\cmd\\AssemblyInfo.cs"]
+
+      exec {
+        commandLine args
+      }
+    }
+  }
+
+  task hen_csharpQuery(
+    dependsOn: ["hecs_dll"],
+    description: "Compile Query.exe for HE"
+  ) {
+    inputs.files("${buildDir}/n/build/dll/he")
+    inputs.files("${buildDir}/n/csharp/cmd")
+    outputs.file("${buildDir}/n/bin/he/Query.exe")
+
+    doLast {
+      def args = [csharpCompiler,
+                  "-out:${buildDir}/n/bin/he/Query.exe",
+                  "-target:exe",
+                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      fileTree(dir: "${buildDir}/n/bin/he",
+               include: "*.dll").each { dll ->
+        args += ["-reference:${dll}"]
+      }
+      // This only runs on Windows, so make sure you use "\"
+      args += ["${buildDir}\\n\\csharp\\cmd\\Query.cs",
+               "${buildDir}\\n\\csharp\\cmd\\AssemblyInfo.cs"]
+
+      exec {
+        commandLine args
+      }
+    }
+  }
 
