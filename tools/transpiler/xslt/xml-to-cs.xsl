@@ -406,6 +406,13 @@
       <xsl:text>}}{$NL}</xsl:text>
    </xsl:template>
    
+   <!-- Don't process a method declaration if (a) it's on an interface, (b) it's marked @Override,
+        and (c) it defines a default implementation. -->
+   <xsl:template match="*[@nodeType='MethodDeclaration']
+                         [../../@isInterface='true']
+                         [modifiers/modifier/@keyword='DEFAULT']
+                         [annotations/annotation/name/@identifier='Override']" priority="20"/>
+   
    <xsl:template match="*[@nodeType='MethodDeclaration']">
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
       <xsl:param name="expandingDefaults" select="false()" tunnel="yes" as="xs:boolean"/>
