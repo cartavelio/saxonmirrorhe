@@ -70,7 +70,7 @@ public abstract class FunctionCall extends Expression {
      * @throws XPathException if the target function cannot be determined
      */
 
-    public abstract Function getTargetFunction(XPathContext context) throws XPathException;
+    public abstract FunctionItem getTargetFunction(XPathContext context) throws XPathException;
 
     /**
      * Get the qualified of the function being called
@@ -210,7 +210,7 @@ public abstract class FunctionCall extends Expression {
      * @throws XPathException if there is a type error
      */
 
-    public void checkFunctionCall(Function target,
+    public void checkFunctionCall(FunctionItem target,
                                   ExpressionVisitor visitor) throws XPathException {
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(visitor.getStaticContext().isInBackwardsCompatibleMode());
         SequenceType[] argTypes = target.getFunctionItemType().getArgumentTypes();
@@ -233,13 +233,15 @@ public abstract class FunctionCall extends Expression {
                 // Substitute default value expression for an argument marked for replacement. This is necessary
                 // because the default value expression was not necessarily available when the function call
                 // was first parsed, in the case where it is a forwards reference
-                if (arg instanceof ErrorExpression && ((ErrorExpression)arg).getErrorCodeLocalPart().equals("UseDefault")) {
+                if (arg instanceof DefaultedArgumentExpression) {
                     arg = ((UserFunction)target).getParameterDefinitions()[i].getDefaultValueExpression();
                 }
-                setArg(i, tc.staticTypeCheck(
-                        arg,
-                        argTypes[i],
-                        role, visitor));
+                if (!(arg instanceof DefaultedArgumentExpression)) {
+                    setArg(i, tc.staticTypeCheck(
+                            arg,
+                            argTypes[i],
+                            role, visitor));
+                }
             }
         }
     }

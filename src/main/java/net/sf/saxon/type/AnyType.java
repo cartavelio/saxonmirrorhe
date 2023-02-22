@@ -634,7 +634,7 @@ public enum AnyType implements ComplexType {
     //#ifdefined SCHEMA
 
     @Override
-    public net.sf.saxon.om.Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         return UserComplexType.getComponentAsFunction(this);
     }
     //#endif

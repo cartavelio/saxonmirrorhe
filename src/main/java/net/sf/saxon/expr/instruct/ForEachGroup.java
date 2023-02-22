@@ -623,7 +623,7 @@ public class ForEachGroup extends Instruction
                 groupIterator = new GroupEndingIterator(selectPull, (Pattern) getGroupingKey(), context);
                 break;
             case GROUP_BREAKING_WHEN:
-                Function breakWhen = (Function)getGroupingKey().evaluateItem(context);
+                FunctionItem breakWhen = (FunctionItem)getGroupingKey().evaluateItem(context);
                 groupIterator = new GroupBreakingIterator(selectPull, breakWhen, context);
                 break;
             default:
@@ -827,7 +827,7 @@ public class ForEachGroup extends Instruction
 
                 case GROUP_BREAKING_WHEN:
                     return context -> {
-                        Function breakWhen = (Function) expr.getGroupingKey().evaluateItem(context);
+                        FunctionItem breakWhen = (FunctionItem) expr.getGroupingKey().evaluateItem(context);
                         return new GroupBreakingIterator(selectPull, breakWhen, context);
                     };
                 default:

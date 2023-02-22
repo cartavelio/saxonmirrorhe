@@ -9,7 +9,7 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
@@ -36,8 +36,8 @@ public class AllFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         SequenceIterator iter = arguments[0].iterate();
-        Function predicate = arguments.length > 1
-                ? (Function) arguments[1].head()
+        FunctionItem predicate = arguments.length > 1
+                ? (FunctionItem) arguments[1].head()
                 : new CoercedFunction(SystemFunction.makeFunction("identity", getRetainedStaticContext(), 1),
                                       new SpecificFunctionType(
                                               new SequenceType[]{SequenceType.SINGLE_ITEM},

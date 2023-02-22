@@ -134,8 +134,8 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
             serializeMap((MapItem) item);
         } else if (item instanceof ArrayItem) {
             serializeArray((ArrayItem) item);
-        } else if (item instanceof Function) {
-            serializeFunction((Function) item);
+        } else if (item instanceof FunctionItem) {
+            serializeFunction((FunctionItem) item);
         }
     }
 
@@ -189,7 +189,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         }
     }
 
-    private void serializeFunction(Function fn) throws XPathException {
+    private void serializeFunction(FunctionItem fn) throws XPathException {
         StructuredQName fname = fn.getFunctionName();
         if (fname == null || fname.hasURI(NamespaceUri.ANONYMOUS)) {
             emit("(anonymous-function)");

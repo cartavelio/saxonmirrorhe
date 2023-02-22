@@ -648,7 +648,7 @@ public class ItemTypeFactory {
                 return new ConstructedItemType(ExternalObjectType.THE_INSTANCE, config);
             //#endif
             } else {
-                Function functionItem = (Function)it;
+                FunctionItem functionItem = (FunctionItem)it;
                 FunctionItemType fit = functionItem.getFunctionItemType();
                 net.sf.saxon.value.SequenceType basicReturnType = fit.getResultType();
                 net.sf.saxon.value.SequenceType[] basicArgTypes = fit.getArgumentTypes();

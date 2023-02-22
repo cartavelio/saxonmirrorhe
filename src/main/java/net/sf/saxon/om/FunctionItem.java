@@ -20,9 +20,16 @@ import net.sf.saxon.type.FunctionItemType;
 /**
  * XDM 3.0 introduces a third kind of item, beyond nodes and atomic values: the function. Functions
  * implement this interface.
+ *
+ * @since 12.0; previously named <code>Function</code>.
  */
 
-public interface Function extends Item, Callable, GroundedValue {
+public interface FunctionItem extends Item, Callable, GroundedValue {
+
+    // TODO: Currently SystemFunction and UserFunction implement this interface, despite
+    //  the fact that they support an arity range, which dynamic functions don't allow. In effect
+    //  they act as function items for the function at the top end of the arity range. Need
+    //  to better reflect the 4.0 data model when it's finalised.
 
     /**
      * Ask whether this function item is a map
@@ -122,7 +129,7 @@ public interface Function extends Item, Callable, GroundedValue {
      * @throws XPathException if the comparison cannot be performed
      */
 
-    boolean deepEquals(Function other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException;
+    boolean deepEquals(FunctionItem other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException;
 
     /**
      * Get a description of this function for use in error messages. For named functions, the description

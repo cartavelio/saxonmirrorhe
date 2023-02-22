@@ -23,7 +23,7 @@ public abstract class SequenceMatching extends SystemFunction {
     protected BooleanValue startsWith(SequenceIterator iter0,
                                       SequenceIterator iter1,
                                       XPathContext context,
-                                      Function comparator) throws XPathException {
+                                      FunctionItem comparator) throws XPathException {
         Item it0, it1;
         if (comparator == null) {
             AtomicComparer comparer = GenericAtomicComparer.makeAtomicComparer(
@@ -71,7 +71,7 @@ public abstract class SequenceMatching extends SystemFunction {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             SequenceIterator iter0 = arguments[0].iterate();
             SequenceIterator iter1 = arguments[1].iterate();
-            Function comparator = arguments.length == 3 ? (Function)arguments[2].head() : null;
+            FunctionItem comparator = arguments.length == 3 ? (FunctionItem)arguments[2].head() : null;
             return startsWith(iter0, iter1, context, comparator);
         }
     }
@@ -81,7 +81,7 @@ public abstract class SequenceMatching extends SystemFunction {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             SequenceIterator iter0 = Reverse.getReverseIterator(arguments[0].iterate());
             SequenceIterator iter1 = Reverse.getReverseIterator(arguments[1].iterate());
-            Function comparator = arguments.length == 3 ? (Function) arguments[2].head() : null;
+            FunctionItem comparator = arguments.length == 3 ? (FunctionItem) arguments[2].head() : null;
             return startsWith(iter0, iter1, context, comparator);
         }
     }
@@ -91,7 +91,7 @@ public abstract class SequenceMatching extends SystemFunction {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             GroundedValue seq0 = arguments[0].materialize();
             GroundedValue seq1 = arguments[1].materialize();
-            Function comparator = arguments.length == 3 ? (Function) arguments[2].head() : null;
+            FunctionItem comparator = arguments.length == 3 ? (FunctionItem) arguments[2].head() : null;
             int len0 = seq0.getLength();
             int len2 = seq1.getLength();
             if (len2 == 0) {

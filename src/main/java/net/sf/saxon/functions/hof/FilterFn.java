@@ -10,7 +10,7 @@ package net.sf.saxon.functions.hof;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
@@ -35,12 +35,12 @@ public class FilterFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         return SequenceTool.toLazySequence(
-                evalFilter((Function) arguments[1].head(),
+                evalFilter((FunctionItem) arguments[1].head(),
                            arguments[0].iterate(), context));
     }
 
     private SequenceIterator evalFilter(
-            final Function function, SequenceIterator basis, final XPathContext context) {
+            final FunctionItem function, SequenceIterator basis, final XPathContext context) {
         return ItemMappingIterator.filter(basis,
                     item -> ((BooleanValue) dynamicCall(function, context, new Sequence[]{item}).head()).getBooleanValue());
     }

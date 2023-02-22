@@ -56,7 +56,7 @@ public abstract class ItemsEnding extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Sequence input = arguments[0];
-        Function endCondition = (Function) arguments[1].head();
+        FunctionItem endCondition = (FunctionItem) arguments[1].head();
         return new LazySequence(new EndingIterator(
                 input.iterate(), endCondition, includeMatchingItem(), context));
     }
@@ -64,12 +64,12 @@ public abstract class ItemsEnding extends SystemFunction {
     private static class EndingIterator implements SequenceIterator {
 
         private final SequenceIterator baseIterator;
-        private final Function end;
+        private final FunctionItem end;
         private final boolean inclusive;
         private final XPathContext context;
         private boolean finished;
 
-        EndingIterator(SequenceIterator in, Function end, boolean inclusive, XPathContext context) {
+        EndingIterator(SequenceIterator in, FunctionItem end, boolean inclusive, XPathContext context) {
             this.baseIterator = in;
             this.end = end;
             this.inclusive = inclusive;

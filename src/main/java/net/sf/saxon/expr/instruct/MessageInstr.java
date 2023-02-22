@@ -252,8 +252,8 @@ public class MessageInstr extends Instruction {
                     processingInstruction("namespace", StringView.of("prefix=\"" + prefix + "\" uri=\"" + item.getUnicodeStringValue() + "\""), Loc.NONE, ReceiverOption.NONE);
                     return;
                 }
-            } else if (item instanceof Function && !((Function) item).isArray()) {
-                String representation = ((Function) item).isMap() ? Err.depict(item) : "Function " + Err.depict(item);
+            } else if (item instanceof FunctionItem && !((FunctionItem) item).isArray()) {
+                String representation = ((FunctionItem) item).isMap() ? Err.depict(item) : "Function " + Err.depict(item);
                 nextReceiver.characters(StringView.of(representation), locationId, ReceiverOption.NONE);
                 return;
             }

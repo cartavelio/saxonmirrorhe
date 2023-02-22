@@ -132,7 +132,7 @@ public class ApplyFn extends SystemFunction  {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        final Function function = (Function) arguments[0].head();
+        final FunctionItem function = (FunctionItem) arguments[0].head();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         FunctionItemType fit = function.getFunctionItemType();
 

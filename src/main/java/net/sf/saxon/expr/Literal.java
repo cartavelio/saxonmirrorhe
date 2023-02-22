@@ -138,7 +138,7 @@ public class Literal extends Expression {
             return UType.VOID;
         } else if (value instanceof AtomicValue) {
             return ((AtomicValue) value).getUType();
-        } else if (value instanceof Function) {
+        } else if (value instanceof FunctionItem) {
             return UType.FUNCTION;
         } else {
             return super.getStaticUType(contextItemType);
@@ -576,8 +576,8 @@ public class Literal extends Expression {
                 exportValue(kvp.value, out);
             }
             out.endElement();
-        } else if (value instanceof Function) {
-            ((Function) value).export(out);
+        } else if (value instanceof FunctionItem) {
+            ((FunctionItem) value).export(out);
         } else if (value instanceof AnyExternalObject) {
             if (((ExpressionPresenter.ExportOptions)out.getOptions()).explaining) {
                 out.startElement("externalObject");
@@ -782,8 +782,8 @@ public class Literal extends Expression {
         value = value.reduce();
         if (value instanceof StringValue) {
             return new StringLiteral((StringValue) value);
-        } else if (value instanceof Function && !(value instanceof MapItem || value instanceof ArrayItem)) {
-            return new FunctionLiteral((Function) value);
+        } else if (value instanceof FunctionItem && !(value instanceof MapItem || value instanceof ArrayItem)) {
+            return new FunctionLiteral((FunctionItem) value);
         } else {
             return new Literal(value);
         }

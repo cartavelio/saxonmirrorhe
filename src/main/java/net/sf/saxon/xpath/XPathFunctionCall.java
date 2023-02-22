@@ -65,7 +65,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
      * @return always null
      */
     @Override
-    public Function getTargetFunction(XPathContext context) {
+    public FunctionItem getTargetFunction(XPathContext context) {
         return null;
     }
 

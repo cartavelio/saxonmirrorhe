@@ -16,12 +16,11 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -305,7 +304,7 @@ public class SpecificFunctionType extends AnyFunctionType {
      */
     @Override
     public boolean matches(Item item, TypeHierarchy th) {
-        if (!(item instanceof Function)) {
+        if (!(item instanceof FunctionItem)) {
             return false;
         }
 
@@ -350,7 +349,7 @@ public class SpecificFunctionType extends AnyFunctionType {
             }
         }
 
-        Affinity affinity = th.relationship(((Function) item).getFunctionItemType(), this);
+        Affinity affinity = th.relationship(((FunctionItem) item).getFunctionItemType(), this);
         return affinity == Affinity.SAME_TYPE || affinity == Affinity.SUBSUMED_BY;
     }
 
@@ -366,7 +365,7 @@ public class SpecificFunctionType extends AnyFunctionType {
     @Override
     @CSharpModifiers(code={"public", "override"})
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
-        if (!(item instanceof Function)) {
+        if (!(item instanceof FunctionItem)) {
             return Optional.empty();
         }
 
@@ -434,10 +433,10 @@ public class SpecificFunctionType extends AnyFunctionType {
             }
         }
 
-        FunctionItemType other = ((Function) item).getFunctionItemType();
-        if (getArity() != ((Function) item).getArity()) {
+        FunctionItemType other = ((FunctionItem) item).getFunctionItemType();
+        if (getArity() != ((FunctionItem) item).getArity()) {
             String s = "The required function arity is " + getArity() +
-                    "; the supplied function has arity " + ((Function) item).getArity();
+                    "; the supplied function has arity " + ((FunctionItem) item).getArity();
             return Optional.of(s);
         }
         Affinity affinity = th.sequenceTypeRelationship(resultType, other.getResultType());

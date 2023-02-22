@@ -32,7 +32,7 @@ import net.sf.saxon.value.SequenceType;
 /**
  * Interface supported by different implementations of an XDM map item
  */
-public abstract class MapItem implements Function {
+public abstract class MapItem implements FunctionItem {
 
     /**
      * Get an entry from the Map
@@ -430,7 +430,7 @@ public abstract class MapItem implements Function {
      * @param other the other function item
      */
     @Override
-    public boolean deepEquals(Function other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
+    public boolean deepEquals(FunctionItem other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
             AtomicIterator keyIter = keys();

@@ -149,8 +149,8 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
 
     /*@Nullable*/
     @Override
-    public Function evaluateItem(XPathContext context) throws XPathException {
-        return (Function)makeElaborator().elaborateForItem().eval(context);
+    public FunctionItem evaluateItem(XPathContext context) throws XPathException {
+        return (FunctionItem)makeElaborator().elaborateForItem().eval(context);
     }
 
 
@@ -228,7 +228,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         return new FunctionSequenceCoercerElaborator();
     }
 
-    private static void checkAnnotations(Function item, FunctionItemType requiredItemType, Configuration config) throws XPathException {
+    private static void checkAnnotations(FunctionItem item, FunctionItemType requiredItemType, Configuration config) throws XPathException {
         for (Annotation ann : requiredItemType.getAnnotationAssertions()) {
             FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ann.getAnnotationQName().getNamespaceUri());
             if (handler != null && !handler.satisfiesAssertion(ann, item.getAnnotations())) {
@@ -250,14 +250,14 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
             this.locator = locator;
         }
 
-        public Function mapItem(Item item) throws XPathException {
-            if (!(item instanceof Function)) {
+        public FunctionItem mapItem(Item item) throws XPathException {
+            if (!(item instanceof FunctionItem)) {
                 throw new XPathException(
                         "Function coercion attempted on an item (" + item.toShortString() + ") which is not a function", "XPTY0004", locator);
             }
             try {
-                checkAnnotations((Function)item, requiredItemType, config);
-                return new CoercedFunction((Function)item, requiredItemType);
+                checkAnnotations((FunctionItem)item, requiredItemType, config);
+                return new CoercedFunction((FunctionItem)item, requiredItemType);
             } catch (XPathException err) {
                 err.maybeSetLocation(locator);
                 throw err;

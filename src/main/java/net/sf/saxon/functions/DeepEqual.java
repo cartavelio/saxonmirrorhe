@@ -160,13 +160,13 @@ public class DeepEqual extends CollatingFunctionFixed {
                     break;
                 }
 
-                if (item1 instanceof Function || item2 instanceof Function) {
-                    if (!(item1 instanceof Function && item2 instanceof Function)) {
+                if (item1 instanceof FunctionItem || item2 instanceof FunctionItem) {
+                    if (!(item1 instanceof FunctionItem && item2 instanceof FunctionItem)) {
                         reason = "if one item is a function then both must be functions (position " + pos1 + ")";
                         return false;
                     }
                     // two maps or arrays can be deep-equal
-                    boolean fe = ((Function) item1).deepEquals((Function) item2, context, comparer, flags);
+                    boolean fe = ((FunctionItem) item1).deepEquals((FunctionItem) item2, context, comparer, flags);
                     if (!fe) {
                         result = false;
                         reason = "functions at position " + pos1 + " differ";

@@ -8,7 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 
@@ -27,7 +27,7 @@ public abstract class ContextAccessorFunction extends SystemFunction {
      * @param context the context to which the function applies. Must not be null.
      */
 
-    public abstract Function bindContext(XPathContext context) throws XPathException;
+    public abstract FunctionItem bindContext(XPathContext context) throws XPathException;
 
 
     /**

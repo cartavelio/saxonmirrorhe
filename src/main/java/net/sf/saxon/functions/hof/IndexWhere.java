@@ -40,10 +40,10 @@ public class IndexWhere extends SystemFunction {
     private static class IndexIterator implements SequenceIterator {
         private int index = 0;
         private final SequenceIterator base;
-        private final Function predicate;
+        private final FunctionItem predicate;
         private final XPathContext context;
 
-        public IndexIterator(SequenceIterator base, XPathContext context, Function predicate) {
+        public IndexIterator(SequenceIterator base, XPathContext context, FunctionItem predicate) {
             this.base = base;
             this.context = context;
             this.predicate = predicate;
@@ -98,7 +98,7 @@ public class IndexWhere extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         SequenceIterator seq = arguments[0].iterate();
-        Function predicate = (Function) arguments[1].head();
+        FunctionItem predicate = (FunctionItem) arguments[1].head();
         SequenceIterator iter = new IndexIterator(seq, context, predicate);
         return new LazySequence(iter);
     }

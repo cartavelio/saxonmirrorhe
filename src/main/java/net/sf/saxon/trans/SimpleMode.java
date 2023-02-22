@@ -554,7 +554,7 @@ public class SimpleMode extends Mode {
             }
             bestRule = searchRuleChain(item, context, bestRule, genericRuleChain);
 
-        } else if (item instanceof Function) {
+        } else if (item instanceof FunctionItem) {
             if (functionItemRuleChain != null) {
                 bestRule = searchRuleChain(item, context, bestRule, functionItemRuleChain);
             }
@@ -861,7 +861,7 @@ public class SimpleMode extends Mode {
             bestRule = searchRuleChain(item, context, bestRule, genericRuleChain, ruleSearchState, filter);
             return bestRule;
 
-        } else if (item instanceof Function) {
+        } else if (item instanceof FunctionItem) {
             if (functionItemRuleChain != null) {
                 ruleSearchState = makeRuleSearchState(functionItemRuleChain, context);
                 bestRule = searchRuleChain(item, context, bestRule, functionItemRuleChain, ruleSearchState, filter);

@@ -14,7 +14,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -51,7 +51,7 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
      * @param context the context to which the function applies. Must not be null.
      */
     @Override
-    public Function bindContext(XPathContext context) {
+    public FunctionItem bindContext(XPathContext context) {
         Int64Value value;
         try {
             value = evaluateItem(context);

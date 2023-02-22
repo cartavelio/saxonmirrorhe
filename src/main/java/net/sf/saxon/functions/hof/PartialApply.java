@@ -10,7 +10,7 @@ package net.sf.saxon.functions.hof;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -294,8 +294,8 @@ public class PartialApply extends Expression {
      */
 
     @Override
-    public Function evaluateItem(XPathContext context) throws XPathException {
-        return (Function)makeElaborator().elaborateForItem().eval(context);
+    public FunctionItem evaluateItem(XPathContext context) throws XPathException {
+        return (FunctionItem)makeElaborator().elaborateForItem().eval(context);
     }
 
     /**
@@ -337,7 +337,7 @@ public class PartialApply extends Expression {
             }
 
             return context -> {
-                Function f = (Function) functionEval.eval(context);
+                FunctionItem f = (FunctionItem) functionEval.eval(context);
                 assert f != null;
                 Sequence[] values = new Sequence[len];
                 for (int i = 0; i < boundArgumentsEvaluators.length; i++) {

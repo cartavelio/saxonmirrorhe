@@ -129,10 +129,10 @@ public final class Atomizer extends UnaryExpression {
                 if (i instanceof NodeInfo) {
                     return this;
                 }
-                if (i instanceof Function) {
-                    if (((Function)i).isArray()) {
+                if (i instanceof FunctionItem) {
+                    if (((FunctionItem)i).isArray()) {
                         return this;
-                    } else if (((Function)i).isMap()) {
+                    } else if (((FunctionItem)i).isMap()) {
                         XPathException err = new XPathException(
                                 expandMessage("Cannot atomize a map (" + i.toShortString() + ")"), "FOTY0013");
                         err.setIsTypeError(true);

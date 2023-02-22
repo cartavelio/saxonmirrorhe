@@ -89,7 +89,7 @@ public abstract class PJConverter {
         jpmap.put(GDayValue.class, SequenceType.OPTIONAL_G_DAY);
         jpmap.put(Base64BinaryValue.class, SequenceType.OPTIONAL_BASE64_BINARY);
         jpmap.put(HexBinaryValue.class, SequenceType.OPTIONAL_HEX_BINARY);
-        jpmap.put(Function.class, SequenceType.OPTIONAL_FUNCTION_ITEM);
+        jpmap.put(FunctionItem.class, SequenceType.OPTIONAL_FUNCTION_ITEM);
         jpmap.put(MapItem.class, MapType.OPTIONAL_MAP_ITEM);
         jpmap.put(NodeInfo.class, SequenceType.OPTIONAL_NODE);
         jpmap.put(TreeInfo.class, SequenceType.OPTIONAL_DOCUMENT_NODE);

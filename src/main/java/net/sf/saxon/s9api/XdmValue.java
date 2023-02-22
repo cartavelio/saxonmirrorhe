@@ -158,8 +158,8 @@ public class XdmValue implements Iterable<XdmItem> {
                 return new XdmMap((MapItem)first);
             } else if (first instanceof ArrayItem) {
                 return new XdmArray((ArrayItem)first);
-            } else if (first instanceof Function) {
-                return new XdmFunctionItem((Function) first);
+            } else if (first instanceof FunctionItem) {
+                return new XdmFunctionItem((FunctionItem) first);
             } else if (first instanceof AnyExternalObject) {
                 return new XdmExternalObject(first);
             } else {

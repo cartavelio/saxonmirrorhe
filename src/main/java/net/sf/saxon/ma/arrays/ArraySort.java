@@ -54,9 +54,9 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
                 collation = context.getConfiguration().getCollation(collName.getStringValue(), getStaticBaseUriString());
             }
         }
-        Function key = null;
+        FunctionItem key = null;
         if (arguments.length == 3){
-            key = (Function) arguments[2].head();
+            key = (FunctionItem) arguments[2].head();
         }
         for (GroundedValue seq: array.members()){
             MemberToBeSorted member = new MemberToBeSorted();

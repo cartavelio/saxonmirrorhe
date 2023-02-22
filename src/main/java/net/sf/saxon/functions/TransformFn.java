@@ -647,7 +647,7 @@ public class TransformFn extends SystemFunction implements Callable {
         Map<QName, XdmValue> tunnelParams = new HashMap<>();
         QName initialFunction = null;
         XdmValue[] functionParams = null;
-        Function postProcessor = null;
+        FunctionItem postProcessor = null;
         String principalResultKey = "output";
 
         for (String name : options.keySet()) {
@@ -726,7 +726,7 @@ public class TransformFn extends SystemFunction implements Callable {
                     }
                     break;
                 case "post-process":
-                    postProcessor = (Function) head;
+                    postProcessor = (FunctionItem) head;
                     break;
             }
         }
@@ -918,7 +918,7 @@ public class TransformFn extends SystemFunction implements Callable {
         protected Xslt30Transformer transformer;
         protected String baseOutputUri;
         protected String principalResultKey;
-        protected Function postProcessor;
+        protected FunctionItem postProcessor;
         protected XPathContext context;
         protected HashTrieMap resultMap = new HashTrieMap();
 
@@ -981,7 +981,7 @@ public class TransformFn extends SystemFunction implements Callable {
          * @param context       the context used for evaluating the postprocessing function
          */
 
-        public void setPostProcessor(Function postProcessor, XPathContext context) {
+        public void setPostProcessor(FunctionItem postProcessor, XPathContext context) {
             this.postProcessor = postProcessor;
             this.context = context;
         }

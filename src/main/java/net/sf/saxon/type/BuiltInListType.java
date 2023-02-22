@@ -553,7 +553,7 @@ public class BuiltInListType implements ListType {
      */
 
     @Override
-    public net.sf.saxon.om.Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         return UserSimpleType.getComponentAsFunction(this);
     }
     //#endif

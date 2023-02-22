@@ -166,7 +166,7 @@ public abstract class AbstractArrayItem extends ArrayItem {
 
 
     @Override
-    public boolean deepEquals(Function other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
+    public boolean deepEquals(FunctionItem other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
         if (other instanceof ArrayItem) {
             ArrayItem that = (ArrayItem) other;
             if (this.arrayLength() != that.arrayLength()) {

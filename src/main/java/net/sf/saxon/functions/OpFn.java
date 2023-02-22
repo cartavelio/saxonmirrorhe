@@ -8,7 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathDynamicContext;
@@ -40,7 +40,7 @@ public class OpFn extends SystemFunction {
         String collation = getRetainedStaticContext().getDefaultCollationName();
         String cacheKey = "fn:op~" + collation;
         // The results of the function are cached
-        Function fn = (Function)context.getController().getUserData(cacheKey, op);
+        FunctionItem fn = (FunctionItem)context.getController().getUserData(cacheKey, op);
         if (fn == null) {
             validateOperator(op);
             String xpath = "function($x, $y) {$x " + op + " $y}";
@@ -51,7 +51,7 @@ public class OpFn extends SystemFunction {
             eval.setStaticContext(env);
             XPathExpression cexp = eval.createExpression(xpath);
             XPathDynamicContext dc = cexp.createDynamicContext();
-            fn = (Function) cexp.evaluateSingle(dc);
+            fn = (FunctionItem) cexp.evaluateSingle(dc);
             context.getController().setUserData(cacheKey, op, fn);
         }
         return fn;

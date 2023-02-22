@@ -15,7 +15,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -27,7 +27,7 @@ import java.util.Arrays;
 /**
  * Abstract superclass (and factory class) for implementations of Function
  */
-public abstract class AbstractFunction implements Function {
+public abstract class AbstractFunction implements FunctionItem {
 
     /**
      * Get the roles of the arguments, for the purposes of streaming
@@ -141,7 +141,7 @@ public abstract class AbstractFunction implements Function {
      * @param other the other function item
      */
     @Override
-    public boolean deepEquals(Function other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
+    public boolean deepEquals(FunctionItem other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
         throw new XPathException("Argument to deep-equal() contains a function item", "FOTY0015");
     }
 

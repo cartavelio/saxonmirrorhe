@@ -15,7 +15,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.StylesheetPackage;
@@ -73,7 +73,7 @@ public class FunctionLookup extends ContextAccessorFunction {
      * @param context the context to which the function applies. Must not be null.
      */
     @Override
-    public Function bindContext(XPathContext context) {
+    public FunctionItem bindContext(XPathContext context) {
         FunctionLookup bound = (FunctionLookup) SystemFunction.makeFunction("function-lookup", getRetainedStaticContext(), 2);
         FocusIterator focusIterator = context.getCurrentIterator();
         if (focusIterator != null) {
@@ -88,7 +88,7 @@ public class FunctionLookup extends ContextAccessorFunction {
         return bound;
     }
 
-    public Function lookup(StructuredQName name, int arity, XPathContext context) throws XPathException {
+    public FunctionItem lookup(StructuredQName name, int arity, XPathContext context) throws XPathException {
 
         Controller controller = context.getController();
         Executable exec = controller.getExecutable();
@@ -105,7 +105,7 @@ public class FunctionLookup extends ContextAccessorFunction {
         ic.setNamespaceResolver(rsc);
         ic.setPackageData(pd);
         try {
-            Function fi = lib.getFunctionItem(sn, ic);
+            FunctionItem fi = lib.getFunctionItem(sn, ic);
             if (fi instanceof UserFunction) {
                 Visibility vis = ((UserFunction) fi).getDeclaredVisibility();
                 if (vis == Visibility.ABSTRACT) {
@@ -143,7 +143,7 @@ public class FunctionLookup extends ContextAccessorFunction {
         XPathContext c = boundContext == null ? context : boundContext;
         QNameValue qname = (QNameValue) arguments[0].head();
         IntegerValue arity = (IntegerValue) arguments[1].head();
-        Function fi = lookup(qname.getStructuredQName(), (int) arity.longValue(), c);
+        FunctionItem fi = lookup(qname.getStructuredQName(), (int) arity.longValue(), c);
         if (fi == null) {
             return EmptySequence.getInstance();
         }

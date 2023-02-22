@@ -599,24 +599,35 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         XSLFunction sourceFunction = (XSLFunction) decl.getSourceElement();
         UserFunction compiledFunction = sourceFunction.getCompiledFunction();
         Component declaringComponent = compiledFunction.obtainDeclaringComponent(sourceFunction);
-        SymbolicName.F sName = sourceFunction.getSymbolicName();
-        //StructuredQName qName = template.getTemplateName();
-        if (sName != null) {
+        int maxArity = sourceFunction.getNumberOfParameters();
+        int minArity = maxArity - sourceFunction.getNumberOfOptionalParameters();
+        for (int arity = minArity; arity <= maxArity; arity++) {
+            SymbolicName.F sName = new SymbolicName.F(sourceFunction.getObjectName(), arity);
+
             // see if there is already a named function with this precedence
-            Component other = componentIndex.get(sName);
-            if (other == null) {
+            ComponentDeclaration otherDecl = functionIndex.get(sName);
+            if (otherDecl == null) {
                 // this is the first
-                componentIndex.put(sName, declaringComponent);
+                if (arity == maxArity) {
+                    componentIndex.put(sName, declaringComponent);
+                }
                 functionIndex.put(sName, decl);
             } else {
-                if (other.getDeclaringPackage() == getStylesheetPackage()) {
+                Component other = componentIndex.get(new SymbolicName.F(sourceFunction.getObjectName(), ((XSLFunction)otherDecl.getSourceElement()).getNumberOfParameters()));
+                if (other != null && other.getDeclaringPackage() == getStylesheetPackage()) {
                     // check the precedences
                     int thisPrecedence = decl.getPrecedence();
                     ComponentDeclaration otherFunction = functionIndex.get(sName);
                     int otherPrecedence = otherFunction.getPrecedence();
                     if (thisPrecedence == otherPrecedence) {
-                        sourceFunction.compileError("Duplicate named function (see line " +
-                                                            otherFunction.getSourceElement().getLineNumber() + " of " + otherFunction.getSourceElement().getSystemId() + ')', "XTSE0770");
+                        String message = "Duplicate named function (see line " +
+                                otherFunction.getSourceElement().getLineNumber() +
+                                " of " + otherFunction.getSourceElement().getSystemId() + ')';
+                        if (maxArity != ((UserFunction)other.getActor()).getNumberOfParameters()) {
+                            message += ". The arity ranges of the two functions overlap";
+                        }
+                        sourceFunction.compileError(message, "XTSE0770");
+                        break;
                     } else if (thisPrecedence < otherPrecedence) {
                         //template.setRedundantNamedTemplate();
                     } else {
@@ -634,6 +645,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                                                         " conflicts with a public function in package " + other.getDeclaringPackage().getPackageName(), "XTSE3050");
 
                 }
+
             }
         }
 
@@ -1550,7 +1562,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                                       new NameTest(Type.ELEMENT, new FingerprintedQName(component.getActor().getComponentName(), pool), pool), -1);
             ComponentTest exactFunctionTest = null;
             if (fp == StandardNames.XSL_FUNCTION) {
-                Function fn = (Function) component.getActor();
+                FunctionItem fn = (FunctionItem) component.getActor();
                 exactFunctionTest =
                         new ComponentTest(fp,
                                           new NameTest(Type.ELEMENT,

@@ -44,10 +44,10 @@ public class ForEachPairFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         return SequenceTool.toLazySequence(evalMapPairs(
-                (Function) arguments[2].head(), arguments[0].iterate(), arguments[1].iterate(), context));
+                (FunctionItem) arguments[2].head(), arguments[0].iterate(), arguments[1].iterate(), context));
     }
 
-    private SequenceIterator evalMapPairs(final Function function,
+    private SequenceIterator evalMapPairs(final FunctionItem function,
                                           SequenceIterator seq0,
                                           SequenceIterator seq1,
                                           final XPathContext context) {

@@ -129,7 +129,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
      *         function item; or null if the function does not exist
      */
     @Override
-    public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext)
+    public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext)
             throws XPathException {
         XQueryFunction fd = getDeclaration(functionName.getComponentName(), functionName.getArity());
         if (fd != null) {

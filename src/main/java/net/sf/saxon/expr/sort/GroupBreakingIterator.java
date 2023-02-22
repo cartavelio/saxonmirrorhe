@@ -30,7 +30,7 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
 
     private final PullEvaluator select;
     private final FocusIterator population;
-    private final Function breakWhen;
+    private final FunctionItem breakWhen;
     private final XPathContext baseContext;
     private final XPathContext runningContext;
     private List<Item> currentMembers;
@@ -39,7 +39,7 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
     private int position = 0;
 
 
-    public GroupBreakingIterator(PullEvaluator select, Function breakWhen,
+    public GroupBreakingIterator(PullEvaluator select, FunctionItem breakWhen,
                                  XPathContext baseContext)
             throws XPathException {
         this.select = select;

@@ -12,7 +12,7 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionBinder;
@@ -67,9 +67,9 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
      *         function item; or null if the function does not exist
      */
     @Override
-    public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
+    public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
         for (FunctionLibrary lib : libraryList) {
-            Function fi = lib.getFunctionItem(functionName, staticContext);
+            FunctionItem fi = lib.getFunctionItem(functionName, staticContext);
             if (fi != null) {
                 return fi;
             }

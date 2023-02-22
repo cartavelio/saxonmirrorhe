@@ -275,7 +275,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
             ArrayItem array = (ArrayItem) arguments[0].head();
             assert array != null;
-            Function fn = (Function) arguments[1].head();
+            FunctionItem fn = (FunctionItem) arguments[1].head();
             List<GroundedValue> list = new ArrayList<>(expectedSize());
             for (GroundedValue gv : array.members()) {
                 if (((BooleanValue) dynamicCall(fn, context, new Sequence[]{gv}).head()).getBooleanValue()) {
@@ -322,7 +322,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             assert array != null;
             int arraySize = array.arrayLength();
             Sequence zero = arguments[1];
-            Function fn = (Function) arguments[2].head();
+            FunctionItem fn = (FunctionItem) arguments[2].head();
             int i;
             for (i=0; i < arraySize; i++) {
                 zero = dynamicCall(fn, context, new Sequence[]{zero, array.get(i)});
@@ -341,7 +341,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             ArrayItem array = (ArrayItem) arguments[0].head();
             assert array != null;
             Sequence zero = arguments[1];
-            Function fn = (Function) arguments[2].head();
+            FunctionItem fn = (FunctionItem) arguments[2].head();
             int i;
             for (i = array.arrayLength() - 1; i >= 0; i--) {
                 zero = dynamicCall(fn, context, new Sequence[]{array.get(i), zero});
@@ -359,7 +359,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             ArrayItem array = (ArrayItem) arguments[0].head();
             assert array != null;
-            Function fn = (Function) arguments[1].head();
+            FunctionItem fn = (FunctionItem) arguments[1].head();
             List<GroundedValue> list = new ArrayList<>(expectedSize());
             for (GroundedValue gv : array.members()) {
                 list.add(dynamicCall(fn, context, new GroundedValue[]{gv}).materialize());
@@ -380,7 +380,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             assert array1 != null;
             ArrayItem array2 = (ArrayItem) arguments[1].head();
             assert array2 != null;
-            Function fn = (Function) arguments[2].head();
+            FunctionItem fn = (FunctionItem) arguments[2].head();
             List<GroundedValue> list = new ArrayList<>(expectedSize());
             int i;
             for (i=0; i < array1.arrayLength() && i < array2.arrayLength(); i++) {

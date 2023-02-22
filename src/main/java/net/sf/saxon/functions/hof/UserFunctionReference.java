@@ -301,8 +301,8 @@ public class UserFunctionReference extends Expression
      *                                           expression
      */
     @Override
-    public Function evaluateItem(XPathContext context) throws XPathException {
-        return (Function) makeElaborator().elaborateForItem().eval(context);
+    public FunctionItem evaluateItem(XPathContext context) throws XPathException {
+        return (FunctionItem) makeElaborator().elaborateForItem().eval(context);
     }
 
     /**
@@ -326,7 +326,7 @@ public class UserFunctionReference extends Expression
      * @throws XPathException if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public Function call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public FunctionItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         return evaluateItem(context);
     }
 
@@ -413,19 +413,19 @@ public class UserFunctionReference extends Expression
     public static class BoundUserFunction extends AbstractFunction implements ContextOriginator {
 
         private final ExportAgent agent;
-        private final Function function;
+        private final FunctionItem function;
         private final Component component;
         private final Controller controller; // retained in case a function is returned from a query or stylesheet
 
 
-        public BoundUserFunction(ExportAgent agent, Function function, Component component, Controller controller) {
+        public BoundUserFunction(ExportAgent agent, FunctionItem function, Component component, Controller controller) {
             this.agent = agent;
             this.function = function;
             this.component = component;
             this.controller = controller;
         }
 
-        public Function getTargetFunction() {
+        public FunctionItem getTargetFunction() {
             return function;
         }
 

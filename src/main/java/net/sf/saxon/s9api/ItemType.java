@@ -14,7 +14,7 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
@@ -148,7 +148,7 @@ public abstract class ItemType implements Predicate<XdmItem> {
 
         @Override
         public boolean matches(XdmItem item) {
-            return item.getUnderlyingValue() instanceof Function;
+            return item.getUnderlyingValue() instanceof FunctionItem;
         }
 
         @Override

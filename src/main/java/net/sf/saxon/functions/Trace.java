@@ -86,9 +86,9 @@ public class Trace extends SystemFunction implements Traceable {
                         + val.getUnicodeStringValue());
             } else if (val instanceof ArrayItem || val instanceof MapItem) {
                 out.info(label + ": " + val.toShortString());
-            } else if (val instanceof Function) {
-                StructuredQName name = ((Function)val).getFunctionName();
-                out.info(label + ": function " + (name==null ? "(anon)" : name.getDisplayName()) + "#" + ((Function)val).getArity());
+            } else if (val instanceof FunctionItem) {
+                StructuredQName name = ((FunctionItem)val).getFunctionName();
+                out.info(label + ": function " + (name==null ? "(anon)" : name.getDisplayName()) + "#" + ((FunctionItem)val).getArity());
             } else if (val.getGenre() == Genre.EXTERNAL) {
                 Object obj = ((ObjectValue<?>)val).getObject();
                 out.info(label + ": " + obj.getClass().getName() + " = " + Err.truncate30(StringView.tidy(obj.toString())));

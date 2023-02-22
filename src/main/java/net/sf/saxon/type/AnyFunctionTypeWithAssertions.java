@@ -10,7 +10,7 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.FunctionAnnotationHandler;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
@@ -53,10 +53,10 @@ public class AnyFunctionTypeWithAssertions extends AnyFunctionType {
      */
     @Override
     public boolean matches(Item item, TypeHierarchy th)  {
-        return item instanceof Function && checkAnnotationAssertions(assertions, (Function) item, th.getConfiguration());
+        return item instanceof FunctionItem && checkAnnotationAssertions(assertions, (FunctionItem) item, th.getConfiguration());
     }
 
-    private static boolean checkAnnotationAssertions(AnnotationList assertions, Function item, Configuration config) {
+    private static boolean checkAnnotationAssertions(AnnotationList assertions, FunctionItem item, Configuration config) {
         AnnotationList annotations = item.getAnnotations();
         for (Annotation ann : assertions) {
             FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ann.getAnnotationQName().getNamespaceUri());
