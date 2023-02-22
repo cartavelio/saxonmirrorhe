@@ -25,10 +25,8 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
-import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.Compilation;
-import net.sf.saxon.style.ExpressionContext;
 import net.sf.saxon.style.ScopedBindingElement;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -1059,18 +1057,18 @@ public class ExpressionTool {
         final Configuration config = visitor.getConfiguration();
         Optimizer opt = visitor.obtainOptimizer();
         StaticContext env = visitor.getStaticContext();
-        boolean compileWithTracing = config.isCompileWithTracing();
-        if (!compileWithTracing) {
-            // Bug 3472 - desperate attempts to discover whether tracing was enabled for this particular compilation
-            if (compilation != null) {
-                compileWithTracing = compilation.getCompilerInfo().isCompileWithTracing();
-            } else if (env instanceof QueryModule) {
-                compileWithTracing = ((QueryModule) env).getUserQueryContext().isCompileWithTracing();
-            } else if (env instanceof ExpressionContext) {
-                compileWithTracing = ((ExpressionContext) env).getStyleElement().getCompilation().getCompilerInfo().isCompileWithTracing();
-            }
-        }
-        if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS) && !compileWithTracing) {
+//        boolean compileWithTracing = config.isCompileWithTracing();
+//        if (!compileWithTracing) {
+//            // Bug 3472 - desperate attempts to discover whether tracing was enabled for this particular compilation
+//            if (compilation != null) {
+//                compileWithTracing = compilation.getCompilerInfo().isCompileWithTracing();
+//            } else if (env instanceof QueryModule) {
+//                compileWithTracing = ((QueryModule) env).getUserQueryContext().isCompileWithTracing();
+//            } else if (env instanceof ExpressionContext) {
+//                compileWithTracing = ((ExpressionContext) env).getStyleElement().getCompilation().getCompilerInfo().isCompileWithTracing();
+//            }
+//        }
+        if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
             ExpressionTool.resetPropertiesWithinSubtree(body);
             if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
                 body = body.optimize(visitor, cisi);

@@ -74,6 +74,7 @@ public class SignificantItemDetector extends ProxyOutputter {
      */
     @Override
     public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+        start();
         getNextOutputter().namespace(prefix, namespaceUri, properties);
     }
 
@@ -82,6 +83,7 @@ public class SignificantItemDetector extends ProxyOutputter {
      */
     @Override
     public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
+        start();
         getNextOutputter().attribute(attName, typeCode, value, location, properties);
     }
 
