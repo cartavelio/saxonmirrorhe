@@ -33,8 +33,6 @@ import static net.sf.saxon.type.Affinity.SUBSUMES;
 
 public class TypeChecker {
 
-    int dummy;
-
     public TypeChecker() {
     }
 

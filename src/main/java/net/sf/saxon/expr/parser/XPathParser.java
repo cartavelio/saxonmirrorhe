@@ -1051,11 +1051,13 @@ public class XPathParser {
             case Token.EXCEPT:
                 return new VennExpression(lhs, operator, rhs);
             case Token.OR_ELSE: {
+                // Compile ($x orElse $y) as (if ($x) then true() else boolean($y))
                 RetainedStaticContext rsc = new RetainedStaticContext(env);
                 rhs = SystemFunction.makeCall("boolean", rsc, rhs);
                 return Choose.makeConditional(lhs, Literal.makeLiteral(BooleanValue.TRUE), rhs);
             }
             case Token.AND_ALSO: {
+                // Compile ($x andAlso $y) as (if ($x) then boolean($y) else false())
                 RetainedStaticContext rsc = new RetainedStaticContext(env);
                 rhs = SystemFunction.makeCall("boolean", rsc, rhs);
                 return Choose.makeConditional(lhs, rhs, Literal.makeLiteral(BooleanValue.FALSE));
