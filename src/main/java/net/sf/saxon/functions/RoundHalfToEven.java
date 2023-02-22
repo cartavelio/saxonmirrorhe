@@ -86,7 +86,7 @@ public final class RoundHalfToEven extends SystemFunction {
 
         public ItemEvaluator elaborateForItem() {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-            final ItemEvaluator arg0eval = makeElaborator(fnc.getArg(0)).elaborateForItem();
+            final ItemEvaluator arg0eval = fnc.getArg(0).makeElaborator().elaborateForItem();
             final boolean nullable = Cardinality.allowsZero(fnc.getArg(0).getCardinality());
 
             if (fnc.getArity() == 1) {
@@ -123,7 +123,7 @@ public final class RoundHalfToEven extends SystemFunction {
 
                 }
         } else {
-                final ItemEvaluator scaleArg = makeElaborator(fnc.getArg(1)).elaborateForItem();
+                final ItemEvaluator scaleArg = fnc.getArg(1).makeElaborator().elaborateForItem();
                 return context -> {
                     NumericValue result = (NumericValue) arg0eval.eval(context);
                     if (result == null) {

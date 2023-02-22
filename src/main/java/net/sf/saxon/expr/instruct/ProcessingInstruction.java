@@ -299,8 +299,8 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
         public PushEvaluator elaborateForPush() {
             ProcessingInstruction expr = (ProcessingInstruction) getExpression();
             Location loc = expr.getLocation();
-            UnicodeStringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForUnicodeString(true);
-            ItemEvaluator nameEval = Elaborator.makeElaborator(expr.getNameExp()).elaborateForItem();
+            UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
+            ItemEvaluator nameEval = expr.getNameExp().makeElaborator().elaborateForItem();
             if (expr.isXSLT()) {
                 return (out, context) -> {
                     StringValue name = (StringValue)nameEval.eval(context);

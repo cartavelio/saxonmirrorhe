@@ -285,8 +285,8 @@ public final class IdentityComparison extends BinaryExpression {
 
         public BooleanEvaluator elaborateForBoolean() {
             final IdentityComparison exp = (IdentityComparison)getExpression();
-            final ItemEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForItem();
-            final ItemEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForItem();
+            final ItemEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForItem();
+            final ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
             final boolean nullable0 = Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
             final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
             final int operator = exp.getOperator();
@@ -316,8 +316,8 @@ public final class IdentityComparison extends BinaryExpression {
 
         public ItemEvaluator elaborateForItem() {
             final IdentityComparison exp = (IdentityComparison) getExpression();
-            final ItemEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForItem();
-            final ItemEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForItem();
+            final ItemEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForItem();
+            final ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
             final boolean nullable0 = Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
             final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
             final int operator = exp.getOperator();

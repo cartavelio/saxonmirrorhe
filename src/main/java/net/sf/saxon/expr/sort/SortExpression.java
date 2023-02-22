@@ -492,7 +492,7 @@ public class SortExpression extends Expression
             // TODO: elaborate the sort key expression, and other expressions in the sort key definition
 
             final SortExpression expr = (SortExpression) getExpression();
-            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
 
             return context -> expr.iterateSorted(baseEval.iterate(context), context);
         }

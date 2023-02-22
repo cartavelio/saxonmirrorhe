@@ -536,8 +536,8 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
 
     @Override
     public TailCall processLeavingTail(Outputter out, XPathContext context) throws XPathException {
-        PushEvaluator push = Elaborator.makeElaborator(this).elaborateForPush();
-        return push.process(out, context);
+        PushEvaluator push = makeElaborator().elaborateForPush();
+        return push.processLeavingTail(out, context);
     }
 
 //        try {
@@ -855,7 +855,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        PullEvaluator pull = Elaborator.makeElaborator(this).elaborateForPull();
+        PullEvaluator pull = makeElaborator().elaborateForPull();
         return pull.iterate(context);
 //        final Controller controller = context.getController();
 //        boolean isXSLT = getRetainedStaticContext().getPackageData().isXSLT();
@@ -958,7 +958,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             boolean isXSLT = expr.getRetainedStaticContext().getPackageData().isXSLT();
             if (expr.schemaType == null && !expr.copyForUpdate &&
                     (expr.validation == Validation.PRESERVE || expr.validation == Validation.STRIP)) {
-                PullEvaluator select = Elaborator.makeElaborator(expr.getSelect()).elaborateForPull();
+                PullEvaluator select = expr.getSelect().makeElaborator().elaborateForPull();
                 return context -> {
                     Controller controller = context.getController();
                     return expr.makeVirtualCopy(select.iterate(context), controller, isXSLT);
@@ -977,7 +977,8 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     }
                     pipe.setHostLanguage(host);
                     try {
-                        push.process(new ComplexContentOutputter(out), context);
+                        TailCall tc = push.processLeavingTail(new ComplexContentOutputter(out), context);
+                        Expression.dispatchTailCall(tc);
                     } catch (XPathException err) {
                         err.maybeSetLocation(expr.getLocation());
                         err.maybeSetContext(context);
@@ -1000,7 +1001,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     // Test case accumulators-070
                     // We have to create a physical copy because of the validation requirement, but this makes
                     // it difficult to copy the accumulator values.
-                    PullEvaluator selectPull = Elaborator.makeElaborator(expr.getSelect()).elaborateForPull();
+                    PullEvaluator selectPull = expr.getSelect().makeElaborator().elaborateForPull();
                     return (output, context) -> {
                         SequenceTool.supply(selectPull.iterate(context), (ItemConsumer<? super Item>) item -> {
                             if (item instanceof NodeInfo) {
@@ -1032,7 +1033,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                         (expr.validation == Validation.SKIP ? 0 : CopyOptions.TYPE_ANNOTATIONS)
                                 | (expr.copyNamespaces ? CopyOptions.ALL_NAMESPACES : 0)
                                 | (expr.copyForUpdate ? CopyOptions.FOR_UPDATE : 0);
-                PullEvaluator selectPull = Elaborator.makeElaborator(expr.getSelect()).elaborateForPull();
+                PullEvaluator selectPull = expr.getSelect().makeElaborator().elaborateForPull();
                 return (output, context) -> {
                     SequenceTool.supply(selectPull.iterate(context), (ItemConsumer<? super Item>) item -> {
                         if (item instanceof NodeInfo) {

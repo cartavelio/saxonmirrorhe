@@ -97,7 +97,7 @@ public class String_1 extends ScalarSystemFunction {
         public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             Expression arg = fnc.getArg(0);
-            UnicodeStringEvaluator argEval = makeElaborator(arg).elaborateForUnicodeString(true);
+            UnicodeStringEvaluator argEval = arg.makeElaborator().elaborateForUnicodeString(true);
             return context -> {
                 try {
                     return argEval.eval(context);
@@ -110,7 +110,7 @@ public class String_1 extends ScalarSystemFunction {
         public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             Expression arg = fnc.getArg(0);
-            StringEvaluator argEval = makeElaborator(arg).elaborateForString(true);
+            StringEvaluator argEval = arg.makeElaborator().elaborateForString(true);
             return context -> {
                 try {
                     return argEval.eval(context);

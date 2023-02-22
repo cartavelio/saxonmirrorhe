@@ -193,9 +193,9 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
         public ItemEvaluator elaborateForItem() {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             final Translate fn = (Translate) fnc.getTargetFunction();
-            final ItemEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForItem();
-            final ItemEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForItem();
-            final ItemEvaluator arg2Eval = makeElaborator(fnc.getArg(2)).elaborateForItem();
+            final ItemEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForItem();
+            final ItemEvaluator arg1Eval = fnc.getArg(1).makeElaborator().elaborateForItem();
+            final ItemEvaluator arg2Eval = fnc.getArg(2).makeElaborator().elaborateForItem();
             final IntToIntMap staticMap = fn.getStaticMap();
 
             if (staticMap != null) {

@@ -9,7 +9,6 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Sequence;
@@ -45,7 +44,7 @@ public class LetClause extends Clause implements Consumer<MemoClosure.MemoClosur
 
     public SequenceEvaluator getEvaluator() {
         if (variableEvaluator == null) {
-            variableEvaluator = Elaborator.makeElaborator(getSequence()).lazily(true);
+            variableEvaluator = getSequence().makeElaborator().lazily(true);
         }
         return variableEvaluator;
     }
@@ -61,7 +60,7 @@ public class LetClause extends Clause implements Consumer<MemoClosure.MemoClosur
             }
             if (completed > 10 && abandoned == 0) {
                 //System.err.println("LetClause set to eager");
-                variableEvaluator = Elaborator.makeElaborator(getSequence()).eagerly();
+                variableEvaluator = getSequence().makeElaborator().eagerly();
                 switchedToEagerEvaluation = true;
             }
         }

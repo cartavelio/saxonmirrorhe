@@ -821,8 +821,8 @@ public class VennExpression extends BinaryExpression {
                     return new UnionIterator(iterators, GlobalOrderComparer.getInstance());
                 };
             } else {
-                PullEvaluator p1 = makeElaborator(exp.getLhsExpression()).elaborateForPull();
-                PullEvaluator p2 = makeElaborator(exp.getRhsExpression()).elaborateForPull();
+                PullEvaluator p1 = exp.getLhsExpression().makeElaborator().elaborateForPull();
+                PullEvaluator p2 = exp.getRhsExpression().makeElaborator().elaborateForPull();
                 if (exp.getOperator() == Token.INTERSECT) {
                     return context -> new IntersectionIterator(
                             p1.iterate(context), p2.iterate(context), GlobalOrderComparer.getInstance());
@@ -838,13 +838,13 @@ public class VennExpression extends BinaryExpression {
             if (e1 instanceof VennExpression && ((VennExpression) e1).getOperator() == Token.UNION) {
                 gatherUnionLeafEvaluators(((VennExpression) e1), leafEvaluators);
             } else {
-                leafEvaluators.add(makeElaborator(e1).elaborateForPull());
+                leafEvaluators.add(e1.makeElaborator().elaborateForPull());
             }
             Expression e2 = exp.getRhsExpression();
             if (e2 instanceof VennExpression && ((VennExpression) e2).getOperator() == Token.UNION) {
                 gatherUnionLeafEvaluators(((VennExpression) e2), leafEvaluators);
             } else {
-                leafEvaluators.add(makeElaborator(e2).elaborateForPull());
+                leafEvaluators.add(e2.makeElaborator().elaborateForPull());
             }
         }
 

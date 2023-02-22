@@ -10,8 +10,7 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.FallbackElaborator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
@@ -293,7 +292,8 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return apply(output, context, _useTailRecursion);
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
+        //return apply(output, context, _useTailRecursion);
     }
 
 
@@ -306,71 +306,71 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
         separator = orphan;
         return separator;
     }
-
-    protected TailCall apply(Outputter output, XPathContext context, boolean returnTailCall) throws XPathException {
-
-        Component.M targetMode = getTargetMode(context);
-        Mode thisMode = targetMode.getActor();
-
-        NodeInfo separator = null;
-        if (separatorOp != null) {
-            separator = makeSeparator(context);
-        }
-
-        // handle parameters if any
-
-        ParameterSet params = assembleParams(context, getActualParams());
-        ParameterSet tunnels = assembleTunnelParams(context, getTunnelParams());
-
-        if (returnTailCall) {
-            XPathContextMajor context2 = context.newContext();
-            context2.setOrigin(this);
-            // Allow context object of caller to be garbage-collected (only affects diagnostics)
-            context2.setCaller(context.getCaller());
-            return new ApplyTemplatesPackage(
-                    ExpressionTool.lazyEvaluate(getSelect(), context, false),
-                    targetMode, params, tunnels, separator, output, context2, getLocation());
-        }
-
-        // Get an iterator to iterate through the selected nodes in original order
-
-        SequenceIterator iter = getSelect().iterate(context);
-
-        // Quick exit if the iterator is empty
-
-        if (iter instanceof EmptyIterator) {
-            return null;
-        }
-
-        // process the selected nodes now
-
-        XPathContextMajor c2 = context.newContext();
-        c2.trackFocus(iter);
-        c2.setCurrentMode(targetMode);
-        c2.setOrigin(this);
-        c2.setCurrentComponent(targetMode);
-        if (inStreamableConstruct) {
-            c2.setCurrentGroupIterator(null);
-        }
-        PipelineConfiguration pipe = output.getPipelineConfiguration();
-        pipe.setXPathContext(c2);
-
-        try {
-            TailCall tc = thisMode.applyTemplates(params, tunnels, separator, output, c2, getLocation());
-            while (tc != null) {
-                tc = tc.processLeavingTail();
-            }
-        } catch (StackOverflowError e) {
-            XPathException err = new XPathException.StackOverflow(
-                    "Too many nested apply-templates calls. The stylesheet may be looping.",
-                    SaxonErrorCode.SXLM0001, getLocation());
-            err.setXPathContext(context);
-            throw err;
-        }
-        pipe.setXPathContext(context);
-        return null;
-
-    }
+//
+//    protected TailCall apply(Outputter output, XPathContext context, boolean returnTailCall) throws XPathException {
+//
+//        Component.M targetMode = getTargetMode(context);
+//        Mode thisMode = targetMode.getActor();
+//
+//        NodeInfo separator = null;
+//        if (separatorOp != null) {
+//            separator = makeSeparator(context);
+//        }
+//
+//        // handle parameters if any
+//
+//        ParameterSet params = assembleParams(context, getActualParams());
+//        ParameterSet tunnels = assembleTunnelParams(context, getTunnelParams());
+//
+//        if (returnTailCall) {
+//            XPathContextMajor context2 = context.newContext();
+//            context2.setOrigin(this);
+//            // Allow context object of caller to be garbage-collected (only affects diagnostics)
+//            context2.setCaller(context.getCaller());
+//            return new ApplyTemplatesPackage(
+//                    ExpressionTool.lazyEvaluate(getSelect(), context, false),
+//                    targetMode, params, tunnels, separator, output, context2, getLocation());
+//        }
+//
+//        // Get an iterator to iterate through the selected nodes in original order
+//
+//        SequenceIterator iter = getSelect().iterate(context);
+//
+//        // Quick exit if the iterator is empty
+//
+//        if (iter instanceof EmptyIterator) {
+//            return null;
+//        }
+//
+//        // process the selected nodes now
+//
+//        XPathContextMajor c2 = context.newContext();
+//        c2.trackFocus(iter);
+//        c2.setCurrentMode(targetMode);
+//        c2.setOrigin(this);
+//        c2.setCurrentComponent(targetMode);
+//        if (inStreamableConstruct) {
+//            c2.setCurrentGroupIterator(null);
+//        }
+//        PipelineConfiguration pipe = output.getPipelineConfiguration();
+//        pipe.setXPathContext(c2);
+//
+//        try {
+//            TailCall tc = thisMode.applyTemplates(params, tunnels, separator, output, c2, getLocation());
+//            while (tc != null) {
+//                tc = tc.processLeavingTail();
+//            }
+//        } catch (StackOverflowError e) {
+//            XPathException err = new XPathException.StackOverflow(
+//                    "Too many nested apply-templates calls. The stylesheet may be looping.",
+//                    SaxonErrorCode.SXLM0001, getLocation());
+//            err.setXPathContext(context);
+//            throw err;
+//        }
+//        pipe.setXPathContext(context);
+//        return null;
+//
+//    }
 
     /**
      * Establish the target mode, at run-time. This (a) resolves overrides across packages,
@@ -646,9 +646,107 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      */
     @Override
     public Elaborator getElaborator() {
-        // Currently using the fallback elaborator. It would be nice to do better, especially for with-param
-        // evaluation, but it's complicated.
-        return new FallbackElaborator(this);
+        return new ApplyTemplatesElaborator();
+    }
+
+    public static class ApplyTemplatesElaborator extends PushElaborator {
+
+        private NodeInfo makeSeparator(UnicodeStringEvaluator sep, XPathContext context) throws XPathException {
+            NodeInfo separator;
+            UnicodeString sepValue = sep.eval(context);
+            Orphan orphan = new Orphan(context.getConfiguration());
+            orphan.setNodeKind(Type.TEXT);
+            orphan.setStringValue(sepValue);
+            separator = orphan;
+            return separator;
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            ApplyTemplates expr = (ApplyTemplates) getExpression();
+
+            UnicodeStringEvaluator sep = expr.separatorOp == null ? null
+                    : expr.getSeparatorExpression().makeElaborator().elaborateForUnicodeString(true);
+            if (expr.useTailRecursion()) {
+                SequenceEvaluator select = expr.getSelect().makeElaborator().lazily(false);
+                return (output, context) -> {
+                    Component.M targetMode = expr.getTargetMode(context);
+
+                    NodeInfo separator = null;
+                    if (sep != null) {
+                        separator = makeSeparator(sep, context);
+                    }
+
+                    // handle parameters if any
+
+                    ParameterSet params = assembleParams(context, expr.getActualParams());
+                    ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
+
+                    XPathContextMajor context2 = context.newContext();
+                    context2.setOrigin(expr);
+                    // Allow context object of caller to be garbage-collected (only affects diagnostics)
+                    context2.setCaller(context.getCaller());
+                    return new ApplyTemplatesPackage(
+                            select.evaluate(context),
+                            targetMode, params, tunnels, separator, output, context2, expr.getLocation());
+
+                };
+            } else {
+                PullEvaluator select = expr.getSelect().makeElaborator().elaborateForPull();
+                return (output, context) -> {
+
+                    Component.M targetMode = expr.getTargetMode(context);
+                    Mode thisMode = targetMode.getActor();
+
+                    NodeInfo separator = null;
+                    if (sep != null) {
+                        separator = makeSeparator(sep, context);
+                    }
+
+                    // handle parameters if any
+
+                    ParameterSet params = assembleParams(context, expr.getActualParams());
+                    ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
+
+                    // Get an iterator to iterate through the selected nodes in original order
+
+                    SequenceIterator iter = select.iterate(context);
+
+                    // Quick exit if the iterator is empty
+
+                    if (iter instanceof EmptyIterator) {
+                        return null;
+                    }
+
+                    // process the selected nodes now
+
+                    XPathContextMajor c2 = context.newContext();
+                    c2.trackFocus(iter);
+                    c2.setCurrentMode(targetMode);
+                    c2.setOrigin(expr);
+                    c2.setCurrentComponent(targetMode);
+                    if (expr.inStreamableConstruct) {
+                        c2.setCurrentGroupIterator(null);
+                    }
+                    PipelineConfiguration pipe = output.getPipelineConfiguration();
+                    pipe.setXPathContext(c2);
+
+                    try {
+                        TailCall tc = thisMode.applyTemplates(params, tunnels, separator, output, c2, expr.getLocation());
+                        dispatchTailCall(tc);
+                    } catch (StackOverflowError e) {
+                        XPathException err = new XPathException.StackOverflow(
+                                "Too many nested apply-templates calls. The stylesheet may be looping.",
+                                SaxonErrorCode.SXLM0001, expr.getLocation());
+                        err.setXPathContext(context);
+                        throw err;
+                    }
+                    pipe.setXPathContext(context);
+                    return null;
+
+                };
+            }
+        }
     }
 
 }

@@ -131,7 +131,7 @@ public class Number_1 extends ScalarSystemFunction {
 
         public ItemEvaluator elaborateForItem() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-            ItemEvaluator argEval = makeElaborator(fnc.getArg(0)).elaborateForItem();
+            ItemEvaluator argEval = fnc.getArg(0).makeElaborator().elaborateForItem();
             return context -> toNumber((AtomicValue)argEval.eval(context));
         }
 

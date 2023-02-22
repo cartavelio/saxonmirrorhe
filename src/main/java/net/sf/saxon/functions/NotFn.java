@@ -132,7 +132,7 @@ public class NotFn extends SystemFunction {
         public BooleanEvaluator elaborateForBoolean() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             Expression arg = fnc.getArg(0);
-            BooleanEvaluator argEval = makeElaborator(arg).elaborateForBoolean();
+            BooleanEvaluator argEval = arg.makeElaborator().elaborateForBoolean();
             return context -> !argEval.eval(context);
         }
 

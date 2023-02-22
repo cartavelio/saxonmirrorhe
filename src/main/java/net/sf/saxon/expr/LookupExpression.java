@@ -318,7 +318,7 @@ public class LookupExpression extends BinaryExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
-        return Elaborator.makeElaborator(this).elaborateForPull().iterate(context);
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 //        Configuration config = context.getConfiguration();
 //        if (isArrayLookup) {
@@ -495,8 +495,8 @@ public class LookupExpression extends BinaryExpression {
             LookupExpression expr = (LookupExpression) getExpression();
             if (expr.isArrayLookup) {
                 if (expr.isSingleContainer && expr.isSingleEntry) {
-                    ItemEvaluator lhs = Elaborator.makeElaborator(expr.getLhsExpression()).elaborateForItem();
-                    ItemEvaluator rhs = Elaborator.makeElaborator(expr.getRhsExpression()).elaborateForItem();
+                    ItemEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForItem();
+                    ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
 
                     return context -> {
                         ArrayItem array = (ArrayItem) lhs.eval(context);
@@ -505,8 +505,8 @@ public class LookupExpression extends BinaryExpression {
                         return array.get(index - 1).iterate();
                     };
                 } else if (expr.isSingleEntry) {
-                    PullEvaluator lhs = Elaborator.makeElaborator(expr.getLhsExpression()).elaborateForPull();
-                    ItemEvaluator rhs = Elaborator.makeElaborator(expr.getRhsExpression()).elaborateForItem();
+                    PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                    ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
 
                     return context -> {
                         IntegerValue subscriptValue = (IntegerValue) rhs.eval(context);
@@ -524,8 +524,8 @@ public class LookupExpression extends BinaryExpression {
                     };
 
                 } else {
-                    PullEvaluator lhs = Elaborator.makeElaborator(expr.getLhsExpression()).elaborateForPull();
-                    PullEvaluator rhs = Elaborator.makeElaborator(expr.getRhsExpression()).elaborateForPull();
+                    PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                    PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
                     return context -> {
                         SequenceIterator baseIterator = lhs.iterate(context);
                         GroundedValue rhsValue = SequenceTool.toGroundedValue(rhs.iterate(context));
@@ -541,8 +541,8 @@ public class LookupExpression extends BinaryExpression {
                 }
             } else if (expr.isMapLookup) {
                 if (expr.isSingleContainer && expr.isSingleEntry) {
-                    ItemEvaluator lhs = Elaborator.makeElaborator(expr.getLhsExpression()).elaborateForItem();
-                    ItemEvaluator rhs = Elaborator.makeElaborator(expr.getRhsExpression()).elaborateForItem();
+                    ItemEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForItem();
+                    ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
 
                     return context -> {
                         MapItem map = (MapItem) lhs.eval(context);
@@ -551,8 +551,8 @@ public class LookupExpression extends BinaryExpression {
                     };
 
                 } else if (expr.isSingleEntry) {
-                    PullEvaluator lhs = Elaborator.makeElaborator(expr.getLhsExpression()).elaborateForPull();
-                    ItemEvaluator rhs = Elaborator.makeElaborator(expr.getRhsExpression()).elaborateForItem();
+                    PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                    ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
                     return context -> {
                         SequenceIterator baseIterator = lhs.iterate(context);
                         AtomicValue key = (AtomicValue) rhs.eval(context);
@@ -561,8 +561,8 @@ public class LookupExpression extends BinaryExpression {
                     };
 
                 } else {
-                    PullEvaluator lhs = Elaborator.makeElaborator(expr.getLhsExpression()).elaborateForPull();
-                    PullEvaluator rhs = Elaborator.makeElaborator(expr.getRhsExpression()).elaborateForPull();
+                    PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                    PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
                     return context -> {
                         SequenceIterator baseIterator = lhs.iterate(context);
                         GroundedValue rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
@@ -575,8 +575,8 @@ public class LookupExpression extends BinaryExpression {
                 }
 
             } else {
-                PullEvaluator lhs = Elaborator.makeElaborator(expr.getLhsExpression()).elaborateForPull();
-                PullEvaluator rhs = Elaborator.makeElaborator(expr.getRhsExpression()).elaborateForPull();
+                PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
                 return context -> {
                     SequenceIterator baseIterator = lhs.iterate(context);
                     GroundedValue rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));

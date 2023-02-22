@@ -970,17 +970,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        int i = choose(context);
-        if (i >= 0) {
-            Expression action = getAction(i);
-            if (action instanceof TailCallReturner) {
-                return ((TailCallReturner) action).processLeavingTail(output, context);
-            } else {
-                action.process(output, context);
-                return null;
-            }
-        }
-        return null;
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     /**
@@ -1111,8 +1101,8 @@ public class Choose extends Instruction implements ConditionalInstruction {
             final BooleanEvaluator[] conditions = new BooleanEvaluator[count];
             final PullEvaluator[] actions = new PullEvaluator[count];
             for (int i = 0; i < count; i++) {
-                conditions[i] = makeElaborator(expr.getCondition(i)).elaborateForBoolean();
-                actions[i] = makeElaborator(expr.getAction(i)).elaborateForPull();
+                conditions[i] = expr.getCondition(i).makeElaborator().elaborateForBoolean();
+                actions[i] = expr.getAction(i).makeElaborator().elaborateForPull();
             }
             return context -> {
                 for (int i = 0; i < count; i++) {
@@ -1131,8 +1121,8 @@ public class Choose extends Instruction implements ConditionalInstruction {
             final BooleanEvaluator[] conditions = new BooleanEvaluator[count];
             final ItemEvaluator[] actions = new ItemEvaluator[count];
             for (int i = 0; i < count; i++) {
-                conditions[i] = makeElaborator(expr.getCondition(i)).elaborateForBoolean();
-                actions[i] = makeElaborator(expr.getAction(i)).elaborateForItem();
+                conditions[i] = expr.getCondition(i).makeElaborator().elaborateForBoolean();
+                actions[i] = expr.getAction(i).makeElaborator().elaborateForItem();
             }
             return (context) -> {
                 for (int i = 0; i < count; i++) {
@@ -1151,13 +1141,13 @@ public class Choose extends Instruction implements ConditionalInstruction {
             final BooleanEvaluator[] conditions = new BooleanEvaluator[count];
             final PushEvaluator[] actions = new PushEvaluator[count];
             for (int i = 0; i < count; i++) {
-                conditions[i] = makeElaborator(expr.getCondition(i)).elaborateForBoolean();
-                actions[i] = makeElaborator(expr.getAction(i)).elaborateForPush();
+                conditions[i] = expr.getCondition(i).makeElaborator().elaborateForBoolean();
+                actions[i] = expr.getAction(i).makeElaborator().elaborateForPush();
             }
             return (out, context) -> {
                 for (int i = 0; i < count; i++) {
                     if (conditions[i].eval(context)) {
-                        return actions[i].process(out, context);
+                        return actions[i].processLeavingTail(out, context);
                     }
                 }
                 return null;

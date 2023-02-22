@@ -217,8 +217,8 @@ public class Substring extends SystemFunction implements Callable {
 
         public ItemEvaluator elaborateForItem() {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-            final ItemEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForItem();
-            final ItemEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForItem();
+            final ItemEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForItem();
+            final ItemEvaluator arg1Eval = fnc.getArg(1).makeElaborator().elaborateForItem();
             final boolean nullable = Cardinality.allowsZero(fnc.getArg(0).getCardinality());
             if (fnc.getArity() == 2) {
                 return context -> {
@@ -230,7 +230,7 @@ public class Substring extends SystemFunction implements Callable {
                     return substring(sv, start);
                 };
             } else {
-                final ItemEvaluator arg2Eval = makeElaborator(fnc.getArg(2)).elaborateForItem();
+                final ItemEvaluator arg2Eval = fnc.getArg(2).makeElaborator().elaborateForItem();
                 return context -> {
                     StringValue sv = (StringValue) arg0Eval.eval(context);
                     if (nullable && sv == null) {

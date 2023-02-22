@@ -158,7 +158,7 @@ public class EmptyTextNodeRemover extends UnaryExpression implements ItemMapping
         public PullEvaluator elaborateForPull() {
 
             final EmptyTextNodeRemover expr = (EmptyTextNodeRemover) getExpression();
-            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
 
             return context -> new ItemMappingIterator(baseEval.iterate(context), expr);
         }

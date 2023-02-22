@@ -13,6 +13,7 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -335,26 +336,9 @@ public final class CardinalityChecker extends UnaryExpression {
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        Expression next = getBaseExpression();
-        ItemType type = Type.ITEM_TYPE;
-        if (next instanceof ItemChecker) {
-            type = ((ItemChecker) next).getRequiredType();
-            next = ((ItemChecker) next).getBaseExpression();
-        }
-        if ((next.getImplementationMethod() & PROCESS_METHOD) != 0 && !(type instanceof DocumentNodeTest)) {
-            TypeCheckingFilter filter = new TypeCheckingFilter(output);
-            filter.setRequiredType(type, requiredCardinality, roleSupplier.get(), getLocation());
-            next.process(filter, context);
-            try {
-                filter.finalCheck();
-            } catch (XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw e;
-            }
-        } else {
-            // Force pull-mode evaluation
-            super.process(output, context);
-        }
+        PushEvaluator pusher = makeElaborator().elaborateForPush();
+        TailCall tc = pusher.processLeavingTail(output, context);
+        Expression.dispatchTailCall(tc);
     }
 
     /**
@@ -513,20 +497,52 @@ public final class CardinalityChecker extends UnaryExpression {
 
         @Override
         public PullEvaluator elaborateForPull() {
-            CardinalityChecker exp = (CardinalityChecker) getExpression();
-            Expression arg = exp.getBaseExpression();
-            PullEvaluator argEval = Elaborator.makeElaborator(arg).elaborateForPull();
-
-            return context -> exp.checkCardinality(argEval.iterate(context), context);
+            CardinalityChecker expr = (CardinalityChecker) getExpression();
+            Expression arg = expr.getBaseExpression();
+            PullEvaluator argEval = arg.makeElaborator().elaborateForPull();
+            return context -> expr.checkCardinality(argEval.iterate(context), context);
         }
 
         @Override
         public PushEvaluator elaborateForPush() {
             CardinalityChecker expr = (CardinalityChecker) getExpression();
-            return (output, context) -> {
-                expr.process(output, context);
-                return null;
-            };
+            Expression next = expr.getBaseExpression();
+
+            ItemType type = Type.ITEM_TYPE;
+            if (next instanceof ItemChecker) {
+                type = ((ItemChecker) next).getRequiredType();
+                next = ((ItemChecker) next).getBaseExpression();
+            }
+            if ((next.getImplementationMethod() & PROCESS_METHOD) != 0 && !(type instanceof DocumentNodeTest)) {
+                ItemType finalType = type;
+                PushEvaluator pushEval = next.makeElaborator().elaborateForPush();
+                return (output, context) -> {
+                    TypeCheckingFilter filter = new TypeCheckingFilter(output);
+                    filter.setRequiredType(finalType, expr.requiredCardinality, expr.roleSupplier.get(), expr.getLocation());
+                    TailCall tc = pushEval.processLeavingTail(filter, context);
+                    Expression.dispatchTailCall(tc);
+                    try {
+                        filter.finalCheck();
+                    } catch (XPathException e) {
+                        e.maybeSetLocation(expr.getLocation());
+                        throw e;
+                    }
+                    return null;
+                };
+
+            } else {
+                // Force pull-mode evaluation
+
+                PullEvaluator argEval = next.makeElaborator().elaborateForPull();
+                return (output, context) -> {
+                    SequenceIterator iter = expr.checkCardinality(argEval.iterate(context), context);
+                    for (Item item; (item = iter.next()) != null;) {
+                        output.append(item);
+                    }
+                    return null;
+                };
+            }
+
         }
     }
 }

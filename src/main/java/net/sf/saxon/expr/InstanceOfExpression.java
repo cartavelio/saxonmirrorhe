@@ -376,13 +376,13 @@ public final class InstanceOfExpression extends UnaryExpression {
             ItemType requiredType = exp.getRequiredItemType();
 
             if (requiredCardinality == StaticProperty.EXACTLY_ONE && !Cardinality.allowsMany(arg.getCardinality())) {
-                final ItemEvaluator itemEval = makeElaborator(arg).elaborateForItem();
+                final ItemEvaluator itemEval = arg.makeElaborator().elaborateForItem();
                 return context -> {
                     Item item = itemEval.eval(context);
                     return item != null && requiredType.matches(item, th);
                 };
             } else {
-                final PullEvaluator argPull = makeElaborator(arg).elaborateForPull();
+                final PullEvaluator argPull = arg.makeElaborator().elaborateForPull();
                 final boolean itemTypeOK = th.isSubType(arg.getItemType(), requiredType);
                 return context -> {
                     SequenceIterator iter = argPull.iterate(context);

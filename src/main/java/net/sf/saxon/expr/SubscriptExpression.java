@@ -270,8 +270,8 @@ public class SubscriptExpression extends SingleItemFilter {
 
         public ItemEvaluator elaborateForItem() {
             final SubscriptExpression expr = (SubscriptExpression) getExpression();
-            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
-            final ItemEvaluator indexEval = makeElaborator(expr.getSubscriptExpression()).elaborateForItem();
+            final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+            final ItemEvaluator indexEval = expr.getSubscriptExpression().makeElaborator().elaborateForItem();
             return context -> {
                 NumericValue index = (NumericValue) indexEval.eval(context);
                 if (index == null) {

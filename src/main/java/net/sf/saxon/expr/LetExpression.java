@@ -126,7 +126,7 @@ public class LetExpression extends Assignation
                 abandoned++;
             }
             if (completed > 20 && abandoned == 0) {
-                setEvaluator(Elaborator.makeElaborator(getSequence()).eagerly());
+                setEvaluator(getSequence().makeElaborator().eagerly());
             }
         }
     }
@@ -409,13 +409,13 @@ public class LetExpression extends Assignation
 
     public void setEvaluator() {
         if (needsEagerEvaluation) {
-            setEvaluator(Elaborator.makeElaborator(getSequence()).eagerly());
+            setEvaluator(getSequence().makeElaborator().eagerly());
         } else if (isIndexedVariable()) {
             Optimizer opt = getConfiguration().obtainOptimizer();
-            PullEvaluator pullEval = Elaborator.makeElaborator(getSequence()).elaborateForPull();
+            PullEvaluator pullEval = getSequence().makeElaborator().elaborateForPull();
             setEvaluator(context -> opt.makeIndexedValue(pullEval.iterate(context)));
         } else if (evaluator == null) {
-            setEvaluator(Elaborator.makeElaborator(getSequence()).lazily(getNominalReferenceCount() > 1));
+            setEvaluator(getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1));
         }
     }
 
@@ -571,7 +571,7 @@ public class LetExpression extends Assignation
 
     public Sequence eval(XPathContext context) throws XPathException {
         if (evaluator == null) {
-            setEvaluator(Elaborator.makeElaborator(getSequence()).lazily(getNominalReferenceCount() > 1));
+            setEvaluator(getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1));
         }
         try {
             int savedOutputState = context.getTemporaryOutputState();
@@ -894,8 +894,8 @@ public class LetExpression extends Assignation
         @Override
         public EagerEvaluator eagerly() {
             final LetExpression expr = (LetExpression) getExpression();
-            final EagerEvaluator selectEval = Elaborator.makeElaborator(expr.getSequence()).eagerly();
-            final EagerEvaluator actionPull = makeElaborator(expr.getAction()).eagerly();
+            final EagerEvaluator selectEval = expr.getSequence().makeElaborator().eagerly();
+            final EagerEvaluator actionPull = expr.getAction().makeElaborator().eagerly();
             final int slot = expr.getLocalSlotNumber();
             return context -> {
                 int savedOutputState = context.getTemporaryOutputState();
@@ -910,8 +910,8 @@ public class LetExpression extends Assignation
         @Override
         public PullEvaluator elaborateForPull() {
             final LetExpression expr = (LetExpression) getExpression();
-            final SequenceEvaluator selectEval = Elaborator.makeElaborator(expr.getSequence()).lazily(true);
-            final PullEvaluator actionPull = makeElaborator(expr.getAction()).elaborateForPull();
+            final SequenceEvaluator selectEval = expr.getSequence().makeElaborator().lazily(true);
+            final PullEvaluator actionPull = expr.getAction().makeElaborator().elaborateForPull();
             final int slot = expr.getLocalSlotNumber();
             return context -> {
                 int savedOutputState = context.getTemporaryOutputState();
@@ -926,8 +926,8 @@ public class LetExpression extends Assignation
         @Override
         public PushEvaluator elaborateForPush() {
             final LetExpression expr = (LetExpression) getExpression();
-            final SequenceEvaluator selectEval = Elaborator.makeElaborator(expr.getSequence()).lazily(true);
-            final PushEvaluator actionPush = makeElaborator(expr.getAction()).elaborateForPush();
+            final SequenceEvaluator selectEval = expr.getSequence().makeElaborator().lazily(true);
+            final PushEvaluator actionPush = expr.getAction().makeElaborator().elaborateForPush();
             final int slot = expr.getLocalSlotNumber();
             return (out, context) -> {
                 int savedOutputState = context.getTemporaryOutputState();
@@ -935,15 +935,15 @@ public class LetExpression extends Assignation
                 Sequence value = selectEval.evaluate(context);
                 context.setLocalVariable(slot, value);
                 context.setTemporaryOutputState(savedOutputState);
-                return actionPush.process(out, context);
+                return actionPush.processLeavingTail(out, context);
             };
         }
 
         @Override
         public ItemEvaluator elaborateForItem() {
             final LetExpression expr = (LetExpression) getExpression();
-            final SequenceEvaluator selectEval = Elaborator.makeElaborator(expr.getSequence()).lazily(true);
-            final ItemEvaluator actionEval = makeElaborator(expr.getAction()).elaborateForItem();
+            final SequenceEvaluator selectEval = expr.getSequence().makeElaborator().lazily(true);
+            final ItemEvaluator actionEval = expr.getAction().makeElaborator().elaborateForItem();
             final int slot = expr.getLocalSlotNumber();
             return context -> {
                 int savedOutputState = context.getTemporaryOutputState();

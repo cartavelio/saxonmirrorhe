@@ -227,7 +227,7 @@ public final class SingletonAtomizer extends UnaryExpression {
 
     @Override
     public AtomicValue evaluateItem(XPathContext context) throws XPathException {
-        return (AtomicValue)Elaborator.makeElaborator(this).elaborateForItem().eval(context);
+        return (AtomicValue) makeElaborator().elaborateForItem().eval(context);
     }
 //        int found = 0;
 //        AtomicValue result = null;
@@ -384,7 +384,7 @@ public final class SingletonAtomizer extends UnaryExpression {
         public ItemEvaluator elaborateForItem() {
 
             final SingletonAtomizer expr = (SingletonAtomizer) getExpression();
-            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
             return context -> {
                 int found = 0;
                 AtomicValue result = null;

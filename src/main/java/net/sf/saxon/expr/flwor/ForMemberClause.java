@@ -9,7 +9,6 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.Parcel;
@@ -141,7 +140,7 @@ public class ForMemberClause extends ForClause {
 
     public ArrayItem evaluateArrayExpression(XPathContext context) throws XPathException {
         if (arrayOperandEvaluator == null) {
-            arrayOperandEvaluator = Elaborator.makeElaborator(getSequence()).elaborateForItem();
+            arrayOperandEvaluator = getSequence().makeElaborator().elaborateForItem();
         }
         return (ArrayItem)arrayOperandEvaluator.eval(context);
     }

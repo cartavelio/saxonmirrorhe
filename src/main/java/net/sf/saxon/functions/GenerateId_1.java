@@ -85,7 +85,7 @@ public class GenerateId_1 extends ScalarSystemFunction {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             final Expression arg = fnc.getArg(0);
             final boolean nullable = Cardinality.allowsZero(arg.getCardinality());
-            final ItemEvaluator argEval = makeElaborator(arg).elaborateForItem();
+            final ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
 
             return context -> {
                 NodeInfo node = (NodeInfo) argEval.eval(context);
@@ -101,7 +101,7 @@ public class GenerateId_1 extends ScalarSystemFunction {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             final Expression arg = fnc.getArg(0);
             final boolean nullable = Cardinality.allowsZero(arg.getCardinality());
-            final ItemEvaluator argEval = makeElaborator(arg).elaborateForItem();
+            final ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
 
             return context -> {
                 NodeInfo node = (NodeInfo) argEval.eval(context);

@@ -61,7 +61,7 @@ public class UpperCase extends ScalarSystemFunction {
         public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             final Expression arg = fnc.getArg(0);
-            final UnicodeStringEvaluator argEval = makeElaborator(arg).elaborateForUnicodeString(false);
+            final UnicodeStringEvaluator argEval = arg.makeElaborator().elaborateForUnicodeString(false);
             final boolean nullable = Cardinality.allowsZero(arg.getCardinality());
             if (fnc.getFunctionName().getLocalPart().equals("lower-case")) {
                 return context -> {
@@ -85,7 +85,7 @@ public class UpperCase extends ScalarSystemFunction {
         public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             final Expression arg = fnc.getArg(0);
-            final StringEvaluator argEval = makeElaborator(arg).elaborateForString(false);
+            final StringEvaluator argEval = arg.makeElaborator().elaborateForString(false);
             final boolean nullable = Cardinality.allowsZero(arg.getCardinality());
             if (fnc.getFunctionName().getLocalPart().equals("lower-case")) {
                 return context -> {

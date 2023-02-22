@@ -230,7 +230,7 @@ public class NumberSequenceFormatter extends Expression {
 
     @Override
     public StringValue evaluateItem(XPathContext context) throws XPathException {
-        UnicodeString s = Elaborator.makeElaborator(this).elaborateForUnicodeString(true).eval(context);
+        UnicodeString s = makeElaborator().elaborateForUnicodeString(true).eval(context);
         return new StringValue(s);
     }
 
@@ -319,20 +319,20 @@ public class NumberSequenceFormatter extends Expression {
         public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
             
             NumberSequenceFormatter expr = (NumberSequenceFormatter) getExpression();
-            StringEvaluator startAtEvaluator = Elaborator.makeElaborator(expr.startAtOp.getChildExpression()).elaborateForString(true);
-            PullEvaluator valueEvaluator = Elaborator.makeElaborator(expr.valueOp.getChildExpression()).elaborateForPull();
+            StringEvaluator startAtEvaluator = expr.startAtOp.getChildExpression().makeElaborator().elaborateForString(true);
+            PullEvaluator valueEvaluator = expr.valueOp.getChildExpression().makeElaborator().elaborateForPull();
             StringEvaluator groupSizeEvaluator = expr.groupSizeOp == null ? null :
-                    Elaborator.makeElaborator(expr.groupSizeOp.getChildExpression()).elaborateForString(true);
+                    expr.groupSizeOp.getChildExpression().makeElaborator().elaborateForString(true);
             StringEvaluator groupSeparatorEvaluator = expr.groupSeparatorOp == null ? null :
-                    Elaborator.makeElaborator(expr.groupSeparatorOp.getChildExpression()).elaborateForString(true);
+                    expr.groupSeparatorOp.getChildExpression().makeElaborator().elaborateForString(true);
             StringEvaluator langEvaluator = expr.langOp == null ? null :
-                    Elaborator.makeElaborator(expr.langOp.getChildExpression()).elaborateForString(true);
+                    expr.langOp.getChildExpression().makeElaborator().elaborateForString(true);
             StringEvaluator ordinalEvaluator = expr.ordinalOp == null ? null :
-                    Elaborator.makeElaborator(expr.ordinalOp.getChildExpression()).elaborateForString(true);
+                    expr.ordinalOp.getChildExpression().makeElaborator().elaborateForString(true);
             StringEvaluator letterValueEvaluator = expr.letterValueOp == null ? null :
-                    Elaborator.makeElaborator(expr.letterValueOp.getChildExpression()).elaborateForString(true);
+                    expr.letterValueOp.getChildExpression().makeElaborator().elaborateForString(true);
             StringEvaluator formatEvaluator = expr.formatter != null ? null :
-                    Elaborator.makeElaborator(expr.formatOp.getChildExpression()).elaborateForString(true);
+                    expr.formatOp.getChildExpression().makeElaborator().elaborateForString(true);
 
             return context -> {
                 List<Object> vec = new ArrayList<>(4);    // a list whose items may be of type either Long or

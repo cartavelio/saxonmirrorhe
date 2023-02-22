@@ -204,11 +204,11 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 argumentEvaluators[i] =
                         context -> context.getConfiguration().obtainOptimizer().evaluateStreamingArgument(arg, context);
             } else if (function.getParameterDefinitions()[i].isIndexedVariable()) {
-                PullEvaluator argPull = Elaborator.makeElaborator(arg).elaborateForPull();
+                PullEvaluator argPull = arg.makeElaborator().elaborateForPull();
                 argumentEvaluators[i] =
                         context -> context.getConfiguration().obtainOptimizer().makeIndexedValue(argPull.iterate(context));
             } else {
-                argumentEvaluators[i] = Elaborator.makeElaborator(arg).lazily(true);
+                argumentEvaluators[i] = arg.makeElaborator().lazily(true);
             }
             i++;
         }
@@ -512,7 +512,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         function.callUpdating(actualArgs, c2, pul);
     }
 
-    private static final int depth = 0;
+    private static int depth = 0;
 
     /**
      * This is the method that actually does the function call (in pull mode)
@@ -522,10 +522,13 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * @throws XPathException if dynamic errors occur
      */
     private Sequence callFunction(XPathContext context) throws XPathException {
+        depth++;
+        System.err.println("depth=" + depth);
         UserFunction targetFunction;
         Sequence[] actualArgs = evaluateArguments(context);
         XPathContextMajor c2;
         if (isTailCall()) {
+            depth--;
             requestTailCall(context, actualArgs);
             return EmptySequence.getInstance();
         }
@@ -548,7 +551,9 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         }
 
         try {
-            return targetFunction.call(c2, actualArgs);
+            Sequence result = targetFunction.call(c2, actualArgs);
+            depth--;
+            return result;
         } catch (UncheckedXPathException e) {
             XPathException xe = e.getXPathException();
             xe.maybeSetLocation(getLocation());
@@ -732,7 +737,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     argumentEvaluators[i] =
                             context -> opt.makeIndexedValue(arg.iterate(context));
                 } else {
-                    argumentEvaluators[i] = makeElaborator(arg).lazily(allowRepeatedUse);
+                    argumentEvaluators[i] = arg.makeElaborator().lazily(allowRepeatedUse);
                 }
                 i++;
             }
@@ -746,8 +751,8 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
 
             if (expr.bindingSlot >= 0) {
-                TailCallLoop.TailCallComponent info = new TailCallLoop.TailCallComponent();
                 return context -> {
+                    TailCallLoop.TailCallComponent info = new TailCallLoop.TailCallComponent();
                     Component target = expr.getTargetComponent(context);
                     info.component = target;
                     info.function = (UserFunction) target.getActor();
@@ -825,8 +830,11 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                                                          expr.getFunctionName().getDisplayName() +
                                                          ") with no implementation", "XTDE3052");
                     }
-
-                    return callTargetFunction(expr, target, context).iterate();
+                    depth++;
+                    System.err.println("depth(pull)=" + depth);
+                    SequenceIterator result = callTargetFunction(expr, target, context).iterate();
+                    depth--;
+                    return result;
                 };
             } else {
                 // Non-package case (XQuery)

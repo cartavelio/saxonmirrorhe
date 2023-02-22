@@ -1127,8 +1127,8 @@ public class SlashExpression extends BinaryExpression
         @Override
         public PullEvaluator elaborateForPull() {
             SlashExpression forEach = (SlashExpression) getExpression();
-            PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
-            PullEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPull();
+            PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
+            PullEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPull();
             ContextMappingFunction mapper = context -> action.iterate(context);
             return context -> {
                 XPathContextMinor c2 = context.newMinorContext();
@@ -1140,15 +1140,15 @@ public class SlashExpression extends BinaryExpression
         @Override
         public PushEvaluator elaborateForPush() {
             SlashExpression forEach = (SlashExpression)getExpression();
-            PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
-            PushEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPush();
+            PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
+            PushEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPush();
             return (out, context) -> {
                 XPathContextMinor c2 = context.newMinorContext();
                 FocusIterator iter = c2.trackFocus(select.iterate(context));
                 TailCall tc = null;
                 while (iter.next() != null) {
                     dispatchTailCall(tc);
-                    tc = action.process(out, c2);
+                    tc = action.processLeavingTail(out, c2);
                 }
                 return tc;
             };

@@ -8,8 +8,10 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -36,7 +38,8 @@ public class ReturnClausePush extends TuplePush {
      */
     @Override
     public void processTuple(XPathContext context) throws XPathException {
-        returnExpr.process(getOutputter(), context);
+        TailCall tc = returnExpr.processLeavingTail(getOutputter(), context);
+        Expression.dispatchTailCall(tc);
     }
 
     /**

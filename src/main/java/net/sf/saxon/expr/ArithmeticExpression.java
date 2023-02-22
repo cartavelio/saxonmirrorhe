@@ -483,8 +483,8 @@ public class ArithmeticExpression extends BinaryExpression {
 
         public ItemEvaluator elaborateForItem() {
             final ArithmeticExpression exp = (ArithmeticExpression)getExpression();
-            final ItemEvaluator arg0Eval = makeElaborator(exp.getLhsExpression()).elaborateForItem();
-            final ItemEvaluator arg1Eval = makeElaborator(exp.getRhsExpression()).elaborateForItem();
+            final ItemEvaluator arg0Eval = exp.getLhsExpression().makeElaborator().elaborateForItem();
+            final ItemEvaluator arg1Eval = exp.getRhsExpression().makeElaborator().elaborateForItem();
             // Allow the null checks to be skipped if not needed
             final boolean nullable0 = Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
             final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
@@ -502,6 +502,7 @@ public class ArithmeticExpression extends BinaryExpression {
                     try {
                         return calc.compute(v0, v1, context);
                     } catch (XPathException e) {
+                        e.maybeSetContext(context);
                         e.maybeSetLocation(exp.getLocation());
                         throw e;
                     }
@@ -513,6 +514,7 @@ public class ArithmeticExpression extends BinaryExpression {
                     try {
                         return calc.compute(v0, v1, context);
                     } catch (XPathException e) {
+                        e.maybeSetContext(context);
                         e.maybeSetLocation(exp.getLocation());
                         throw e;
                     }

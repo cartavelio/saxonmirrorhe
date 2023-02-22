@@ -50,7 +50,7 @@ public final class Abs extends ScalarSystemFunction {
 
         public ItemEvaluator elaborateForItem() {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-            final ItemEvaluator argEval = makeElaborator(fnc.getArg(0)).elaborateForItem();
+            final ItemEvaluator argEval = fnc.getArg(0).makeElaborator().elaborateForItem();
             final boolean nullable = Cardinality.allowsZero(fnc.getArg(0).getCardinality());
             if (nullable) {
                 return context -> {

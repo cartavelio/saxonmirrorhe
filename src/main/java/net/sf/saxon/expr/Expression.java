@@ -1775,7 +1775,16 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
         return new FallbackElaborator();
     }
 
-//    public abstract Elaborator getElaborator();
+    /**
+     * Factory method to construct an {@code Elaborator} for this expression
+     * @return an elaborator for the expression
+     */
+
+    public final Elaborator makeElaborator() {
+        Elaborator elab = getElaborator();
+        elab.setExpression(this);
+        return elab;
+    }
 
 
 }

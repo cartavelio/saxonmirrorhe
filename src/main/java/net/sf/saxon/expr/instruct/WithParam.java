@@ -11,7 +11,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Sequence;
@@ -216,7 +215,7 @@ public class WithParam  {
 
 
     private void computeEvaluator() {
-        evaluator = Elaborator.makeElaborator(selectOp.getChildExpression()).lazily(true);
+        evaluator = selectOp.getChildExpression().makeElaborator().lazily(true);
     }
 
 

@@ -111,7 +111,7 @@ public final class LastItemExpression extends SingleItemFilter {
         public ItemEvaluator elaborateForItem() {
 
             final LastItemExpression expr = (LastItemExpression) getExpression();
-            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
 
             return context -> {
                 final SequenceIterator forwards = baseEval.iterate(context);

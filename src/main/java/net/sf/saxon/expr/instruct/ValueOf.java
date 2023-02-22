@@ -446,7 +446,7 @@ public final class ValueOf extends SimpleNodeConstructor {
             int options = expr.getOptions();
 
             if (noNodeIfEmpty) {
-                ItemEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForItem();
+                ItemEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForItem();
                 return (output, context) -> {
                     Item value = contentEval.eval(context);
                     if (value != null) {
@@ -462,13 +462,13 @@ public final class ValueOf extends SimpleNodeConstructor {
                 //       expression might return an empty sequence.
                 // TODO: use a learning strategy, don't do the streaming unless it has benefits
                 //  (monitor the number of calls on characters(), or the size of the strings)
-                PushEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForPush();
+                PushEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForPush();
                 return (output, context) -> {
                     Outputter streamer = new TextNodeOutputStreamer(output, loc, options);
-                    return contentEval.process(streamer, context);
+                    return contentEval.processLeavingTail(streamer, context);
                 };
             } else {
-                UnicodeStringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForUnicodeString(true);
+                UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
                 return (output, context) -> {
                     UnicodeString value = contentEval.eval(context);
                     output.characters(value, loc, options);
@@ -480,7 +480,7 @@ public final class ValueOf extends SimpleNodeConstructor {
         @Override
         public ItemEvaluator elaborateForItem() {
             ValueOf expr = (ValueOf)getExpression();
-            ItemEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForItem();
+            ItemEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForItem();
             boolean noNodeIfEmpty = expr.noNodeIfEmpty;
             boolean doe = expr.isDisableOutputEscaping();
             return context -> ValueOf.makeTextNode(contentEval.eval(context), noNodeIfEmpty, doe, context);

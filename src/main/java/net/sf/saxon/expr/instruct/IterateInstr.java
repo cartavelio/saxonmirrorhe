@@ -10,6 +10,10 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -315,50 +319,8 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        XPathContextMajor c2 = context.newContext();
-        c2.setOrigin(this);
-        FocusIterator iter = c2.trackFocus(getSelectExpression().iterate(context));
-        c2.setCurrentTemplateRule(null);
-        PipelineConfiguration pipe = output.getPipelineConfiguration();
-        pipe.setXPathContext(c2);
-
-        boolean tracing = context.getController().isTracing();
-        TraceListener listener = tracing ? context.getController().getTraceListener() : null;
-
-        getInitiallyExp().process(output, context);
-
-        while (true) {
-            Item item = iter.next();
-            if (item != null) {
-                if (tracing) {
-                    listener.startCurrentItem(item);
-                }
-                getActionExpression().process(output, c2);
-                if (tracing) {
-                    listener.endCurrentItem(item);
-                }
-                TailCallLoop.TailCallInfo comp = c2.getTailCallInfo();
-                if (comp == null) {
-                    // no xsl:next-iteration or xsl:break was encountered; just loop around
-                } else if (comp instanceof BreakInstr) {
-                    // indicates a xsl:break instruction was encountered: break the loop
-                    //System.err.println("IterateInstr found xsl:break");
-                    iter.close();
-                    return null;
-                } else {
-                    // a xsl:next-iteration instruction was encountered.
-                    // It will have reset the parameters to the loop; we just need to loop round
-                }
-            } else {
-                // Execute on-completion instruction
-                XPathContextMinor c3 = context.newMinorContext();
-                c3.setCurrentIterator(null);
-                getOnCompletion().process(output, c3);
-                break;
-            }
-        }
-        pipe.setXPathContext(context);
-        return null;
+        PushEvaluator push = makeElaborator().elaborateForPush();
+        return push.processLeavingTail(output, context);
     }
 
 
@@ -381,6 +343,71 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
         out.setChildRole("action");
         getActionExpression().export(out);
         out.endElement();
+    }
+
+    public Elaborator getElaborator() {
+        return new IterateElaborator();
+    }
+
+    public static class IterateElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            IterateInstr expr = (IterateInstr)getExpression();
+            PullEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForPull();
+            PushEvaluator initial = expr.getInitiallyExp().makeElaborator().elaborateForPush();
+            PushEvaluator action = expr.getActionExpression().makeElaborator().elaborateForPush();
+            PushEvaluator completion = expr.getOnCompletion().makeElaborator().elaborateForPush();
+            return (output, context) -> {
+                XPathContextMajor c2 = context.newContext();
+                c2.setOrigin(expr);
+                FocusIterator iter = c2.trackFocus(select.iterate(context));
+                c2.setCurrentTemplateRule(null);
+                PipelineConfiguration pipe = output.getPipelineConfiguration();
+                pipe.setXPathContext(c2);
+
+                boolean tracing = context.getController().isTracing();
+                TraceListener listener = tracing ? context.getController().getTraceListener() : null;
+
+                TailCall tc = initial.processLeavingTail(output, context);
+                Expression.dispatchTailCall(tc);
+
+                while (true) {
+                    Item item = iter.next();
+                    if (item != null) {
+                        if (tracing) {
+                            listener.startCurrentItem(item);
+                        }
+                        tc = action.processLeavingTail(output, c2);
+                        Expression.dispatchTailCall(tc);
+                        if (tracing) {
+                            listener.endCurrentItem(item);
+                        }
+                        TailCallLoop.TailCallInfo comp = c2.getTailCallInfo();
+                        if (comp == null) {
+                            // no xsl:next-iteration or xsl:break was encountered; just loop around
+                        } else if (comp instanceof BreakInstr) {
+                            // indicates a xsl:break instruction was encountered: break the loop
+                            //System.err.println("IterateInstr found xsl:break");
+                            iter.close();
+                            return null;
+                        } else {
+                            // a xsl:next-iteration instruction was encountered.
+                            // It will have reset the parameters to the loop; we just need to loop round
+                        }
+                    } else {
+                        // Execute on-completion instruction
+                        XPathContextMinor c3 = context.newMinorContext();
+                        c3.setCurrentIterator(null);
+                        tc = completion.processLeavingTail(output, c3);
+                        Expression.dispatchTailCall(tc);
+                        break;
+                    }
+                }
+                pipe.setXPathContext(context);
+                return null;
+            };
+        }
     }
 
 

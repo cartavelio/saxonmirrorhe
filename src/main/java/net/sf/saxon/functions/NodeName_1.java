@@ -62,7 +62,7 @@ public class NodeName_1 extends ScalarSystemFunction {
         public ItemEvaluator elaborateForItem() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             Expression arg = fnc.getArg(0);
-            ItemEvaluator argEval = makeElaborator(arg).elaborateForItem();
+            ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
 
             return context -> {
                 NodeInfo node = (NodeInfo) argEval.eval(context);

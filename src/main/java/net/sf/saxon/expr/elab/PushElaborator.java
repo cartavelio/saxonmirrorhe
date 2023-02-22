@@ -3,6 +3,8 @@ package net.sf.saxon.expr.elab;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.SequenceCollector;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -16,7 +18,8 @@ public abstract class PushElaborator extends Elaborator {
             Controller controller = context.getController();
             assert controller != null;
             SequenceCollector seq = controller.allocateSequenceOutputter();
-            pushEval.process(new ComplexContentOutputter(seq), context);
+            TailCall tc = pushEval.processLeavingTail(new ComplexContentOutputter(seq), context);
+            Expression.dispatchTailCall(tc);
             seq.close();
             return seq.iterate();
         };
@@ -29,7 +32,8 @@ public abstract class PushElaborator extends Elaborator {
             Controller controller = context.getController();
             assert controller != null;
             SequenceCollector seq = controller.allocateSequenceOutputter();
-            pushEval.process(new ComplexContentOutputter(seq), context);
+            TailCall tc = pushEval.processLeavingTail(new ComplexContentOutputter(seq), context);
+            Expression.dispatchTailCall(tc);
             seq.close();
             return seq.getSequence();
         };
@@ -49,7 +53,8 @@ public abstract class PushElaborator extends Elaborator {
             Controller controller = context.getController();
             assert controller != null;
             SequenceCollector seq = controller.allocateSequenceOutputter();
-            pushEval.process(new ComplexContentOutputter(seq), context);
+            TailCall tc = pushEval.processLeavingTail(new ComplexContentOutputter(seq), context);
+            Expression.dispatchTailCall(tc);
             seq.close();
             return seq.getFirstItem();
         };

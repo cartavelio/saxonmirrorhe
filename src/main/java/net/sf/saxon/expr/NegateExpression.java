@@ -192,7 +192,7 @@ public class NegateExpression extends UnaryExpression {
         public ItemEvaluator elaborateForItem() {
 
             final NegateExpression exp = (NegateExpression)getExpression();
-            final ItemEvaluator argEval = makeElaborator(exp.getBaseExpression()).elaborateForItem();
+            final ItemEvaluator argEval = exp.getBaseExpression().makeElaborator().elaborateForItem();
             final boolean maybeEmpty = Cardinality.allowsZero(exp.getBaseExpression().getCardinality());
             final boolean backwardsCompatible = exp.isBackwardsCompatible();
 

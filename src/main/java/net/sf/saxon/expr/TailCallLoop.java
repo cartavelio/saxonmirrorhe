@@ -8,6 +8,8 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -98,21 +100,7 @@ public final class TailCallLoop extends UnaryExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        final XPathContextMajor cm = (XPathContextMajor) context;
-        while (true) {
-            SequenceIterator iter = getBaseExpression().iterate(cm);
-            GroundedValue extent = SequenceTool.toGroundedValue(iter);
-            TailCallInfo tail = cm.getTailCallInfo();
-            if (tail == null) {
-                return extent.iterate();
-            } else {
-                UserFunction target = establishTargetFunction(tail, cm);
-                if (target != containingFunction) {
-                    return tailCallDifferentFunction(target, cm).iterate();
-                }
-                // otherwise, loop round to execute the tail call
-            }
-        }
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     /**
@@ -121,21 +109,7 @@ public final class TailCallLoop extends UnaryExpression {
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        final XPathContextMajor cm = (XPathContextMajor) context;
-        while (true) {
-            Item item = getBaseExpression().evaluateItem(context);
-
-            TailCallInfo tail = cm.getTailCallInfo();
-            if (tail == null) {
-                return item;
-            } else {
-                UserFunction target = establishTargetFunction(tail, cm);
-                if (target != containingFunction) {
-                    return tailCallDifferentFunction(target, cm).head();
-                }
-                // otherwise, loop round to execute the tail call
-            }
-        }
+        return makeElaborator().elaborateForItem().eval(context);
     }
 
     private UserFunction establishTargetFunction(TailCallInfo tail, XPathContextMajor cm) {
@@ -159,22 +133,8 @@ public final class TailCallLoop extends UnaryExpression {
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        final XPathContextMajor cm = (XPathContextMajor) context;
-        Expression operand = getBaseExpression();
-        while (true) {
-            operand.process(output, context);
-            TailCallInfo tail = cm.getTailCallInfo();
-            if (tail == null) {
-                return;
-            } else {
-                UserFunction target = establishTargetFunction(tail, cm);
-                if (target != containingFunction) {
-                    SequenceTool.process(tailCallDifferentFunction(target, cm), output, operand.getLocation());
-                    return;
-                }
-                // otherwise, loop round to execute the tail call
-            }
-        }
+        TailCall tc =  makeElaborator().elaborateForPush().processLeavingTail(output, context);
+        assert tc == null;
     }
 
     /**
@@ -233,7 +193,86 @@ public final class TailCallLoop extends UnaryExpression {
         public UserFunction function;
     }
 
+    @Override
+    public Elaborator getElaborator() {
+        return new TailCallLoopElaborator();
+    }
 
+    private static class TailCallLoopElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            TailCallLoop expr = (TailCallLoop)getExpression();
+            PullEvaluator contentEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+            return context -> {
+                final XPathContextMajor cm = (XPathContextMajor) context;
+                while (true) {
+                    SequenceIterator iter = contentEval.iterate(context);
+                    GroundedValue extent = SequenceTool.toGroundedValue(iter);
+                    TailCallInfo tail = cm.getTailCallInfo();
+                    if (tail == null) {
+                        return extent.iterate();
+                    } else {
+                        UserFunction target = expr.establishTargetFunction(tail, cm);
+                        if (target != expr.containingFunction) {
+                            return expr.tailCallDifferentFunction(target, cm).iterate();
+                        }
+                        // otherwise, loop round to execute the tail call
+                    }
+                }
+            };
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            TailCallLoop expr = (TailCallLoop) getExpression();
+            PushEvaluator contentPush = expr.getBaseExpression().makeElaborator().elaborateForPush();
+            return (output, context) -> {
+
+                final XPathContextMajor cm = (XPathContextMajor) context;
+                while (true) {
+                    TailCall tc = contentPush.processLeavingTail(output, context);
+                    assert tc == null;
+                    TailCallInfo tail = cm.getTailCallInfo();
+                    if (tail == null) {
+                        return null;
+                    } else {
+                        UserFunction target = expr.establishTargetFunction(tail, cm);
+                        if (target != expr.containingFunction) {
+                            SequenceTool.process(expr.tailCallDifferentFunction(target, cm), output, expr.getLocation());
+                            return null;
+                        }
+                        // otherwise, loop round to execute the tail call
+                    }
+                }
+
+            };
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            TailCallLoop expr = (TailCallLoop) getExpression();
+            ItemEvaluator contentEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
+
+            return context -> {
+                final XPathContextMajor cm = (XPathContextMajor) context;
+                while (true) {
+                    Item item = contentEval.eval(context);
+
+                    TailCallInfo tail = cm.getTailCallInfo();
+                    if (tail == null) {
+                        return item;
+                    } else {
+                        UserFunction target = expr.establishTargetFunction(tail, cm);
+                        if (target != expr.containingFunction) {
+                            return expr.tailCallDifferentFunction(target, cm).head();
+                        }
+                        // otherwise, loop round to execute the tail call
+                    }
+                }
+            };
+        }
+    }
 
 
 }

@@ -74,8 +74,8 @@ public class SubstringBefore extends CollatingFunctionFixed {
             final SubstringMatcher stringCollator = (SubstringMatcher) fn.getStringCollator();
             assert stringCollator != null; // We don't go down this path until the collation is known
 
-            final UnicodeStringEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForUnicodeString(true);
-            final UnicodeStringEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForUnicodeString(true);
+            final UnicodeStringEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForUnicodeString(true);
+            final UnicodeStringEvaluator arg1Eval = fnc.getArg(1).makeElaborator().elaborateForUnicodeString(true);
 
             if (stringCollator instanceof CodepointCollator) {
                 return context -> {
@@ -110,8 +110,8 @@ public class SubstringBefore extends CollatingFunctionFixed {
             assert stringCollator != null; // We don't go down this path until the collation is known
 
             if (stringCollator instanceof CodepointCollator) {
-                final StringEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForString(true);
-                final StringEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForString(true);
+                final StringEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForString(true);
+                final StringEvaluator arg1Eval = fnc.getArg(1).makeElaborator().elaborateForString(true);
 
                 return context -> {
                     String s0 = arg0Eval.eval(context);

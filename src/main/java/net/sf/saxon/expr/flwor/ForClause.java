@@ -10,7 +10,6 @@ package net.sf.saxon.expr.flwor;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.KeyFn;
@@ -89,7 +88,7 @@ public class ForClause extends Clause {
      */
     protected SequenceIterator getIterator(XPathContext context) throws XPathException {
         if (sequenceOperandEvaluator == null) {
-            sequenceOperandEvaluator = Elaborator.makeElaborator(getSequence()).elaborateForPull();
+            sequenceOperandEvaluator = getSequence().makeElaborator().elaborateForPull();
         }
         return sequenceOperandEvaluator.iterate(context);
     }

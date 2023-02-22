@@ -7,13 +7,11 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.TypeCheckingFilter;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -466,21 +464,53 @@ public final class ItemChecker extends UnaryExpression {
         public PullEvaluator elaborateForPull() {
             ItemChecker exp = (ItemChecker) getExpression();
             Expression arg = exp.getBaseExpression();
-            PullEvaluator argEval = Elaborator.makeElaborator(arg).elaborateForPull();
+            PullEvaluator argEval = arg.makeElaborator().elaborateForPull();
 
             return context -> exp.checkSequence(argEval.iterate(context), context);
         }
 
         @Override
         public ItemEvaluator elaborateForItem() {
-            ItemChecker exp = (ItemChecker) getExpression();
-            Expression arg = exp.getBaseExpression();
-            ItemEvaluator argEval = Elaborator.makeElaborator(arg).elaborateForItem();
+            ItemChecker expr = (ItemChecker) getExpression();
+            Expression arg = expr.getBaseExpression();
+            ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
 
-            return context -> exp.checkItem(argEval.eval(context), context);
+            return context -> expr.checkItem(argEval.eval(context), context);
         }
 
-        // TODO: push-mode checking
+        @Override
+        public PushEvaluator elaborateForPush() {
+            ItemChecker expr = (ItemChecker) getExpression();
+            Expression arg = expr.getBaseExpression();
+            int card = StaticProperty.ALLOWS_ZERO_OR_MORE;
+            if (arg instanceof CardinalityChecker) {
+                card = ((CardinalityChecker) arg).getRequiredCardinality();
+                arg = ((CardinalityChecker) arg).getBaseExpression();
+            }
+            if ((arg.getImplementationMethod() & PROCESS_METHOD) != 0 && !(expr.requiredItemType instanceof DocumentNodeTest)) {
+                Expression finalArg = arg;
+                int finalCard = card;
+                return (output, context) -> {
+                    PushEvaluator argPush = finalArg.makeElaborator().elaborateForPush();
+                    TypeCheckingFilter filter = new TypeCheckingFilter(output);
+                    filter.setRequiredType(expr.requiredItemType, finalCard, expr.roleSupplier.get(), expr.getLocation());
+                    TailCall tc = argPush.processLeavingTail(filter, context);
+                    Expression.dispatchTailCall(tc);
+                    filter.finalCheck();
+                    return null;
+                };
+            } else {
+                // Force pull-mode evaluation
+                PullEvaluator argEval = arg.makeElaborator().elaborateForPull();
+                return (output, context) -> {
+                    SequenceIterator iter = expr.checkSequence(argEval.iterate(context), context);
+                    for (Item item; (item = iter.next()) != null; ) {
+                        output.append(item);
+                    }
+                    return null;
+                };
+            }
+        }
     }
 }
 

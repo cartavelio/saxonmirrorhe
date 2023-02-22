@@ -530,11 +530,11 @@ public final class ComputedAttribute extends AttributeCreator {
             ComputedAttribute expr = (ComputedAttribute) getExpression();
             Location loc = expr.getLocation();
             int options = expr.getOptions();
-            ItemEvaluator nameEval = Elaborator.makeElaborator(expr.getNameExp()).elaborateForItem();
+            ItemEvaluator nameEval = expr.getNameExp().makeElaborator().elaborateForItem();
 
             if (expr.getSchemaType() != null
                     || expr.getValidationAction() == Validation.STRICT || expr.getValidationAction() == Validation.LAX) {
-                UnicodeStringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForUnicodeString(true);
+                UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
                 return (output, context) -> {
                     Item nameItem = nameEval.eval(context);
                     NodeName name = expr.validateNodeName(nameItem, context);
@@ -553,7 +553,7 @@ public final class ComputedAttribute extends AttributeCreator {
                     return null;
                 };
             } else {
-                StringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForString(true);
+                StringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForString(true);
                 return (output, context) -> {
                     Item nameItem = nameEval.eval(context);
                     NodeName name = expr.validateNodeName(nameItem, context);

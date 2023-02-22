@@ -221,7 +221,7 @@ public final class Comment extends SimpleNodeConstructor {
         public PushEvaluator elaborateForPush() {
             Comment expr = (Comment)getExpression();
             Location loc = expr.getLocation();
-            UnicodeStringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForUnicodeString(true);
+            UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
             if (expr.isXSLT()) {
                 return (out, context) -> {
                     UnicodeString content = contentEval.eval(context);

@@ -187,7 +187,7 @@ public class HomogeneityChecker extends UnaryExpression {
             HomogeneityChecker exp = (HomogeneityChecker) getExpression();
             Location location = exp.getLocation();
             Expression arg = exp.getBaseExpression();
-            PullEvaluator argEval = Elaborator.makeElaborator(arg).elaborateForPull();
+            PullEvaluator argEval = arg.makeElaborator().elaborateForPull();
 
             return context -> new HomogeneityCheckerIterator(argEval.iterate(context), location);
         }

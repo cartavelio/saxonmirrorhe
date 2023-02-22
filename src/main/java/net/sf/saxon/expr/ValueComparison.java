@@ -214,12 +214,12 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                 }
 
                 visitor.getStaticContext().issueWarning("Comparison of " + t0.toString() +
-                        (opt0 ? "?" : "") + " to " + t1.toString() +
+                        (opt0 ? "?" : "") + " to " + t1 +
                         (opt1 ? "?" : "") + " will fail unless " + which + " empty", getLocation());
                 needsRuntimeCheck = true;
             } else {
                 String message = "In {" + toShortString() + "}: cannot compare " +
-                        t0.toString() + " to " + t1.toString();
+                        t0 + " to " + t1;
                 XPathException err = new XPathException(message);
                 err.setIsTypeError(true);
                 err.setErrorCode("XPTY0004");
@@ -553,8 +553,8 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
         public ItemEvaluator elaborateForItem() {
             final ValueComparison exp = (ValueComparison)getExpression();
-            final ItemEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForItem();
-            final ItemEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForItem();
+            final ItemEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForItem();
+            final ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
             final AtomicComparer comparer = exp.getAtomicComparer();
             final BooleanValue resultWhenEmpty = exp.getResultWhenEmpty();
             final int operator = exp.getOperator();
@@ -579,25 +579,42 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
         public BooleanEvaluator elaborateForBoolean() {
             final ValueComparison exp = (ValueComparison) getExpression();
-            final ItemEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForItem();
-            final ItemEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForItem();
+            final ItemEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForItem();
+            final ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
             final AtomicComparer comparer = exp.getAtomicComparer();
             final boolean resultWhenEmpty = exp.getResultWhenEmpty() != null && exp.getResultWhenEmpty().getBooleanValue();
             final int operator = exp.getOperator();
-            final boolean needsRuntimeCheck = exp.needsRuntimeComparabilityCheck();
             final boolean nullable0 = Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
             final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
+            if (!nullable0 && !nullable1 && comparer == ContextFreeAtomicComparer.getInstance()) {
+                switch (operator) {
+                    case Token.FEQ:
+                        return context -> p0.eval(context).equals(p1.eval(context));
+                    case Token.FNE:
+                        return context -> !p0.eval(context).equals(p1.eval(context));
+                    case Token.FGT:
+                        return context -> ((XPathComparable) p0.eval(context)).compareTo((XPathComparable) p1.eval(context)) > 0;
+                    case Token.FLT:
+                        return context -> ((XPathComparable) p0.eval(context)).compareTo((XPathComparable) p1.eval(context)) < 0;
+                    case Token.FGE:
+                        return context -> ((XPathComparable) p0.eval(context)).compareTo((XPathComparable) p1.eval(context)) >= 0;
+                    case Token.FLE:
+                        return context -> ((XPathComparable) p0.eval(context)).compareTo((XPathComparable) p1.eval(context)) <= 0;
+                    default:
+                        throw new UnsupportedOperationException("Unknown operator " + operator);
+                }
+            }
+            if (comparer == ContextFreeAtomicComparer.getInstance()) {
+                return context -> {
+                    AtomicValue v0 = (AtomicValue) p0.eval(context);
+                    if (v0 == null) {
+                        return resultWhenEmpty;  // normally false
+                    }
+                    AtomicValue v1 = (AtomicValue) p1.eval(context);
+                    if (v1 == null) {
+                        return resultWhenEmpty;  // normally false
+                    }
 
-            return context -> {
-                AtomicValue v0 = (AtomicValue) p0.eval(context);
-                if (nullable0 && v0 == null) {
-                    return resultWhenEmpty;  // normally false
-                }
-                AtomicValue v1 = (AtomicValue) p1.eval(context);
-                if (nullable1 && v1 == null) {
-                    return resultWhenEmpty;  // normally false
-                }
-                if (comparer == ContextFreeAtomicComparer.getInstance()) {
                     switch (operator) {
                         case Token.FEQ:
                             return v0.equals(v1);
@@ -614,10 +631,21 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                         default:
                             throw new UnsupportedOperationException("Unknown operator " + operator);
                     }
-                } else {
+                };
+            } else {
+                final boolean needsRuntimeCheck = exp.needsRuntimeComparabilityCheck();
+                return context -> {
+                    AtomicValue v0 = (AtomicValue) p0.eval(context);
+                    if (v0 == null) {
+                        return resultWhenEmpty;  // normally false
+                    }
+                    AtomicValue v1 = (AtomicValue) p1.eval(context);
+                    if (v1 == null) {
+                        return resultWhenEmpty;  // normally false
+                    }
                     return compare(v0, operator, v1, comparer.provideContext(context), needsRuntimeCheck);
-                }
-            };
+                };
+            }
 
         }
 
