@@ -1,3 +1,22 @@
+if (systemOs.isWindows()) {
+  csplatform = "Windows"
+  csrid = "win-x64"
+}
+
+if (systemOs.isMacOsX()) {
+  csplatform = "MacOS"
+  csrid = "osx-x64"
+}
+
+if (systemOs.isLinux()) {
+  csplatform = "Linux"
+  csrid= "linux-x64"
+}
+
+if (csplatform == null) {
+  throw new GradleException("Unrecognized OS: ${systemOs}")
+}
+
 task eecs_featureKeys(
   type: JavaExec,
   description: "Construct the feature keys for Saxon-CS"
@@ -465,37 +484,28 @@ task dotnetRelease(
 task dotnetPublish(
   dependsOn: ['dotnetRelease']
 ) {
-  def platform = null
-  def rid = null
-  if (systemOs.isWindows()) {
-    platform = "Windows"
-    rid = "win-x64"
-  }
-  if (systemOs.isMacOsX()) {
-    platform = "MacOS"
-    rid = "osx-x64"
-  }
-  if (systemOs.isLinux()) {
-    platform = "Linux"
-    rid= "linux-x64"
-  }
-  if (platform == null) {
-    throw new GradleException("Unrecognized OS: ${systemOs}")
-  }
-
   inputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
-  outputs.files fileTree(dir: "${buildDir}/cs/bin/Release/net5.0/${rid}/publish")
+  outputs.files fileTree(dir: "${buildDir}/cs/bin/Release/net5.0/${csrid}/publish")
 
   doLast {
     exec {
       workingDir = "${buildDir}/cs"
       commandLine dotnetex, 'publish', 'SaxonCS.sln',
-        '--configuration', 'Release', '-r', rid
+        '--configuration', 'Release', '-r', csrid
     }
   }
   doLast {
-    println("Published SaxonCS release for ${platform}")
+    println("Published SaxonCS release for ${csplatform}")
   }
+}
+
+task dotnetPublishZip(
+  dependsOn: ['dotnetPublish'],
+  type: Zip
+) {
+  archiveFileName = "SaxonCS-${saxonVersion}-${csplatform}.zip"
+  from "${buildDir}/cs/bin/Release/net5.0/${csrid}/publish"
+  into "/SaxonCS-${saxonVersion}/"
 }
 
 task eecs_hello_world(
