@@ -405,7 +405,7 @@
                <p>--<i>feature</i>:value</p>
             </td>
             <td>
-               <p>Set a configuration feature: see <a class="bodylink" href="configuration/config-features">Configuration Features</a>.
+               <p>Set a configuration feature: see <a class="bodylink" href="/configuration/config-features">Configuration Features</a>.
                   The value used here is the part of the name after the last "/", for example
                      <code>--allow-external-functions:off</code>. Only features accepting a string
                   or boolean may be set; for booleans the values

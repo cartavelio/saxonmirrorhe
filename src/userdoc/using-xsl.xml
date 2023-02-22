@@ -1834,7 +1834,7 @@
             <code>loadLibraryPackage</code> and <code>loadExecutablePackage</code> (Java),
          or <code>LoadLibraryPackage</code> and <code>LoadExecutablePackage</code> (C#).
       Another option, probably the best option if many library packages are used, is to list
-      them in a <a  class="bodylink" href="config/configuration-file">configuration file</a>.</p>
+      them in a <a class="bodylink" href="/configuration/configuration-file">configuration file</a>.</p>
 
       <p>In the case of schema-aware stylesheets, the schema components needed by a stylesheet are
          not exported along with the stylesheet code. The user of the stylesheet needs to import the

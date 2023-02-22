@@ -2298,7 +2298,8 @@ public static int lineNumber(XPathContext c) {
       <h1>Converting the Result of a Java Extension Function</h1>
       
       <p>The result of a Java extension function is converted to an XDM value (a value suitable for use
-        in XPath expressions) using the general conversion rules described at <a class="bodylink" href="java-to-xdm-conversion"/>.</p>
+        in XPath expressions) using the general conversion rules described at <a class="bodylink"
+          href="/extensibility/java-to-xdm-conversion">Converting Java values to XDM values</a>.</p>
       
       <p>The following additional rules apply specifically to the handling of the return value from
         Java methods and constructors used as extension functions:</p>
@@ -2963,10 +2964,10 @@ config.setLocalizerFactory(new LocalizerFactory() {
           open-source component. You must agree to release it under the Mozilla Public License or
           under any other recognized open source license that Saxon might adopt in the future.</i>
       </p>-->
-
+      </div>
+      
       <xi:include href="extensibility/locales-ICU-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
       <xi:include href="extensibility/other-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-      </div>
     </section>
 
     <section id="uri-resolution" title="Customizing URI Resolution">
