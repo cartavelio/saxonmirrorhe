@@ -7,6 +7,8 @@ using net.sf.saxon.om;
 using net.sf.saxon.query;
 using net.sf.saxon.s9api;
 using net.sf.saxon.trans;
+using Saxon.Api.Support;
+using Saxon.Impl.Helpers;
 
 namespace Saxon.Api {
     /// <summary inherits="IEnumerable">
@@ -20,10 +22,8 @@ namespace Saxon.Api {
     /// <para>An <c>XQueryEvaluator</c> is always constructed by running the <c>Load</c> method of
     /// an <c>XQueryExecutable</c>.</para>
     /// </remarks>     
-
     [Serializable]
-    public class XQueryEvaluator : IEnumerable
-    {
+    public class XQueryEvaluator : IEnumerable<XdmItem> {
         private net.sf.saxon.s9api.XQueryEvaluator evaluator;
         private StandardLogger traceFunctionDestination;
 
@@ -34,8 +34,7 @@ namespace Saxon.Api {
 
         // internal constructor
 
-        internal XQueryEvaluator(net.sf.saxon.s9api.XQueryEvaluator eval)
-        {
+        internal XQueryEvaluator(net.sf.saxon.s9api.XQueryEvaluator eval) {
             this.evaluator = eval;
             //this.exp = exp;
             //this.context =
@@ -50,10 +49,10 @@ namespace Saxon.Api {
         /// using a <c>DocumentBuilder</c> created from the <c>Processor</c> object.
         /// </remarks>
 
-        public XdmItem ContextItem
-        {
-            get { return (XdmItem)XdmValue.Wrap(evaluator.getContextItem().getUnderlyingValue()); }
-            set { evaluator.setContextItem((net.sf.saxon.s9api.XdmItem)XdmValue.FromGroundedValueToJXdmValue(value.value)); }
+        public XdmItem ContextItem {
+            get => (XdmItem) XdmValue.Wrap(evaluator.getContextItem().getUnderlyingValue());
+            set => evaluator.setContextItem(
+                (net.sf.saxon.s9api.XdmItem) XdmValue.FromGroundedValueToJXdmValue(value.value));
         }
 
         /// <summary>
@@ -65,12 +64,9 @@ namespace Saxon.Api {
         /// of external variables.
         /// </remarks>
 
-        public SchemaValidationMode SchemaValidationMode
-        {
-            get
-            {
-                switch (evaluator.getUnderlyingQueryContext().getSchemaValidationMode())
-                {
+        public SchemaValidationMode SchemaValidationMode {
+            get {
+                switch (evaluator.getUnderlyingQueryContext().getSchemaValidationMode()) {
                     case Validation.STRICT:
                         return SchemaValidationMode.Strict;
                     case Validation.LAX:
@@ -85,11 +81,9 @@ namespace Saxon.Api {
                 }
             }
 
-            set
-            {
+            set {
                 DynamicQueryContext context = evaluator.getUnderlyingQueryContext();
-                switch (value)
-                {
+                switch (value) {
                     case SchemaValidationMode.Strict:
                         context.setSchemaValidationMode(Validation.STRICT);
                         break;
@@ -115,16 +109,9 @@ namespace Saxon.Api {
         /// supplied to the <c>doc()</c> function.
         /// </summary>
 
-        public XmlResolver InputXmlResolver
-        {
-            get
-            {
-                return ((JDotNetURIResolver)evaluator.getURIResolver()).getXmlResolver();
-            }
-            set
-            {
-                evaluator.setURIResolver(new JDotNetURIResolver(value));
-            }
+        public XmlResolver InputXmlResolver {
+            get => ((DotNetURIResolver) evaluator.getURIResolver()).getXmlResolver();
+            set => evaluator.setURIResolver(new DotNetURIResolver(value));
         }
 
         /// <summary>
@@ -138,10 +125,9 @@ namespace Saxon.Api {
         /// <param name="value">The value to be given to the external variable.
         /// If the variable declaration defines a required type for the variable, then
         /// this value must match the required type: no conversions are applied.</param>
-
-        public void SetExternalVariable(QName name, XdmValue value)
-        {
-            evaluator.setExternalVariable(new net.sf.saxon.s9api.QName(name.ToStructuredQName()), value == null ? null : XdmValue.FromGroundedValueToJXdmValue(value.value));
+        public void SetExternalVariable(QName name, XdmValue value) {
+            evaluator.setExternalVariable(new net.sf.saxon.s9api.QName(name.GetStructuredQName()),
+                value == null ? null : XdmValue.FromGroundedValueToJXdmValue(value.value));
         }
 
         /// <summary>
@@ -153,17 +139,12 @@ namespace Saxon.Api {
         /// <para>The supplied destination is ignored if a <c>TraceListener</c> is in use.</para>
         /// </remarks>
 
-        public StandardLogger TraceFunctionDestination
-        {
-            set
-            {
+        public StandardLogger TraceFunctionDestination {
+            set {
                 traceFunctionDestination = value;
                 evaluator.setTraceFunctionDestination(value);
             }
-            get
-            {
-                return traceFunctionDestination;
-            }
+            get { return traceFunctionDestination; }
         }
 
 
@@ -176,16 +157,12 @@ namespace Saxon.Api {
         /// </returns>
         /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if any run-time failure
         /// occurs while evaluating the query.</exception>
-
-        public XdmValue Evaluate()
-        {
-            try
-            {
+        public XdmValue Evaluate() {
+            try {
                 net.sf.saxon.s9api.XdmValue value = evaluator.evaluate();
                 return XdmValue.Wrap(value.getUnderlyingValue());
             }
-            catch (SaxonApiException err)
-            {
+            catch (SaxonApiException err) {
                 throw new DynamicError(err);
             }
         }
@@ -201,15 +178,11 @@ namespace Saxon.Api {
         /// </returns>
         /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if any run-time failure
         /// occurs while evaluating the expression.</exception>
-
-        public XdmItem EvaluateSingle()
-        {
-            try
-            {
-                return (XdmItem)XdmValue.Wrap(evaluator.evaluateSingle().getUnderlyingValue());
+        public XdmItem EvaluateSingle() {
+            try {
+                return (XdmItem) XdmValue.Wrap(evaluator.evaluateSingle().getUnderlyingValue());
             }
-            catch (SaxonApiException err)
-            {
+            catch (SaxonApiException err) {
                 throw new DynamicError(err);
             }
         }
@@ -227,20 +200,15 @@ namespace Saxon.Api {
         /// </returns>
         /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if any run-time failure
         /// occurs while evaluating the expression.</exception>
-
-        public IEnumerator GetEnumerator()
-        {
-            try
-            {
+        public IEnumerator GetEnumerator() {
+            try {
                 return new SequenceEnumerator<XdmItem>(evaluator.iterator());
             }
-            catch (net.sf.saxon.s9api.SaxonApiUncheckedException err)
-            {
+            catch (net.sf.saxon.s9api.SaxonApiUncheckedException err) {
                 throw new DynamicError(XPathException.makeXPathException(err));
             }
         }
 
-        
 
         /// <summary>
         /// Evaluate the query, sending the result to a specified destination.
@@ -252,20 +220,14 @@ namespace Saxon.Api {
         /// </param>
         /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if any run-time failure
         /// occurs while evaluating the expression.</exception>
-
-        public void Run(XmlDestination destination)
-        {
-            try
-            {
+        public void Run(XmlDestination destination) {
+            try {
                 evaluator.setDestination(destination.GetUnderlyingDestination());
                 evaluator.run();
-    
             }
-            catch (SaxonApiException err)
-            {
+            catch (SaxonApiException err) {
                 throw new DynamicError(err);
             }
-         
         }
 
         /// <summary>
@@ -276,26 +238,21 @@ namespace Saxon.Api {
         /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if any run-time failure
         /// occurs while evaluating the expression, or if the expression is not an
         /// updating query.</exception>
-
-        public XdmNode[] RunUpdate()
-        {
-            try
-            {
-
+        public XdmNode[] RunUpdate() {
+            try {
                 evaluator.run();
                 java.util.Iterator updatedDocsIter = evaluator.getUpdatedDocuments();
                 List<XdmNode> resultList = new List<XdmNode>();
 
-                for (; updatedDocsIter.hasNext(); )
-
-                {
-                    resultList.Add((XdmNode)XdmValue.Wrap( ((net.sf.saxon.s9api.XdmNode)updatedDocsIter.next()).getUnderlyingNode()));
+                for (; updatedDocsIter.hasNext();) {
+                    resultList.Add((XdmNode) XdmValue.Wrap(((net.sf.saxon.s9api.XdmNode) updatedDocsIter.next())
+                        .getUnderlyingNode()));
                 }
+
                 XdmNode[] result = resultList.ToArray();
                 return result;
             }
-            catch (SaxonApiException err)
-            {
+            catch (SaxonApiException err) {
                 throw new DynamicError(err);
             }
         }
@@ -322,30 +279,28 @@ namespace Saxon.Api {
         /// signature.</exception>
         /// <exception cref="DynamicError">If a dynamic error occurs in evaluating the function.
         /// </exception>
-
-        public XdmValue CallFunction(QName function, XdmValue[] arguments) {    
+        public XdmValue CallFunction(QName function, XdmValue[] arguments) {
             try {
                 net.sf.saxon.s9api.XdmValue[] vr = new net.sf.saxon.s9api.XdmValue[arguments.Length];
-                for (int i=0; i<arguments.Length; i++) {
+                for (int i = 0; i < arguments.Length; i++) {
                     vr[i] = XdmValue.FromGroundedValueToJXdmValue(arguments[i].value);
                 }
+
                 Sequence result = evaluator.callFunction(function.UnderlyingQName(), vr).getUnderlyingValue();
                 return XdmValue.Wrap(result);
-            } catch (SaxonApiException e) {
+            }
+            catch (SaxonApiException e) {
                 throw new DynamicError(e);
             }
         }
-
 
 
         /// <summary>
         /// Escape hatch to the <c>net.sf.saxon.query.DynamicQueryContext</c> object in the underlying Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.XQueryEvaluator Implementation
-        {
+        public net.sf.saxon.s9api.XQueryEvaluator Implementation {
             get { return evaluator; }
         }
-
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
 using javax.xml.transform.stream;
@@ -200,7 +201,7 @@ namespace Saxon.Api {
 
         public void Compile(Stream input, Uri baseUri)
         {
-            StreamSource ss = new StreamSource(new JDotNetInputStream(input));
+            StreamSource ss = new StreamSource(input);
             ss.setSystemId(baseUri.ToString());
             schemaManager.load (ss);
         }
@@ -238,7 +239,7 @@ namespace Saxon.Api {
 
         public void Compile(XmlReader reader)
         {
-            PullProvider pp = new JDotNetPullProvider(reader);
+            PullProvider pp = new DotNetPullProvider(reader);
             pp.setPipelineConfiguration(config.makePipelineConfiguration());
             // pp = new PullTracer(pp);  /* diagnostics */
             PullSource ss = new PullSource(pp);
@@ -307,7 +308,7 @@ namespace Saxon.Api {
 
         public XdmAtomicType GetAtomicType(QName qname)
         {
-            SchemaType type = config.getSchemaType(qname.ToStructuredQName());
+            SchemaType type = config.getSchemaType(qname.GetStructuredQName());
             if (type is BuiltInAtomicType)
             {
                 return XdmAtomicType.BuiltInAtomicType(qname);

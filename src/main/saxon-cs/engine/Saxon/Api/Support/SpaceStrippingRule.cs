@@ -4,7 +4,7 @@ using net.sf.saxon.om;
 using net.sf.saxon.trace;
 using net.sf.saxon.type;
 
-namespace Saxon.Api {
+namespace Saxon.Api.Support {
     internal class SpaceStrippingRule : net.sf.saxon.om.SpaceStrippingRule
     {
         private System.Predicate<QName> elementTest;
