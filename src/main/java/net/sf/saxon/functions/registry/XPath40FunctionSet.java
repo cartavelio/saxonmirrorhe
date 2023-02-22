@@ -8,7 +8,6 @@
 package net.sf.saxon.functions.registry;
 
 import com.saxonica.functions.extfn.CharactersFn;
-import net.sf.saxon.functions.ExpandedQNameFn;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.ma.Parcel;
@@ -43,6 +42,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         SpecificFunctionType predicate = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
+                SequenceType.SINGLE_BOOLEAN);
+
+        SpecificFunctionType compareFnType = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
                 SequenceType.SINGLE_BOOLEAN);
 
         SpecificFunctionType ft = new SpecificFunctionType(
@@ -80,6 +83,26 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         // Concat changes in 4.0:
         register("concat", 1, e -> e.populate( Concat::new, BuiltInAtomicType.STRING, ONE, SEQV)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
+
+        register("contains-sequence", 2, e -> e.populate(SequenceMatching.ContainsSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE));
+
+        register("contains-sequence", 3, e -> e.populate(SequenceMatching.ContainsSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
+                .arg(2, compareFnType, ONE, null));
+
+
+        register("ends-with-sequence", 2, e -> e.populate(SequenceMatching.EndsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE));
+
+        register("ends-with-sequence", 3, e -> e.populate(SequenceMatching.EndsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
+                .arg(2, compareFnType, ONE, null));
+
 
         register("expanded-QName", 1, e -> e.populate(ExpandedQNameFn::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, null));
@@ -189,6 +212,15 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("some", 2, e -> e.populate(SomeFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(1, predicate, ONE, null));
+
+        register("starts-with-sequence", 2, e -> e.populate(SequenceMatching.StartsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE));
+
+        register("starts-with-sequence", 3, e -> e.populate(SequenceMatching.StartsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
+                .arg(2, compareFnType, ONE, null));
 
 
         register("unparcel", 1, e -> e.populate( UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
