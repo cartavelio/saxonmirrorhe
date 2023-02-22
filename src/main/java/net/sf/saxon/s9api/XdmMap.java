@@ -17,6 +17,7 @@ import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.StringItem;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * A map in the XDM data model. A map is a list of zero or more entries, each of which
@@ -125,9 +126,11 @@ public class XdmMap extends XdmFunctionItem {
         return new AbstractSet<XdmAtomicValue>() {
             @Override
             public Iterator<XdmAtomicValue> iterator() {
+                final Function<KeyValuePair, XdmAtomicValue> atomicValueFunction =
+                        kvp -> (XdmAtomicValue) XdmValue.wrap(kvp.key);
                 return new MappingJavaIterator<>(
                         getUnderlyingValue().keyValuePairs().iterator(),
-                        kvp -> (XdmAtomicValue) XdmValue.wrap(kvp.key));
+                        atomicValueFunction);
             }
 
             @Override

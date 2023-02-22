@@ -135,7 +135,7 @@ public final class Version {
     }
 
 
-    public static Class<? extends Configuration> configurationClass;
+    //public static Class<? extends Configuration> configurationClass;
 
 
     public static String softwareEdition;
