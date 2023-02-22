@@ -232,8 +232,8 @@ public final class XSLForEachGroup extends StyleElement {
             }
         }
 
-        starting = typeCheck("starting", starting);
-        ending = typeCheck("ending", ending);
+        starting = typeCheck("group-starting-with", starting);
+        ending = typeCheck("group-ending-with", ending);
 
         if ((starting != null || ending != null) && visitor.getStaticContext().getXPathVersion() < 30) {
             try {

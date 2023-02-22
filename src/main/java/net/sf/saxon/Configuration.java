@@ -24,7 +24,7 @@ import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.PatternParser30;
+import net.sf.saxon.pattern.PatternParser;
 import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.StaticQueryContext;
@@ -3490,7 +3490,7 @@ public class Configuration implements SourceResolver, NotationSet {
             }
         } else if ("PATTERN".equals(language)) {
             if (languageVersion == 30 || languageVersion == 20 || languageVersion == 305 || languageVersion == 31) {
-                return new PatternParser30();
+                return new PatternParser();
             } else {
                 throw new XPathException("Unknown XPath version " + languageVersion);
             }
