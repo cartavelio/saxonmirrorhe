@@ -23,19 +23,43 @@ import net.sf.saxon.transpile.CSharpModifiers;
 
 public class UncheckedXPathException extends RuntimeException {
 
+    /**
+     * Create an unchecked XPath exception that wraps a supplied checked exception
+     * @param cause the checked exception to be wrapped
+     */
+
     public UncheckedXPathException(XPathException cause) {
         super(cause);
     }
+
+    /**
+     * Create an unchecked XPath exception with supplied error message
+     * @param message the error message
+     */
 
     @CSharpModifiers(code = {"public", "override"})
     public UncheckedXPathException(String message) {
         super(new XPathException(message));
     }
 
+    /**
+     * Create an unchecked XPath exception with supplied error message and error code
+     * @param message the error message
+     * @param errorCode the local part of the error code
+     */
+
+    public UncheckedXPathException(String message, String errorCode) {
+        super(new XPathException(message, errorCode));
+    }
+
     public UncheckedXPathException(Throwable cause) {
         super(new XPathException(cause));
     }
 
+    /**
+     * Get the underlying (checked) XPathException
+     * @return the checked XPathException wrapped by this UncheckedXPathException
+     */
     public XPathException getXPathException() {
         return (XPathException)getCause();
     }
