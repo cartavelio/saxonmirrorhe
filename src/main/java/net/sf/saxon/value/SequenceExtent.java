@@ -80,6 +80,7 @@ public abstract class SequenceExtent implements GroundedValue {
      *
      * @param input a List containing the items in the sequence. The caller guarantees that
      *              the list will not be subsequently modified.
+     * @param <T> the type of items in the list
      * @return a grounded sequence holding the items in the list. If the
      * sequence is empty the result will be an instance of {@link EmptySequence}. If it is of length
      * one, the result will be an {@link Item}. In all other cases, it will be an instance of

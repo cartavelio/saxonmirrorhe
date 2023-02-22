@@ -43,16 +43,13 @@ public abstract class SystemFunction extends AbstractFunction {
      * @param name      The local name of the function.
      * @param rsc       Necessary information about the static context
      * @param arguments the arguments to the function call
-     * @return a FunctionCall that implements this function, if it
-     * exists, or null if the function is unknown.
+     * @return a FunctionCall that implements this function, if it exists
+     * @throws IllegalArgumentException if there is no system function with the required name and arity
      */
 
     /*@Nullable*/
     public static Expression makeCall(String name, RetainedStaticContext rsc, Expression... arguments)  {
         SystemFunction f = makeFunction(name, rsc, arguments.length);
-        if (f == null) {
-            return null;
-        }
         Expression expr = f.makeFunctionCall(arguments);
         expr.setRetainedStaticContext(rsc);
         return expr;
@@ -334,7 +331,7 @@ public abstract class SystemFunction extends AbstractFunction {
      * Return the error code to be used for type errors. This is overridden for functions
      * such as exactly-one(), one-or-more(), ...
      *
-     * @return the error code to be used for type errors in the function call. Normally XPTY0004,
+     * @return the error code to be used for type errors in the function call. Normally <code>XPTY0004</code>,
      * but different codes are used for functions such as exactly-one()
      */
 
@@ -493,7 +490,7 @@ public abstract class SystemFunction extends AbstractFunction {
     /**
      * Type-check a call on this function
      * @param caller the function call expression calling this function
-     * @param visitor
+     * @param visitor the expression visitor
      * @param contextInfo static context information relating to the call
      * @return a type-checked replacement for the supplied function call
      * @throws XPathException if an error is detected

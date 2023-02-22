@@ -260,9 +260,7 @@ public class GroupByClause extends Clause {
     }
 
     public String toString() {
-        StringBuilder fsb = new StringBuilder(64);
-        fsb.append("group by ... ");
-        return fsb.toString();
+        return "group by ... ";
     }
 
     /**
@@ -314,7 +312,7 @@ public class GroupByClause extends Clause {
      * Callback to get the comparison key for a tuple. Two tuples are equal if their comparison
      * keys compare equal using the equals() method.
      * @param t the tuple whose comparison key is required
-     * @param comparers
+     * @param comparers array of comparers for comparing each component of the grouping key
      * @return a comparison key suitable for comparing with other tuples
      */
 
@@ -332,7 +330,7 @@ public class GroupByClause extends Clause {
      * methods can be used to test whether two tuples have equivalent grouping keys
      */
 
-    public class TupleComparisonKey {
+    public static class TupleComparisonKey {
 
         // Note: this is over-engineered. Each grouping value is required to be either a single atomic
         // value or an empty sequence.

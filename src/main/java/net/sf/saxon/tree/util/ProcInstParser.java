@@ -59,8 +59,8 @@ public class ProcInstParser {
      * uses pseudo-attribute syntax, which it does not have to. This syntax is as described
      * in the W3C Recommendation "Associating Style Sheets with XML Documents".
      *
-     * @param content
-     * @param name
+     * @param content the content of the processing instruction
+     * @param name the name of the required pseudo-attribute
      * @return the value of the pseudo-attribute if present, or null if not
      * @throws XPathException if the syntax is invalid
      */

@@ -90,7 +90,7 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
 
     /**
      * Start of a document node.
-     * @param properties
+     * @param properties the properties of the document node
      */
 
     @Override
@@ -173,7 +173,7 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
         for (AttributeInfo att : attributes) {
             String attqname = att.getNodeName().getDisplayName();
             String atturi = att.getNodeName().getURI();
-            Nodes nodes = null;
+            Nodes nodes;
             try {
                 nodes = nodeFactory.makeAttribute(attqname, atturi, att.getValue(), Attribute.Type.CDATA);
             } catch (nu.xom.IllegalNameException e) {

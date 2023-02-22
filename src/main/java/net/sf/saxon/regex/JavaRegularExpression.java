@@ -82,7 +82,7 @@ public class JavaRegularExpression implements RegularExpression {
      * analyze-string instruction. The resulting RegexIterator provides both the matching and
      * non-matching substrings, and allows them to be distinguished. It also provides access
      * to matched subgroups.
-     * @param input
+     * @param input the string to which the regular expression is to be applied
      */
 
     @Override

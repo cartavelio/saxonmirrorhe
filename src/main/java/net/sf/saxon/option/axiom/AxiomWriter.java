@@ -76,7 +76,7 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
 
     /**
      * Start of a document node.
-     * @param properties
+     * @param properties properties of the node
      */
 
     @Override

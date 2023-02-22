@@ -429,6 +429,7 @@ public class XdmValue implements Iterable<XdmItem> {
      * in XPath.
      *
      * @param step the Step to be applied to the items in this value
+     * @param <T> the type of items to be returned by the step (often {@link XdmNode})
      * @return a Stream of items obtained by replacing each item X in this value by the items obtained
      * by applying the Step function to X.
      * @since 9.9
