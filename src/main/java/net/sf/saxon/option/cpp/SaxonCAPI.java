@@ -311,8 +311,8 @@ public class SaxonCAPI {
      * Method to convert arrays received from C++ to Java map object
      * this method also extracts serialization properties and parameters
      *
-     * @param params - Array of Processor option keys
-     * @param values - Array of Processor option values
+     *
+     * @param processorDataAccumulatorRef
      * @param props   - Serialisaztion properties to be setup
      * @param parameters - Passed Processor parameters as map. Updated within method
      * @param staticParameters   - For XSLT use
@@ -322,7 +322,11 @@ public class SaxonCAPI {
      * @return Map of String, Object pairs
      * @throws SaxonApiException
      */
-    public static Map<String, Object> setupConfigurationAndBuildMap(String[] params, Object[] values, Properties props, Map<QName, XdmValue> parameters, Map<QName, XdmValue> staticParameters, Map<QName, XdmValue> globals, Map<QName, XdmValue> initialTemplateParameters, boolean forXslt) throws SaxonApiException {
+    public static Map<String, Object> setupConfigurationAndBuildMap(ObjectHandle processorDataAccumulatorRef, Properties props, Map<QName, XdmValue> parameters, Map<QName, XdmValue> staticParameters, Map<QName, XdmValue> globals, Map<QName, XdmValue> initialTemplateParameters, boolean forXslt) throws SaxonApiException {
+        ProcessorDataAccumulator processorDataAccumulator= objectHandles.get(processorDataAccumulatorRef);
+        String[] params = processorDataAccumulator.getParameterNames();
+        Object[] values = processorDataAccumulator.getValues();
+
         Map<String, Object> map = new HashMap();
         if (params == null || values == null) {
             return map;
