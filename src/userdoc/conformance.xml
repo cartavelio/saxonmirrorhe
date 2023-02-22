@@ -32,13 +32,13 @@
    <section id="xslt20" title="XSLT 2.0 conformance">
       <h1>XSLT 2.0 conformance</h1>
       
-      <p>Since Saxon 9.8, Saxon no longer offers XSLT 2.0 conformance.</p>
+      <p>Since Saxon 9.8, Saxon no longer aims to achieve complete XSLT 2.0 conformance.</p>
       
       <p>The vast majority of XSLT 2.0 stylesheets will work correctly, because 3.0 is backwards compatible.
          There are a few very minor incompatibilities between XSLT 3.0 and XSLT 2.0 listed in the W3C specifications: for example,
          some error codes have changed.</p>
       
-      <p>However, consider an XSLT stylesheet containing an <code>xsl:mode</code> declaration:</p>
+      <p>Consider an XSLT stylesheet containing an <code>xsl:mode</code> declaration:</p>
       
       <ol>
          <li>If the stylesheet specifies <code>version="2.0"</code>, an XSLT 2.0 processor is required
@@ -61,11 +61,15 @@
       
       <h2 class="subtitle">Test results</h2>
       
-      <p>At the time of release, SaxonCS 11 passes all 11393 applicable tests from the XSLT 3.0 test suite. Some 1658 tests
-      are classified as not applicable, because they have unsatisfied dependencies (for example, localization).</p>
+      <p class="javaonly">SaxonJ 11.1 passes all 11714 applicable tests from the XSLT 3.0 test suite.</p>
       
+      <p class="csonly">SaxonCS 11.1 passes all 11475 applicable tests from the XSLT 3.0 test suite.
+         (The totals are different because some tests are applicable to one product
+         but not the other, for example because they have dependencies on optional settings such as localization).</p>
       
- 
+      <p>These figures exclude tests that were specifically omitted because they cannot be run, even where this represents
+      a non-conformance. For example, the Microsoft <code>System.Xml</code> parser does not report DTD-based attribute types
+      to the application, which means that some of the tests for the <code>id()</code> function cannot succeed.</p>
       
       <p>Although the W3C XSLT Working Group has ceased operation, the W3C test suite continues to be developed by
       volunteers, and Saxonica remains an active contributor. Conformance issues raised by Saxon users typically
@@ -113,8 +117,9 @@
             </ul>
                
             <p>Saxon-EE also provides many
-               more operational options not specifically tied to language features, for example bytecode generation,
-               the ability to export packages in compiled form, and multi-threaded execution.</p>
+               more operational options not specifically tied to language features, for example 
+               the ability to export packages in compiled form, and multi-threaded execution. SaxonJ-EE also includes
+            Java bytecode generation.</p>
          </li>
       </ul>
       
@@ -131,6 +136,8 @@
       <p>The following non-conformances are known:</p>
       
       <ol>
+         <li class="csonly"><p>In SaxonCS, there are limitations imposed by use of the Microsoft <code>System.Xml</code>
+            parser: for details see <a class="bodylink" href="saxon-cs/xmlparsing">XML Parsing in SaxonCS</a>.</p></li>
          <li><p>The W3C specification requires that vendor-defined extensions must only change the processor's
          behavior to the extent that the specification leaves the behavior implementation-defined. Some Saxon-defined
          extensions do not follow this rule: they explicitly change the behavior to make it non-conformant.</p>
@@ -565,9 +572,12 @@
                      attribute recognized for any given language. (See 12.4 Number to String
                      Conversion Attributes)</i>
                </p>
-               <p>&#x25BA; Saxon uses the ICU-J library for localization. This offers a large and
+               <p class="javaonly">&#x25BA; SaxonJ uses the ICU-J library for localization. This offers a large and
                extensible set of languages. The numbering sequences recognized are listed
                at <a class="bodylink" href="/xsl-elements/number">xsl:number</a>.</p>
+               <p class="csonly">&#x25BA; SaxonCS uses the ICU-N library for localization. This does not include 
+                  support for numbering sequences (such as spelled-out numbering, <i>one</i>, <i>two</i>, <i>three</i>).
+               SaxonCS therefore supports such sequences only for English.</p>
             </li>
             <li>
                <p>
@@ -821,9 +831,11 @@
          <li><p>Functions in the standard function library are added to the static context only if they were available in XPath 2.0</p></li>
       </ul>
       
-      <p>TODO update for Saxon 11</p>
-      
-      <p>Saxon-EE 9.9 passes 15238 out of 15242 XPath 2.0 tests in the W3C test suite. The failures occur in cases where XPath 3.1 relaxes the rules
+      15295 successes, 3 failures
+      <p class="javaonly">SaxonJ-EE 11.1 passes 15338 out of 15341 applicable XPath 2.0 tests in the W3C test suite.</p>
+      <p class="csonly">SaxonCS 11.1 passes 15295 out of 15298 applicable XPath 2.0 tests in the W3C test suite.</p>
+         
+       <p>The failures occur in cases where XPath 3.1 relaxes the rules
       and it is not practical or sensible for Saxon to enforce several different sets of constraints. In particular:</p>
 
       <ul>
@@ -851,27 +863,22 @@
       <h1>XPath 3.1 conformance</h1>
 
       <p>Saxon implements the final XPath 3.1 Recommendation in its entirety.</p>
-      
-      <p>At the time of release SaxonCS 11.0 passes all 21564 applicable tests in the W3C XPath/XQuery test suite (QT3),
+
+      <p class="javaonly">SaxonJ-EE 11.1 passes all 22268 applicable tests in the W3C XPath/XQuery test suite (QT3),
          when run as an XPath 3.1 processor.
       </p>
       
-      <aside>A further 11571 tests have been classified as "not applicable". Most of these require support for XQuery; a
+      <p class="csonly">SaxonCS 11.1 passes all 21625 applicable tests in the W3C XPath/XQuery test suite (QT3),
+         when run as an XPath 3.1 processor.
+      </p>
+      
+      <aside>Around ten thousand of the QT3 tests are classified as "not applicable" to XPath 3.1 or to the Saxon implementation. 
+         Most of these are XQuery tests; a
          few require capabilities that are not available in Saxon's XPath API, for example the ability to define
          named decimal formats in the dynamic context.</aside>
       
       
-      <p>At the time of releasing SaxonCS 11.0, the corresponding Java product passes all 22,263 applicable XPath 3.1 tests in 
-         the W3C XPath/XQuery test suite (QT3). The pass rate on C# is slightly lower (22,000 tests), mainly because the tests are written
-         to require requests on the <code>fn:unparsed-text()</code> function to be redirected to local files, and the SaxonCS XPath API
-         does not currently offer this capability.
-      </p>
-      
-      <aside>A further 2031 tests have been classified as "not applicable". These include tests for static type checking (which is
-      not implemented in Saxon), tests for other optional features such as number and date formatting in German or French,
-      tests that exceed Saxon limits such as the maximum length of durations, and a handful of tests that cannot
-      be conveniently run because they take too much time or memory.</aside>
-      
+  
       <p>Although the W3C XQuery Working Group has ceased operation, the W3C QT3 test suite continues to be developed by
          volunteers, and Saxonica remains an active contributor. The test suite can be found at 
          <a href="https://github.com/w3c/qt3tests" class="bodylink">https://github.com/w3c/qt3tests</a>.
@@ -1019,16 +1026,22 @@
       <p>Saxon fully implements the final XQuery 3.1 <a
             class="bodylink" href="http://www.w3.org/TR/xquery-31/">Recommendation</a> of 21 March 2017.</p>
 
-      <p>See also <a class="bodylink" href="../xpath31">XPath 3.1 Conformance</a>; all the new
+      <p>See also <a class="bodylink" href="../xpath31">XPath 3.1 Conformance</a>; all the 
          features implemented for XPath 3.1 are also available in XQuery 3.1.</p>
       
       <h2 class="subtitle">Test results</h2>
       
-      <p>At the time of release SaxonCS 11.0 passes all 31104 applicable tests in the W3C XPath/XQuery test suite (QT3),
+      
+      <p class="javaonly">SaxonJ 11.1 passes all 31291 applicable tests in the W3C XPath/XQuery test suite (QT3),
+         when run as an XQuery 3.1 processor.
+      </p>
+
+      
+      <p class="csonly">SaxonCS 11.1 passes all 31200 applicable tests in the W3C XPath/XQuery test suite (QT3),
          when run as an XQuery 3.1 processor.
       </p>
       
-      <aside>A further 2031 tests have been classified as "not applicable". These include tests for static type checking (which is
+      <aside>Around 400 tests have been classified as "not applicable". These include tests for static type checking (which is
          not implemented in Saxon), tests for other optional features such as number and date formatting in German or French,
          tests that exceed Saxon limits such as the maximum length of durations, and a handful of tests that cannot
          be conveniently run because they take too much time or memory.</aside>
@@ -1068,7 +1081,7 @@
       operate as an XQuery 1.0 or XQuery 3.0 processor. However, there are very few incompatibilities, so queries
       that ran successfully under XQuery 1.0 or XQuery 3.0 will almost certainly continue to work.</p>
      
-     <aside>Although Saxon 10 is no longer technically an XQuery 1.0 processor, it still passes
+     <aside>Although Saxon 11 is no longer technically an XQuery 1.0 processor, it still passes
      99.7% of the XQuery 1.0 conformance tests. The tests it fails fall into two categories: (a)
      constructs that XQuery 1.0 processors are supposed to reject, but which XQuery 3.1 accepts, and (b)
      edge cases where XQuery 3.1 has cleaned up the specification: for example XQuery 1.0 allowed
