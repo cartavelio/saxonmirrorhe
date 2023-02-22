@@ -560,7 +560,7 @@ public class Literal extends Expression {
                         if (!name.getPrefix().isEmpty()) {
                             out.emitAttribute("prefix", name.getPrefix());
                         }
-                        if (!name.getURI().isEmpty()) {
+                        if (!name.hasURI("")) {
                             out.emitAttribute("ns", name.getURI());
                         }
                         out.emitAttribute("content", ((NodeInfo) value).getStringValue());

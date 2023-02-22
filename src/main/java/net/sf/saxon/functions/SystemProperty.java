@@ -52,15 +52,15 @@ public class SystemProperty extends SystemFunction implements Callable {
                 StructuredQName qName = StructuredQName.fromLexicalQName(name,
                                                                          false, true,
                                                                          getRetainedStaticContext());
-                String uri = qName.getURI();
-                String local = qName.getLocalPart();
-                if (uri.equals(NamespaceConstant.XSLT) &&
-                        (local.equals("version") || local.equals("vendor") ||
+                if (qName.hasURI(NamespaceConstant.XSLT)) {
+                    String local = qName.getLocalPart();
+                    if (local.equals("version") || local.equals("vendor") ||
                                 local.equals("vendor-url") || local.equals("product-name") ||
                                 local.equals("product-version") || local.equals("supports-backwards-compatibility") ||
-                                local.equals("xpath-version") || local.equals("xsd-version"))) {
-                    String result = getProperty(uri, local, getRetainedStaticContext());
-                    return new StringLiteral(result);
+                                local.equals("xpath-version") || local.equals("xsd-version")) {
+                        String result = getProperty(NamespaceConstant.XSLT, local, getRetainedStaticContext());
+                        return new StringLiteral(result);
+                    }
                 }
             } catch (XPathException e) {
                 // no action

@@ -273,7 +273,7 @@ public class CDATAFilter extends ProxyReceiver {
             StructuredQName sq = StructuredQName.fromClarkName(expandedName);
             String uri = sq.getURI();
             if (!isHTML || (isHTML4 && !uri.equals("")) || (isHTML5 && !uri.equals("") && !uri.equals(NamespaceConstant.XHTML))) {
-                nameList.add(new FingerprintedQName("", sq.getURI(), sq.getLocalPart()));
+                nameList.add(new FingerprintedQName("", uri, sq.getLocalPart()));
             }
         }
     }

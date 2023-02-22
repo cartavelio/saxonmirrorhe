@@ -1917,7 +1917,7 @@ public class PackageLoaderHE implements IPackageLoader {
             if (schemaType != null) {
                 validation = Validation.BY_TYPE;
             }
-            ComputedAttribute att = new ComputedAttribute(name, namespace, null, validation, (SimpleType) schemaType, false);
+            ComputedAttribute att = new ComputedAttribute(name, namespace, validation, (SimpleType) schemaType, false);
             att.setSelect(content);
             return att;
         });

@@ -94,9 +94,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         if (functionName.getArity() != 1) {
             return false;
         }
-        final String uri = functionName.getComponentName().getURI();
-        final String localName = functionName.getComponentName().getLocalPart();
-        final SchemaType type = config.getSchemaType(new StructuredQName("", uri, localName));
+        final SchemaType type = config.getSchemaType(functionName.getComponentName());
         if (type == null || type.isComplexType()) {
             return false;
         }

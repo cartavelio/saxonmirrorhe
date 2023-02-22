@@ -268,11 +268,9 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
 
         ComputedAttribute inst = new ComputedAttribute(attributeName,
                 namespace,
-                nsContext,
                 validationAction,
                 schemaType,
                 false);
-        //inst.bindStaticContext(getStaticContext());
         inst.setInstruction(true);
         inst.setLocation(allocateLocation());
         compileContent(compilation, decl, inst, separator);

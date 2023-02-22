@@ -93,10 +93,9 @@ public class ItemTypeFactory {
     }
 
     private ItemType getAtomicType(StructuredQName name) throws SaxonApiException {
-        String uri = name.getURI();
-        String local = name.getLocalPart();
-        if (NamespaceConstant.SCHEMA.equals(uri)) {
-            int fp = StandardNames.getFingerprint(uri, local);
+        if (name.hasURI(NamespaceConstant.SCHEMA)) {
+            String local = name.getLocalPart();
+            int fp = StandardNames.getFingerprint(NamespaceConstant.SCHEMA, local);
             if (config.getXsdVersion() == Configuration.XSD10 && config.getXMLVersion() == Configuration.XML10) {
                 return getBuiltInAtomicType(fp);
             } else {
@@ -104,7 +103,7 @@ public class ItemTypeFactory {
                         (ItemType.BuiltInAtomicItemType) getBuiltInAtomicType(fp), config.getConversionRules());
             }
         } else {
-            SchemaType type = config.getSchemaType(new StructuredQName("", uri, local));
+            SchemaType type = config.getSchemaType(name);
             if (type == null || !type.isAtomicType()) {
                 throw new SaxonApiException("Unknown atomic type " + name.getClarkName());
             }
