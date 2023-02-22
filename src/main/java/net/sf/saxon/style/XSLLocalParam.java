@@ -148,12 +148,13 @@ public class XSLLocalParam extends XSLGeneralVariable {
         StructuredQName name = sourceBinding.getVariableQName();
 
         NodeInfo parent = getParent();
+        boolean isFunction = getParent() instanceof XSLFunction;
 
         if (!((parent instanceof StyleElement) && ((StyleElement) parent).mayContainParam())) {
             compileError("xsl:param must be immediately within a template, function or stylesheet", "XTSE0010");
         }
 
-        if (hasChildNodes() && getParent() instanceof XSLFunction && getCompilation().getCompilerInfo().getXsltVersion() != 40) {
+        if (hasChildNodes() && isFunction && getCompilation().getCompilerInfo().getXsltVersion() != 40) {
             compileError("Function parameters cannot have a default value", "XTSE0760");
         }
 
@@ -161,7 +162,11 @@ public class XSLLocalParam extends XSLGeneralVariable {
         SequenceTool.supply(iterateAxis(AxisInfo.PRECEDING_SIBLING), (ItemConsumer<? super Item>) node -> {
             if (node instanceof XSLLocalParam) {
                 if (name.equals(((XSLLocalParam) node).sourceBinding.getVariableQName())) {
-                    compileError("The name of the parameter is not unique", "XTSE0580");
+                    compileError("The name of the parameter (" + name + ") is not unique", "XTSE0580");
+                }
+                if (isFunction && isRequiredParam() && !((XSLLocalParam) node).isRequiredParam()) {
+                    compileError("Parameter " + name + " is required, but an earlier parameter "
+                                         + ((XSLLocalParam) node).sourceBinding.getVariableQName() + " is optional", "XTSE0761");
                 }
             } else if (node instanceof StyleElement && ((StyleElement) node).getFingerprint() != StandardNames.XSL_CONTEXT_ITEM) {
                 compileError("xsl:param must not be preceded by other instructions", "XTSE0010");
@@ -183,10 +188,10 @@ public class XSLLocalParam extends XSLGeneralVariable {
         if (sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
             if (sourceBinding.getSelectExpression() != null) {
                 // NB, we do this test before setting the default select attribute
-                compileError("The select attribute must be omitted when required='yes'", "XTSE0010");
+                compileError("The select attribute must be omitted when required='yes'", "XTSE0760");
             }
             if (hasChildNodes()) {
-                compileError("A parameter specifying required='yes' must have empty content", "XTSE0010");
+                compileError("A parameter specifying required='yes' must have empty content", "XTSE0760");
             }
         }
 
@@ -199,6 +204,15 @@ public class XSLLocalParam extends XSLGeneralVariable {
 
     public boolean isRequiredParam() {
         return sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED);
+    }
+
+    /**
+     * Ask whether variables declared in an "uncle" element are visible.
+     * @return false if this xsl:param is a child of xsl:function (new rule in 4.0 draft)
+     */
+
+    protected boolean seesAvuncularVariables() {
+        return !(getParent() instanceof XSLFunction);
     }
 
     @Override

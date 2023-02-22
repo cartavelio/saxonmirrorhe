@@ -64,7 +64,7 @@ public class XSLGlobalParam extends XSLGlobalVariable {
                 compileError("The select attribute must be absent when required='yes'", "XTSE0010");
             }
             if (hasChildNodes()) {
-                compileError("A parameter specifying required='yes' must have empty content", "XTSE0010");
+                compileError("A parameter specifying required='yes' must have empty content", "XTSE0760");
             }
             Visibility vis = getVisibility();
             if (!sourceBinding.isStatic() &&
