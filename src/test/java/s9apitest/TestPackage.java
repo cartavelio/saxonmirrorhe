@@ -268,6 +268,7 @@ public class TestPackage {
         try {
             Processor processor1 = new Processor(true);
             XsltCompiler compiler = processor1.newXsltCompiler();
+            compiler.setJustInTimeCompilation(false);
             XsltExecutable top = compiler.compile(
                     new StreamSource(new File(DATA_DIR + "bills.xsl")));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -291,6 +292,7 @@ public class TestPackage {
             Processor processor1 = new Processor(true);
             XsltCompiler compiler = processor1.newXsltCompiler();
             compiler.setTargetEdition("HE");
+            compiler.setJustInTimeCompilation(false);
             // Choose a stylesheet that Saxon-EE will optimize
             XsltExecutable top = compiler.compile(
                     new StreamSource(new File(XMARK_DIR + "q8.xsl")));
