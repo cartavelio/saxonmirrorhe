@@ -268,7 +268,7 @@
       </result>
    </test-case>
    
-   <test-case name="union-103">
+   <test-case name="union-103b">
       <description>Union type - subtype relationships</description>
       <created by="Michael Kay" on="2020-01-28"/>
       <environment>
