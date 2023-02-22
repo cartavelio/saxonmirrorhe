@@ -714,14 +714,15 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator 
 
 
     int64_t xdmNodeRef = parseXmlStringWithValidator(sxn_environ->thread, (void*)procRef, (validator != nullptr ? (void *)validator->getUnderlyingValidator() : (void *)nullptr), (char *)source);
-    if (xdmNodeRef != -1) {
+    if (xdmNodeRef >= 0) {
         XdmNode *value = nullptr;
         value = new XdmNode(xdmNodeRef);
 
         return value;
-    } else if (exceptionOccurred()) {
+    } else if (xdmNodeRef == -2) {
         createException();
     }
+    return nullptr;
 
 }
 
@@ -735,27 +736,29 @@ int SaxonProcessor::getNodeKind(int64_t nodeRef) {
 
 
 XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename, SchemaValidator * validator) {
-    int64_t xdmNodeRef = parseXmlFileWithValidator(sxn_environ->thread, (char *)cwd.c_str(), (void *)procRef, (void *)(validator != nullptr ? validator->getUnderlyingValidator() : -1), (char *)filename);
-    if (xdmNodeRef != -1) {
+    int64_t xdmNodeRef = parseXmlFileWithValidator(sxn_environ->thread, (char *)cwd.c_str(), (void *)procRef, (validator != nullptr ? (void *)validator->getUnderlyingValidator() : (void *)nullptr), (char *)filename);
+    if (xdmNodeRef >= 0) {
         XdmNode *value = nullptr;
         value = new XdmNode(xdmNodeRef);
 
         return value;
-    } else if (exceptionOccurred()) {
+    } else if (xdmNodeRef == -2) {
         createException();
     }
+    return nullptr;
 }
 
 XdmNode *SaxonProcessor::parseXmlFromUri(const char *uri, SchemaValidator * validator) {
-    int64_t xdmNodeRef = parseXmlFileWithValidator(sxn_environ->thread, (char *) cwd.c_str(), (void *)procRef, (void *)(validator != nullptr ? validator->getUnderlyingValidator() : -1), (char *)uri);
-    if (xdmNodeRef != -1) {
+    int64_t xdmNodeRef = parseXmlFileWithValidator(sxn_environ->thread, (char *) cwd.c_str(), (void *)procRef, (validator != nullptr ? (void *)validator->getUnderlyingValidator() : (void *)nullptr), (char *)uri);
+    if (xdmNodeRef >= 0) {
         XdmNode *value = nullptr;
         value = new XdmNode(xdmNodeRef);
 
         return value;
-    } else if (exceptionOccurred()) {
+    } else if (xdmNodeRef == -2) {
         createException();
     }
+    return nullptr;
 }
 
 
