@@ -226,22 +226,22 @@ void Xslt30Processor::createException(const char * message) {
 
 
 void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* filename) {
-    j_compileFromXdmNodeAndSave(SaxonProcessor::sxn_environ->thread, cppXT, cwdXT, node->getUnderlyingValue(), filename);
+    j_compileFromXdmNodeAndSave(SaxonProcessor::sxn_environ->thread, cppXT, (char *)cwdXT.c_str(), node->getUnderlyingValue(), filename);
 
 }
 
     void Xslt30Processor::compileFromStringAndSave(const char* stylesheetStr, const char* filename){
-        j_compileFromStringAndSave(SaxonProcessor::sxn_environ->thread, cppXT, cwdXT, stylesheetStr, filename);
+        j_compileFromStringAndSave(SaxonProcessor::sxn_environ->thread, cppXT, (char *)cwdXT.c_str(), stylesheetStr, filename);
 }
 
 
 
     void Xslt30Processor::compileFromFileAndSave(const char* xslFilename, const char* filename){
-        j_compileFromFileAndSave(SaxonProcessor::sxn_environ->thread, cppXT, cwdXT, xslFilename, filename);
+        j_compileFromFileAndSave(SaxonProcessor::sxn_environ->thread, cppXT, (char *)cwdXT.c_str(), xslFilename, filename);
 }
 
 XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
-	    int64_t  objRef = j_compileFromString(SaxonProcessor::sxn_environ->thread, cppXT, cwdXT, stylesheetStr);
+	    int64_t  objRef = j_compileFromString(SaxonProcessor::sxn_environ->thread, cppXT, (char *)cwdXT.c_str(), stylesheetStr);
         XsltExecutable * executable = new XsltExecutable(objRef, cwdXT, proc->getResourcesDirectory());
 		return executable;
 	}
@@ -249,7 +249,7 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
 }
 
 XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
-    int64_t  objRef = j_compileFromXdmNode(SaxonProcessor::sxn_environ->thread, cppXT, cwdXT, node->getUnderlyingValue());
+    int64_t  objRef = j_compileFromXdmNode(SaxonProcessor::sxn_environ->thread, cppXT, (char *)cwdXT.c_str(), node->getUnderlyingValue());
     XsltExecutable * executable = new XsltExecutable(objRef, cwdXT, proc->getResourcesDirectory());
     return executable;
 	}
@@ -257,14 +257,14 @@ XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
 }
 
 XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) {
-    int64_t  objRef = j_compileFromAssociatedFile(SaxonProcessor::sxn_environ->thread, cppXT, cwdXT, source);
-    XsltExecutable * executable = new XsltExecutable(objRef, cwdXT, proc->getResourcesDirectory());
+    int64_t  objRef = j_compileFromAssociatedFile(SaxonProcessor::sxn_environ->thread, cppXT, (char *)cwdXT.c_str(), source);
+    XsltExecutable * executable = new XsltExecutable(objRef, (char *)cwdXT.c_str(), proc->getResourcesDirectory());
     return executable;
 }
 
 
 XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
-    int64_t  objRef = j_compileFromFile(SaxonProcessor::sxn_environ->thread, cppXT, cwdXT, stylesheet);
+    int64_t  objRef = j_compileFromFile(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheet);
     XsltExecutable * executable = new XsltExecutable(objRef, cwdXT, proc->getResourcesDirectory());
     return executable;
 }
@@ -280,7 +280,7 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
 		return nullptr;
 	}
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    int64_t  result = j_transformToValue(SaxonProcessor::sxn_environ->thread,cwdXT, cppXT, -1, sourcefile, stylesheetfile, processorDataRef);
+    int64_t  result = j_transformToValue(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), cppXT, -1, sourcefile, stylesheetfile, processorDataRef);
 
 
     if (result > -1) {
@@ -342,7 +342,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
 		return;
 	}
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    j_transformToFile(SaxonProcessor::sxn_environ->thread,cwdXT, cppXT, -1, source, stylesheet, outputfile, processorDataRef);
+    j_transformToFile(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), cppXT, -1, source, stylesheet, outputfile, processorDataRef);
 }
 
 
@@ -360,7 +360,7 @@ const char * Xslt30Processor::transformFileToString(const char* source,
 	}
 
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    char * result = j_transformToString(SaxonProcessor::sxn_environ->thread,cwdXT, cppXT, -1, source, stylesheet, processorDataRef);
+    char * result = j_transformToString(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), (void *)cppXT, (void *)-1, (char *)source, (char *)stylesheet, (void *)processorDataRef);
 
     return result;
 }
