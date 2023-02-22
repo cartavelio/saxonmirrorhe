@@ -780,7 +780,7 @@ task all_saxonc_releases() {
         include "php8_XQueryProcessor.cpp"
         include "config.m4"
         include "config.w32"
-        exclude "readme.md"
+        exclude "README.md"
         exclude "PHP7"
         filter { line ->
           line.replaceAll('@@VERSION@@', saxonVersion)

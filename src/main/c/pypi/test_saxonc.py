@@ -193,7 +193,7 @@ def test_xslt30_processor(data_dir):
 
 def test_Xslt_from_file1(saxonproc, data_dir):
     xsltproc = saxonproc.new_xslt30_processor()
-    xmlFile = '../../samples/data/cat.xml'
+    xmlFile = data_dir + 'cat.xml'
     result = xsltproc.transform_to_string(source_file=xmlFile, stylesheet_file=data_dir+'test.xsl')
     assert result is not None
     print(result)
@@ -262,7 +262,7 @@ def testEmbeddedStylesheet(saxonproc, data_dir):
     href = hrefval.string_value
     print("href="+href)
     assert href != ""
-    styles_dir = "../../samples/data/"
+    styles_dir = data_dir
     executable = trans.compile_stylesheet(stylesheet_file=styles_dir+href)
     if executable is None and trans.exception_occurred:
         print(trans.error_message)
@@ -274,6 +274,16 @@ def testEmbeddedStylesheet(saxonproc, data_dir):
         print(executable.error_message)
     assert node is not None
 
+def collection_test(saxonproc, data_dir):
+    xq = saxonproc.new_xquery_processor()
+    print(getcwd())
+    xq.set_query_base_uri(data_dir)
+    xq.set_query_content("collection('?select=*.xml")
+    r = xq.run_query_to_value()
+    assert r is not None and not xq.exception_occurred
+
+
+
 def xquery_40_functions():
     proc = PySaxonProcessor(license=True)
 
@@ -281,11 +291,23 @@ def xquery_40_functions():
 
     xquery_processor = proc.new_xquery_processor()
 
-    result = xquery_processor.run_query_to_value(query_text = 'xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")')
+    result = xquery_processor.run_query_to_value(query_text = 'xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")', lang= '4.0')
 
     assert not xquery_processor.exception_occurred
     
     assert "paragraph" in result
+
+def xquery_40_functions_error():
+    proc = PySaxonProcessor(license=True)
+
+    proc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')
+
+    xquery_processor = proc.new_xquery_processor()
+
+    result = xquery_processor.run_query_to_value(query_text = 'xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")', lang= '3.0')
+
+    assert xquery_processor.exception_occurred
+
 
 def testContext2NotRootNamedTemplate(saxonproc, files_dir, data_dir):
         trans = saxonproc.new_xslt30_processor()
