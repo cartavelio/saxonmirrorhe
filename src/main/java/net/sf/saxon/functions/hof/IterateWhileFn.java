@@ -10,15 +10,16 @@ package net.sf.saxon.functions.hof;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 
 /**
- * This class implements the function fn:while(), which is a proposed function for XPath 4.0
+ * This class implements the function fn:iterate-while(), which is a proposed function for XPath 4.0
  */
 
-public class WhileFn extends SystemFunction {
+public class IterateWhileFn extends SystemFunction {
 
     /**
      * Evaluate the expression
@@ -31,13 +32,13 @@ public class WhileFn extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Sequence input = arguments[0];
+        GroundedValue input = arguments[0].materialize();
         FunctionItem predicate = (FunctionItem) arguments[1].head();
         FunctionItem action = (FunctionItem) arguments[2].head();
         while (true) {
-            boolean condition = ((BooleanValue) dynamicCall(predicate, context, new Sequence[]{input}).head()).getBooleanValue();
+            boolean condition = ((BooleanValue) dynamicCall(predicate, context, input).head()).getBooleanValue();
             if (condition) {
-                input = dynamicCall(action, context, new Sequence[]{input});
+                input = dynamicCall(action, context, input).materialize();
             } else {
                 return input;
             }

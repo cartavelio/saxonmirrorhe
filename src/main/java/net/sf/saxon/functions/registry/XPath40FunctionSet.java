@@ -166,7 +166,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
 
-        register("iterate-while", 3, e -> e.populate(WhileFn::new, AnyItemType.getInstance(), STAR, 0)
+        register("iterate-while", 3, e -> e.populate(IterateWhileFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, valuePredicate, ONE, null)
                 .arg(2, valueAction, ONE, null));
