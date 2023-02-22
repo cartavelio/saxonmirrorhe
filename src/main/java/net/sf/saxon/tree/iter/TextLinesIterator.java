@@ -9,6 +9,7 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -31,6 +32,7 @@ public abstract class TextLinesIterator implements SequenceIterator {
     int position = 0;
     protected Location location;
     protected URI uri;
+    private SequenceIterator dischargedIterator;
 
     protected TextLinesIterator() {
 
@@ -64,6 +66,9 @@ public abstract class TextLinesIterator implements SequenceIterator {
     /*@Nullable*/
     @Override
     public StringValue next() {
+        if (dischargedIterator != null) {
+            return (StringValue)dischargedIterator.next();
+        }
         if (position < 0) {
             // input already exhausted
             close();
@@ -104,6 +109,12 @@ public abstract class TextLinesIterator implements SequenceIterator {
         } catch (IOException err) {
             //
         }
+    }
+
+    @Override
+    public void discharge() {
+        dischargedIterator = SequenceTool.toGroundedValue(this).iterate();
+        close();
     }
 
 

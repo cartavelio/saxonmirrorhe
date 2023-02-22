@@ -255,9 +255,19 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
                 if (results instanceof EmptyIterator) {
                     return EmptySequence.getInstance();
                 } else if (results instanceof SingletonIterator) {
-                    return results.next();
+                    NodeInfo result = (NodeInfo)results.next();
+                    if (doc.equals(origin) || Navigator.isAncestorOrSelf(origin, result)) {
+                        return result;
+                    } else {
+                        return EmptySequence.getInstance();
+                    }
                 } else {
-                    return new LazySequence(results);
+                    if (doc.equals(origin)) {
+                        return new LazySequence(results);
+                    } else {
+                        new LazySequence(ItemMappingIterator.filter(results, item ->
+                                Navigator.isAncestorOrSelf(origin, (NodeInfo) item)));
+                    }
                 }
 
             }

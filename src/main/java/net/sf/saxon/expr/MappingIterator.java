@@ -35,6 +35,7 @@ public class MappingIterator implements SequenceIterator {
     private final SequenceIterator base;
     private final MappingFunction action;
     private SequenceIterator results = null;
+    private boolean discharged;
 
     /**
      * Construct a MappingIterator that will apply a specified MappingFunction to
@@ -79,6 +80,9 @@ public class MappingIterator implements SequenceIterator {
                 if (nextSource != null) {
                     // Call the supplied mapping function
                     SequenceIterator obj = action.map(nextSource);
+                    if (discharged) {
+                        obj.discharge();
+                    }
 
                     // The result may be null (representing an empty sequence),
                     //  or a SequenceIterator (any sequence)
@@ -111,6 +115,15 @@ public class MappingIterator implements SequenceIterator {
             results.close();
         }
         base.close();
+    }
+
+    @Override
+    public void discharge() {
+        if (results != null) {
+            results.discharge();
+        }
+        base.discharge();
+        discharged = true;
     }
 
 }

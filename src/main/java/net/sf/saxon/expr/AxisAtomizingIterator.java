@@ -73,6 +73,11 @@ public final class AxisAtomizingIterator implements SequenceIterator {
         base.close();
     }
 
+    @Override
+    public void discharge() {
+        base.discharge();
+    }
+
 
 }
 

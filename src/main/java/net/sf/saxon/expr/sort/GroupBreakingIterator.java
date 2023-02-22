@@ -123,6 +123,11 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
         population.close();
     }
 
+    @Override
+    public void discharge() {
+        population.discharge();
+    }
+
     //#if EE==true
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
