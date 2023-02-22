@@ -36,11 +36,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
     private SchemaManager schemaManager = null;
     private Source source = null;
-    //private String xmlString = null;
-    //private Serializer serializer = null;
     private XdmDestination xdmDestination;
-    XMLStreamWriter streamWriter = null;
-    private boolean reporting = false;
 
 
     /*
@@ -112,21 +108,9 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     @CEntryPoint(name = "j_getSchemaManager")
     public static long j_getSchemaManager(IsolateThread thread, ObjectHandle processorRef) {
         Processor processor = objectHandles.get(processorRef);
-        if (processor == null) {
-            return 0;
-        }
         SchemaManager manager = processor.getSchemaManager();
         ObjectHandle handle = objectHandles.create(manager);
         return handle.rawValue();
-    }
-
-    /**
-     * Set reporting feature on validator
-     *
-     * @param r true or false value
-     */
-    public void reporting(boolean r) {
-        reporting = r;
     }
 
 
@@ -144,10 +128,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
 
     public XdmNode getValidationReport() throws SaxonApiException {
-        if (reporting && streamWriter != null) {
-            return ((BuildingStreamWriterImpl) streamWriter).getDocumentNode();
-        }
-        return null;
+       return xdmDestination.getXdmNode();
     }
 
     @CEntryPoint(name = "j_getValidationReport", exceptionHandler = SaxonCExceptionLongHandler.class)
@@ -242,9 +223,6 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
             SaxonApiException ex = new SaxonApiException("Schema document not found");
             throw ex;
         }
-
-
-        //validator.setErrorListener(errorListener);
 
         processor.getSchemaManager().load(new StreamSource(new StringReader(xsd), systemId));
         return SaxonCAPI.STATUS_OK;
