@@ -13,6 +13,7 @@ using Saxon.Hej.ma.map;
 using Saxon.Hej.om;
 using Saxon.Hej.value;
 using Saxon.Hej.expr;
+using Saxon.Hej.functions;
 using Saxon.Hej.serialize;
 using Saxon.Hej.trans;
 using Exception = System.Exception;
@@ -138,7 +139,7 @@ namespace Saxon.Api {
                 }
             }
         }
-
+        
 
         /// <summary>
         /// Concatenate two <c>IEnumerable</c> objects of <c>XdmItem</c> objects or items of its subclass.
@@ -185,7 +186,7 @@ namespace Saxon.Api {
             if (predicate == null) {
                 throw new ArgumentNullException(nameof(predicate));
             }
-
+            
             return this.Select(new Step<T, T>(x => {
                 if (!(x is T)) {
                     throw new Exception("Type error for item in XdmValue");
@@ -200,6 +201,10 @@ namespace Saxon.Api {
         /// Might not evaluate the predicate on all items if not necessary for 
         /// determining the result. 
         /// </summary>
+        /// <remarks>
+        /// <para>To test whether any items match a particular XDM item type, write
+        /// for example <c>.AnyMatch(XdmAtomicType.Integer.Matches)</c></para>
+        /// </remarks>
         /// <typeparam name="T">The types of object in the enumerable. The object must be an <c>XdmItem</c> or
         /// a derived type.</typeparam>
         /// <param name="predicate">The predicate to apply to items of this <c>XdmValue</c></param>
@@ -223,6 +228,10 @@ namespace Saxon.Api {
         /// Ask whether all items of this <c>XdmValue</c> match the provided predicate.
         /// Might not evaluate the predicate on all items if not necessary for determining the result.
         /// </summary>
+        /// <remarks>
+        /// <para>To test whether all items match a particular XDM item type, write
+        /// for example <c>.AllMatch(XdmAtomicType.Integer.Matches)</c></para>
+        /// </remarks>
         /// <typeparam name="T">The types of object in the enumerable. The object must be an <c>XdmItem</c> or a derived type.</typeparam>
         /// <param name="predicate">The predicate to apply to items of this <c>XdmValue</c></param>
         /// <returns><c>true</c> if either all items of the <c>XdmValue</c> match the provided predicate or the <c>XdmValue</c> is empty, otherwise <c>false</c></returns>

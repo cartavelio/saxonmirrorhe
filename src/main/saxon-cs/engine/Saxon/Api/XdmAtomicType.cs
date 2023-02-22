@@ -451,6 +451,9 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>For example, <c>"Q{http://www.w3.org/2001/XMLSchema}string"</c> for the <c>xs:string</c> data type</returns>
         public override string ToString() {
+            if (TypeName.Uri == NamespaceConstant.SCHEMA) {
+                return "xs:" + TypeName.LocalName;
+            }
             return TypeName.EQName;
         }
 
