@@ -185,8 +185,8 @@ the block finishes.
 
 ## Source code & Development
 - Source code is available here: [Saxonica's site](https://www.saxonica.com/download/c.xml) 
-- We have the source code on a [github repo](https://github.com/?????) to make the wheel packages for Linux and macOS. We have [a separate repo](https://github.com/tennom/??????-win) for Windows. 
-- We use Github action runners for CI and releases.
 
 ## Acknowledgement
-To create this wheel project we had help from the Saxonpy wheel package, which is a third-party project created by [github repo](https://github.com/tennom/saxonpy).
+To create this wheel project we had help from the Saxonpy wheel
+package, which is a third-party project created by [github
+repo](https://github.com/tennom/saxonpy).
