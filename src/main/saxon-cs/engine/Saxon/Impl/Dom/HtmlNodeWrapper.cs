@@ -207,10 +207,12 @@ namespace Saxon.Impl.Dom {
         }
 
         public override string getAttributeValue(string uri, string local) {
-            foreach (HtmlAttribute att in node.GetAttributes(local)) {
-                return att.Value;
-            }
-            return null;
+            
+            string val = node.GetAttributeValue(local, "# # # #");
+            // foreach (HtmlAttribute att in node.GetAttributes(local)) {
+            //     return att.Value;
+            // }
+            return val == "# # # #" ? null : val;
         }
 
         public override bool hasChildNodes() {
