@@ -109,11 +109,13 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
     allocFn fn = operator new;
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties,0);
     int64_t results = j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
-
+     std::cerr<<"XXXXXXX evaluate result = "<<results<<std::endl;
 	if(results >0) {
 	    XdmValue * value = nullptr;
 
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results);
+
+         std::cerr<<"XXXXXXX evaluate j_getXdmObjectType = "<<typeRef<<std::endl;
         XdmItem * xdmItem = nullptr;
         if(typeRef == -2) {
             exception = new SaxonApiException();
@@ -143,7 +145,12 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
             value = new XdmValue();
             xdmItem =  new XdmFunctionItem(results);
             value->addXdmItem(xdmItem);
-        } else {
+        } else if (typeRef == 6) {
+           //Empty Sequence detected.
+           //TODO Maybe we should create an EmptySequence object
+           return nullptr;
+
+        }else {
             value = new XdmValue(results, true);
 
         }
@@ -299,8 +306,13 @@ bool XPathProcessor::effectiveBooleanValue(const char * xpathStr) {
 
     setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    bool resultsi = (bool)j_effectiveBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
-    return resultsi;
+    int resultsi = j_effectiveBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    if(resultsi == -2) {
+        exception = new SaxonApiException();
+        return false;
+    }
+
+    return (bool)resultsi;
 }
 
 

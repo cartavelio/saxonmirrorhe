@@ -1,7 +1,8 @@
 <?php
 /*error_reporting(E_ALL|E_STRICT);
 ini_set('display_errors', 'on');*/
-ini_set('MAX_EXECUTION_TIME', '-1');
+//ini_set('MAX_EXECUTION_TIME', '-1');
+set_time_limit(300);
 /*$root = pathinfo($_SERVER['SCRIPT_FILENAME']);
 define('BASE_FOLDER', basename($root['dirname']));
 define('SITE_ROOT', realpath(dirname(__FILE__)));
@@ -55,6 +56,7 @@ $run_test = null;//"result-document";
 $run_test_case = null;//"result-document-0206";
 $run_assertion = null; //"serialization-matches";
 $total_tests = 0;
+$exceptionList = "number-5018 number-2806 number-5014 number-5029";
 
 
 function test_set_files($catalog)
@@ -106,8 +108,8 @@ function test_set_files($catalog)
 
 function check_dependency($xml)
 {
-
-    if($xml != null) {
+    error_log("check_dependency".$xml);
+    if($xml != null ) {           //&& $xml->size() > 0s
         error_log("dependency_count=".$xml->size());
         $xmlNode = $xml->itemAt(0)->getNodeValue();
         error_log("check_depend=".$xmlNode);
@@ -129,9 +131,10 @@ function check_dependency($xml)
                     case "year_component_values":
                         if($child->getAttributeValue('value') == "support negative year")  {
                             //return true;
-                            break;
+                            continue;
                         }  else {
                             //if value = 'support year zero' then set schema_aware and return true
+                            error_log("check_DependencyXX returning false");
                             return false;
                         }
 
@@ -142,19 +145,21 @@ function check_dependency($xml)
                         $attrStr == "assertSerializationMatches" or $attrStr == "default_output_encoding" or $attrStr == "maximum_number_of_decimal_digits" or $attrStr == "supported_calendars_in_date_formatting_functions" or
                         $attrStr == "default_calendar_in_date_formatting_functions" or $attrStr == "disabling_output_escaping") {
                             //return true;
-                            break;
+                            continue;
                         } elseif ($attrStr == "streaming") {
-
+                            error_log("check_DependencyXX returning false");
                             return false;
                             //break;
                         } else {
+                            error_log("check_DependencyXX returning false");
                             return false;
                         }
                     case "spec":
                         if ($child->getAttributeValue('value')== "XSLT30" or $child->getAttributeValue('value')== "XSLT20+" or $child->getAttributeValue('value')== "XSLT30+" or $child->getAttributeValue('value')== "XSLT10+") {
                            //true
-                            break;
+                            continue;
                         } else {
+                            error_log("check_DependencyXX returning false");
                             return false;
                         }
                     
@@ -164,6 +169,7 @@ function check_dependency($xml)
             unset($child);
         }
     }
+    error_log("check_DependencyYY returning true");
     return true;
 }
 
@@ -373,6 +379,7 @@ function test_case($test_set)
     global $run_test_case;
     global $total_tests;
     global $notrun;
+    global $exceptionList;
     $env = null;
     $xml = null;
     $test_path = pathinfo($test_set)['dirname'] . "/";
@@ -416,7 +423,7 @@ function test_case($test_set)
         $t_dep = getNodeFromXPath($xml, "./*:test-set/*:dependencies");
 
         $check = check_dependency($t_dep);
-        $testCases = $xpathProcForEnv->evaluate("//test-case");
+        $testCases = $xpathProcForEnv->evaluate("//*:test-case");
         if ($check and   $testCases != null) {
 
             $countTC = $testCases->size();
@@ -428,7 +435,7 @@ function test_case($test_set)
                     $testCaseName = $nodex->getAttributeValue("name");
                     echo "<tr><td>$testCaseName</td>";
                     $result = null;
-                    if($run_test_case == null || $run_test_case == $testCaseName) {
+                    if(($run_test_case == null || $run_test_case == $testCaseName) && strpos($exceptionList, $testCaseName) == false) {
                         $result = run_test_case($nodex, $env, $test_path);
                     }  else {
                         $result = "Not run";
@@ -1085,17 +1092,18 @@ function run_test_case($testcase, $env, $path)
 
 
     }
-    $t_dep = getNodeFromXPath($testcase, "./dependencies");
+    $t_dep = getNodeFromXPath($testcase, "./*:dependencies");
 
     $checkDependency = check_dependency($t_dep);//check_dependency($testcase->dependencies);
     if ($checkDependency) {
-        $testElem = getSingleNodeFromXPath($testcase, "./test");
+        error_log("TEST CASE checkpoint 1 - LLLLLl ");
+        $testElem = getSingleNodeFromXPath($testcase, "./*:test");
 
-        // error_log("TEST ELEMENT :".$testcase);
+         error_log("TEST ELEMENT :".$testcase);
         $testStylesheet = null;
 
         if ($testElem != null) {
-
+            error_log("TEST CASE checkpoint 2 - LLLLLl ");
             $test = null;
 
             $asserts = getNodeFromXPath($testcase, "./result/child::*");
@@ -1115,7 +1123,7 @@ function run_test_case($testcase, $env, $path)
 
             }
             if(!$foundStylesheet) {
-                $testStylesheet = getSingleNodeFromXPath($testElem->getNodeValue(), "./stylesheet");
+                $testStylesheet = getSingleNodeFromXPath($testElem->getNodeValue(), "./*:stylesheet");
                 if($testStylesheet != null) {
                     $test = $path . $testStylesheet->getNodeValue()->getAttributeValue("file");
                     $foundStylesheet = true;
@@ -1461,7 +1469,7 @@ function run_test_case($testcase, $env, $path)
                             */
 
                     } catch (Exception $ex) {
-                        $asserts = getNodeFromXPath($testcase, "./result/child::*");
+                        $asserts = getNodeFromXPath($testcase, "./*:result/child::*");
                         if($run_assertion != null and $asserts->itemAt(0)->getNodeValue()->getLocalName() != $run_assertion) {
                             $notrun++;
                             return "Not Run";

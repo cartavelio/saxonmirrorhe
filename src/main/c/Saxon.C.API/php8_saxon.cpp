@@ -1451,8 +1451,9 @@ PHP_METHOD(XdmValue,  itemAt){
     xdmValue = obj->xdmValue;
     if (xdmValue != nullptr) {
 	XdmItem * item = xdmValue->itemAt((unsigned int)index);
-	item->incrementRefCount();
+
 	if(item != nullptr) {
+
             if (object_init_ex(return_value, xdmItem_ce) != SUCCESS) {
                 RETURN_NULL();
                 return;
