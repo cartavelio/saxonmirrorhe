@@ -542,69 +542,11 @@ public class SimpleMode extends Mode {
         }
 
         // search the specific list for this node type / node name
-
-        RuleChain unnamedNodeChain;
         Rule bestRule = null;
 
         if (item instanceof NodeInfo) {
             NodeInfo node = (NodeInfo) item;
-            switch (node.getNodeKind()) {
-                case Type.DOCUMENT:
-                    unnamedNodeChain = documentRuleChain;
-                    break;
-
-                case Type.ELEMENT: {
-                    unnamedNodeChain = unnamedElementRuleChain;
-                    RuleChain namedNodeChain;
-                    if (node.hasFingerprint()) {
-                        namedNodeChain = namedElementRuleChains.get(node.getFingerprint());
-                    } else {
-                        namedNodeChain = getNamedRuleChain(context, Type.ELEMENT, node.getNamespaceUri(), node.getLocalPart());
-                    }
-                    if (namedNodeChain != null) {
-                        bestRule = searchRuleChain(node, context, null, namedNodeChain);
-                    }
-                    break;
-                }
-                case Type.ATTRIBUTE: {
-                    unnamedNodeChain = unnamedAttributeRuleChain;
-                    RuleChain namedNodeChain;
-                    if (node.hasFingerprint()) {
-                        namedNodeChain = namedAttributeRuleChains.get(node.getFingerprint());
-                    } else {
-                        namedNodeChain = getNamedRuleChain(context, Type.ATTRIBUTE, node.getNamespaceUri(), node.getLocalPart());
-                    }
-                    if (namedNodeChain != null) {
-                        bestRule = searchRuleChain(node, context, null, namedNodeChain);
-                    }
-                    break;
-                }
-                case Type.TEXT:
-                    unnamedNodeChain = textRuleChain;
-                    break;
-                case Type.COMMENT:
-                    unnamedNodeChain = commentRuleChain;
-                    break;
-                case Type.PROCESSING_INSTRUCTION:
-                    unnamedNodeChain = processingInstructionRuleChain;
-                    break;
-                case Type.NAMESPACE:
-                    unnamedNodeChain = namespaceRuleChain;
-                    break;
-                default:
-                    throw new AssertionError("Unknown node kind");
-            }
-
-            // search the list for unnamed nodes of a particular kind
-
-            if (unnamedNodeChain != null) {
-                bestRule = searchRuleChain(node, context, bestRule, unnamedNodeChain);
-            }
-
-            // Search the list for rules for nodes of unknown node kind
-
-            bestRule = searchRuleChain(node, context, bestRule, genericRuleChain);
-
+            bestRule = findBestRuleForNodeInfo(node, context);
         } else if (item instanceof AtomicValue) {
             if (atomicValueRuleChain != null) {
                 bestRule = searchRuleChain(item, context, bestRule, atomicValueRuleChain);
@@ -619,6 +561,69 @@ public class SimpleMode extends Mode {
         }
 
         return bestRule;
+    }
+
+    private Rule findBestRuleForNodeInfo(NodeInfo node, XPathContext context) throws XPathException
+    {
+        RuleChain unnamedNodeChain;
+        Rule bestRule = null;
+
+        switch (node.getNodeKind()) {
+        case Type.DOCUMENT:
+            unnamedNodeChain = documentRuleChain;
+            break;
+
+        case Type.ELEMENT: {
+            unnamedNodeChain = unnamedElementRuleChain;
+            RuleChain namedNodeChain;
+            if (node.hasFingerprint()) {
+                namedNodeChain = namedElementRuleChains.get(node.getFingerprint());
+            } else {
+                namedNodeChain = getNamedRuleChain(context, Type.ELEMENT, node.getNamespaceUri(), node.getLocalPart());
+            }
+            if (namedNodeChain != null) {
+                bestRule = searchRuleChain(node, context, null, namedNodeChain);
+            }
+            break;
+        }
+        case Type.ATTRIBUTE: {
+            unnamedNodeChain = unnamedAttributeRuleChain;
+            RuleChain namedNodeChain;
+            if (node.hasFingerprint()) {
+                namedNodeChain = namedAttributeRuleChains.get(node.getFingerprint());
+            } else {
+                namedNodeChain = getNamedRuleChain(context, Type.ATTRIBUTE, node.getNamespaceUri(), node.getLocalPart());
+            }
+            if (namedNodeChain != null) {
+                bestRule = searchRuleChain(node, context, null, namedNodeChain);
+            }
+            break;
+        }
+        case Type.TEXT:
+            unnamedNodeChain = textRuleChain;
+            break;
+        case Type.COMMENT:
+            unnamedNodeChain = commentRuleChain;
+            break;
+        case Type.PROCESSING_INSTRUCTION:
+            unnamedNodeChain = processingInstructionRuleChain;
+            break;
+        case Type.NAMESPACE:
+            unnamedNodeChain = namespaceRuleChain;
+            break;
+        default:
+            throw new AssertionError("Unknown node kind");
+        }
+
+        // search the list for unnamed nodes of a particular kind
+
+        if (unnamedNodeChain != null) {
+            bestRule = searchRuleChain(node, context, bestRule, unnamedNodeChain);
+        }
+
+        // Search the list for rules for nodes of unknown node kind
+
+        return searchRuleChain(node, context, bestRule, genericRuleChain);
     }
 
 
