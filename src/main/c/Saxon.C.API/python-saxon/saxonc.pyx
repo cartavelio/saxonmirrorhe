@@ -1,6 +1,7 @@
 """@package saxonc
 This documentation details the Python API for SaxonC, which has been written in cython for Python3.
-SaxonC is a cross-compiled variant of Saxon from the Java platform to the C/C++ platform.
+SaxonC is is produced by compiling the Java source code of Saxon to a native executable using GraalVM,
+and adding APIs for C/C++, Python, and PHP.
 SaxonC provides processing in XSLT 3.0, XQuery 3.1 and XPath 3.1, and Schema validation 1.0/1.1.
 Main classes in SaxonC Python API: PySaxonProcessor, PyXslt30Processor, PyXsltExecutable, PyXQueryProcessor,
 PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmAtomicValue, PyXdmNode, PyXdmFunctionItem, PyXdmArray, and PyXdmMap."""

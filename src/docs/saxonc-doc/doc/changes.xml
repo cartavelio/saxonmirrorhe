@@ -4,37 +4,66 @@
       <cat name="all" title="ALL"/>
       <cat name="main" title="Main new features"/>
       <cat name="api" title="API"/>
-      <cat name="installation" title="Packaging, installation, and licensing changes"/>
-      <!--<cat name="documentation" title="Documentation changes"/>-->
-      
+      <cat name="installation" title="Packaging, installation, and licensing changes"/>      
    </categories>
 
-   <release number="12" date="2022-12-01">
+   <release number="12" date="2023-01-12">
       <h2 class="subtitle">Changes between releases 11 and 12</h2>
 
       <category name="main">
          <ul>
-            <li>The SaxonC 12 release is built from SaxonJ (Java) 12 as its baseline.</li>
-            <li>SaxonC is now cross-compiled with GraalVM Native Image (version 22.3.0) as a direct replacement to Excelsior Jet JVM.
-            This replacement of JVM is significant in that we now only require a single shared native library which contains only the code required at run time,
-               that is the application classes, standard-library classes, the language runtime, and statically-linked native code from the JDK.</li>
-            <li>SaxonC now uses the Native Image C API instead of JNI Invocation API for calling a method embedded in a native shared library. There are benchmarks
-               available which show that using the Native Image C API is considerably faster than using JNI.
+            <li><p>The SaxonC 12 release is built from the Java source code of SaxonJ 12, with some variations.</p></li>
+            <li><p>SaxonC is now compiled to a native executable using GraalVM Native Image (version 22.3.0). (Earlier
+               versions used Excelsior Jet, which is no longer marketed or supported). GraalVM performs ahead-of-time
+               compilation of the Java source code to executable machine code: the target code is specific to an
+               operating system (Windows, Linux, or MacOS) and CPU architecture.</p>
+               <p>The move from Excelsior JET to GraalVM has a number of benefits:</p>
+               <ul>
+                  <li>GraalVM is actively developed and supported by Oracle, and has excellent performance.</li>
+                  <li>We can now deliver (for each target platform) a single shared native library which 
+                     contains all the code required at run time, that is the application classes, 
+                     standard library classes, the language runtime, and statically linked native 
+                     code from the JDK.</li>
+               </ul>
             </li>
-            <li>SaxonC-EE is built using GraalVM Enterprise edition, while SaxonC-PE and SaxonC-HE are built using GraalVM Community edition.</li>
-            <li>The SaxonC Python extension is now available as a Python wheel package. This is available using Pypi for a number of platforms and
+            <li><p>SaxonC now uses the Native Image C API instead of JNI Invocation API for calling methods embedded 
+               in a native (that is, non-Java) shared library. There are benchmarks
+               available which show that using the Native Image C API is considerably faster than using JNI.</p>
+            </li>
+            <li><p>SaxonC-EE is built using GraalVM Enterprise edition, while SaxonC-PE and SaxonC-HE 
+               are built using GraalVM Community edition. Early indications suggest that GraalVM Enterprise
+               Edition delivers a 20% performance boost.</p></li>
+            <li><p>The SaxonC Python extension is now available as a Python wheel package. This is available using Pypi for a number of platforms and
                flavors including MacOS, Linux and Windows.
-               Python 3.8+ is supported.</li>
-            <li>SaxonC now supports PHP 8 and has removed support for PHP 7 since it has reached End of Life and is no longer supported.</li>
+               Python 3.8+ is supported.</p></li>
+            <li><p>SaxonC now works with PHP 8 and has removed support for PHP 7 since it is no longer supported.</p></li>
+            <li><p>In SaxonC 12.0, a few features from SaxonC 11.x have not yet been bridged to GraalVM,
+            in particular:</p>
+            <ul>
+               <li><p>Localization using ICU-J. (Localization using the capabilities of the JDK remains
+               available, but is more limited.)</p></li>
+               <li><p>Calls to user-written host language extension functions</p></li>
+            </ul>
+            <p>We hope to restore these features (perhaps in a slightly different form) in the future.</p></li>
          </ul>
       </category>
 
       <category name="api">
          <ul>
-            <li>The ICU localization is currently not support in SaxonC-PE and SaxonC-EE.</li>
-            <li>Host language Extension functions are currently not supported in SaxonC-EE.</li>
-            <li>Added the method <code>clarkNameToEQName</code> and <code>EQNameToClarkName</code> on the SaxonProcessor across the languages C++, PHP and Python</li>
-            <li>Dropped the 'flag' argument in the setCatalog class</li>
+            <li>ICU localization is currently not supported.</li>
+            <li>Host language Extension functions are currently not supported.</li>
+            <li>A new method <code>clarkNameToEQName</code> and <code>EQNameToClarkName</code> 
+               is available on the <code>SaxonProcessor</code> class across the languages C++, PHP and Python</li>
+            <li>The <code>flag</code> argument in the <code>setCatalog</code> method has been dropped.</li>
+         </ul>
+      </category>
+      
+      <category name="installation">
+         <ul>
+            <li>The move to a different JVM technology inevitably changes the mechanisms for
+            product installation and configuration. Please see the documentation for details.</li>
+            <li>For Python users, the product is now available as a Python wheel package,
+            for multiple platforms.</li>
          </ul>
       </category>
    </release>
@@ -44,7 +73,7 @@
    
       <category name="main">
          <ul>
-            <li>Compiling the C++ API now requires at least C++14. This also affects the building of the Python and
+            <li>Compiling the C++ API now requires at least C++ 14. This also affects the building of the Python and
                PHP APIs.</li>
             <li>ICU localization support added in SaxonC-PE and SaxonC-EE, to provide support for formatting numbers
                and dates, as well as sorting and comparison of strings, in a wide variety of languages.</li>
