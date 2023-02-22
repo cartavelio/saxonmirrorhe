@@ -151,6 +151,12 @@
         application over which the user has no direct control. (Note, applications wishing to suppress this are free to
         clear the system property.)</p>
         
+        <p>Most warning conditions now have specific error codes associated with them, and internal interfaces have been extended
+        so the error code can get through to a user-supplied <code>ErrorReporter</code>. This makes it much easier to suppress
+        warnings selectively. The codes used can be found in the JavaDoc for class <code>net.sf.saxon.trans.SaxonErrorCode</code>
+        (or, of course, in the warning message itself). The <code>StandardErrorReporter</code> now has a method
+        <code>suppressWarning</code> that allows a specific warning condition to be suppressed.</p>
+        
    
     </category>
 
