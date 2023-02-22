@@ -189,7 +189,7 @@ public class XsltProcessor extends SaxonCAPI {
         if (obj instanceof XdmNode) {
             node = (XdmNode) obj;
         } else {
-            SaxonCException ex  = new SaxonCException("Failed to create Stylesheet from XdoNode");
+            SaxonApiException ex  = new SaxonApiException("Failed to create Stylesheet from XdoNode");
           
             throw ex;
         }
@@ -249,17 +249,13 @@ public class XsltProcessor extends SaxonCAPI {
 
         }
 
-        try {
+   
             if(packagesToLoad.size()>0) {
                 compilePackages(compiler);
             }
             executable = compiler.compile(source);
             return executable;
-        } catch (SaxonApiException ex) {
-            SaxonCException ex2 = new SaxonCException(ex);
 
-            throw ex2;
-        }
 
     }
 
@@ -279,7 +275,7 @@ public class XsltProcessor extends SaxonCAPI {
         if (obj instanceof XdmNode) {
             node = (XdmNode) obj;
         } else {
-            SaxonCException ex  = new SaxonCException("Failed to create Stylesheet from XdoNode");
+            SaxonApiException ex  = new SaxonApiException("Failed to create Stylesheet from XdoNode");
 
             throw ex;
         }
@@ -400,7 +396,7 @@ public class XsltProcessor extends SaxonCAPI {
             DocumentBuilder builder = processor.newDocumentBuilder();
             Map<Serializer.Property, String> propsList = new HashMap<Serializer.Property, String>();
             if (params.length != values.length) {
-                throw new SaxonCException("Length of params array not equal to the length of values array");
+                throw new SaxonApiException("Length of params array not equal to the length of values array");
 
             }
             if (params.length != 0) {
@@ -411,7 +407,7 @@ public class XsltProcessor extends SaxonCAPI {
                 }
                 for (int i = 0; i < params.length; i++) {
                     if (values[i] == null && !params[i].equals("it")) {
-                        throw new SaxonCException("Null parameter/property value found " + (params[i] != null ? "Check name: " + params[i] : ""));
+                        throw new SaxonApiException("Null parameter/property value found " + (params[i] != null ? "Check name: " + params[i] : ""));
 
                     }
                     if (debug) {
@@ -429,7 +425,7 @@ public class XsltProcessor extends SaxonCAPI {
                         try {
                             processor.setConfigurationProperty("http://saxon.sf.net/feature/" + params[i].substring(2), values[i]);
                         } catch (IllegalArgumentException err) {
-                            throw new SaxonCException(err.getMessage());
+                            throw new SaxonApiException(err.getMessage());
                         }
 
                     } else if (params[i].equals("o") && outfile == null) {
@@ -698,7 +694,7 @@ public class XsltProcessor extends SaxonCAPI {
             if (stylesheet == null && executable != null) {
                 transformer = executable.load();
             } else if (stylesheet == null) {
-                SaxonCException ex = new SaxonCException("Stylesheet not found!");
+                SaxonApiException ex = new SaxonApiException("Stylesheet not found!");
 
                 throw ex;
             } else {

@@ -1136,10 +1136,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
             serializer = null;
 
-        } catch (SaxonApiException e) {
-            SaxonCException ex = new SaxonCException(e);
-            throw e;
-        } catch (NullPointerException ex) {
+        }  catch (NullPointerException ex) {
             SaxonApiException ex2 = new SaxonApiException(ex);
             throw ex2;
         } catch (Exception ex) {

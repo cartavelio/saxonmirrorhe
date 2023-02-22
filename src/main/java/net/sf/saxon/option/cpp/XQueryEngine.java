@@ -214,7 +214,7 @@ public class XQueryEngine extends SaxonCAPI {
         //compiler.setErrorListener(errorListener);
         String query = null;
         if (params != null && params.length != values.length) {
-            SaxonCException ex = new SaxonCException("Length of params array not equal to the length of values array");
+            SaxonApiException ex = new SaxonApiException("Length of params array not equal to the length of values array");
             throw ex;
         }
         XQueryExecutable executable = null;
