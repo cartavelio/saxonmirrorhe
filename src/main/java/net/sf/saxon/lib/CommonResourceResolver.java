@@ -11,21 +11,23 @@ import javax.xml.transform.URIResolver;
 /**
  * The CommonResourceResolver is the centralized handler for resolving URIs to resources.
  *
- * XSLT and XQuery read data from URIs in a number of different places:
+ * <p>XSLT and XQuery read data from URIs in a number of different places:</p>
  *
- * 1. XML documents are loaded from URIs with <code>doc()</code> and related functions
- * 2. External parsed entities are resolved within those documents.
- * 3. Unparsed (text) documents are loaded from URIs with <code>unparsed-text()</code> and related functions
- * 4. Stylesheet and query modules are imported from URIs
- * 5. Schemas are imported by URI and their imports are loaded
+ * <ol>
+ * <li>XML documents are loaded from URIs with <code>doc()</code> and related functions</li>
+ * <li>External parsed entities are resolved within those documents.</li>
+ * <li>Unparsed (text) documents are loaded from URIs with <code>unparsed-text()</code> and related functions</li>
+ * <li>Stylesheet and query modules are imported from URIs </li>
+ * <li>Schemas are imported by URI and their imports are loaded</li>
+ * </ol>
  *
- * Saxonica provides different resolver classes in each of these places, allowing application writers
- * to have fine-grained control of the resources returned.
+ * <p>Saxonica provides different resolver classes in each of these places, allowing application writers
+ * to have fine-grained control of the resources returned.</p>
  *
- * Starting in Saxon 11, the default implementation of all these different resolvers is centralized
+ * <p>Starting in Saxon 11, the default implementation of all these different resolvers is centralized
  * in the CommonResourceResolver. The standard implementation of this abstract class is provided by
  * CatalogResourceResolver which uses the XML Resolver, an XML Catalog based resolver to map
- * URIs to resources.
+ * URIs to resources.</p>
  *
  * <blockquote><p>Note: There is an unfortunate but unavoidable terminology issue here to bear in mind. Within the context
  * of a resource resolver, the notion of "NamespaceResolver" is about mapping from a namespace URI,
@@ -40,27 +42,27 @@ import javax.xml.transform.URIResolver;
  *     <li><code>URIResolver</code> is used for other URIs.</li>
  * </ul>
  *
- * Each <code>Configuration</code> has its own resource resolver and they are independent of each other.
+ * <p>Each <code>Configuration</code> has its own resource resolver and they are independent of each other.
  * It is possible to specify a new, common resolver for a <code>Configuration</code> by providing a concrete extension of the
  * <code>CommonResourceResolver</code> class to {@link net.sf.saxon.Configuration#setCommonResourceResolver}.
  * This does not replace the existing APIs which allow
  * an application to specify individual resolvers in various places. Those resolvers will take precedence
- * over the common resolver.
+ * over the common resolver.</p>
  *
- * It is a common feature of existing resolver APIs that they chain together. For example,
+ * <p>It is a common feature of existing resolver APIs that they chain together. For example,
  * it is often the case that when a new <code>EntityResolver</code> is added to an <code>XMLReader</code>,
  * it is configured so that the existing (possibly underlying, implementation defined) resolver will be called
- * if the newly specified resolver fails to resolve the URI.
+ * if the newly specified resolver fails to resolve the URI.</p>
  *
- * The <code>chain</code> methods allow for this kind of chaining. A <code>CommonResourceResolver</code>
+ * <p>The <code>chain</code> methods allow for this kind of chaining. A <code>CommonResourceResolver</code>
  * can be instructed to chain failed entity resolution through a previous or different resolver.
+ * The chain methods returns a new <code>CommonResourceResolver</code> that incorporates the fallback; the
+ * original is unchanged.</p>
  *
- * The chain methods returns "this" so that calls to the chain methods can be strung together in a fluent style.
- *
- * The resolver methods in this class are expected to return <code>null</code> if the requested resource
+ * <p>The resolver methods in this class are expected to return <code>null</code> if the requested resource
  * could not be found. It's common for the caller to then simply attempt to resolve the resource by
  * dereferencing the URI, but the resolver APIs don't do this. (If they did, it would be impossible for
- * the caller to determine if the resolver was able to locate the resource or not, sometimes useful information.)
+ * the caller to determine if the resolver was able to locate the resource or not, sometimes useful information.)</p>
  *
  * @since 11
  */
@@ -116,7 +118,7 @@ public abstract class CommonResourceResolver implements EntityResolver, EntityRe
      *
      * @param resolver the fallback resolver. If the fallback resolver is an instance of <code>EntityResolver2</code>,
      *                 it will be used as the fallback for that interface as well.
-     * @return this
+     * @return a new CommonResourceResolver that adds the fallback capability
      */
     public CommonResourceResolver chain(EntityResolver resolver) {
         CommonResourceResolver copy = newInstance();
@@ -139,7 +141,7 @@ public abstract class CommonResourceResolver implements EntityResolver, EntityRe
      * both resolvers to use the EntityResolver2 passed in.</p>
      *
      * @param resolver the fallback resolver.
-     * @return this
+     * @return a new CommonResourceResolver that adds the fallback capability
      */
     public CommonResourceResolver chain(EntityResolver2 resolver) {
         CommonResourceResolver copy = newInstance();
@@ -157,7 +159,7 @@ public abstract class CommonResourceResolver implements EntityResolver, EntityRe
      * URIResolver if resolution otherwise failed.</p>
      *
      * @param resolver the fallback resolver.
-     * @return this
+     * @return a new CommonResourceResolver that adds the fallback capability
      */
     public CommonResourceResolver chain(URIResolver resolver) {
         CommonResourceResolver copy = newInstance();
@@ -174,7 +176,7 @@ public abstract class CommonResourceResolver implements EntityResolver, EntityRe
      * NamespaceResolver if resolution otherwise failed.</p>
      *
      * @param resolver the fallback resolver.
-     * @return this
+     * @return a new CommonResourceResolver that adds the fallback capability
      */
     public CommonResourceResolver chain(NamespaceResolver resolver) {
         CommonResourceResolver copy = newInstance();
