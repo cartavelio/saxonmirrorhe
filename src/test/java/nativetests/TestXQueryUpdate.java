@@ -4,18 +4,16 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.om.*;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.om.*;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 
@@ -34,13 +32,10 @@ public class TestXQueryUpdate {
 
         try {
             final EnterpriseConfiguration config = new EnterpriseConfiguration();
-            config.setURIResolver(new URIResolver() {
-                 @Override
-                 public Source resolve(String href, String base) throws TransformerException {
+            config.setResourceResolver(request -> {
                      Source s = new StreamSource(new StringReader(xml));
-                     s.setSystemId(href);
+                     s.setSystemId(request.uri);
                      return s;
-                }
             });
             config.setTreeModel(Builder.LINKED_TREE);
             final StaticQueryContext sqc = config.newStaticQueryContext();

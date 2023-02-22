@@ -2,13 +2,10 @@ package internaltests;
 
 import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.DirectResourceResolver;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.QName;
-import net.sf.saxon.s9api.XdmDestination;
-import net.sf.saxon.s9api.XsltCompiler;
-import net.sf.saxon.s9api.XsltExecutable;
-import net.sf.saxon.s9api.XsltTransformer;
+import net.sf.saxon.lib.ResourceRequest;
+import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
@@ -27,11 +24,11 @@ public class IncludeImportJarUri {
         try {
             Processor processor = new Processor(false);
             Configuration config = processor.getUnderlyingConfiguration();
-            Source styleSource = null;
-            styleSource = config.getURIResolver().resolve(styleFileName, null);
-            if (styleSource == null) {
-                styleSource = config.getSystemURIResolver().resolve(styleFileName, null);
-            }
+            ResourceRequest request = new ResourceRequest();
+            request.uri = styleFileName;
+            request.nature = ResourceRequest.XSLT_NATURE;
+            Source styleSource = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+
             QName initialTemplateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
 
             XsltCompiler compiler = processor.newXsltCompiler();

@@ -11,12 +11,11 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
 import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.ChainedResourceResolver;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -594,25 +593,23 @@ public class TestXsltCompiler {
         String goodQuery = "document('http://example.com/good')";
         Processor p = new Processor(false);
         XsltCompiler c = p.newXsltCompiler();
-        final List<String> counter = new ArrayList<String>();
-        p.getUnderlyingConfiguration().setURIResolver(new StandardURIResolver() {
-            @Override
-            public Source resolve(String href, String base) throws XPathException {
-                switch (href) {
-                    case "http://example.com/bad":
-                        String badXml = "<bad>";
-                        counter.add(href);
-                        return new StreamSource(new StringReader(badXml));
-                    case "http://example.com/good":
-                        String goodXml = "<good/>";
-                        counter.add(href);
-                        return new StreamSource(new StringReader(goodXml));
-                    default:
-                        return super.resolve(href, base);
-                }
-            }
-
-        });
+        final List<String> counter = new ArrayList<>();
+        p.getUnderlyingConfiguration().setResourceResolver(
+                new ChainedResourceResolver(request -> {
+                    switch (request.relativeUri == null ? "" : request.relativeUri) {
+                        case "http://example.com/bad":
+                            String badXml = "<bad>";
+                            counter.add(request.relativeUri);
+                            return new StreamSource(new StringReader(badXml));
+                        case "http://example.com/good":
+                            String goodXml = "<good/>";
+                            counter.add(request.relativeUri);
+                            return new StreamSource(new StringReader(goodXml));
+                        default:
+                            return null;
+                    }
+                },
+                p.getUnderlyingConfiguration().getResourceResolver()));
         p.setConfigurationProperty(Feature.PRE_EVALUATE_DOC_FUNCTION, false);
         XsltExecutable q = null;
         try {

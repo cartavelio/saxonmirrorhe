@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.xml.sax.*;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.sax.SAXSource;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,12 +30,7 @@ public class XQueryStreamingTest {
         Configuration configuration = new EnterpriseConfiguration();
 
         final Source[] source = new Source[]{null};
-        configuration.setURIResolver(new URIResolver() {
-            @Override
-            public Source resolve(String href, String base) throws TransformerException {
-                return source[0];
-            }
-        });
+
         String query = "saxon:stream(doc('uriresolver:resolve')/song/chorus)";
         Processor processor = new Processor(configuration);
         XQueryExecutable xqueryExecutable = processor.newXQueryCompiler().compile(query);
@@ -48,6 +41,7 @@ public class XQueryStreamingTest {
             for (int repetition = 0; repetition < 4; ++repetition)
                 for (int nResults = 8; nResults < 4096; nResults <<= 2) {
                     XQueryEvaluator xqueryEvaluator = xqueryExecutable.load();
+                    xqueryEvaluator.setResourceResolver(request -> source[0]);
                     final Reader factoryReader = readerFactory.newReader();
                     final Reader delayingReader = new Reader() {
 
