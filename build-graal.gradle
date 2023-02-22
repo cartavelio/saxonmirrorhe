@@ -619,6 +619,7 @@ task graal_eec_jar(
   task "setup_${edition}c_pypi"(
     dependsOn: [graalEdition, "${edition}c_graalImage"]
   ) {
+    inputs.files fileTree(dir: "${projectDir}/src/main/c/pypi")
     inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
     outputs.files fileTree(dir: pypiDir, exclude: "dist/**")
 
@@ -661,8 +662,9 @@ task graal_eec_jar(
       
     doLast {
       copy {
-        from "${projectDir}/src/main/c/Saxon.C.API/graalvm"
+        from "${buildDir}/c/"
         into "${buildDir}/${edition}c_pypi/Saxon.C.API/graalvm"
+        include "*.h"
       }
     }
     
@@ -717,6 +719,11 @@ task graal_eec_jar(
         include "XPathProcessor.h"
         include "SchemaValidator.h"
         include "SaxonApiException.h"
+        filter { line ->
+          line.replaceAll('@@VERSION@@', saxonVersion)
+            .replace('@@edition@@', edition)
+            .replace('@@EDITION@@', edition.toUpperCase())
+        }
       }
     }
   }
