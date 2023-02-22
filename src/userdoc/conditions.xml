@@ -20,7 +20,7 @@
     <li>
       <p><i>Category A</i> consists of open-source code which was written as part of Saxon either by the initial
         developer, or by another contributor. All such components are subject only to the MPL 2.0
-        license. Details of third-party <a class="bodylink" href="contributors">Contributions</a> is provided, for
+        license. Details of third-party <a class="bodylink" href="contributors">Contributions</a> are provided, for
         information.</p>
     </li>
     <li>
@@ -39,10 +39,7 @@
     <li>
       <p><i>Category C</i> code consists of components that are included unchanged in the Saxon
         distribution in binary form, for the convenience of users to avoid the need for a separate
-        download. (In the Java product this includes the ASM library for bytecode generation, the
-        XQJ interface definitions, and the JLine 2 library for interactive console input; 
-        in the .NET product it also includes the IKVMC and OpenJDK
-        runtimes, the Apache <dfn>Xerces</dfn> parser, and the <dfn>TagSoup</dfn> HTML parser.)
+        download. 
         These are listed as <a class="bodylink" href="redistributed">Redistributed components</a>.
       </p>
       <p>The code in this category is in most cases used in all Saxon editions (the only open source
@@ -111,12 +108,12 @@
     into this category, please delete the <code>saxon-xqj-10.0.jar</code> file. (In Saxon-PE and
     Saxon-EE, the XQJ components are delivered as part of the main Saxon JAR file.)</p>
   
-  <aside><p>Although Saxonica complies with all the terms of the XQJ license, Saxonica does
-    not necessarily accept that producing an implementation of a published API is an action
-    that legally requires a license.</p></aside>
+  <aside><p>Although Saxonica complies with all the terms of the XQJ license, Saxonica takes
+    the view that implementing the published XQJ API does not actually require a license (a view
+    reinforced by the decision on Google LLC v. Oracle America, Inc.)</p></aside>
   
 
-  <h2 class="subtitle">Saxon-EE and Saxon-PE</h2>
+  <h2 class="subtitle">Saxon-EE and Saxon-PE on Java</h2>
 
   <p>The Enterprise and Professional editions of Saxon are commercial products released under the
     terms and conditions published at <a href="http://www.saxonica.com/license/paid-license.pdf"
@@ -129,7 +126,33 @@
     entirely defined by the commercial license, the existence of an open source license for these
     components gives you additional rights, which are described above.</p>
 
+  <h2 class="subtitle">Saxon-CS</h2>
   
+  <p>Saxon-CS is a commercial Saxonica product built from the following components:</p>
+  
+  <ol>
+    <li><p>The Java source code of Saxon-EE (see above), converted to C# using Saxonica-owned tooling.</p></li>
+    <li><p>Additional Saxonica-owned code written in C#, to provide a C# API and to integrate with .NET
+    components such as the <code>System.Xml.XmlReader</code> parser.</p></li>
+    <li><p>Third party libraries referenced by means of <code>nuget</code> dependencies. These libraries are not distributed
+    with the Saxon product, but are downloaded automatically as part of the installation process. The relevant libraries are:</p>
+    <ul>
+      <li>HtmlAgilityPack</li>
+      <li>ICU4N</li>
+      <li>ICU4N.Collation</li>
+      <li>ICU4N.CurrencyData</li>
+      <li>ICU4N.LanguageData</li>
+      <li>ICU4N.RegionData</li>
+      <li>ICU4N.Transliterator</li>
+      <li>Microsoft.AspNetCore.StaticFiles</li>
+      <li>Org.XmlResolver</li>
+      <li>Org.XmlResolverData</li>
+      <li>Singulink.Numerics.BigDecimal</li>
+      <li>Singulink.Numerics.BigIntegerExtensions</li>
+      <li>System.Collections.Immutable</li>
+    </ul>
+    </li>
+  </ol>
 
   
   <h2 class="subtitle">The Saxon SQL extension</h2>
@@ -693,7 +716,7 @@
           <p>Modifications</p>
         </td>
         <td>
-          <p>Almost entirely rewritten with enhancements to handle XPath 2.0/3.0 and XQuery 1.0/3.0
+          <p>Almost entirely rewritten over the years, with enhancements to handle XPath 2.0/3.0/3.1 and XQuery 1.0/3.0/3.1
             syntax, improved error reporting, etc.</p>
         </td>
       </tr>
@@ -910,7 +933,7 @@
     <p>This page describes <i>Category C</i> components as defined above: components that are
       redistributed with Saxon in binary form, without source-level alteration.</p>
     
-    <h2 class="subtitle">Java and .NET platforms</h2>
+    <h2 class="subtitle">Saxon on Java</h2>  
     
     <p>
       <strong>ASM</strong>
@@ -918,7 +941,7 @@
     
     <p>See http://asm.ow2.org/</p>
     
-    <p>Saxon-EE, on both Java and .NET, includes the ASM bytecode generation library. The code is
+    <p>Saxon-EE, on Java, includes the ASM bytecode generation library. The code is
       issued without modification, except that on .NET it is cross-compiled to .NET IL form. </p>
     
     <p>The license can be found at http://asm.ow2.org/license.html</p>
@@ -952,7 +975,7 @@
     
     <p>See <a href="http://site.icu-project.org//">http://site.icu-project.org//</a></p>
     
-    <p>Saxon-EE, on both Java and .NET, includes portions of the International Components for
+    <p>Saxon-EE, on Java, includes portions of the International Components for
       Unicode library, principally to support use of the Unicode Collation Algorithm, and localization
       features such as formatting of numbers and dates.</p>
     
@@ -983,7 +1006,7 @@
     </aside>
     
     
-    <h2 class="subtitle">Saxon on Java</h2>    
+      
 
     <p>
       <strong>XQJ</strong>
@@ -1071,8 +1094,8 @@
       conditions of this license (for example, it passes the tests in the TCK).</p>
     
     <p><i>Note: although Saxonica complies with all the conditions of this license, 
-    Saxonica does not necessarily accept that implementing a published specification
-    is an action that requires a license.</i></p>
+    Saxonica believes that creating an implementation of the XQJ API would be lawful
+    without any license.</i></p>
 
     <p>
       <strong>JLine 2</strong>
@@ -1125,90 +1148,9 @@
     
     <p>Applicable notice: JLINE2.txt</p>
 
-    <h2 class="subtitle">Saxon on .NET</h2>
 
-    <p>
-      <strong>IKVM Runtime</strong>
-    </p>
 
-    <p>See http://www.ikvm.net/. Can be downloaded from
-      http://sourceforge.net/project/showfiles.php?group_id=69637. Saxon links dynamically to this
-      DLL.</p>
-
-    <p>License is at http://weblog.ikvm.net/story.aspx/license</p>
-    <aside> Copyright (C) 2002-2007 Jeroen Frijters<br/>
-      <br/> This software is provided 'as-is', without any express or implied warranty. In no event
-      will the authors be held liable for any damages arising from the use of this software.<br/>
-      <br/> Permission is granted to anyone to use this software for any purpose, including
-      commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:<br/>
-      <br/> 1. The origin of this software must not be misrepresented; you must not claim that you
-      wrote the original software. If you use this software in a product, an acknowledgment in the
-      product documentation would be appreciated but is not required.<br/>
-      <br/> 2. Altered source versions must be plainly marked as such, and must not be
-      misrepresented as being the original software.<br/>
-      <br/> 3. This notice may not be removed or altered from any source distribution.<br/>
-      <br/> Jeroen Frijters<br/> jeroen@frijters.net </aside>
-
-    <p>Applicable notice: FRIJTERS.txt</p>
-
-    <p>
-      <strong>OpenJDK Classpath</strong>
-    </p>
-
-    <p>The copy of OpenJDK Classpath released with Saxon on .NET is derived from the version that
-      is released as part of IKVM Runtime (see above). This in turn is derived largely from the Sun
-      OpenJDK distribution, together with some components taken from the Red Hat IcedTea library,
-      compiled into CIL code using IKVMC. Saxon 9.1 uses IKVM 0.40.0.1, which in turn uses OpenJDK 7
-      b13.</p>
-
-    <p>Saxon distributes only the parts of this library that are actually needed. These parts have
-      been rebuilt from source code, but no source modifications have been made.</p>
-
-    <p>Saxon links dynamically to this DLL.</p>
-
-    <p>The license conditions are at <a href="http://openjdk.java.net/legal/gplv2+ce.html"
-        class="bodylink">http://openjdk.java.net/legal/gplv2+ce.html</a>. (This is a modified
-      variant of the GNU Public License version 2, with a special clause allowing it to be used as
-      part of a product that is not itself open source.)</p>
-
-    <p>Applicable notice: GPL+CLASSPATH.txt</p>
-
-    <p>
-      <strong>Apache Xerces</strong>
-    </p>
-
-    <p>Rather than distributing the Sun version of Xerces that comes with the OpenJDK library, Saxon
-      instead distributes the Apache version of Xerces. (The two versions have diverged
-      considerably. The Apache version is used because it is considered more reliable and is also
-      easier to integrate because it does not have unnecessary dependencies on other parts of the
-      JDK library.)</p>
-
-    <p>The two Apache JAR files <code>xercesImpl.jar</code> and <code>resolver.jar</code> have been
-      cross-compiled to IL code using the IKVMC compiler, but are otherwise unmodified.</p>
-
-    <p>The license conditions for Xerces are at <a href="http://www.apache.org/licenses/LICENSE-2.0"
-        class="bodylink">http://www.apache.org/licenses/LICENSE-2.0</a></p>
-
-    <p>Applicable notices: APACHE-XERCES.txt, APACHE-RESOLVER.txt</p>
-
-    <p>
-      <strong>TagSoup</strong>
-    </p>
-
-    <p>Supporting the <code>saxon:parse-html()</code> extension function, the code of TagSoup
-      version 1.2 is included in the Saxon-PE and Saxon-EE distributions on .NET. Apart from
-      cross-compiling from Java bytecode to IL code, the code is unmodified.</p>
-
-    <p>Information about TagSoup, including links to the download location for source code, is
-      available at <a href="https://mvnrepository.com/artifact/org.ccil.cowan.tagsoup/tagsoup/1.2"
-        class="bodylink"
-        >https://mvnrepository.com/artifact/org.ccil.cowan.tagsoup/tagsoup/1.2</a>.</p>
-
-    <p>The license conditions for TagSoup are at <a
-        href="http://www.apache.org/licenses/LICENSE-2.0" class="bodylink"
-        >http://www.apache.org/licenses/LICENSE-2.0</a></p>
-
-    <p>Applicable notices: APACHE-TAGSOUP.txt</p>
+    
   </section>
   <section id="algorithms" title="Published Algorithms and Specifications">
     <h1>Published Algorithms and Specifications</h1>

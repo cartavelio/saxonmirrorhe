@@ -66,7 +66,7 @@
    <section id="gettingstarted" title="Getting Started">
       <h1>Getting Started</h1>
 
-      <p>If you are new to Saxon, or to Java, or to XML, XSLT, and XQuery, this section provides a
+      <p>If you are new to Saxon, or to Java/.NET, or to XML, XSLT, and XQuery, this section provides a
          quick checklist of the things you need to do before you can run your first application.</p>
 
       <p>First decide which platform you want to use. If you already use either the Java or .NET
@@ -79,14 +79,12 @@
          <ul/>
       </nav>
 
-      <section id="gettingstartedjava" title="Getting started with Saxon on the Java platform">
+      <section id="gettingstartedjava" title="Getting started with Saxon on the Java platform" for="J">
          <h1>Getting started with Saxon on the Java platform</h1>
 
-         <p>Saxon doesn't come with a graphical user interface: it's designed to be integrated into
+         <p>Saxon doesn't come with a graphical user interface: it's a library designed to be integrated into
             other tools and applications. You will therefore start by using it from the operating
-            system command line. On Windows, you may want to install a text editor such as
-               <code>jEdit</code> that offers a more friendly command line than the standard DOS
-            console provided by Microsoft.</p>
+            system command line.</p>
 
          <p>Alternatively, Saxon is integrated with popular XML development environments such as <a
                class="bodylink" href="http://www.oxygenxml.com/">Oxygen XML Editor</a> and <a class="bodylink"
@@ -193,36 +191,38 @@
                href="../../installationjava">Installing (Java)</a>.</p>
       </section>
 
-      <section id="gettingstarteddotnet" title="Getting started with Saxon on the .NET platform">
+      <section id="gettingstarteddotnet" title="Getting started with Saxon on the .NET platform" for="CS">
          <h1>Getting started with Saxon on the .NET platform</h1>
+         
+         <p>Saxon-CS is a new product for .NET Core, replacing the older Saxon/.NET product. The older
+         product was built by compiling the Java source code to bytecode, and then converting this to run
+         on .NET using the IKVM converter. IKVM never supported .NET Core (which is the strategic version
+         of .NET for the future), and development has been discontinued, so Saxon-CS uses a different approach:
+         Saxonica developed a source code transpiler that converts the Java source code of the product to
+         equivalent C# code.</p>
 
          <p>Saxon doesn't come with a graphical user interface: it's designed to be integrated into
             other tools and applications. You will therefore start by using it from the operating
-            system command line. On Windows, you may want to install a text editor such as <a
-               href="http://www.ultraedit.com/" class="bodylink">UltraEdit</a> that offers a more
-            friendly command line than the standard DOS console provided by Microsoft.</p>
+            system command line.</p>
+         
+         <p>Saxon-CS is currently only available in the Enterprise Edition, which requires a license
+         file that you can obtain from Saxonica.</p>
 
          <ol>
             <li>
-               <p>It is highly recommended that you have .NET version 4.0 or higher installed on
-                  your machine. This is available as a free download from Microsoft. (Saxon may work
-                  with older versions of .NET, but this has not been thoroughly tested.) For
-                  non-Windows users, the .NET Saxon product can also be run on the Mono
-                  platform.</p>
-              
-                <p><b>Saxon does not work with .NET Core. This is a limitation of the technology
-                used to port Saxon from the Java platform to .NET.</b></p>
+               <p>Saxon-CS is targeted at .NET Core 5, and you will need to install this separately.
+                  For details, see <a class="bodylink" href="https://dotnet.microsoft.com/download/dotnet/5.0">https://dotnet.microsoft.com/download/dotnet/5.0</a>.
+               There's a bewildering variety of options. Choose the latest version of the SDK (for example, SDK 5.0.400)
+               corresponding to your chosen operating system (Windows, MacOS, or Linux) and CPU architecture (for example Arm64, x64, or x86).</p>
+
             </li>
             <li>
-               <p>Download the software (you will typically start with the open-source version
-                  Saxon-HE) from <a
-                     href="http://sourceforge.net/project/showfiles.php?group_id=29872"
-                     class="bodylink">SourceForge</a>. Alternatively, the commercial editions of the
-                  product (Saxon-PE and Saxon-EE) can be downloaded from <a
-                     href="http://www.saxonica.com/" class="bodylink">www.saxonica.com</a>.</p>
+               <p>Download the software from <a
+                     href="https://www.saxonica.com/" class="bodylink">www.saxonica.com</a>.
+               TBA?? Use nuget.</p>
             </li>
             <li>
-               <p>The software comes as a .exe installer: <code>SaxonHEn-n-n-nNsetup.exe</code> for
+               <p>TBA: The software comes as a .exe installer: <code>SaxonHEn-n-n-nNsetup.exe</code> for
                   Saxon Home Edition, <code>SaxonPEn-n-n-nNsetup.exe</code> for the Professional
                   Edition, and <code>SaxonEEn-n-n-nNsetup.exe</code> for the Enterprise Edition.
                   Double-click it to run the installer. It installs the executable files into a
@@ -237,18 +237,14 @@
                   Unzip the contents of this file into the same directory as the Saxon software.</p>
             </li>
             <li>
-               <p>If you are using a commercial edition of Saxon (that is, Saxon-PE or Saxon-EE),
-                  you will need to obtain a file containing a licence key. The license key is
+               <p>You will need to obtain a file containing a licence key. The license key is
                   interchangeable between the Java and .NET platforms. You can apply for a free
                   30-day evaluation license key by going to <a href="http://www.saxonica.com/"
                      class="bodylink">www.saxonica.com</a> and clicking on "Try Saxon for 30 days".
                   The license key file will be sent by email within 24 hours. This file, called
-                     <code>saxon-license.lic</code>, should be placed in the directory containing
-                  the Saxon DLL files: for example <code>c:/Program
-                     Files/Saxonica/SaxonPE10.0N/bin</code>. <i>When running Saxon from the command
-                     line, it is no longer necessary for the directory containing the license file
-                     to be on the classpath.</i> For more details on Saxon license keys, see the <a
-                     class="bodylink" href="../../license">Saxon Licenses</a> section.</p>
+                     <code>saxon-license.lic</code>, should be placed in a suitable directory,
+               and the environment variable <code>SAXON_LICENSE_DIR</code> must be set to the
+               name of this directory.</p>
             </li>
          </ol>
 
@@ -260,13 +256,13 @@
          <p>
             <i>for XSLT (all on one line):</i>
          </p>
-         <samp><![CDATA[bin\Transform -t -s:samples\data\books.xml 
+         <samp><![CDATA[dotnet Saxon transform -t -s:samples\data\books.xml 
      -xsl:samples\styles\books.xsl -o:c:\temp.html]]></samp>
 
          <p>
             <i>for XQuery (all on one line):</i>
          </p>
-         <samp><![CDATA[bin\Query -t -s:samples\data\books.xml 
+         <samp><![CDATA[dotnet Saxon query -t -s:samples\data\books.xml 
        -q:samples\query\books-to-html.xq -o:c:\temp.html]]></samp>
 
          <p>Now open <code>c:\temp.html</code> in your browser to check that it worked.</p>
@@ -308,7 +304,7 @@
                from the command line, or invoked from an application.</p>
          </li>
 
-         <li>
+         <li for="J">
             <p>On the Java platform, when using XSLT, XPath, XQuery, or XML schema validation, Saxon offers
                a choice of APIs. If you need portability across different vendors' tools, you can
                use the JAXP API for XSLT, XPath, and XML Schema processing, and the XQJ interface
@@ -319,7 +315,7 @@
                documented in the JavaDoc. Clearly, the deeper you go, the greater the risk of
                interfaces changing in future releases.</p>
          </li>
-         <li>
+         <li for="CS">
             <p>On the .NET platform, Saxon offers an API that enables close integration with other
                services available from .NET, notably the XML-related classes in the
                   <code>System.Xml</code> namespace. It isn't possible to use Saxon as a transparent
@@ -354,10 +350,14 @@
    <section id="packages" title="Choosing the Saxon Edition">
       <h1>Choosing the Saxon Edition</h1>
 
-      <p>Saxon is distributed in three editions: Saxon-HE, Saxon-PE, and Saxon-EE, each of which is
+      <p for="J">Saxon (on the Java platform) is distributed in three editions: Saxon-HE, Saxon-PE, and Saxon-EE, each of which is
          available for both the Java and .NET platforms. Saxon-HE is available under an open-source
          license (specifically, the Mozilla Public License 2.0), and all its features are available
          to all users. Saxon-PE and Saxon-EE are commercial products and require activation by a
+         license key.</p>
+      
+      <p for="CS">Saxon (on the .NET platform) currently offers only the Enterprise Edition Saxon-EE.
+         Saxon-EE is a commercial product and requires activation by a
          license key.</p>
 
       <p>There are also restricted licenses that work with Saxon-EE but restrict its capability:</p>
@@ -391,7 +391,7 @@
    </section>
 
 
-   <section id="installationjava" title="Installation: Java platform">
+   <section id="installationjava" title="Installation: Java platform" for="J">
       <h1>Installation: Java platform</h1>
 
 
@@ -429,6 +429,9 @@
                         but this can never be 100% guaranteed without testing. Many DOM
                         implementations, especially non-productized implementations, deviate in
                         minor but significant ways from the specifications. </p>
+                     <p>The DOM must be namespace-aware: this is typically set using the
+                     method <code>DocumentBuilderFactory.setNamespaceAware(true)</code>. This
+                     is not the default setting.</p>
                   </li>
                   <li>
                      <p>For the other object models, JDOM2, XOM, DOM4J, and AXIOM, the
@@ -445,7 +448,7 @@
                            file</a>. (With Saxon-PE and Saxon-EE, the supported object models
                      are registered automatically if the underlying code is found on the classpath.)</p>
                   </li>
-                 <li><p><i>Note that support for JDOM version 1 is dropped in Saxon 10.</i></p></li>
+                 <li><p><i>Note that support for JDOM version 1 was dropped in Saxon 10.</i></p></li>
 
                </ul>
             </li>
@@ -845,13 +848,10 @@
          
    </section>
 
-   <section id="installationdotnet" title="Installation: .NET platform">
+   <section id="installationdotnet" title="Installation: .NET platform" for="CS">
       <h1>Installation: .NET platform</h1>
      
-     <p><b>This information is provisional. Saxon 10 is not yet available for .NET;
-     the information will be updated when it is released.</b></p>
-
-
+ 
       <p>This section explains in more detail how to install Saxon on the .NET platform. For a basic
          "quick start" guide, see <a class="bodylink"
             href="/about/gettingstarted/gettingstarteddotnet">Getting started with Saxon on the .NET
@@ -878,7 +878,7 @@
          download.</p>
       <ul>
          <li>
-            <p>To run Saxon you need to install the .NET platform, version 4.0 or later.</p>
+            <p>To run Saxon you need to install .NET Core, version 4.0 or later.</p>
          </li>
       </ul>
 
@@ -986,10 +986,10 @@
 
       <h2 class="subtitle">Sample applications</h2>
 
-      <p>Saxon on .NET is distributed with a number of sample applications. These are issued
+      <p>Saxon-CS is distributed with a number of sample applications. These are issued
          (together with this documentation and other resources) in a separate download file
-            <code>saxon-resources-10.zip</code>, available from both the SourceForge and Saxonica
-         websites. Once this is unzipped, the sample applications can be found in the directory
+            <code>saxon-resources-11.zip</code>, available from the Saxonica
+         website. Once this is unzipped, the sample applications can be found in the directory
             <code>/samples</code>. They are described in <a class="bodylink" href="/samples"
             >Samples</a>.</p>
 
@@ -1091,7 +1091,7 @@
          </p>
       </section>
 
-      <section id="verifylicense" title="Verifying a license">
+      <section id="verifylicense" title="Verifying a license" for="J">
 
          <h1>Verifying a license</h1>
 
@@ -1202,9 +1202,10 @@
                   Company (email systems can be unkind to such files). In the event of problems, try
                   applying again, restricting yourself to ASCII characters.</p>
                
-                  <p><i>We upgraded the tools we use for creating license files in late 2017, and
-                  we believe this problem is now fixed. However, the data flow is not all under
-                  our control, so it remains a possibility.</i></p>
+                  <p><i>In the past, license files containing non-ASCII characters (in your name or
+                     Company name) often caused problems. We believe this problem is now fixed. 
+                     However, email transmission is not all under
+                  our control, so this remains a possibility.</i></p>
             </li>
             <li>
                <p>
@@ -1318,17 +1319,14 @@
          by the Mozilla Public License.</p>
 
       <p>The port of Saxon to the .NET platform was pioneered by Pieter Siegers Kort and M. David
-         Peterson, without any involvement from Saxonica. Their work was absorbed into the Saxonica
-         product line from Saxon 8.7 onwards. The Saxonica product used the same approach as the
-         previous Saxon.NET product for cross-compiling the code into CIL assemblies. In addition,
-         however, it provided a new .NET API for use by C# and other .NET applications, and made
+         Peterson, without any involvement from Saxonica. They used the open source IKVM tool
+         to cross-compile Java bytecode into CIL assemblies. Their work was absorbed into the Saxonica
+         product line from Saxon 8.7 onwards. At this stage a new .NET API was developed, and the product made
          much greater use of .NET services such as collations and regular expression processing.
-         This integration was done by Saxonica with generous advice from M. David Peterson. The
-         project would not have been possible without the IKVMC cross-compilation technology
-         developed by Jeroen Frijters, as well as the GNU Classpath developed by a large team of
-         individual enthusiasts. The use of GNU Classpath was subsequently discontinued and replaced
-         with OpenJDK. Further development of IKVMC has been discontinued; however the software is
-         robust and stable and we do not envisage any problems with its continued use.</p>
+         In 2019 Microsoft announced that the future of .NET lay with .NET Core, and that .NET Framework
+         would be discontinued. IKVM has never supported .NET Core, and was no longer being developed,
+         so a new approach was necessary. Saxonica decided to develop transpiler technology to convert
+         the Java source code to C#, and the result is being shipped as Saxon-CS.</p>
 
       <p>
          <i>It is unfortunately not possible to release Saxon-HE under any license other than the
