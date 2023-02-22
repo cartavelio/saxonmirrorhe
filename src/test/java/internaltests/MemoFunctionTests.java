@@ -1,7 +1,12 @@
 package internaltests;
 
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.CopyOptions;
+import net.sf.saxon.om.Durability;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Steps;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.tiny.TinyBuilder;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -14,6 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class MemoFunctionTests {
+
+    /**
+     * General-purpose framework for testing arity-1 memo function. We do this by having a function that actually
+     * produces different results if invoked twice with the same arguments (it calls saxon:time-stamp) so we can
+     * distinguish whether the function value has been retrieved from cache or re-calculated.
+     * @return an XsltExecutable
+     */
 
     private XsltExecutable prepareArity1() {
         try {
@@ -31,6 +43,11 @@ public class MemoFunctionTests {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * General-purpose framework for testing arity-2 memo function
+     * @return an XsltExecutable
+     */
 
     private XsltExecutable prepareArity2() {
         try {
@@ -156,7 +173,7 @@ public class MemoFunctionTests {
     }
 
     @Test
-    public void testNodes() {
+    public void testLastingNodes() {
         try {
             XsltExecutable exec = prepareArity1();
             Processor proc = exec.getProcessor();
@@ -171,6 +188,54 @@ public class MemoFunctionTests {
             testArity1(exec, e0, e1, false);
             testArity1(exec, e1, e1, true);
         } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testTemporaryNodes() {
+        try {
+            XsltExecutable exec = prepareArity1();
+            Processor proc = exec.getProcessor();
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode n0 = builder.build(new StreamSource(new StringReader("<doc/>")));
+            XdmNode e0 = n0.select(Steps.child("doc")).asNode();
+            XdmNode n1 = builder.build(new StreamSource(new StringReader("<doc/>")));
+            XdmNode e1 = n1.select(Steps.child("doc")).asNode();
+
+            TinyBuilder b = new TinyBuilder(proc.getUnderlyingConfiguration().makePipelineConfiguration());
+            b.setDurability(Durability.TEMPORARY);
+
+            b.open();
+            n0.getUnderlyingNode().copy(b, CopyOptions.ALL_NAMESPACES, Loc.NONE);
+            b.close();
+            XdmNode n0c = new XdmNode(b.getCurrentRoot());
+
+            b.reset();
+            b.open();
+            e0.getUnderlyingNode().copy(b, CopyOptions.ALL_NAMESPACES, Loc.NONE);
+            b.close();
+            XdmNode e0c = new XdmNode(b.getCurrentRoot());
+
+            b.reset();
+            b.open();
+            n1.getUnderlyingNode().copy(b, CopyOptions.ALL_NAMESPACES, Loc.NONE);
+            b.close();
+            XdmNode n1c = new XdmNode(b.getCurrentRoot());
+
+            b.reset();
+            b.open();
+            e1.getUnderlyingNode().copy(b, CopyOptions.ALL_NAMESPACES, Loc.NONE);
+            b.close();
+            XdmNode e1c = new XdmNode(b.getCurrentRoot());
+
+            testArity1(exec, n0c, n0c, true);
+            testArity1(exec, n0c, n1c, false);
+            testArity1(exec, n0c, e0c, false);
+            testArity1(exec, e0c, e1c, false);
+            testArity1(exec, e1c, e1c, true);
+        } catch (SaxonApiException | XPathException e) {
             e.printStackTrace();
             fail();
         }
