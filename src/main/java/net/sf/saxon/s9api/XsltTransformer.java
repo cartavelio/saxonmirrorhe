@@ -13,10 +13,7 @@ import net.sf.saxon.event.SequenceNormalizerWithSpaceSeparator;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeSource;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -160,7 +157,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
     public synchronized void setSource(Source source) {
         if (source instanceof NodeInfo) {
             setInitialContextNode(new XdmNode((NodeInfo) source));
-            //#if CSHARP==false
+        //#if CSHARP==false
         } else if (source instanceof DOMSource) {
             if (((DOMSource)source).getNode() == null) {
                 DocumentImpl doc = new DocumentImpl();
@@ -170,7 +167,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
                 NodeInfo n = processor.getUnderlyingConfiguration().unravel(source);
                 setInitialContextNode(new XdmNode(n));
             }
-            //#endif
+        //#endif
         } else {
             initialSource = source;
         }
