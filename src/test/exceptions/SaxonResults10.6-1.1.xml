@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testSuiteResults xmlns="http://www.w3.org/XML/2004/xml-schema-test-suite/"
+                  xmlns:saxon="http://saxon.sf.net/"
+                  suite="XS_2006"
+                  processor="Saxon EE 10.6 with xsdVersion=1.1"
+                  submitDate="2022-01-18"
+                  publicationPermission="public"
+                  xsdVersion="1.1">
+   <testResult set="Real"
+               group="real008"
+               test="real008.v1.xsd"
+               expectedValidity="valid"
+               actualValidity="invalid"
+               saxon:outcome="different"/>
+</testSuiteResults>

@@ -290,7 +290,7 @@ public class TestXQueryNative {
         Configuration config = Configuration.newConfiguration();
         config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, true);
         StaticQueryContext sqc = config.newStaticQueryContext();
-        String testDir = ConfigTest.DATA_DIR;
+        String testDir = ConfigTest.junitXMarkDirectory();
         sqc.setBaseURI(testDir);
         //sqc.declareDefaultCollation("");
         DynamicQueryContext dqc = new DynamicQueryContext(config);

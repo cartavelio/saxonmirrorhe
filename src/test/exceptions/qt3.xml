@@ -14,6 +14,11 @@
     <reason>Known bug in ICU</reason>
   </exception>
   
+  <exception test-set="fn-format-time" test-case="format-time-025b format-time-025c" run="false" report="known restriction">
+    <created by="Michael Kay" on="2022-09-22"/>
+    <reason>JDK formatting of named timezones has changed</reason>
+  </exception>
+  
   <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="known restriction">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
@@ -35,7 +40,7 @@
   </exception>
   
  
-  
+ format-time-025b
 
 
 </exceptions>

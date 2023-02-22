@@ -1,5 +1,19 @@
 <exceptions>
   
+  <exception test-case="copy-3002" run="false" report="Bug">
+    <created by="Michael Kay" on="2022-09-22"/>
+    <reason>Saxon bug 5405</reason>
+  </exception>
+  
+  <exception test-case="stream-208" run="false" report="Bug">
+    <created by="Michael Kay" on="2022-09-22"/>
+    <reason>Saxon bug 5484</reason>
+  </exception>
+  
+  <exception test-case="unparsed-text-2002" run="false" report="Bug">
+    <created by="Michael Kay" on="2022-09-23"/>
+    <reason>Saxon bug 5688</reason>
+  </exception>
   
   <exception test-case="package-017" run="false" report="disputed">
     <created by="Michael Kay" on="2015-11-02"/>
@@ -69,6 +83,7 @@
     sx-union-312
     sx-union-313
     sx-union-314
+    sx-union-315
     sx-union-316
     sx-union-317
     sx-union-320
@@ -108,6 +123,14 @@
     <created by="Michael Kay" on="2022-05-24"/>
     <reason>Saxon bug 5488, streaming "intersect" with two consuming operands.</reason>
   </exception>
+  
+  <exception test-case="arrays-306" run="false" report="Bug">
+    <created by="Michael Kay" on="2022-09-22"/>
+    <reason>Saxon bug 5600. Involved a substantial redesign to fix in 11.x</reason>
+  </exception>
+  
+  
+
 
 
 </exceptions>

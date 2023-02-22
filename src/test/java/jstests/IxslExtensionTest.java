@@ -37,8 +37,11 @@ public class IxslExtensionTest {
             XdmItem result = exec.load().evaluateSingle();
             assertEquals("4", result.getStringValue());
         } catch (SaxonApiException err) {
-            err.printStackTrace();
-            fail();
+            if (!(err.getMessage().contains("Javascript extensions not available"))) {
+                // Test requires Nashorn to be available
+                err.printStackTrace();
+                fail();
+            }
         }
     }
 

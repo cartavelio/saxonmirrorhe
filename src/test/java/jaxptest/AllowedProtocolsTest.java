@@ -230,6 +230,8 @@ public class AllowedProtocolsTest {
 
     private void externalProtocolsDTD(String baseURI, String instruction, String rule, boolean expectSuccess) {
         try {
+            System.err.println("Java version: " + System.getProperty("java.version"));
+            // Note (MHK, 2022-09-23) This fails under Java 17, cannot instantiate the com.sun.org class
             String xsl =
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                             "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
