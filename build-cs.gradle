@@ -509,7 +509,6 @@ task dotnetRelease(
   }
 
   doLast {
-    println("DOING THE REPLACE")
     copy {
       // Copy the csproj and sln files, renaming them so that the release
       // build uses the names we want the packages to have
@@ -535,7 +534,8 @@ task dotnetRelease(
   doLast {
     exec {
       workingDir = "${buildDir}/cs"
-      commandLine dotnetex, 'restore', 'SaxonCS.sln', '--verbosity', 'Normal'
+      commandLine dotnetex, 'restore', 'SaxonCS.sln', '--verbosity', 'Normal',
+        '-p:Configuration=Release', '-p:Platform=Any CPU'
     }
   }
 
@@ -545,7 +545,8 @@ task dotnetRelease(
       commandLine dotnetex, 'build', 'SaxonCS.sln', '--verbosity', 'Normal',
         '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
         '-p:SelfContained=true', '-p:PublishSingleFile=true',
-        "-p:Version=${csver}", "-p:PackageVersion=${csver}"
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}",
+        '-p:Configuration=Release', '-p:Platform=Any CPU'
     }
   }
 

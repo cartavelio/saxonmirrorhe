@@ -970,83 +970,54 @@ task saxonc_doc_pypi(type: Copy, dependsOn: ['saxon_eec_pypi']) {
   from "${buildDir}/eec_pypi"
 }
 
-if ((findProperty('inContainer') ?: 'false') == 'true') {
-  task saxonc_doxygen() {
-    inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
-    outputs.files fileTree(dir: "${buildDir}/build/doc_pypi/documentation")
-    doLast {
-      exec {
-        workingDir "${projectDir}/tools/container"
-        commandLine "sh", "./doc-build.sh",
-          "-doxygen:yes", "-ee:yes" ,"-output:${buildDir}/doc_pypi"
+task saxonc_doxygen(dependsOn: ['saxonc_doc_pypi']) {
+  inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
+  outputs.files fileTree(dir: "${buildDir}/build/doc_pypi/documentation")
+  doLast {
+    copy {
+      into "${buildDir}/doc_pypi/Saxon.C.API"
+      from "${projectDir}/src/main/c/Saxon.C.API"
+      include "Doxyfile"
+      include "readme.md"
+      filter { line ->
+        line.replaceAll('@@VERSION@@', saxonVersion)
+          .replace('@@LOGO@@', '/img/saxonica_logo.gif')
+          .replace('@@SOURCES@@', 'src')
+          .replace('@@OUTPUT@@', 'documentation')
       }
     }
   }
-} else {
-  task saxonc_doxygen(dependsOn: ['saxonc_doc_pypi']) {
-    inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
-    outputs.files fileTree(dir: "${buildDir}/build/doc_pypi/documentation")
-    doLast {
-      copy {
-        into "${buildDir}/doc_pypi/Saxon.C.API"
-        from "${projectDir}/src/main/c/Saxon.C.API"
-        include "Doxyfile"
-        include "readme.md"
-        filter { line ->
-          line.replaceAll('@@VERSION@@', saxonVersion)
-            .replace('@@LOGO@@', '/img/saxonica_logo.gif')
-            .replace('@@SOURCES@@', 'src')
-            .replace('@@OUTPUT@@', 'documentation')
-        }
-      }
-    }
 
-    doLast {
-      exec {
-        workingDir "${buildDir}/doc_pypi"
-        commandLine 'doxygen', 'Saxon.C.API/Doxyfile'
-      }
+  doLast {
+    exec {
+      workingDir "${buildDir}/doc_pypi"
+      commandLine 'doxygen', 'Saxon.C.API/Doxyfile'
     }
   }
 }
 
-if ((findProperty('inContainer') ?: 'false') == 'true') {
-  task saxonc_pydoc3() {
-    inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
-    outputs.file "${buildDir}/doc_pypi/saxonc.html"
+task saxonc_pydoc3(dependsOn: ['saxonc_doc_pypi']) {
+  inputs.files fileTree(dir: "${buildDir}/doc_pypi", exclude: "*.html")
+  outputs.file "${buildDir}/doc_pypi/saxonc.html"
 
-    doLast {
-      exec {
-        workingDir "${projectDir}/tools/container"
-        commandLine "sh", "./doc-build.sh",
-          "-pydoc:yes", "-ee:yes" ,"-output:${buildDir}/doc_pypi"
-      }
+  doLast {
+    exec {
+      workingDir "${buildDir}/doc_pypi"
+      commandLine 'python3', '-m', 'pip', 'install', '-r', 'requirements.txt'
     }
   }
-} else {
-  task saxonc_pydoc3(dependsOn: ['saxonc_doc_pypi']) {
-    inputs.files fileTree(dir: "${buildDir}/doc_pypi", exclude: "*.html")
-    outputs.file "${buildDir}/doc_pypi/saxonc.html"
 
-    doLast {
-      exec {
-        workingDir "${buildDir}/doc_pypi"
-        commandLine 'python3', '-m', 'pip', 'install', '-r', 'requirements.txt'
-      }
+  doLast {
+    exec {
+      workingDir "${buildDir}/doc_pypi"
+      commandLine 'python3', 'setup.py', 'build_ext', '-if'
     }
+  }
 
-    doLast {
-      exec {
-        workingDir "${buildDir}/doc_pypi"
-        commandLine 'python3', 'setup.py', 'build_ext', '-if'
-      }
-    }
-
-    doLast {
-      exec {
-        workingDir "${buildDir}/doc_pypi"
-        commandLine pydocex, '-w', 'saxonc'
-      }
+  doLast {
+    exec {
+      workingDir "${buildDir}/doc_pypi"
+      commandLine pydocex, '-w', 'saxonc'
     }
   }
 }

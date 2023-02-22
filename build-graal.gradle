@@ -614,6 +614,10 @@ task graal_eec_jar(
 
 // ============================================================
 
+task all_saxonc_releases() {
+  // Just somewhere to hang dependencies
+}
+
 ["he", "pe", "ee"].each { edition ->
   def EDITION = edition.toUpperCase()
   def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
@@ -813,7 +817,7 @@ task graal_eec_jar(
     }
   }
 
-  task "zip_${edition}c_release"(
+  Task t = task "zip_${edition}c_release"(
     type: Zip,
     dependsOn: ["setup_${edition}c_release"]
   ) {
@@ -821,6 +825,7 @@ task graal_eec_jar(
     include "${saxoncReleaseName}/**"
     archiveFileName = "${saxoncReleaseName}.zip"
   }
+  all_saxonc_releases.dependsOn t
 
   task "buildCPP_${edition}"(
           dependsOn: ["setup_${edition}c_release"]
