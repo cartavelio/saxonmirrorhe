@@ -307,7 +307,7 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// Close the <c>Destination</c>, releasing any resources that need to be released.
+        /// Close this <c>Destination</c>, releasing any resources that need to be released.
         /// </summary>
         /// <remarks>
         /// This method is called by the system on completion of a query or transformation.
@@ -361,7 +361,7 @@ namespace Saxon.Api {
             s9Transformer.setDestination(destination.UnderlyingDestination);
             s9Transformer.transform();
         }
-
+        
         /// <summary>
         /// Escape hatch to the underlying implementation
         /// </summary>
