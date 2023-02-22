@@ -6,6 +6,7 @@ import net.sf.saxon.event.EventSource;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
@@ -36,7 +37,7 @@ public class EventSourceTest {
             public Source resolve(String href, String base) throws XPathException {
                 return new EventSource() {
                     @Override
-                    public void send(Receiver receiver) throws XPathException {
+                    public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
                         AttributeMap attributes = EmptyAttributeMap.getInstance();
                         NamespaceMap namespaces = NamespaceMap.emptyMap();
                         receiver.startDocument(ReceiverOption.NONE);

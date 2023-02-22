@@ -7,6 +7,7 @@ import net.sf.saxon.lib.Initializer;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.SourceResolver;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 
@@ -406,7 +407,7 @@ public class TransformTests {
         public void initialize(Configuration config) throws TransformerException {
             config.setSourceResolver(new SourceResolver() {
                 @Override
-                public Source resolveSource(Source source, Configuration config) throws XPathException {
+                public ActiveSource resolveSource(Source source, Configuration config) throws XPathException {
                     if (source instanceof NodeInfo && source.getSystemId().endsWith("caffo/Input.xml")) {
                         fail("Source tree for caffo/Input.xml has been built in memory");
                     }
