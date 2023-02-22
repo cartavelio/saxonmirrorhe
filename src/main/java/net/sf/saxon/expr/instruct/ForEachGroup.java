@@ -750,6 +750,7 @@ public class ForEachGroup extends Instruction
      *
      * @param n the requested index
      * @param c the XPath context
+     * @return the evaluated sort key
      * @throws XPathException if any error occurs
      */
 
