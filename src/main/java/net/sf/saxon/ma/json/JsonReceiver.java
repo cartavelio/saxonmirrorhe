@@ -43,6 +43,8 @@ public class JsonReceiver implements Receiver {
     private boolean indenting = false;
     private boolean escaped = false;
     private final Stack<Set<String>> keyChecker = new Stack<>();
+    private java.util.function.Function<Double, String> numberFormatter =
+            dbl -> new DoubleValue(dbl).getStringValue();
 
     private static final String ERR_INPUT = "FOJS0006";
 
@@ -74,6 +76,14 @@ public class JsonReceiver implements Receiver {
 
     public boolean isIndenting() {
         return indenting;
+    }
+
+    public void setNumberFormatter(java.util.function.Function<Double, String> formatter) {
+        this.numberFormatter = formatter;
+    }
+
+    public java.util.function.Function<Double, String> getNumberFormatter() {
+        return this.numberFormatter;
     }
 
     @Override
@@ -263,7 +273,7 @@ public class JsonReceiver implements Receiver {
                 if (Double.isNaN(d) || Double.isInfinite(d)) {
                     throw new XPathException("xml-to-json: Infinity and NaN are not allowed", ERR_INPUT);
                 }
-                output.append(((GroundedValue) new DoubleValue(d)).getUnicodeStringValue());
+                output.append(StringView.of(numberFormatter.apply(d)));
             } catch (NumberFormatException e) {
                 throw new XPathException("xml-to-json: Invalid number: " + textBuffer, ERR_INPUT);
             }
