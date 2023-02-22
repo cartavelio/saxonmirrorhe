@@ -125,6 +125,64 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(e.Message);
             }
         }
+        
+        [Test]
+        public void testDescendantAxisWithXsltTransformer() {
+            // Bug 4683, this time using XsltTransformer rather than Xslt30Transformer
+            try {
+                
+                string xml = "<root>\n"
+                             + "  <item/>\n"
+                             + "  <item>\n"
+                             + "    <foo id=\"foo1\"/>\n"
+                             + "  </item>\n"
+                             + "  <item></item>\n"
+                             + "  <item>\n"
+                             + "    <foo id=\"foo2\"/>\n"
+                             + "  </item>\n"
+                             + "</root>";
+
+                // Read an XML file to a DOM
+                Processor proc = new();
+                DocumentBuilder builder = proc.NewDocumentBuilder();
+                XmlDocument doc = new();
+                doc.Load(new StringReader(xml));
+                XdmNode xdmNode = builder.Wrap(doc);
+
+                string stylesheet =
+                    "<xsl:transform version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n"
+                    + "  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" exclude-result-prefixes=\"#all\">\n"
+                    + "\n"
+                    + "  <xsl:param name=\"DEBUG\" static=\"yes\" as=\"xs:boolean\" select=\"true()\"/>\n"
+                    + "\n"
+                    + "  <xsl:output method=\"text\" item-separator=\"&#10;\"/>\n"
+                    + "\n"
+                    + "  <xsl:template match=\"/\">\n"
+                    + "    <xsl:for-each select=\"//item\">\n"
+                    + "      <xsl:assert test=\"not(*) eq not(descendant::foo)\" use-when=\"$DEBUG\">No child elements but descendants</xsl:assert>\n"
+                    + "      <xsl:value-of select=\"position(), not(*), descendant::foo/@id\"/>\n"
+                    + "    </xsl:for-each>\n"
+                    + "  </xsl:template>\n"
+                    + "\n"
+                    + "</xsl:transform>";
+
+                XsltExecutable templates = proc.NewXsltCompiler().Compile(new StringReader(stylesheet));
+                XsltTransformer transformer = templates.Load();
+                StringWriter sw = new StringWriter();
+                transformer.InitialContextNode = proc.NewDocumentBuilder().Wrap(doc);
+                transformer.Destination = proc.NewSerializer(sw);
+                transformer.Run();
+                //System.err.println(sw.ToString());
+                Assert.That(sw.ToString().Contains("1 true\n"
+                                                   + "2 false foo1\n"
+                                                   + "3 true\n"
+                                                   + "4 false foo2"));
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
+
 
         /**
          * Get the string value of a document node
