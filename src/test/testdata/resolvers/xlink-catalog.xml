@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="public">
+
+        <uri name="https://www.w3.org/1999/xlink.xsd"
+             uri="./quasi-xlink.xsd"/>
+        <uri name="http://www.w3.org/1999/xlink"
+                uri="./quasi-xlink.xsd"/>
+
+</catalog>
