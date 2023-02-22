@@ -6,7 +6,7 @@
     <convert from="xs:anyAtomicType" to="xs:string">
      <data>
       <mergeAdj>
-       <gVarRef name="Q{}top-author" bSlot="0"/>
+       <gVarRef name="Q{}top-author"  bSlot="0"/>
       </mergeAdj>
      </data>
     </convert>
