@@ -232,7 +232,8 @@
                 to <code>use-last</code>. If a singleton map does not match any template rule, then it is effectively skipped.</li>
         </ul>
         
-       <p>The proposed 4.0 functions fn:all-equal(), fn:all-different(), fn:expanded-QName(), fn:intersperse(), fn:replicate(),
+       <p>The proposed 4.0 functions fn:all-equal(), fn:all-different(), fn:contains-sequence(), fn:ends-with-sequence(), 
+           fn:expanded-QName(), fn:intersperse(), fn:replicate(), fn:starts-with-sequence()
            and fn:while() are implemented.</p>
         
         <p>The new single-argument version of fn:QName is implemented.</p>
