@@ -553,8 +553,6 @@ cdef class PySaxonProcessor:
         """
         make_map2(self, dict dataMap)
         Make a PyXdmMap from a dict type whose entries are key-value pairs of type (str, PyXdmValue).
-        The factory method create_xdm_dict(proc, mmap) can be used to create pairs of type (str, PyXdmValue)
-        from primitive types, which can then be used as input to this function make_map2.
         Args:
             dataMap (dict): Dictionary of (str, PyXdmValue) pairs
         Returns:
@@ -2240,7 +2238,7 @@ cdef class PyXsltExecutable:
         If no source file or xdm value has been supplied, then the clark name for 'xsl:initial-template' is used.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template
-            **kwds: Possible keyword arguments: source_file (str) or xdm_Value (PyXdmValue); and
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
                 base_output_uri (str) which is used for resolving relative URIs in the href attribute
                 of the xsl:result-document instruction.
         Returns:
@@ -2384,17 +2382,17 @@ cdef class PyXsltExecutable:
         Invoke a transformation by calling a named function and return the result as a PyXdmValue.
         Args:
 			function_name (str): The name of the function to invoke, in clark notation {uri}local
-			args (list): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
+			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
 			    to the function.
             **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue).
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
-            1) result = executable.call_function_returning_value("{http://localhost/example}func")
+            1) result = executable.call_function_returning_value("{http://localhost/example}func", [])
             2) executable.set_initial_match_selection(file_name="cat.xml")\r
-               result = executable.call_function_returning_value("{http://localhost/test}add")
-            3) result = executable.call_function_returning_value("{http://example.com}func1", source_file="cat.xml")
+               result = executable.call_function_returning_value("{http://localhost/test}add", [saxonproc.make_integer_value(2)])
+            3) result = executable.call_function_returning_value("{http://example.com}func1", [], source_file="cat.xml")
             
         """
         cdef const char * c_functionName = NULL
@@ -2409,7 +2407,6 @@ cdef class PyXsltExecutable:
         cdef PyXdmArray valuear_ = None
         py_source_string = None
         py_template_name_str = None
-        py_stylesheet_string = None
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "source_file":
@@ -2497,21 +2494,20 @@ cdef class PyXsltExecutable:
         Invoke a transformation by calling a named function and return the result as a serialized string.
         Args:
 			function_name (str): The name of the function to invoke, in clark notation {uri}local
-			args (list): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
+			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
 			    to the function.
             **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and stylesheet_file (str).
         Returns:
             str: Result of the transformation as a str value
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
-            1) result = executable.call_function_returning_string("{http://localhost/example}func")
+            1) result = executable.call_function_returning_string("{http://localhost/example}func", [])
             2) executable.set_initial_match_selection(file_name="cat.xml")\r
-               result = executable.call_function_returning_string("{http://localhost/test}add")
-            3) result = executable.call_function_returning_string("{http://example.com}func1", source_file="cat.xml")
+               result = executable.call_function_returning_string("{http://localhost/test}add", [saxonproc.make_integer_value(2)])
+            3) result = executable.call_function_returning_string("{http://example.com}func1", [], source_file="cat.xml")
         """
         cdef const char * c_functionName = NULL
         cdef const char * c_sourcefile = NULL
-        cdef const char * c_stylesheetfile = NULL
         cdef PyXdmValue value_ = None
         cdef PyXdmItem valuei_ = None
         cdef PyXdmNode valuen_ = None
@@ -2521,7 +2517,6 @@ cdef class PyXsltExecutable:
         cdef PyXdmArray valuear_ = None
         py_source_string = None
         py_template_name_str = None
-        py_stylesheet_string = None
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "source_file":
@@ -2534,12 +2529,6 @@ cdef class PyXsltExecutable:
               py_s_string = value.encode('UTF-8') if value is not None else None
               c_base_output_uri = py_s_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
-            if key == "stylesheet_file":
-              '''c_stylesheetfile = make_c_str(value)'''
-              py_s_string = value.encode('UTF-8') if value is not None else None
-              c_stylesheetfile = py_s_string if value is not None else ""
-              '''if isfile(value) == False:
-                raise Exception("Stylesheet file does not exist")'''
           elif key == "xdm_value" or key == "xdm_node":
               if isinstance(value, PyXdmValue):
                 value_ = value
@@ -2587,22 +2576,21 @@ cdef class PyXsltExecutable:
         the output file as an argument or using the set_output_file method.
         Args:
 			function_name(str): The name of the function to invoke, in clark notation {uri}local
-			args (list): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
+			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
 			    to the function.
-            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); stylesheet_file (str),
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue);
                 and output_file (str)
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test2.xsl")
             1) executable.set_output_file("result.xml")
-			   executable.call_function_returning_file("{http://localhost/example}func")
+			   executable.call_function_returning_file("{http://localhost/example}func", [])
             2) executable.set_initial_match_selection(file_name="cat.xml")\r
-               executable.call_function_returning_file("{http://localhost/test}add", output_file="result.xml")
-            3) executable.call_function_returning_file("{http://example.com}func1", output_file="result.xml", source_file="cat.xml")
+               executable.call_function_returning_file("{http://localhost/test}add", [saxonproc.make_integer_value(2)], output_file="result.xml")
+            3) executable.call_function_returning_file("{http://example.com}func1", [], output_file="result.xml", source_file="cat.xml")
         """
         cdef const char * c_functionName = NULL
         cdef const char * c_sourcefile = NULL
         cdef const char * c_outputfile = NULL
-        cdef const char * c_stylesheetfile = NULL
         cdef PyXdmValue value_ = None
         cdef PyXdmItem valuei_ = None
         cdef PyXdmNode valuen_ = None
@@ -2613,7 +2601,6 @@ cdef class PyXsltExecutable:
         cdef PyXdmValue valueArgs_ = None
         py_source_string = None
         py_template_name_str = None
-        py_stylesheet_string = None
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "source_file":
@@ -2629,12 +2616,6 @@ cdef class PyXsltExecutable:
             if key == "output_file":
               py_output_string = value.encode('UTF-8') if value is not None else None
               c_outputfile = py_output_string if value is not None else ""
-            if key == "stylesheet_file":
-              '''c_stylesheetfile = make_c_str(value)'''
-              py_s_string = value.encode('UTF-8') if value is not None else None
-              c_stylesheetfile = py_s_string if value is not None else ""
-              '''if isfile(value) == False:
-                raise Exception("Stylesheet file does not exist")'''
           elif key == "xdm_value" or key == "xdm_node":
               if isinstance(value, PyXdmValue):
                 value_ = value
@@ -2873,9 +2854,9 @@ cdef class PyXQueryProcessor:
             if "input_file_name" in kwds:
                 self.set_context(file_name=kwds["input_file_name"])
             elif "input_xdm_item" in kwds:
-                self.set_context(xdm_item=(kwds["xdm_item"]))
+                self.set_context(xdm_item=(kwds["input_xdm_item"]))
             if "query_file" in kwds:
-                self.set_query_file(kwds["output_file_name"])
+                self.set_query_file(kwds["query_file"])
             elif "query_text" in kwds:
                 self.set_query_content(kwds["query_text"])
 
@@ -2928,9 +2909,9 @@ cdef class PyXQueryProcessor:
         if "input_file_name" in kwds:
           self.set_context(file_name=kwds["input_file_name"])
         elif "input_xdm_item" in kwds:
-          self.set_context(xdm_item=(kwds["xdm_item"]))
+          self.set_context(xdm_item=(kwds["input_xdm_item"]))
         if "query_file" in kwds:
-          self.set_query_file(kwds["output_file_name"])
+          self.set_query_file(kwds["query_file"])
         elif "query_text" in kwds:
           self.set_query_content(kwds["query_text"])
 
@@ -2951,13 +2932,13 @@ cdef class PyXQueryProcessor:
         if "input_file_name" in kwds:
           self.set_context(file_name=(kwds["input_file_name"]))
         elif "input_xdm_item" in kwds:
-          self.set_context(xdm_item=(kwds["xdm_item"]))
+          self.set_context(xdm_item=(kwds["input_xdm_item"]))
         if "output_file_name" in kwds:
           self.set_output_file(kwds["output_file_name"])
         else:
           raise Exception("Error: output_file_name required in method run_query_to_file")
         if "query_file" in kwds:
-          self.set_query_file(kwds["output_file_name"])
+          self.set_query_file(kwds["query_file"])
         elif "query_text" in kwds:
           self.set_query_content(kwds["query_text"])
         self.thisxqptr.runQueryToFile()
@@ -2971,7 +2952,7 @@ cdef class PyXQueryProcessor:
         Args:
             prefix (str): The namespace prefix. If the value is a zero-length string, this method sets the default
                 namespace for elements and types.
-            uri (uri) : The namespace URI. It is possible to specify a zero-length string to "undeclare" a namespace;
+            uri (str) : The namespace URI. It is possible to specify a zero-length string to "undeclare" a namespace;
                 in this case the prefix will not be available for use, except in the case where the prefix is also a
                 zero length string, in which case the absence of a prefix implies that the name is in no namespace.
         """
@@ -4437,7 +4418,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          function, provided a licensed Processor is used.
          Args:
              proc (PySaxonProcessor): the Saxon processor
-             name (str): the name of the requested function
+             name (str): the name of the requested function as an EQName
              arity (int): the arity of the requested function
          Returns:
              PyXdmFunctionItem: the requested function
