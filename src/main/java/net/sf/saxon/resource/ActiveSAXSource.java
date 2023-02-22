@@ -229,9 +229,6 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
         } catch (java.io.IOException err) {
             throw new XPathException("I/O error reported by XML parser processing " +
                                              getSystemId(), err);
-        } catch (Exception x) {
-            x.printStackTrace();
-            throw new IllegalStateException();
         }
     }
 
