@@ -27,9 +27,9 @@ import net.sf.saxon.s9api.*;
  * <p>Here is an example of application code written to construct a simple XML document:</p>
  *
  * <pre>{@code
- * Push.Document doc = processor.newPush(destination).document(true);
+ * Document doc = processor.newPush(destination).document(true);
  * doc.setDefaultNamespace("http://www.example.org/ns");
- * Push.Element top = doc.element("root")
+ * Element top = doc.element("root")
  *                       .attribute("version", "1.5");
  * for (Employee emp : employees) {
  *     top.element("emp")
