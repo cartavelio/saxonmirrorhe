@@ -391,6 +391,7 @@ public class DocumentInstr extends ParentNodeConstructor {
             PushEvaluator content = makeElaborator(expr.getContentExpression()).elaborateForPush();
             if (expr.preservingTypes && !expr.textOnly) {
                 return (output, context) -> {
+                    output.setSystemId(expr.getStaticBaseURIString());
                     output.startDocument(ReceiverOption.NONE);
                     TailCall tc = content.process(output, context);
                     dispatchTailCall(tc);

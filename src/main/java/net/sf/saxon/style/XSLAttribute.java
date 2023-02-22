@@ -15,9 +15,9 @@ import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.StringValue;
@@ -222,21 +222,19 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                 compileContent(compilation, decl, instruction, separator);
                 return instruction;
             } else if (namespace instanceof StringLiteral) {
-                String nsuri = ((StringLiteral) namespace).stringify();
-                if (nsuri.equals("")) {
+                UnicodeString nsuri = ((StringLiteral) namespace).getString();
+                if (nsuri.isEmpty()) {
                     parts[0] = "";
                 } else if (parts[0].equals("")) {
                     // Need to choose an arbitrary prefix
                     // First see if the requested namespace is declared in the stylesheet
-                    AxisIterator iter = iterateAxis(AxisInfo.NAMESPACE);
-                    NodeInfo ns;
-                    while ((ns = iter.next()) != null) {
-                        if (ns.getUnicodeStringValue().equals(nsuri)) {
-                            parts[0] = ns.getLocalPart();
+                    for (NamespaceBinding nb : getAllNamespaces()) {
+                        if (nb.getNamespaceUri().toUnicodeString().equals(nsuri)) {
+                            parts[0] = nb.getPrefix();
                             break;
                         }
                     }
-                    // Otherwise see if the URI is known to the namepool
+                    // Otherwise see if the URI is known to the namePool
                     if (parts[0].equals("")) {
                         String p = getNamePool().suggestPrefixForURI(
                                 NamespaceUri.of(((StringLiteral) namespace).stringify()));
@@ -250,7 +248,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                         parts[0] = "ns0";
                     }
                 }
-                NodeName nodeName = new FingerprintedQName(parts[0], NamespaceUri.of(nsuri), parts[1]);
+                NodeName nodeName = new FingerprintedQName(parts[0], NamespaceUri.of(nsuri.toString()), parts[1]);
                 nodeName.obtainFingerprint(getNamePool());
                 FixedAttribute fixedAtt = new FixedAttribute(nodeName, validationAction, schemaType);
                 fixedAtt.setInstruction(true);

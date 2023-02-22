@@ -12,6 +12,10 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.AccumulatorManager;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
@@ -23,7 +27,6 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharp;
@@ -531,54 +534,57 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
 
     @Override
     public TailCall processLeavingTail(Outputter out, XPathContext context) throws XPathException {
-
-        try {
-            if (copyAccumulators) {
-                // Try to create a virtual copy if we can. This is cheaper
-                if (mustPush()) {
-                    // This typically happens with the combination copy-accumulators=yes, validation=strict
-                    // Test case accumulators-070
-                    // We have to create a physical copy because of the validation requirement, but this makes
-                    // it difficult to copy the accumulator values.
-                    SequenceTool.supply(getSelect().iterate(context), (ItemConsumer<? super Item>) item -> {
-                        if (item instanceof NodeInfo) {
-                            TinyBuilder builder = new TinyBuilder(out.getPipelineConfiguration());
-                            ComplexContentOutputter cco = new ComplexContentOutputter(builder);
-                            cco.open();
-                            copyOneNode(context, cco, (NodeInfo) item, CopyOptions.ALL_NAMESPACES);
-                            cco.close();
-                            TinyNodeImpl copy = (TinyNodeImpl) builder.getCurrentRoot();
-                            copy.getTree().setCopiedFrom((NodeInfo) item);
-                            out.append(copy);
-                        } else {
-                            out.append(item);
-                        }
-                    });
-                } else {
-                    // Use the iterate() method to create a virtual copy.
-                    SequenceTool.supply(iterate(context), (ItemConsumer<? super Item>)out::append);
-                }
-            } else {
-
-                int copyOptions =
-                        (validation == Validation.SKIP ? 0 : CopyOptions.TYPE_ANNOTATIONS)
-                        | (copyNamespaces ? CopyOptions.ALL_NAMESPACES : 0)
-                        | (copyForUpdate ? CopyOptions.FOR_UPDATE : 0);
-
-                SequenceTool.supply(getSelect().iterate(context), (ItemConsumer<? super Item>) item -> {
-                    if (item instanceof NodeInfo) {
-                        copyOneNode(context, out, (NodeInfo) item, copyOptions);
-                    } else {
-                        out.append(item, getLocation(), ReceiverOption.ALL_NAMESPACES);
-                    }
-                });
-
-            }
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
-        }
-        return null;
+        PushEvaluator push = Elaborator.makeElaborator(this).elaborateForPush();
+        return push.process(out, context);
     }
+
+//        try {
+//            if (copyAccumulators) {
+//                // Try to create a virtual copy if we can. This is cheaper
+//                if (mustPush()) {
+//                    // This typically happens with the combination copy-accumulators=yes, validation=strict
+//                    // Test case accumulators-070
+//                    // We have to create a physical copy because of the validation requirement, but this makes
+//                    // it difficult to copy the accumulator values.
+//                    SequenceTool.supply(getSelect().iterate(context), (ItemConsumer<? super Item>) item -> {
+//                        if (item instanceof NodeInfo) {
+//                            TinyBuilder builder = new TinyBuilder(out.getPipelineConfiguration());
+//                            ComplexContentOutputter cco = new ComplexContentOutputter(builder);
+//                            cco.open();
+//                            copyOneNode(context, cco, (NodeInfo) item, CopyOptions.ALL_NAMESPACES);
+//                            cco.close();
+//                            TinyNodeImpl copy = (TinyNodeImpl) builder.getCurrentRoot();
+//                            copy.getTree().setCopiedFrom((NodeInfo) item);
+//                            out.append(copy);
+//                        } else {
+//                            out.append(item);
+//                        }
+//                    });
+//                } else {
+//                    // Use the iterate() method to create a virtual copy.
+//                    SequenceTool.supply(iterate(context), (ItemConsumer<? super Item>)out::append);
+//                }
+//            } else {
+//
+//                int copyOptions =
+//                        (validation == Validation.SKIP ? 0 : CopyOptions.TYPE_ANNOTATIONS)
+//                        | (copyNamespaces ? CopyOptions.ALL_NAMESPACES : 0)
+//                        | (copyForUpdate ? CopyOptions.FOR_UPDATE : 0);
+//
+//                SequenceTool.supply(getSelect().iterate(context), (ItemConsumer<? super Item>) item -> {
+//                    if (item instanceof NodeInfo) {
+//                        copyOneNode(context, out, (NodeInfo) item, copyOptions);
+//                    } else {
+//                        out.append(item, getLocation(), ReceiverOption.ALL_NAMESPACES);
+//                    }
+//                });
+//
+//            }
+//        } catch (UncheckedXPathException e) {
+//            throw e.getXPathException();
+//        }
+//        return null;
+//    }
 
     private void copyOneNode(XPathContext context, Outputter out, NodeInfo item, int copyOptions) throws XPathException {
         Controller controller = context.getController();
@@ -847,30 +853,32 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        final Controller controller = context.getController();
-        boolean isXSLT = getRetainedStaticContext().getPackageData().isXSLT();
-        assert controller != null;
-        if (schemaType == null && !copyForUpdate) {
-            SequenceIterator result = makeVirtualCopy(getSelect().iterate(context), controller, isXSLT);
-            if (result != null) {
-                return result;
-            }
-        }
-        PipelineConfiguration pipe = controller.makePipelineConfiguration();
-        pipe.setXPathContext(context);
-        SequenceCollector out = new SequenceCollector(pipe);
-        if (copyForUpdate) {
-            out.setTreeModel(TreeModel.LINKED_TREE);
-        }
-        pipe.setHostLanguage(getPackageData().getHostLanguage());
-        try {
-            process(new ComplexContentOutputter(out), context);
-        } catch (XPathException err) {
-            err.maybeSetLocation(getLocation());
-            err.maybeSetContext(context);
-            throw err;
-        }
-        return out.getSequence().iterate();
+        PullEvaluator pull = Elaborator.makeElaborator(this).elaborateForPull();
+        return pull.iterate(context);
+//        final Controller controller = context.getController();
+//        boolean isXSLT = getRetainedStaticContext().getPackageData().isXSLT();
+//        assert controller != null;
+//        if (schemaType == null && !copyForUpdate) {
+//            SequenceIterator result = makeVirtualCopy(getSelect().iterate(context), controller, isXSLT);
+//            if (result != null) {
+//                return result;
+//            }
+//        }
+//        PipelineConfiguration pipe = controller.makePipelineConfiguration();
+//        pipe.setXPathContext(context);
+//        SequenceCollector out = new SequenceCollector(pipe);
+//        if (copyForUpdate) {
+//            out.setTreeModel(TreeModel.LINKED_TREE);
+//        }
+//        pipe.setHostLanguage(getPackageData().getHostLanguage());
+//        try {
+//            process(new ComplexContentOutputter(out), context);
+//        } catch (XPathException err) {
+//            err.maybeSetLocation(getLocation());
+//            err.maybeSetContext(context);
+//            throw err;
+//        }
+//        return out.getSequence().iterate();
     }
 
     private ItemMappingIterator makeVirtualCopy(SequenceIterator input, Controller controller, boolean isXSLT) throws XPathException {
@@ -923,6 +931,111 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             return new ItemMappingIterator(input, copier, true);
         } else {
             return null;
+        }
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new CopyOfElaborator();
+    }
+
+    private static class CopyOfElaborator extends PushElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            CopyOf expr = (CopyOf)getExpression();
+            boolean isXSLT = expr.getRetainedStaticContext().getPackageData().isXSLT();
+            if (expr.schemaType == null && !expr.copyForUpdate &&
+                    (expr.validation == Validation.PRESERVE || expr.validation == Validation.STRIP)) {
+                PullEvaluator select = Elaborator.makeElaborator(expr.getSelect()).elaborateForPull();
+                return context -> {
+                    Controller controller = context.getController();
+                    return expr.makeVirtualCopy(select.iterate(context), controller, isXSLT);
+                };
+            } else {
+                HostLanguage host = expr.getPackageData().getHostLanguage();
+                PushEvaluator push = elaborateForPush();
+                return context -> {
+                    final Controller controller = context.getController();
+                    assert controller != null;
+                    PipelineConfiguration pipe = controller.makePipelineConfiguration();
+                    pipe.setXPathContext(context);
+                    SequenceCollector out = new SequenceCollector(pipe);
+                    if (expr.copyForUpdate) {
+                        out.setTreeModel(TreeModel.LINKED_TREE);
+                    }
+                    pipe.setHostLanguage(host);
+                    try {
+                        push.process(new ComplexContentOutputter(out), context);
+                    } catch (XPathException err) {
+                        err.maybeSetLocation(expr.getLocation());
+                        err.maybeSetContext(context);
+                        throw err;
+                    }
+                    return out.getSequence().iterate();
+                };
+            }
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            CopyOf expr = (CopyOf) getExpression();
+            if (expr.copyAccumulators) {
+                if (expr.mustPush()) {
+                    // This typically happens with the combination copy-accumulators=yes, validation=strict
+                    // Test case accumulators-070
+                    // We have to create a physical copy because of the validation requirement, but this makes
+                    // it difficult to copy the accumulator values.
+                    PullEvaluator selectPull = Elaborator.makeElaborator(expr.getSelect()).elaborateForPull();
+                    return (output, context) -> {
+                        SequenceTool.supply(selectPull.iterate(context), (ItemConsumer<? super Item>) item -> {
+                            if (item instanceof NodeInfo) {
+                                TinyBuilder builder = new TinyBuilder(output.getPipelineConfiguration());
+                                ComplexContentOutputter cco = new ComplexContentOutputter(builder);
+                                cco.open();
+                                expr.copyOneNode(context, cco, (NodeInfo) item, CopyOptions.ALL_NAMESPACES);
+                                cco.close();
+                                TinyNodeImpl copy = (TinyNodeImpl) builder.getCurrentRoot();
+                                copy.getTree().setCopiedFrom((NodeInfo) item);
+                                output.append(copy);
+                            } else {
+                                output.append(item);
+                            }
+                        });
+                        return null;
+                    };
+                } else {
+                    // Use the iterate() method to create a virtual copy.
+                    PullEvaluator pull = elaborateForPull();
+                    return (output, context) -> {
+                        SequenceTool.supply(pull.iterate(context), (ItemConsumer<? super Item>) output::append);
+                        return null;
+                    };
+                }
+            } else {
+
+                int copyOptions =
+                        (expr.validation == Validation.SKIP ? 0 : CopyOptions.TYPE_ANNOTATIONS)
+                                | (expr.copyNamespaces ? CopyOptions.ALL_NAMESPACES : 0)
+                                | (expr.copyForUpdate ? CopyOptions.FOR_UPDATE : 0);
+                PullEvaluator selectPull = Elaborator.makeElaborator(expr.getSelect()).elaborateForPull();
+                return (output, context) -> {
+                    SequenceTool.supply(selectPull.iterate(context), (ItemConsumer<? super Item>) item -> {
+                        if (item instanceof NodeInfo) {
+                            expr.copyOneNode(context, output, (NodeInfo) item, copyOptions);
+                        } else {
+                            output.append(item, expr.getLocation(), ReceiverOption.ALL_NAMESPACES);
+                        }
+                    });
+                    return null;
+                };
+
+            }
         }
     }
 

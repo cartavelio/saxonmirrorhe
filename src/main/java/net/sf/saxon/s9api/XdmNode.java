@@ -13,7 +13,6 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.s9api.streams.XdmStream;
@@ -472,61 +471,61 @@ public class XdmNode extends XdmItem {
                 getUnderlyingNode().equals(((XdmNode) other).getUnderlyingNode());
     }
 
-    /**
-     * The toString() method returns a simple XML serialization of the node
-     * with defaulted serialization parameters.
-     * <p>In the case of an element node, the result will be a well-formed
-     * XML document serialized as defined in the W3C XSLT/XQuery serialization specification,
-     * using options method="xml", indent="yes", omit-xml-declaration="yes".</p>
-     * <p>In the case of a document node, the result will be a well-formed
-     * XML document provided that the document node contains exactly one element child,
-     * and no text node children. In other cases it will be a well-formed external
-     * general parsed entity.</p>
-     * <p>In the case of an attribute node, the output is a string in the form
-     * <code>name="value"</code>. The name will use the original namespace prefix.</p>
-     * <p>In the case of a namespace node, the output is a string in the form of a namespace
-     * declaration, that is <code>xmlns="uri"</code> or <code>xmlns:pre="uri"</code>.</p>
-     * <p>Other nodes, such as text nodes, comments, and processing instructions, are
-     * represented as they would appear in lexical XML. Note: this means that in the case
-     * of text nodes, special characters such as <code>&amp;</code> and <code>&lt;</code>
-     * are output in escaped form. To get the unescaped string value of a text node, use
-     * {@link #getStringValue()} instead.</p>
-     * <p><i>For more control over serialization, use the {@link Serializer} class.</i></p>
-     *
-     * @return a simple XML serialization of the node. Under error conditions the method
-     * may return an error message which will always begin with the label "Error: ".
-     */
-
-    public String toString() {
-        NodeInfo node = getUnderlyingNode();
-
-        if (node.getNodeKind() == Type.ATTRIBUTE) {
-            String val = node.getStringValue()
-                    .replace("&", "&amp;")
-                    .replace("\"", "&quot;")
-                    .replace("<", "&lt;");
-            return node.getDisplayName() + "=\"" + val + '"';
-        } else if (node.getNodeKind() == Type.NAMESPACE) {
-            String val = node.getStringValue()
-                    .replace("&", "&amp;")
-                    .replace("\"", "&quot;")
-                    .replace("<", "&lt;");
-            String name = node.getDisplayName();
-            name = name.equals("") ? "xmlns" : "xmlns:" + name;
-            return name + "=\"" + val + '"';
-        } else if (node.getNodeKind() == Type.TEXT) {
-            return node.getStringValue()
-                    .replace("&", "&amp;")
-                    .replace("<", "&lt;")
-                    .replace("]]>", "]]&gt;");
-        }
-
-        try {
-            return QueryResult.serialize(node).trim();
-        } catch (XPathException err) {
-            throw new IllegalStateException(err);
-        }
-    }
+//    /**
+//     * The toString() method returns a simple XML serialization of the node
+//     * with defaulted serialization parameters.
+//     * <p>In the case of an element node, the result will be a well-formed
+//     * XML document serialized as defined in the W3C XSLT/XQuery serialization specification,
+//     * using options method="xml", indent="yes", omit-xml-declaration="yes".</p>
+//     * <p>In the case of a document node, the result will be a well-formed
+//     * XML document provided that the document node contains exactly one element child,
+//     * and no text node children. In other cases it will be a well-formed external
+//     * general parsed entity.</p>
+//     * <p>In the case of an attribute node, the output is a string in the form
+//     * <code>name="value"</code>. The name will use the original namespace prefix.</p>
+//     * <p>In the case of a namespace node, the output is a string in the form of a namespace
+//     * declaration, that is <code>xmlns="uri"</code> or <code>xmlns:pre="uri"</code>.</p>
+//     * <p>Other nodes, such as text nodes, comments, and processing instructions, are
+//     * represented as they would appear in lexical XML. Note: this means that in the case
+//     * of text nodes, special characters such as <code>&amp;</code> and <code>&lt;</code>
+//     * are output in escaped form. To get the unescaped string value of a text node, use
+//     * {@link #getStringValue()} instead.</p>
+//     * <p><i>For more control over serialization, use the {@link Serializer} class.</i></p>
+//     *
+//     * @return a simple XML serialization of the node. Under error conditions the method
+//     * may return an error message which will always begin with the label "Error: ".
+//     */
+//
+//    public String toString() {
+//        NodeInfo node = getUnderlyingNode();
+//
+//        if (node.getNodeKind() == Type.ATTRIBUTE) {
+//            String val = node.getStringValue()
+//                    .replace("&", "&amp;")
+//                    .replace("\"", "&quot;")
+//                    .replace("<", "&lt;");
+//            return node.getDisplayName() + "=\"" + val + '"';
+//        } else if (node.getNodeKind() == Type.NAMESPACE) {
+//            String val = node.getStringValue()
+//                    .replace("&", "&amp;")
+//                    .replace("\"", "&quot;")
+//                    .replace("<", "&lt;");
+//            String name = node.getDisplayName();
+//            name = name.equals("") ? "xmlns" : "xmlns:" + name;
+//            return name + "=\"" + val + '"';
+//        } else if (node.getNodeKind() == Type.TEXT) {
+//            return node.getStringValue()
+//                    .replace("&", "&amp;")
+//                    .replace("<", "&lt;")
+//                    .replace("]]>", "]]&gt;");
+//        }
+//
+//        try {
+//            return QueryResult.serialize(node).trim();
+//        } catch (XPathException err) {
+//            throw new IllegalStateException(err);
+//        }
+//    }
 
     /**
      * Get the underlying Saxon implementation object representing this node. This provides
