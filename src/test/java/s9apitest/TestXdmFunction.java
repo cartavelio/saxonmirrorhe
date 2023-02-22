@@ -94,6 +94,49 @@ public class TestXdmFunction {
     }
 
     @Test
+    public void testCallSystemFunctionWithContextDependency() {
+        try {
+            Processor proc = new Processor(false);
+            XdmFunctionItem fi = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceConstant.FN, "local-name"), 0);
+            assertNotNull(fi);
+            XdmValue result = fi.call(proc);
+            fail("Unexpected success");
+        } catch (SaxonApiException e) {
+            assertEquals("XPDY0002", e.getErrorCode().getLocalName());
+        }
+    }
+
+    @Test
+    public void testCallPositionFunction() {
+        try {
+            Processor proc = new Processor(false);
+            XdmFunctionItem fi = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceConstant.FN, "position"), 0);
+            assertNotNull(fi);
+            XdmValue result = fi.call(proc);
+            fail("Unexpected success");
+        } catch (SaxonApiException e) {
+            assertEquals("XPDY0002", e.getErrorCode().getLocalName());
+        }
+    }
+
+    @Test
+    public void testCallSystemFunctionWithPushNode() {
+        try {
+            Processor proc = new Processor(false);
+            XdmDestination destination = new XdmDestination();
+            proc.newPush(destination).document(true).element("root").close();
+            XdmNode top = destination.getXdmNode().getOutermostElement();
+            XdmFunctionItem fi = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceConstant.FN, "local-name"), 1);
+            assertNotNull(fi);
+            XdmValue result = fi.call(proc, top);
+            assertEquals("root", result.stream().first().asString());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
     public void testCallSystemFunctionFailIfUnlicensed() {
         try {
             Processor proc = new Processor(false);
