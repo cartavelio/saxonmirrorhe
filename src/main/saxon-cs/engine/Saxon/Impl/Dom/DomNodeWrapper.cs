@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using SysCollGen = System.Collections.Generic;
 using System.Xml;
 using Saxon.Hej.om;
 using Saxon.Hej.pattern;
+using Saxon.Hej.str;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
 using Saxon.Hej.tree.wrapper;
 using Saxon.Hej.type;
+using Type = Saxon.Hej.type.Type;
 
 namespace Saxon.Impl.Dom {
     public class DomNodeWrapper : AbstractNodeWrapper, SteppingNode, SiblingCountingNode {
@@ -17,7 +20,7 @@ namespace Saxon.Impl.Dom {
         protected DomDocumentTree docTree;
         private NamespaceMap inScopeNamespaces;
         private int index;
-        
+
         // the number of adjacent text nodes wrapped by this NodeWrapper.
         // If span>1, node will always be the first of a sequence of adjacent text nodes
         protected int span = 1;
@@ -37,7 +40,8 @@ namespace Saxon.Impl.Dom {
             }
 
             if ((docTree == null)) {
-                throw new Saxon.Ejava.lang.NullPointerException("NodeWrapper#makeWrapper: DocumentWrapper must not be null");
+                throw new Saxon.Ejava.lang.NullPointerException(
+                    "NodeWrapper#makeWrapper: DocumentWrapper must not be null");
             }
 
             return makeWrapper(node, docTree, null, -1);
@@ -48,7 +52,7 @@ namespace Saxon.Impl.Dom {
             DomNodeWrapper wrapper;
             switch (node.NodeType) {
                 case XmlNodeType.Document:
-                    wrapper = (DomNodeWrapper) docTree.getRootNode();
+                    wrapper = (DomNodeWrapper)docTree.getRootNode();
                     if ((wrapper == null)) {
                         wrapper = new DomNodeWrapper(node, parent, index);
                         wrapper.nodeKind = Saxon.Hej.type.Type.DOCUMENT;
@@ -87,7 +91,7 @@ namespace Saxon.Impl.Dom {
             wrapper.treeInfo = docTree;
             return wrapper;
         }
-        
+
         public override string getSystemId() {
             return docTree.getSystemId();
         }
@@ -122,6 +126,13 @@ namespace Saxon.Impl.Dom {
         public override Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
             switch (nodeKind) {
                 case Saxon.Hej.type.Type.DOCUMENT:
+                    // Cannot use node.InnerText because this includes whitespace text nodes of the document node
+                    UnicodeBuilder builder = new();
+                    foreach (NodeInfo child in children()) {
+                        builder.append(child.getUnicodeStringValue());
+                    }
+
+                    return builder.toUnicodeString();
                 case Saxon.Hej.type.Type.ELEMENT:
                     return Saxon.Hej.str.StringView.tidy(node.InnerText);
                 case Saxon.Hej.type.Type.ATTRIBUTE:
@@ -131,7 +142,7 @@ namespace Saxon.Impl.Dom {
                         return Saxon.Hej.str.StringView.tidy(node.InnerText);
                     }
                     else {
-                        Saxon.Hej.str.UnicodeBuilder fsb = new ();
+                        Saxon.Hej.str.UnicodeBuilder fsb = new();
                         XmlNode textNode = node;
                         for (int i = 0; (i < span); i++) {
                             fsb.append(textNode.InnerText);
@@ -194,13 +205,10 @@ namespace Saxon.Impl.Dom {
                 uri = "";
             }
             else {
-                AxisIterator nsIter = element.iterateAxis(AxisInfo.NAMESPACE);
-                NodeInfo ns;
-                while (((ns = ((NodeInfo) nsIter.next())) != null)) {
-                    if (ns.getLocalPart().Equals(parts[0])) {
-                        uri = ns.getStringValue();
-                        break;
-                    }
+                NamespaceMap nsMap = getAllNamespaces();
+                string declaredNs = nsMap.getURI(parts[0]);
+                if (declaredNs != null) {
+                    uri = declaredNs.ToString();
                 }
 
                 if ((uri == null)) {
@@ -209,7 +217,7 @@ namespace Saxon.Impl.Dom {
                     }
                     else {
                         throw new Saxon.Ejava.lang.IllegalStateException(("Undeclared namespace prefix in DOM input: " +
-                                                                   parts[0]));
+                                                                          parts[0]));
                     }
                 }
             }
@@ -236,7 +244,7 @@ namespace Saxon.Impl.Dom {
             if ((parent == null)) {
                 switch (getNodeKind()) {
                     case Saxon.Hej.type.Type.ATTRIBUTE:
-                        parent = makeWrapper(((XmlAttribute) node).OwnerElement, docTree);
+                        parent = makeWrapper(((XmlAttribute)node).OwnerElement, docTree);
                         break;
                     default:
                         XmlNode p = node.ParentNode;
@@ -276,7 +284,7 @@ namespace Saxon.Impl.Dom {
                         ix = 0;
                         AxisIterator iter = parent.iterateAxis(AxisInfo.ATTRIBUTE);
                         while (true) {
-                            NodeInfo n = ((NodeInfo) iter.next());
+                            NodeInfo n = ((NodeInfo)iter.next());
                             if (((n == null) || Navigator.haveSameName(this, n))) {
                                 index = ix;
                                 return ix;
@@ -288,7 +296,7 @@ namespace Saxon.Impl.Dom {
                         ix = 0;
                         iter = parent.iterateAxis(AxisInfo.NAMESPACE);
                         while (true) {
-                            NodeInfo n = ((NodeInfo) iter.next());
+                            NodeInfo n = ((NodeInfo)iter.next());
                             if (((n == null) || Navigator.haveSameName(this, n))) {
                                 index = ix;
                                 return ix;
@@ -315,7 +323,7 @@ namespace Saxon.Impl.Dom {
         }
 
         private bool isElementOnly(NodeTest nodeTest) {
-            return nodeTest.getUType() == UType.ELEMENT; 
+            return nodeTest.getUType() == UType.ELEMENT;
         }
 
         protected internal override AxisIterator iterateChildren(NodeTest nodeTest) {
@@ -327,7 +335,7 @@ namespace Saxon.Impl.Dom {
 
             return iter;
         }
-        
+
         protected internal override AxisIterator iterateSiblings(NodeTest nodeTest, bool forwards) {
             bool elementOnly = isElementOnly(nodeTest);
             AxisIterator iter = new Navigator.EmptyTextFilter(
@@ -335,9 +343,10 @@ namespace Saxon.Impl.Dom {
             if (nodeTest != AnyNodeTest.getInstance()) {
                 iter = new Navigator.AxisFilter(iter, nodeTest);
             }
+
             return iter;
         }
-        
+
         protected override AxisIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest,
             bool includeSelf) {
             return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
@@ -347,11 +356,11 @@ namespace Saxon.Impl.Dom {
             Saxon.Hej.pattern.NameTest test =
                 new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, uri, local, getNamePool());
             AxisIterator iterator = iterateAxis(AxisInfo.ATTRIBUTE, test);
-            NodeInfo attribute = ((NodeInfo) iterator.next());
+            NodeInfo attribute = ((NodeInfo)iterator.next());
             return attribute?.getStringValue();
         }
-        
-        
+
+
 
         public override bool hasChildNodes() {
             return ((node.NodeType != XmlNodeType.Attribute) && node.HasChildNodes);
@@ -361,18 +370,19 @@ namespace Saxon.Impl.Dom {
             Navigator.appendSequentialKey(this, buffer, true);
         }
 
-        public override void copy(Saxon.Hej.@event.Receiver @out, int copyOptions, Saxon.Hej.s9api.Location locationId) {
+        public override void copy(Saxon.Hej.@event.Receiver @out, int copyOptions,
+            Saxon.Hej.s9api.Location locationId) {
             Saxon.Hej.@event.Receiver r = new Saxon.Hej.@event.NamespaceReducer(@out);
             Navigator.copy(this, r, copyOptions, locationId);
         }
 
         public override NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
             if ((node.NodeType == XmlNodeType.Element)) {
-                XmlElement elem = (XmlElement) node;
+                XmlElement elem = (XmlElement)node;
                 XmlNamedNodeMap atts = elem.Attributes;
                 SysCollGen.HashSet<NamespaceBinding> codes = new SysCollGen.HashSet<NamespaceBinding>();
                 for (int i = 0; (i < atts.Count); i++) {
-                    XmlAttribute att = (XmlAttribute) atts.Item(i);
+                    XmlAttribute att = (XmlAttribute)atts.Item(i);
                     string attName = att.Name;
                     if (attName.Equals("xmlns")) {
                         string prefix = "";
@@ -415,32 +425,62 @@ namespace Saxon.Impl.Dom {
             if (getNodeKind() == Saxon.Hej.type.Type.ELEMENT) {
                 if (inScopeNamespaces != null) {
                     return inScopeNamespaces;
-                } else {
+                }
+                else {
                     NodeInfo parent = getParent();
                     NamespaceMap nsMap = parent != null && parent.getNodeKind() == Saxon.Hej.type.Type.ELEMENT
                         ? parent.getAllNamespaces()
                         : NamespaceMap.emptyMap();
-                    XmlElement elem = (XmlElement) node;
+                    XmlElement elem = (XmlElement)node;
                     XmlAttributeCollection atts = elem.Attributes;
- 
-                    int attsLen = atts.Count;
+
+                    bool namespacedAtt = false;
                     foreach (XmlAttribute att in atts) {
                         string attName = att.Name;
                         if (attName.StartsWith("xmlns")) {
                             if (attName.Length == 5) {
                                 nsMap = nsMap.bind("", att.Value);
-                            } else if (attName[5] == ':') {
+                            }
+                            else if (attName[5] == ':') {
                                 nsMap = nsMap.bind(attName.Substring(6), att.Value);
                             }
                         }
+                        else if (attName.Contains(':')) {
+                            namespacedAtt = true;
+                        }
                     }
-                    
+
+                    // if the element name or an attribute name uses a namespace that's not declared, declare it
+                    // now. This can happen with a programmatically-created DOM
+
+                    string ns = node.NamespaceURI;
+                    if (ns != "") {
+                        string declaredNs = nsMap.getURI(node.Prefix);
+                        if (declaredNs != ns) {
+                            nsMap = nsMap.put(node.Prefix, ns);
+                        }
+                    }
+
+                    if (namespacedAtt) {
+                        foreach (XmlAttribute att in atts) {
+                            string attName = att.Name;
+                            if (attName.Contains(':') && !attName.StartsWith("xmlns:")) {
+                                string prefix = att.Prefix;
+                                string uri = att.NamespaceURI;
+                                if (nsMap.getURI(prefix) != uri) {
+                                    nsMap = nsMap.put(prefix, uri);
+                                }
+                            }
+                        }
+                    }
+
                     return inScopeNamespaces = nsMap;
                 }
-            } else {
+            }
+            else {
                 // not an element node
                 return null;
-            }            
+            }
         }
 
         public SteppingNode getNextSibling() {
@@ -448,18 +488,27 @@ namespace Saxon.Impl.Dom {
             for (int i = 0; i < span; i++) {
                 currNode = currNode.NextSibling;
             }
+
             if (currNode != null) {
                 XmlNodeType type = currNode.NodeType;
-                if (type == XmlNodeType.DocumentType) {
+                if (type == XmlNodeType.DocumentType || type == XmlNodeType.XmlDeclaration
+                                                     || (type == XmlNodeType.Whitespace &&
+                                                         currNode.ParentNode?.NodeType == XmlNodeType.Document)) {
                     currNode = currNode.NextSibling;
-                } else if (type is XmlNodeType.Text or XmlNodeType.CDATA) {
+                    if (currNode == null) {
+                        return null;
+                    }
+                }
+                else if (type is XmlNodeType.Text or XmlNodeType.CDATA) {
                     return spannedWrapper(currNode);
                 }
+
                 return makeWrapper(currNode, docTree);
             }
+
             return null;
         }
-        
+
         private DomNodeWrapper spannedWrapper(XmlNode currNode) {
             XmlNode currText = currNode;
             int thisSpan = 1;
@@ -467,10 +516,12 @@ namespace Saxon.Impl.Dom {
                 currText = currText.NextSibling;
                 if (currText != null && currText.NodeType is XmlNodeType.Text or XmlNodeType.CDATA) {
                     thisSpan++;
-                } else {
+                }
+                else {
                     break;
                 }
             }
+
             DomNodeWrapper spannedText = makeWrapper(currNode, docTree);
             spannedText.span = thisSpan;
             return spannedText;
@@ -479,15 +530,21 @@ namespace Saxon.Impl.Dom {
         public SteppingNode getFirstChild() {
             XmlNode currNode = node.FirstChild;
             if (currNode != null) {
-                if (currNode.NodeType == XmlNodeType.DocumentType) {
-                    currNode = currNode.NextSibling;
+                if (node.NodeType == XmlNodeType.Document) {
+                    while (currNode.NodeType == XmlNodeType.DocumentType
+                           || currNode.NodeType == XmlNodeType.XmlDeclaration
+                           || currNode.NodeType == XmlNodeType.Whitespace) {
+                        currNode = currNode.NextSibling;
+                    }
                 }
 
                 if (currNode.NodeType is XmlNodeType.Text or XmlNodeType.CDATA) {
                     return spannedWrapper(currNode);
                 }
+
                 return makeWrapper(currNode, docTree);
             }
+
             return null;
         }
 
@@ -497,21 +554,25 @@ namespace Saxon.Impl.Dom {
                 XmlNodeType type = currNode.NodeType;
                 if (type == XmlNodeType.DocumentType) {
                     return null;
-                } else if (type is XmlNodeType.Text or XmlNodeType.CDATA) {
+                }
+                else if (type is XmlNodeType.Text or XmlNodeType.CDATA) {
                     int span = 1;
                     while (true) {
                         XmlNode prev = currNode.PreviousSibling;
                         if (prev != null && prev.NodeType is XmlNodeType.Text or XmlNodeType.CDATA) {
                             span++;
                             currNode = prev;
-                        } else {
+                        }
+                        else {
                             break;
                         }
                     }
+
                     DomNodeWrapper wrapper = makeWrapper(currNode, docTree);
                     wrapper.span = span;
                     return wrapper;
                 }
+
                 return makeWrapper(currNode, docTree);
             }
 
@@ -519,7 +580,7 @@ namespace Saxon.Impl.Dom {
         }
 
         public SteppingNode getSuccessorElement(SteppingNode anchor, string uri, string local) {
-            XmlNode stop = (((anchor == null) ? null : ((DomNodeWrapper) anchor).node));
+            XmlNode stop = (((anchor == null) ? null : ((DomNodeWrapper)anchor).node));
             XmlNode next = node;
             do {
                 next = getSuccessorNode(next, stop);
@@ -540,7 +601,7 @@ namespace Saxon.Impl.Dom {
             if (start.HasChildNodes) {
                 return start.FirstChild;
             }
-            
+
             if (anchor != null && start == anchor) {
                 return null;
             }
@@ -599,22 +660,22 @@ namespace Saxon.Impl.Dom {
                 ix++;
                 return current;
             }
-            
+
 
             public void close() {
             }
 
             public void discharge() {
             }
-            
+
         }
 
-        private sealed class ChildEnumeration : AxisIterator, LookaheadIterator {
+        private sealed class ChildEnumeration : AxisIterator {
             private readonly DomDocumentTree _docTree;
             private readonly DomNodeWrapper start;
             private readonly DomNodeWrapper commonParent;
 
-            private readonly SysCollGen.List<DomNodeWrapper> items = new (20);
+            private readonly SysCollGen.List<DomNodeWrapper> items = new(20);
 
             private int ix;
             private int position;
@@ -624,8 +685,10 @@ namespace Saxon.Impl.Dom {
             private int currentSpan; // number of DOM nodes mapping to the current XPath node
             private XmlNodeList childNodes;
             private int childNodesLength;
+            private readonly bool parentIsDocument;
 
-            public ChildEnumeration(DomDocumentTree docTree, DomNodeWrapper start, bool downwards, bool forwards, bool elementOnly) {
+            public ChildEnumeration(DomDocumentTree docTree, DomNodeWrapper start, bool downwards, bool forwards,
+                bool elementOnly) {
                 this._docTree = docTree;
                 this.start = start;
                 this.downwards = downwards;
@@ -637,16 +700,18 @@ namespace Saxon.Impl.Dom {
                     commonParent = start;
                 }
                 else {
-                    commonParent = ((DomNodeWrapper) start.getParent());
+                    commonParent = ((DomNodeWrapper)start.getParent());
                 }
 
+                parentIsDocument = commonParent.nodeKind == Type.DOCUMENT;
                 childNodes = commonParent.node.ChildNodes;
                 childNodesLength = childNodes.Count;
                 if (downwards) {
                     currentSpan = 1;
                     if (forwards) {
                         ix = -1; // just before first
-                    } else {
+                    }
+                    else {
                         ix = childNodesLength; // just after last
                     }
                 }
@@ -655,12 +720,12 @@ namespace Saxon.Impl.Dom {
                     currentSpan = start.span;
                 }
 
-            
+
             }
-            
-             // Starting with ix positioned at a node, which is the last in a span, calculate the length
-             // of the span, that is the number of DOM nodes mapped to this XPath node.
-             // @return the number of nodes spanned
+
+            // Starting with ix positioned at a node, which is the last in a span, calculate the length
+            // of the span, that is the number of DOM nodes mapped to this XPath node.
+            // @return the number of nodes spanned
 
             private int skipPrecedingTextNodes() {
                 int count = 0;
@@ -669,13 +734,15 @@ namespace Saxon.Impl.Dom {
                     XmlNodeType kind = node.NodeType;
                     if (kind is XmlNodeType.Text or XmlNodeType.CDATA) {
                         count++;
-                    } else {
+                    }
+                    else {
                         break;
                     }
                 }
+
                 return count == 0 ? 1 : count;
             }
-            
+
             //  Starting with ix positioned at a node, which is the first in a span, calculate the length
             //  of the span, that is the number of DOM nodes mapped to this XPath node.
             //  @return the number of nodes spanned
@@ -690,24 +757,26 @@ namespace Saxon.Impl.Dom {
                     if (kind is XmlNodeType.Text or XmlNodeType.CDATA) {
                         pos++;
                         count++;
-                    } else {
+                    }
+                    else {
                         break;
                     }
                 }
+
                 return count == 0 ? 1 : count;
             }
 
-            public bool supportsHasNext() {
-                return true;
-            }
-
-            public bool hasNext() {
-                if (forwards) {
-                    return ix + currentSpan < childNodesLength;
-                } else {
-                    return ix > 0;
-                }
-            }
+            // public bool supportsHasNext() {
+            //     return true;
+            // }
+            //
+            // public bool hasNext() {
+            //     if (forwards) {
+            //         return ix + currentSpan < childNodesLength;
+            //     } else {
+            //         return ix > 0;
+            //     }
+            // }
 
             public Item next() {
                 while (true) {
@@ -728,6 +797,9 @@ namespace Saxon.Impl.Dom {
                                     break;
                                 default:
                                     if (elementOnly) {
+                                        continue;
+                                    }
+                                    else if (parentIsDocument && IsWhitespaceText(currentDomNode)) {
                                         continue;
                                     }
                                     else {
@@ -753,10 +825,15 @@ namespace Saxon.Impl.Dom {
                             switch (currentDomNode.NodeType) {
                                 case XmlNodeType.DocumentType:
                                     continue;
+                                case XmlNodeType.XmlDeclaration:
+                                    continue;
                                 case XmlNodeType.Element:
                                     break;
                                 default:
                                     if (elementOnly) {
+                                        continue;
+                                    }
+                                    else if (parentIsDocument && IsWhitespaceText(currentDomNode)) {
                                         continue;
                                     }
                                     else {
@@ -777,8 +854,16 @@ namespace Saxon.Impl.Dom {
 
             public void discharge() {
             }
+
+            private readonly static Regex allWhite = new("^[\\x20\\x09\\x0A\\x0D]+$");
+
+            private bool IsWhitespaceText(XmlNode node) {
+                return node.NodeType == XmlNodeType.Whitespace ||
+                       (node.NodeType == XmlNodeType.Text && allWhite.IsMatch(node.Value));
+            }
         }
     }
 }
+
 
 // Copyright (c) 2021 Saxonica Limited
