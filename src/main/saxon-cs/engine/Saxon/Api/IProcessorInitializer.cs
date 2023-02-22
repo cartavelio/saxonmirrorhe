@@ -15,7 +15,7 @@ namespace Saxon.Api {
         /// configuration properties on the processor; it should not attempt to use it for
         /// activities such as executing queries and transformations.</param>
 
-        void Initialize(Processor processor);
+        /**public**/ void Initialize(Processor processor);
  
     }
 }

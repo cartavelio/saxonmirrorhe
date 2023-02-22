@@ -141,6 +141,11 @@ namespace Saxon.Api {
             return (itemType.ToString() + occurrenceIn).Trim();
         }
 
+        /// <summary>
+        /// Compare two sequence types for equality
+        /// </summary>
+        /// <param name="other">The object to be compared</param>
+        /// <returns>The result of the equality comparison.</returns>
         public override bool Equals(object obj) {
             if (obj is XdmSequenceType other) {
                 return itemType.Equals(other.itemType) && occurrence == other.occurrence;
@@ -149,6 +154,10 @@ namespace Saxon.Api {
             return false;
         }
 
+        /// <summary>
+        /// Get a hash code to support equality comparison
+        /// </summary>
+        /// <returns>A suitable hash code</returns>
         public override int GetHashCode() {
             return itemType.GetHashCode() ^ (occurrence<<3);
         }

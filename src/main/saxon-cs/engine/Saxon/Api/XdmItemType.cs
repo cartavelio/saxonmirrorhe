@@ -154,10 +154,19 @@ namespace Saxon.Api {
             return underlyingType.ToString().Replace("Q{http://www.w3.org/2001/XMLSchema}", "xs:");
         }
 
+        /// <summary>
+        /// Compare two item types for equality
+        /// </summary>
+        /// <param name="other">The object to be compared</param>
+        /// <returns>The result of the equality comparison.</returns>
         public override bool Equals(object other) {
             return other is XdmItemType otherType && underlyingType.Equals(otherType.underlyingType);
         }
 
+        /// <summary>
+        /// Get a hash code to support equality comparison
+        /// </summary>
+        /// <returns>A suitable hash code</returns>
         public override int GetHashCode() {
             return underlyingType.GetHashCode();
         }
