@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <page size="A4" margin="25"/>
+  <header space="20"/>
+  <footer space="35"/>
+  <page-number format="1"/>
+</config>
