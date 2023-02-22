@@ -11,6 +11,7 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -205,6 +206,10 @@ public class Predicates {
      */
 
     public static Predicate<XdmNode> hasLocalName(String localName) {
+        Objects.requireNonNull(localName);
+        if (localName.isEmpty()) {
+            return item -> item.getNodeName() == null;
+        }
         return item -> {
             QName name = item.getNodeName();
             return name != null &&
