@@ -1183,10 +1183,8 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
                 return value;
 
             } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, nodeClass) == JNI_TRUE) {
-                std::cerr<<"XsltExe path: cp0-1"<<std::endl;
                 xdmItem = new XdmNode(result);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                std::cerr<<"XsltExe path: cp0-1 str= "<<std::endl;
                 value->addXdmItem(xdmItem);
                 return value;
             } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass) == JNI_TRUE) {
@@ -1206,7 +1204,6 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
                 value->addXdmItem(xdmItem);
                 return value;
             } else {
-                std::cerr<<"XsltExe path: cp1"<<std::endl;
                 value = new XdmValue(result, true);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 return value;

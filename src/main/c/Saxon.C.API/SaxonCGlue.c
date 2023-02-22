@@ -397,15 +397,21 @@ jobject createSaxonProcessor2(JNIEnv* penv, jclass myClassInDll, const char * ar
  * Callback to check for exceptions. When called it returns the exception as a string
  */
 const char * checkForException(sxnc_environment *environii) {
+    fflush(stdout);
 	if ((*(environii->env))->ExceptionCheck(environii->env)) {
 
 		jthrowable exc = (*(environii->env))->ExceptionOccurred(environii->env);
 #ifdef DEBUG
 		(*(environii->env))->ExceptionDescribe(environii->env);
 #endif
+        fflush(stdout);
 		if (exc) {
 			printf("Exception Occurred!");
+		} else {
+		    return 0;
+
 		}
+        fflush(stdout);
 		jclass exccls = (jclass)(*(environii->env))->GetObjectClass(environii->env, exc);
 
 		jclass clscls = (jclass)(*(environii->env))->FindClass(environii->env, "java/lang/Class");
