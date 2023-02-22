@@ -471,7 +471,6 @@ task hejJarTests(
   archiveBaseName = "saxon-he-test-${saxonVersion}"
   manifest {
     attributes "Project-Name": "Saxon-HE-TestDriver"
-    attributes "Main-Class": "com.saxonica.testdriver.gui.TestDriverGui"
   }
   from ("${buildDir}/testdriver_classes/hej") {
     include "net/sf/saxon/testdriver/**"
@@ -486,7 +485,6 @@ task pejJarTests(
   archiveBaseName = "saxon-pe-test-${saxonVersion}"
   manifest {
     attributes "Project-Name": "Saxon-PE-TestDriver"
-    attributes "Main-Class": "com.saxonica.testdriver.gui.TestDriverGui"
   }
   from ("${buildDir}/testdriver_classes/pej") {
     include "net/sf/saxon/testdriver/**"
@@ -503,7 +501,6 @@ task eejJarTests(
   archiveBaseName = "saxon-ee-test-${saxonVersion}"
   manifest {
     attributes "Project-Name": "Saxon-EE-TestDriver"
-    attributes "Main-Class": "com.saxonica.testdriver.gui.TestDriverGui"
   }
   from ("${buildDir}/testdriver_classes/eej") {
     include "net/sf/saxon/testdriver/**"
@@ -836,14 +833,6 @@ task pej_copyTestDrivers(
     .files
     .each { fileMap[it] = copySourceName(it, 'src/testdrivers/pej') }
 
-  files("${projectDir}/src/main/java")
-    .asFileTree
-    .matching {
-      include "com/saxonica/testdriver/gui/images/*"
-    }
-    .files
-    .each { fileMap[it] = copySourceName(it, 'testdriver_classes/pej') }
-
   inputs.files fileMap.keySet()
   outputs.files fileMap.values()
 
@@ -871,14 +860,6 @@ task eej_copyTestDrivers(
     }
     .files
     .each { fileMap[it] = copySourceName(it, 'src/testdrivers/eej') }
-
-  files("${projectDir}/src/main/java")
-    .asFileTree
-    .matching {
-      include "com/saxonica/testdriver/gui/images/*"
-    }
-    .files
-    .each { fileMap[it] = copySourceName(it, 'testdriver_classes/eej') }
 
   files("${projectDir}/tools/nashorn")
     .asFileTree
