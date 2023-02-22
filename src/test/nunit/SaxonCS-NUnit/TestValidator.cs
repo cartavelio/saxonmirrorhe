@@ -345,11 +345,7 @@ namespace SaxonCS_NUnit {
             }
         }
 
-        public class MyThing : StandardUnparsedTextResolver {
-            public MyThing(Configuration config) : base(config) {
-                
-            }
-        }
+        
 
         [Test]
         public void TestAssertionsHidingComments() {
