@@ -1,6 +1,7 @@
 using System;
 using net.sf.saxon;
 using net.sf.saxon.expr.instruct;
+using Saxon.Impl.Overrides;
 using Version = System.Version;
 
 namespace SaxonCS3.Saxon.Cmd {
@@ -21,6 +22,8 @@ namespace SaxonCS3.Saxon.Cmd {
                     net.sf.saxon.Version.main(tail);
                 } else if (subCommand == "help") {
                     Console.Error.WriteLine("saxon (query|transform|version) -?");
+                // } else if (subCommand == "verify") {
+                //     Verifier.main(args);
                 }
                 else {
                     Console.Error.WriteLine("Unknown subcommand: " + subCommand);
