@@ -62,6 +62,36 @@ public class SaxonCException  {
     }
 
 
+    @CEntryPoint(name = "j_getErrorMessageWithErrorCode")
+    public static CCharPointer j_getErrorMessageWithErrorCode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
+        SaxonApiException exception = null;
+        if(throwable == null) {
+            return WordFactory.nullPointer();
+        }
+        if(throwable instanceof SaxonApiException) {
+           exception = (SaxonApiException)throwable;
+        } if(throwable instanceof NullPointerException) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            throwable.printStackTrace(pw);
+          exception = new SaxonApiException("NullPointer exception found: "+ sw.toString());
+        } else {
+            exception = new SaxonApiException(throwable);
+        }
+        if(exception.getMessage() == null) {
+            return WordFactory.nullPointer();
+        }
+        CCharPointer a = null;
+        if(exception.getErrorCode() == null) {
+            a = SaxonCAPI.stringToNative2(alloc, exception.getMessage());
+        } else {
+            a = SaxonCAPI.stringToNative2(alloc,exception.getErrorCode().getLocalName() + ": " + exception.getMessage());
+        }
+
+        return a;
+    }
+
+
     @CEntryPoint(name = "j_getErrorMessageInJavaMem")
     public static CCharPointer j_getErrorMessageInJavaMem(IsolateThread thread){
         SaxonApiException exception = null;

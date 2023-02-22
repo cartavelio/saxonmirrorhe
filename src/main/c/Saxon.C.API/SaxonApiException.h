@@ -87,6 +87,13 @@ public:
      */
 	const char * getMessage();
 
+    /**
+     * Returns the detail message string as a char array of the throwable, if there is one
+     * @return the detail message string of this <tt>Throwable</tt> instance with the error code
+     * as prefix if there is an error code associated with the exception.
+     */
+	const char * getMessageWithErrorCode();
+
 
     const char * getCombinedStaticErrorMessages();
 

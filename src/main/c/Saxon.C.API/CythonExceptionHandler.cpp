@@ -12,16 +12,11 @@ void raise_py_error()
     throw;
   } 
   catch (SaxonApiException* e) {
-          const char * errorCode = e->getErrorCode();
-          string errorMessage = NULL;
-          if(errorCode != NULL) {
-                errorMessage = errorCode  ": " +  e->getMessage();
-          } else {
-                errorMessage = e->getMessage();
-          }
+
+      const char * errorMessage = e->getMessageWithErrorCode();
 
 
-    PyErr_SetString(pysaxonapierror, errorMessage.c_str());
+    PyErr_SetString(pysaxonapierror, errorMessage);
 
    // PyErr_SetString(PyExc_RuntimeError, msg);
   }  catch (const std::exception& e) {
