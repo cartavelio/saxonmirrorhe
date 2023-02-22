@@ -18,11 +18,16 @@ SchemaValidator::SchemaValidator(SaxonProcessor* p, std::string curr){
 	proc = p;
     cppV = createSchemaValidatorWithProcessor(SaxonProcessor::sxn_environ->thread, (void *)p->procRef);
     exception = nullptr;
+
     if(cppV < 0) {
 
-        std::cerr<<"Error: Failed to create the SchemaValidator internal object"<<std::endl;
-        exception = new SaxonApiException("Failed to create the SchemaValidator internal object");
-        return;
+        std::cerr<<"Error: Failed to create the SchemaValidator object - check license exists"<<std::endl;
+        exception = new SaxonApiException();
+        const char * message = exception->getMessage();
+        if(message != nullptr) {
+            std::cerr<<exception->getMessage()<<std::endl;
+        }
+        throw exception;
     }
 
 
@@ -34,13 +39,13 @@ SchemaValidator::SchemaValidator(SaxonProcessor* p, std::string curr){
 		cwdV = curr;
 	}
 
-    sourceNode = nullptr;
+
 	lax = false;
 
 }
 
 SchemaValidator::SchemaValidator(const SchemaValidator &other){
-    sourceNode = other.sourceNode;
+
     exception = nullptr;
     lax = other.lax;
     cwdV = other.cwdV;
@@ -72,9 +77,7 @@ SchemaValidator::SchemaValidator(const SchemaValidator &other){
 SchemaValidator::~SchemaValidator() {
     clearProperties();
     clearParameters();
-    if(sourceNode != nullptr) {
-        sourceNode->decrementRefCount();
-    }
+
     if(cppV > 0) {
         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppV);
     }
@@ -217,8 +220,8 @@ const char * SchemaValidator::getErrorCode(int i) {
 }
 
 const char * SchemaValidator::getErrorMessage(int i ){
- if(proc->exception == nullptr) {return nullptr;}
- return proc->exception->getMessage();
+ if(exception == nullptr) {return nullptr;}
+ return exception->getMessage();
  }
 
 bool SchemaValidator::exceptionOccurred() {

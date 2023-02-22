@@ -445,7 +445,7 @@ int main(int argc, char* argv[])
         cwd = argv[1];
     }
 
-    SaxonProcessor * processor = new SaxonProcessor(true);
+    SaxonProcessor * processor = new SaxonProcessor(false);
     setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
     cout<<"Test: XQueryProcessor with Saxon version="<<processor->version()<<endl<<endl;
 

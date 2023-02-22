@@ -228,7 +228,6 @@ public:
 private:
     bool lax; /*!< flag to indicate lax mode for the Schema valdiation */
 	SaxonProcessor * proc; /*!< Saxon Processor Pointer, which created this SchemaValidator */
-	XdmItem * sourceNode; /*!< source node to run against schema validation */
 	//jclass  cppClass; /*!< JNI object where the SchemaValidator method will be invoked */
 	int64_t cppV; /*!< The underlying SchemaValidator Java object */
 	std::string cwdV; /*!< current working directory */
