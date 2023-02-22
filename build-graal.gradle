@@ -90,7 +90,7 @@ task buildSaxonGlue(
 task buildTransform(type: Exec) {
   dependsOn 'buildSaxonGlue'
   workingDir "${commandDir}"
-  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Transform.c", "-o", "${commandDir}/transform", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
+  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Transform.c", "-o", "${commandDir}/transform", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-${saxonVersion}"
   doLast {
     println "built transform wrapper"
   }
@@ -99,7 +99,7 @@ task buildTransform(type: Exec) {
 task buildQuery(type: Exec) {
   dependsOn 'buildSaxonGlue'
   workingDir "${commandDir}"
-  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Query.c", "-o", "${commandDir}/query", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
+  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Query.c", "-o", "${commandDir}/query", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-${saxonVersion}"
   doLast {
     println "built query wrapper"
   } 
@@ -108,7 +108,7 @@ task buildQuery(type: Exec) {
 task buildValidate(type: Exec) {
   dependsOn 'buildSaxonGlue'
   workingDir "${commandDir}"
-  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Validate.c", "-o", "${commandDir}/validate", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
+  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Validate.c", "-o", "${commandDir}/validate", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-${saxonVersion}"
   doLast {
     println "built validate wrapper"
   }
