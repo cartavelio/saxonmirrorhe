@@ -417,12 +417,29 @@ task copyEXPathTestSuite(
 }
 
 task copySaxonExtraTestSuites(
-  type: Copy,
   dependsOn: ["cloneSaxonExtraTestSuites"],
   description: "Copies the extra tests into the build directory"
 ) {
-  into "${buildDir}/tests/extra"
-  from "${testsuites.saxonExtraTestSuiteDir}"
+  inputs.files fileTree(testsuites.saxonExtraTestSuiteDir)
+  outputs.files fileTree("${buildDir}/tests/extra")
+
+  doLast {
+    copy {
+      into "${buildDir}/tests/extra"
+      from "${testsuites.saxonExtraTestSuiteDir}"
+    }
+  }
+
+  // Work around the fact that the .NET test driver has a
+  // hard-coded catalog file name.
+  doLast {
+    copy {
+      into "${buildDir}/tests/extra/suites/qt3"
+      from "${testsuites.saxonExtraTestSuiteDir}/suites/qt3"
+      include "j-catalog.xml"
+      rename { "catalog.xml" }
+    }
+  }
 }
 
 ["he", "pe", "ee"].each { release ->
