@@ -231,7 +231,7 @@ public:
      *
      * @return a new SchemaValidator
      */
-    //SchemaValidator *newSchemaValidator();
+    SchemaValidator *newSchemaValidator();
 
     //! Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
     /*!

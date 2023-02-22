@@ -149,7 +149,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      *               We handle processor properties here
      * @param values - the values of the parameters and properties. given as a array of Java objects
      */
-    @CEntryPoint(name = "registerSchema", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_registerSchema", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long registerSchema(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer cxsd, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         if (processorRef == WordFactory.nullPointer()) {
@@ -196,7 +196,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      *                 We handle processor properties here
      * @param values   - the values of the parameters and properties. given as a array of Java objects
      */
-    @CEntryPoint(name = "registerSchemaString")
+    @CEntryPoint(name = "j_registerSchemaString")
     public static long registerSchemaString(IsolateThread thread, ObjectHandle processorRef, CCharPointer cxsd, CCharPointer csystemId, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Processor processor = null;
         if (processorRef == WordFactory.nullPointer()) {
@@ -224,7 +224,14 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
             throw ex;
         }
 
-        processor.getSchemaManager().load(new StreamSource(new StringReader(xsd), systemId));
+        StreamSource source = null;
+        if(systemId != null) {
+            source = new StreamSource(new StringReader(xsd), systemId);
+        } else {
+            source = new StreamSource(new StringReader(xsd));
+        }
+
+        processor.getSchemaManager().load(source);
         return SaxonCAPI.STATUS_OK;
 
     }
@@ -238,7 +245,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param outputfile The file name to which the SCM will be saved
      * @throws SaxonApiException
      */
-    @CEntryPoint(name = "exportSchema", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_exportSchema", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long exportSchema(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer coutputfile) throws SaxonApiException {
         String cwd = null;
         if (ccwd != WordFactory.nullPointer()) {
@@ -469,7 +476,8 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
                         System.err.println("parameter length:" + params[i].length());
                     }
                     if (params[i].equals("lax")) {
-                        validator.setLax(((Boolean) values[i]).booleanValue());
+                        boolean lax = CTypeConversion.toBoolean(Integer.parseInt((String)values[i]));
+                        validator.setLax(lax);
                     } else if (params[i].equals("element-name")) {
                         String paramName = (String) values[i];
                         QName qname = QName.fromClarkName(paramName);
