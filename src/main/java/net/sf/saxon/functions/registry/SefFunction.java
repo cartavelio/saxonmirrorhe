@@ -1,0 +1,106 @@
+package net.sf.saxon.functions.registry;
+
+import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.instruct.UserFunction;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.style.StylesheetPackage;
+import net.sf.saxon.trans.PackageLoaderHE;
+import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.UncheckedXPathException;
+import net.sf.saxon.trans.XPathException;
+
+import javax.xml.transform.stream.StreamSource;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SefFunction extends SystemFunction {
+
+    private final static String FN_ALIAS = "http://ns.saxonica.com/xpath-functions";
+    protected SymbolicName.F functionAlias;
+
+    /**
+     * Set the details of this type of function
+     *
+     * @param entry information giving details of the function signature and other function properties
+     */
+    @Override
+    public void setDetails(BuiltInFunctionSet.Entry entry) {
+        super.setDetails(entry);
+        functionAlias = new SymbolicName.F(
+                new StructuredQName("", FN_ALIAS, getDetails().name.getLocalPart()), getDetails().arity);
+    }
+
+    /**
+     * Make an expression that either calls this function, or that is equivalent to a call
+     * on this function
+     *
+     * @param arguments the supplied arguments to the function call
+     * @return either a function call on this function, or an expression that delivers
+     * the same result
+     */
+
+    @Override
+    public Expression makeFunctionCall(Expression... arguments) {
+        Expression e = new SystemFunctionCall(this, arguments);
+        e.setRetainedStaticContext(getRetainedStaticContext());
+        return e;
+    }
+
+    protected StylesheetPackage pack;
+
+    protected Sequence callFunction(XPathContext context, SymbolicName.F name, Sequence[] args) throws XPathException {
+        if (pack == null) {
+            Configuration config = context.getConfiguration();
+            PackageLoaderHE loader = new PackageLoaderHE(config);
+            List<String> messages = new ArrayList<>();
+            List<ClassLoader> classLoaders = new ArrayList<>();
+            InputStream is = Configuration.locateResource("sef/function-library.sef.xml", messages, classLoaders);
+            if (is == null) {
+                throw new XPathException("Failed to load built-in function library: " + messages.get(0));
+            }
+            pack = loader.loadPackage(new StreamSource(is));
+        }
+
+        UserFunction targetFunction;
+        XPathContextMajor c2;
+        Component target = pack.getComponent(name);
+        if (target == null) {
+            throw new XPathException("Built-in XSLT function " + getDetails().name.getEQName() + " not found");
+        }
+        if (target.isHiddenAbstractComponent()) {
+            throw new XPathException("Cannot call an abstract function (" +
+                                             name.getComponentName().getDisplayName() +
+                                             ") with no implementation", "XTDE3052");
+        }
+        targetFunction = (UserFunction) target.getActor();
+        c2 = targetFunction.makeNewContext(context, null);
+        c2.setCurrentComponent(target);
+        try {
+            return targetFunction.call(c2, args);
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
+    }
+
+    /**
+     * Invoke the function
+     *
+     * @param context the XPath dynamic evaluation context
+     * @param args    the actual arguments to be supplied
+     * @return the result of invoking the function
+     * @throws XPathException if a dynamic error occurs within the function
+     */
+    @Override
+    public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
+        for (int i=0; i<args.length; i++) {
+            args[i] = args[i].materialize();
+        }
+        return callFunction(context, functionAlias, args);
+    }
+
+}
+

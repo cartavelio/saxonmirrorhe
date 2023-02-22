@@ -8,7 +8,6 @@
 package net.sf.saxon.trans.packages;
 
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.StylesheetPackage;
 
@@ -85,5 +84,6 @@ public class PackageDetails {
      * is null. This field is used when checking for cycles of package dependencies.
      */
     public Thread beingProcessed;
+
 }
 

@@ -156,6 +156,9 @@ public abstract class AbstractStaticContext implements StaticContext {
             case 31:
                 lib.addFunctionLibrary(config.getXPath31FunctionSet());
                 break;
+            case 40:
+                lib.addFunctionLibrary(config.getXPath40FunctionSet());
+                break;
         }
         lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList());
         lib.addFunctionLibrary(new ConstructorFunctionLibrary(getConfiguration()));
@@ -366,7 +369,7 @@ public abstract class AbstractStaticContext implements StaticContext {
 
     /**
      * Set the XPath language level supported.
-     * The current levels supported are 20 (=2.0) and 31 (=3.1). The default is 3.1.
+     * The current levels supported are 20 (=2.0), 31 (=3.1), and 40 (=4.0). The default is 3.1.
      *
      * @param level the XPath language level
      * @since 9.3. From 9.8 this only affects the XPath syntax that is accepted;

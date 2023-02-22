@@ -488,11 +488,17 @@ public class Configuration implements SourceResolver, NotationSet {
         return new ConfigurationReader();
     }
 
-
     protected void init() {
         Version.platform.initialize(this);
         defaultXsltCompilerInfo.setURIResolver(getSystemURIResolver());
         StandardEntityResolver resolver = new StandardEntityResolver(this);
+
+        // If the call to makeStandardModuleURIResolver during initialization, created
+        // a StandardModuleURIResolver without a config, make sure it gets this config.
+        if (standardModuleURIResolver instanceof StandardModuleURIResolver) {
+            ((StandardModuleURIResolver) standardModuleURIResolver).setConfiguration(this);
+        }
+
         defaultParseOptions.setEntityResolver(resolver);
         internalSetBooleanProperty(Feature.PREFER_JAXP_PARSER, true);
         internalSetBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS, true);
@@ -1425,6 +1431,10 @@ public class Configuration implements SourceResolver, NotationSet {
         return XPath31FunctionSet.getInstance();
     }
 
+    public BuiltInFunctionSet getXPath40FunctionSet() {
+        return XPath40FunctionSet.getInstance();
+    }
+
     public BuiltInFunctionSet getXQueryUpdateFunctionSet() {
         return null;
     }
@@ -2039,6 +2049,9 @@ public class Configuration implements SourceResolver, NotationSet {
     public void setModuleURIResolver(String className) throws TransformerException {
         Object obj = dynamicLoader.getInstance(className, null);
         if (obj instanceof ModuleURIResolver) {
+            if (obj instanceof StandardModuleURIResolver) {
+                ((StandardModuleURIResolver) obj).setConfiguration(this);
+            }
             setModuleURIResolver((ModuleURIResolver) obj);
         } else {
             throw new XPathException("Class " + className + " is not a ModuleURIResolver");
@@ -3460,15 +3473,15 @@ public class Configuration implements SourceResolver, NotationSet {
         if ("XQ".equals(language)) {
             if (updating) {
                 throw new XPathException("XQuery Update is supported only in Saxon-EE");
-            } else if (languageVersion == 31 || languageVersion == 30 || languageVersion == 10) {
-                XQueryParser parser = new XQueryParser();
-                parser.setLanguage(XPathParser.ParsedLanguage.XQUERY, 31);
+            } else if (languageVersion == 40 || languageVersion == 31 || languageVersion == 30 || languageVersion == 10) {
+                XQueryParser parser = new XQueryParser(31);
+                parser.setLanguage(XPathParser.ParsedLanguage.XQUERY, Math.max(languageVersion, 31));
                 return parser;
             } else {
                 throw new XPathException("Unknown XQuery version " + languageVersion);
             }
         } else if ("XP".equals(language)) {
-            if (languageVersion == 31 || languageVersion == 30 || languageVersion == 305 || languageVersion == 20) {
+            if (languageVersion == 40 || languageVersion == 31 || languageVersion == 30 || languageVersion == 305 || languageVersion == 20) {
                 XPathParser parser = new XPathParser();
                 parser.setLanguage(XPathParser.ParsedLanguage.XPATH, languageVersion);
                 return parser;
@@ -4479,8 +4492,11 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
 
                 case FeatureCode.MODULE_URI_RESOLVER_CLASS:
-                    setModuleURIResolver(
-                            (ModuleURIResolver) instantiateClassName(name, value, ModuleURIResolver.class));
+                    ModuleURIResolver resolver = (ModuleURIResolver) instantiateClassName(name, value, ModuleURIResolver.class);
+                    if (resolver instanceof StandardModuleURIResolver) {
+                        ((StandardModuleURIResolver) resolver).setConfiguration(this);
+                    }
+                    setModuleURIResolver(resolver);
                     break;
 
                 case FeatureCode.NAME_POOL:
@@ -4694,8 +4710,8 @@ public class Configuration implements SourceResolver, NotationSet {
                 }
                 case FeatureCode.XPATH_VERSION_FOR_XSLT: {
                     int val = requireInteger(name, value);
-                    if (val != 20 && val != 30 && val != 305 && val != 31) {
-                        throw new IllegalArgumentException("XPath version for XSLT must be 20 (XPath 2.0), 30 (XPath 3.0), 31 (XPath 3.1), or 305 (XPath 3.0 with XSLT-defined extensions)");
+                    if (val != 20 && val != 30 && val != 305 && val != 31 && val != 40) {
+                        throw new IllegalArgumentException("XPath version for XSLT must be 20 (XPath 2.0), 30 (XPath 3.0), 31 (XPath 3.1), or 305 (XPath 3.0 with XSLT-defined extensions), or 40 (XPath 4.0 proposal)");
                     }
                     xpathVersionForXslt = val;
                     break;

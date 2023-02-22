@@ -220,16 +220,9 @@ public class ParserExtension {
      */
 
     public ItemType parseExtendedItemType(XPathParser p) throws XPathException {
-        Tokenizer t = p.getTokenizer();
-        if (t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("tuple")) {
-            // Saxon 9.8 extension: tuple types
-            needExtension(p, "Tuple types");
-        } else if (t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("union")) {
-            // Saxon 9.8 extension: union types
-            needExtension(p, "Inline union types");
-        }
         return null;
     }
+
 
     /**
      * Parse an extended XSLT pattern in the form ~itemType (predicate)*

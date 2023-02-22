@@ -1052,10 +1052,11 @@ public final class Tokenizer {
             case "attribute":
                 return Token.NODEKIND;
             case "atomic":
-            case "tuple":
+            case "tuple": // Retained as synonym of "record" for the time benig
+            case "record":
             case "type":
             case "union":
-                return allowSaxonExtensions ? Token.NODEKIND : Token.FUNCTION; // Saxon extension types
+                return languageLevel == 40 ? Token.NODEKIND : Token.FUNCTION; // Saxon extension types
             case "switch":
                 // Reserved in XPath 3.0, even though only used in XQuery
                 return languageLevel == 20 ? Token.FUNCTION : Token.SWITCH;

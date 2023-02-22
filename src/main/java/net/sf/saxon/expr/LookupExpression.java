@@ -14,7 +14,7 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.TupleItemType;
+import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.ma.map.TupleType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -84,11 +84,11 @@ public class LookupExpression extends BinaryExpression {
                 }
             } else if (isMapLookup) {
                 ItemType mapType = getLhsExpression().getItemType();
-                if (mapType instanceof TupleItemType && getRhsExpression() instanceof StringLiteral) {
+                if (mapType instanceof RecordTest && getRhsExpression() instanceof StringLiteral) {
                     String fieldName = ((StringLiteral) getRhsExpression()).stringify();
-                    SequenceType fieldType = ((TupleItemType) mapType).getFieldType(fieldName);
+                    SequenceType fieldType = ((RecordTest) mapType).getFieldType(fieldName);
                     if (fieldType == null) {
-                        return ((TupleItemType) mapType).isExtensible() ? AnyItemType.getInstance() : ErrorType.getInstance();
+                        return ((RecordTest) mapType).isExtensible() ? AnyItemType.getInstance() : ErrorType.getInstance();
                     } else {
                         return fieldType.getPrimaryType();
                     }
@@ -254,11 +254,11 @@ public class LookupExpression extends BinaryExpression {
                 }
             } else if (isMapLookup) {
                 ItemType mapType = getLhsExpression().getItemType();
-                if (mapType instanceof TupleItemType && getRhsExpression() instanceof StringLiteral) {
+                if (mapType instanceof RecordTest && getRhsExpression() instanceof StringLiteral) {
                     String fieldName = ((StringLiteral) getRhsExpression()).stringify();
-                    SequenceType fieldType = ((TupleItemType) mapType).getFieldType(fieldName);
+                    SequenceType fieldType = ((RecordTest) mapType).getFieldType(fieldName);
                     if (fieldType == null) {
-                        return ((TupleItemType) mapType).isExtensible() ? StaticProperty.ALLOWS_ZERO_OR_MORE : StaticProperty.ALLOWS_ZERO;
+                        return ((RecordTest) mapType).isExtensible() ? StaticProperty.ALLOWS_ZERO_OR_MORE : StaticProperty.ALLOWS_ZERO;
                     } else {
                         return fieldType.getCardinality();
                     }

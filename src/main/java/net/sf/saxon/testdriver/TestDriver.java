@@ -332,7 +332,7 @@ public abstract class TestDriver {
         XdmNode catalog = catbuilder.build(catalogFile);
         catalogNode = catalog;
         XPathCompiler xpc = driverProc.newXPathCompiler();
-        xpc.setLanguageVersion("3.1");
+        xpc.setLanguageVersion("4.0");
         xpc.setCaching(true);
         xpc.declareNamespace("", catalogNamespace());
 

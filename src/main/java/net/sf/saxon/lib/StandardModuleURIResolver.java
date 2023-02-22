@@ -37,7 +37,7 @@ import java.net.URLConnection;
 
 public class StandardModuleURIResolver implements ModuleURIResolver {
 
-    Configuration config;
+    Configuration config = null;
 
     /**
      * Create a StandardModuleURIResolver. Although the class is generally used as a singleton,
@@ -58,6 +58,16 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
 
     public StandardModuleURIResolver(Configuration config) {
         this.config = config;
+    }
+
+    /**
+     * Set the Configuration that this resolver uses. Has no effect if the configuration
+     * has already been supplied by the constructor.
+     */
+    public void setConfiguration(Configuration newConfig) {
+        if (config == null) {
+            config = newConfig;
+        }
     }
 
     /**
@@ -97,7 +107,7 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
                     se.setIsStaticError(true);
                     throw se;
                 }
-                if (!config.getAllowedUriTest().test(absoluteURI)) {
+                if (config != null && !config.getAllowedUriTest().test(absoluteURI)) {
                     throw new XPathException("URI scheme '" + absoluteURI.getScheme() + "' has been disallowed");
                 }
 

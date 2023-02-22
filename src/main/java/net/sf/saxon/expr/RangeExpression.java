@@ -37,16 +37,16 @@ public class RangeExpression extends Expression {
     private boolean defaultedStep;
 
     /**
-     * Construct a stepping range expression of the form A by B to C.
-     * Because of the way the parser works, this is constructed as if it were a binary
-     * expression (A by (B to C)) even though that doesn't reflect the semantics
+     * Construct a stepping range expression of the form S by B. If S is a RangeExpression,
+     * we collapse this into a 3-operand RangeExpression. If S is anything else, we generate
+     * a function call saxon:_step-over-sequence(S, B)
      */
 
-    public static RangeExpression makeSteppingExpression(Expression start, Expression rhs) throws XPathException {
-        if (!(rhs instanceof RangeExpression && ((RangeExpression)rhs).defaultedStep)) {
-            throw new XPathException("'by' operator must be followed by 'x to y'");
+    public static RangeExpression makeSteppingExpression(Expression lhs, Expression rhs) throws XPathException {
+        if (!(lhs instanceof RangeExpression && ((RangeExpression)lhs).defaultedStep)) {
+            throw new XPathException("Temporary restriction: 'by' operator must be preceded by 'x to y'");
         }
-        return new RangeExpression(start, ((RangeExpression) rhs).getStartExpression(), ((RangeExpression) rhs).getEndExpression());
+        return new RangeExpression(((RangeExpression) lhs).getStartExpression(), rhs, ((RangeExpression) lhs).getEndExpression());
     }
 
     /**
@@ -61,7 +61,7 @@ public class RangeExpression extends Expression {
     }
 
     /**
-     * Construct a RangeExpression with increment of 1
+     * Construct a RangeExpression with specified increment
      *
      * @param start expression that computes the start of the range
      * @param end   expression that computes the end of the range
@@ -171,23 +171,19 @@ public class RangeExpression extends Expression {
                 long i0 = ((Int64Value) v0).longValue();
                 long i1 = ((Int64Value) v1).longValue();
                 long i2 = ((Int64Value) v2).longValue();
-                if (i1 == 0 || (i1 > 0 && i0 > i2) || i1 < 0 && i0 < i2) {
+                if (i1 == 0 || i0 > i2) {
                     result = Literal.makeEmptySequence();
-                } else if (i0 == i2) {
-                    result = Literal.makeLiteral(Int64Value.makeIntegerValue(i0), this);
                 } else {
                     if (Math.abs((i2 - i0)/i1) > Integer.MAX_VALUE) {
                         throw new XPathException("Maximum length of sequence in Saxon is " + Integer.MAX_VALUE, "XPDY0130");
                     }
-                    result = Literal.makeLiteral(new IntegerRange(i0, i1, i2), this);
+                    result = Literal.makeLiteral(i1 < 0 ? new IntegerRange(i2, i1, i0) : new IntegerRange(i0, i1, i2), this);
                 }
             } else {
                 BigInteger i0 = ((IntegerValue) v0).asBigInteger();
                 BigInteger i1 = ((IntegerValue) v1).asBigInteger();
                 BigInteger i2 = ((IntegerValue) v2).asBigInteger();
-                if (i0.equals(BigInteger.ZERO)
-                        || (i1.compareTo(BigInteger.ZERO) > 0 && i0.compareTo(i2) > 0)
-                        || i1.compareTo(BigInteger.ZERO) < 0 && i0.compareTo(i2) < 0) {
+                if (i0.equals(BigInteger.ZERO) || i0.compareTo(i2) > 0) {
                     result = Literal.makeEmptySequence();
                 } else if (i0.equals(i2)) {
                     result = Literal.makeLiteral(Int64Value.makeIntegerValue(i0), this);
@@ -362,13 +358,15 @@ public class RangeExpression extends Expression {
     @Override
     public String toString() {
         String by = getStepExpression().toString();
-        return getStartExpression().toString() + (by.equals("1") ? "" : (" by " + by)) + " to " + getEndExpression().toString();
+        return getStartExpression().toString() + " to " + getEndExpression().toString()
+                + (by.equals("1") ? "" : (" by " + by));
     }
 
     @Override
     public String toShortString() {
         String by = getStepExpression().toShortString();
-        return getStartExpression().toShortString() + (by.equals("1") ? "" : (" by " + by)) + " to " + getEndExpression().toShortString();
+        return getStartExpression().toShortString() + " to " + getEndExpression().toShortString()
+                + (by.equals("1") ? "" : (" by " + by));
     }
 
     /**

@@ -87,6 +87,14 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
 
+        SpecificFunctionType indexArg = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_ITEM},
+                SequenceType.SINGLE_ATOMIC);
+
+        register("index", 2, MapIndex.class, MapType.ANY_MAP_TYPE, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, indexArg, ONE, null);
+
         register("put", 3, MapPut.class, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
@@ -192,9 +200,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public ItemType getResultItemType(Expression[] args) {
             ItemType mapType = args[0].getItemType();
-            if (mapType instanceof TupleItemType && args[1] instanceof StringLiteral) {
+            if (mapType instanceof RecordTest && args[1] instanceof StringLiteral) {
                 String key = ((StringLiteral) args[1]).stringify();
-                TupleItemType tit = (TupleItemType) mapType;
+                RecordTest tit = (RecordTest) mapType;
                 SequenceType valueType = tit.getFieldType(key);
                 if (valueType == null) {
                     warning("Field " + key + " is not defined in tuple type");
@@ -218,9 +226,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public int getCardinality(Expression[] args) {
             ItemType mapType = args[0].getItemType();
-            if (mapType instanceof TupleItemType && args[1] instanceof StringLiteral) {
+            if (mapType instanceof RecordTest && args[1] instanceof StringLiteral) {
                 String key = ((StringLiteral) args[1]).stringify();
-                TupleItemType tit = (TupleItemType) mapType;
+                RecordTest tit = (RecordTest) mapType;
                 SequenceType valueType = tit.getFieldType(key);
                 if (valueType == null) {
                     warning("Field " + key + " is not defined in tuple type");
@@ -369,7 +377,29 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
-     * Implementation of the extension function map:keys(Map) =&gt; atomicValue*
+     * Implementation of the proposed XPath 4.0 function
+     * map:index($sequence, function(item()) as xs:anyAtomicType) =&gt; map(*)
+     */
+    public static class MapIndex extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            HashTrieMap map = new HashTrieMap();
+            Function function = (Function)arguments[1];
+            SequenceIterator iter = arguments[0].iterate();
+            Item item;
+            Sequence[] args = new Sequence[1];
+            while ((item = iter.next()) != null) {
+                args[0] = item;
+                AtomicValue key = (AtomicValue)dynamicCall(function, context, args);
+                map.initialPut(key, item);
+            }
+            return map;
+        }
+    }
+
+    /**
+     * Implementation of the XPath 3.1 function map:keys(Map) =&gt; atomicValue*
      */
     public static class MapKeys extends SystemFunction {
 

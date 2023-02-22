@@ -756,7 +756,8 @@ public class AlphaCode {
                     for (AlphaCodeTree t : tree.argTypes) {
                         fieldTypes.add(sequenceTypeFromTree(t, config));
                     }
-                    itemType = new TupleItemType(tree.fieldNames, fieldTypes, tree.extensibleTupleType);
+                    List<String> optionalFields = new ArrayList<>(); // TODO: capture this in the AlphaCode
+                    itemType = new RecordTest(tree.fieldNames, fieldTypes, optionalFields, tree.extensibleTupleType);
                 }
             } else {
                 AlphaCodeTree returnType = tree.resultType;
@@ -870,13 +871,13 @@ public class AlphaCode {
                 if (memberType != SequenceType.ANY_SEQUENCE) {
                     result.valueType = makeTree(memberType);
                 }
-            } else if (primary instanceof TupleItemType) {
-                result.extensibleTupleType = ((TupleItemType)primary).isExtensible();
+            } else if (primary instanceof RecordTest) {
+                result.extensibleTupleType = ((RecordTest)primary).isExtensible();
                 result.fieldNames = new ArrayList<>();
                 result.argTypes = new ArrayList<>();
-                for (String s : ((TupleItemType) primary).getFieldNames()) {
+                for (String s : ((RecordTest) primary).getFieldNames()) {
                     result.fieldNames.add(s);
-                    result.argTypes.add(makeTree(((TupleItemType) primary).getFieldType(s)));
+                    result.argTypes.add(makeTree(((RecordTest) primary).getFieldType(s)));
                 }
             } else if (primary instanceof MapType) {
                 AtomicType keyType = ((MapType) primary).getKeyType();

@@ -97,6 +97,10 @@ public class Environment implements URIResolver {
         environment.xpathCompiler = environment.processor.newXPathCompiler();
         environment.xpathCompiler.setBaseURI(baseURI);
         environment.xqueryCompiler = environment.processor.newXQueryCompiler();
+        if (spec == Spec.XQ40) {
+            environment.xqueryCompiler.setLanguageVersion("4.0");
+            environment.xpathCompiler.setLanguageVersion("4.0");
+        }
         environment.xqueryCompiler.setBaseURI(baseURI);
         environment.xsltCompiler = environment.processor.newXsltCompiler();
         if (testDriver.runWithJS) {
@@ -109,6 +113,9 @@ public class Environment implements URIResolver {
         if (spec == Spec.XT30) {
             //environment.xsltCompiler.setXsltLanguageVersion("3.0");
             environment.xpathCompiler.setLanguageVersion("3.1");
+        } else if (spec == Spec.XT40) {
+            //environment.xsltCompiler.setXsltLanguageVersion("3.0");
+            environment.xpathCompiler.setLanguageVersion("4.0");
         } else if (spec == Spec.XT20) {
             throw new AssertionError("Unsupported spec: XSLT 2.0");
         }
@@ -160,11 +167,13 @@ public class Environment implements URIResolver {
 
         environment.xpathCompiler = environment.processor.newXPathCompiler();
         environment.xpathCompiler.setBaseURI(env.getBaseURI());
+        environment.xpathCompiler.setLanguageVersion(driver.spec.version);
         environment.xqueryCompiler = environment.processor.newXQueryCompiler();
         environment.xqueryCompiler.setBaseURI(env.getBaseURI());
+        environment.xqueryCompiler.setLanguageVersion(driver.spec.version);
         if (driver.spec.shortSpecName.equals("XT")) {
             environment.xsltCompiler = environment.processor.newXsltCompiler();
-            //environment.xsltCompiler.setXsltLanguageVersion(driver.spec.version);
+            environment.xsltCompiler.setXsltLanguageVersion(driver.spec.version);
             if (driver.runWithJS) {
                 environment.xsltCompiler.setTargetEdition("JS");
             }
