@@ -285,7 +285,7 @@ public class QueryModule implements StaticContext {
 
         functionLibraryList = new FunctionLibraryList();
         functionLibraryList.addFunctionLibrary(getBuiltInFunctionSet());
-        functionLibraryList.addFunctionLibrary(config.getBuiltInExtensionLibraryList(31));
+        functionLibraryList.addFunctionLibrary(config.getBuiltInExtensionLibraryList(sqc.getLanguageVersion()));
         functionLibraryList.addFunctionLibrary(new ConstructorFunctionLibrary(config));
 
         localFunctionLibraryNr = functionLibraryList.addFunctionLibrary(
@@ -294,7 +294,7 @@ public class QueryModule implements StaticContext {
         importedFunctionLibraryNr = functionLibraryList.addFunctionLibrary(
                 new ImportedFunctionLibrary(this, getTopLevelModule().getGlobalFunctionLibrary()));
 
-        if (sqc != null && sqc.getExtensionFunctionLibrary() != null) {
+        if (sqc.getExtensionFunctionLibrary() != null) {
             functionLibraryList.addFunctionLibrary(sqc.getExtensionFunctionLibrary());
         }
 

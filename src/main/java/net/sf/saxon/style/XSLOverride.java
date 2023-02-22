@@ -8,7 +8,6 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Component;
-import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.type.Type;
@@ -108,15 +107,5 @@ public class XSLOverride extends StyleElement {
             }
         }
     }
-
-    /**
-     * Add a function library that recognizes the function call xsl:original, which is permitted
-     * within a function that overrides another
-     *
-     * @param list the function library list to which the new function library should be added
-     */
-
-    public void addXSLOverrideFunctionLibrary(FunctionLibraryList list){
-        list.addFunctionLibrary(XSLOriginalLibrary.getInstance());
-    }
+    
 }
