@@ -518,7 +518,7 @@ public class Query {
     }
 
     @CSharpModifiers(code={"internal", "static"})
-    @CSharpReplaceBody(code="return new Saxon.Api.JsonBuilder(processor.getUnderlyingConfiguration()).parseJson(jsonReader);")
+    @CSharpReplaceBody(code="return new Saxon.Api.JsonBuilder(processor.getUnderlyingConfiguration()).ParseJson(jsonReader);")
     static XdmValue parseJson(Processor processor, Reader jsonReader) throws SaxonApiException {
         return processor.newJsonBuilder().parseJson(jsonReader);
     }
