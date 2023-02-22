@@ -80,9 +80,9 @@ public class OnDemandFunctionSet implements FunctionLibrary {
     }
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName) {
+    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
         boolean match = load(functionName, null);
-        return match && library.isAvailable(functionName);
+        return match && library.isAvailable(functionName, languageLevel);
     }
 
     @Override
