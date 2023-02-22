@@ -7,7 +7,6 @@
 
 package net.sf.saxon.tree.linked;
 
-import net.sf.saxon.event.CopyInformee;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
@@ -301,9 +300,9 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
         SchemaType typeCode = CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS) ?
                 getSchemaType() : Untyped.getInstance();
-        CopyInformee informee = (CopyInformee) out.getPipelineConfiguration().getComponent("net.sf.saxon.event.CopyInformee");
+        java.util.function.Function<NodeInfo, Object> informee = out.getPipelineConfiguration().getCopyInformee();
         if (informee != null) {
-            Object o = informee.notifyElementNode(this);
+            Object o = informee.apply(this);
             if (o instanceof Location) {
                 location = (Location)o;
             }
