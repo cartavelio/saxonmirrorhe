@@ -12,9 +12,48 @@
 
    <section id="config-interfaces" title="Configuration interfaces">
       <h1>Configuration interfaces</h1>
-
-
-      <p>At the heart of Saxon is the class <a class="javalink" href="net.sf.saxon.Configuration">net.sf.saxon.Configuration</a>. This contains all the current
+      
+      <p>All the various APIs for invoking Saxon functionality start by creating a top-level object holding all the resources
+      held by the application as a whole, and providing factory mechanisms for instantiating particular functionality and
+      configuring its properties. These classes include the following:</p>
+      
+      <table>
+         <thead>
+            <tr>
+               <th>API</th>
+               <th>Class</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr class="javaonly">
+               <td>JAXP Transformation</td>
+               <td><code>javax.xml.transform.TransformerFactory</code></td>
+            </tr>
+            <tr class="javaonly">
+               <td>JAXP Schema Validation</td>
+               <td><code>javax.xml.validation</code></td>
+            </tr>
+            <tr class="javaonly">
+               <td>JAXP XPath Evaluator</td>
+               <td><code>javax.xml.xpath.XPathFactory</code></td>
+            </tr>
+            <tr class="javaonly">
+               <td>XQJ</td>
+               <td><code>javax.xml.xquery.XQDataSource</code></td>
+            </tr>
+            <tr class="javaonly">
+               <td>s9api</td>
+               <td>net.sf.saxon.s9api.Processor</td>
+            </tr>
+            <tr class="csonly">
+               <td>Saxon.Api</td>
+               <td>Saxon.Api.Processor</td>
+            </tr>
+         </tbody>
+      </table>
+      
+      <p>In each case this top-level class encapsulates the class <a class="javalink" href="net.sf.saxon.Configuration">net.sf.saxon.Configuration</a> (in Java)
+         or <code>Saxon.Hej.Configuration</code> (C#). This contains all the current
          settings of configuration options. All Saxon tasks, such as compiling and running queries and transformations, or building and validating source
          documents, happen under the control of a <code>Configuration</code>. Many resources are owned by the <code>Configuration</code>, meaning that related
          tasks must run under the same <code>Configuration</code>. Most notably, the <code>Configuration</code> holds a <a class="javalink"
@@ -24,32 +63,36 @@
          qualified names. However, two Saxon tasks that are unrelated can run under different <code>Configuration</code> objects.</p>
 
       <p>There are subclasses of <code>Configuration</code> containing resources associated with the capabilities of the different Saxon editions: specifically,
-            <a class="javalink" href="com.saxonica.config.ProfessionalConfiguration">com.saxonica.config.ProfessionalConfiguration</a> and <a class="javalink"
-            href="com.saxonica.config.EnterpriseConfiguration">com.saxonica.config.EnterpriseConfiguration</a>. In many cases the <code>Configuration</code> is
+            <a class="javalink" href="com.saxonica.config.ProfessionalConfiguration">ProfessionalConfiguration</a> and <a class="javalink"
+            href="com.saxonica.config.EnterpriseConfiguration">EnterpriseConfiguration</a>. In many cases the <code>Configuration</code> is
          used as a factory class to deliver services associated with the different capability levels, for example the method <code>getOptimizer()</code> returns
          the query optimizer appropriate to the loaded Saxon edition.</p>
+      
+      <p>Most applications will manipulate the configuration via the public API in the top-level processing class (for example 
+      the s9api or Saxon.Api <code>Processor</code> class; but applications wanting to take full advantage of Saxon's capabilities
+         will often find themselves exposing the lower-level <code>Configuration</code> object.</p>
+      
+      <p class="javaonly">In the s9api interface on Java, configuration options can be set using a method call such as
+      <code>processor.setConfigurationFeature(Feature.LINE_NUMBERING, true)</code>. The method definition uses Java
+      generics to ensure that the supplied property value is of the correct type for the selected feature.</p>
+      
+      <p class="csonly">In the Saxon.Api interface on Java, configuration options can be set using a method call such as
+         <code>processor.SetConfigurationFeature(Feature&lt;bool>.LINE_NUMBERING, true)</code>. It's necessary to specify
+         the type of the value (here <code>bool</code>) to make the method type-safe.</p>
+      
+      <p>It's also possible to set the same properties by using lower-level methods on the <code>Configuration</code>
+         object itself. The properties all have names in the form of URIs (for example <code>"http://saxon.sf.net/feature/linenumbering"</code>),
+      and these names are useful when a property has to be set via an API that expects property names as strings (for example the
+      JAXP <code>TransformerFactory</code>. When boolean values need to be supplied as strings, Saxon accepts the values
+      <code>"true"</code>, <code>"on"</code>, <code>"yes"</code>, and <code>"1"</code> to represent true, and
+         <code>"false"</code>, <code>"off"</code>, <code>"no"</code>, and <code>"0"</code> to represent false.</p>
 
       <p>Many configuration options have direct setter and getter methods on the <code>Configuration</code> object, for example
             <code>setAllowExternalFunctions()</code> and <code>isAllowExternalFunctions()</code>. Some other options have setters and getters on objects
          reachable from the <code>Configuration</code>, for example defaults for XSLT processing can be controlled using methods such as
             <code>getDefaultXsltCompilerInfo().setXsltVersion()</code>, while defaults for XQuery processing can be controlled using methods such as
             <code>getDefaultStaticQueryContext().setLanguageVersion()</code>.</p>
-      
-      <p>The most general mechanism for getting and setting configuration properties, however, is provided by the methods
-         <code>getConfigurationProperty(Feature)</code> and <code>setConfigurationProperty(Feature,
-            value)</code>. In these methods the property to be read or written is identified by a
-         <a class="javalink" href="net.sf.saxon.lib.Feature">net.sf.saxon.lib.Feature</a> object,
-         typically one of the objects defined as static constants, for example
-         <code>Feature.ALLOW_EXTERNAL_FUNCTIONS</code>. The Feature object is also parameterized by
-         the type of value required, for example <code>Feature.ALLOW_EXTERNAL_FUNCTIONS</code> is a
-         <code>Feature&lt;Boolean&gt;</code>. Internally, the <code>Feature</code> object defines
-         both a unique integer code for the feature, and a unique string in the form of a URI (for
-         example, <code>"http://saxon.sf.net/feature/allowExternalFunctions"</code>). In some
-         interfaces, for example the JAXP <code>TransformerFactory</code>, configuration options are identified
-         by strings, and the required strings can be accessed using the <code>name</code> property of the
-         <code>Feature</code>, for example <code>net.sf.saxon.lib.Feature.ALLOW_EXTERNAL_FUNCTIONS.name</code>.
-         For backwards compatibility reasons, these strings are also available as constants in the class
-         <a class="javalink" href="net.sf.saxon.lib.FeatureKeys">net.sf.saxon.lib.FeatureKeys</a>.</p>
+     
       
       <p>On command line interfaces such as <code>net.sf.saxon.Transform</code>, configuration
          options can be supplied using the form <code>--name:value</code>. Here <code>name</code> is
@@ -59,27 +102,15 @@
          <code>xslt/factory/attribute</code> element in Ant), Saxon accepts the strings "true", "1",
          "yes", "on", or "false", "0", "no", "off", to represent booleans.</p>
 
-      <p>For backwards compatibility, the <code>Configuration</code> class continues to support the methods 
-            <code>getConfigurationProperty(name)</code> and <code>setConfigurationProperty(name, value)</code>. In these methods the name of the configuration
-         property is always a string in the form of a URI (for example, <code>"http://saxon.sf.net/feature/initialTemplate"</code>), and the strings available
-         are all defined by constants in the class <a class="javalink" href="net.sf.saxon.lib.FeatureKeys">net.sf.saxon.lib.FeatureKeys</a> (for example,
-            <code>FeatureKeys.INITIAL_TEMPLATE</code>). The value is of various types depending on the property. In the vast majority of cases, the property can
-         be supplied as a string, or it has an alternative, equivalent property that can be supplied as a string. For properties that are essentially boolean in
-         nature the value can be supplied either as one of the Java constants <code>Boolean.TRUE</code> or <code>Boolean.FALSE</code>, or as one of the strings
-         "true", "1", "yes", "on", or "false", "0", "no", "off". These choices are designed to suit the conventions of different APIs in which the configuration
-         options are exposed.</p>
-
-      <p>In many APIs for controlling Saxon activities, the <code>Configuration</code> object is not exposed directly, but is hidden below some similar object
-         acting as the root object for that particular API. Many of these objects provide a direct way to set the configuration options. These are discussed in
-         the following sections.</p>
+      
 
       <nav>
          <ul/>
       </nav>
 
-      <section id="jaxp-configuration" title="JAXP Factory Interfaces" class="javaonly">
+      <section id="jaxp-configuration" title="JAXP Factory Interfaces">
          <h1>JAXP Factory Interfaces</h1>
-
+        <div class="javaonly">
 
          <p>Saxon implements a number of JAXP interfaces, notably the APIs for transformation, XPath processing, and validation.</p>
          
@@ -146,11 +177,11 @@
                >com.saxonica.ee.jaxp.SchemaFactoryImpl</a>. The interface offers methods <code>getProperty(name)</code> and <code>setProperty(name,
                value)</code> which map to the underlying methods in the Saxon <code>Configuration</code>; again, it is also possible to cast to the Saxon
             implementation class and call configuration-setting methods directly.</p>
-
+       </div>
       </section>
       <section id="s9api-config" title="Configuration using s9api" class="javaonly">
          <h1>Configuration using s9api (Java)</h1>
-
+         <div class="javaonly">
 
          <p>In Saxon's s9api interface the root API object is the <a class="javalink" href="net.sf.saxon.s9api.Processor">net.sf.saxon.s9api.Processor</a>
             object. This again is a wrapper around a <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>. All the configuration properties
@@ -169,20 +200,32 @@
                class="javalink" href="net.sf.saxon.trans.CompilerInfo">CompilerInfo</a> in the case of XSLT, and <a class="javalink"
                href="net.sf.saxon.query.StaticQueryContext">StaticQueryContext</a> in the case of XQuery.</p>
         
-        <aside>When s9api was introduced, the name stood for "Saxon 9 Application Programming Interface.
+        <aside>When s9api was introduced, the name stood for "Saxon 9 Application Programming Interface".
           It's a nice snappy name, so we've retained it unchanged for Saxon 10.</aside>
+         </div>
       </section>
 
       <section id="config-dotnet" title="Configuration using Saxon.Api (C#)" class="csonly">
          <h1>Configuration using Saxon.Api (C#)</h1>
 
+         <div class="csonly">
 
-
-         <p>In Saxon's Saxon.Api interface on .NET, the root API object is the <a class="cslink" href="Saxon.Api.Processor">Saxon.Api.Processor</a> object.
-            This is a wrapper around a <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>. All the configuration properties are
-            exposed via the <code>Processor</code> methods <code>getProperty(name)</code> and <code>setProperty(name, value)</code> which map directly to the
-            methods <code>getConfigurationProperty(name)</code> and <code>setConfigurationProperty(name, value)</code> on the underlying
-               <code>Configuration</code>.</p>
+         <p>In the Saxon.Api interface in Saxon-CS, the root API object is the <a class="cslink" href="Saxon.Api.Processor">Saxon.Api.Processor</a> object.
+            This is a wrapper around a <code>Saxon.Hej.Configuration</code> object, which should not normally be used directly (though it's exposed
+            as public, just in case you need to). There are two ways to set configuration properties:</p>
+            
+            <ul>
+               <li><p><code>processor.SetProperty(Saxon.Api.Feature&lt;bool>.TIMING, true)</code></p></li>
+               <li><p><code>processor.SetProperty("http://saxon.sf.net/feature/timing", "true");</code></p></li>
+            </ul>
+            
+            <p>There are also two <code>GetProperty()</code> in the same vein.</p>
+            
+            <p>The first form is recommended for type-safety (it is also faster, though this is rarely going to make a difference). The second
+               form may be needed when the property name is not known statically, for example if it is being read from a configuration file
+               of some kind.</p>
+            
+      
 
          <p>The Saxon.Api <code>Processor</code> object also has a constructor <code>new Processor(stream)</code> which allows the underlying
                <code>Configuration</code> to be built from a supplied configuration file, which must have the format described in <a class="bodylink"
@@ -191,9 +234,10 @@
          <p>In many cases with the Saxon.Api interface it is more appropriate to set options at a finer level of granularity than the <code>Processor</code>.
             For example, options that affect XSLT stylesheet compilation can be set on the <a class="cslink" href="Saxon.Api.XsltCompiler">XsltCompiler</a>
             object, and options that affect XQuery compilation on the <a class="cslink" href="Saxon.Api.XQueryCompiler">XQueryCompiler</a>.</p>
+         </div>
       </section>
 
-      <section id="config-commandline" title="Configuration from the command line">
+      <section id="config-commandline" title="Configuration from the Command Line">
          <h1>Configuration from the command line</h1>
 
          <p>The main command-line interfaces to Saxon are the <code>Transform</code> for running a
@@ -203,6 +247,8 @@
             commands allow this to be requested using the option <code>-xsdversion:1.1</code> (the
             default from Saxon 9.8). Many of these options correspond directly to the configuration
             properties available on the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a> object.</p>
+         
+         <p>The commands are available with minor variations on both the Java and .NET platforms.</p>
          
          <p>For full details, including lists of the available command line options for each of
             these interfaces, see the following:</p>
@@ -224,7 +270,8 @@
       <section id="config-xqj" title="Configuration using XQJ" class="javaonly">
          <h1>Configuration using XQJ</h1>
 
-         <p>The root object in the XQJ (XQuery for Java) API is <code>javax.xml.query.XQDataSource</code>, and the Saxon implementation class is <a
+         <div class="javaonly">
+            <p>The root object in the XQJ (XQuery for Java) API is <code>javax.xml.query.XQDataSource</code>, and the Saxon implementation class is <a
                class="javalink" href="com.saxonica.xqj.SaxonXQDataSource">com.saxonica.xqj.SaxonXQDataSource</a>. The <code>XQDataSource</code> provides methods
                <code>getProperty(name)</code> and <code>setProperty(name, value)</code>. In these
             calls, the name is the URI-valued string associated with one of the <a
@@ -253,11 +300,12 @@
                   represented using any of the strings ("yes", "on", "true", or "1"), or ("no", "off", "false", or "0").</p>
             </li>
          </ol>
+         </div>
 
       </section>
       <section id="config-ant" title="Configuration when running Ant" class="javaonly">
          <h1>Configuration when running Ant</h1>
-
+         <div class="javaonly">
          <p>It is possible to run XSLT transformations from Ant using the <code>xslt</code> task, selecting Saxon as the XSLT processor by setting the
                <code>factory</code> child element to the Saxon implementation class of <code>javax.xml.transform.TransformerFactory</code>; that is one of <a
                class="javalink" href="net.sf.saxon.TransformerFactoryImpl">net.sf.saxon.TransformerFactoryImpl</a>, <a class="javalink"
@@ -294,6 +342,7 @@
          in an <code>attribute</code> child of the <code>factory</code> element overrides this. This can
          give dramatic performance improvements when using Ant to transform documents that contain references
          to these common W3C DTDs and entity files.</p></aside>
+         </div>
       </section>
    </section>
    <section id="configuration-file" title="Saxon configuration file">
