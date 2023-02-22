@@ -810,7 +810,13 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
-        QName qname = QName.fromClarkName(cFuncName);
+        QName qname = null;
+        if(cFuncName.startsWith("Q{")) {
+            qname = QName.fromEQName(cFuncName);
+        } else {
+            qname = QName.fromClarkName(cFuncName);
+        }
+
         Map<String, Object> paramsMap =  setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
         if(executable == null) {
             throw new SaxonApiException("Error XsltExecutable is null");

@@ -343,7 +343,7 @@ public class XdmUtils {
      * function, provided a licensed Processor is used.
      * @param thread  - Graalvm runtime data structure for the thread
      * @param procRef - the Processor object given as a reference into the ObjectHandles pool
-     * @param c_eqname he name of the requested function given as a C char pointer array
+     * @param c_eqname the name of the requested function given as a C char pointer array. Both Clarkname and EQName and notation accepted
      * @param arity - the arity of the function
      * @return the requested function, or null if there is no such function. Note that some functions
      *      * (those with particular context dependencies) may be unsuitable for dynamic calling.
@@ -361,7 +361,13 @@ public class XdmUtils {
         }
         Processor proc = SaxonCAPI.objectHandles.get(procRef);
         String eqname = CTypeConversion.toJavaString(c_eqname);
-        XdmFunctionItem function = XdmFunctionItem.getSystemFunction(proc, QName.fromEQName(eqname), arity);
+        QName qname = null;
+        if(eqname.startsWith("Q")){
+            qname =  QName.fromEQName(eqname);
+        } else {
+            qname = QName.fromClarkName(eqname);
+        }
+        XdmFunctionItem function = XdmFunctionItem.getSystemFunction(proc, qname, arity);
         if(function == null) {
             return -1;
         } else {
