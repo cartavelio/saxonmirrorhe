@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -60,7 +61,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
      *                   than those declared)
      */
 
-    public RecordTest(List<String> names, List<SequenceType> types, List<String> optionalFieldNames, boolean extensible) {
+    public RecordTest(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible) {
         setDetails(names, types, optionalFieldNames, extensible);
     }
 
@@ -74,7 +75,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
      * @param extensible indicates whether the RecordTest is extensible (allows fields other
      *                   than those declared)
      */
-    public void setDetails(List<String> names, List<SequenceType> types, List<String> optionalFieldNames, boolean extensible) {
+    public void setDetails(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible) {
         for (int i = 0; i < names.size(); i++) {
             fieldTypes.put(names.get(i), types.get(i));
         }
@@ -307,7 +308,11 @@ public class RecordTest extends AnyFunctionType implements TupleType {
             } else {
                 sb.append(", ");
             }
-            sb.append(field.getKey());
+            if (NameChecker.isValidNCName(field.getKey())) {
+                sb.append(field.getKey());
+            } else {
+                sb.append('"').append(field.getKey()).append('"');
+            }
             if (isOptionalField(field.getKey())) {
                 sb.append('?');
             }

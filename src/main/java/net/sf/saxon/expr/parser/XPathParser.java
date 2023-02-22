@@ -1905,7 +1905,7 @@ public class XPathParser {
                     // self-reference
                     p.nextToken();
                     int occ = parseOccurrenceIndicator();
-                    arg = SequenceType.makeSequenceType(recordTest, occ);
+                    arg = SequenceType.makeSequenceType(new SelfReferenceRecordTest(recordTest), occ);
                     if (!Cardinality.allowsZero(occ) && !optionalFieldNames.contains(name)) {
                         throw new XPathException("A self-referencing field in a record type must be emptiable or optional", "XPST0140");
                     }
