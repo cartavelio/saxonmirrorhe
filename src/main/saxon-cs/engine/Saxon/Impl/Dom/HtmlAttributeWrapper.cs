@@ -154,12 +154,12 @@ namespace Saxon.Impl.Dom {
         public SteppingNode getFirstChild() {
             return null;
         }
-
+        
         public SteppingNode getPreviousSibling() {
             return null;
         }
 
-        public SteppingNode getSuccessorElement(SteppingNode anchor, string uri, string local) {
+        public SteppingNode getSuccessorElement(SteppingNode anchor, NamespaceUri uri, string local) {
             return parent.getSuccessorElement(anchor, uri, local);
         }
 

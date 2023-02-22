@@ -172,7 +172,7 @@ namespace Saxon.Api {
         /// Construct an atomic value of type <c>xs:QName</c>
         /// </summary>
         /// <param name="q">The QName value</param>                
-        public XdmAtomicValue(QName q) : base(new QNameValue( q.Prefix, q.Uri, q.LocalName)) {
+        public XdmAtomicValue(QName q) : base(new QNameValue( q.Prefix, q.NamespaceUri, q.LocalName)) {
         }
 
         /// <summary>

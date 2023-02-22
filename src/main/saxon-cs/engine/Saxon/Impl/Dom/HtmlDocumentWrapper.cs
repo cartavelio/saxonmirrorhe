@@ -74,6 +74,10 @@ namespace Saxon.Impl.Dom {
             return "";
         }
 
+        public override NamespaceUri getNamespaceUri() {
+            return NamespaceUri.NULL;
+        }
+
         public override string getPrefix() {
             return "";
         }
@@ -143,7 +147,7 @@ namespace Saxon.Impl.Dom {
             return null;
         }
 
-        public SteppingNode getSuccessorElement(SteppingNode anchor, string uri, string local) {
+        public SteppingNode getSuccessorElement(SteppingNode anchor, NamespaceUri uri, string local) {
             return outermostElement;
         }
 

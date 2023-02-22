@@ -54,7 +54,7 @@ namespace Saxon.Api {
             {
                 if (exception.getErrorCodeLocalPart() != null) {
                     return new QName("err",
-                        exception.getErrorCodeNamespace(),
+                        exception.getErrorCodeNamespace().ToString(),
                         exception.getErrorCodeLocalPart());
                 } else {
                     return null;

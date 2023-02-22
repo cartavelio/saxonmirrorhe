@@ -261,7 +261,7 @@ namespace Saxon.Api {
         /// Returns null if there is no built-in atomic type with this name.
         /// It is undefined whether two requests for the same built-in type will return the same object.</returns>
         public static XdmAtomicType BuiltInAtomicType(QName name) {
-            int fingerprint = StandardNames.getFingerprint(name.Uri, name.LocalName);
+            int fingerprint = StandardNames.getFingerprint(name.NamespaceUri, name.LocalName);
             return BuiltInAtomicType(fingerprint);
         }
 

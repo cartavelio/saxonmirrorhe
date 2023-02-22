@@ -307,7 +307,7 @@ namespace Saxon.Impl.XDoc {
                     foreach (XAttribute att in element.Attributes()) {
                         if (att.IsNamespaceDeclaration) {
                             string prefix = att.Name.LocalName == "xmlns" ? "" : att.Name.LocalName;
-                            bindings[i++] = new NamespaceBinding(prefix, att.Value);
+                            bindings[i++] = new NamespaceBinding(prefix, NamespaceUri.of(att.Value));
                         }
                     }
 
@@ -333,9 +333,9 @@ namespace Saxon.Impl.XDoc {
                 foreach (XAttribute att in elem.Attributes()) {
                     if (att.IsNamespaceDeclaration) {
                         if (att.Name.LocalName == "xmlns") {
-                            nsMap = nsMap.bind("", att.Value);
+                            nsMap = nsMap.bind("", NamespaceUri.of(att.Value));
                         } else {
-                            nsMap = nsMap.bind(att.Name.LocalName, att.Value);
+                            nsMap = nsMap.bind(att.Name.LocalName, NamespaceUri.of(att.Value));
                         }
                     }
                 }

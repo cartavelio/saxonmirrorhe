@@ -343,7 +343,7 @@ namespace Saxon.Impl.Dom {
             return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
         }
 
-        public override string getAttributeValue(string uri, string local) {
+        public override string getAttributeValue(NamespaceUri uri, string local) {
             Saxon.Hej.pattern.NameTest test =
                 new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, uri, local, getNamePool());
             AxisIterator iterator = iterateAxis(AxisInfo.ATTRIBUTE, test);
@@ -376,25 +376,25 @@ namespace Saxon.Impl.Dom {
                     string attName = att.Name;
                     if (attName.Equals("xmlns")) {
                         string prefix = "";
-                        string uri = att.Value;
+                        NamespaceUri uri = NamespaceUri.of(att.Value);
                         codes.Add(new NamespaceBinding(prefix, uri));
                     }
                     else {
                         if (attName.StartsWith("xmlns:")) {
                             string prefix = attName.Substring(6);
-                            string uri = att.Value;
+                            NamespaceUri uri = NamespaceUri.of(att.Value);
                             codes.Add(new NamespaceBinding(prefix, uri));
                         }
                         else {
                             if ((att.NamespaceURI.Length != 0)) {
-                                codes.Add(new NamespaceBinding(att.Prefix, att.NamespaceURI));
+                                codes.Add(new NamespaceBinding(att.Prefix, NamespaceUri.of(att.NamespaceURI)));
                             }
                         }
                     }
                 }
 
                 if ((elem.NamespaceURI.Length != 0)) {
-                    codes.Add(new NamespaceBinding(elem.Prefix, elem.NamespaceURI));
+                    codes.Add(new NamespaceBinding(elem.Prefix, NamespaceUri.of(elem.NamespaceURI)));
                 }
 
                 int count = codes.Count;
@@ -428,9 +428,9 @@ namespace Saxon.Impl.Dom {
                         string attName = att.Name;
                         if (attName.StartsWith("xmlns")) {
                             if (attName.Length == 5) {
-                                nsMap = nsMap.bind("", att.Value);
+                                nsMap = nsMap.bind("", NamespaceUri.of(att.Value));
                             } else if (attName[5] == ':') {
-                                nsMap = nsMap.bind(attName.Substring(6), att.Value);
+                                nsMap = nsMap.bind(attName.Substring(6), NamespaceUri.of(att.Value));
                             }
                         }
                     }
@@ -518,14 +518,15 @@ namespace Saxon.Impl.Dom {
             return null;
         }
 
-        public SteppingNode getSuccessorElement(SteppingNode anchor, string uri, string local) {
+        public SteppingNode getSuccessorElement(SteppingNode anchor, NamespaceUri uri, string local) {
+            string uriStr = uri?.ToString();
             XmlNode stop = (((anchor == null) ? null : ((DomNodeWrapper) anchor).node));
             XmlNode next = node;
             do {
                 next = getSuccessorNode(next, stop);
             } while (((next != null) &&
                       !((((next.NodeType == XmlNodeType.Element) &&
-                          (((uri == null) || uri.Equals(next.NamespaceURI)))) &&
+                          (((uriStr == null) || uriStr.Equals(next.NamespaceURI)))) &&
                          (((local == null) || local.Equals(next.LocalName)))))));
 
             if ((next == null)) {

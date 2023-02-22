@@ -301,6 +301,8 @@ namespace Saxon.Api {
 
         public string Uri => sqName.getURI();
 
+        internal NamespaceUri NamespaceUri => sqName.getNamespaceUri();
+
         /// <summary>Get the local part of the <c>QName</c></summary>
 
         public string LocalName => sqName.getLocalPart();
@@ -384,7 +386,7 @@ namespace Saxon.Api {
         // internal method: Convert to a Saxon.Hej.value.QNameValue
 
         internal QNameValue ToQNameValue() {
-            return new QNameValue(sqName.getPrefix(), sqName.getURI(), sqName.getLocalPart(), null);
+            return new QNameValue(sqName.getPrefix(), sqName.getNamespaceUri(), sqName.getLocalPart(), null);
         }
 
         /// <summary>

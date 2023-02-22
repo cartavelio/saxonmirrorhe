@@ -6,6 +6,7 @@ using Saxon.Hej.str;
 using Saxon.Api;
 using Saxon.Hej.@event;
 using Saxon.Hej.expr.parser;
+using Saxon.Hej.om;
 using Saxon.Hej.type;
 using Saxon.Hej.value;
 using WSP = Saxon.Api.WhitespacePolicy;
@@ -51,7 +52,7 @@ namespace System.Impl.Helpers {
                 for (int i = 0; (i < parser.AttributeCount); i++) {
                     parser.MoveToAttribute(i);
                     string prefix = parser.Prefix;
-                    string namespaceURI = parser.NamespaceURI;
+                    NamespaceUri namespaceURI = NamespaceUri.of(parser.NamespaceURI);
                     string localName = parser.LocalName;
                     if (("xmlns".Equals(prefix) || (("".Equals(prefix) && "xmlns".Equals(localName))))) {
                     }
@@ -75,7 +76,7 @@ namespace System.Impl.Helpers {
         }
 
         public Saxon.Hej.om.NodeName getNodeName() {
-            return new Saxon.Hej.om.FingerprintedQName(parser.Prefix, parser.NamespaceURI, parser.LocalName);
+            return new Saxon.Hej.om.FingerprintedQName(parser.Prefix, NamespaceUri.of(parser.NamespaceURI), parser.LocalName);
         }
 
         public Saxon.Hej.om.NamespaceBinding[] getNamespaceDeclarations() {
@@ -89,12 +90,12 @@ namespace System.Impl.Helpers {
                     string localName = parser.LocalName;
                     if ("xmlns".Equals(prefix)) {
                         Saxon.Hej.om.NamespaceBinding nscode =
-                            new Saxon.Hej.om.NamespaceBinding(localName, parser.Value);
+                            new Saxon.Hej.om.NamespaceBinding(localName, NamespaceUri.of(parser.Value));
                         nsBindings[used++] = nscode;
                     }
                     else {
                         if (((prefix.Length == 0) && "xmlns".Equals(localName))) {
-                            Saxon.Hej.om.NamespaceBinding nscode = new Saxon.Hej.om.NamespaceBinding("", parser.Value);
+                            Saxon.Hej.om.NamespaceBinding nscode = new Saxon.Hej.om.NamespaceBinding("", NamespaceUri.of(parser.Value));
                             nsBindings[used++] = nscode;
                         }
                         else {
@@ -210,11 +211,11 @@ namespace System.Impl.Helpers {
                                 string prefix = parser.Prefix;
                                 string localName = parser.LocalName;
                                 if ("xmlns".Equals(prefix)) {
-                                    nsMap = nsMap.bind(localName, parser.Value);
+                                    nsMap = nsMap.bind(localName, NamespaceUri.of(parser.Value));
                                 }
                                 else {
                                     if (((prefix.Length == 0) && "xmlns".Equals(localName))) {
-                                        nsMap = nsMap.bind("", parser.Value);
+                                        nsMap = nsMap.bind("", NamespaceUri.of(parser.Value));
                                     }
                                 }
                             }

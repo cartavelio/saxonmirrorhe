@@ -30,7 +30,7 @@ namespace Saxon.Impl.Dom {
         public static NamespaceMap XhtmlNamespaceMap;
 
         static HtmlNodeWrapper() {
-            XhtmlNamespaceMap = new NamespaceMap().put("", NamespaceConstant.XHTML);
+            XhtmlNamespaceMap = new NamespaceMap().put("", NamespaceUri.XHTML);
         }
 
         
@@ -261,7 +261,7 @@ namespace Saxon.Impl.Dom {
             return null;
         }
 
-        public SteppingNode getSuccessorElement(SteppingNode anchor, string uri, string local) {
+        public SteppingNode getSuccessorElement(SteppingNode anchor, NamespaceUri uri, string local) {
             HtmlNode stop = (((anchor == null) ? null : ((HtmlNodeWrapper) anchor).node));
             HtmlNode next = node;
             while (true) {

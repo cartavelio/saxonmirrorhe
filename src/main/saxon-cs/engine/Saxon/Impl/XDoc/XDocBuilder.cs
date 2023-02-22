@@ -64,7 +64,7 @@ namespace Saxon.Impl.XDoc {
                 foreach (Saxon.Hej.om.NamespaceBinding ns in namespaces) {
                     // TODO: avoid creating redundant namespaces
                     string nsprefix = ns.getPrefix();
-                    string nsuri = ns.getURI();
+                    string nsuri = ns.getNamespaceUri().ToString();
                     if (!(nsuri.Equals(Saxon.Hej.lib.NamespaceConstant.XML))) {
                         if ((nsprefix.Length == 0)) {
                             element.SetAttributeValue("xmlns", nsuri);
