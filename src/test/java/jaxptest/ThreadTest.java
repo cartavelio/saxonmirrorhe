@@ -2,6 +2,7 @@ package jaxptest;
 
 import com.saxonica.config.EnterpriseTransformerFactory;
 import net.sf.saxon.lib.FeatureKeys;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Templates;
@@ -217,7 +218,8 @@ public class ThreadTest {
         }
     }
 
-    @Test
+    @Disabled
+    // Can only pass for Mike
     public void testNonParallelByteCodeGeneration() {
         // Same stylesheet as above but not multithreaded, for comparison
         try {

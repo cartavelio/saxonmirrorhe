@@ -11,6 +11,7 @@ import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.ErrorListener;
@@ -56,7 +57,8 @@ public class ConfigurationTest {
         }
     }
 
-    @Test
+    @Disabled
+    // This test can't succeed for anyone except Mike :-)
     public void testBug4650() {
         try {
             Configuration configuration = Configuration.readConfiguration(new StreamSource(new File("/Users/mike/bugs/2020/4650-Nadolu/SaxonTest-2/resources/saxonPEConfig.xml")));

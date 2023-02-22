@@ -19,6 +19,7 @@ import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.ValidationException;
 import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.ErrorHandler;
@@ -1056,7 +1057,8 @@ public class TestValidator {
         assertEquals(0, errorHandler.fatals, "fatals");
     }
 
-    @Test
+    @Disabled
+    // Documents are not in the repository
     public void testMillicomErrorListener() {
         String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "SubsidyTrackingFactXSD11.xsd",
