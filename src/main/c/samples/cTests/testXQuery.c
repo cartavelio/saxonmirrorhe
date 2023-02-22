@@ -39,7 +39,7 @@ int main()
      */
 
     create_graalvm_isolate(environi);
-    c_createSaxonProcessor((environi->thread), processor, 0);
+    c_createSaxonProcessor(environi, processor, 0);
 
     //setDebugMode(environi->thread, 1);
 
