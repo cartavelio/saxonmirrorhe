@@ -729,7 +729,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
             }*/ // this bit of logic is now included in the SubPicture class
             if (minExponentSize == 0) {
                 dval = dval.setScale(maxFractionPartSize, RoundingMode.HALF_EVEN);
-            } else {
+            } else if (dval.signum() != 0) {
                 exponent = dval.precision() - dval.scale() - scalingFactor;
                 dval = dval.movePointLeft(exponent);
                 dval = dval.setScale(maxFractionPartSize, RoundingMode.HALF_EVEN);
