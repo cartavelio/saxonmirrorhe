@@ -198,7 +198,6 @@ bool XdmNode::isAtomic() {
 
 
 XdmItem * XdmNode::getHead(){
-     std::cerr<<std::endl<<"XdmNode-getHead:"<<std::endl;
 return this;}
 
     const char * XdmNode::getStringValue(){
