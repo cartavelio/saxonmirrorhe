@@ -16,7 +16,7 @@
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
    
-   <exception test-set="fn-highest" test-case="highest-117"  run="false" report="bad test">
+   <!--<exception test-set="fn-highest" test-case="highest-117"  run="false" report="bad test">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Bug #30 raised against test case</reason>
    </exception>
@@ -24,7 +24,7 @@
    <exception test-set="fn-lowest" test-case="lowest-117"  run="false" report="bad test">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Bug #30 raised against test case</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="fn-range"  run="false" report="spec not agreed">
       <created by="Michael Kay" on="2022-11-23"/>
