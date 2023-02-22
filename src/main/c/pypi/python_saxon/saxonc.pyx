@@ -15,10 +15,8 @@ from libcpp.string cimport string
 from libcpp.map cimport map
 from cython.operator import dereference, postincrement
 from os.path import isfile
-
 from libc.stdlib cimport free, malloc, realloc
 from libc.string cimport memcpy
-
 from cython import Py_ssize_t
 
 
@@ -50,7 +48,7 @@ def create_xdm_dict(proc, mmap):
             elif isinstance(value,int):
                 xdmValue_ = proc.make_integer_value(value)
             elif isinstance(value,float):
-                xdmValue_ = proc.make_integer_value(double)
+                xdmValue_ = proc.make_integer_value(value)
             elif value in (True, False):
                 xdmValue_ = proc.make_boolean_value(value)
 
@@ -349,7 +347,7 @@ cdef class PySaxonProcessor:
         """
         cdef char * c_str_
         py_name_string = name.encode('utf-8') if name is not None else None
-        c_str_ = py_value_string if name is not None else ""
+        c_str_ = py_name_string if name is not None else ""
         cdef const char* c_string = self.thisptr.EQNameToClarkName(c_str_)
         ustring = make_py_str(c_string)
         return ustring
@@ -516,13 +514,13 @@ cdef class PySaxonProcessor:
           elif isinstance(values[x], PyXdmAtomicValue):
             avalue_ = values[x]
             argumentV[x] = <saxoncClasses.XdmValue*> avalue_.derivedaptr
-          elif isinstance(values[x], PyXdmNodeValue):
+          elif isinstance(values[x], PyXdmNode):
             nvalue_ = values[x]
             argumentV[x] =  <saxoncClasses.XdmValue *>nvalue_.derivednptr
-          elif isinstance(values[x], PyXdmArrayValue):
+          elif isinstance(values[x], PyXdmArray):
             aavalue_ = values[x]
             argumentV[x] =  <saxoncClasses.XdmValue *>aavalue_.derivedaaptr
-          elif isinstance(values[x], PyXdmMapValue):
+          elif isinstance(values[x], PyXdmMap):
             mvalue_ = values[x]
             argumentV[x] =  <saxoncClasses.XdmValue *>mvalue_.derivedmmptr
           else:
