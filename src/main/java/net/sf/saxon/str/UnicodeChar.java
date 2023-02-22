@@ -20,7 +20,7 @@ public class UnicodeChar extends UnicodeString {
 
     /**
      * Get an iterator over the code points present in the string. Note that this method
-     * is always available, whether or not the {@code UniString} has been prepared for codePoint access.
+     * is always available, whether or not the {@code UnicodeString} has been prepared for codePoint access.
      *
      * @return an iterator that delivers the individual code points
      */
@@ -33,7 +33,7 @@ public class UnicodeChar extends UnicodeString {
      * Get the length of the string
      *
      * @return the number of code points in the string
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      *                                       for codePoint access
      */
     @Override
@@ -66,7 +66,7 @@ public class UnicodeChar extends UnicodeString {
      * @param codePoint the sought codePoint
      * @param from      the position from which the search should start (0-based)
      * @return the position (0-based) of the first occurrence found, or -1 if not found
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      *                                       for codePoint access
      */
     @Override
@@ -78,7 +78,7 @@ public class UnicodeChar extends UnicodeString {
      * Get the code point at a given position in the string
      *
      * @param index the given position (0-based)
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      *                                       for codePoint access
      */
     @Override
@@ -93,7 +93,7 @@ public class UnicodeChar extends UnicodeString {
      *              code point to be included
      * @param end   the end position (0-based): specifically, the position of the first
      *              code point not to be included
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      *                                       for codePoint access
      */
     @Override
@@ -113,7 +113,7 @@ public class UnicodeChar extends UnicodeString {
      * @param predicate condition that the codepoint must satisfy
      * @param from      the position from which the search should start (0-based)
      * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      *                                       for codePoint access
      */
     @Override

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 /**
- * Builder class to construct a UniString by appending text incrementally
+ * Builder class to construct a UnicodeString by appending text incrementally
  */
 
 public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
@@ -119,7 +119,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     }
 
     /**
-     * Construct a UniString whose value is formed from the contents of this builder
+     * Construct a UnicodeString whose value is formed from the contents of this builder
      * @return the constructed {@link UnicodeString}
      */
 

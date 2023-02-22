@@ -108,9 +108,9 @@ public class JsonHandler {
 
     /**
      * Optionally apply escaping or unescaping to a value.
-     * @param val the string to be escaped or unEscaped. This is supplied as a String rather than a UniString
+     * @param val the string to be escaped or unEscaped. This is supplied as a String rather than a UnicodeString
      *            because there are special rules for handling unpaired surrogates, which cannot be represented
-     *            in a UniString
+     *            in a UnicodeString
      * @return the escaped or unescaped string
      * @throws XPathException if there are invalid characters or escape sequences
      */

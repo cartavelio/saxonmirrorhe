@@ -403,9 +403,9 @@ public class ZenoString extends UnicodeString {
     }
 
     /**
-     * Get an equivalent UniString that uses the most economical representation available
+     * Get an equivalent UnicodeString that uses the most economical representation available
      *
-     * @return an equivalent UniString
+     * @return an equivalent UnicodeString
      */
     @Override
     public UnicodeString economize() {

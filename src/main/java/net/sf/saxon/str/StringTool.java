@@ -222,7 +222,7 @@ public class StringTool {
     }
 
     /**
-     * Attempt to compress a UniString consisting entirely of whitespace. This is the first thing we
+     * Attempt to compress a UnicodeString consisting entirely of whitespace. This is the first thing we
      * do to an incoming text node
      *
      * @param in the Unicode string to be compressed

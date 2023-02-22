@@ -92,8 +92,8 @@ public interface GroundedValue extends Sequence {
      *
      * <p>The result of this method is always equivalent to the result of the {@link #getStringValue()} method.
      * Use this method in preference either (a) if you need to use the value in a context where a {@link UnicodeString}
-     * is required, or (b) if the underlying value is held as a {@code UniString}, or in a form that is readily
-     * converted to a {@code UniString}. This is typically the case (i) when the value is a text or element node
+     * is required, or (b) if the underlying value is held as a {@code UnicodeString}, or in a form that is readily
+     * converted to a {@code UnicodeString}. This is typically the case (i) when the value is a text or element node
      * in a TinyTree, and (ii) when the value is a {@code StringItem}: that is, an atomic value of type
      * {@code xs:string}.</p>
      *

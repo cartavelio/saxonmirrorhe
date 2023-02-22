@@ -59,7 +59,7 @@ public class StringLiteral extends Literal {
     }
 
     /**
-     * Get the string represented by this StringLiteral, as a UniString
+     * Get the string represented by this StringLiteral, as a UnicodeString
      *
      * @return the underlying string
      */

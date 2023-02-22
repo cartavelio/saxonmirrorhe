@@ -153,7 +153,7 @@ public final class EmptyUnicodeString extends UnicodeString {
     }
 
     /**
-     * Test whether this UniString is equal to another under the rules of the codepoint collation.
+     * Test whether this UnicodeString is equal to another under the rules of the codepoint collation.
      *
      * @param o the value to be compared with this value
      * @return true if the strings are equal on a codepoint-by-codepoint basis
@@ -187,7 +187,7 @@ public final class EmptyUnicodeString extends UnicodeString {
      * @param predicate condition that the codepoint must satisfy
      * @param from      the position from which the search should start (0-based)
      * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      *                                       for codePoint access
      */
     @Override
