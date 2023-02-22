@@ -6,7 +6,7 @@
    <p>There are many parameters and options that can be set to control the way in which Saxon
       behaves. For a comprehensive guide to the Saxon configuration features see the <a
          href="http://www.saxonica.com/documentation11/index.html#!configuration/config-features"
-         target="_blank">Saxon 11 documentation</a>.</p>
+         target="_blank">Saxon 12 documentation</a>.</p>
 
    <aside>Note that a small number of the features are not available with SaxonC. Please see the <a
       href="/technical">Technical information: Limitations</a> section for details.</aside>

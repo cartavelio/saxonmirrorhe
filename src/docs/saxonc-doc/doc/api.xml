@@ -391,7 +391,7 @@
                   <code>void</code>
                </td>
                <td>
-                  <span class="signature">setCatalog(string $catalog_filename, bool $isTracing)</span>
+                  <span class="signature">setCatalog(string $catalog_filename)</span>
                   <div class="fcomment">Set a catalog to be used in Saxon.</div>
                </td>
             </tr>
