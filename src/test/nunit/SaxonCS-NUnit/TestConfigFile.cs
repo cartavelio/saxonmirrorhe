@@ -406,7 +406,7 @@ namespace SaxonCS_NUnit {
             // Test that the SVG 1.0 DTD can be retrieved from the local cache
             try {
                 Processor proc =  new();
-                proc.SetProperty("http://saxon.sf.net/feature/timing", "true");
+                proc.SetProperty(Feature.TIMING, true);
                 DocumentBuilder b = proc.NewDocumentBuilder();
                 b.DtdValidation = true;
                 StringReader sr = new StringReader(
