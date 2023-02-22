@@ -4,7 +4,7 @@ import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.NamespaceReducer;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.pull.PullProvider;
+import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.pull.PullPushCopier;
 import net.sf.saxon.pull.StaxBridge;
 import net.sf.saxon.serialize.UTF8Writer;
@@ -93,11 +93,11 @@ public class StaxBridgeTest {
             String piContent = null;
             File f = new File(ConfigTest.DATA_DIR + "birthdays.xml");
             puller.setInputStream(f.toURI().toString(), new FileInputStream(f));
-            PullProvider.Event ev;
-            while ((ev = puller.next()) != PullProvider.Event.END_OF_INPUT) {
-                if (ev == PullProvider.Event.COMMENT) {
+            PullEvent ev;
+            while ((ev = puller.next()) != PullEvent.END_OF_INPUT) {
+                if (ev == PullEvent.COMMENT) {
                     comment = puller.getStringValue().toString();
-                } else if (ev == PullProvider.Event.PROCESSING_INSTRUCTION) {
+                } else if (ev == PullEvent.PROCESSING_INSTRUCTION) {
                     piName = puller.getNodeName().getLocalPart();
                     piContent = puller.getStringValue().toString();
                 }
