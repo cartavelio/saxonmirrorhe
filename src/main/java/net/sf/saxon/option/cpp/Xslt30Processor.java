@@ -224,11 +224,12 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param filename - the file to which the compiled package should be saved
      */
     @CEntryPoint(name = "j_compileFromXdmNodeAndSave", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static void compileFromXdmNodeAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, ObjectHandle xdmNodeRef, CCharPointer ccwd, CCharPointer cfilename) throws SaxonApiException {
+    public static long compileFromXdmNodeAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, ObjectHandle xdmNodeRef, CCharPointer ccwd, CCharPointer cfilename) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
         if(processor == null) {
-            return;
+            //TODO throw exception
+            return SaxonCAPI.STATUS_FAIL;
         }
         XsltCompiler compiler = processor.newXsltCompiler();
         XdmNode node = objectHandles.get(xdmNodeRef);
@@ -248,6 +249,8 @@ public class Xslt30Processor extends SaxonCAPI {
             File file = resolveFile(processor, cwd, filename, ResourceRequest.XSLT_NATURE);
             pack.save(file);
         }
+
+        return SaxonCAPI.STATUS_OK;
 
     }
 
