@@ -346,6 +346,8 @@ task eecs_generateCSharp(
     "-repo:${projectDir}",
     "-xml:${buildDir}/ee_xmlout",
     "-digest:${buildDir}/ee_refined-digest.xml",
+    "-ee:${saxonVersion}",
+    "-icu4j:59.1"
     "-debug"
   doFirst {
     mkdir("${buildDir}/cs")
