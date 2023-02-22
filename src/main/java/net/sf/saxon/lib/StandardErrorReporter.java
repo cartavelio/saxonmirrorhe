@@ -220,7 +220,6 @@ public class StandardErrorReporter
         }
         String message = constructMessage(error, "", "Warning ");
         if (!warningsIssued.contains(message)) {
-            logger.warning(message);
             if (warningCount > getMaximumNumberOfWarnings()) {
                 if (warningCount == getMaximumNumberOfWarnings() + 1) {
                     logger.info("No more warnings will be displayed");
@@ -228,6 +227,7 @@ public class StandardErrorReporter
             } else {
                 logger.warning(message);
             }
+            warningCount++;
             warningsIssued.add(message);
         }
     }

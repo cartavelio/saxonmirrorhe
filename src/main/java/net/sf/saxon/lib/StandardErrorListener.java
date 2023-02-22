@@ -192,7 +192,6 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
         if (!warningsIssued.contains(message)) {
             if (exception instanceof ValidationException) {
                 logger.error(message);
-
             } else {
                 if (warningCount > getMaximumNumberOfWarnings()) {
                     if (warningCount == getMaximumNumberOfWarnings() + 1) {
