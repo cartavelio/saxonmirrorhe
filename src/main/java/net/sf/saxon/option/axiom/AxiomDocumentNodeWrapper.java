@@ -24,7 +24,7 @@ import org.apache.axiom.om.OMNode;
  * The document node in an AXIOM tree
  */
 
-public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
+public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper {
 
     /**
      * Create a Saxon wrapper for an Axiom document node

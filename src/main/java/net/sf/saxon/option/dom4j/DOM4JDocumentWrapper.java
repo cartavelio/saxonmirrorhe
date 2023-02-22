@@ -8,8 +8,12 @@
 package net.sf.saxon.option.dom4j;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.lib.ActiveSource;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.GenericTreeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.trans.XPathException;
 import org.dom4j.Branch;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -22,7 +26,7 @@ import java.util.List;
  * TreeInfo class for a virtual tree that wraps a DOM4J tree
  */
 
-public class DOM4JDocumentWrapper extends GenericTreeInfo {
+public class DOM4JDocumentWrapper extends GenericTreeInfo implements ActiveSource {
 
     /**
      * Create a Saxon wrapper for a dom4j document
@@ -37,6 +41,18 @@ public class DOM4JDocumentWrapper extends GenericTreeInfo {
         config.requireProfessionalLicense("DOM4J");
         setRootNode(wrap(doc));
         setSystemId(baseURI);
+    }
+
+    /**
+     * Implement ActiveSource by delivering the document to a supplied receiver
+     *
+     * @param receiver the receiver to which events representing the parsed XML document will be sent
+     * @param options  options for parsing the source
+     * @throws XPathException if things don't work out
+     */
+    @Override
+    public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
+        getRootNode().deliver(receiver, options);
     }
 
     /**

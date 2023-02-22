@@ -8,10 +8,14 @@
 package net.sf.saxon.option.jdom2;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.lib.ActiveSource;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.GenericTreeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -27,7 +31,7 @@ import java.util.HashMap;
  */
 
 
-public class JDOM2DocumentWrapper extends GenericTreeInfo {
+public class JDOM2DocumentWrapper extends GenericTreeInfo implements ActiveSource {
 
     protected Configuration config;
     protected long documentNumber;
@@ -46,6 +50,15 @@ public class JDOM2DocumentWrapper extends GenericTreeInfo {
         config.requireProfessionalLicense("JDOM2");
         setRootNode(wrap(doc));
         setSystemId(doc.getBaseURI());
+    }
+
+    /**
+     * Implement the ActiveSource interface
+     */
+
+    @Override
+    public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
+        getRootNode().deliver(receiver, options);
     }
 
 

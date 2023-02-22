@@ -8,9 +8,13 @@
 package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.GenericTreeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMDocument;
@@ -24,7 +28,7 @@ import java.util.Iterator;
  * Information about a tree that wraps an AXIOM document
  */
 
-public class AxiomDocument extends GenericTreeInfo {
+public class AxiomDocument extends GenericTreeInfo implements ActiveSource {
 
     private HashMap<String, NodeInfo> idIndex;
 
@@ -40,6 +44,18 @@ public class AxiomDocument extends GenericTreeInfo {
         super(config);
         setRootNode(new AxiomDocumentNodeWrapper(root, baseURI, config, this));
         setSystemId(baseURI);
+    }
+
+    /**
+     * Implement ActiveSource by delivering the document to a supplied receiver
+     *
+     * @param receiver the receiver to which events representing the parsed XML document will be sent
+     * @param options  options for parsing the source
+     * @throws XPathException if things don't work out
+     */
+    @Override
+    public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
+        getRootNode().deliver(receiver, options);
     }
 
     /**
