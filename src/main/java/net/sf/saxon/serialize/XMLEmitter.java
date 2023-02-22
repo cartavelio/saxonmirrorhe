@@ -196,8 +196,8 @@ public class XMLEmitter extends Emitter {
         }
 
         if (allCharactersEncodable) {
-            isSpecialInText = c -> (c < 127 ? specialInText[c] : (c < 160 || c == 0x2028 || c > 65535));
-            isSpecialInAttribute = c -> (c < 127 ? attSpecials[c] : (c < 160 || c == 0x2028 || c > 65535));
+            isSpecialInText = c -> (c < 127 ? specialInText[c] : (c < 160 || c == 0x2028));
+            isSpecialInAttribute = c -> (c < 127 ? attSpecials[c] : (c < 160 || c == 0x2028));
         } else {
             isSpecialInText = c -> (c < 127 ? specialInText[c] : (c < 160 || c == 0x2028 || c > 65535 || !characterSet.inCharset(c)));
             isSpecialInAttribute = c -> (c < 127 ? attSpecials[c] : (c < 160 || c == 0x2028 || c > 65535 || !characterSet.inCharset(c)));
@@ -860,9 +860,13 @@ public class XMLEmitter extends Emitter {
             long found = chars.indexWhere(special, segstart);
             long i = found == -1 ? clength : found;
 
-            // if this was the whole string write it out and exit
+            // if this was the whole (or remainder of the) string write it out and exit
             if (found < 0) {
-                writer.write(chars.substring(segstart, clength));
+                if (segstart == 0) {
+                    writer.write(chars);
+                } else {
+                    writer.write(chars.substring(segstart, clength));
+                }
                 return;
             }
 

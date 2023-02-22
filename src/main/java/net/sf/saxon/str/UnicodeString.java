@@ -116,7 +116,8 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
         IntIterator iter = codePoints();
         long i = 0;
         while (iter.hasNext()) {
-            if (i >= from && predicate.test(iter.next())) {
+            int ch = iter.next();
+            if (i >= from && predicate.test(ch)) {
                 return i;
             }
             i++;
