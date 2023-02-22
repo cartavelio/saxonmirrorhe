@@ -628,7 +628,8 @@ task dotnetPublish(
         '--configuration', 'Release', '-r', csrid,
         '--self-contained', 'true',
         "-p:PublishSingleFile=${singleFile}",
-        "-p:Version=${csver}", "-p:PackageVersion=${csver}"
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}",
+        '-p:Configuration=Release', '-p:Platform=Any CPU'
     }
   }
   doLast {
