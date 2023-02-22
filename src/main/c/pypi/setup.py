@@ -19,7 +19,7 @@ extra_link_args = []
 if system() == 'Darwin':
     extra_link_args.append('-Llibs/darwin')
 elif system() == 'Windows':
-    extra_link_args.append('-Llibs/win')
+    extra_link_args.append('libs\\win\\libsaxon-@@edition@@c-@@VERSION@@.lib')
 else:
     extra_link_args.append('-Llibs/nix')
 
@@ -48,7 +48,7 @@ ext_modules = [Extension(
                         language="c++",
                         include_dirs = ['Saxon.C.API/graalvm',],
                          extra_link_args = extra_link_args,
-                       libraries=['saxon-@@edition@@c-@@VERSION@@']
+                       libraries=['@@libpath@@saxon-@@edition@@c-@@VERSION@@']
                         ),
                     "python_saxon/nodekind.py",
                 ]
