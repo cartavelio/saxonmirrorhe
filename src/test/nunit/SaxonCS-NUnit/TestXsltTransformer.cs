@@ -271,6 +271,42 @@ namespace SaxonCS_NUnit {
                 Assert.True(line >= 2 && line <= 6, "line=5");
             }
         }
+        
+        [Test]
+        public void TestXmlResolver() {
+            try {
+                Processor proc =  new();
+                string source = "<doc><e>text</e></doc>";
+
+                DocumentBuilder builder = proc.NewDocumentBuilder();
+                builder.LineNumbering = true;
+                builder.BaseUri = new Uri("http://importer/");
+                XdmNode node = builder.Build(new StringReader(source));
+                XsltCompiler xqcomp = proc.NewXsltCompiler();
+                StringReader sr = new StringReader(
+                    "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
+                    "<xsl:template match='e' as='node()'>\n" +
+                    "<xsl:param name='x' select='0'/>\n" +
+                    "<xsl:param name='p' as='node()*' select='()'/>\n" +
+                    "<e1/>" +
+                    "<xsl:sequence select='$p'/>\n" +
+                    "</xsl:template>\n" +
+                    "</xsl:stylesheet>");
+
+                xqcomp.StylesheetModuleResolver = (request) => new TextResource(sr, request.Uri);
+                XsltExecutable exec = xqcomp.Compile(new Uri("http://random-stylesheet.org/"));
+                XsltTransformer trans = exec.Load();
+                trans.Destination = new RawDestination();
+                trans.InitialContextNode = node;
+                trans.Run();
+                Assert.True(((RawDestination)trans.Destination).XdmValue[0] is XdmNode);
+                Assert.True(((XdmNode)((RawDestination)trans.Destination).XdmValue[0]).NodeName.LocalName.Equals("e1"));
+            }
+            catch (Exception exc) {
+                Assert.Fail(exc.Message);
+            }
+        }
+
 
         /**
          * Test created ErrorListener picks up errors in imported stylesheet
