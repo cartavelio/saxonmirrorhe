@@ -439,8 +439,7 @@ public class Query {
                         if (outputFile.isDirectory()) {
                             quit("Output is a directory", 2);
                         }
-                        createFileIfNecessary(outputFile);
-                        serializer = processor.newSerializer(new FileOutputStream(outputFile));
+                       serializer = processor.newSerializer(outputFile);
                     } else {
                         serializer = processor.newSerializer(System.out);
                     }
