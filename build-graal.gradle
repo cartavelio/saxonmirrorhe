@@ -134,6 +134,29 @@ task graalImage(
 }
 
 
+
+task graalImageExe(
+  dependsOn: ["graalJar"],
+  description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
+) {
+  doLast {
+    exec {
+      commandLine "${graalHome}/native-image",
+        "-cp", "${buildDir}/libs/libsaxon-eec-${saxonVersion}.jar", "net.sf.saxon.Transform", "-o","${buildDir}/c/saxon-eec-${saxonVersion}",
+        "--no-fallback", "-H:Path=${buildDir}/c",
+        "-H:+AllowVMInspection",
+        "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
+        "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+        "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+        "-H:+ReportExceptionStackTraces",
+        "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
+        "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
+        "--trace-class-initialization=jdk.xml.internal.SecuritySupport"
+    }
+  }
+}
+
+
 task hec_graal_setupPreprocess(
   type: Copy,
   dependsOn: ["hej_featureKeys"],
