@@ -61,7 +61,7 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
             BooleanValue result = (BooleanValue)breakWhen.call(runningContext,
                                                                new Sequence[]{
                                                                        SequenceExtent.makeSequenceExtent(currentMembers),
-                                                               nextCandidate});
+                                                               nextCandidate}).head();
             try {
                 if (!result.getBooleanValue()) {
                     currentMembers.add(nextCandidate);

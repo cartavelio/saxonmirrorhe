@@ -85,12 +85,6 @@ public class XSLForEach extends StyleElement {
             String value = att.getValue();
             if (f.equals("select")) {
                 select = makeExpression(value, att);
-//            } else if (f.equals("array")) {
-//                requireXslt40("array");
-//                select = arrayToSequence(makeExpression(value, att));
-//            } else if (f.equals("map")) {
-//                requireXslt40("map");
-//                select = mapToSequence(makeExpression(value, att));
             } else if (f.equals("separator")) {
                 requireXslt40("separator");
                 separator = makeAttributeValueTemplate(value, att);

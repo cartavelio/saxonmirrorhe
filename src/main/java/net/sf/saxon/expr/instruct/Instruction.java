@@ -12,6 +12,9 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.FallbackElaborator;
+import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StandardNames;
@@ -358,7 +361,14 @@ public abstract class Instruction extends Expression /*implements TailCallReturn
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPull().iterate(context);
+        Elaborator elaborator = makeElaborator();
+        if (elaborator instanceof FallbackElaborator) {
+            if ((getImplementationMethod() & PROCESS_METHOD) != 0) {
+                return ExpressionTool.getIteratorFromProcessMethod(this, context);
+            }
+            throw new IllegalStateException("No iterate() method available for expression " + toShortString());
+        }
+        return elaborator.elaborateForPull().iterate(context);
 //        int m = getImplementationMethod();
 //        if ((m & EVALUATE_METHOD) != 0) {
 //            Item item = evaluateItem(context);

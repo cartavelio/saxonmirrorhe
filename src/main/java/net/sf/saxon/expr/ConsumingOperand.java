@@ -194,7 +194,7 @@ public class ConsumingOperand extends UnaryExpression {
 
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
-        if ("JS".equals(((ExpressionPresenter.ExportOptions) destination.getOptions()).target)) {
+        if ("JS".equals(destination.getOptions().target)) {
             getBaseExpression().export(destination);
         } else {
             destination.startElement("consume", this);
