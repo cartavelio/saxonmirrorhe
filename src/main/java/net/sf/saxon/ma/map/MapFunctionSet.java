@@ -335,7 +335,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             if (arguments[1] instanceof Item) {
                 return new SingleEntryMap(key, (Item)arguments[1]);
             }
-            GroundedValue value = SequenceTool.toGroundedValue(arguments[1].iterate());
+            GroundedValue value = arguments[1].materialize();
             return new SingleEntryMap(key, value);
         }
 

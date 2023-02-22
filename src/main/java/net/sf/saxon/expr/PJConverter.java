@@ -546,7 +546,7 @@ public abstract class PJConverter {
 
         @Override
         public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
-            return SequenceTool.toGroundedValue(value.iterate());
+            return value.materialize();
         }
 
     }
