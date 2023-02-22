@@ -853,8 +853,7 @@
                <td>
                   <span class="signature">transformToFile(<a class="bodylink code"
                         href="../saxon_c_php_xdmnode">XdmNode</a> $context)</span>
-                  <div class="fcomment">Perform a one shot transformation, saving the results to the
-                     file as previously set (e.g. using <code>setOutputFile()</code>). The global
+                  <div class="fcomment">Perform a one shot transformation. The global
                      context item may be supplied in the $context argument, but this is optional -
                      the method will also execute without any arguments.</div>
                </td>
@@ -1691,6 +1690,23 @@
                   <code>void</code>
                </td>
                <td>
+                  <span class="signature">declareVariable(string $name)</span>
+                  <div class="fcomment"><p>Declare a variable as part of the static context for XPath expressions
+                     compiled using this <code>XPathCompiler</code>.</p>
+                     <p>It is an error for the XPath expression to refer to a variable unless it has been
+                        declared. This method declares the existence of the variable, but it does not
+                        bind any value to the variable; that is done later, when the XPath expression is evaluated.
+                        The variable is allowed to have any type (that is, the required type is <code>item()*</code>).</p>
+                     <p>The name of the variable must be supplied as a string representing the QName in Clark
+                        notation.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
                   <span class="signature">setBackwardsCompatible(bool $flag)</span>
                   <div class="fcomment">Say whether XPath 1.0 backwards compatibility mode is to be used. In backwards compatibility
                      mode, more implicit type conversions are allowed in XPath expressions, for example it
@@ -1719,14 +1735,15 @@
                </td>
                <td>
                   <span class="signature">importSchemaNamespace(string $uri)</span>
-                  <div class="fcomment">Import a schema namespace. Here we add the element and attribute declarations and type definitions
-                      contained in a given namespace to the static context for the XPath expression.
+                  <div class="fcomment"><p>Import a schema namespace. Here we add the element and attribute declarations and type definitions
+                      contained in a given namespace to the static context for the XPath expression.</p>
                       <p>This method will not cause the schema to be loaded. This method will not fail if the schema has not been loaded (but in that case
                        the set of declarations and definitions made available to the XPath expression is empty). The schema
                      document for the specified namespace may be loaded before or after this method is called.</p>
                      <p>This method does not bind a prefix to the namespace. That must be done separately, using the
-                        <code>declareNamespace()</code> method.</p> The argument $uri is the schema namespace to be imported. To import declarations in a no-namespace schema,
-                     supply a zero-length string.</div>
+                        <code>declareNamespace()</code> method.</p>
+                     <p>The argument $uri is the schema namespace to be imported. To import declarations in a no-namespace schema,
+                     supply a zero-length string.</p></div>
                </td>
             </tr>
             <tr>
@@ -2339,7 +2356,8 @@
                </td>
                <td>
                   <span class="signature">getName()</span>
-                  <div class="fcomment">Get the name of the function. The string function name returned is as a QName, or null for an anonymous inline function item</div>
+                  <div class="fcomment">Get the name of the function in EQName notation, i.e.
+                     <code>Q{uri}local</code>. Returns null for an anonymous inline function item.</div>
                </td>
             </tr>
             
@@ -2349,7 +2367,8 @@
                </td>
                <td>
                   <span class="signature">getArity()</span>
-                  <div class="fcomment">Get the arity of the function. The arity of the function, that is, the number of arguments in the function's signature</div>
+                  <div class="fcomment">Get the arity of the function. The arity of the function, that is, the
+                     number of arguments in the function's signature.</div>
                </td>
             </tr>
             <tr>
