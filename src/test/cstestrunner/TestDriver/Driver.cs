@@ -24,7 +24,7 @@ namespace TestDriver {
         protected int wrongErrorResults = 0;
         protected bool unfolded = false;
         protected bool saveResults = false;
-        protected TreeModel treeModel = TreeModel.TinyTree; //TODO test .net dom
+        protected string treeModel = "tiny";
         protected bool debug = false;
         protected Regex testPattern = null;
         protected string requestedTestSet = null;
@@ -74,8 +74,10 @@ namespace TestDriver {
         }
 
         protected void recordFailure(string testSet, string testName) {
-            failures++;
-            failingTestCases.Add(testName);
+            if (!failingTestCases.Contains(testName)) {
+                failures++;
+                failingTestCases.Add(testName);
+            }
             if (failuresPerTestSet.ContainsKey(testSet)) {
                 failuresPerTestSet[testSet]++;
             }
@@ -101,7 +103,7 @@ namespace TestDriver {
             set => unfolded = value;
         }
 
-        public TreeModel TreeModel {
+        public string TreeModel {
             get => treeModel;
             set => treeModel = value;
         }
@@ -218,6 +220,17 @@ namespace TestDriver {
                         specStr = args[i].Substring(6);
                         processSpec(specStr);
                     }
+                    
+                    if (args[i].StartsWith("-tree:")) {
+                        string model = args[i].Substring(6);
+                        if (model == "tiny" || model == "linked" || model == "condensed" 
+                                || model == "dom" || model == "linq") {
+                            treeModel = model;
+                        }
+                        else {
+                            feedback.Message("Unknown tre model " + model + " (use tiny|linked|condensed|dom|linq)", true);
+                        }
+                    }
 
                     // Temporary for controlling test processor
                     if (args[i].StartsWith("-xt30")) {
@@ -279,7 +292,17 @@ namespace TestDriver {
 
         private void processCatalog(string catalogFile) {
             DocumentBuilder catBuilder = driverProc.NewDocumentBuilder();
-            catBuilder.TreeModel = treeModel;
+            switch (treeModel) {
+                case "linked": 
+                    catBuilder.TreeModel = Saxon.Api.TreeModel.LinkedTree;
+                    break;
+                case "condensed": 
+                    catBuilder.TreeModel = Saxon.Api.TreeModel.TinyTreeCondensed;
+                    break;
+                default: 
+                    catBuilder.TreeModel = Saxon.Api.TreeModel.TinyTree;
+                    break;
+            }
             XdmNode catalog = catBuilder.Build(new Uri(Path.GetFullPath(catalogFile)));
             XPathCompiler xpc = driverProc.NewXPathCompiler();
             //xpc.XPathLanguageVersion = "3.1";

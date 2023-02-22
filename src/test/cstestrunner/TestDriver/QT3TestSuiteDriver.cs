@@ -242,18 +242,6 @@ namespace TestDriver {
                         return makeSchemaAware(env, inverse);
 
                     }
-                    // else if ("xpath-1.0-compatibility".Equals(value))
-                    // {
-                    //     if (env != null)
-                    //     {
-                    //         env.xpathCompiler.BackwardsCompatible = !inverse;
-                    //         return true;
-                    //     }
-                    //     else
-                    //     {
-                    //         return false;
-                    //     }
-                    // }
                     else if ("staticTyping".Equals(value)) {
                         return inverse;
                     }
@@ -264,8 +252,8 @@ namespace TestDriver {
                         return !inverse;
                     }
                     else if ("info-dtd".Equals(value)) {
-                        if (treeModel == TreeModel.TinyTree || treeModel == TreeModel.LinkedTree ||
-                            treeModel == TreeModel.TinyTreeCondensed) {
+                        if (treeModel == "tiny" || treeModel == "linked" ||
+                            treeModel == "condensed") {
                             return !inverse;
                         }
                         else {
