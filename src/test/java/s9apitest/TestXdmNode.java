@@ -108,6 +108,24 @@ public class TestXdmNode {
         }
     }
 
+    @Test
+    public void TestOutermostElement() {
+        try {
+            Processor proc = new Processor(false);
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode doc = builder.build(new StreamSource(new StringReader("<in xmlns='http://ns.com/' foo='bar'><baz/></in>")));
+            assertEquals("in", doc.getOutermostElement().getNodeName().getLocalName());
+            XdmNode el1 = doc.getOutermostElement();
+            assertEquals("in", el1.getOutermostElement().getNodeName().getLocalName());
+            XdmNode baz = el1.select(child("baz")).firstItem();
+            assertEquals("in", baz.getOutermostElement().getNodeName().getLocalName());
+            XdmNode foo = el1.select(attribute("foo")).firstItem();
+            assertEquals("in", foo.getOutermostElement().getNodeName().getLocalName());
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
     private static int count(Iterable<? extends XdmItem> seq) {
         int counter=0;
         for (XdmItem item : seq) {
