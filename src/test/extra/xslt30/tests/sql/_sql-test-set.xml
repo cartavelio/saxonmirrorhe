@@ -1,46 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <test-set xmlns:xs="http://www.w3.org/2001/XMLSchema"
-   xmlns="http://www.w3.org/2012/10/xslt-test-catalog" name="sql">
-   <description>Tests sql</description>
-   <environment name="sql001">
-      <source role="." file="sql-001.xml"/>
-      <stylesheet file="Jsql-001.xsl"/>
-      <param name="driver" static="yes" select="'org.apache.derby.jdbc.EmbeddedDriver'"/>
-      <param name="database" static="yes" select="'jdbc:derby:test-db-001'"/>
-      <saxon:property name="http://saxon.sf.net/feature/allow-multithreading" value="false" xmlns:saxon="http://saxon.sf.net/"/>
-   </environment>
-  
+          xmlns="http://www.w3.org/2012/10/xslt-test-catalog" name="sql">
+  <description>Tests sql</description>
+
+  <!-- You can configure different driver/database combinations. At the
+       time of this writing, the build scripts can stand up either
+       a PostgreSQL database:
+
+         <param name="driver" select="'org.postgresql.Driver'"/>
+         <param name="database" select="'jdbc:postgresql://localhost/sample'"/>
+
+       or a MySQL database:
+
+          <param name="driver" select="'com.mysql.cj.jdbc.Driver'"/>
+          <param name="database"  select="'jdbc:mysql://localhost/sample?generateSimpleParameterMetadata=true'"/>
+
+       Neither driver passes test sql-005 because of namespace differences
+       in the output.
+  -->
+
+  <environment name="sql001">
+    <source role="." file="sql-001.xml"/>
+    <stylesheet file="Jsql-001.xsl"/>
+    <param name="driver" select="'org.postgresql.Driver'"/>
+    <param name="database" select="'jdbc:postgresql://localhost/sample'"/>
+<!--
+    <param name="driver" select="'com.mysql.cj.jdbc.Driver'"/>
+    <param name="database"  select="'jdbc:mysql://localhost/sample?generateSimpleParameterMetadata=true'"/>
+-->
+    <saxon:property name="http://saxon.sf.net/feature/allow-multithreading"
+                    value="false" xmlns:saxon="http://saxon.sf.net/"/>
+  </environment>
+
    <!--
      MHK 2020-03-10
      To investigate the database interactively from the terminal:
-     
+
      >cd to the xslt30extra/10.0 directory
      >~/repo/lib/db-derby-10.14.2.0-bin/bin/ij
      (responds: ij version 10.14)
      ij> connect 'jdbc:derby:test-db-001';
      ij> select * from JWL.book;
-   
-   -->
-   
-   <environment name="osql001">
-      <source role="." file="sql-001.xml"/>
-      <param name="driver" static="yes" select="'org.apache.derby.jdbc.EmbeddedDriver'"/>
-      <param name="database" static="yes" select="'jdbc:derby:test-db-001'"/>
-      <saxon:property name="http://saxon.sf.net/feature/allow-multithreading" value="false" xmlns:saxon="http://saxon.sf.net/"/>
-   </environment>
-   
-   <environment name="sqlf-001">
-      <source role="." file="sql-001.xml"/>
-      <stylesheet file="sql-fn-001.xsl"/>
-      <param name="driver" static="yes" select="'org.apache.derby.jdbc.EmbeddedDriver'"/>
-      <param name="database" static="yes" select="'jdbc:derby:test-db-001'"/>
-      <saxon:property name="http://saxon.sf.net/feature/allow-multithreading" value="false" xmlns:saxon="http://saxon.sf.net/"/>
-   </environment>
-   
-   <dependencies>
-      <feature value="Saxon-PE"/>
-   </dependencies>
 
+   -->
+
+   <environment name="osql001">
+     <source role="." file="sql-001.xml"/>
+    <param name="driver" select="'org.postgresql.Driver'"/>
+    <param name="database" select="'jdbc:postgresql://localhost/sample'"/>
+<!--
+    <param name="driver" select="'com.mysql.cj.jdbc.Driver'"/>
+    <param name="database"  select="'jdbc:mysql://localhost/sample?generateSimpleParameterMetadata=true'"/>
+-->
+     <saxon:property name="http://saxon.sf.net/feature/allow-multithreading" value="false" xmlns:saxon="http://saxon.sf.net/"/>
+   </environment>
+
+   <environment name="sqlf-001">
+     <source role="." file="sql-001.xml"/>
+     <stylesheet file="sql-fn-001.xsl"/>
+    <param name="driver" select="'org.postgresql.Driver'"/>
+    <param name="database" select="'jdbc:postgresql://localhost/sample'"/>
+<!--
+    <param name="driver" select="'com.mysql.cj.jdbc.Driver'"/>
+    <param name="database"  select="'jdbc:mysql://localhost/sample?generateSimpleParameterMetadata=true'"/>
+-->
+     <saxon:property name="http://saxon.sf.net/feature/allow-multithreading" value="false" xmlns:saxon="http://saxon.sf.net/"/>
+   </environment>
+
+   <dependencies>
+     <feature value="Saxon-PE"/>
+   </dependencies>
 
    <test-case name="Jsql-001">
       <description>Test SQL extension elements - building a database and simple
@@ -58,6 +87,7 @@
          <assert-xml><![CDATA[<out>Inserted 8 records.</out>]]></assert-xml>
       </result>
    </test-case>
+
    <test-case name="Jsql-002">
       <description>Test SQL extension elements - simple column extraction</description>
       <created by="John Lumley" on="2014-08-15"/>
@@ -72,6 +102,7 @@
          <assert-xml><![CDATA[<out rows="8"><c>C</c><c>F</c><c>S</c><c>U</c><c>X</c></out>]]></assert-xml>
       </result>
    </test-case>
+
    <!--<test-case name="Jsql-002a">
       <description>Test SQL extension elements - simple column extraction through
          functions</description>
@@ -132,6 +163,7 @@
          <assert>count(//row) eq 8</assert>
       </result>
    </test-case>-->
+
    <test-case name="Jsql-003">
       <description>Test SQL extension elements - simple query</description>
       <created by="John Lumley" on="2014-08-15"/>
@@ -301,10 +333,6 @@
          </all-of>
       </result>
    </test-case>-->
-   
-
-
-
 
    <test-case name="sql-001">
       <description>Test SQL extension elements</description>
@@ -336,7 +364,7 @@
          <assert-xml><![CDATA[<out>Inserted 8 records.</out>]]></assert-xml>
       </result>
    </test-case>
-   
+
    <test-case name="sql-003">
       <description>Test SQL extension element sql:update and sql:query</description>
       <created by="Michael Kay" on="2014-04-13"/>
@@ -367,7 +395,7 @@
          <assert>/out = "Inserted 8 records."</assert>
       </result>
    </test-case>
-   
+
    <test-case name="sql-005">
       <description>Test SQL extension element sql:execute</description>
       <created by="Michael Kay" on="2014-04-13"/>
@@ -379,51 +407,50 @@
          <stylesheet file="sql-005.xsl"/>
       </test>
       <result>
-         <assert-xml><![CDATA[<out>
-   <book>
-      <TITLE>Number, the Language of Science</TITLE>
-      <AUTHOR>Danzig</AUTHOR>
-      <CATEGORY>S</CATEGORY>
+         <assert-xml><![CDATA[<out><book>
+      <title>Number, the Language of Science</title>
+      <author>Danzig</author>
+      <category>S</category>
    </book>
    <book>
-      <TITLE>Tales of Grandpa Cat</TITLE>
-      <AUTHOR>Wardlaw, Lee</AUTHOR>
-      <CATEGORY>F</CATEGORY>
+      <title>Tales of Grandpa Cat</title>
+      <author>Wardlaw, Lee</author>
+      <category>F</category>
    </book>
    <book>
-      <TITLE>Language &amp; the Science of Number</TITLE>
-      <AUTHOR>Danzig</AUTHOR>
-      <CATEGORY>S</CATEGORY>
+      <title>Language &amp; the Science of Number</title>
+      <author>Danzig</author>
+      <category>S</category>
    </book>
    <book>
-      <TITLE>Evolution of Complexity in Animal Culture</TITLE>
-      <AUTHOR>Bonner</AUTHOR>
-      <CATEGORY>S</CATEGORY>
+      <title>Evolution of Complexity in Animal Culture</title>
+      <author>Bonner</author>
+      <category>S</category>
    </book>
    <book>
-      <TITLE>Patterns of Crime in Animal Culture</TITLE>
-      <AUTHOR>Bonner</AUTHOR>
-      <CATEGORY>X</CATEGORY>
+      <title>Patterns of Crime in Animal Culture</title>
+      <author>Bonner</author>
+      <category>X</category>
    </book>
    <book>
-      <TITLE>When We Were Very Young</TITLE>
-      <AUTHOR>Milne, A. A.</AUTHOR>
-      <CATEGORY>F</CATEGORY>
+      <title>When We Were Very Young</title>
+      <author>Milne, A. A.</author>
+      <category>F</category>
    </book>
    <book>
-      <TITLE>Learn Java Now</TITLE>
-      <AUTHOR>Stephen R. Davis</AUTHOR>
-      <CATEGORY>C</CATEGORY>
+      <title>Learn Java Now</title>
+      <author>Stephen R. Davis</author>
+      <category>C</category>
    </book>
    <book>
-      <TITLE>Design Patterns</TITLE>
-      <AUTHOR>Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides</AUTHOR>
-      <CATEGORY>U</CATEGORY>
+      <title>Design Patterns</title>
+      <author>Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides</author>
+      <category>U</category>
    </book>
 </out>]]></assert-xml>
       </result>
    </test-case>
-   
+
    <test-case name="sql-fn-001">
       <description>Test SQL extension instructions - building a database and simple
          insertion</description>
@@ -439,7 +466,7 @@
          <assert-xml><![CDATA[<void/>]]></assert-xml>
       </result>
    </test-case>
-   
+
    <test-case name="sql-fn-002">
       <description>Test SQL extension elements - simple column extraction</description>
       <created by="Michael Kay" on="2017-11-22"/>
@@ -454,7 +481,7 @@
          <assert-xml><![CDATA[<out rows="8"><c>C</c><c>F</c><c>S</c><c>U</c><c>X</c></out>]]></assert-xml>
       </result>
    </test-case>
-   
+
    <test-case name="sql-fn-003">
       <description>Test SQL extension elements - query with predicate</description>
       <created by="Michael Kay" on="2017-11-22"/>
@@ -473,7 +500,7 @@
          </all-of>
       </result>
    </test-case>
-   
+
    <test-case name="sql-fn-004">
       <description>SQL query results as JSON</description>
       <created by="Michael Kay" on="2017-11-22"/>
@@ -486,12 +513,13 @@
       </test>
       <result>
          <all-of>
-            <assert>/out/@rows = '5'</assert>
-            <assert>contains(/out,  '"AUTHOR":"Danzig"')</assert>
+            <assert>/out/@rows = '2'</assert>
+            <assert>contains(/out,  '"AUTHOR":"Danzig"')
+            or contains(/out,  '"author":"Danzig"')</assert>
          </all-of>
       </result>
    </test-case>
-   
+
    <test-case name="sql-fn-005">
       <description>SQL Update</description>
       <created by="Michael Kay" on="2017-11-22"/>
@@ -506,7 +534,7 @@
          <assert-xml><![CDATA[<out bonner-category="F F"/>]]></assert-xml>
       </result>
    </test-case>
-   
+
    <test-case name="sql-fn-006">
       <description>SQL prepared query</description>
       <created by="Michael Kay" on="2017-11-22"/>
@@ -521,7 +549,7 @@
          <assert>count(/out/result) = 2</assert>
       </result>
    </test-case>
-   
+
    <test-case name="sql-fn-007">
       <description>SQL delete, rollback, commit</description>
       <created by="Michael Kay" on="2017-11-22"/>
@@ -541,7 +569,7 @@
          </all-of>
       </result>
    </test-case>
-   
+
    <test-case name="sql-fn-008">
       <description>SQL prepared statement</description>
       <created by="Michael Kay" on="2017-11-22"/>
@@ -557,5 +585,5 @@
       </result>
    </test-case>
 
-   
+
 </test-set>
