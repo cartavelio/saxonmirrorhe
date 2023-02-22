@@ -1291,7 +1291,11 @@ namespace TestDriver {
                 case "year_component_values":
                     if ("support year zero".Equals(value)) {
                         if (env != null) {
+                            string oldValue = (string)env.processor.GetProperty(Saxon.Api.Feature.XSD_VERSION);
                             env.processor.SetProperty(Saxon.Api.Feature.XSD_VERSION, inverse ? "1.0" : "1.1");
+                            env.resetActions.Add(env => {
+                                env.processor.SetProperty(Saxon.Api.Feature.XSD_VERSION, oldValue);
+                            });
                             return true;
                         }
                         else {
