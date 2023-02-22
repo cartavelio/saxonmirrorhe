@@ -3,6 +3,7 @@ task resources(
               "resources_userdoc_xml",
               "resources_userdoc_html",
               "resources_saxonc_userdoc",
+              "documentation",
               "resources_drivers",
               "samples_common",
               "samples_j",
