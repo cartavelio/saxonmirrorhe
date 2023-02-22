@@ -11,14 +11,12 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.Builder;
-import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
@@ -169,20 +167,16 @@ public class ParseXml extends SystemFunction implements Callable {
      */
     private NodeInfo parseXmlPull(StringValue inputArg, XPathContext context) throws XPathException {
         String baseURI = getRetainedStaticContext().getStaticBaseUriString();
-
         try {
             Controller controller = context.getController();
             if (controller == null) {
                 throw new XPathException("parse-xml() function is not available in this environment");
             }
-            Configuration config = controller.getConfiguration();
-            PipelineConfiguration pipe = controller.makePipelineConfiguration();
+            Configuration config = context.getConfiguration();
 
             StringReader sr = new StringReader(inputArg.getStringValue());
             StreamSource ss = new StreamSource(sr, baseURI);
-            // Following code allows the .NET platform to use a Pull parser
-            boolean dtdValidation = false;
-            Source pullSource = Version.platform.getParserSource(pipe, ss, Validation.SKIP, dtdValidation);
+            Source pullSource = Version.platform.resolveSource(ss, config);
 
             Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
             Receiver s = b;

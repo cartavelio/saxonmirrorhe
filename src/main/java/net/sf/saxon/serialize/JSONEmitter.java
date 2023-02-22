@@ -40,6 +40,7 @@ public class JSONEmitter {
 
     private Configuration config;
     private UnicodeWriter writer;
+    private boolean normalize;
     private Normalizer.Form normalizationForm;
     private CharacterMap characterMap;
     private Properties outputProperties;
@@ -116,6 +117,7 @@ public class JSONEmitter {
      */
 
     public void setNormalizationForm(Normalizer.Form form) {
+        this.normalize = true;
         this.normalizationForm = form;
     }
 
@@ -307,7 +309,7 @@ public class JSONEmitter {
     }
 
     private String simpleEscape(String cs) throws XPathException {
-        if (normalizationForm != null) {
+        if (normalize) {
             cs = Normalizer.normalize(cs, normalizationForm);
         }
         return JsonReceiver.escape(cs, false,

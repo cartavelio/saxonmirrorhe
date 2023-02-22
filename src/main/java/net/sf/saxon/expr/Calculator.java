@@ -1139,6 +1139,8 @@ public abstract class Calculator {
         public AtomicValue compute(AtomicValue a, AtomicValue b, XPathContext c) throws XPathException {
             if (b instanceof Int64Value) {
                 return ((DurationValue) a).multiply(((Int64Value) b).longValue());
+            } else if (b instanceof DecimalValue) {
+                return ((DurationValue) a).multiply(((DecimalValue) b).getDecimalValue());
             } else {
                 return ((DurationValue) a).multiply(((NumericValue) b).getDoubleValue());
             }

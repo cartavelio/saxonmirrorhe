@@ -741,12 +741,12 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
          */
         @CSharpModifiers(code={"protected", "virtual"})
         private void formatDecimal(BigDecimal dval, StringBuilder fsb) {
+            //NOTE: C# has its own version of this code in an overriding subclass
             //#if CSHARP==false
             int exponent = 0;
             if (minExponentSize == 0) {
                 dval = dval.setScale(maxFractionPartSize, RoundingMode.HALF_EVEN);
             } else if (dval.signum() != 0) {
-                //TODO: reinstate for C#, in some form
                 exponent = dval.precision() - dval.scale() - scalingFactor;
                 dval = dval.movePointLeft(exponent);
                 dval = dval.setScale(maxFractionPartSize, RoundingMode.HALF_EVEN);
