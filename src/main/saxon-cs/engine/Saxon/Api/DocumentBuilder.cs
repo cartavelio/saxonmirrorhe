@@ -1,6 +1,7 @@
 using System;
 using System.Impl.Helpers;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using Saxon.Callbacks;
@@ -8,8 +9,12 @@ using Saxon.Ejava.lang;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
+using Saxon.Hej.@event;
+using Saxon.Hej.expr.parser;
 using Saxon.Hej.lib;
+using Saxon.Hej.om;
 using Saxon.Hej.pull;
+using Saxon.Hej.serialize;
 using Saxon.Hej.trans;
 using Saxon.Impl.Dom;
 using Saxon.Impl.XDoc;
@@ -457,6 +462,34 @@ namespace Saxon.Api {
             return doc;
         }
 
+        /// <summary>
+        /// Load an Linq document or element node, supplied as an <c>XContainer</c>, into a Saxon <c>XdmNode</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The returned document will contain only the subtree rooted at the supplied node.
+        /// </para>
+        /// <para>
+        /// This method copies the Linq tree to create a Saxon tree. See the <c>Wrap</c> method for
+        /// an alternative that creates a wrapper around the Linq tree, allowing it to be modified in situ.
+        /// </para>
+        /// </remarks>
+        /// <param name="source">The Link document or element node to be copied to form a Saxon tree</param>
+        /// <returns>An <c>XdmNode</c>, the document or element node corresponding to the supplied
+        /// Linq node. If the supplied source was an XDocument node, the result will be an XDM document node;
+        /// if it was an XElement node, it will be an XDM element node forming the outermost element of
+        /// a tree whose root is an XDM document node.
+        /// </returns>
+        public XdmNode Build(XContainer source) {
+            XdmNode doc = Build(source.CreateReader());
+            if (source is XElement) {
+                return doc.Select(Steps.Child("*")).First();
+            }
+            else {
+                return doc;
+            }
+        }
+        
         /// <summary>
         /// Load an XML DOM document, supplied as an <c>XmlNode</c>, into a Saxon <c>XdmNode</c>.
         /// </summary>
