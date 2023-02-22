@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  * A prefix pool maintains a two-way mapping from namespace prefixes (as strings) to
- * integer prefix codes. Prefix codes always fit in 10 bits, but are handled as ints.
+ * integer prefix codes. Prefix codes always fit in 11 bits, but are handled as ints.
  *
  * Until 9.8, prefixes were managed by the NamePool. The NamePool now only handles
  * fingerprints, which are integer representations of the URI and local name parts of
