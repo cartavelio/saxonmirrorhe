@@ -189,7 +189,7 @@ public class StyleNodeFactory implements NodeFactory {
                     if (((XSLStylesheet) parent).getEffectiveVersion() <= processorVersion) {
                         temp = new AbsentExtensionElement();
                         temp.setCompilation(compilation);
-                        temp.setValidationError(new XmlProcessingIncident("Unknown top-level XSLT declaration " + elemName.getDisplayName()),
+                        temp.setValidationError(new XmlProcessingIncident("Unknown top-level XSLT declaration " + elemName.getDisplayName(), "XTSE0010", location),
                                 StyleElement.OnFailure.REPORT_UNLESS_FORWARDS_COMPATIBLE);
                     }
                 } else {
@@ -199,7 +199,7 @@ public class StyleNodeFactory implements NodeFactory {
                     temp.setCompilation(compilation);
                     temp.processStandardAttributes("");
                     temp.setValidationError(
-                            new XmlProcessingIncident("Unknown XSLT instruction " + elemName.getDisplayName(), "XTSE0010"),
+                            new XmlProcessingIncident("Unknown XSLT instruction " + elemName.getDisplayName(), "XTSE0010", location),
                             temp.getEffectiveVersion() > processorVersion
                                 ? StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE
                                 : StyleElement.OnFailure.REPORT_ALWAYS);
