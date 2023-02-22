@@ -82,6 +82,9 @@ public class DocumentKey {
      * "file:///", and (b) to normalize case in the case of Windows filenames: especially the distinction
      * between "file:/C:" and "file:/c:".
      *
+     * <p>The result of this function should only be used when comparing two URIs to see if they correspond.
+     * The result is otherwise undefined; it might change between releases, and it might even not be a valid URI.</p>
+     *
      * @param uri the URI to be normalized
      * @return the normalized URI.
      */
