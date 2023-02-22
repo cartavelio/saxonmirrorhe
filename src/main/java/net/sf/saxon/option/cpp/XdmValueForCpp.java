@@ -97,14 +97,12 @@ public class XdmValueForCpp {
             return WordFactory.nullPointer();
         }
         XdmValue value = SaxonCAPI.objectHandles.get(valueRef);
-        int size = value.size();
-        if(size >0) {
-            size+=1;
+        if(value.size() == 0) {
+            return WordFactory.nullPointer();
         }
+        int size = value.size()+1;
         long[] valueRefs = new long[size];
-        if(size>0) {
-            valueRefs[0] = value.size();
-        }
+        valueRefs[0] = value.size();
         int i = 1;
         for (XdmItem item : value) {
             ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(item);
