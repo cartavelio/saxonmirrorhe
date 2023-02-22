@@ -255,7 +255,7 @@ return this;}
 
     int XdmNode::getChildCount(){
 	if(childCount == -1) {
-        std::cerr<<"getChildCount value="<<((int)value)<<std::endl;
+        std::cerr<<"getChildCount count="<<((int)childCount)<< " value="<<value<<std::endl;
 		childCount = j_getChildCount(SaxonProcessor::sxn_environ->thread, (void *)value);
         std::cerr<<"getChildCount count="<<childCount<<std::endl;
 
