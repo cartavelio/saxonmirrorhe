@@ -66,7 +66,7 @@ public final class EmptySequence implements GroundedValue {
 
     /**
      * Return an iteration over the sequence
-     * @return
+     * @return an empty iterator
      */
 
     /*@NotNull*/
