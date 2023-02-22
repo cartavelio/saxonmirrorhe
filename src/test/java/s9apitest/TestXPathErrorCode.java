@@ -18,6 +18,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.lib.StandardErrorReporter;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
@@ -34,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -187,6 +189,24 @@ public class TestXPathErrorCode {
             }
         }
 
+    }
+
+    @Test
+    public void testSuppressWarnings() {
+        try {
+            Processor proc = new Processor(true);
+            XPathCompiler comp = proc.newXPathCompiler();
+            StandardErrorReporter reporter = new StandardErrorReporter();
+            comp.setWarningHandler(reporter);
+            comp.compile("parse-xml('<abc/>')//*/@*/text()");
+            assertEquals(reporter.getNumberOfWarnings(), 1);
+            reporter.suppressWarning("SXWN9037");
+            comp.compile("parse-xml('<abc/>')//namespace::*/text()");
+            assertEquals(reporter.getNumberOfWarnings(), 1);
+
+        } catch (Exception e) {
+            System.out.println(String.format("EXCEPTION %s %s", e.getClass().getName(), e.getMessage()));
+        }
     }
 
 
