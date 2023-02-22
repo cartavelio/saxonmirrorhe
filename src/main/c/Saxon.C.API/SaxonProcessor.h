@@ -431,18 +431,18 @@ public:
     //! Parse a source document file and return it as an XdmNode.
     /**
      *
-     @param source the filename of the source document
-     @param validator
-     @return an XdmNode
+     * @param source the filename of the source document
+     * @param validator
+     * @return an XdmNode
     */
     XdmNode *parseXmlFromFile(const char *source, SchemaValidator * validator = nullptr);
 
     //! Parse a source document available by URI and return it as an XdmNode.
     /**
      *
-     @param source the URI of the source document
-     @param validator
-     @return an XdmNode
+     * @param source the URI of the source document
+     * @param validator
+     * @return an XdmNode
     */
     XdmNode *parseXmlFromUri(const char *source, SchemaValidator * validator = nullptr);
 
@@ -529,6 +529,7 @@ public:
      *
      * Properties specified here are common across all the processors.
      * Example 'l':enable line number has the value 'on' or 'off'
+     *
      * @param name of the property
      * @param value of the property
      */
