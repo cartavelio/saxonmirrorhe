@@ -190,6 +190,7 @@ task buildCWrappers (
           "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
           "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
           "--enable-url-protocols=https",
+          "--enable-url-protocols=http",
           "--shared"
       }
     }
