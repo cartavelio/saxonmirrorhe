@@ -6,7 +6,6 @@ import com.saxonica.ee.stream.Projector;
 import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.FilterFactory;
-import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.Expression;
@@ -50,12 +49,7 @@ public class ProjectionTests {
             XQueryExpression exp = sqc.compileQuery(query2);
 
             final PathMap map = ((XQueryExpressionEE)exp).getPathMap();
-            FilterFactory ff = new FilterFactory() {
-                @Override
-                public ProxyReceiver makeFilter(Receiver next) {
-                    return new Projector(map.getRootForDocument(fileName), next);
-                }
-            };
+            FilterFactory ff = next -> new Projector(map.getRootForDocument(fileName), next);
             StreamSource ss = new StreamSource(fileName);
 
             ParseOptions options = new ParseOptions();
