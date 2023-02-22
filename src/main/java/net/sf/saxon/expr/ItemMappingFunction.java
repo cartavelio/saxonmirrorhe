@@ -17,7 +17,9 @@ import net.sf.saxon.trans.XPathException;
  *
  * <p>NOTE: Java allows a lambda expression to be used where an ItemMappingFunction
  * is needed, but C# does not (it's not possible in C# to have a class implementing
- * a delegate). So if a delegate is wanted, use {@link ItemMapper}</p>
+ * a delegate). So if a delegate is wanted, use {@link ItemMapper}. Note that this
+ * class is deliberately NOT declared as a FunctionalInterface, to ensure that it
+ * transpiles into a C# interface rather than a delegate.</p>
  */
 
 public interface ItemMappingFunction {

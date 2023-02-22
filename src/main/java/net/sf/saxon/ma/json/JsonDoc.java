@@ -14,6 +14,7 @@ import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -86,7 +87,7 @@ public class JsonDoc extends SystemFunction  {
             checkedOptions = ParseJsonFn.OPTION_DETAILS.getDefaultOptions();
         }
         Item result = ParseJsonFn.parse(content.toString(), checkedOptions, context);
-        return result == null ? EmptySequence.getInstance() : result;
+        return SequenceTool.itemOrEmpty(result);
     }
 
 

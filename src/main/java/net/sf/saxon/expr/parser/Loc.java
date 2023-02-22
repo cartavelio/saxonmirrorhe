@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.s9api.Location;
-import org.xml.sax.Locator;
 
 import javax.xml.transform.SourceLocator;
 
@@ -43,7 +42,7 @@ public class Loc implements Location {
      * @param loc the SAX Locator
      */
 
-    public static Loc makeFromSax(Locator loc) {
+    public static Loc makeFromSax(org.xml.sax.Locator loc) {
         return new Loc(loc.getSystemId(), loc.getLineNumber(), loc.getColumnNumber());
     }
 

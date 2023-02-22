@@ -51,8 +51,9 @@ public class TailIterator
      * underlying array. This optimization is important when doing recursion over a node-set using
      * repeated calls of <code>$nodes[position()&gt;1]</code>
      *
-     * @param base  An iteration of the items to be filtered
-     * @param start The position of the first item to be included (base 1). If &lt;= 1, the whole of the
+     * @param base  An iteration of the items to be filtered. The state of this iterator after
+     *              the operation is undefined - it may or may not be consumed
+     * @param start The position of the first item to be included (origin 1). If &lt;= 1, the whole of the
      *              base sequence is returned
      * @return an iterator over the items in the sequence from the start item to the end of the sequence.
      *         The returned iterator will not necessarily be an instance of this class.

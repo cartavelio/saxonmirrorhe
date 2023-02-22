@@ -540,7 +540,9 @@ public class MergeInstr extends Instruction {
             SequenceIterator inputIterator = getMergedInputIterator(context, comps, c1);
 
             // Now perform the merge into a grouped sequence
-            inputIterator = new MergeGroupingIterator(inputIterator, getComparer(mergeSources[0].mergeKeyDefinitions, comps), getLastPositionFinder(context));
+            inputIterator = new MergeGroupingIterator(inputIterator,
+                                                      getComparer(mergeSources[0].mergeKeyDefinitions, comps),
+                                                      getLastPositionFinder(context));
 
             // and apply the merging action to each group of duplicate items within this sequence
             c1.setCurrentMergeGroupIterator((GroupIterator) inputIterator);
@@ -587,7 +589,7 @@ public class MergeInstr extends Instruction {
                 SequenceIterator uriIter = ms.getForEachSource().iterate(c1);
                 XsltController controller = (XsltController)context.getController();
                 final AccumulatorManager accumulatorManager = controller.getAccumulatorManager();
-                anchorsIter = new ItemMappingIterator(uriIter, ItemMapper.of(baseItem -> {
+                anchorsIter = new ItemMappingIterator(uriIter, baseItem -> {
                     String uri = baseItem.getStringValue();
                     NodeInfo node = DocumentFn.makeDoc(uri, getRetainedStaticContext().getStaticBaseUriString(),
                                                        getPackageData(), options, c1, getLocation(), true);
@@ -595,7 +597,7 @@ public class MergeInstr extends Instruction {
                         accumulatorManager.setApplicableAccumulators(node.getTreeInfo(), ms.accumulators);
                     }
                     return node;
-                }));
+                });
                 XPathContext c2 = c1.newMinorContext();
                 FocusIterator anchorsIterFocus = c2.trackFocus(anchorsIter);
                 while (anchorsIterFocus.next() != null) {

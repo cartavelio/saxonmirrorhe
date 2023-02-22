@@ -76,13 +76,13 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         } else if (type instanceof ListType) {
             return new ListConstructorFunction((ListType)type, resolver, true);
         } else {
-            Callable callable = (context, arguments) -> {
+            Callable callable = new CallableLambda((context, arguments) -> {
                 AtomicValue value = (AtomicValue) arguments[0].head();
                 if (value == null) {
                     return EmptySequence.getInstance();
                 }
                 return UnionConstructorFunction.cast(value, (UnionType) type, resolver, context.getConfiguration().getConversionRules());
-            };
+            });
             SequenceType returnType = ((UnionType) type).getResultTypeOfCast();
             return new CallableFunction(1, callable,
                                         new SpecificFunctionType(new SequenceType[]{SequenceType.OPTIONAL_ATOMIC}, returnType));

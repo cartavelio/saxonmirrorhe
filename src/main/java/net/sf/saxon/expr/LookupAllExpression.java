@@ -41,11 +41,11 @@ public class LookupAllExpression extends UnaryExpression {
     /**
      * Constructor
      *
-     * @param base The left hand operand (which must always select a sequence of maps or arrays).
+     * @param lhs The left hand operand (which must always select a sequence of maps or arrays).
      */
 
-    public LookupAllExpression(Expression base) {
-        super(base);
+    public LookupAllExpression(Expression lhs) {
+        super(lhs);
     }
 
     @Override
@@ -63,11 +63,11 @@ public class LookupAllExpression extends UnaryExpression {
     /*@NotNull*/
     @Override
     public final ItemType getItemType() {
-        ItemType base = getBaseExpression().getItemType();
-        if (base instanceof MapType) {
-            return ((MapType)base).getValueType().getPrimaryType();
-        } else if (base instanceof ArrayItemType) {
-            return ((ArrayItemType) base).getMemberType().getPrimaryType();
+        ItemType lhs = getBaseExpression().getItemType();
+        if (lhs instanceof MapType) {
+            return ((MapType)lhs).getValueType().getPrimaryType();
+        } else if (lhs instanceof ArrayItemType) {
+            return ((ArrayItemType) lhs).getMemberType().getPrimaryType();
         } else {
             return AnyItemType.getInstance();
         }
@@ -237,17 +237,17 @@ public class LookupAllExpression extends UnaryExpression {
             public Item next() throws XPathException {
                 if (level2 == null) {
                     if (level1 == null) {
-                        Item base = level0.next();
-                        if (base == null) {
+                        Item lhs = level0.next();
+                        if (lhs == null) {
                             return null;
-                        } else if (base instanceof ArrayItem) {
-                            level1 = ((ArrayItem)base).members().iterator();
+                        } else if (lhs instanceof ArrayItem) {
+                            level1 = ((ArrayItem)lhs).members().iterator();
                             return next();
-                        } else if (base instanceof MapItem) {
-                            level1 = ((MapItem)base).keyValuePairs().iterator();
+                        } else if (lhs instanceof MapItem) {
+                            level1 = ((MapItem)lhs).keyValuePairs().iterator();
                             return next();
                         } else {
-                            LookupExpression.mustBeArrayOrMap(LookupAllExpression.this, base);
+                            LookupExpression.mustBeArrayOrMap(LookupAllExpression.this, lhs);
                             return null;
                         }
                     } else {
@@ -267,12 +267,12 @@ public class LookupAllExpression extends UnaryExpression {
                         return next();
                     }
                 } else {
-                    Item next = level2.next();
-                    if (next == null) {
+                    Item nextItem = level2.next();
+                    if (nextItem == null) {
                         level2 = null;
                         return next();
                     } else {
-                        return next;
+                        return nextItem;
                     }
                 }
             }

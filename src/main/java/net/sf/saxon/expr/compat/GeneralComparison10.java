@@ -319,7 +319,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
 
         if (operator == Token.LT || operator == Token.LE || operator == Token.GT || operator == Token.GE) {
             final Configuration config = context.getConfiguration();
-            ItemMappingFunction map = ItemMapper.of(item -> Number_1.convert((AtomicValue)item, config));
+            ItemMappingFunction map = item -> Number_1.convert((AtomicValue)item, config);
             iter0 = new ItemMappingIterator(iter0, map, true);
             iter1 = new ItemMappingIterator(iter1, map, true);
         }

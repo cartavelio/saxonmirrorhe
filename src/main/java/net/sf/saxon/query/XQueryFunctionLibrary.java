@@ -376,7 +376,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
     @Override
     public FunctionLibrary copy() {
         XQueryFunctionLibrary qfl = new XQueryFunctionLibrary(config);
-        qfl.functions = new HashMap<>(functions);
+        qfl.functions = new HashMap<SymbolicName, XQueryFunction>(functions);
         return qfl;
     }
 

@@ -11,7 +11,6 @@ import com.saxonica.ee.schema.UserSimpleType;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.MappingFunction;
 import net.sf.saxon.expr.MappingIterator;
-import net.sf.saxon.expr.SequenceMapper;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
@@ -518,7 +517,7 @@ public class BuiltInListType implements ListType {
         map.atomicType = (AtomicType) getItemType();
         map.rules = rules;
         try {
-            return new AtomicArray(new MappingIterator(iter, SequenceMapper.of(map::map)));
+            return new AtomicArray(new MappingIterator(iter, map));
         } catch (XPathException err) {
             throw new ValidationException(err); // should not happen
         }

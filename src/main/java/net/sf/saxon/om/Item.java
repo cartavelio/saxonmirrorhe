@@ -113,7 +113,11 @@ public interface Item extends GroundedValue {
      */
     @Override
     default GroundedValue subsequence(int start, int length) {
-        return start <= 0 && (start + length) > 0 ? this : EmptySequence.getInstance();
+        if (start <= 0 && (start + length) > 0) {
+            return this;
+        } else {
+            return EmptySequence.getInstance();
+        }
     }
 
     /**

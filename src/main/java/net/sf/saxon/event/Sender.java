@@ -125,7 +125,7 @@ public abstract class Sender {
         } else if (source instanceof PullSource) {
             sendPullSource((PullSource) source, next, options);
             return;
-//#if CSHARP=false
+//#if CSHARP==false
         } else if (source instanceof EventSource) {
             ((EventSource) source).send(next);
             return;
@@ -194,7 +194,7 @@ public abstract class Sender {
     }
 
     private static void processStreamSource(Source source, ParseOptions options, Configuration config, Receiver next, StreamSource ss) throws XPathException {
-//#if CSHARP=false
+//#if CSHARP==false
         String url = source.getSystemId();
         InputSource is = new InputSource(url);
         is.setCharacterStream(ss.getReader());
@@ -262,7 +262,7 @@ public abstract class Sender {
         // end event stream
         receiver.close();
     }
-//#if CSHARP=false
+//#if CSHARP==false
     /**
      * Send the contents of a SAXSource to a given Receiver
      *

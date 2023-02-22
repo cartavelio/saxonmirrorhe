@@ -312,6 +312,7 @@ public class AugmentedSource implements Source {
         return options.isLineNumberingSet();
     }
 
+    //#if CSHARP==false
     /**
      * Set the SAX parser (XMLReader) to be used
      *
@@ -344,7 +345,7 @@ public class AugmentedSource implements Source {
             return null;
         }
     }
-
+    //#endif
     /**
      * Assuming that the contained Source is a node in a tree, indicate whether a tree should be created
      * as a view of this supplied tree, or as a copy.
@@ -442,6 +443,7 @@ public class AugmentedSource implements Source {
         return options.isXIncludeAware();
     }
 
+    //#if CSHARP==false
     /**
      * Set an EntityResolver to be used when parsing. Note this is used only
      * when a system-allocated parser is used; when a user-supplied parser
@@ -467,6 +469,8 @@ public class AugmentedSource implements Source {
         return options.getEntityResolver();
     }
 
+    //#endif
+    
     /**
      * Set an ErrorReporter to be used when parsing
      *

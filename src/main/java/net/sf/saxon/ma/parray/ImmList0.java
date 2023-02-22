@@ -7,6 +7,8 @@
 
 package net.sf.saxon.ma.parray;
 
+import net.sf.saxon.transpile.CSharpInjectMembers;
+
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -15,11 +17,22 @@ import java.util.Iterator;
  * @param <E> the (nominal) type of the list elements
  */
 
+@CSharpInjectMembers(code = {
+        "public static <E> ImmList0<E> getInstance() { return new ImmList0<E>(); }"
+})
+
 public class ImmList0<E> extends ImmList<E> {
 
-    final static ImmList0 INSTANCE = new ImmList0();
+    //#if CSHARP==false
+    private final static ImmList0 INSTANCE = new ImmList0();
 
-    private ImmList0() {}
+    public static <E> ImmList0<E> getInstance() {
+        return INSTANCE;
+    }
+    //#endif
+    
+    private ImmList0() {
+    }
 
     @Override
     public E get(int index) {

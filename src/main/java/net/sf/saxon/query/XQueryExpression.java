@@ -267,10 +267,10 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
 
     /*@NotNull*/
     public StructuredQName[] getExternalVariableNames() {
-        List list = stackFrameMap.getVariableMap();
+        List<StructuredQName> list = stackFrameMap.getVariableMap();
         StructuredQName[] names = new StructuredQName[stackFrameMap.getNumberOfVariables()];
         for (int i = 0; i < names.length; i++) {
-            names[i] = (StructuredQName) list.get(i);
+            names[i] = list.get(i);
         }
         return names;
     }

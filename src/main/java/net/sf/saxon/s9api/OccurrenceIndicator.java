@@ -20,7 +20,8 @@ public enum OccurrenceIndicator {
     ZERO, ZERO_OR_ONE, ZERO_OR_MORE, ONE, ONE_OR_MORE;
 
     protected int getCardinality() {
-        switch (this) {
+        OccurrenceIndicator indicator = this;
+        switch (indicator) {
             case ZERO:
                 return StaticProperty.EMPTY;
             case ZERO_OR_ONE:
@@ -98,7 +99,8 @@ public enum OccurrenceIndicator {
      */
 
     public String toString() {
-        switch (this) {
+        OccurrenceIndicator indicator = this;
+        switch (indicator) {
             case ZERO:
                 return "0";
             case ZERO_OR_ONE:

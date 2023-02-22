@@ -17,6 +17,12 @@ import net.sf.saxon.trans.XPathException;
  * SequenceIterator that delivers a sequence of zero or more Items.
  *
  * <p>It maps an item of class F to a sequence of items of class T, returned as an iterator.</p>
+ *
+ *  <p>NOTE: Java allows a lambda expression to be used where an ItemMappingFunction
+ *  is needed, but C# does not (it's not possible in C# to have a class implementing
+ *  a delegate). So if a delegate is wanted, use {@link ItemMapper}. Note that this
+ *  class is deliberately NOT declared as a FunctionalInterface, to ensure that it
+ *  transpiles into a C# interface rather than a delegate.</p>
  */
 
 public interface MappingFunction {

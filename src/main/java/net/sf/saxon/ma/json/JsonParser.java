@@ -159,7 +159,8 @@ public class JsonParser {
         if (debug) {
             System.err.println("token:" + tokenizer.currentToken + " :" + tokenizer.currentTokenValue);
         }
-        switch (tokenizer.currentToken) {
+        JsonToken tok = tokenizer.currentToken;
+        switch (tok) {
             case LCURLY:
                 parseObject(handler, tokenizer, flags, context);
                 break;
