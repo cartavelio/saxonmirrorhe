@@ -46,7 +46,7 @@ public class JDOM2Example {
     }
 
     /**
-     * Show (a) use of freestanding XPath expressions against the JDOM document, and
+     * Show (a) use of freestanding XPath expressions against the JDOM2 document, and
      * (b) the simplest possible transformation from system id to output stream.
      */
 
