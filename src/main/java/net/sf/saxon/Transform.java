@@ -945,6 +945,18 @@ public class Transform {
         }
     }
 
+    /**
+     * Support method for main program. This support method can also be invoked from subclasses
+     * that support the same command line interface
+     *
+     * @param args the command-line arguments
+     * @param command not used, retained for backwards compatibility
+     */
+
+    public void doTransform(String[] args, String command) {
+        doTransform(args);
+    }
+
     @CSharpReplaceBody(code="return Saxon.Ejava.io.File.CurrentDirectoryUri();")
     private static URI getCurrentWorkingDirectory() {
         return new File(System.getProperty("user.dir")).toURI();
