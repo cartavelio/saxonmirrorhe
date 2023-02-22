@@ -13,6 +13,7 @@ import net.sf.saxon.option.jdom2.JDOM2DocumentWrapper;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.xpath.XPathFactoryImpl;
@@ -35,7 +36,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * tests for mapping of Java types to XPath types
@@ -436,6 +439,38 @@ public class ExtensionTest {
             assertEquals("magic", ((XdmAtomicValue) result).getStringValue());
         } catch (SaxonApiException e) {
             e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testInstanceMethodStaticallyNull() {  // Bug 5044
+        try {
+            Processor proc = new Processor(true);
+            proc.getUnderlyingConfiguration().registerExternalObjectModel(new JDOM2ObjectModel());
+            XQueryEvaluator eval = proc.newXQueryCompiler().compile(
+                    "Q{java:java.lang.Object}hash-code(())").load();
+            XdmValue result = eval.evaluate();
+            assertEquals(1, result.size());
+            assertTrue(result.itemAt(0).isAtomicValue());
+            assertTrue(result.itemAt(0).getUnderlyingValue() instanceof Int64Value);
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testInstanceMethodDynamicallyNull() {  // Bug 5044
+        try {
+            Processor proc = new Processor(true);
+            proc.getUnderlyingConfiguration().registerExternalObjectModel(new JDOM2ObjectModel());
+            XQueryEvaluator eval = proc.newXQueryCompiler().compile(
+                    "Q{java:java.lang.Object}hash-code(current-date()[year-from-date(.) lt 2000])").load();
+            XdmValue result = eval.evaluate();
+            assertEquals(1, result.size());
+            assertTrue(result.itemAt(0).isAtomicValue());
+            assertTrue(result.itemAt(0).getUnderlyingValue() instanceof Int64Value);
+        } catch (SaxonApiException e) {
             fail();
         }
     }
