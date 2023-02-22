@@ -10,14 +10,17 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.serialize.codenorm.Normalizer;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
+import java.text.Normalizer;
 import java.util.HashSet;
 
 
@@ -124,7 +127,7 @@ public class XHTMLURIEscaper extends HTMLURIEscaper {
                             try {
                                 String normalized = (isAllAscii(value)
                                                                ? value
-                                                               : Normalizer.make(Normalizer.C, getConfiguration()).normalize(value));
+                                                               : Normalizer.normalize(value, Normalizer.Form.NFC));
                                 return new AttributeInfo(
                                         attName,
                                         att.getType(),

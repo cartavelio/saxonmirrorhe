@@ -13,7 +13,6 @@ import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.json.JsonReceiver;
 import net.sf.saxon.serialize.charcode.CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
-import net.sf.saxon.serialize.codenorm.Normalizer;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeWriter;
 import net.sf.saxon.trans.XPathException;
@@ -24,6 +23,7 @@ import net.sf.saxon.value.NumericValue;
 
 import javax.xml.transform.OutputKeys;
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.Properties;
 import java.util.Stack;
 
@@ -41,7 +41,7 @@ public class JSONEmitter {
 
     private Configuration config;
     private UnicodeWriter writer;
-    private Normalizer normalizer;
+    private Normalizer.Form normalizationForm;
     private CharacterMap characterMap;
     private Properties outputProperties;
     private CharacterSet characterSet;
@@ -113,11 +113,11 @@ public class JSONEmitter {
     /**
      * Set the Unicode normalizer to be used for normalizing strings.
      *
-     * @param normalizer the normalizer to be used
+     * @param form the normalization form to be used (default is no normalization)
      */
 
-    public void setNormalizer(Normalizer normalizer) {
-        this.normalizer = normalizer;
+    public void setNormalizationForm(Normalizer.Form form) {
+        this.normalizationForm = form;
     }
 
     /**
@@ -308,8 +308,8 @@ public class JSONEmitter {
     }
 
     private String simpleEscape(String cs) throws XPathException {
-        if (normalizer != null) {
-            cs = normalizer.normalize(cs);
+        if (normalizationForm != null) {
+            cs = Normalizer.normalize(cs, normalizationForm);
         }
         return JsonReceiver.escape(cs, false,
                                    c -> c < 31 || (c >= 127 && c <= 159) || !characterSet.inCharset(c));

@@ -14,13 +14,17 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
-import net.sf.saxon.serialize.codenorm.Normalizer;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSingletonIterator;
+
+import java.text.Normalizer;
 
 /**
  * This class is used as a filter on the serialization pipeline; it performs the function
@@ -178,7 +182,7 @@ public class HTMLURIEscaper extends ProxyReceiver {
             int ch = iter.next();
             if (ch < 32 || ch > 126) {
                 if (normalize) {
-                    String normalized = Normalizer.make(Normalizer.C, config).normalize(url.toString());
+                    String normalized = Normalizer.normalize(url.toString(), Normalizer.Form.NFC);
                     return reallyEscapeURL(normalized);
                 } else {
                     return reallyEscapeURL(url.toString());

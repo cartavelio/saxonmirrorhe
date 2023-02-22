@@ -9,12 +9,11 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.StringTool;
-import net.sf.saxon.serialize.codenorm.Normalizer;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
-import net.sf.saxon.z.IntIterator;
+
+import java.text.Normalizer;
 
 /**
  * Implement the XPath normalize-unicode() function (both the 1-argument and 2-argument versions)
@@ -42,16 +41,16 @@ public class NormalizeUnicode extends SystemFunction {
     }
 
     public static String normalize(String sv, String form, XPathContext c) throws XPathException {
-        byte fb;
+        Normalizer.Form fb;
 
         if (form.equalsIgnoreCase("NFC")) {
-            fb = Normalizer.C;
+            fb = Normalizer.Form.NFC;
         } else if (form.equalsIgnoreCase("NFD")) {
-            fb = Normalizer.D;
+            fb = Normalizer.Form.NFD;
         } else if (form.equalsIgnoreCase("NFKC")) {
-            fb = Normalizer.KC;
+            fb = Normalizer.Form.NFKC;
         } else if (form.equalsIgnoreCase("NFKD")) {
-            fb = Normalizer.KD;
+            fb = Normalizer.Form.NFKD;
         } else if (form.isEmpty()) {
             return sv;
         } else {
@@ -62,22 +61,21 @@ public class NormalizeUnicode extends SystemFunction {
             throw err;
         }
 
-        // fast path for ASCII strings: normalization is a no-op
-        boolean allASCII = true;
+//        // fast path for ASCII strings: normalization is a no-op
+//        boolean allASCII = true;
+//
+//        IntIterator iter = StringTool.codePoints(sv);
+//        while (iter.hasNext()) {
+//            if (iter.next() > 127) {
+//                allASCII = false;
+//                break;
+//            }
+//        }
+//        if (allASCII) {
+//            return sv;
+//        }
 
-        IntIterator iter = StringTool.codePoints(sv);
-        while (iter.hasNext()) {
-            if (iter.next() > 127) {
-                allASCII = false;
-                break;
-            }
-        }
-        if (allASCII) {
-            return sv;
-        }
-
-        Normalizer norm = Normalizer.make(fb, c.getConfiguration());
-        return norm.normalize(sv);
+        return Normalizer.normalize(sv, fb);
     }
 
 }
