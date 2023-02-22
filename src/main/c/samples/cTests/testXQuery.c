@@ -33,8 +33,8 @@ int main()
      * Initialize JET run-time.
      * The handle of loaded component is used to retrieve Invocation API.
      */
-    initDefaultJavaRT (&environi);
-    //initJavaRT (environi->myDllHandle, &(environi->jvm), &(environi->env));
+    //initDefaultJavaRT (&environi);
+    initJavaRT (environi->myDllHandle, &(environi->jvm), &(environi->env));
     const char *verCh = version(*environi);
     printf("XQuery Tests\n\nSaxon version: %s \n", verCh);
 
@@ -42,7 +42,7 @@ int main()
 
     setProperty(&properties, &propLen, &propCap, "qs", "<out>{count(/out/person)}</out>");
 
-    const char * result = executeQueryToString(environi, &processor, NULL, 0,properties,0,propLen);
+    const char * result = executeQueryToString(*environi, &processor, NULL, 0,properties,0,propLen);
 
     if(!result) {
       printf("result is null\n");

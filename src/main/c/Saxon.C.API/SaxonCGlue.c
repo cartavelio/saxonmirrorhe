@@ -492,6 +492,9 @@ char* getProperty(sxnc_property * properties, int propLen, const char* namespace
  */
 void setParameter(sxnc_parameter **parameters, int * parLen, int * parCap, const char * namespacei, const char * name, jobject value) {
 
+    if(name == NULL) {
+        return;
+    }
 	namespacei = NULL;
 	if (getParameter(*parameters, (*parLen), "", name) != 0) {
 		return;
@@ -507,14 +510,28 @@ void setParameter(sxnc_parameter **parameters, int * parLen, int * parCap, const
 		free(parameters);
 		parameters = &temp;
 	}
+    printf("setPar cp1 \n");
 	int nameLen = strlen(name) + 7;
 	char *newName = malloc(sizeof(char)*nameLen);
-	int namespaceLen = strlen(namespacei);
-	char *newNamespace = malloc(sizeof(char)*namespaceLen);
+    printf("setPar cp2 \n");
+    int namespaceLen = 0;
+    char *newNamespace =  NULL;
+    if(namespacei>0) {
+        namespaceLen = strlen(namespacei);
+        newNamespace = malloc(sizeof(char)*namespaceLen);
+        snprintf(newNamespace, namespaceLen, "%s", name);
+    }
+    printf("setPar cp1:%i \n", namespaceLen);
+
+    printf("setPar cp3 \n");
 	snprintf(newName, nameLen, "%s%s", "param:", name);
-	snprintf(newNamespace, namespaceLen, "%s", name);
+    printf("setPar cp4 \n");
+
 	(*parameters)[(*parLen) - 1].name = (char*)newName;
-	(*parameters)[(*parLen) - 1].namespacei = (char*)newNamespace;
+    printf("setPar cp5 \n");
+    if(namespacei>0) {
+        (*parameters)[(*parLen) - 1].namespacei = (char *) newNamespace;
+    }
 	(*parameters)[(*parLen) - 1].value = (jobject)value;
 }
 
