@@ -912,6 +912,9 @@ task graal_eec_jar(
         include "saxoncClasses.pxd"
         include "nodekind.py"
         include "readme.txt"
+        filter { line ->
+          line.replace('@@edition@@', edition)
+        }
       }
     }
 
@@ -920,6 +923,7 @@ task graal_eec_jar(
         from "${projectDir}/src/main/c/pypi/python_saxon"
         into "${buildDir}/${edition}c_pypi"
         include "test_saxonc.py"
+        include "test_saxon_schema.py"
         filter { line ->
           line.replace('@@edition@@', edition)
         }
@@ -933,6 +937,9 @@ task graal_eec_jar(
         include "saxon_example.py"
         include "saxon_example2.py"
         include "saxon_example3.py"
+        filter { line ->
+          line.replace('@@edition@@', edition)
+        }
       }
     }
 
