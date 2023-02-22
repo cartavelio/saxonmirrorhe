@@ -667,6 +667,21 @@ task graal_eec_jar(
 
     doLast {
       copy {
+        from "${projectDir}/src/main/c/Saxon.C.API"
+        into "${saxoncReleaseDir}"
+        include "readme.md"
+        filter { line ->
+          line.replaceAll('@@VERSION@@', saxonVersion)
+                  .replace('@@edition@@', edition)
+                  .replace('@@EDITION@@', edition.toUpperCase())
+                  .replace('@@libpath@@', libpath)
+                  .replace('@@location@@', location)
+        }
+      }
+    }
+
+    doLast {
+      copy {
         from "${buildDir}/c/"
         into "${saxoncReleaseDir}/Saxon.C.API/graalvm"
         include "graal*.h"
@@ -762,6 +777,7 @@ task graal_eec_jar(
         include "php8_XQueryProcessor.cpp"
         include "config.m4"
         include "config.w32"
+        exclude "readme.md"
         filter { line ->
           line.replaceAll('@@VERSION@@', saxonVersion)
                   .replace('@@edition@@', edition)
