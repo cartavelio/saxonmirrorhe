@@ -114,6 +114,10 @@ public class ProcessorDataAccumulator {
 
     }
 
+    public int size(){
+        return values.size();
+    }
+
 
 
 
