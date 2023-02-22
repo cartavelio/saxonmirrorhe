@@ -69,6 +69,7 @@
   
   <!-- Saxon-specific features in the implementation of standard functions -->
   <test-set name="fn-copy-of" file="misc/fn-copy-of.xml"/>
+  <test-set name="fn-matches" file="misc/fn-matches.xml"/>
   <test-set name="fn-map-merge" file="misc/fn-map-merge.xml"/>
   <test-set name="fn-parse-json" file="misc/fn-parse-json.xml"/>
   <test-set name="fn-serialize" file="misc/fn-serialize.xml"/>
