@@ -336,7 +336,6 @@ configurations.compileClasspath.each { cp ->
 }
 
 apply from: "build-n.gradle"
-apply from: "build-c.gradle"
 apply from: "build-doc.gradle"
 apply from: "test-suites.gradle"
 apply from: "build-resources.gradle"
