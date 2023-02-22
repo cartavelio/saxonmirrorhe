@@ -33,12 +33,9 @@ import java.io.StringWriter;
 import java.util.*;
 
 
-//TODO: setParameter('name', 'value')
-//TODO: setParameter('name', 'value', 'type')
-
 
 /**
- * * This class is to use with Saxon/C on C++
+ * * This class is to use with SaxonC on C++
  */
 public class XsltProcessor extends SaxonCAPI {
 
@@ -126,7 +123,7 @@ public class XsltProcessor extends SaxonCAPI {
 
     public class MyMessageListener implements MessageListener {
 
-        //TODO: This is not ideal. We should output the xsl-message to the System.err as they happen.
+
         //Second option is to write them out to a file.
 
         @Override

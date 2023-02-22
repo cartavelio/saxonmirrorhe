@@ -466,14 +466,14 @@ public class XPathProcessor extends SaxonCAPI {
              Map<QName, XdmValue> variables = parameters;
              for(Map.Entry<QName, XdmValue> entry: variables.entrySet()){
                  if (SaxonCAPI.debug) {
-                         System.err.println("applyXPathPrperties: key=" + entry.getKey().getClarkName() + ", Value="+entry.getValue().toString());
+                         System.err.println("applyXPathProperties: key=" + entry.getKey().getClarkName() + ", Value="+entry.getValue().toString());
                  }
                  selector.setVariable(entry.getKey(), entry.getValue());
 
              }
          } else {
              if (SaxonCAPI.debug) {
-                 System.err.println("applyXPathPrperties: parameters map is empty");
+                 System.err.println("applyXPathProperties: parameters map is empty");
              }
 
          }
@@ -484,8 +484,7 @@ public class XPathProcessor extends SaxonCAPI {
 
     public static void main(String[] arg) throws SaxonApiException {
 
-        int num = Integer.parseInt("123", 5);
-        System.out.println("Xxxxxxx= " + num);
+
 
         XPathProcessor xpath = new XPathProcessor(false);
         /*System.out.println("Version: " + SaxonCAPI.getProductVersion(xpath.processor));

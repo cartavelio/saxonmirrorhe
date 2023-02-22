@@ -100,9 +100,9 @@ public class SaxonCException  {
 
 
         for(Object item : errorList) {
-            System.err.println("Java DEBUG j_getCombinedStaticErrorMessages message: "+((XmlProcessingError)item).getMessage());
+            //System.err.println("Java DEBUG j_getCombinedStaticErrorMessages message: "+((XmlProcessingError)item).getMessage());
             message+=(((XmlProcessingError)item).getMessage() + "\n");
-            System.err.println("Java DEBUG j_getCombinedStaticErrorMessages message-1: "+message);
+            //System.err.println("Java DEBUG j_getCombinedStaticErrorMessages message-1: "+message);
         }
 
 

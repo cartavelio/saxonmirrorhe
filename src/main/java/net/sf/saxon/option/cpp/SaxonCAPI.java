@@ -74,6 +74,7 @@ public class SaxonCAPI {
 
     public static final long STATUS_OK = 0;
     public static final long STATUS_FAIL = -1;
+    public static final long STATUS_EXCEPTION = -2;
 
 
     /**
@@ -207,9 +208,7 @@ public class SaxonCAPI {
         }
 
 
-    }
-
-    ;
+    };
 
 
     interface AllocatorFn extends CFunctionPointer {
@@ -380,7 +379,7 @@ public class SaxonCAPI {
         return holder.get();
     }
 
-    @CEntryPoint(name = "j_testProg")
+    /* @CEntryPoint(name = "j_testProg")
     public static CCharPointer j_testProg(IsolateThread thread, int flag) throws Exception{
 
         if(flag == 2) {
@@ -421,7 +420,7 @@ public class SaxonCAPI {
                     System.err.println("Exception = " + ex.getMessage());
                     throw ex;
                 }
-    }
+    }         */
 
     @CEntryPoint(name = "j_setCatalogFile", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long j_setCatalog(IsolateThread thread, ObjectHandle processorRef, CCharPointer catalogFile) {
@@ -967,6 +966,7 @@ public class SaxonCAPI {
     /**
      * Utility method
      *
+     * @param thread
      * @param ctypeStr
      * @return
      */
@@ -987,6 +987,7 @@ public class SaxonCAPI {
     /**
      * Utility method to get the String value from the XdmValue representation
      *
+     * @param thread
      * @param xdmvalueRef
      * @return CCharPointer object
      */

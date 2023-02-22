@@ -812,9 +812,10 @@ public class XdmUtils {
     /**
      * Get the name of the node, as a EQName
      *
-     * @param thread
-     * @param nodeRef
-     * @return the name of the node. In the case of unnamed nodes (for example, text and comment nodes)
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param alloc - Allocator function to create C memory space passed from the C++ application
+     * @param nodeRef - reference to an XdmNode object in the ObjectHandles pool
+     * @return C string pointer to the name of the node in the C memory space. In the case of unnamed nodes (for example, text and comment nodes)
      * return null.
      */
     @CEntryPoint(name = "j_getNodeName", exceptionHandler = SaxonCExceptionCCharHandler.class)
@@ -850,8 +851,10 @@ public class XdmUtils {
     /**
      * Create a string representation of the array of values. The is the result of serializing
      * the value using the adaptive serialization method.
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param alloc - Allocator function to create C memory space passed from the C++ application
      * @param processorDataAccumulatorRef - ObjectHandle to array of XdmValue held as ProcessorDataAccumulator
-     * @return a string representation of the value
+     * @return C string pointer to the string representation of the XdmValue array in the C memory space. Return null pointer if XdmValue is null
      */
     @CEntryPoint(name = "xdmValueArrayToString")
     public static CCharPointer xdmValueArrayToString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle processorDataAccumulatorRef){
@@ -874,8 +877,8 @@ public class XdmUtils {
     /**
      * Get the string value of a named attribute of the element passed
      *
-     * @param thread
-     * @param nodeRef
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param nodeRef  - reference to an XdmNode object in the ObjectHandles pool
      * @param c_eqname
      * @return null if this node is not an element, or if this element has no
      * attribute with the specified name. Otherwise return the string value of the
