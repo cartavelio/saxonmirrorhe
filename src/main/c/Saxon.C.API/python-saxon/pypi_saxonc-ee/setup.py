@@ -18,8 +18,10 @@ extra_link_args = []
 
 if system() == 'Darwin':
     extra_link_args.append('-Llibs/darwin')
-else:
+elif system() == 'Linux':
     extra_link_args.append('-Llibs/nix')
+else
+    extra_link_args.append('-Llibs/win')
 
 # extented modules
 ext_modules = [Extension(
