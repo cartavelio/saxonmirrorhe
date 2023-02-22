@@ -633,6 +633,10 @@ task graal_eec_jar(
         include "libsaxon-${edition}c-*.so"
         include "libsaxon-${edition}c-*.dylib"
         include "libsaxon-${edition}c-*.dll"
+        if(systemOs.isWindows()) {
+          include "libsaxon-${edition}c-*.lib"
+          include "libsaxon-${edition}c-*.exp"
+        }
       }
     }
 
@@ -767,7 +771,7 @@ task graal_eec_jar(
         if(systemOs.isLinux() || systemOs.isMacOsX()) {
           commandLine "${buildCPPScript}", "-L${sharedLibDir}"
         } else {
-          commandLine "cmd","/c","${buildCPPScript}", "-L${sharedLibDir}"
+          commandLine "cmd","/c","${buildCPPScript}"
         }
         println "built C++ Wrappers"
       }

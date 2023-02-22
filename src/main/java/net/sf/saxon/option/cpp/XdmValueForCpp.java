@@ -35,7 +35,9 @@ public class XdmValueForCpp {
     private XdmValue value;
     private static QName errorCode = null;
 
-
+    /**
+     * Constructor
+     */
     public XdmValueForCpp() {
         value = XdmEmptySequence.getInstance();
         type = (BuiltInAtomicType) BuiltInType.getSchemaType(StandardNames.XS_ERROR);
@@ -79,7 +81,11 @@ public class XdmValueForCpp {
         type = null;
     }
 
-
+    /**
+     * convert XdmValue to items in a ProcessorDataAccumulator object
+     * @param value   XdmValue
+     * @return  ProcessorDataAccumulator
+     */
     public static ProcessorDataAccumulator makeArrayFromXdmValue(XdmValue value) {
         XdmItem[] items = new XdmItem[value.size()];
 
@@ -116,7 +122,13 @@ public class XdmValueForCpp {
 
     }
 
-
+    /**
+     *
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param valueRef - reference to XdmValue held in the ObjectHandle's pool
+     * @return long value reference to the XdmValue
+     * @throws SaxonApiException
+     */
     @CEntryPoint(name = "j_getTypedValue")
     public static long getTypedValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
         XdmNode value = SaxonCAPI.objectHandles.get(valueRef);
@@ -125,7 +137,13 @@ public class XdmValueForCpp {
         return objectHandle.rawValue();
     }
 
-
+    /**
+     * Get the value converted to a boolean using the XPath casting rules
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param valueRef - reference to XdmValue held in the ObjectHandle's pool
+     * @return byte value representing the boolean
+     * @throws SaxonApiException
+     */
     @CEntryPoint(name = "j_getBooleanValue")
     public static byte getBooleanValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
         XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
@@ -134,20 +152,42 @@ public class XdmValueForCpp {
         return result;
     }
 
-
+    /**
+     * Get the value converted to a double using the XPath casting rules.
+     * <p>If the value is a string, the XSD 1.1 rules are used, which means that the string
+     * "+INF" is recognised.</p>
+     *
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param valueRef - reference to XdmValue held in the ObjectHandle's pool
+     * @return  the result of converting to a double - reference to XdmAtomicValue given as long
+     * @throws SaxonApiException
+     */
     @CEntryPoint(name = "j_getDoubleValue")
     public static double getDoubleValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
         XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
         return value.getDoubleValue();
     }
 
-
+    /**
+     * Get the value converted to an integer using the XPath casting rules
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param valueRef - reference to XdmValue held in the ObjectHandle's pool
+     * @return  long value as reference for the XdmAtomicValue - the result of converting to an integer
+     * @throws SaxonApiException
+     */
     @CEntryPoint(name = "j_getLongValue")
     public static long getLongValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
         XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
         return value.getLongValue();
     }
 
+    /**
+     * Get a hashcode that reflects the rules for equality matching
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param valueRef - reference to XdmValue held in the ObjectHandle's pool
+     * @return a suitable hash code
+     * @throws SaxonApiException
+     */
     @CEntryPoint(name = "j_getHashCode")
     public static int getHashCode(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
         XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
