@@ -914,6 +914,11 @@ public class ExpressionTool {
             if (!list.contains(function)) {
                 list.add(function);
             }
+        } else if (e instanceof UserFunctionReference) {
+            UserFunction function = ((UserFunctionReference) e).getNominalTarget();
+            if (!list.contains(function)) {
+                list.add(function);
+            }
         } else {
             for (Operand o : e.operands()) {
                 gatherCalledFunctions(o.getChildExpression(), list);
