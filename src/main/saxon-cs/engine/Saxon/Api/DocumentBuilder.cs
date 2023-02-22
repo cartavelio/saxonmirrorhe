@@ -131,11 +131,8 @@ namespace Saxon.Api {
         /// </remarks> 
 
         public QName TopLevelElementName {
-            get { return topLevelElement; }
-            set {
-                topLevelElement = value;
-                //schemaValidator.UnderlyingSchemaValidator.setDocumentElementName(topLevelElement);
-            }
+            get => topLevelElement;
+            set => topLevelElement = value;
         }
 
         /// <summary>
