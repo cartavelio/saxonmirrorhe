@@ -15,6 +15,7 @@ import net.sf.saxon.expr.instruct.ForEachGroup;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
+import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.AttributeInfo;
@@ -271,7 +272,12 @@ public final class XSLForEachGroup extends StyleElement {
         if (collationName instanceof StringLiteral) {
             // if the collation name is constant, then we've already resolved it against the base URI
             final String uri = ((StringLiteral) collationName).stringify();
-            collator = findCollation(uri, getBaseURI());
+            try {
+                collator = findCollation(uri, getBaseURI());
+            } catch (XPathException err) {
+                compileError("Failed to load collation " + uri + ": " + err.getMessage(), "XTDE1110");
+                collator = CodepointCollator.getInstance();     // for recovery paths
+            }
             if (collator == null) {
                 compileError("The collation name '" + collationName + "' has not been defined", "XTDE1110");
             }
