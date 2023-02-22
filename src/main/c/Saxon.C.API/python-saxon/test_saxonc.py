@@ -556,6 +556,18 @@ def testCallNamedTemplateWithTunnelParams(saxonproc):
     assert sw is not None
     assert "17" in sw
 
+def testCallNamedTemplateWithTunnelParams2(saxonproc):
+    trans = saxonproc.new_xslt30_processor()
+    source = "<?xml version='1.0'?> <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' version='3.0'>  <xsl:template name='t'> <xsl:call-template name='u'/>  </xsl:template>  <xsl:template name='u'> <xsl:param name='a' as='xs:double' tunnel='yes'/>  <xsl:param name='b' as='xs:float' tunnel='yes'/>   <xsl:sequence select='$a + $b'/> </xsl:template> </xsl:stylesheet>"
+    executable = trans.compile_stylesheet(stylesheet_text=source)
+    executable.set_property("!omit-xml-declaration", "yes")
+    executable.set_property("tunnel", "true")
+    aVar = saxonproc.make_double_value(12)
+    executable.set_initial_template_parameters(True, {"a":aVar, "b":saxonproc.make_integer_value(5)})
+    sw = executable.call_template_returning_string("t")
+    assert sw is not None
+    assert "17" in sw
+
 def testCallTemplateRuleWithParams(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     source = "<?xml version='1.0'?> <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema'  version='3.0'> <xsl:template match='*'>  <xsl:param name='a' as='xs:double'/>  <xsl:param name='b' as='xs:float'/>  <xsl:sequence select='name(.), $a + $b'/> </xsl:template>  </xsl:stylesheet>"
@@ -811,6 +823,14 @@ def test_default_namespace(saxonproc):
     query_proc.set_query_content("/foo")
     value = query_proc.run_query_to_value()
     assert value.size == 1
+
+def test_default_namespace2(saxonproc):
+    query_proc = saxonproc.new_xquery_processor()
+    query_proc.declare_namespace("", "http://one.uri/")
+    node = saxonproc.parse_xml(xml_text="<foo xmlns='http://one.uri/'><bar/></foo>")
+    value = query_proc.run_query_to_value(input_xdm_item=node, query_text="/foo")
+    assert value.size == 1
+
 def test_XQuery_line_number():
     ''' No license file given therefore result will return None'''
     try:
@@ -855,6 +875,24 @@ def testReusability(saxonproc):
     result2 = queryproc.run_query_to_value()
     item2 = result2.head
     assert item2.integer_value == 18
+
+
+def testQueryKeyWords(saxonproc):
+    queryproc = saxonproc.new_xquery_processor()
+    queryproc.clear_properties()
+    queryproc.clear_parameters()
+    input_ =  saxonproc.parse_xml(xml_text="<foo xmlns='http://one.uri/'><bar xmlns='http://two.uri'>12</bar></foo>")
+    queryproc.declare_namespace("", "http://one.uri/")
+    value1 = saxonproc.make_boolean_value(True)
+    queryproc.set_parameter("p",value1)
+    foo_file = data_dir+"/foo.xq"
+    result = queryproc.run_query_to_value(query_file=foo_file, input_xdm_item=input_)
+    item = result.head
+    assert result is not None
+    assert item.is_atomic
+    assert item.boolean_value
+    queryproc.clear_parameters()
+    queryproc.clear_properties()
 
 def test_make_string_value(saxonproc):
     xdm_string_value = saxonproc.make_string_value('text1')
