@@ -300,8 +300,8 @@
     <xsl:template match="*:a" priority="5">
         <xsl:choose>
             <xsl:when test="substring(@href, 1, 5) = ('file:','http:') or starts-with(@href, 'https:')">
-                <a class="link" href="{@href}">
-                    <xsl:value-of select="."/>
+                <a>
+                    <xsl:apply-templates select="node()|@*" mode="secondary"/>
                 </a>
             </xsl:when>
             <xsl:otherwise>
