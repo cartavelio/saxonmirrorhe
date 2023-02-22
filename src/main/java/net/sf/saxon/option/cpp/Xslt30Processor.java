@@ -1348,14 +1348,13 @@ public class Xslt30Processor extends SaxonCAPI {
     @CEntryPoint(name = "j_transformToValue", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long transformToValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle xslt30ProcessorRef, ObjectHandle executableRef, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = null;
+        Xslt30Processor xslt30Processor = null;
         if(executableRef != WordFactory.nullPointer()) {
             executable = objectHandles.get(executableRef);
-        }
-
-
-        Xslt30Processor xslt30Processor = null;
-        if(xslt30ProcessorRef != WordFactory.nullPointer()) {
+        } else if(xslt30ProcessorRef != WordFactory.nullPointer()) {
             xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        } else {
+            throw new SaxonApiException("XSLT30 Processor not created");
         }
         String cwd = null;
         if(ccwd !=WordFactory.nullPointer()) {

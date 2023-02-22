@@ -12,7 +12,7 @@
 #include <exception>
 #include "SaxonProcessor.h"
 
-
+class SaxonProcessor;
 
 
 /*! <code>SaxonApiException</code>. An exception thrown by the Saxon s9api API (Java). This is always a C++ wrapper for some other underlying exception in Java
@@ -62,21 +62,7 @@ public:
     /**
      * A destructor.
      */
-	virtual ~SaxonApiException() throw() {
-        std::cerr<<"~SaxonApiException cp0"<<std::endl;
-	    if(message != nullptr) {
-            delete message;
-        }
-        std::cerr<<"~SaxonApiException cp1"<<std::endl;
-	    if(errorCode != nullptr) {
-            delete errorCode;
-        }
-        std::cerr<<"~SaxonApiException cp2"<<std::endl;
-	    if(systemId != nullptr) {
-            delete systemId;
-        }
-        std::cerr<<"~SaxonApiException cp3"<<std::endl;
-	}
+	virtual ~SaxonApiException() throw() ;
 
 
 
