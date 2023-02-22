@@ -49,9 +49,10 @@
             </td>
             <td>
                <p>An <code>Xslt30Processor</code> represents a factory to compile, load and execute
-                  a stylesheet. It supports new options for invoking a stylesheet, corresponding to
-                  facilities defined in the XSLT 3.0 specification, but is not confined to XSLT 3.0,
-                  it can also work well with XSLT 2.0 and XSLT 1.0 stylesheets.</p>
+                  stylesheets. The name of the class refers to the fact that this XSLT processor
+                  supports options for invoking a stylesheet corresponding to the new facilities
+                  defined in the XSLT 3.0 specification. But the processor can of course also
+                  process XSLT 2.0 and XSLT 1.0 stylesheets.</p>
             </td>
             <td>
                <p>
@@ -70,8 +71,9 @@
                </p>
             </td>
             <td>
-               <p>An <code>XsltExecutable</code> represents the compiled form of a stylesheet, created using
-                  one of the compile methods on the <code>Xslt30Processor</code> class.</p>
+               <p>An <code>XsltExecutable</code> represents the compiled form of a stylesheet. An
+                  <code>XsltExecutable</code> is created using one of the compile methods on the
+                  <code>Xslt30Processor</code> class.</p>
             </td>
             <td>
                <p>
@@ -90,8 +92,8 @@
                </p>
             </td>
             <td>
-               <p>An <code>XQueryProcessor</code> object represents a factory to compile, load and
-                  execute XQuery queries.</p>
+               <p>An <code>XQueryProcessor</code> represents a factory to compile, load and execute
+                  queries.</p>
             </td>
             <td>
                <p>
@@ -247,6 +249,9 @@
 
       <section id="saxon_c_php_saxonprocessor" title="Saxon\SaxonProcessor">
          <h1>Saxon\SaxonProcessor</h1>
+         
+         <p>The <code>SaxonProcessor</code> class acts as a factory for generating XSLT, XQuery,
+            XPath and Schema processors. It is also used to create XDM objects from primitive types.</p>
 
          <table>
             <thead>
@@ -722,6 +727,10 @@
 
       <section id="saxon_c_php_xslt30processor" title="Saxon\Xslt30Processor">
          <h1>Saxon\Xslt30Processor</h1>
+         
+         <p>An <code>Xslt30Processor</code> represents a factory to compile, load and execute
+            stylesheets. It is possible to cache the context and the stylesheet in the
+            <code>Xslt30Processor</code>.</p>
 
          <table>
             <thead>
@@ -961,10 +970,13 @@
          </table>
       </section>
       
-      
-      
-            <section id="saxon_c_php_xsltexecutable" title="Saxon\XsltExecutable">
+      <section id="saxon_c_php_xsltexecutable" title="Saxon\XsltExecutable">
          <h1>Saxon\XsltExecutable</h1>
+         
+         <p>An <code>XsltExecutable</code> represents the compiled form of a stylesheet. An
+            <code>XsltExecutable</code> is created by using one of the <code>compile</code> methods
+            on the <a class="bodylink code"
+               href="../saxon_c_php_xslt30processor">Xslt30Processor</a> class.</p>
 
          <table>
             <thead>
@@ -1461,6 +1473,9 @@
 
       <section id="saxon_c_php_xqueryprocessor" title="Saxon\XQueryProcessor">
          <h1>Saxon\XQueryProcessor</h1>
+         
+         <p>An <code>XQueryProcessor</code> represents a factory to compile, load and execute
+            queries.</p>
 
          <table>
             <thead>
@@ -1646,6 +1661,9 @@
 
       <section id="saxon_c_php_xpathprocessor" title="Saxon\XPathProcessor">
          <h1>Saxon\XPathProcessor</h1>
+         
+         <p>An <code>XPathProcessor</code> represents a factory to compile, load and execute XPath
+            expressions.</p>
 
          <table>
             <thead>
@@ -1876,6 +1894,9 @@
 
       <section id="saxon_c_php_schemavalidator" title="Saxon\SchemaValidator">
          <h1>Saxon\SchemaValidator</h1>
+         
+         <p>A <code>SchemaValidator</code> represents a factory for validating instance documents
+            against a schema.</p>
 
          <table>
             <thead>
@@ -2090,6 +2111,12 @@
       <section id="saxon_c_php_documentBuilder" title="Saxon\DocumentBuilder">
          <h1>Saxon\DocumentBuilder</h1>
          
+         <p>A <code>DocumentBuilder</code> holds properties controlling how a Saxon document tree
+            should be built, and provides methods to invoke the tree construction.</p>
+         <p>This class has no public constructor. To construct a <code>DocumentBuilder</code>, use
+            the factory method <code>newDocumentBuilder()</code> of <a class="bodylink code"
+               href="../saxon_c_php_saxonprocessor">SaxonProcessor</a>.</p>
+         
          <table>
             <thead>
                <tr>
@@ -2275,6 +2302,9 @@
 
       <section id="saxon_c_php_xdmvalue" title="Saxon\XdmValue">
          <h1>Saxon\XdmValue</h1>
+         
+         <p>An <code>XdmValue</code> represents a value in the XDM data model. A value is a sequence
+            of zero or more items, each item being an atomic value, a node, or a function item.</p>
 
          <table>
             <thead>
@@ -2328,6 +2358,8 @@
       <section id="saxon_c_php_xdmitem" title="Saxon\XdmItem">
          <h1>Saxon\XdmItem</h1>
          <p>extends <a href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a></p>
+         <p>The class <code>XdmItem</code> represents an item in a sequence, as defined by the XDM
+            data model. An item is either an atomic value, a node, or a function item.</p>
 
          <table>
             <thead>
@@ -2397,6 +2429,10 @@
       <section id="saxon_c_php_xdmatomicvalue" title="Saxon\XdmAtomicValue">
          <h1>Saxon\XdmAtomicValue</h1>
          <p>extends <a href="../saxon_c_php_xdmitem">Saxon\XdmItem</a></p>
+         <p>The class <code>PyXdmAtomicValue</code> represents an item in an XPath sequence that is
+            an atomic value. The value may belong to any of the 19 primitive types defined in XML
+            Schema, or to a type derived from these primitive types, or the XPath type
+            xs:untypedAtomic.</p>
 
          <table>
             <thead>
@@ -2464,6 +2500,11 @@
       <section id="saxon_c_php_xdmnode" title="Saxon\XdmNode">
          <h1>Saxon\XdmNode</h1>
          <p>extends <a href="../saxon_c_php_xdmitem">Saxon\XdmItem</a></p>
+         <p>This class represents a node in the XDM data model. An <code>XdmNode</code> is an
+            <code>XdmItem</code>, and is therefore an <code>XdmValue</code> in its own right, and
+            may also participate as one item within a sequence value. The <code>XdmNode</code>
+            interface exposes basic properties of the node, such as its name, its string value, and
+            its typed value.</p>
          
          <table>
             <thead>
@@ -2574,8 +2615,7 @@
       <section id="saxon_c_php_xdmfunctionitem" title="Saxon\XdmFunctionItem">
          <h1>Saxon\XdmFunctionItem</h1>
          <p>extends <a href="../saxon_c_php_xdmitem">Saxon\XdmItem</a></p>
-         
-       
+         <p>The class <code>XdmFunctionItem</code> represents a function item.</p>
          
          <table>
             <thead>
@@ -2646,6 +2686,9 @@
       <section id="saxon_c_php_xdmarray" title="Saxon\XdmArray">
          <h1>Saxon\XdmArray</h1>
          <p>extends <a href="../saxon_c_php_xdmfunctionitem">Saxon\XdmFunctionItem</a></p>
+         <p>The class <code>XdmArray</code> represents an array in the XDM data model. An array is a
+            list of zero or more members, each of which is an arbitrary XDM value. The array itself
+            is an XDM item. An <code>XdmArray</code> is immutable.</p>
          
          <table>
             <thead>
@@ -2720,6 +2763,10 @@
       <section id="saxon_c_php_xdmmap" title="Saxon\XdmMap">
          <h1>Saxon\XdmMap</h1>
          <p>extends <a href="../saxon_c_php_xdmfunctionitem">Saxon\XdmFunctionItem</a></p>
+         <p>The class <code>XdmMap</code> represents a map item in the XDM data model. A map is a
+            list of zero or more entries, each of which is a pair comprising a key (which is an
+            atomic value) and a value (which is an arbitrary value). The map itself is an XDM item.
+            A <code>XdmMap</code> is immutable.</p>
          
          <table>
             <thead>
