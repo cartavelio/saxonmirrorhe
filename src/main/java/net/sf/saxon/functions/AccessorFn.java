@@ -7,11 +7,16 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
 
@@ -271,5 +276,39 @@ public abstract class AccessorFn extends ScalarSystemFunction {
         }
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new AccessorFnElaborator();
+    }
+
+    /**
+     * Elaborator for accessor functions such as hours-from-date-Time, minutes-from-duration
+     */
+
+    public static class AccessorFnElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final AccessorFn fn = (AccessorFn) fnc.getTargetFunction();
+            final Component component = fn.getComponentId();
+            final ItemEvaluator argEval = makeElaborator(fnc.getArg(0)).elaborateForItem();
+            final boolean nullable = Cardinality.allowsZero(fnc.getArg((0)).getCardinality());
+            return context -> {
+                AtomicValue base = ((AtomicValue) argEval.eval(context));
+                if (nullable && base == null) {
+                    return null;
+                }
+                return base.getComponent(component);
+            };
+        }
+
+
+    }
 }
 

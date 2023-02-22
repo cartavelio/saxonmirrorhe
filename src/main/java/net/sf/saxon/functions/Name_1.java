@@ -7,11 +7,21 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.StringEvaluator;
+import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.StringElaborator;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.StringValue;
 
 /**
@@ -35,5 +45,51 @@ public class Name_1 extends ScalarSystemFunction {
         return "NameCompiler";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new NameElaborator();
+    }
+
+
+    public static class NameElaborator extends StringElaborator {
+
+        public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthIfAbsent) {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final Expression arg = fnc.getArg(0);
+            final boolean nullable = Cardinality.allowsZero(arg.getCardinality());
+            final ItemEvaluator argEval = makeElaborator(arg).elaborateForItem();
+
+            return context -> {
+                NodeInfo node = (NodeInfo) argEval.eval(context);
+                if (nullable && node == null) {
+                    return EmptyUnicodeString.getInstance();
+                }
+                return StringView.of(node.getDisplayName());
+            };
+
+        }
+
+        public StringEvaluator elaborateForString(boolean zeroLengthIfAbsent) {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final Expression arg = fnc.getArg(0);
+            final boolean nullable = Cardinality.allowsZero(arg.getCardinality());
+            final ItemEvaluator argEval = makeElaborator(arg).elaborateForItem();
+
+            return context -> {
+                NodeInfo node = (NodeInfo) argEval.eval(context);
+                if (nullable && node == null) {
+                    return "";
+                }
+                return node.getDisplayName();
+            };
+
+        }
+    }
 }
 

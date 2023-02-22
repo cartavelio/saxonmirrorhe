@@ -7,10 +7,10 @@
 
 package net.sf.saxon.expr;
 
-import com.saxonica.ee.elab.eval.ItemEvaluator;
-import com.saxonica.ee.elab.eval.PullEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
-import com.saxonica.ee.elab.gen.PullElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.instruct.AnalyzeString;
@@ -591,7 +591,13 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
 
     @Override
     public Elaborator getElaborator() {
-        return new SystemFunctionCallElaborator();
+        SystemFunction fn = getTargetFunction();
+        Elaborator fnElaborator = fn.getElaborator();
+        if (fnElaborator != null) {
+            return fnElaborator;
+        } else {
+            return new SystemFunctionCallElaborator();
+        }
     }
 
     /**

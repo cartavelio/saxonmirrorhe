@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
@@ -16,7 +20,6 @@ import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.PrependSequenceIterator;
@@ -662,6 +665,51 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
     @Override
     public String getStreamerName() {
         return "ForEach";
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new ForEachElaborator();
+    }
+
+    public static class ForEachElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            ForEach forEach = (ForEach) getExpression();
+            PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
+            PullEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPull();
+            ContextMappingFunction mapper = context -> action.eval(context);
+            return context -> {
+                XPathContextMinor c2 = context.newMinorContext();
+                c2.trackFocus(select.eval(context));
+                return new ContextMappingIterator(mapper, c2);
+            };
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            ForEach forEach = (ForEach)getExpression();
+            PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
+            PushEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPush();
+            return (out, context) -> {
+                XPathContextMinor c2 = context.newMinorContext();
+                FocusIterator iter = c2.trackFocus(select.eval(context));
+                TailCall tc = null;
+                while (iter.next() != null) {
+                    dispatchTailCall(tc);
+                    tc = action.process(out, c2);
+                }
+                return tc;
+            };
+
+        }
     }
 }
 

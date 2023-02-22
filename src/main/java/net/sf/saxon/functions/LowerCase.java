@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -33,6 +34,16 @@ public class LowerCase extends ScalarSystemFunction {
     @Override
     public String getCompilerName() {
         return "ForceCaseCompiler";
+    }
+
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new UpperCase.ForceCaseFnElaborator();
     }
 
 }

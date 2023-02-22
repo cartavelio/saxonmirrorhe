@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.*;
@@ -591,6 +592,16 @@ public abstract class SystemFunction extends AbstractFunction {
     protected UnicodeString getUniStringArg(Sequence supplied) throws XPathException {
         StringValue item = (StringValue)supplied.head();
         return item == null ? EmptyUnicodeString.getInstance() : item.getUnicodeStringValue();
+    }
+
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+
+    public Elaborator getElaborator() {
+        return null;
     }
 
 

@@ -9,6 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.OperandElaborator;
 import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.RebindingMap;
@@ -391,7 +392,8 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
 
         try {
             if (bodyEvaluator == null) {
-                bodyEvaluator = context.getConfiguration().obtainOperandEvaluator(body);
+                context.getConfiguration();
+                bodyEvaluator = new OperandElaborator(body);
             }
             return bodyEvaluator.processLeavingTail(output, context);
         } catch (UncheckedXPathException e) {

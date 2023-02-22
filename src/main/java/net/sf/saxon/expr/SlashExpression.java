@@ -7,10 +7,10 @@
 
 package net.sf.saxon.expr;
 
-import com.saxonica.ee.elab.eval.PullEvaluator;
-import com.saxonica.ee.elab.eval.PushEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
-import com.saxonica.ee.elab.gen.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.instruct.CopyOf;
 import net.sf.saxon.expr.instruct.TailCall;

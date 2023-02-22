@@ -7,6 +7,9 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -14,6 +17,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.StringValue;
@@ -197,6 +201,48 @@ public class Substring extends SystemFunction implements Callable {
     @Override
     public String getCompilerName() {
         return "SubstringCompiler";
+    }
+
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new SubstringFnElaborator();
+    }
+
+    public static class SubstringFnElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final ItemEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForItem();
+            final ItemEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForItem();
+            final boolean nullable = Cardinality.allowsZero(fnc.getArg(0).getCardinality());
+            if (fnc.getArity() == 2) {
+                return context -> {
+                    StringValue sv = (StringValue)arg0Eval.eval(context);
+                    if (nullable && sv == null) {
+                        return StringValue.EMPTY_STRING;
+                    }
+                    NumericValue start = (NumericValue)arg1Eval.eval(context);
+                    return substring(sv, start);
+                };
+            } else {
+                final ItemEvaluator arg2Eval = makeElaborator(fnc.getArg(2)).elaborateForItem();
+                return context -> {
+                    StringValue sv = (StringValue) arg0Eval.eval(context);
+                    if (nullable && sv == null) {
+                        return StringValue.EMPTY_STRING;
+                    }
+                    NumericValue start = (NumericValue) arg1Eval.eval(context);
+                    NumericValue len = (NumericValue) arg2Eval.eval(context);
+                    return substring(sv, start, len);
+                };
+            }
+        }
+
     }
 }
 

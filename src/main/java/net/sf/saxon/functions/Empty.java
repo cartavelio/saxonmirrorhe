@@ -7,10 +7,15 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
@@ -171,6 +176,31 @@ public class Empty extends Aggregate {
         return "Empty";
     }
 
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new EmptyFnElaborator();
+    }
 
+    public static class EmptyFnElaborator extends BooleanElaborator {
+
+        public BooleanEvaluator elaborateForBoolean() {
+            SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            Expression arg = fnc.getArg(0);
+            PullEvaluator puller = makeElaborator(arg).elaborateForPull();
+            return context -> {
+                SequenceIterator iter = puller.eval(context);
+                Item nextItem = iter.next();
+                iter.close();
+                return nextItem == null;
+            };
+        }
+
+
+    }
 }
 

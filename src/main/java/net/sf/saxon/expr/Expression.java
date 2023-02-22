@@ -7,8 +7,8 @@
 
 package net.sf.saxon.expr;
 
-import com.saxonica.ee.elab.gen.Elaborator;
-import com.saxonica.ee.elab.gen.FallbackElaborator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.FallbackElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;

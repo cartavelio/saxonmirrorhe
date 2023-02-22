@@ -7,11 +7,20 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.StringEvaluator;
+import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.StringElaborator;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.ToUpper;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.StringValue;
 
 
@@ -36,6 +45,66 @@ public class UpperCase extends ScalarSystemFunction {
         return "ForceCaseCompiler";
     }
 
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new ForceCaseFnElaborator();
+    }
 
+
+    public static class ForceCaseFnElaborator extends StringElaborator {
+
+        public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final Expression arg = fnc.getArg(0);
+            final UnicodeStringEvaluator argEval = makeElaborator(arg).elaborateForUnicodeString(false);
+            final boolean nullable = Cardinality.allowsZero(arg.getCardinality());
+            if (fnc.getFunctionName().getLocalPart().equals("lower-case")) {
+                return context -> {
+                    UnicodeString s0 = argEval.eval(context);
+                    if (nullable && s0 == null) {
+                        return handleNullUnicodeString(zeroLengthWhenAbsent);
+                    }
+                    return StringView.of(s0.toString().toLowerCase());
+                };
+            } else {
+                return context -> {
+                    UnicodeString s0 = argEval.eval(context);
+                    if (nullable && s0 == null) {
+                        return handleNullUnicodeString(zeroLengthWhenAbsent);
+                    }
+                    return StringView.of(s0.toString().toUpperCase());
+                };
+            }
+        }
+
+        public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final Expression arg = fnc.getArg(0);
+            final StringEvaluator argEval = makeElaborator(arg).elaborateForString(false);
+            final boolean nullable = Cardinality.allowsZero(arg.getCardinality());
+            if (fnc.getFunctionName().getLocalPart().equals("lower-case")) {
+                return context -> {
+                    String s0 = argEval.eval(context);
+                    if (nullable && s0 == null) {
+                        return handleNullString(zeroLengthWhenAbsent);
+                    }
+                    return s0.toLowerCase();
+                };
+            } else {
+                return context -> {
+                    String s0 = argEval.eval(context);
+                    if (nullable && s0 == null) {
+                        return handleNullString(zeroLengthWhenAbsent);
+                    }
+                    return s0.toUpperCase();
+                };
+            }
+        }
+    }
 }
 

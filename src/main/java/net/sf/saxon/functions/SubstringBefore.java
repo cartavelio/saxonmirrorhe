@@ -7,10 +7,17 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.StringEvaluator;
+import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.StringElaborator;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.lib.SubstringMatcher;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
@@ -49,5 +56,83 @@ public class SubstringBefore extends CollatingFunctionFixed {
         return "SubstringBeforeCompiler";
     }
 
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new SubstringBeforeFnElaborator();
+    }
+
+    public static class SubstringBeforeFnElaborator extends StringElaborator {
+
+        public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final SubstringBefore fn = (SubstringBefore) fnc.getTargetFunction();
+            final SubstringMatcher stringCollator = (SubstringMatcher) fn.getStringCollator();
+            assert stringCollator != null; // We don't go down this path until the collation is known
+
+            final UnicodeStringEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForUnicodeString(true);
+            final UnicodeStringEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForUnicodeString(true);
+
+            if (stringCollator instanceof CodepointCollator) {
+                return context -> {
+                    UnicodeString s0 = arg0Eval.eval(context);
+                    UnicodeString s1 = arg1Eval.eval(context);
+                    if (s1.isEmpty()) {
+                        return s0;
+                    }
+                    if (s0.isEmpty()) {
+                        return EmptyUnicodeString.getInstance();
+                    }
+                    long j = s0.indexOf(s1, 0);
+                    if (j < 0) {
+                        return EmptyUnicodeString.getInstance();
+                    }
+                    return s0.prefix(j);
+                };
+            } else {
+                return context -> {
+                    UnicodeString s0 = arg0Eval.eval(context);
+                    UnicodeString s1 = arg1Eval.eval(context);
+                    return stringCollator.substringBefore(s0, s1);
+                };
+            }
+        }
+
+
+        public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final SubstringBefore fn = (SubstringBefore) fnc.getTargetFunction();
+            final SubstringMatcher stringCollator = (SubstringMatcher) fn.getStringCollator();
+            assert stringCollator != null; // We don't go down this path until the collation is known
+
+            if (stringCollator instanceof CodepointCollator) {
+                final StringEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForString(true);
+                final StringEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForString(true);
+
+                return context -> {
+                    String s0 = arg0Eval.eval(context);
+                    String s1 = arg1Eval.eval(context);
+                    if (s1.isEmpty()) {
+                        return s0;
+                    }
+                    if (s0.isEmpty()) {
+                        return "";
+                    }
+                    int j = s0.indexOf(s1, 0);
+                    if (j < 0) {
+                        return "";
+                    }
+                    return s0.substring(0, j);
+                };
+            } else {
+                return super.elaborateForString(zeroLengthWhenAbsent);
+            }
+        }
+
+    }
 }
 

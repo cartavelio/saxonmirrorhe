@@ -7,6 +7,10 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
@@ -200,5 +204,36 @@ public class Sum extends FoldingFunction {
         return "SumCompiler";
     }
 
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new SumFnElaborator();
+    }
+
+    public static class SumFnElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+            SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            PullEvaluator puller = makeElaborator(fnc.getArg(0)).elaborateForPull();
+            ItemEvaluator zero = fnc.getArity() == 2
+                    ? makeElaborator(fnc.getArg(1)).elaborateForItem()
+                    : context -> Int64Value.ZERO;
+            return context -> {
+                SumFold fold = new SumFold(context, (AtomicValue)zero.eval(context));
+                SequenceIterator iter = puller.eval(context);
+                Item it;
+                while ((it = iter.next()) != null) {
+                    fold.processItem(it);
+                }
+                return (AtomicValue)fold.result();
+            };
+        }
+
+
+    }
 }
 

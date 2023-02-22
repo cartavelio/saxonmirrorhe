@@ -7,8 +7,13 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.StringEvaluator;
+import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.StringElaborator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
@@ -76,6 +81,43 @@ public class String_1 extends ScalarSystemFunction {
         return "StringFn";
     }
 
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new StringFnElaborator();
+    }
 
+    public static class StringFnElaborator extends StringElaborator {
+
+        public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
+            SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            Expression arg = fnc.getArg(0);
+            UnicodeStringEvaluator argEval = makeElaborator(arg).elaborateForUnicodeString(true);
+            return context -> {
+                try {
+                    return argEval.eval(context);
+                } catch (UnsupportedOperationException err) {
+                    throw new XPathException(err.getMessage(), "FOTY0014");
+                }
+            };
+        }
+
+        public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
+            SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            Expression arg = fnc.getArg(0);
+            StringEvaluator argEval = makeElaborator(arg).elaborateForString(true);
+            return context -> {
+                try {
+                    return argEval.eval(context);
+                } catch (UnsupportedOperationException err) {
+                    throw new XPathException(err.getMessage(), "FOTY0014");
+                }
+            };
+        }
+    }
 }
 

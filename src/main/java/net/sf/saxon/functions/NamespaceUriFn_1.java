@@ -7,6 +7,11 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceUri;
@@ -14,6 +19,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.Cardinality;
 
 /**
  * This class supports the namespace-uri() function
@@ -37,5 +43,36 @@ public class NamespaceUriFn_1 extends ScalarSystemFunction {
         return "NamespaceUriFnCompiler";
     }
 
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new NamespaceUriFnElaborator();
+    }
+
+    /**
+     * Elaborator for the namespace-uri() function
+     */
+
+    public static class NamespaceUriFnElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final Expression arg = fnc.getArg(0);
+            final boolean nullable = Cardinality.allowsZero(arg.getCardinality());
+            final ItemEvaluator argEval = makeElaborator(arg).elaborateForItem();
+
+            return context -> {
+                NodeInfo node = (NodeInfo) argEval.eval(context);
+                NamespaceUri uri = nullable && node == null ? NamespaceUri.NULL : node.getNamespaceUri();
+                return new AnyURIValue(uri.toUnicodeString());
+            };
+
+        }
+
+    }
 }
 

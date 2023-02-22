@@ -7,9 +7,9 @@
 
 package net.sf.saxon.expr;
 
-import com.saxonica.ee.elab.eval.ItemEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
-import com.saxonica.ee.elab.gen.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.GroundedValue;

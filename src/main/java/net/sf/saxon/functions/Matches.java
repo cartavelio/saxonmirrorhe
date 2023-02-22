@@ -7,7 +7,12 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
+import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.regex.RegularExpression;
@@ -114,6 +119,38 @@ public class Matches extends RegexFunction {
         return "MatchesCompiler";
     }
 
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new MatchesFnElaborator();
+    }
 
+    public static class MatchesFnElaborator extends BooleanElaborator {
+
+        public BooleanEvaluator elaborateForBoolean() {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final Matches fn = (Matches) fnc.getTargetFunction();
+            final UnicodeStringEvaluator arg0eval = makeElaborator(fnc.getArg(0)).elaborateForUnicodeString(true);
+            final RegularExpression staticRegex = fn.getStaticRegex();
+            if (staticRegex == null) {
+                final UnicodeStringEvaluator arg1eval = makeElaborator(fnc.getArg(1)).elaborateForUnicodeString(true);
+                final UnicodeStringEvaluator arg2eval = fn.getArity() == 3
+                        ? makeElaborator(fnc.getArg(2)).elaborateForUnicodeString(true)
+                        : cxt -> EmptyUnicodeString.getInstance();
+                return context -> fn.evalMatches(
+                            arg0eval.eval(context),
+                            arg1eval.eval(context),
+                            arg2eval.eval(context),
+                            context);
+            } else {
+                return context -> staticRegex.containsMatch(arg0eval.eval(context));
+            }
+        }
+
+    }
 }
 

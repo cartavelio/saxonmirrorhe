@@ -7,6 +7,8 @@
 
 package net.sf.saxon.query;
 
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.ComplexContentOutputter;
@@ -60,6 +62,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
     protected SlotManager stackFrameMap;
     protected Executable executable;
     protected QueryModule mainModule;
+    protected PullEvaluator pullEvaluator = null;
 
 
     /**
@@ -358,6 +361,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         if (!env.getConfiguration().isCompatible(getExecutable().getConfiguration())) {
             throw new XPathException("The query must be compiled and executed under the same Configuration", SaxonErrorCode.SXXP0004);
         }
+
         Controller controller = newController(env);
 
         try {
@@ -393,6 +397,12 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
     }
 
     protected SequenceIterator getExpressionIterator(XPathContext context) throws XPathException {
+        if (getConfiguration().getOptimizerOptions().isSet(OptimizerOptions.ELABORATION)) {
+            if (pullEvaluator == null) {
+                pullEvaluator = Elaborator.makeElaborator(expression).elaborateForPull();
+            }
+            return pullEvaluator.eval(context);
+        }
         return expression.iterate(context);
     }
 
