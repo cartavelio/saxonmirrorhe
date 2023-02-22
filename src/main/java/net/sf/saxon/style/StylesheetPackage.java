@@ -1072,6 +1072,16 @@ public class StylesheetPackage extends PackageData {
     }
 
     /**
+     * Mark the package as non-exportable, supplying an error message to be reported if export is attempted
+     *
+     * @param message   the error message to report indicating why export is not possible
+     * @param errorCode the error code to report if export is attempted
+     */
+
+    public void markNonExportable(String message, String errorCode) {
+    }
+
+    /**
      * Output the abstract expression tree to the supplied destination.
      *
      * @param presenter the expression presenter used to display the structure

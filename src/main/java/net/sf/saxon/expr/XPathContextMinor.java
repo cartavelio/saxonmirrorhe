@@ -250,7 +250,7 @@ public class XPathContextMinor implements XPathContext {
         }
         try {
             int length = currentIterator.getLength();
-            System.err.println("Current iterator.length = " + length);
+            //System.err.println("Current iterator.length = " + length);
             last = new LastValue(length);
             return length;
         } catch (XPathException err) {
