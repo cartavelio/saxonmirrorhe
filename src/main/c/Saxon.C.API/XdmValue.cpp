@@ -64,10 +64,8 @@ const char * XdmValue::toString() {
         if(toStringValue.empty()) {
             return nullptr;
         }
-
         return toStringValue.c_str();
     } else {
-
         return toStringValue.c_str();
 
     }

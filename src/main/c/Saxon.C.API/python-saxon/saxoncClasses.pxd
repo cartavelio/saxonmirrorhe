@@ -545,6 +545,10 @@ cdef extern from "../XdmItem.h":
 
         bool isNode()
 
+        bool isMap()
+
+        bool isArray()
+
 
 
 
