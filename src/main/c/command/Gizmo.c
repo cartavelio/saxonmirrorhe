@@ -25,6 +25,11 @@ const char * failure;
 
 int gizmo(sxnc_environment * environi, int argc, const char* argv[]) {
 
+
+#ifdef DEBUG
+    setDebugMode(environi->thread, 1);
+#endif
+
     if(argc < 2) {
         printf("\nError: Not enough arguments in Transform");
         return 0;
