@@ -91,7 +91,7 @@ public class DirectResourceResolver implements ResourceResolver {
                     if (s.startsWith("/")) {
                         s = s.substring(1);
                     }
-                    stream = ClassLoader.getSystemResourceAsStream(s);
+                    stream = config.getDynamicLoader().getResourceAsStream(s);
                 } else {
                     stream = ResourceLoader.urlStream(new URL(request.uri));
                 }
