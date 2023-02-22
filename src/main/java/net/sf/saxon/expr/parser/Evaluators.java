@@ -1,15 +1,6 @@
 package net.sf.saxon.expr.parser;
 
-import net.sf.saxon.z.IntHashMap;
-
 public class Evaluators {
-    
-    private final static IntHashMap<Evaluator> map = new IntHashMap<>(20);
-
-    private static void bind(int code, Evaluator evaluator) {
-        evaluator.setCode(code);
-        map.put(code, evaluator);
-    }
 
     // These numeric constants must be stable as they are held in the SEF file
 
@@ -31,32 +22,46 @@ public class Evaluators {
     public static final int STREAMING_ARGUMENT = 15;
     public static final int CALL_EVALUATE_SINGLE_ITEM = 16;
 
-//    public static void init() {
-//        bind(UNDECIDED, Evaluator.EagerSequence.INSTANCE);
-//        bind(EVALUATE_LITERAL, Evaluator.Literal.INSTANCE);
-//        bind(EVALUATE_VARIABLE, Evaluator.Variable.INSTANCE);
-//        bind(MAKE_CLOSURE, Evaluator.LazySequence.INSTANCE);
-//        bind(MAKE_MEMO_CLOSURE, Evaluator.MemoClosure.INSTANCE);
-//        bind(RETURN_EMPTY_SEQUENCE, Evaluator.EmptySequence.INSTANCE);
-//        bind(EVALUATE_AND_MATERIALIZE_VARIABLE, Evaluator.Variable.INSTANCE);
-//        bind(CALL_EVALUATE_OPTIONAL_ITEM, Evaluator.OptionalItem.INSTANCE);
-//        bind(ITERATE_AND_MATERIALIZE, Evaluator.EagerSequence.INSTANCE);
-//        bind(PROCESS, Evaluator.Process.INSTANCE);
-//        bind(LAZY_TAIL_EXPRESSION, Evaluator.LazyTail.INSTANCE);
-//        bind(SHARED_APPEND_EXPRESSION, Evaluator.SharedAppend.INSTANCE);
-//        bind(MAKE_INDEXED_VARIABLE, Evaluator.MakeIndexedVariable.INSTANCE);
-//        bind(MAKE_SINGLETON_CLOSURE, Evaluator.SingletonClosure.INSTANCE);
-//        bind(EVALUATE_SUPPLIED_PARAMETER, Evaluator.SuppliedParameter.INSTANCE);
-//        bind(STREAMING_ARGUMENT, Evaluator.StreamingArgument.INSTANCE);
-//        bind(CALL_EVALUATE_SINGLE_ITEM, Evaluator.SingleItem.INSTANCE);
-//    }
-    
     public static Evaluator getEvaluator(int code) {
-        return map.get(code);
+        switch(code) {
+            case UNDECIDED:
+                return Evaluator.EagerSequence.INSTANCE;
+            case EVALUATE_LITERAL:
+                return Evaluator.Literal.INSTANCE;
+            case EVALUATE_VARIABLE:
+                return Evaluator.Variable.INSTANCE;
+            case MAKE_CLOSURE:
+                return Evaluator.LazySequence.INSTANCE;
+            case MAKE_MEMO_CLOSURE:
+                return Evaluator.MemoClosureEvaluator.INSTANCE;
+            case RETURN_EMPTY_SEQUENCE:
+                return Evaluator.EmptySequenceEvaluator.INSTANCE;
+            case EVALUATE_AND_MATERIALIZE_VARIABLE:
+                return Evaluator.Variable.INSTANCE;
+            case CALL_EVALUATE_OPTIONAL_ITEM:
+                return Evaluator.OptionalItem.INSTANCE;
+            case ITERATE_AND_MATERIALIZE:
+                return Evaluator.EagerSequence.INSTANCE;
+            case PROCESS:
+                return Evaluator.Process.INSTANCE;
+            case LAZY_TAIL_EXPRESSION:
+                return Evaluator.LazyTail.INSTANCE;
+            case SHARED_APPEND_EXPRESSION:
+                return Evaluator.SharedAppend.INSTANCE;
+            case MAKE_INDEXED_VARIABLE:
+                return Evaluator.MakeIndexedVariable.INSTANCE;
+            case MAKE_SINGLETON_CLOSURE:
+                return Evaluator.SingletonClosure.INSTANCE;
+            case EVALUATE_SUPPLIED_PARAMETER:
+                return Evaluator.SuppliedParameter.INSTANCE;
+            case STREAMING_ARGUMENT:
+                return Evaluator.StreamingArgument.INSTANCE;
+            case CALL_EVALUATE_SINGLE_ITEM:
+                return Evaluator.SingleItem.INSTANCE;
+            default:
+                return Evaluator.EagerSequence.INSTANCE;
+        }
     }
 
-    public static void index(Evaluator evaluator, int code) {
-        map.put(code, evaluator);
-    }
 }
 
