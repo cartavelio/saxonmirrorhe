@@ -14,6 +14,7 @@ using Saxon.Hej.functions;
 using Saxon.Hej.type;
 using Saxon.Hej.value;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
+using Error = Saxon.Api.Error;
 using Location = Saxon.Api.Location;
 using Processor = Saxon.Api.Processor;
 using RawDestination = Saxon.Api.RawDestination;
@@ -22,7 +23,6 @@ using SchemaValidator = Saxon.Api.SchemaValidator;
 using Serializer = Saxon.Api.Serializer;
 using XdmDestination = Saxon.Api.XdmDestination;
 using XdmNodeKind = Saxon.Api.XdmNodeKind;
-using XmlProcessingError = Saxon.Api.XmlProcessingError;
 using Xslt30Transformer = Saxon.Api.Xslt30Transformer;
 using XsltCompiler = Saxon.Api.XsltCompiler;
 using XsltExecutable = Saxon.Api.XsltExecutable;
@@ -75,7 +75,7 @@ namespace SaxonCS_NUnit {
 
             XsltCompiler xsltCompiler = processor.NewXsltCompiler();
 
-            List<XmlProcessingError> errorList = new();
+            List<Error> errorList = new();
             xsltCompiler.ErrorReporter = errorList.Add;
             string xslt =
                 @"<xsl:stylesheet xmlns:xsl=""http://www.w3.org/1999/XSL/Transform"" version=""3.0""</xsl:stylesheet>";
@@ -686,7 +686,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestErrorInImportedStylesheet() {
    
-            List<XmlProcessingError> errors = new ();
+            List<Error> errors = new ();
 
             try {
                 Processor proc = new Processor(true);
@@ -1099,7 +1099,7 @@ namespace SaxonCS_NUnit {
          * Test location information for run-time errors when stylesheet built as an XdmNode
          */
         public void TestErrorNotificationFromSaxonParse() {
-            List<XmlProcessingError> errors = new ();
+            List<Error> errors = new ();
 
             try {
                 // Norm Walsh reported saxon:parse errors not notified to the ErrorListener. Can't reproduce.
