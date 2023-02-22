@@ -15,9 +15,13 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.Whitespace;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
@@ -92,8 +96,8 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
     }
 
     @Override
-    public Iterable<PlainType> getPlainMemberTypes() {
-        return Collections.emptySet();
+    public List<? extends PlainType> getPlainMemberTypes() {
+        return Collections.emptyList();
     }
 
     /**

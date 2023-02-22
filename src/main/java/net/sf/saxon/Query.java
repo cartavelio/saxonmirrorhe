@@ -418,7 +418,8 @@ public class Query {
 
             // Supply query parameters
 
-            options.setParams(processor, evaluator::setExternalVariable);
+            //noinspection Convert2MethodRef
+            options.setParams(processor, (name, value) -> evaluator.setExternalVariable(name, value));
 
             // Run the query (repeatedly, if the -repeat option was set)
 
@@ -427,18 +428,17 @@ public class Query {
             int r;
             for (r = 0; r < repeat; r++) {      // repeat is for internal testing/timing
                 try {
-                    OutputStream out;
+                    Serializer serializer;
                     if (outputFileName != null) {
                         File outputFile = new File(outputFileName);
                         if (outputFile.isDirectory()) {
                             quit("Output is a directory", 2);
                         }
                         createFileIfNecessary(outputFile);
-                        out = new FileOutputStream(outputFile);
+                        serializer = processor.newSerializer(new FileOutputStream(outputFile));
                     } else {
-                        out = System.out;
+                        serializer = processor.newSerializer(System.out);
                     }
-                    Serializer serializer = processor.newSerializer(out);
                     try {
                         options.setSerializationProperties(serializer);
                     } catch (IllegalArgumentException e) {

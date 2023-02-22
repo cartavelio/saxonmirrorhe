@@ -1941,9 +1941,11 @@ public abstract class StyleElement extends ElementImpl {
     }
 
     protected boolean isWithinDeclaredStreamableConstruct() {
-        String streamableAtt = getAttributeValue("streamable");
-        if (streamableAtt != null) {
-            return processStreamableAtt(streamableAtt);
+        if (getURI().equals(NamespaceConstant.XSLT)) {
+            String streamableAtt = getAttributeValue("streamable");
+            if (streamableAtt != null) {
+                return processStreamableAtt(streamableAtt);
+            }
         }
         NodeInfo parent = getParent();
         return parent instanceof StyleElement && ((StyleElement) parent).isWithinDeclaredStreamableConstruct();

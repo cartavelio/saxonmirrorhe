@@ -50,6 +50,7 @@ import net.sf.saxon.trace.XSLTTraceCodeInjector;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.packages.IPackageLoader;
 import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TreeStatistics;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
 import net.sf.saxon.type.*;
@@ -328,6 +329,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws IllegalAccessException if the class is not accessible
      */
 
+    @CSharpReplaceBody(code="return new net.sf.saxon.Configuration();")
     public static Configuration instantiateConfiguration(String className, ClassLoader classLoader) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         Class theClass;
         ClassLoader loader = classLoader;
@@ -855,24 +857,6 @@ public class Configuration implements SourceResolver, NotationSet {
             ((StandardLogger) traceOutput).setPrintStream(out);
         }
     }
-
-    /**
-     * Get the standard error output to be used in all cases where no more specific destination
-     * is defined. This defaults to System.err.
-     *
-     * @return If the {@link Configuration#getLogger()} object is an instance of {@link StandardLogger},
-     * then the value of  {@link StandardLogger#getPrintStream()}; otherwise {@code System.err}.
-     * @since 9.3
-     */
-
-    public /*@NotNull*/ PrintStream getStandardErrorOutput() {
-        if (traceOutput instanceof StandardLogger) {
-            return ((StandardLogger) traceOutput).getPrintStream();
-        } else {
-            return System.err;
-        }
-    }
-
 
     /**
      * Register a new logger to be used in the Saxon event logging mechanism
@@ -4020,24 +4004,27 @@ public class Configuration implements SourceResolver, NotationSet {
         if (source instanceof SAXSource) {
             return source;
         }
+        //#if CSHARP==false
         if (source instanceof DOMSource) {
             return source;
         }
+        if (source instanceof StAXSource) {
+            return source;
+        }
+        if (source instanceof SaplingDocument) {
+            return source;
+        }
+        //#endif
         if (source instanceof NodeInfo) {
             return source;
         }
         if (source instanceof PullSource) {
             return source;
         }
-        if (source instanceof StAXSource) {
-            return source;
-        }
         if (source instanceof EventSource) {
             return source;
         }
-        if (source instanceof SaplingDocument) {
-            return source;
-        }
+
         return null;
     }
 

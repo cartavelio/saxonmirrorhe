@@ -189,7 +189,7 @@ public class SerializationParamsHandler {
         CharacterMapIndex index = new CharacterMapIndex();
         if (characterMap != null) {
             index.putCharacterMap(new StructuredQName("", "", "charMap"), characterMap);
-            properties.put(SaxonOutputKeys.USE_CHARACTER_MAPS, "charMap");
+            properties.setProperty(SaxonOutputKeys.USE_CHARACTER_MAPS, "charMap");
         }
         return new SerializationProperties(properties, index);
     }

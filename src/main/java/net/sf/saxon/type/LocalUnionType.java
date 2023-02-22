@@ -17,6 +17,7 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * A class that represents a union type declared locally, for example using
@@ -100,6 +101,15 @@ public class LocalUnionType implements PlainType, UnionType {
         return SequenceType.makeSequenceType(this, StaticProperty.ALLOWS_ZERO_OR_ONE);
     }
 
+    private boolean someMemberTypeSatisfies(Predicate<AtomicType> condition) {
+        for (AtomicType member : memberTypes) {
+            if (condition.test(member)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Ask whether this type is an ID type. This is defined to be any simple type
      * who typed value may contain atomic values of type xs:ID: that is, it includes types derived
@@ -109,7 +119,7 @@ public class LocalUnionType implements PlainType, UnionType {
      */
 
     public boolean isIdType() {
-        return memberTypes.stream().anyMatch(AtomicType::isIdType);
+        return someMemberTypeSatisfies(AtomicType::isIdType);
     }
 
     /**
@@ -119,7 +129,7 @@ public class LocalUnionType implements PlainType, UnionType {
      */
 
     public boolean isIdRefType() {
-        return memberTypes.stream().anyMatch(AtomicType::isIdRefType);
+        return someMemberTypeSatisfies(AtomicType::isIdRefType);
     }
 
     /**
@@ -188,7 +198,7 @@ public class LocalUnionType implements PlainType, UnionType {
 
     @Override
     public boolean isNamespaceSensitive() {
-        return memberTypes.stream().anyMatch(AtomicType::isNamespaceSensitive);
+        return someMemberTypeSatisfies(AtomicType::isNamespaceSensitive);
     }
 
     /**
@@ -261,7 +271,7 @@ public class LocalUnionType implements PlainType, UnionType {
     @Override
     public boolean matches(Item item, TypeHierarchy th) {
         if (item instanceof AtomicValue) {
-            return memberTypes.stream().anyMatch(at -> at.matches(item, th));
+            return someMemberTypeSatisfies(at -> at.matches(item, th));
         } else {
             return false;
         }
@@ -308,7 +318,7 @@ public class LocalUnionType implements PlainType, UnionType {
      *         in its transitive membership, in declaration order
      */
     @Override
-    public Iterable<AtomicType> getPlainMemberTypes()  {
+    public List<? extends PlainType> getPlainMemberTypes()  {
         return memberTypes;
     }
 
