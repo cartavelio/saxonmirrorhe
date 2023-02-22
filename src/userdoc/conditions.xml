@@ -1048,7 +1048,7 @@
       
       <p>The <code>xmlresolverdata</code> JAR file contains standard DTDs, schemas, and URIs for
       use with the XML Resolver. These resources carry individual copyright statements; most
-      of them are <emph>Copyright W3C (MIT, ERCIM, Keio)</emph>, with a variety of dates, 
+      of them are <em>Copyright W3C (MIT, ERCIM, Keio)</em>, with a variety of dates, 
         and are distributed under the 
         <a href="https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document"
           class="bodylink">W3C Software and Document Notice and License</a>.</p>

@@ -452,7 +452,7 @@
             negative: <code>10 by -1 to 6</code> returns <code>(10, 9, 8, 7, 6)</code>.</p>
         
         <p>The ternary conditional syntax <code>A ?? B !! C</code> is implemented (it is semantically equivalent
-        to <code>if (A) then B else C</code>). <emph>The syntax is borrowed from Perl6.</emph></p>
+        to <code>if (A) then B else C</code>). <em>The syntax is borrowed from Perl6.</em></p>
         
         <p>The <a class="bodylink" href="/v4extensions/new-types/record-types">Tuple type</a> construct
             <code>tuple(x,y,x)</code> is now renamed <code>record(x,y,z)</code>, though the old keyword is retained for

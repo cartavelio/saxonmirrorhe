@@ -10389,7 +10389,7 @@ return saxon:transform($splitter, $results)]]></samp>
           the 1-based index of the value within the containing array. The container will itself have a pedigree,
           so it is possible to navigate upwards through the tree back to the root.</p>
           <aside>In the functional programming world, the structure created by this function is known as
-          a <emph>zipper</emph>.</aside>
+          a <em>zipper</em>.</aside>
         </div>
       </details>
       <see-also namespace="http://saxon.sf.net/" name="pedigree"/>

@@ -2115,7 +2115,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       </li>
     </ul>
     
-    <p>Note that Java maps (instances of <code>java.util.Map</code> are <emph>not</emph> converted
+    <p>Note that Java maps (instances of <code>java.util.Map</code> are <em>not</em> converted
       to XDM maps. Such a conversion can be achieved using the static factory method <code>XdmMap.makeMap()</code>.</p>
     
     <aside><p>Java collections and arrays are converted to XDM sequences, never to XDM arrays.

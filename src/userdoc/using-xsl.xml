@@ -1333,7 +1333,7 @@
                are used.</p></li>
             <li><p>The result of the previous steps is then converted, where necessary, to the
                declared type of the <code>xsl:param</code> element by applying the standard
-               <emph>function conversion rules</emph> defined in the XPath specification: for example,
+               <em>function conversion rules</em> defined in the XPath specification: for example,
                if the supplied value is a node and the required value is a string, then the node
                will be atomized.</p></li>
          </ul>
