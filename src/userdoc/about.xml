@@ -130,13 +130,19 @@
                      class="bodylink">get the software from Oracle</a>.</p>
             </li>
             <li>
-               <p>Download the Saxon software (you will typically start with the open-source version
-                  SaxonJ-HE) from <a
-                     href="http://sourceforge.net/project/showfiles.php?group_id=29872"
-                     class="bodylink">SourceForge</a>. Alternatively, the commercial versions of the
+               <p>Download the Saxon software. You will typically start with the open-source version
+                  SaxonJ-HE which you can download:</p>
+                 <ul>
+                    <li>From <a href="https://mvnrepository.com/artifact/net.sf.saxon/Saxon-HE" class="bodylink">Maven</a></li>
+                    <li>From <a
+                       href="http://sourceforge.net/project/showfiles.php?group_id=29872"
+                       class="bodylink">SourceForge</a></li>
+                 </ul>
+               <p>Alternatively, the commercial versions of the
                   product (SaxonJ-PE and SaxonJ-EE) can be downloaded from <a
-                     href="http://www.saxonica.com/" class="bodylink">www.saxonica.com</a>. Because
-                  the software is pure Java, the same version applies whether you are using Java on
+                     href="http://www.saxonica.com/" class="bodylink">www.saxonica.com</a>.</p> 
+               <p>Because
+                  the software is pure Java, the same software us used whether you are running on
                   Windows, Linux, or Mac OS/X.</p>
             </li>
             <li>
@@ -148,29 +154,35 @@
                <p>To check that the software is working, try running a simple query from the command
                   line, as follows. The filename after the "-cp" flag should match the location
                   where you installed the software. The file will be called
-                     <code>saxon-he-11.0.jar</code> for Saxon Home Edition, <code>saxon-pe-11.0.jar</code> for
-                  the Professional Edition, or <code>saxon-ee-11.0.jar</code> for the Enterprise
-                  Edition (where the "11.0" in the name will change to "11.1", "11.2", etc. in
+                     <code>saxon-he-11.1.jar</code> for Saxon Home Edition, <code>saxon-pe-11.1.jar</code> for
+                  the Professional Edition, or <code>saxon-ee-11.1.jar</code> for the Enterprise
+                  Edition (where the "11.1" in the name will change to "11.2", "11.3", etc. in
                   subsequent maintenance releases):</p>
 
-               <kbd>java -cp c:\saxon\saxon-he-11.0.jar net.sf.saxon.Query -t -qs:"current-date()"</kbd>
+               <kbd>java -cp c:\saxon\saxon-he-11.1.jar net.sf.saxon.Query -t -qs:"current-date()"</kbd>
 
-               <p>Here <strong>java</strong> tells the operating system to run the Java virtual
-                  machine; the filename after <strong>-cp</strong> is known as the classpath, and
-                  tells Java where to find the Saxon application software;
-                     <strong>net.sf.saxon.Query</strong> is the Saxon entry point for the XQuery
-                  processor; the option <strong>-t</strong> tells Saxon to report what it is doing
-                  on the console; and the option <strong>-qs:"current-date()"</strong> tells Saxon to
-                  run the simple query <code>current-date()</code>, which returns the current date
-                  and displays the result on the console.</p>
-
+               <p>Here:</p>
+                  <ul>
+                     <li><strong>java</strong> tells the operating system to run the Java virtual
+                        machine</li>
+                     <li>the filename after <strong>-cp</strong> is known as the classpath, and
+                        tells Java where to find the Saxon application software</li>
+                     <li><strong>net.sf.saxon.Query</strong> is the Saxon entry point for the XQuery
+                        processor</li>
+                     <li>the option <strong>-t</strong> tells Saxon to report what it is doing
+                        on the console</li>
+                     <li>the option <strong>-qs:"current-date()"</strong> tells Saxon to
+                        run the simple query <code>current-date()</code>, which returns the current date
+                        and displays the result on the console.</li>
+                  </ul>
+  
                <p>If this doesn't work, there are three possible reasons: the operating system can't
                   find the Java software; Java can't find the Saxon software; or Saxon has been
                   invoked, but has failed to run your query. The error message should give you a
                   clue which of these is the case.</p>
             </li>
             <li>
-               <p>As a first-time user, you will probably want to install the sample applications.
+               <p>As a first-time user, you may find it useful to install the sample applications.
                   These are packaged together with a copy of this documentation in the file
                   <code>saxon-resources-11.zip</code>. This can be downloaded from
                   either the SourceForge or Saxonica sites (it is the same file in both cases).
@@ -190,7 +202,7 @@
                   can apply for a free 30-day evaluation license key by going to <a
                      href="http://www.saxonica.com/" class="bodylink">www.saxonica.com</a> and
                   clicking on "Download / Evaluation License". The license key file will be sent by email
-                  within 24 hours. This file, called <code>saxon-license.lic</code>, should be
+                  within 24 hours. This file, called <code>saxon-license.lic</code>, is best
                   placed in the same directory where the file <code>saxon-pe-11.#.jar</code> or
                      <code>saxon-ee-11.#.jar</code> is found. <i>When running Saxon from the command
                      line, it not usually necessary for the directory containing the license file
@@ -206,13 +218,13 @@
          <p>
             <i>for XSLT (all on one line):</i>
          </p>
-         <kbd>java -cp saxon-he-11.0.jar net.sf.saxon.Transform -t -s:samples\data\books.xml 
+         <kbd>java -cp saxon-he-11.1.jar net.sf.saxon.Transform -t -s:samples\data\books.xml 
      -xsl:samples\styles\books.xsl -o:c:\temp.html</kbd>
 
          <p>
             <i>for XQuery (all on one line):</i>
          </p>
-         <kbd>java -cp saxon-he-11.0.jar net.sf.saxon.Query -t 
+         <kbd>java -cp saxon-he-11.1.jar net.sf.saxon.Query -t 
    -s:samples\data\books.xml -q:samples\query\books-to-html.xq -o:c:\temp.html</kbd>
 
          <p>Now open <code>c:\temp.html</code> in your browser to check that it worked.</p>
@@ -227,7 +239,7 @@
          
          <p>SaxonCS is a new product for .NET Core, replacing the older Saxon/.NET product. The older
          product was built by compiling the Java source code to bytecode, and then converting this to run
-         on .NET using the IKVM converter. IKVM never supported .NET Core (which is the strategic version
+         on .NET using the IKVM converter. IKVM has never supported .NET Core (which is the strategic version
          of .NET for the future), and development has been discontinued, so SaxonCS uses a different approach:
          Saxonica developed a source code transpiler that converts the Java source code of the product to
          equivalent C# code.</p>
@@ -412,6 +424,10 @@
          license (specifically, the Mozilla Public License 2.0), and all its features are available
          to all users. SaxonC-PE and SaxonC-EE are commercial products and require activation by a
          license key.</p>
+      
+      <p>Also available, but not described here in detail, is SaxonJS, the JavaScript edition,
+      which runs on Node.js and in all modern browsers. For further information, see
+         <a href="https://www.saxonica.com/saxon-js/documentation2/index.html" class="bodylink"/>the SaxonJS documentation.</p>
 
       <p>There are also restricted licenses that work with SaxonJ-EE, SaxonCS or SaxonC-EE but restrict its
          capability:</p>
@@ -466,7 +482,8 @@
             <li>
                <p>To run SaxonJ you need at least a Java VM, and preferably a Java development
                   environment. SaxonJ 11 requires at least Java SE 8 (also known as JDK 1.8). 
-                  It should also run under later Java versions, but this may not be fully tested. </p>
+                  It should also run under all subsequent Java versions, but this may not be 
+                  fully tested. </p>
             </li>
             
             <li>
@@ -514,13 +531,12 @@
             the past Saxonica recommended using the Apache version of Xerces in preference to the
             built-in parser delivered with the JDK, but since JDK 8 the built-in parser appears to be equally
             reliable. The parser must be SAX2-compliant. All the
-            relevant JAR files must be installed on your Java CLASSPATH.</p>
+            relevant JAR files must be installed on your Java classpath.</p>
 
          <p>SaxonJ will also work with a StAX parser. Generally speaking, StAX parsers are 
-            less mature and less interoperable than SAX parsers, and any performance advantage is likely to be very minor.
+            less robust and less interoperable than SAX parsers, and any performance advantage is likely to be very minor.
             However, the support for StAX provides the ability to supply input via a customized pull
-            pipeline. SaxonJ is tested with Woodstox 3.0.0. Saxon's schema validation is available
-            only with a SAX2 parser.</p>
+            pipeline. SaxonJ is tested with Woodstox 3.0.0.</p>
          
       </section>
 
@@ -549,9 +565,9 @@
 
 
          <p>One of the files that will be created in this directory is the principal JAR file. This
-            is <strong>saxon-he-11.0.jar</strong>, <strong>saxon-pe-11.0.jar</strong>, or
-               <strong>saxon-ee-11.0.jar</strong> depending on which Saxon edition you are using.
-         The "11.0" in the name will change to "11.1", "11.2", etc. in subsequent maintenance releases.</p>
+            is <strong>saxon-he-11.1.jar</strong>, <strong>saxon-pe-11.0.jar</strong>, or
+               <strong>saxon-ee-11.1.jar</strong> depending on which Saxon edition you are using.
+         The "11.1" in the name will change to "11.2", "11.3", etc. in subsequent maintenance releases.</p>
 
          <p>There are some additional JAR files to support optional features such as the SQL
             interface and the ICU localization library. When running SaxonJ, the principal JAR file
@@ -760,7 +776,7 @@
          </table>
 
          <p>When running any Java application, SaxonJ included, all Java classes that are needed must
-            be present on the CLASSPATH. The classpath can be set in the form of an environment
+            be present on the classpath. The classpath can be set in the form of an environment
             variable, or it can be included in the <code>java</code> command that invokes the
             application.</p>
 
@@ -813,13 +829,13 @@
             can use to verify that the files have not been tampered with. The signatures are based on a digital certificate 
             issued to Saxonica by the security company GlobalSign.</p>
          
-         <p>You can verify that a particular JAR file (for example <code>saxon-ee-11.0.jar</code>) has a valid signature using the command:</p>
+         <p>You can verify that a particular JAR file (for example <code>saxon-ee-11.1.jar</code>) has a valid signature using the command:</p>
          
-         <kbd>jarsigner -verify saxon-ee-11.0.jar</kbd>
+         <kbd>jarsigner -verify saxon-ee-11.1.jar</kbd>
          
          <p>More usefully, you can check that it was signed by Saxonica with the command:</p>
          
-         <kbd>jarsigner -verify -verbose saxon-ee-11.0.jar</kbd>
+         <kbd>jarsigner -verify -verbose saxon-ee-11.1.jar</kbd>
          
          <p>This produces voluminous information about the contents of the JAR file, ending with details of the security certificate, 
             something like this:</p>
@@ -861,7 +877,7 @@
          many features of the W3C specifications have been left implementation-defined (for example, vendor extension functions),
          and even at the API level, products are in many cases allowed to interpret the specifications in their own way.
          Therefore Saxonica recommends that applications should explicitly load a software package that has been tested with the
-         application and is known to work, rather than allowing a different provider to be substituted simply by changing the class path.</p>
+         application and is known to work, rather than allowing a different provider to be substituted simply by changing the classpath.</p>
          
          <p>SaxonJ uses dynamic loading to access resources in a number of situations, for example:</p>
          
@@ -1026,8 +1042,10 @@
          for previous releases continue to function with Saxon 11 until the date on which their upgrade 
          entitlement ends.</p>
 
-         <p>The license key will arrive in the form of a file named <code>saxon-license.lic</code>
-            attached to an email message, or placed in a location you can download. </p>
+         <p>When you order a license key, we will send you an email message containing a link
+            to a location on Saxonica's servers where the license file is available for download.
+            The link is valid for 30 days. When you download the file, you must keep the name
+            <code>saxon-license.lic</code>.</p>
          
          <p>Saxon will search for the license key in the following
             locations:</p>
@@ -1109,8 +1127,8 @@
          
          <p>To check that a valid license for SaxonJ-PE or SaxonJ-EE has been found and Saxon is
             running with full functionality, try running one of the following simple commands.</p>
-         <div class="javaonly"><p>On Java (for example, for SaxonJ-EE 11.0):</p>
-         <kbd>java -cp saxon-ee-11.0.jar net.sf.saxon.Query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
+         <div class="javaonly"><p>On Java (for example, for SaxonJ-EE 11.1):</p>
+         <kbd>java -cp saxon-ee-11.1.jar net.sf.saxon.Query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
          </div>
          <div class="csonly"><p>On .NET:</p>
          <kbd>dotnet SaxonCS query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
@@ -1258,26 +1276,41 @@
                class="bodylink">www.saxonica.com</a> sites. The documentation is also available
          online.</p>
       
-      <p class="javaonly">The preprocessed source code for SaxonJ-HE is issued as a ZIP archive downloadable from the
-         Saxon project site on SourceForge. The raw source is available from a 
-         <a href="https://saxonica.plan.io/projects/saxonmirrorhe/repository" class="bodylink">GIT repository</a>.</p>
-
+      
       <h2 class="subtitle">Source code</h2>
 
-      <p>Note that it is not necessary to download or recompile the source code unless you
+      <p>It is not necessary to download or recompile the source code unless you
          need to make changes (and it is rarely necessary to make changes, because Saxon provides
          extensive system programming hooks to enable customization). The exception to this is that
          in SaxonJ-HE, adapters for external object models, and localization code for non-English
          languages, are provided in source form only.</p>
+      
+      <p>The original source code (the code that Saxonica's developers work with) contains
+         preprocessor directives that mark some of the code to be included only in some Saxonica
+         products and not others. Saxonica makes this original source code available, as required
+         by the terms of an open source license. However, for many users it is simpler to work with
+         the version of the code that has been preprocessed for SaxonJ-HE. The preprocessed code
+         can be dropped directly into an IDE such as Eclipse or IntelliJ.</p>
+      
+      <ul>
+         <li>The original source code, including preprocessor directives, is available in 
+            <a href="https://saxonica.plan.io/projects/saxonmirrorhe/repository" 
+               class="bodylink">a GIT repository</a>. This also includes gradle build scripts, which
+               you may need to customize to remove unwanted dependencies.</li>
+         <li>The preprocessed source code, suitable for dropping into your IDE, is available
+            as a download on <a href="https://sourceforge.net/projects/saxon/files/Saxon-HE/"
+         class="bodylink">SourceForge</a>.</li>
+      </ul>
 
-      <p>The modules included in the source code of SaxonJ-HE are also used, without modification, in
+      <p>The modules included in the original source code of SaxonJ-HE are also used, 
+         with different preprocessing, in
          SaxonJ-PE and SaxonJ-EE. Source code for the additional components of the commercial editions
          is not provided. The source code is the same between the Java and .NET platforms: both
          products are generated from the same source, though there are some modules that apply only
          to one platform or the other.</p>
       
       <p class="csonly">Source code for SaxonCS is not available. (The bulk of the C# code
-      is generated from Java using proprietary tools, so it would not be useful anyway.)</p>
+      is generated from Java using proprietary tools, so it would not be useful.)</p>
 
 
       <h2 class="subtitle">User documentation</h2>
@@ -1322,7 +1355,7 @@
          it is produced in accordance with the provisions defined
          by the Mozilla Public License.</p>
 
-      <p>The port of Saxon to the .NET platform was pioneered by Pieter Siegers Kort and M. David
+      <p>The first port of Saxon to the .NET platform was pioneered by Pieter Siegers Kort and M. David
          Peterson, without any involvement from Saxonica. They used the open source IKVM tool
          to cross-compile Java bytecode into CIL assemblies. Their work was absorbed into the Saxonica
          product line from Saxon 8.7 onwards. At this stage a new .NET API was developed, and the product made
@@ -1372,7 +1405,8 @@
          We don't have layers of support staff that you have to get past before you talk to someone who knows
          the answer.</li>
          <li>On the down side, we're not on the phone 24 hours a day. We operate primarily by email and internet
-         forums where you can usually expect a response within a day or so.</li>
+         forums where you can usually expect a response within a day or so. Also, if you're using Saxon alongside
+         third-party software or on esoteric hardware platforms, we may have difficulty reproducing your problem.</li>
       </ul>
       
       <p>If you're an open source user, you have no entitlement to support, but we try to help anyway, because
@@ -1508,11 +1542,11 @@
       <code>URIResolver</code>, <code>XmlResolver</code> etc) on both Java and C#, that enable resources identified
       by URI to be retrieved from a local cache, by reference to a resource catalog. The library can be used with 
       Saxon on both the Java and C# platforms. The lead
-      developer, Norm Walsh, is now with Saxonica, and Saxonica supports his continued involvement in the project.</p>
+      developer, Norm Tovey-Walsh, is now with Saxonica, and Saxonica supports his continued involvement in the project.</p>
       
       <p><a href="https://www.schematron.com">Schematron</a> is a language for specifying assertions about XML documents; it
       has a wide range of uses both in conjunction with, and as an alternative to, the XSD schema specification. Both the
-      original implementation by Rick Jeliffe, and the more recent implementation by David Maus (<a href="https://github.com/schxslt/schxslt">SchXslt</a>),
+      original implementation by Rick Jelliffe, and the more recent implementation by David Maus (<a href="https://github.com/schxslt/schxslt">SchXslt</a>),
       rely heavily on Saxon "under the hood".</p>
       
       

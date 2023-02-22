@@ -80,7 +80,7 @@
     the source code in the form required by the MPL license, that is, "the form of the work preferred
     for making modifications". This form of the code includes preprocessor directives used to identify
     variations between the code for different Saxon editions, and it therefore cannot be compiled until
-    the preprocessor has been run. The repository includes Ant build files that invoke this preprocessing.
+    the preprocessor has been run. The repository includes gradle build files that invoke this preprocessing.
     The build files are complex and have many dependencies. Many users will therefore find it easier
     to build from the preprocessed source published on SourceForge.</p></li>
     <li><p>For every release, a ZIP file containing Saxon-HE source is published on the SourceForge site
@@ -116,6 +116,18 @@
       <p>The Enterprise and Professional editions of Saxon are commercial products released under the
         terms and conditions published at <a href="http://www.saxonica.com/license/paid-license.pdf"
           class="bodylink">http://www.saxonica.com/license/paid-license.pdf</a>.</p>
+    
+      <p>From Saxon 11, licenses are issued as term licenses rather than perpetual licenses: that is,
+      they have an expiry date. Please take care to order a replacement license so that it can be
+      installed before the old one expires. Replacement licenses will always run until the anniversary 
+      of the original expiry date, so there is no penalty for reordering early. If you do allow
+      a license to expire before a replacement is installed, then to minimize inconvenience, the
+      software will degrade gracefully: every time an application starts up, there will be a delay which
+      increases progressively each day.</p>
+    
+     <p>Existing perpetual licenses will continue to work with Saxon 11 until their upgrade
+     entitlement period ends. The upgrade entitlement period is normally one year from the date of
+     purchase, unless you chose to pay for a longer term.</p>
     
       <p>These products include some open source components. In particular, they include the open-source components
         used to build Saxon-HE (categories A, B, and C above) in their entirety; they also include some open-source
@@ -843,7 +855,7 @@
     <p>See http://asm.ow2.org/</p>
     
     <p>SaxonJ-EE, includes the ASM bytecode generation library. The code is
-      issued without modification, except that on .NET it is cross-compiled to .NET IL form. </p>
+      issued without modification, except that classes are renamed to avoid version conflicts. </p>
     
     <p>The license can be found at http://asm.ow2.org/license.html</p>
     
