@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- exceptions file for SaxonCS 11.x against the QT4 Test Suite -->
+<exceptions>
+   
+   <exception test-set="array-foot" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="array-partition" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="array-slice" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="array-trunk" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-characters" test-case="characters-001" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>not accepting empty sequence</reason>
+   </exception>
+   
+   <exception test-set="fn-all" test-case="all-20 all-21 all-22 all-23 all-24" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>fn:all#1 not implemented</reason>
+   </exception>
+   
+   <exception test-set="fn-all-different" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-all-equal" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-contains-sequence" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-deep-equal" test-case="fn-deep-equal-mix-args-017a
+      fn-deep-equal-mix-args-018a" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>Changed semantics of decimal-double comparison</reason>
+   </exception>
+   
+   <exception test-set="fn-distinct-values" test-case="cbcl-distinct-values-002c
+      fn-distinct-values-mixed-args-012a
+      fn-distinct-values-mixed-args-013a" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>Changed semantics of decimal-double comparison</reason>
+   </exception>
+
+   
+   <exception test-set="fn-ends-with-sequence" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-expanded-QName" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-foot" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-format-integer" test-case="format-integer-077" run="false" report="disputed">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>Questionable results for German localization</reason>
+   </exception>
+   
+   <exception test-set="fn-format-number" test-case="numberformat-40-87 numberformat-40-88" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>Spec now allows last argument to be an xs:QName</reason>
+   </exception>
+   
+   <exception test-set="fn-highest" test-case="highest-116
+      highest-117" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>Calls fn:replicate</reason>
+   </exception>
+   
+   <exception test-set="fn-intersperse" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-items-at" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-items-ending-where" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-items-starting-where" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-iterate-while" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-lowest" test-case="lowest-116
+      lowest-117" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>Calls fn:replicate</reason>
+   </exception>
+   
+   <exception test-set="fn-op" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-parse-QName" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-replicate" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-replace" test-case="
+      fn-replace-100
+      fn-replace-101
+      fn-replace-102
+      fn-replace-103
+      fn-replace-104
+      fn-replace-105
+      fn-replace-106
+      fn-replace-107
+      fn-replace-108
+      fn-replace-109
+      fn-replace-110
+      fn-replace-111
+      fn-replace-112
+      fn-replace-113
+      fn-replace-114
+      fn-replace-115     
+      " run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-slice" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-some" test-case="some-20 some-21 some-22 some-23 some-24" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>fn:some#1 not implemented</reason>
+   </exception>
+   
+   <exception test-set="fn-starts-with-sequence" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="fn-trunk" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="map-build" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="map-filter" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="misc-BuiltInKeywords" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="misc-HtmlTestSuite" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="op-same-key" test-case="same-key-006a" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>Comparison of numeric values changed</reason>
+   </exception>
+
+   <exception test-set="op-to" test-case="
+      RangeExpr-408f
+      RangeExpr-408g
+      RangeExpr-408h
+      RangeExpr-408i
+      RangeExpr-408j
+      RangeExpr-408k
+      RangeExpr-410f
+      RangeExpr-410g
+      RangeExpr-410h
+      RangeExpr-410i
+      RangeExpr-410j
+      RangeExpr-410k" run="false" report="tooBig">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>Breaks limits on size of sequence</reason>
+   </exception>
+   
+   <exception test-set="prod-BracedActions" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="prod-CastExpr" test-case="K-SeqExprCast-76a
+      K-SeqExprCast-81a" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>Changed semantics of decimal-double comparison</reason>
+   </exception>
+   
+   <exception test-set="prod-FunctionDecl" test-case="
+      function-decl-40-001
+      function-decl-40-002
+      function-decl-40-003
+      function-decl-40-004
+      function-decl-40-005
+      function-decl-40-006
+      function-decl-40-007
+      function-decl-40-008
+      function-decl-40-009
+      function-decl-40-010
+      function-decl-40-011
+      function-decl-40-012
+      function-decl-40-013
+      function-decl-40-014
+      function-decl-40-015
+      function-decl-40-016
+      function-decl-40-017
+      function-decl-40-018
+      function-decl-40-019
+      function-decl-40-020
+      function-decl-40-021
+      function-decl-40-022
+      function-decl-40-023
+      function-decl-40-024
+      " run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="prod-IfExpr" test-case="reject-proposed-ternary-operator" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>Syntax withdrawn from the spec but not from the product.</reason>
+   </exception>
+   
+   
+   <exception test-set="prod-StringTemplate" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="prod-ThinArrow" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   <exception test-set="prod-UnionNodeTest" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+   </exception>
+   
+   
+   <!--    app-CatalogCheck : 3
+  fn-format-integer : 1
+  fn-format-number : 2
+  fn-some : 3
+  op-same-key : 1 -->
+   
+   
+   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009" run="false" report="notRun">
+      <created by="Michael Kay" on="2018-02-01"/>
+      <reason>Known bug in ICU</reason>
+   </exception>
+   
+   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-010" run="false" report="notRun">
+      <created by="Michael Kay" on="2018-02-01"/>
+      <reason>Known bug in ICU</reason>
+   </exception>
+   
+   <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="n/a">
+      <created by="Michael Kay" on="2019-03-11"/>
+      <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
+   </exception>
+   
+   <exception test-set="prod-CastExpr" test-case="K-SeqExprCast-71a" run="false" report="n/a">
+      <created by="Michael Kay" on="2019-03-11"/>
+      <reason>Pre-3.1 rules for casting to QName no longer supported</reason>
+   </exception>
+   
+   <exception test-set="prod-CastableExpr" test-case="CastableAs648" run="false" report="n/a">
+      <created by="Michael Kay" on="2019-03-11"/>
+      <reason>Pre-3.1 rules for casting to QName no longer supported</reason>
+   </exception>
+   
+   <exception test-set="prod-FunctionCall" test-case="K-FunctionCallExpr-15" run="false" report="n/a">
+      <created by="Michael Kay" on="2019-03-11"/>
+      <reason>format-number() is allowed under XPath 2.0 though it should not be</reason>
+   </exception>
+   
+   <exception test-set="fo-spec-examples" test-case="
+      fo-test-fn-id-001
+      fo-test-fn-id-002
+      fo-test-fn-element-with-id-001
+      fo-test-fn-element-with-id-002
+      fo-test-fn-idref-001
+      fo-test-fn-idref-002" run="false" edition="HE PE" report="n/a">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>(Generated) Tests use a validate expression but are not tagged as schema-aware.</reason>
+   </exception>
+   
+   <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="disputed">
+      <created by="Michael Kay" on="2023-02-02"/>
+      <reason>4.0 coverage data in test catalog is incomplete</reason>
+   </exception>
+   
+   
+   <exception test-set="fn-collection" test-case="cbcl-collection-002" run="false" report="disputed">
+      <created by="Michael Kay" on="2021-08-23"/>
+      <reason>Saxon-CS delivers collection results in wrong order due to multithreading. Should this be allowed? See bug 5067.</reason>
+   </exception>
+   
+   <exception test-set="fn-format-integer" 
+      test-case="format-integer-032 format-integer-032-fr format-integer-032-it
+      format-integer-065 format-integer-066 format-integer-077" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2021-12-07"/>
+      <reason>SaxonCS doesn't format "numbers as words" for languages other than English.</reason>
+   </exception>
+   
+   <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="n/a">
+      <created by="Michael Kay" on="2019-03-11"/>
+      <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
+   </exception>
+   
+   <exception test-set="prod-CastExpr" test-case="K-SeqExprCast-71a" run="false" report="n/a">
+      <created by="Michael Kay" on="2019-03-11"/>
+      <reason>Pre-3.1 rules for casting to QName no longer supported</reason>
+   </exception>
+   
+   <exception test-set="prod-CastableExpr" test-case="CastableAs648" run="false" report="n/a">
+      <created by="Michael Kay" on="2019-03-11"/>
+      <reason>Pre-3.1 rules for casting to QName no longer supported</reason>
+   </exception>
+   
+   <exception test-set="prod-FunctionCall" test-case="K-FunctionCallExpr-15" run="false" report="n/a">
+      <created by="Michael Kay" on="2021-08-08"/>
+      <reason>format-number() is allowed under XPath 2.0 though it should not be</reason>
+   </exception>
+   
+   <exception test-set="misc-JsonTestSuite" test-case="n_structure_100000_opening_arrays n_structure_open_array_object" run="false" report="tooBig">
+      <created by="Michael Kay" on="2021-10-04"/>
+      <reason>Fails with a stack overflow (we've set a limit but it's too low)</reason>
+   </exception>
+   
+ 
+   
+   
+   
+   
+</exceptions>
