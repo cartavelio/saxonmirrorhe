@@ -81,10 +81,7 @@
           <xsl:variable name="item-id" select="translate($javaclass, '#','.')"/>
           <xsl:variable name="found" select="exists(key('jd-types', $item-id, $javadoc-types))"
                as="xs:boolean"/>
-          <xsl:variable name="founddotnet" select="exists(key('jd-types', $item-id, $dotnetdoc-types))"
-               as="xs:boolean"/>
-          <!--<xsl:variable name="founddotnet" select="false()" as="xs:boolean"/>--><!-- Temporary pre 10 .NET release-->
-          <xsl:if test="not($found or $founddotnet)">
+          <xsl:if test="not($found)">
                <xsl:message>Warning: javadoc ref <xsl:value-of select="$item-id"/> not found</xsl:message>
           </xsl:if>
           <xsl:variable name="link" select="translate($javaclass, '.', '/')"/>
@@ -92,9 +89,28 @@
                select="if (contains($link, '#')) 
                then concat(substring-before($link, '#'), '.html#', substring-after($link, '#'))
                else concat($link, '.html')"/>
-          <xsl:variable name="platform-doc" select="if (starts-with($link, 'Saxon/Api')) then
-               'dotnetdoc/' else 'javadoc/'"/>
-          <a class="javalink" href="{concat($hash-path, $platform-doc, $file)}">
+          <a class="javalink" href="{concat($hash-path, 'javadoc/', $file)}">
+               <xsl:apply-templates/>
+          </a>
+     </xsl:template>
+     
+     <xsl:template match="a[@class ='cslink']|code[@cs]" mode="secondary">
+          <xsl:param name="hash-path" tunnel="yes" required="no" as="xs:string" select="''"/>
+          <xsl:variable name="csclass" select="if (local-name() = 'a') then @href else @cs" as="xs:string"/>
+          <!--<xsl:message select="'csclass is ', $csclass"/>-->
+          <xsl:variable name="item-id" select="translate($csclass, '#','.')"/>
+          <xsl:variable name="founddotnet" select="exists(key('jd-types', $item-id, $dotnetdoc-types))"
+               as="xs:boolean"/>
+          <!--<xsl:variable name="founddotnet" select="false()" as="xs:boolean"/>--><!-- Temporary pre 10 .NET release-->
+          <xsl:if test="not($founddotnet)">
+               <xsl:message>Warning: dotnetdoc ref <xsl:value-of select="$item-id"/> not found</xsl:message>
+          </xsl:if>
+          <xsl:variable name="link" select="translate($csclass, '.', '/')"/>
+          <xsl:variable name="file"
+               select="if (contains($link, '#')) 
+               then concat(substring-before($link, '#'), '.html#', substring-after($link, '#'))
+               else concat($link, '.html')"/>
+          <a class="cslink" href="{concat($hash-path, 'dotnetdoc/', $file)}">
                <xsl:apply-templates/>
           </a>
      </xsl:template>
