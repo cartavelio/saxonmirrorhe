@@ -7,62 +7,70 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.ma.zeno.ZenoChain;
-import net.sf.saxon.ma.zeno.ZenoSequence;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.sxpath.IndependentContext;
+import net.sf.saxon.sxpath.XPathDynamicContext;
+import net.sf.saxon.sxpath.XPathEvaluator;
+import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.Type;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
- * The proposed XPath 4.0 intersperse() function
+ * This class implements the function fn:op(), which is a proposed function in XPath 4.0
+ * to return a function that implements a supplied operator
  */
 
-
-public class Intersperse extends SystemFunction {
+public class OpFn extends SystemFunction {
 
     /**
-     * Evaluate the expression as a general function call
+     * Evaluate the expression
      *
      * @param context   the dynamic evaluation context
-     * @param arguments the values of the arguments
-     * @return the result of the evaluation
-     * @throws XPathException
-     *          if a dynamic error occurs during the evaluation of the expression
+     * @param arguments the values of the arguments, supplied as Sequences
+     * @return the result of the evaluation, in the form of a Sequence
+     * @throws XPathException if a dynamic error occurs during the evaluation of the expression
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        SequenceIterator input = arguments[0].iterate();
-        GroundedValue separator = arguments[1].materialize();
-        // TODO: lazy evaluation as an iterator
-        ZenoChain<Item> result = new ZenoChain<>();
-        Item first = input.next();
-        if (first != null) {
-            result = result.add(first);
-            for (Item it; (it = input.next()) != null;) {
-                result = result.addAll(separator.asIterable());
-                result = result.add(it);
-            }
+        String op = arguments[0].head().getStringValue();
+        String collation = getRetainedStaticContext().getDefaultCollationName();
+        String cacheKey = "fn:op~" + collation;
+        // The results of the function are cached
+        Function fn = (Function)context.getController().getUserData(cacheKey, op);
+        if (fn == null) {
+            validateOperator(op);
+            String xpath = "function($x, $y) {$x " + op + " $y}";
+            XPathEvaluator eval = new XPathEvaluator(context.getConfiguration());
+            IndependentContext env = new IndependentContext(context.getConfiguration());
+            env.setDefaultCollationName(collation);
+            env.setXPathLanguageLevel(40);
+            eval.setStaticContext(env);
+            XPathExpression cexp = eval.createExpression(xpath);
+            XPathDynamicContext dc = cexp.createDynamicContext();
+            fn = (Function) cexp.evaluateSingle(dc);
+            context.getController().setUserData(cacheKey, op, fn);
         }
-        return new ZenoSequence(result);
+        return fn;
     }
 
-    @Override
-    public Expression makeFunctionCall(Expression[] arguments) {
-        return new SystemFunctionCall(this, arguments) {
-            @Override
-            public ItemType getItemType() {
-                return Type.getCommonSuperType(getArg(0).getItemType(), getArg(2).getItemType());
-            }
-        };
+    private final static HashSet<String> allowedOperators = new HashSet<>();
+    static {
+        String[] ops = {",", "and", "or", 
+                "+", "-", "*", "div", "idiv", "mod",
+                "=", "<", "<=", ">", ">=", "!=",
+                "eq", "lt", "le", "gt", "ge", "ne",
+                "<<", ">>", "is", "||", "|",
+                "union", "except", "intersect", "to",
+                "otherwise"};
+        allowedOperators.addAll(Arrays.asList(ops));
     }
-
-    // TODO: streaming implementation
+    private static void validateOperator(String op) throws XPathException {
+        if (!allowedOperators.contains(op)) {
+            throw new XPathException("Unsupported operator '" + op + "'", "XPTY0004");
+        }
+    }
 }
-
