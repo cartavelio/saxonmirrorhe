@@ -632,6 +632,7 @@ DocumentBuilder * SaxonProcessor::newDocumentBuilder(){
 
 Xslt30Processor *SaxonProcessor::newXslt30Processor() {
     applyConfigurationProperties();
+
     return (new Xslt30Processor(this, cwd));
 }
 

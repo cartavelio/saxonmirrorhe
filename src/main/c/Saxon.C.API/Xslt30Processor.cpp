@@ -27,12 +27,15 @@ Xslt30Processor::Xslt30Processor() {
 
 Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 
+
+	proc = p;
     if(proc == nullptr) {
+        std::cerr<<"procRef in Xsl30Proc is NULL "<<std::endl;
         return;
     }
-	proc = p;
     jitCompilation = false;
     exception = nullptr;
+    std::cerr<<"procRef in Xsl30Proc = "<<((int)proc->procRef)<<std::endl;
     cppXT = createXslt30WithProcessor(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef);
 
 
