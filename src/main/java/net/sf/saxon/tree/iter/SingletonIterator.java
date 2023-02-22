@@ -15,7 +15,7 @@ import net.sf.saxon.value.EmptySequence;
 
 
 /**
- * SingletonIterator: an iterator over a sequence of zero or one values
+ * SingletonIterator: an iterator over a sequence exactly one value
  */
 
 public class SingletonIterator implements SequenceIterator,
@@ -25,12 +25,13 @@ public class SingletonIterator implements SequenceIterator,
     boolean gone = false;
 
     /**
-     * Private constructor: external classes should use the factory method
+     * Protected constructor: external classes should use the factory method
      *
-     * @param value the item to iterate over
+     * @param value the item to iterate over. Must not be null.
      */
 
-    public SingletonIterator(Item value) {
+    protected SingletonIterator(Item value) {
+        assert value != null;
         this.item = value;
     }
 
@@ -49,19 +50,6 @@ public class SingletonIterator implements SequenceIterator,
         } else {
             return new SingletonIterator(item);
         }
-    }
-
-    /**
-     * Factory method for use when it is known the item will not be null
-     *
-     * @param item the item to iterate over; must not be null
-     * @return a SingletonIterator over the supplied item
-     */
-
-
-    public static SingletonIterator rawIterator(Item item) {
-        assert item != null;
-        return new SingletonIterator(item);
     }
 
     @Override
@@ -102,7 +90,7 @@ public class SingletonIterator implements SequenceIterator,
 
     @Override
     public int getLength() {
-        return item==null ? 0 : 1;
+        return 1;
     }
 
     public boolean isActuallyGrounded() {
@@ -130,11 +118,7 @@ public class SingletonIterator implements SequenceIterator,
     /*@NotNull*/
     @Override
     public GroundedValue materialize() {
-        if (item != null) {
-            return item;
-        } else {
-            return EmptySequence.getInstance();
-        }
+        return item;
     }
 
     @Override
