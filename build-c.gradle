@@ -278,8 +278,23 @@ task test_jetHome(
   }
 }
 
+task hec_featureKeys(
+  type: JavaExec,
+  description: "Construct the feature keys for HE"
+) {
+  inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
+  outputs.file "${projectDir}/src/main/csharp/api/Saxon.Api/Feature.cs"
+  outputs.file "${projectDir}/src/main/csharp/api/Saxon.Api/FeatureKeys.cs"
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
+    "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToCSharp.xsl",
+    "-o:${projectDir}/src/main/csharp/api/Saxon.Api/establish-an-output-base-uri"
+}
+
 task hec_setupPreprocess(
   type: Copy,
+  dependsOn: ["hec_featureKeys"],
   description: "Copy HE sources for preprocessing HE"
 ) {
   into "${buildDir}/filtered/hec"

@@ -20,6 +20,7 @@ repositories {
   mavenLocal()
   mavenCentral()
   maven { url = "https://org.apache.maven" }
+  maven { url "https://dev.saxonica.com/maven" }
 }
 
 configurations.all {
@@ -37,13 +38,24 @@ configurations {
   asmDotNet.extendsFrom(implementation)
 }
 
+// Set saxonLicenseDir in gradle.properties, or from the
+// command line if you have a license in some other place.
+if (!hasProperty("saxonLicenseDir")) {
+  if (System.getenv("SAXON_LICENSE_DIR") != null) {
+    ext.saxonLicenseDir=System.getenv('SAXON_LICENSE_DIR')
+  } else {
+    ext.saxonLicenseDir=System.getenv('HOME') + "/java"
+  }
+}
+
 dependencies {
   preprocessor (
     [group: 'com.igormaznitsa', name: 'jcp', version: '7.0.4'],
-    [group: 'com.tonicsystems', name: 'jarjar', version: '0.6' ]
+    [group: 'com.tonicsystems', name: 'jarjar', version: '0.6' ],
+    [group: 'com.saxonica', name: 'Saxon-EE', version: '10.3' ],
+    files(saxonLicenseDir)
   )
   implementation (
-    //fileTree(dir: "lib", include: "System*.jar"),
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.2.15'],
     [group: 'xom', name: 'xom', version: '1.3.5'],
     [group: 'org.jdom', name: 'jdom', version: '1.1.3'],
@@ -150,6 +162,7 @@ configurations.compileClasspath.each { cp ->
 
 apply from: "build-n.gradle"
 apply from: "build-c.gradle"
+apply from: "build-doc.gradle"
 
 def pathExists(pathname) {
   // Returns true iff pathame is an existing file or directory
@@ -281,7 +294,7 @@ task hejJarTests(
     attributes "Project-Name": "Saxon-HE-TestDriver"
     attributes "Main-Class": "com.saxonica.testdriver.gui.TestDriverGui"
   }
-  from ("build/classes/hej/testdrivers") {
+  from ("${buildDir}/classes/hej/testdrivers") {
     include "net/sf/saxon/testdriver/**"
   }
 }
@@ -296,7 +309,7 @@ task pejJarTests(
     attributes "Project-Name": "Saxon-PE-TestDriver"
     attributes "Main-Class": "com.saxonica.testdriver.gui.TestDriverGui"
   }
-  from ("build/classes/pej/testdrivers") {
+  from ("${buildDir}/classes/pej/testdrivers") {
     include "net/sf/saxon/testdriver/**"
     include "com/saxonica/testdriver/**"
     exclude "com/saxonica/testdriver/ee/**"
@@ -313,7 +326,7 @@ task eejJarTests(
     attributes "Project-Name": "Saxon-EE-TestDriver"
     attributes "Main-Class": "com.saxonica.testdriver.gui.TestDriverGui"
   }
-  from ("build/classes/eej/testdrivers") {
+  from ("${buildDir}/classes/eej/testdrivers") {
     include "net/sf/saxon/testdriver/**"
     include "com/saxonica/testdriver/**"
   }
@@ -321,8 +334,44 @@ task eejJarTests(
 
 // ============================================================
 
+task hej_sampleConfig(
+  type: JavaExec,
+  description: "Construct the configuration file XSD"
+) {
+  inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
+  inputs.files "${projectDir}/src/samples/config/config-raw.xsd"
+  outputs.file "${projectDir}/src/samples/config/config.xsd"
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
+    "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToSchema.xsl",
+    "-o:${projectDir}/src/samples/config/config.xsd",
+    "FeatureKeys=FeatureKeys.xml",
+    "AdditionalFeatures=AdditionalFeatures.xml",
+    "ConfigSchema=${projectDir}/src/samples/config/config-raw.xsd"
+}
+
+// There's no real dependency here, but I'm not sure how the
+// samples directory should be integrated into the build.
+task hej_featureKeys(
+  type: JavaExec,
+  dependsOn: ["hej_sampleConfig"],
+  description: "Construct the feature keys for HE"
+) {
+  inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
+  outputs.file "${projectDir}/src/main/java/net/sf/saxon/lib/Feature.java"
+  outputs.file "${projectDir}/src/main/java/net/sf/saxon/lib/FeatureCode.java"
+  outputs.file "${projectDir}/src/main/java/net/sf/saxon/lib/FeatureKeys.java"
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
+    "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToJava.xsl",
+    "-o:${projectDir}/src/main/java/net/sf/saxon/lib/establish-an-output-base-uri"
+}
+
 task hej_setupPreprocess(
   type: Copy,
+  dependsOn: ["hej_featureKeys"],
   description: "Copy HE sources for preprocessing HE"
 ) {
   from "${projectDir}/src/main/java"
@@ -808,10 +857,10 @@ task hejJar(
     attributes "Project-Name": "Saxon-HE"
     attributes "Main-Class": "net.sf.saxon.Transform"
   }
-  from ("build/services/saxon-he") {
+  from ("${buildDir}/services/saxon-he") {
     include "META-INF/**"
   }
-  from ("build/classes/hej") {
+  from ("${buildDir}/classes/hej") {
     include "net/**/*.class"
     exclude "net/sf/saxon/option/**"
   }
@@ -829,7 +878,7 @@ if (file("${projectDir}/src/main/java/com/saxonica/xqj").exists()) {
     description: "Build the XQJ jar file for HE"
   ) {
     archiveBaseName = "saxon-he-xqj-${saxonVersion}"
-    from ("build/classes/eej") {
+    from ("${buildDir}/classes/eej") {
       include "com/saxonica/xqj/**/*.class"
       include "javax/xml/xquery/**/*.class"
     }
@@ -854,10 +903,10 @@ task pejJar(
     attributes "Project-Name": "Saxon-PE"
     attributes "Main-Class": "net.sf.saxon.Transform"
   }
-  from ("build/services/saxon-pe") {
+  from ("${buildDir}/services/saxon-pe") {
     include "META-INF/**"
   }
-  from ("build/classes/pej") {
+  from ("${buildDir}/classes/pej") {
     include "net/**/*.class"
     include "com/saxonica/**/*.class"
     include "javax/xml/xquery/*.class"
@@ -889,7 +938,7 @@ task pejJarSql(
   description: "Build the SQL jar file for PE"
 ) {
   archiveBaseName = "saxon-pe-sql-${saxonVersion}"
-  from ("build/classes/pej") {
+  from ("${buildDir}/classes/pej") {
     include "net/sf/saxon/option/sql/*.class"
     include "com/saxonica/functions/sql/*.class"
   }
@@ -905,10 +954,10 @@ task eejJar(
     attributes "Project-Name": "Saxon-EE"
     attributes "Main-Class": "net.sf.saxon.Transform"
   }
-  from ("build/services/saxon-ee") {
+  from ("${buildDir}/services/saxon-ee") {
     include "META-INF/**"
   }
-  from ("build/classes/eej") {
+  from ("${buildDir}/classes/eej") {
     include "net/**/*.class"
     include "com/saxonica/**/*.class"
     include "javax/xml/xquery/*.class"
@@ -929,7 +978,7 @@ task eejJarSql(
   description: "Build the SQL jar file for EE"
 ) {
   archiveBaseName = "saxon-ee-sql-${saxonVersion}"
-  from ("build/classes/eej") {
+  from ("${buildDir}/classes/eej") {
     include "net/sf/saxon/option/sql/*.class"
     include "com/saxonica/functions/sql/*.class"
   }
@@ -1045,7 +1094,7 @@ task docker_setupBuilder(
   description: "Setup to build the builder container"
 ) {
   from "src/docker/builder"
-  into "build/docker/builder"
+  into "${buildDir}/docker/builder"
 }
 
 task docker_testJdk(
@@ -1064,7 +1113,7 @@ task docker_setupJdk(
   description: "Setup the JDK for the builder container"
 ) {
   from dockerJdk
-  into "build/docker/builder"
+  into "${buildDir}/docker/builder"
 }
 
 task docker_testJet(
@@ -1083,7 +1132,7 @@ task docker_setupJet(
   description: "Setup the Jet archive for the builder container"
 ) {
   from dockerJet
-  into "build/docker/builder"
+  into "${buildDir}/docker/builder"
 }
 
 // ============================================================
