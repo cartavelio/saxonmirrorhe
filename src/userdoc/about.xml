@@ -1033,15 +1033,19 @@ any version number.</p>
          </li>
       </ul>
 
-
-
       <h2 class="subtitle">Installing the software</h2>
       
       <p>Before you can run the software, you will need to ensure that a license file is installed, as described
          in <a class="bodylink" href="/about/license/licensekey">Setting up a license key</a>.</p>
          
-      <p>The software is designed to be installed using Nuget, in which case all its dependencies
-      will be automatically loaded as well. It consists of a single DLL file, named SaxonCS.</p>
+      <p>The software can be installed using .NET using Nuget or directly as
+      an executable.</p>
+
+      <h3>Installing with Nuget</h3>
+
+      <p>When installed with Nuget, all of the dependencies will be
+      automatically loaded as well. It consists of a single DLL file,
+      named SaxonCS.</p>
 
       <p>To invoke SaxonCS from a C# application, simply add a Nuget dependency to your project
       as you would for any other third-party library.</p>
@@ -1053,14 +1057,37 @@ any version number.</p>
          <li><p>Firstly, having installed the DLL using Nuget, you can use the dotnet command, for example:</p>
             <kbd>dotnet SaxonCS transform -t -s:source.xml -xsl:stylesheet.xsl</kbd>
          </li>
-         <li><p>Alternatively, executables are available for specific platforms from 
-            <a class="bodylink" href="https://www.saxonica.com/download/dotnet.xml">https://www.saxonica.com/download/dotnet.xml</a>.
-         Having installed the right executable for your target platform, you can invoke it directly using a command such as:</p>
-            <kbd>SaxonCS transform -t -s:source.xml -xsl:stylesheet.xsl</kbd>
-         </li>
       </ul>
-         
-      
+
+     <h3>Installing an application</h3>
+
+     <p>To install the application, download the version appropriate for your
+     platform: Linux, Windows, or MacOS from
+     <a class="bodylink" href="https://www.saxonica.com/download/dotnet.xml">https://www.saxonica.com/download/dotnet.xml</a>.
+     The MacOS application is a universal binary
+     that will work with either Intel or AMD64 versions of Mac hardware.</p>
+
+     <h4>Installing on Linux or Windows</h4>
+
+     <p>The Linux and Windows applications are ZIP files that contain the
+     application. You can unzip the archive and place the applications anywhere
+     convenient.</p>
+
+     <h4>Installing on MacOS</h4>
+
+     <p>The MacOS application is distributed as a signed, notarized “DMG” file.
+     Download the DMG file, open it up, drag the “SaxonCS” application across
+     the screen into the Applications folder.</p>
+
+     <p>The SaxonCS application doesn’t have a GUI interface, so simply clicking on
+     the application icon doesn’t do anything. From a terminal window, you can
+     run <code>/Applications/SaxonCS.app/Contents/Mac/SaxonCS</code>.
+     For convenience, create an alias or link the application into another
+     directory such as <code>/usr/local/bin</code>.</p>
+
+     <p>Having installed the right executable for your target
+     platform, you can invoke it directly using a command such as:</p>
+     <kbd>SaxonCS transform -t -s:source.xml -xsl:stylesheet.xsl</kbd>
 
       <h2 class="subtitle">Sample applications</h2>
 
