@@ -54,6 +54,7 @@ public abstract class Sender {
 
     public static void send(Source source, Receiver receiver, ParseOptions options)
             throws XPathException {
+        Source suppliedSource = source;
         PipelineConfiguration pipe = receiver.getPipelineConfiguration();
         if (options == null) {
             options = new ParseOptions(pipe.getParseOptions());
@@ -97,7 +98,7 @@ public abstract class Sender {
         }
 
         if (source == null) {
-            throw new XPathException("A source of type " + source.getClass().getName() +
+            throw new XPathException("A source of type " + suppliedSource.getClass().getName() +
                                              " is not supported in this environment");
         }
 
