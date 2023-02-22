@@ -1,5 +1,6 @@
 package net.sf.saxon.ma.zeno;
 
+import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -147,7 +148,7 @@ public class ZenoSequence implements GroundedValue {
         return new ZenoSequence(list);
     }
 
-    public static class ZenoSequenceIterator implements GroundedIterator
+    public static class ZenoSequenceIterator implements GroundedIterator, LastPositionFinder
             //#if CSHARP==false
             , LookaheadIterator
             //#endif
@@ -172,6 +173,16 @@ public class ZenoSequence implements GroundedValue {
         public Item next() {
             position++;
             return chainIterator.hasNext() ? chainIterator.next() : null;
+        }
+
+        @Override
+        public boolean supportsGetLength() {
+            return true;
+        }
+
+        @Override
+        public int getLength() {
+            return sequence.getLength();
         }
 
         @Override

@@ -442,17 +442,17 @@ public class FormatDate extends SystemFunction implements Callable {
         UnicodeString widths = EmptyUnicodeString.getInstance();
         if (comma >= 0) {
             widths = format.substring(comma);
-            format = format.substring(0, comma);
+            format = format.prefix(comma);
         }
         UnicodeString primary = format;
         String letterValue = null;
         String ordinal = null;
         int lastCP = StringTool.lastCodePoint(primary);
         if (lastCP == 't') {
-            primary = primary.substring(0, primary.length() - 1);
+            primary = primary.prefix(primary.length() - 1);
             letterValue = "traditional";
         } else if (lastCP == 'o') {
-            primary = primary.substring(0, primary.length() - 1);
+            primary = primary.prefix(primary.length() - 1);
             ordinal = numberer.getOrdinalSuffixForDateTime(component.toString());
         }
 
@@ -554,7 +554,7 @@ public class FormatDate extends SystemFunction implements Callable {
                         STR_s, Integer.parseInt(reverseValue.toString()), reverseFormat, false, numberer, context);
                 UnicodeString correctedResult = reverse(reverseResult);
                 if (correctedResult.length() > max) {
-                    correctedResult = correctedResult.substring(0, max);
+                    correctedResult = correctedResult.prefix(max);
                 }
                 return correctedResult;
             }
@@ -568,7 +568,7 @@ public class FormatDate extends SystemFunction implements Callable {
                 str = BMPString.of(((1000000 + value) + "").substring(1));
                 if (str.length() > max) {
                     // Spec bug 29749 says we should truncate rather than rounding
-                    str = str.substring(0, max);
+                    str = str.prefix(max);
                 }
             }
             while (str.length() < min) {
@@ -576,7 +576,7 @@ public class FormatDate extends SystemFunction implements Callable {
             }
             if (str.length() > min)
             while (str.length() > min && str.codePointAt(str.length() - 1) == '0') {
-                str = str.substring(0, str.length() - 1);
+                str = str.prefix(str.length() - 1);
             }
             // for non standard decimal digit family
             int zeroDigit = Alphanumeric.getDigitFamily(format.codePointAt(0));
@@ -701,7 +701,7 @@ public class FormatDate extends SystemFunction implements Callable {
         UnicodeString widthModifier = EmptyUnicodeString.getInstance();
         if (comma >= 0) {
             widthModifier = format.substring(comma);
-            format = format.substring(0, comma);
+            format = format.prefix(comma);
         }
         if (!value.hasTimezone()) {
             if (format.equals(STR_Z)) {
@@ -732,7 +732,7 @@ public class FormatDate extends SystemFunction implements Callable {
             return STR_Z;
         }
         if (useZforZero) {
-            format = format.substring(0, format.length() - 1);
+            format = format.prefix(format.length() - 1);
         }
         int digits = 0;
         int separators = 0;

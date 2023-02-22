@@ -83,10 +83,10 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public UnicodeBuilder append(CharSequence str) {
-        int uLength = StringTool.getStringLength(str);
-        if (uLength == str.length()) {
-            // No surrogate pairs
-        }
+//        int uLength = StringTool.getStringLength(str);
+//        if (uLength == str.length()) {
+//            // No surrogate pairs
+//        }
         return append(StringTool.codePoints(str));
     }
 

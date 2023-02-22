@@ -16,7 +16,6 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
-import net.sf.saxon.value.UntypedAtomicValue;
 
 /**
  * A node in the XML parse tree representing a text node with compressed whitespace content
@@ -85,7 +84,7 @@ public final class WhitespaceTextImpl extends TinyNodeImpl {
 
     @Override
     public StringValue atomize() {
-        return new UntypedAtomicValue(getUnicodeStringValue());
+        return StringValue.makeUntypedAtomic(getUnicodeStringValue());
     }
 
     /**

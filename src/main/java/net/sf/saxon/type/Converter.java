@@ -290,7 +290,7 @@ public abstract class Converter {
         public static final ToUntypedAtomicConverter INSTANCE = new ToUntypedAtomicConverter();
         @Override
         public StringValue convert(AtomicValue input) {
-            return new UntypedAtomicValue(input.getUnicodeStringValue());
+            return StringValue.makeUntypedAtomic(input.getUnicodeStringValue());
         }
     }
 

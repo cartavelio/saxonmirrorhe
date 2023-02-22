@@ -355,7 +355,7 @@ public final class Date {
     public static double weekInYear(XPathContext context, StringValue dateTime) {
         dateTime = nn(dateTime);
         int dayInYear = (int) dayInYear(context, dateTime);
-        StringValue firstJan = new StringValue(new StringValue(dateTime.getContent().substring(0, 4)).getContent().concat(StringValue.bmp("-01-01").getContent()));
+        StringValue firstJan = new StringValue(new StringValue(dateTime.getContent().prefix(4)).getContent().concat(StringValue.bmp("-01-01").getContent()));
         int jan1day = ((int) dayInWeek(context, firstJan) + 5) % 7;
         int daysInFirstWeek = jan1day == 0 ? 0 : 7 - jan1day;
 
@@ -368,7 +368,7 @@ public final class Date {
                 return rawWeek;
             } else {
                 // week number should be 52 or 53: same as 31 Dec in previous year
-                int lastYear = Integer.parseInt((new StringValue(dateTime.getContent().substring(0, 4)).getStringValue())) - 1;
+                int lastYear = Integer.parseInt((new StringValue(dateTime.getContent().prefix(4)).getStringValue())) - 1;
                 StringValue dec31 = StringValue.bmp(lastYear + "-12-31");
                 // assumes year > 999
                 return weekInYear(context, dec31);

@@ -40,7 +40,7 @@ public class StringValue extends AtomicValue {
     public static final StringValue TRUE = new StringValue(StringConstants.TRUE);
     public static final StringValue FALSE = new StringValue(StringConstants.FALSE);
 
-    public static final StringValue ZERO_LENGTH_UNTYPED = new UntypedAtomicValue(EmptyUnicodeString.getInstance());
+    public static final StringValue ZERO_LENGTH_UNTYPED = StringValue.makeUntypedAtomic(EmptyUnicodeString.getInstance());
 
 
     /**
@@ -92,6 +92,16 @@ public class StringValue extends AtomicValue {
     public StringValue(String value, AtomicType typeLabel) {
         this.content = StringView.of(value).tidy();
         this.typeLabel = typeLabel;
+    }
+
+    /**
+     * Factory method for untyped atomic values
+     * @param value the string value
+     * @return a new untyped atomic value around this string
+     */
+
+    public static StringValue makeUntypedAtomic(UnicodeString value) {
+        return new StringValue(value, BuiltInAtomicType.UNTYPED_ATOMIC);
     }
 
     /**

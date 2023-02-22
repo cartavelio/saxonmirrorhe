@@ -292,9 +292,9 @@ public final class RuleManager {
      */
 
     public void checkConsistency() throws XPathException {
-        unnamedMode.checkForConflictingProperties(this);
+        unnamedMode.resolveProperties(this);
         for (Mode mode : modes.values()) {
-            mode.getActivePart().checkForConflictingProperties(this);
+            mode.getActivePart().resolveProperties(this);
         }
     }
 

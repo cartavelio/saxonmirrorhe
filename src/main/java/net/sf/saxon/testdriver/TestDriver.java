@@ -12,7 +12,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Steps;
@@ -325,12 +324,15 @@ public abstract class TestDriver {
                 driverProc.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, 0);
                 driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
             } else if (generateByteCode >0) {
-                driverProc.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, ""+generateByteCode);
+                driverProc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
+                driverProc.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, generateByteCode);
                 driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
             } else if (generateByteCode == 0 && debugByteCode) {
                 driverProc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
                 driverProc.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, 0);
                 driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, true);
+                driverProc.setConfigurationProperty(Feature.DISPLAY_BYTE_CODE, true);
+                driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, getResultsDir() + "/byteCode/");
             } else {
                 driverProc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
                 driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);

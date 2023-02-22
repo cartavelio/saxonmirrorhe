@@ -30,7 +30,6 @@ import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.TextFragmentValue;
-import net.sf.saxon.value.UntypedAtomicValue;
 
 
 /**
@@ -192,7 +191,7 @@ public class DocumentInstr extends ParentNodeConstructor {
     public Expression getStringValueExpression() {
         if (textOnly) {
             if (constantText != null) {
-                return new StringLiteral(new UntypedAtomicValue(constantText));
+                return new StringLiteral(StringValue.makeUntypedAtomic(constantText));
             } else if (getContentExpression() instanceof ValueOf) {
                 return ((ValueOf) getContentExpression()).convertToCastAsString();
             } else {

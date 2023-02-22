@@ -9,9 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -19,58 +17,21 @@ import net.sf.saxon.trans.XPathException;
  * concatenating the result of each instruction into a single combined sequence.
  */
 
-public class BlockIterator implements SequenceIterator {
+public class BlockIterator extends AbstractBlockIterator {
 
     private final Operand[] operanda;
-    private int currentChildExpr = 0;
-    private SequenceIterator currentIter;
-    private final XPathContext context;
-    private int position = 0;
 
     public BlockIterator(Operand[] operanda, XPathContext context) {
+        super(operanda.length, context);
         this.operanda = operanda;
-        this.currentChildExpr = 0;
-        this.context = context;
-    }
 
-    /**
-     * Get the next item in the sequence. <BR>
-     *
-     * @return the next item, or null if there are no more items.
-     */
-
-    @Override
-    public Item next() {
-        if (position < 0) {
-            return null;
-        }
-        try {
-            while (true) {
-                if (currentIter == null) {
-                    currentIter = operanda[currentChildExpr++].getChildExpression().iterate(context);
-                }
-                Item current = currentIter.next();
-                if (current != null) {
-                    position++;
-                    return current;
-                }
-                currentIter = null;
-                if (currentChildExpr >= operanda.length) {
-                    position = -1;
-                    return null;
-                }
-            }
-        } catch (XPathException e) {
-            throw new UncheckedXPathException(e);
-        }
     }
 
     @Override
-    public void close() {
-        if (currentIter != null) {
-            currentIter.close();
-        }
+    public SequenceIterator getNthChildIterator(int n) throws XPathException {
+        return operanda[n].getChildExpression().iterate(context);
     }
+
 
 }
 

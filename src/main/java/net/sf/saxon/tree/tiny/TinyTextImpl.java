@@ -14,7 +14,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 
 /**
  * A node in the XML parse tree representing character content
@@ -92,7 +92,7 @@ public final class TinyTextImpl extends TinyNodeImpl {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize() {
-        return new UntypedAtomicValue(getUnicodeStringValue());
+        return StringValue.makeUntypedAtomic(getUnicodeStringValue());
     }
 }
 

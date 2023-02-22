@@ -227,6 +227,18 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
     public abstract UnicodeString substring(long start, long end);
 
     /**
+     * Get a substring of this string, starting at position 0, with a given end position
+     * @param end the end position (0-based): specifically, the position of the first
+     *          code point not to be included
+     * @return the requested substring
+     * @throws IndexOutOfBoundsException if the end position is out of range
+     */
+
+    public UnicodeString prefix(long end) {
+        return substring(0, end);
+    }
+
+    /**
      * Concatenate with another string, returning a new string
      * @param other the string to be appended
      * @return the result of concatenating this string followed by the other

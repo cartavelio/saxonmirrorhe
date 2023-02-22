@@ -144,7 +144,7 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
         if (j < 0) {
             return EmptyUnicodeString.getInstance();
         }
-        return s1.substring(0, j);
+        return s1.prefix(j);
     }
 
     /**
