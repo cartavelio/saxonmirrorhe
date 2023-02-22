@@ -1357,9 +1357,6 @@ public class TestValidator {
                     + "</schema>";
 
             SchemaFactory proc = new SchemaFactoryImpl();
-            proc.setProperty(FeatureKeys.GENERATE_BYTE_CODE, byteCodeOn);
-            //proc.setProperty(Feature.DEBUG_BYTE_CODE.name, byteCodeOn);
-            //proc.setProperty(FeatureKeys.DEBUG_BYTE_CODE_DIR, configTest.getTempDir() + "Saxon-bytecode");
             Schema sch = proc.newSchema(new StreamSource(new StringReader(sch1)));
             Validator val = sch.newValidator();
             StringBuilder sb = new StringBuilder();

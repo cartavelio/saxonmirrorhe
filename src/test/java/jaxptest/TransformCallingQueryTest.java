@@ -1,7 +1,6 @@
 package jaxptest;
 
 import net.sf.saxon.TransformerFactoryImpl;
-import net.sf.saxon.lib.FeatureKeys;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Transformer;
@@ -26,7 +25,6 @@ public class TransformCallingQueryTest  {
         // Bug reported 2012-03-28 by Michael Hedenus, Continental Corporation. Only fails if running PE.
         try {
             TransformerFactory transformerFactory = new TransformerFactoryImpl();
-            transformerFactory.setAttribute(FeatureKeys.GENERATE_BYTE_CODE, false);
             Transformer transformer = transformerFactory.newTransformer(new StreamSource(configTest.getBugsDir() + "hedenus/bug.xslt"));
             transformer.setParameter("myparam", "london");
 

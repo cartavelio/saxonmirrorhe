@@ -11,7 +11,6 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StaticQueryContextFactory;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.DynamicQueryContext;
@@ -294,7 +293,6 @@ public class TestXQueryNative {
     @Test
     public void testCollationQuery() throws XPathException {
         Configuration config = Configuration.newConfiguration();
-        config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, true);
         StaticQueryContext sqc = config.newStaticQueryContext();
         String testDir = configTest.getXMarkDir();
         sqc.setBaseURI(testDir);
@@ -318,7 +316,6 @@ public class TestXQueryNative {
     @Test
     public void testDynamicCollationQuery() throws XPathException {
         Configuration config = Configuration.newConfiguration();
-        config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, true);
         StaticQueryContext sqc = config.newStaticQueryContext();
         String testDir = configTest.getXMarkDir();
         sqc.setBaseURI(testDir);

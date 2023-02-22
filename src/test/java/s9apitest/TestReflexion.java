@@ -22,11 +22,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestReflexion {
     private final ConfigTest configTest = new ConfigTest();
-    private final static boolean BYTECODE = false;
 
     private XQueryCompiler makeCompiler() {
         Processor p = new Processor(true);
-        p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
         XQueryCompiler c = p.newXQueryCompiler();
         c.declareNamespace("this", "java:s9apitest.TestReflexionHelper");
         return c;
@@ -145,7 +143,6 @@ public class TestReflexion {
         // See http://stackoverflow.com/questions/11448305/
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' " +
@@ -287,7 +284,6 @@ public class TestReflexion {
     public void testEmptyList() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                     "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
@@ -314,7 +310,6 @@ public class TestReflexion {
     public void testNonEmptyList() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                     "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
@@ -341,7 +336,6 @@ public class TestReflexion {
     public void testStringSplit() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                     "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
@@ -366,7 +360,6 @@ public class TestReflexion {
     public void testStaticInvalidRequiredExternalObjectType() {
         // Error should be detected at compile time
         Processor p = new Processor(true);
-        p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
         XsltCompiler c = p.newXsltCompiler();
         String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
@@ -400,7 +393,6 @@ public class TestReflexion {
         try {
             // Error should be detected at run time
             Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                     "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +

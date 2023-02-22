@@ -242,7 +242,6 @@ public class ExtensionTest {
             messages.clear();
             Processor proc = new Processor(true);
             ProfessionalConfiguration config = (ProfessionalConfiguration)proc.getUnderlyingConfiguration();
-            config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, false);
             JavaExtensionFunctionFactory eff = new JavaExtensionFunctionFactory(config);
             eff.setExtensionFunctionClass(CallInterceptor.class);
             JavaExtensionLibrary jel = (JavaExtensionLibrary)config.getExtensionBinder("java");
@@ -273,7 +272,6 @@ public class ExtensionTest {
             messages.clear();
             Processor proc = new Processor(true);
             ProfessionalConfiguration config = (ProfessionalConfiguration)proc.getUnderlyingConfiguration();
-            config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, false);
             JavaExtensionFunctionFactory eff = new JavaExtensionFunctionFactory(config);
             eff.setExtensionFunctionClass(CallInterceptor.class);
             JavaExtensionLibrary jel = (JavaExtensionLibrary)config.getExtensionBinder("java");
