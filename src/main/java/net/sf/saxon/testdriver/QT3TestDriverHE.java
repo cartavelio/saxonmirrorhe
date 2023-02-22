@@ -623,7 +623,7 @@ public class QT3TestDriverHE extends TestDriver {
                             mr.setTestCase(testCase);
                             testXqc.getProcessor().getUnderlyingConfiguration().setModuleURIResolver(mr);
                             testXqc.setModuleURIResolver(mr);
-                            testXqc.setBaseURI(testCase.getBaseURI());
+                            //testXqc.setBaseURI(testCase.getBaseURI());
 
                             try {
                                 testXqc.getUnderlyingStaticContext().setModuleLocation(
