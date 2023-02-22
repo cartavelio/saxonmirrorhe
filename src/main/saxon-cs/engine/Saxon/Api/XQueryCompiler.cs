@@ -46,6 +46,16 @@ namespace Saxon.Api {
         public void DeclareNamespace(string prefix, string uri) {
             Implementation.declareNamespace(prefix, uri);
         }
+        
+        /// <summary>
+        /// The name of the default collation used by queries compiled using this <c>XQueryCompiler</c>.
+        /// This must be the name of a collation that is known to the <c>Processor</c>.
+        /// </summary>
+
+        public string DefaultCollationName {
+            get => Implementation.getDefaultCollationName();
+            set => Implementation.declareDefaultCollation(value);
+        }
 
         /// <summary>
         /// Get the <c>Processor</c> from which this <c>XQueryCompiler</c> was constructed

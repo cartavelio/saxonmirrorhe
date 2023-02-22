@@ -421,6 +421,17 @@ public class XQueryCompiler {
         staticQueryContext.declareDefaultCollation(uri);
     }
 
+    /**
+     * Get the name of the default collation
+     * @return the name of the default collation for this query; or the name of the codepoint collation
+     *      if no default collation has been defined.
+     * @since 11.0
+     */
+
+    public String getDefaultCollationName() {
+        return staticQueryContext.getDefaultCollationName();
+    }
+
 
     /**
      * Declare the static type of the context item. If this type is declared, and if a context item
