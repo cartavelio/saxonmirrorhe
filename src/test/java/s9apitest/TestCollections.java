@@ -38,7 +38,7 @@ public class TestCollections {
         try {
             Processor p = new Processor(true);
             XPathCompiler c = p.newXPathCompiler();
-            XPathExecutable exec = c.compile("collection(.)!document-uri(.)");
+            XPathExecutable exec = c.compile("collection(.)!base-uri(.)");
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml"));
             XdmValue val = eval.evaluate();
@@ -56,7 +56,7 @@ public class TestCollections {
             c.setLanguageVersion("3.1");
             c.declareVariable(new QName("a"));
             c.declareVariable(new QName("b"));
-            XPathExecutable exec = c.compile("collection($a||'trax/xml/?match='||encode-for-uri($b))!document-uri(.)");
+            XPathExecutable exec = c.compile("collection($a||'trax/xml/?match='||encode-for-uri($b))!base-uri(.)");
             XPathSelector eval = exec.load();
             eval.setVariable(new QName("a"), new XdmAtomicValue("file://" + ConfigTest.DATA_DIR));
             eval.setVariable(new QName("b"), new XdmAtomicValue("[A-Za-z]+\\.xml"));
@@ -73,7 +73,7 @@ public class TestCollections {
             Processor p = new Processor(true);
             XPathCompiler c = p.newXPathCompiler();
             c.setLanguageVersion("3.0");
-            XPathExecutable exec = c.compile("collection(.)!document-uri(.)");
+            XPathExecutable exec = c.compile("collection(.)!base-uri(.)");
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml"));
             XdmValue val = eval.evaluate();
@@ -88,7 +88,7 @@ public class TestCollections {
         try {
             Processor p = new Processor(true);
             XPathCompiler c = p.newXPathCompiler();
-            XPathExecutable exec = c.compile("collection(.)!document-uri(.)");
+            XPathExecutable exec = c.compile("collection(.)!base-uri(.)");
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml;recurse=yes"));
             XdmValue val = eval.evaluate();
