@@ -776,13 +776,13 @@ public class ExpressionTool {
             } else if (first instanceof StringItem) {   // includes anyURI value
                 if (iterator.next() != null) {
                     iterator.close();
-                    ebvError("a sequence of two or more items starting with a string");
+                    ebvError("a sequence of two or more items starting with a string ('" + first.getStringValue() + "')");
                 }
                 return !((StringItem) first).isEmpty();
             } else if (first instanceof NumericValue) {
                 if (iterator.next() != null) {
                     iterator.close();
-                    ebvError("a sequence of two or more items starting with a numeric value");
+                    ebvError("a sequence of two or more items starting with a numeric value (" + first.getStringValue() + ")");
                 }
                 final NumericValue n = (NumericValue) first;
                 return (n.compareTo(0) != 0) && !n.isNaN();
