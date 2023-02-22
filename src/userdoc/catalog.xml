@@ -8,7 +8,8 @@
   <section ref="using-xsl">Using XSLT</section>
   <section ref="using-xquery">Using XQuery</section>
   <section ref="xpath-api">Using XPath</section>  
-  <section ref="schema-processing">Using XML Schema (XSD)</section>  
+  <section ref="schema-processing">Using XML Schema (XSD)</section> 
+  <section ref="streaming">Streaming</section> 
   <section ref="gizmo">The Gizmo Utility</section>  
   <section ref="saxon-cs">SaxonCS</section>
   <section ref="localization">Localization</section>
