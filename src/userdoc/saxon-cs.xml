@@ -297,7 +297,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
             <li><p>The DOM can be <i>wrapped</i> as a Saxon tree. This avoids the cost
             and memory overhead of copying the tree, but the result is slower to navigate.</p></li>
             <li><p><i>(SaxonCS does not currently offer the Domino model, which is a hybrid
-            between copying and wrapping: it uses the DOM as supplied, but adds indexes for fast
+            between copying and wrapping: Domino on SaxonJ uses the DOM as supplied, but adds indexes for fast
             searching.)</i></p></li>
          </ul></li>
       </ul>
@@ -313,12 +313,19 @@ need to mix use of the .NET API with the internal classes converted from the ori
       
       <h2>HTML parsing</h2>
       
-      <p>The <a class="bodylink code" href="/functions/saxon/parse-html">saxon:parse-html()</a> extension function is available. It parses the supplied
-      HTML content using HTML Agility Pack, returning a Saxon wrapper around the resulting
-      <code>HtmlDocument</code> node, from which XPath navigation is possible.</p>
+      <p>Parsing of HTML5 documents can be achieved by calling either of the functions
+         <a class="bodylink code" href="/functions/saxon/parse-html">saxon:parse-html()</a> or (if 4.0 extensions are enabled)
+         <code>fn:parse-html()</code>. Both forms are identical. The function has changed substantially
+         between SaxonCS 11 and SaxonCS 12; whereas SaxonCS 11 used <code>HtmlAgilityPack</code> as the underlying
+         parser, SaxonCS 12 uses <code>AngleSharp</code>, which conforms much more closely to the standard HTML5 parsing algorithm.
+         Saxon parses the supplied HTML content using <code>AngleSharp</code>, returning a Saxon wrapper around the resulting
+         <code>AngleSharp.Dom.IDocument</code> node, from which XPath navigation is possible.</p>
       
-      <aside>Because a different HTML parser is used, the results will not necessarily be the same
-      as when <code>saxon:parse-html()</code> is used with SaxonJ.</aside>
+      <aside>As well as changing the underlying technology, the function is also much more thoroughly tested
+         in SaxonCS 12, and conformance with HTML5 has been checked by comparing the results of nearly 1400 test cases
+         with other implementations. About 30 of these tests return different results across SaxonJ and SaxonCS; these
+         are being investigated. The differences are almost exclusively concerned with the way in which the parser repairs
+         erroneous HTML.</aside>
       
       <p>Normal HTML elements (such as <code>&lt;p&gt;</code>, <code>&lt;div&gt;</code>, etc) are delivered
       as element nodes whose local name is in lower-case, with the XHTML namespace URI.</p>
