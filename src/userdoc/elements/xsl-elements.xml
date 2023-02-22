@@ -4225,6 +4225,13 @@
                 <attribute name="validation" use="optional">Requests strict or lax validation of the
                     contents of the document against the element declaration of its top-level
                     element.</attribute>
+                <attribute name="saxon:dtd-validation" use="optional" data-type="boolean">Controls
+                    whether DTD validation takes place. For details see <a class="bodylink code"
+                        href="/extensions/attributes/dtd-validation">saxon:dtd-validation</a>.</attribute>
+                <attribute name="saxon:expand-attribute-defaults" use="optional"
+                    data-type="boolean">Controls whether attribute defaults defined in the schema or
+                    DTD are expanded. For details see <a class="bodylink code"
+                        href="/extensions/attributes/expand-attribute-defaults">saxon:expand-attribute-defaults</a>.</attribute>
                 <attribute name="saxon:line-numbering" use="optional" data-type="boolean">Used to
                     enable line numbering for the document being read. For details see <a
                         class="bodylink code"
@@ -4238,6 +4245,9 @@
                             code" href="/xsl-elements/preserve-space">xsl:preserve-space</a>
                     declarations. For details see <a class="bodylink code"
                         href="/extensions/attributes/strip-space">saxon:strip-space</a>.</attribute>
+                <attribute name="saxon:xinclude" use="optional" data-type="boolean">Controls whether
+                    XInclude processing takes place. For details see <a class="bodylink code"
+                        href="/extensions/attributes/xinclude">saxon:xinclude</a>.</attribute>
             </attributes>
             <details>
                 

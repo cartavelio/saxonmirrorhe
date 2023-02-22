@@ -6176,12 +6176,12 @@
               <tr>
                 <td><p>type</p></td>
                 <td><p>xs:QName</p></td>
-                <td><p>Requests validation against a named type</p></td>
+                <td><p>Requests validation against a named type.</p></td>
               </tr>
               <tr>
                 <td><p>dtd-validation</p></td>
                 <td><p>xs:boolean</p></td>
-                <td><p>Determines whether DTD validation takes place</p></td>
+                <td><p>Determines whether DTD validation takes place.</p></td>
               </tr>
               <tr>
                 <td><p>strip-space</p></td>
@@ -6200,6 +6200,13 @@
                 <td><p>accumulators</p></td>
                 <td><p>xs:QName*</p></td>
                 <td><p>Names the accumulators that are applicable to this document.</p></td>
+              </tr>
+              <tr>
+                <td><p>use-xsi-schema-location</p></td>
+                <td><p>xs:boolean</p></td>
+                <td><p>Controls whether or not to use the <code>xsi:schemaLocation</code> and
+                  <code>xsi:noNamespaceSchemaLocation</code> attributes to locate a schema for
+                  validation.</p></td>
               </tr>
             </tbody>
           </table>
