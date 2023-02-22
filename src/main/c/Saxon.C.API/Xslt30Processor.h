@@ -308,17 +308,17 @@ public:
     void exceptionClear();
 
 
-     //! Get the error message if there are any error
+     //! Get the first error message if there are any errors
     /**
      * A transformation may have a number of errors reported against it.
      * @return char* - The message of the exception
     */
     const char * getErrorMessage();
 
-     //! Get the ith error code if there are any error
+     //! Get the first error code if there are any errors
     /**
      * A transformation may have a number of errors reported against it.
-     * @return char* - The error code of the exception. The error code are related to the specific specification
+     * @return char* - The error code of the exception. The error codes are related to the specific specification
     */
     const char * getErrorCode();
 

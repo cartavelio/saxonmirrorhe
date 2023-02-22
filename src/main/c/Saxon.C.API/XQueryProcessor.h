@@ -238,15 +238,15 @@ public:
     void exceptionClear();
 
 
-     //! Get the ith error message if there are any error
+     //! Get the first error message if there are any errors
     /**
-     * A transformation may have a number of errors reported against it.
+     * A query may have a number of errors reported against it.
      * @return char* - The message of the exception
     */
     const char * getErrorMessage();
 
 
-     //! Get the i'th error code if there are any error
+     //! Get the first error code if there are any errors
     /**
      * After the execution of the query there may be a number of errors reported against it.
      * @return char* - The error code of the exception.
@@ -270,8 +270,8 @@ private:
 	SaxonProcessor * proc;
 
 	int64_t cppXQ;
-	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
-	std::map<std::string,std::string> properties; /*!< map of properties used for the transformation as (string, string) pairs */
+	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the query as (string, value) pairs */
+	std::map<std::string,std::string> properties; /*!< map of properties used for the query as (string, string) pairs */
 	SaxonApiException * exception;
 };
 
