@@ -252,6 +252,11 @@
         
         <p>Added <code>saxon:slice()</code> based on proposed XPath 4.0 function fn:slice(). For example
         <code>slice(("a", "b", "c"), -1)</code> returns <code>"c"</code></p>
+        
+        <p>The function <code>saxon:escape-NCName</code> can be used to turn any string into a valid
+        <code>NCName</code>: for example <code>"date of birth"</code> becomes <code>"date_20_of_20_birth"</code>.
+        This can be useful when converting JSON to XML. The function <code>saxon:unescape-NCName</code> reverses
+        the operation.</p>
 
         <h2>Dropped Extension Functions</h2>
 
