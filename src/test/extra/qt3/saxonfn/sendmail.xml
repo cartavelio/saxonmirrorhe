@@ -5,8 +5,6 @@
          idref="func-abs"/>
 
    <dependency type="spec" value="XQ30+ XP31+"/>
-   <dependency type="saxon:platform" value="J"/>
-  
    <environment name="contentDoc">
       <source role="." file="sendmail/content.xml">
          <description>The data contains an HTML document</description>
@@ -21,7 +19,7 @@
      <modified by="Debbie Lockett" on="2015-11-03" change="update map syntax ':=' -> ':' "/>
       <environment ref="contentDoc"/>
       <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-            'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'true', 'realname':'saxon:Send-mail', 'port':'2525'}, "Test send-mail-001", .)</test>
+            'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'true', 'realname':'saxon:Send-mail', 'port':'1025'}, "Test send-mail-001", .)</test>
       <result>
         <assert-true/>
       </result>
@@ -33,7 +31,7 @@
      <modified by="Debbie Lockett" on="2015-11-03" change="update map syntax ':=' -> ':' "/>
       <environment ref="contentDoc"/>
       <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-            'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'true', 'realname':'saxon:Send-mail', 'port':'2525'}, "", .)</test>
+            'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'true', 'realname':'saxon:Send-mail', 'port':'1025'}, "", .)</test>
       <result>
         <assert-true/>
       </result>
@@ -45,7 +43,7 @@
      <modified by="Debbie Lockett" on="2015-11-03" change="update map syntax ':=' -> ':' "/>
       <environment ref="contentDoc"/>
       <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-            'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':true(), 'realname':'saxon:Send-mail'}, "Test send-mail-003", .)</test>
+            'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':true(), 'realname':'saxon:Send-mail'}, "Test send-mail-003", .)</test>
        <result>
            <assert-true/>
        </result>
@@ -57,7 +55,7 @@
      <modified by="Debbie Lockett" on="2015-11-03" change="update map syntax ':=' -> ':' "/>
        <environment ref="contentDoc"/>
       <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-            'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'realname':'saxon:Send-mail', 'port':'2525'}, "Test send-mail-004", parse-xml(<![CDATA['<doc>text content</doc>']]>))</test>
+            'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'realname':'saxon:Send-mail', 'port':'1025'}, "Test send-mail-004", parse-xml(<![CDATA['<doc>text content</doc>']]>))</test>
        <result>
            <assert-true/>
        </result>
@@ -70,7 +68,7 @@
         <created by="O'Neil Delpratt" on="2012-06-20"/>
         <modified by="Debbie Lockett" on="2015-11-03" change="update map syntax ':=' -> ':' "/>
       <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-            'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'realname':'saxon:Send-mail', 'port':'2525'}, "Test send-mail-005", "text content")</test>
+            'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'realname':'saxon:Send-mail', 'port':'1025'}, "Test send-mail-005", "text content")</test>
           <result>
               <assert-true/>
           </result>
@@ -81,7 +79,7 @@
         <created by="O'Neil Delpratt" on="2012-06-20"/>
         <modified by="Debbie Lockett" on="2015-11-03" change="update map syntax ':=' -> ':' "/>
       <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-            'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'true', 'realname':'saxon:Send-mail', 'port':'2525'}, "Test send-mail-006", "text content")</test>
+            'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'true', 'realname':'saxon:Send-mail', 'port':'1025'}, "Test send-mail-006", "text content")</test>
       <result>
           <assert-true/>
       </result>
@@ -93,7 +91,7 @@
      <modified by="Debbie Lockett" on="2015-11-03" change="update map syntax ':=' -> ':' "/>
        <environment ref="contentDoc"/>
       <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-            'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'realname':'saxon:Send-mail', 'port':'2525'}, "Test send-mail-007", .)</test>
+            'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'realname':'saxon:Send-mail', 'port':'1025'}, "Test send-mail-007", .)</test>
        <result>
            <assert-true/>
        </result>
@@ -104,21 +102,21 @@
      <created by="O'Neil Delpratt" on="2012-06-20"/>
      <modified by="Debbie Lockett" on="2015-11-03" change="update map syntax ':=' -> ':' "/>
       <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-            'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'true', 'realname':'saxon:Send-mail', 'port':'2525'}, "Test send-mail-008", "<html><body>email text content body</body></html>")</test>
+            'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'true', 'realname':'saxon:Send-mail', 'port':'1025'}, "Test send-mail-008", "<html><body>email text content body</body></html>")</test>
       <result>
             <assert-true/>
       </result>
    </test-case>
 
       <test-case name="send-mail-009">
-      <description>Use the function saxon:send-mail() with attachment</description>
+      <description>Use the function saxon:send-mail() with invalid attachment type</description>
         <created by="O'Neil Delpratt" on="2012-06-20"/>
         <modified by="Debbie Lockett" on="2015-11-03" change="update map syntax ':=' -> ':' "/>
        <environment ref="contentDoc"/>
       <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-            'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'true', 'realname':'saxon:Send-mail', 'port':'2525'}, "Test send-mail-009", ., "")</test>
+            'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'true', 'realname':'saxon:Send-mail', 'port':'1025'}, "Test send-mail-009", ., "")</test>
           <result>
-              <assert-true/>
+            <error code="SXJE0051"/>
           </result>
    </test-case>
 
@@ -126,7 +124,7 @@
     <description>Use the function saxon:send-mail() with SSL option true</description>
       <created by="O'Neil Delpratt" on="2018-09-04"/>
     <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-          'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'ssl':'true', 'realname':'saxon:Send-mail', 'port':'465'}, "Test send-mail-010", "text content")</test>
+          'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'ssl':'true', 'realname':'saxon:Send-mail', 'port':'465'}, "Test send-mail-010", "text content")</test>
     <result>
         <assert-true/>
     </result>
@@ -136,7 +134,7 @@
         <description>Use the function saxon:send-mail() with SSL option false</description>
           <created by="O'Neil Delpratt" on="2018-09-04"/>
         <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-              'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'ssl':'false', 'realname':'saxon:Send-mail', 'port':'465'}, "Test send-mail-011", "text content")</test>
+              'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'ssl':'false', 'realname':'saxon:Send-mail', 'port':'465'}, "Test send-mail-011", "text content")</test>
         <result>
               <assert-true/>
         </result>
@@ -147,7 +145,7 @@
         <description>Use the function saxon:send-mail() with SSL option false</description>
           <created by="O'Neil Delpratt" on="2018-09-04"/>
         <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-              'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'ssl':'false', 'realname':'saxon:Send-mail', 'port':'25'}, "Test send-mail-012", "text content")</test>
+              'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'ssl':'false', 'realname':'saxon:Send-mail', 'port':'25'}, "Test send-mail-012", "text content")</test>
         <result>
               <assert-true/>
         </result>
@@ -158,7 +156,7 @@
         <description>Use the function saxon:send-mail() with SSL option true xs:booleanValue</description>
           <created by="O'Neil Delpratt" on="2018-09-04"/>
         <test>saxon:send-mail(map{'to':'70e5321a21-fd3366@inbox.mailtrap.io', 'from':'support@saxonica.com',
-              'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'ssl':true(), 'realname':'saxon:Send-mail', 'port':'465'}, "Test send-mail-013", "text content")</test>
+              'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'false', 'ssl':true(), 'realname':'saxon:Send-mail', 'port':'465'}, "Test send-mail-013", "text content")</test>
         <result>
               <assert-true/>
         </result>
@@ -179,7 +177,7 @@
       <modified by="Debbie Lockett" on="2015-11-03" change="update map syntax ':=' -> ':' "/>
       <environment ref="contentDoc"/>
       <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-            'smtp-server':'smtp.mailtrap.io', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'true', 'realname':'saxon:Send-mail', 'port':'2525', 'mail.smtp.timeout':'1000'}, .)</test>
+            'smtp-server':'localhost', 'username':'send-mail', 'password':'9091d8ef09ca0cf5', 'html':'true', 'realname':'saxon:Send-mail', 'port':'1025', 'mail.smtp.timeout':'1000'}, .)</test>
       <result>
          <error code="XPST0017"/>
       </result>
@@ -191,7 +189,7 @@
       <modified by="Debbie Lockett" on="2015-11-03" change="update map syntax ':=' -> ':' "/>
       <environment ref="contentDoc"/>
       <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-            'smtp-server':'smtp.saxonica.com', 'username':'support@saxonica.com', 'password':'xxx', 'html':'true', 'realname':'saxon:Send-mail', 'port':'587', 'mail.smtp.timeout':'1000'}, "Incorrect password", .)</test>
+            'smtp-server':'localhost', 'username':'support@saxonica.com', 'password':'xxx', 'html':'true', 'realname':'saxon:Send-mail', 'port':'1025', 'mail.smtp.timeout':'1000'}, "Incorrect password", .)</test>
       <result>
         <error code="SXJM0002"/>
       </result>
@@ -203,24 +201,21 @@
      <modified by="Debbie Lockett" on="2015-11-03" change="update map syntax ':=' -> ':' "/>
       <environment ref="contentDoc"/>
       <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-            'smtp-server':'smtp.saxonica.com', 'username':'xx', 'password':'xx', 'html':'true', 'realname':'saxon:Send-mail', 'port':'587',
+            'smtp-server':'localhost', 'username':'xx', 'password':'xx', 'html':'true', 'realname':'saxon:Send-mail', 'port':'1025',
             'mail.smtp.timeout':'1000'}, "send-mail", .)</test>
       <result>
         <error code="SXJM0002"/>
       </result>
    </test-case>
-  
+
   <test-case name="send-mail-905err">
     <description>The function saxon:send-mail(): missing smtp-server option</description>
     <created by="Michael Kay" on="2017-08-18"/>
     <environment ref="contentDoc"/>
     <test>saxon:send-mail(map{'to':'oneil@saxonica.com', 'from':'support@saxonica.com',
-      'username':'xx', 'password':'xx', 'html':'true', 'realname':'saxon:Send-mail', 'port':'587', 'mail.smtp.timeout':'1000'}, "send-mail", .)</test>
+      'username':'xx', 'password':'xx', 'html':'true', 'realname':'saxon:Send-mail', 'port':'1025', 'mail.smtp.timeout':'1000'}, "send-mail", .)</test>
     <result>
       <error code="SXJM0001"/>
     </result>
   </test-case>
-
-
-
 </test-set>
