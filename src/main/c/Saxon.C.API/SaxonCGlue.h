@@ -74,7 +74,7 @@ extern int jvmCreated;
 
 
 //===============================================================================================//
-/*! <code>Environment</code>. This struct captures the jni, JVM and handler to the cross compiled Saxon/C library.
+/*! <code>Environment</code>. This struct captures the jni, JVM and handler to the cross compiled SaxonC library.
  * <p/>
  */
 typedef struct {
@@ -140,7 +140,7 @@ char * _getResourceDirectory();
 void setDllname();
 
 /*
- * Load dll using the default setting in Saxon/C
+ * Load dll using the default setting in SaxonC
  * Recommended method to use to load library
  */
 HANDLE loadDefaultDll();

@@ -101,7 +101,7 @@ struct xdmAtomicValue_object {
 };
 
 
-#define PHP_SAXON_EXTNAME  "Saxon/C"
+#define PHP_SAXON_EXTNAME  "SaxonC"
 #define PHP_SAXON_EXTVER   "1.2.0"
 
 /*
