@@ -8,6 +8,7 @@
 package net.sf.saxon.option.cpp;
 
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
@@ -214,6 +215,39 @@ public class XdmUtils {
         }
         return XdmUtils.getEQName(qname);
 
+    }
+
+    /**
+     * Convert an array of xdmValues (Which we expect to be XdmItem objects) to a XdmValue
+     * @param values   - given as an array of XdmValue
+     * @return   XdmValue
+     */
+    public static XdmValue buildXdmValue(XdmValue [] values){
+
+        if(values == null) {
+            return null;
+        }
+        List<XdmItem> items = new ArrayList<>();
+
+        for(int i = 0; i< values.length; i++) {
+                items.add((XdmItem) values[i]);
+        }
+        return new XdmValue(items);
+    }
+
+
+    /**
+     * Create a string representation of the array of values. The is the result of serializing
+     * the value using the adaptive serialization method.
+     * @param values - given as an array of XdmValue
+     * @return a string representation of the value
+     */
+    public static String xdmValueArrayToString(XdmValue [] values){
+
+        if(values == null) {
+            return null;
+        }
+        return buildXdmValue(values).toString();
     }
 
 
