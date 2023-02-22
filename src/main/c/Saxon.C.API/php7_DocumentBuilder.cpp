@@ -263,7 +263,7 @@ PHP_METHOD(DocumentBuilder, parseXmlFromString)
             if(documentBuilder->exceptionOccurred()){
                 SaxonApiException * exception = documentBuilder->getException();
                 if(exception != nullptr) {
-                    zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                    zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
                 }
             }
         }
@@ -307,7 +307,7 @@ PHP_METHOD(DocumentBuilder, parseXmlFromFile)
             if(documentBuilder->exceptionOccurred()){
                 SaxonApiException * exception = documentBuilder->getException();
                 if(exception != nullptr) {
-                    zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                    zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
                 }
             }
         }
@@ -350,7 +350,7 @@ PHP_METHOD(DocumentBuilder, parseXmlFromUri){
             if(documentBuilder->exceptionOccurred()){
                 SaxonApiException * exception = documentBuilder->getException();
                 if(exception != nullptr) {
-                    zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                    zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
                 }
             }
         }
@@ -442,7 +442,7 @@ PHP_METHOD(DocumentBuilder, exceptionClear)
 
 
 zend_function_entry DocumentBuilder_methods[] = {
-    PHP_ME(DocumentBuilder,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(DocumentBuilder,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(DocumentBuilder, setLineNumbering, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(DocumentBuilder, isLineNumbering, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(DocumentBuilder, setSchemaValidator, nullptr, ZEND_ACC_PUBLIC)

@@ -187,8 +187,8 @@ struct xsltExecutable_object {
  * Signature: ([Ljava/lang/String;[Ljava/lang/String;)Ljava/lang/Object;
  */
 
-jobject JNICALL phpNativeCall
-  (JNIEnv *env, jobject object, jstring funcName, jobjectArray arguments, jobjectArray arrayTypes);
+/* jobject JNICALL phpNativeCall
+  (JNIEnv *env, jobject object, jstring funcName, jobjectArray arguments, jobjectArray arrayTypes); */
 	
 	PHP_MSHUTDOWN_FUNCTION(saxon);
 	PHP_MINFO_FUNCTION(saxon);

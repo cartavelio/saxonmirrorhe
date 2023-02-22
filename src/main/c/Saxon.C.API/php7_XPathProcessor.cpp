@@ -533,7 +533,7 @@ PHP_METHOD(XPathProcessor, exceptionClear)
 }
 
 zend_function_entry XPathProcessor_methods[] = {
-        PHP_ME(XPathProcessor,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+        PHP_ME(XPathProcessor,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(XPathProcessor,  setContextItem,      nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(XPathProcessor,  setContextFile,      nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(XPathProcessor,  effectiveBooleanValue,      nullptr, ZEND_ACC_PUBLIC)

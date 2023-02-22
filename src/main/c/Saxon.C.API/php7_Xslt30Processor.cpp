@@ -92,7 +92,7 @@ PHP_METHOD(Xslt30Processor, transformFileToFile)
         if(xsltProcessor->exceptionOccurred()) {
           SaxonApiException * exception = xsltProcessor->getException();
           if(exception != nullptr) {
-            zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+            zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
             delete exception;
             }
 
@@ -125,7 +125,7 @@ PHP_METHOD(Xslt30Processor, transformFileToString)
         } else if(xslt30Processor->exceptionOccurred()){
             SaxonApiException * exception = xslt30Processor->getException();
             if(exception != nullptr) {
-                zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);;
             }
         }
     }
@@ -163,7 +163,7 @@ PHP_METHOD(Xslt30Processor, transformFileToValue)
             if(obj->xslt30Processor->exceptionOccurred()){
                 SaxonApiException * exception = xslt30Processor->getException();
                 if(exception != nullptr) {
-                    zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                    zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);;
                 }
 
             }
@@ -258,7 +258,7 @@ PHP_METHOD(Xslt30Processor, compileFromFile)
         } else if(xslt30Processor->exceptionOccurred()){
             SaxonApiException * exception = xslt30Processor->getException();
             if(exception != nullptr) {
-                zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);;
             }
 
         }
@@ -289,7 +289,7 @@ PHP_METHOD(Xslt30Processor, compileFromAssociatedFile)
         } else if(xslt30Processor->exceptionOccurred()){
             SaxonApiException * exception = xslt30Processor->getException();
             if(exception != nullptr) {
-                zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);;
             }
         }
     }
@@ -328,7 +328,7 @@ PHP_METHOD(Xslt30Processor, compileFromString)
         } else if(xslt30Processor->exceptionOccurred()){
             SaxonApiException * exception = xslt30Processor->getException();
             if(exception != nullptr) {
-                zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);;
             }
         }
 
@@ -352,7 +352,7 @@ PHP_METHOD(Xslt30Processor, compileFromStringAndSave)
         if(xslt30Processor->exceptionOccurred()){
             SaxonApiException * exception = xslt30Processor->getException();
             if(exception != nullptr) {
-                zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);;
             }
         }
     }
@@ -376,7 +376,7 @@ PHP_METHOD(Xslt30Processor, compileFromFileAndSave)
         if(xslt30Processor->exceptionOccurred()){
             SaxonApiException * exception = xslt30Processor->getException();
             if(exception != nullptr) {
-                zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);;
             }
         }
     }
@@ -415,7 +415,7 @@ PHP_METHOD(Xslt30Processor, compileFromValue)
                 } else if(xslt30Processor->exceptionOccurred()){
                     SaxonApiException * exception = xslt30Processor->getException();
                     if(exception != nullptr) {
-                        zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                        zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);;
                     }
                 }
             }
@@ -539,7 +539,7 @@ PHP_METHOD(Xslt30Processor, exceptionClear)
 
 
 zend_function_entry Xslt30Processor_methods[] = {
-        PHP_ME(Xslt30Processor,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+        PHP_ME(Xslt30Processor,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  transformFileToFile, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  transformFileToString, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  transformFileToValue, nullptr, ZEND_ACC_PUBLIC)
