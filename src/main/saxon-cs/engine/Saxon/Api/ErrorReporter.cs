@@ -11,4 +11,4 @@ namespace Saxon.Api {
     public delegate void ErrorReporter(Error error);
 }
 
-// Copyright (c) 2021 Saxonica Limited
+// Copyright (c) 2021 - 2023 Saxonica Limited
