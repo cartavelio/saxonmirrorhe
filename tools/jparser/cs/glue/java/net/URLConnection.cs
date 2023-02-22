@@ -15,5 +15,9 @@ namespace java.net {
             return null;
         }
 
+        public string getContentType() {
+            throw new NotImplementedException();
+        }
+
     }
 }

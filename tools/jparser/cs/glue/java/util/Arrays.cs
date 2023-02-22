@@ -34,7 +34,7 @@ namespace java.util
             throw new NotImplementedException();
         }
 
-        public static java.util.List<T> asList<T>(T[] array) {
+        public static java.util.List<T> asList<T>(params T[] array) {
             return new ArrayList<T>(new SysCollGen.List<T>(array));
         }
 
@@ -51,6 +51,10 @@ namespace java.util
 
         public static string ToString<T>(T[] array) {
             return "Arrays.ToString not implemented";
+        }
+
+        public static int hashCode(byte[] array) {
+            throw new NotImplementedException();
         }
     }
 }

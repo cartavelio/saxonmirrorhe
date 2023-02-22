@@ -8,7 +8,7 @@
    default-mode="methods"
    version="3.0">
    
-   <xsl:mode name="methods" on-no-match="fail"/>
+   <xsl:mode name="methods" on-no-match="fail" saxon:trace="no" xmlns:saxon="http://saxon.sf.net/"/>
    
    <!-- This module is concerned with method calls, especially rules for method
       calls that are specific to particular classes. All the rules in this 
@@ -18,18 +18,23 @@
    -->
    
    <xsl:template match="*" priority="1000">
-      <!--<xsl:message>METHOD CALL {name/@identifier}() RESOLVED_TYPE={@RESOLVED_TYPE} is-exception={f:is-exception-type(@RESOLVED_TYPE)}</xsl:message>-->
+      <!--<xsl:message>METHOD CALL {name/@identifier}() RESOLVED_TYPE={@RESOLVED_TYPE} is-exception={f:isExceptionType(@RESOLVED_TYPE)}</xsl:message>-->
       <xsl:next-match/>
    </xsl:template>
    
+   <xsl:template name="scopeIfPresent">
+      <xsl:if test="exists(scope)">
+         <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+         <xsl:text>.</xsl:text>
+      </xsl:if>
+   </xsl:template>
+   
    <xsl:template match="iterable[@nodeType='MethodCallExpr']
-      [starts-with(@RESOLVED_TYPE, 'java.util.Map')]
-      [name/@identifier='entrySet']" priority="30" mode="methods">
-      <!--<xsl:message>Iterable.{name/@identifier}()</xsl:message>-->
-      <xsl:apply-templates select="scope/*" mode="xml-to-cs"/>
-      <!--     <xsl:text>(</xsl:text>
-      <xsl:apply-templates select="arguments"/>
-      <xsl:text>)</xsl:text>-->
+                                [starts-with(@RESOLVED_TYPE, 'java.util.Map')]
+                                [name/@identifier='entrySet']" 
+                                priority="30" mode="methods">
+      <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+      <xsl:text>/* .entrySet() */</xsl:text>
    </xsl:template>
    
    <xsl:template match="*[name/@identifier='getClass'][empty(arguments/argument)]" priority="100" mode="methods">
@@ -45,15 +50,8 @@
    </xsl:template>
    
    <xsl:template match="*[name/@identifier='hashCode'][empty(arguments/argument)]" priority="100" mode="methods">
-      <xsl:choose>
-         <xsl:when test="scope">
-            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-         </xsl:when>
-         <xsl:otherwise>
-            <xsl:text>this</xsl:text>
-         </xsl:otherwise>
-      </xsl:choose>     
-      <xsl:text>.GetHashCode()</xsl:text>
+      <xsl:call-template name="scopeIfPresent"/>
+      <xsl:text>GetHashCode()</xsl:text>
    </xsl:template>
    
    <!-- Special for System.err.println() -->
@@ -122,7 +120,7 @@
          </xsl:when>
          <xsl:when test="name/@identifier = 'equalsIgnoreCase'">
             <!-- Java str.getChars(begin, end, array, dest) => C# str.CopyTo(begin, array, dest, count) -->
-            <xsl:text>com.saxonica.glue.StringUtils.stringEqualsIgnoreCase(</xsl:text>
+            <xsl:text>Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
@@ -130,7 +128,7 @@
          </xsl:when>
          <xsl:when test="name/@identifier = 'getChars'">
             <!-- Java str.getChars(begin, end, array, dest) => C# str.CopyTo(begin, array, dest, count) -->
-            <xsl:text>com.saxonica.glue.StringUtils.stringToCharArray(</xsl:text>
+            <xsl:text>Saxon.Impl.Helpers.StringUtils.stringToCharArray(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
@@ -157,9 +155,20 @@
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
+         <xsl:when test="name/@identifier = 'replaceFirst'">
+            <!-- Java str.replaceFirst(pattern, replacement) ==> C# new Regex(pattern).Replace(str, replacement, 1) -->
+            <xsl:text>new System.Text.RegularExpressions.Regex(</xsl:text>
+            <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
+            <xsl:text>).Replace(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>, </xsl:text>
+            <xsl:apply-templates select="arguments/argument[2]" mode="xml-to-cs"/>
+            <xsl:text>, 1)</xsl:text>
+         </xsl:when> 
+         
          <xsl:when test="name/@identifier = 'replaceAll'">
             <!-- Java str.replaceAll(pattern, replacement) ==> C# Regex.Replace(str, pattern, replacement) -->
-            <xsl:text>System.Text.RegularExpressions.Regex(</xsl:text>
+            <xsl:text>System.Text.RegularExpressions.Regex.Replace(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
@@ -171,7 +180,13 @@
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
-         </xsl:when>   
+         </xsl:when>
+         <xsl:when test="name/@identifier = ('substring', 'subSequence')">
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>.Substring(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when> 
          <xsl:when test="map:contains($renamedMethods, name/@identifier)">
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>.</xsl:text>
@@ -191,12 +206,41 @@
       </xsl:choose>
    </xsl:template>
    
+  
    <!-- Convert method calls applied to built-in numeric types (java.lang.Integer, etc) -->
    <xsl:template match="*[@RESOLVED_TYPE='java.lang.Integer']" 
       priority="30" mode="methods">
       <xsl:choose>
-         <xsl:when test="name/@identifier = 'parseInt'">
+         <xsl:when test="name/@identifier = 'parseInt' and count(arguments/argument) = 1">
             <xsl:text>System.Int32.Parse(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'parseInt' 
+                           and count(arguments/argument) = 2
+                           and arguments/argument[2]/@value='16'">
+            <xsl:text>System.Int32.Parse(</xsl:text>
+            <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
+            <xsl:text>, System.Globalization.NumberStyles.HexNumber)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'signum'">
+            <xsl:text>System.Math.Sign(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'valueOf'">
+            <xsl:text>System.Int32.Parse(</xsl:text>
+            <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'compare'">
+            <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
+            <xsl:text>.CompareTo(</xsl:text>
+            <xsl:apply-templates select="arguments/argument[2]" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'toHexString'">
+            <xsl:text>Saxon.Impl.Helpers.Utils.intToHexString(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
@@ -211,20 +255,340 @@
       </xsl:choose>
    </xsl:template>
    
-   <!-- Convert method calls applied to built-in numeric types (java.lang.Integer, etc) -->
-   <xsl:template match="*[@RESOLVED_TYPE=('java.lang.Long', 'java.lang.Double')]" 
+   <!-- Convert method calls applied to built-in numeric types (java.lang.Long) -->
+   <xsl:template match="*[@RESOLVED_TYPE='java.lang.Long']" 
       priority="30" mode="methods">
       <xsl:choose>
-         <xsl:when test="name/@identifier = 'parseLong'">
+         <xsl:when test="name/@identifier = 'parseLong' and count(arguments/argument) = 1">
             <xsl:text>System.Int64.Parse(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
+         <xsl:when test="name/@identifier = 'parseLong' 
+                           and count(arguments/argument) = 2
+                           and arguments/argument[2]/@value='16'">
+            <xsl:text>System.Int64.Parse(</xsl:text>
+            <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
+            <xsl:text>, System.Globalization.NumberStyles.HexNumber)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'signum'">
+            <xsl:text>System.Math.Sign(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'compare'">
+            <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
+            <xsl:text>.CompareTo(</xsl:text>
+            <xsl:apply-templates select="arguments/argument[2]" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
          <xsl:when test="name/@identifier = 'toHexString'">
+            <xsl:text>Saxon.Impl.Helpers.Utils.longToHexString(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>.</xsl:text>
+            <xsl:apply-templates select="f:capitalize(name/@identifier)" mode="xml-to-cs"/>
             <xsl:text>(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-            <xsl:text>).ToString("X")</xsl:text>
+            <xsl:text>)</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+ 
+   
+   <!-- Convert method calls applied to built-in numeric types (java.lang.Integer, etc) -->
+   <xsl:template match="*[@RESOLVED_TYPE='java.lang.Double']" 
+      priority="30" mode="methods">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'parseDouble'">
+            <xsl:text>System.Double.Parse(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
          </xsl:when>
+         <xsl:when test="name/@identifier = 'signum'">
+            <xsl:text>System.Math.Sign(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'compare'">
+            <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
+            <xsl:text>.CompareTo(</xsl:text>
+            <xsl:apply-templates select="arguments/argument[2]" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'isNaN'">
+            <xsl:text>System.Double.IsNaN(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'isInfinite'">
+            <xsl:text>System.Double.IsInfinity(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'valueOf'">
+            <xsl:text>(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>.</xsl:text>
+            <xsl:apply-templates select="f:capitalize(name/@identifier)" mode="xml-to-cs"/>
+            <xsl:text>(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Convert method calls applied to java.util.EnumSet -->
+   <xsl:template match="*[starts-with(@RESOLVED_TYPE, 'java.util.EnumSet')]" 
+      priority="30" mode="methods">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'of'">
+            <xsl:variable name="expandedArgs" as="xs:string*">
+               <xsl:for-each select="arguments/argument">
+                  <xsl:variable name="expandedArg" as="xs:string">
+                     <xsl:value-of>
+                        <xsl:apply-templates select="." mode="xml-to-cs"/>
+                     </xsl:value-of>
+                  </xsl:variable>
+                  <xsl:sequence select="$expandedArg"/>
+               </xsl:for-each>
+            </xsl:variable>
+            <xsl:text>(</xsl:text>
+            <xsl:value-of select="$expandedArgs" separator="|"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'copyOf'">
+            <xsl:text>(</xsl:text>
+            <xsl:apply-templates select="arguments"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'noneOf'">
+            <xsl:text>{arguments/argument[1]/type/@RESOLVED_TYPE}.NONE</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'contains'">
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>.HasFlag(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'add'">
+            <!-- assume context is a statement like `propSet.add(property)` -->
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text> |= (</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'remove'">
+            <!-- assume context is a statement like `propSet.remove(property)` -->
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text> &amp;= ~(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'retainAll'">
+            <!-- assume context is a statement like `propSet.retainAll(property)` -->
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text> &amp;= (</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Convert method calls applied to net.sf.saxon.om.EnumSetTool -->
+   <xsl:template match="*[@RESOLVED_TYPE = 'net.sf.saxon.om.EnumSetTool']" 
+      priority="30" mode="methods">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'intersect'">
+            <xsl:variable name="expandedArgs" as="xs:string*">
+               <xsl:for-each select="arguments/argument">
+                  <xsl:variable name="expandedArg" as="xs:string">
+                     <xsl:value-of>
+                        <xsl:apply-templates select="." mode="xml-to-cs"/>
+                     </xsl:value-of>
+                  </xsl:variable>
+                  <xsl:sequence select="$expandedArg"/>
+               </xsl:for-each>
+            </xsl:variable>
+            <xsl:text>(</xsl:text>
+            <xsl:value-of select="$expandedArgs" separator="&amp;"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'union'">
+            <xsl:variable name="expandedArgs" as="xs:string*">
+               <xsl:for-each select="arguments/argument">
+                  <xsl:variable name="expandedArg" as="xs:string">
+                     <xsl:value-of>
+                        <xsl:apply-templates select="." mode="xml-to-cs"/>
+                     </xsl:value-of>
+                  </xsl:variable>
+                  <xsl:sequence select="$expandedArg"/>
+               </xsl:for-each>
+            </xsl:variable>
+            <xsl:text>(</xsl:text>
+            <xsl:value-of select="$expandedArgs" separator="|"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Convert method calls applied to java.util.Optional (which translates to System.Nullable) -->
+   <xsl:template match="*[starts-with(@RESOLVED_TYPE, 'java.util.Optional')]" 
+      priority="30" mode="methods">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'of'">
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'empty'">
+            <xsl:text>null</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'isPresent'">
+            <xsl:variable name="paramType" select="f:extract-type-arguments(@RESOLVED_TYPE)"/>
+            <xsl:message>paramType = {$paramType}</xsl:message>
+            <xsl:choose>
+               <xsl:when test="matches($paramType, 'System\.(Boolean|Int32|Int64)')">
+                  <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+                  <xsl:text>.HasValue</xsl:text>
+               </xsl:when>
+               <xsl:otherwise>
+                  <xsl:text>(</xsl:text>
+                  <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+                  <xsl:text> != null)</xsl:text>
+               </xsl:otherwise>
+            </xsl:choose>           
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'get'">
+            <xsl:variable name="paramType" select="f:extract-type-arguments(@RESOLVED_TYPE)"/>
+            <xsl:choose>
+               <xsl:when test="matches($paramType, 'System\.(Boolean|Int32|Int64)')">
+                  <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+                  <xsl:text>.Value</xsl:text>
+               </xsl:when>
+               <xsl:otherwise>
+                  <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+               </xsl:otherwise>
+            </xsl:choose>  
+         </xsl:when>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Convert method calls applied to java.net.URI (which translates to System.Uri) -->
+   <xsl:template match="*[@RESOLVED_TYPE='java.net.URI']" 
+      priority="30" mode="methods">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'create'">
+            <xsl:text>new System.Uri(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getAuthority'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>Authority</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getFragment'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>Fragment</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getHost'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>Host</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getPath'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>LocalPath</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getPort'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>Port</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getQuery'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>Query</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getRawAuthority'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>Authority</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getRawFragment'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>Fragment</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getRawPath'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>Path</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getRawQuery'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>Query</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getRawAuthority'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>Authority</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getRawSchemeSpecificPart'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>RawSchemeSpecificPart</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getRawUserInfo'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>UserInfo</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getScheme'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>Scheme</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getSchemeSpecificPart'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>SchemeSpecificPart</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getUserInfo'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>UserInfo</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'isAbsolute'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>IsAbsoluteUri</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'isOpaque'">
+            <xsl:text>Saxon.Impl.Helpers.UriUtils.IsOpaque(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'normalize'">
+            <xsl:text>Saxon.Impl.Helpers.UriUtils.Normalize(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'resolve'">
+            <xsl:text>new System.Uri(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>, </xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'toASCIIString'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>ToString()</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'toURL'">
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>ToURL()</xsl:text>
+         </xsl:when>
+
          <xsl:otherwise>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>.</xsl:text>
@@ -237,16 +601,17 @@
    </xsl:template>
    
    <!-- Convert method calls applied to Exception classes -->
-   <xsl:template match="*[exists(@RESOLVED_TYPE) and f:is-exception-type(@RESOLVED_TYPE)]" priority="20">
+   <xsl:template match="*[(exists(@RESOLVED_TYPE) and f:isExceptionType(@RESOLVED_TYPE)) 
+             or (exists(@DECLARING_TYPE) and f:isExceptionType(@DECLARING_TYPE))]" priority="20">
       <!--<xsl:message>Exception.{name/@identifier}()</xsl:message>-->
       <xsl:choose>
          <xsl:when test="name/@identifier = 'getMessage'">
-            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>.Message</xsl:text>
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>Message</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'getCause'">
-            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>.InnerException</xsl:text>
+            <xsl:call-template name="scopeIfPresent"/>
+            <xsl:text>InnerException</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'printStackTrace'">
             <xsl:text>Console.Write(</xsl:text>
@@ -256,8 +621,7 @@
             <xsl:text>.StackTrace)</xsl:text>
          </xsl:when>
          <xsl:otherwise>
-            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>.</xsl:text>
+            <xsl:call-template name="scopeIfPresent"/>
             <xsl:apply-templates select="name/@identifier" mode="xml-to-cs"/>
             <xsl:text>(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
@@ -319,8 +683,7 @@
             <xsl:text>System.Activator.CreateInstance({$classExpr})</xsl:text>
          </xsl:when>
          <xsl:otherwise>
-            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>.</xsl:text>
+            <xsl:call-template name="scopeIfPresent"/>
             <xsl:apply-templates select="f:capitalize(name/@identifier)" mode="xml-to-cs"/>
             <xsl:text>(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
@@ -337,9 +700,14 @@
             <xsl:text>(new System.Random()).NextDouble()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'round' and count(arguments/argument)=1">
-            <xsl:text>(long)(System.Math.Round(</xsl:text>
+            <xsl:text>(long)System.Math.Round(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-            <xsl:text>, System.MidpointRounding.ToPositiveInfinity)</xsl:text>
+            <xsl:text>, System.MidpointRounding.AwayFromZero)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'ceil' and count(arguments/argument)=1">
+            <xsl:text>(long)System.Math.Ceiling(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:otherwise>
             <xsl:text>System.Math.</xsl:text>
@@ -357,6 +725,11 @@
     <!--  <xsl:message>BigInteger.{name/@identifier}()</xsl:message>-->
       <xsl:variable name="renamedMethods" as="map(*)" select="map{}"/>
       <xsl:choose>
+         <xsl:when test="name/@identifier = 'abs'">
+            <xsl:text>System.Numerics.BigInteger.Abs(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
          <xsl:when test="name/@identifier = 'add'">
             <xsl:text>System.Numerics.BigInteger.Add(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
@@ -391,33 +764,33 @@
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'mod'">
-            <xsl:text>com.saxonica.glue.BigIntegerUtils.Mod(</xsl:text>
+            <xsl:text>Saxon.Impl.Helpers.BigIntegerUtils.Mod(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'remainder'">
-            <xsl:text>com.saxonica.glue.BigIntegerUtils.Remainder(</xsl:text>
+            <xsl:text>Saxon.Impl.Helpers.BigIntegerUtils.Remainder(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'divideAndRemainder'">
-            <xsl:text>com.saxonica.glue.BigIntegerUtils.DivideAndRemainder(</xsl:text>
+            <xsl:text>Saxon.Impl.Helpers.BigIntegerUtils.DivideAndRemainder(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'signum'">
-            <xsl:text>com.saxonica.glue.BigIntegerUtils.Signum(</xsl:text>
+            <xsl:text>Saxon.Impl.Helpers.BigIntegerUtils.Signum(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'valueOf'">
-            <xsl:text>com.saxonica.glue.BigIntegerUtils.ValueOf(</xsl:text>
+            <xsl:text>Saxon.Impl.Helpers.BigIntegerUtils.ValueOf(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
@@ -426,9 +799,31 @@
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
+         <xsl:when test="name/@identifier = 'longValueExact'">
+            <xsl:text>Saxon.Impl.Helpers.BigIntegerUtils.LongValueExact(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
          <xsl:when test="name/@identifier = 'intValue'">
             <xsl:text>((int)</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'intValueExact'">
+            <xsl:text>Saxon.Impl.Helpers.BigIntegerUtils.IntValueExact(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'doubleValue'">
+            <xsl:text>((double)</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'pow'">
+            <xsl:text>System.Numerics.BigInteger.Pow(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>, </xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'valueOf'">
@@ -448,73 +843,92 @@
       </xsl:choose>
    </xsl:template>
    
-   <!-- Convert method calls applied to java.math.BigDecimal (which becomes System.Numerics.BigDecimal) -->
+   <!-- Convert method calls applied to java.math.BigDecimal (which becomes Singulink.Numerics.BigDecimal) -->
    <xsl:template match="*[@RESOLVED_TYPE = 'java.math.BigDecimal']" 
       priority="20" mode="methods">
       <!--<xsl:message>BigDecimal.{name/@identifier}()</xsl:message>-->
       <xsl:variable name="renamedMethods" as="map(*)" select="map{}"/>
       <xsl:choose>
          <xsl:when test="name/@identifier = 'add'">
-            <xsl:text>System.Numerics.BigDecimal.Add(</xsl:text>
+            <xsl:text>(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>, </xsl:text>
+            <xsl:text>+</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'subtract'">
-            <xsl:text>System.Numerics.BigDecimal.Subtract(</xsl:text>
+            <xsl:text>(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>, </xsl:text>
+            <xsl:text>-</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'multiply'">
-            <xsl:text>System.Numerics.BigDecimal.Multiply(</xsl:text>
+            <xsl:text>(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>, </xsl:text>
+            <xsl:text>*</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'divide'">
-            <xsl:text>System.Numerics.BigDecimal.Divide(</xsl:text>
+            <xsl:text>Singulink.Numerics.BigDecimal.Divide(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>, </xsl:text>
-            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
+            <xsl:choose>
+               <xsl:when test="count(arguments/argument) = 1">, 18</xsl:when>
+               <xsl:when test="count(arguments/argument) = 2">
+                  <xsl:text>, </xsl:text>
+                  <xsl:apply-templates select="arguments/argument[2]" mode="xml-to-cs"/>
+               </xsl:when>
+               <xsl:when test="count(arguments/argument) = 3">
+                  <xsl:text>, </xsl:text>
+                  <xsl:apply-templates select="arguments/argument[2]" mode="xml-to-cs"/>
+                  <xsl:text>, </xsl:text>
+                  <xsl:apply-templates select="arguments/argument[3]" mode="xml-to-cs"/>
+               </xsl:when>
+               <xsl:otherwise>/* Unknown DIVIDE overload */</xsl:otherwise>
+            </xsl:choose>
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'negate'">
-            <xsl:text>System.Numerics.BigDecimal.Negate(</xsl:text>
+            <xsl:text>-</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'mod'">
-            <xsl:text>com.saxonica.glue.BigDecimalUtils.Mod(</xsl:text>
+            <xsl:text>Saxon.Impl.Helpers.BigDecimalUtils.Mod(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'remainder'">
-            <xsl:text>com.saxonica.glue.BigDecimalUtils.Remainder(</xsl:text>
+            <xsl:text>Saxon.Impl.Helpers.BigDecimalUtils.Remainder(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>, </xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'divideToIntegralValue'">
+            <xsl:text>Saxon.Impl.Helpers.BigDecimalUtils.Idiv(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'divideAndRemainder'">
-            <xsl:text>com.saxonica.glue.BigDecimalUtils.DivideAndRemainder(</xsl:text>
+            <xsl:text>Saxon.Impl.Helpers.BigDecimalUtils.DivideAndRemainder(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'signum'">
-            <xsl:text>com.saxonica.glue.BigDecimalUtils.Signum(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>)</xsl:text>
+            <xsl:text>.Sign</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'valueOf'">
-            <xsl:text>com.saxonica.glue.BigDecimalUtils.ValueOf(</xsl:text>
+            <xsl:text>Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
@@ -529,16 +943,12 @@
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'setScale'">
-            <xsl:text>com.saxonica.glue.BigDecimalUtils.SetScale(</xsl:text>
+            <!-- noop, values are normalized -->
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>, </xsl:text>
-            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-            <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'stripTrailingZeros'">
-            <xsl:text>com.saxonica.glue.BigDecimalUtils.StripTrailingZeros(</xsl:text>
+            <!-- noop, values are normalized -->
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'toBigInteger'">
             <xsl:text>((System.Numerics.BigInteger)</xsl:text>
@@ -546,12 +956,12 @@
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'doubleValue'">
-            <xsl:text>System.Double.Parse(</xsl:text>
+            <xsl:text>((double)</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>.ToString())</xsl:text>
+            <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'floatValue'">
-            <xsl:text>System.Float.Parse(</xsl:text>
+            <xsl:text>((float)</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
@@ -560,11 +970,7 @@
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
-         <xsl:when test="name/@identifier = 'valueOf'">
-            <xsl:text>new System.Numerics.BigDecimal(</xsl:text>
-            <xsl:apply-templates select="arguments"/>
-            <xsl:text>)</xsl:text>
-         </xsl:when>
+         
          
          <xsl:otherwise>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
@@ -595,10 +1001,10 @@
    </xsl:template>
    
 
-   <!-- Special-case EnumSet.noneOf(Class<E> x) and EnumSet.of(Class.ENUM)-->
+   <!--<!-\- Special-case EnumSet.noneOf(Class<E> x) and EnumSet.of(Class.ENUM), etc-\->
    <xsl:template match="*[starts-with(@RESOLVED_TYPE, 'java.util.EnumSet')]" 
       priority="20" mode="methods">
-    <!--  <xsl:message>EnumSet.{name/@identifier}()</xsl:message>-->
+    <!-\-  <xsl:message>EnumSet.{name/@identifier}()</xsl:message>-\->
       <xsl:choose>
          <xsl:when test="name/@identifier = 'noneOf' and arguments/argument[1]/@nodeType='ClassExpr'">
             <xsl:text>java.util.EnumSet&lt;{arguments/argument[1]/type/@RESOLVED_TYPE}>.noneOf()</xsl:text>
@@ -612,7 +1018,7 @@
             <xsl:next-match/>
          </xsl:otherwise>
       </xsl:choose>
-   </xsl:template>
+   </xsl:template>-->
    
    <!-- Special-case List.remove, which causes problems because Java has both
       List.remove(int) and List.remove(object), which conflict in C# -->
@@ -642,20 +1048,20 @@
       </xsl:variable>
       <xsl:choose>
          <xsl:when test="name/@identifier = 'emptyIterator' and $targetClass">
-            <xsl:text>java.util.Collections.emptyIterator&lt;{f:rename-generic-type($targetClass)}>()</xsl:text>
+            <xsl:text>java.util.Collections.emptyIterator&lt;{f:renameGenericType($targetClass)}>()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'emptyList' and $targetClass">
-            <xsl:text>java.util.Collections.emptyList&lt;{f:rename-generic-type($targetClass)}>()</xsl:text>
+            <xsl:text>java.util.Collections.emptyList&lt;{f:renameGenericType($targetClass)}>()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'emptySet' and $targetClass">
-            <xsl:text>java.util.Collections.emptySet&lt;{f:rename-generic-type($targetClass)}>()</xsl:text>
+            <xsl:text>java.util.Collections.emptySet&lt;{f:renameGenericType($targetClass)}>()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'emptyMap' and $targetClass">
             <xsl:variable name="targetClass2" select="string(ancestor::member/type/typeArguments/typeArgument[2]/@RESOLVED_TYPE)"/>
-            <xsl:text>java.util.Collections.emptyMap&lt;{f:rename-generic-type($targetClass), f:rename-generic-type($targetClass2)}>()</xsl:text>
+            <xsl:text>java.util.Collections.emptyMap&lt;{f:renameGenericType($targetClass), f:renameGenericType($targetClass2)}>()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'singleton' and $targetClass">
-            <xsl:text>java.util.Collections.singleton&lt;{f:rename-generic-type($targetClass)}>(</xsl:text>
+            <xsl:text>java.util.Collections.singleton&lt;{f:renameGenericType($targetClass)}>(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
@@ -679,7 +1085,7 @@
       </xsl:variable>
       <xsl:choose>
          <xsl:when test="name/@identifier = ('empty', 'of') and $targetClass">
-            <xsl:text>java.util.Optional&lt;{f:rename-generic-type($targetClass)}>.{name/@identifier}(</xsl:text>
+            <xsl:text>java.util.Optional&lt;{f:renameGenericType($targetClass)}>.{name/@identifier}(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
@@ -691,7 +1097,7 @@
    
    <xsl:template match="*" priority="10" mode="methods">
       <xsl:variable name="targetType" select="(@RESOLVED_TYPE,@DECLARING_TYPE)[1]" as="xs:string?"/>
-      <xsl:variable name="methodName" select="name/@identifier"/>
+      <xsl:variable name="methodName" select="string(name/@identifier)"/>
       <xsl:variable name="arity" select="count(arguments/argument)"/>
       <xsl:variable name="digestMethod" select="f:candidateMethods($targetType, $methodName, $arity)"/>
       <!--<xsl:message>Method call = {$methodName}#{$arity} digestMethods={count($digestMethod)} 
@@ -717,7 +1123,7 @@
          <xsl:text>.</xsl:text>         
       </xsl:if>
       <xsl:apply-templates select="typeArguments" mode="xml-to-cs"/>
-      <xsl:variable name="property" select="f:method-as-property(.)"/>
+      <xsl:variable name="property" select="f:methodAsProperty(.)"/>
         
       <xsl:choose>
          <xsl:when test="$property">{$property}</xsl:when>     

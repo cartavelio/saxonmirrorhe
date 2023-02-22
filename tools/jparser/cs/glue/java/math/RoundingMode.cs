@@ -16,7 +16,7 @@ namespace java.math {
 
             HALF_EVEN,
 
-            UNNECESSARY;
+            UNNECESSARY
         } 
   
 }

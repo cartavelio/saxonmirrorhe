@@ -31,18 +31,18 @@
 
    <xsl:function name="f:full-method-name" as="xs:string">
       <xsl:param name="method" as="element(method)"/>
-      <xsl:text>{$method/ancestor::module[1]/@package}.{string-join($method/ancestor::class/@name, '.')}#{$method/@name}!{$method/@sig}</xsl:text>
+      <xsl:text>{$method/ancestor::module[1]/@package}.{string-join($method/ancestor::*[self::class|self::interface]/@name, '.')}#{$method/@name}!{$method/@sig}</xsl:text>
    </xsl:function>
 
    <xsl:function name="f:process-methods" as="map(*)*">
       <xsl:param name="root" as="document-node()"/>
       <xsl:for-each select="$root//method[not(@static='1')]">
          <xsl:variable name="this-method-name" select="f:full-method-name(.)"/>
-         <!--<xsl:if test="contains($this-method-name, 'MathFunctionSet') or @name='compute'">
-            <xsl:message>Full method name: {$this-method-name}</xsl:message>
+         <!--<xsl:if test="@name='itemAt'">
+            <xsl:message>*** PROCESS-METHODS - Full method name: {$this-method-name}</xsl:message>
          </xsl:if>-->
          <xsl:variable name="overridden-methods" select="f:overridden-methods(., .., false())"/>
-         <!--<xsl:if test="contains($this-method-name, 'MathFunctionSet') or @name='compute'">
+         <!--<xsl:if test="@name='itemAt'">
             <xsl:message>Overridden method name: {$overridden-methods}</xsl:message>
          </xsl:if>-->
          <xsl:for-each select="$overridden-methods">
@@ -101,6 +101,9 @@
       <xsl:param name="method" as="element(method)"/>
       <xsl:param name="class" as="element(*)"/>
       <xsl:param name="include-abstract" as="xs:boolean"/>
+      <!--<xsl:if test="$method/@name = 'itemAt'">
+         <xsl:message>Looking for overrides of itemAt in class {$class/@name}</xsl:message>
+      </xsl:if>-->
       <xsl:for-each select="($class/extends | $class/implements[$include-abstract])[string(@name)]">
          <xsl:variable name="superclass" select="key('classKey', @name)" as="element(*)?"/>
          <xsl:choose>
@@ -110,8 +113,8 @@
                </xsl:if>-->
             </xsl:when>
             <xsl:otherwise>
-               <!--<xsl:if test="$method/@name = 'compute'">
-                  <xsl:message>Examining class {@name} (with {count($superclass/method)} methods)</xsl:message>
+               <!--<xsl:if test="$method/@name = 'itemAt'">
+                  <xsl:message>Examining superclass {@name} (with {count($superclass/method)} methods)</xsl:message>
                </xsl:if>-->
                <xsl:variable name="supermethod"
                   select="$superclass/method[@name = $method/@name and string(@sig) = string($method/@sig)]"/>

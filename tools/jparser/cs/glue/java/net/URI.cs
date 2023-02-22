@@ -17,6 +17,14 @@ namespace java.net {
             uri = u;
         }
 
+        public URL toURL() {
+            throw new NotImplementedException();
+        }
+
+        public static URI create(string s) {
+            return new URI(s);
+        }
+
         public bool isAbsolute() {
             return uri.IsAbsoluteUri;
         }
@@ -32,6 +40,14 @@ namespace java.net {
             return uri.OriginalString; // TODO - probably not correct
         }
         public string getScheme() {
+            throw new NotImplementedException();
+        }
+
+        public string getPath() {
+            throw new NotImplementedException();
+        }
+
+        public string getRawQuery() {
             throw new NotImplementedException();
         }
 

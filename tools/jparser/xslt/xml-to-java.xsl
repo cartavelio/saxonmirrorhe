@@ -17,9 +17,9 @@
       <xsl:text>*** {name()}/{@nodeType} ***</xsl:text>
    </xsl:template>-->
    
-   <xsl:function name="f:qualified-name" as="xs:string">
+   <xsl:function name="f:qualifiedName" as="xs:string">
       <xsl:param name="in" as="element(*)"/>
-      <xsl:sequence select="(if ($in/qualifier) then f:qualified-name($in/qualifier) || '.' else '') || $in/@identifier"/>
+      <xsl:sequence select="(if ($in/qualifier) then f:qualifiedName($in/qualifier) || '.' else '') || $in/@identifier"/>
    </xsl:function>
    
    <xsl:template name="indent">
@@ -34,11 +34,11 @@
    </xsl:template>
    
    <xsl:template match="packageDeclaration">
-      <xsl:text>package {f:qualified-name(name)};{$NL}</xsl:text>
+      <xsl:text>package {f:qualifiedName(name)};{$NL}</xsl:text>
    </xsl:template>
    
    <xsl:template match="import">
-      <xsl:text>import {if (@isStatic='true') then 'static ' else ''}{f:qualified-name(name)}{if (@isAsterisk='true') then '.*' else ''};{$NL}</xsl:text>
+      <xsl:text>import {if (@isStatic='true') then 'static ' else ''}{f:qualifiedName(name)}{if (@isAsterisk='true') then '.*' else ''};{$NL}</xsl:text>
    </xsl:template>
    
    <xsl:template match="name | *[@nodeType='Name']">
@@ -46,11 +46,11 @@
          <xsl:apply-templates select="../scope"/>
          <xsl:text>.</xsl:text>
       </xsl:if>
-      <xsl:value-of select="f:qualified-name(.)"/>
+      <xsl:value-of select="f:qualifiedName(.)"/>
    </xsl:template>
    
    <xsl:template match="name | *[@nodeType='Name']" mode="sans-scope">
-      <xsl:value-of select="f:qualified-name(.)"/>
+      <xsl:value-of select="f:qualifiedName(.)"/>
    </xsl:template>
    
    <xsl:template match="scope">
@@ -798,7 +798,7 @@
    </xsl:template>
  
    <xsl:template match="*[@nodeType='ClassExpr']">
-      <!--<xsl:text>{if (type/name) then f:qualified-name(type/name) else "**unknown class name**"}.class</xsl:text>-->
+      <!--<xsl:text>{if (type/name) then f:qualifiedName(type/name) else "**unknown class name**"}.class</xsl:text>-->
       <xsl:apply-templates select="type"/>
       <xsl:text>.class</xsl:text>
       <!--<xsl:apply-templates select="value"/>-->

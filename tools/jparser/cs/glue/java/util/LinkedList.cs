@@ -11,7 +11,7 @@ namespace java.util {
             this._list = new System.Collections.Generic.LinkedList<E>(alloc);
         }
         
-        public LinkedList(LinkedList<E> existing) {
+        public LinkedList(Collection<E> existing) {
             this._list = new System.Collections.Generic.LinkedList<E>(existing.size());
             addAll(existing);
         }
@@ -35,7 +35,7 @@ namespace java.util {
             _list.Insert(index, entry);
         }
 
-        public void addAll(List<E> entry)
+        public void addAll(Collection<E> entry)
         {
             throw new Exception("not implemented");
         }

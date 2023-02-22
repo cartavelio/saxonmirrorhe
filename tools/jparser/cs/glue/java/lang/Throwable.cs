@@ -12,6 +12,10 @@ namespace java.lang {
         public Throwable(string str, SysEx cause) {
             _inner = new SysEx(str, cause);
         }
+        
+        public Throwable(SysEx cause) {
+            _inner = new SysEx(cause.Message, cause);
+        }
 
         public string getMessage() {
             return _inner.Message;
