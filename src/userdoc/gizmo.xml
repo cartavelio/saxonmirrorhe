@@ -55,6 +55,19 @@
       <ul/>
    </nav>
   
+  <section id="call" title="The call command">
+    <h1>The call command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>call {filename}</kbd>
+    
+    <p>Executes the script contained in the specified file.</p>
+    <p>The script shares the context with the calling script. It has access to the variables and namespaces
+      declared in the calling script, and any variables and namespaces that it declared are available to the
+      caller on return.</p>
+    
+  </section>
+  
   <section id="copy" title="The copy command">
     <h1>The copy command</h1>
     
@@ -74,19 +87,6 @@
     <kbd>copy //img</kbd> 
     <p>returns a document containing as its children copies of all the <code>img</code> elements in
       the source.</p>
-    
-  </section>
-  
-  <section id="call" title="The call command">
-    <h1>The call command</h1>
-    
-    <p><i>Syntax:</i></p>
-    <kbd>call {filename}</kbd>
-    
-    <p>Executes the script contained in the specified file.</p>
-    <p>The script shares the context with the calling script. It has access to the variables and namespaces
-    declared in the calling script, and any variables and namespaces that it declared are available to the
-    caller on return.</p>
     
   </section>
    

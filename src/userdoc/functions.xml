@@ -8166,19 +8166,19 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.2. Reimplemented in SaxonJ 12.</p>
+        <p>Available since Saxon 9.2. Reimplemented in Saxon 12.</p>
       </status>
       <saxon-edition>PE/EE</saxon-edition>
       <details>
         <div>
           <p>This function takes a single argument, a string containing the source text of an HTML
             document. It returns the document node (root node) that results from parsing this text
-            using the TagSoup parser. </p>
+            using the <code>validator.nu</code> parser on Java and the <code>AngleSharp</code> parser on .NET.</p>
 
           <p class="javaonly">On the Java platform, the <code>validator.nu</code> jar file must be on the classpath. It may be
             downloaded from Maven.</p>
 
-          <p class="csonly">On SaxonCS platform, the HTML is parsed using <code>AngleSharp</code>, which
+          <p class="csonly">For SaxonCS, the HTML is parsed using <code>AngleSharp</code>, which
           is registered as a dependency and will normally be installed automatically by <b>nuget</b>.</p>
 
           <p>This function is useful where an HTML document is embedded inside another using CDATA.

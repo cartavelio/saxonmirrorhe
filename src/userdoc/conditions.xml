@@ -150,7 +150,7 @@
         downloaded automatically as part of the installation process; in addition, they are bundled into the
         platform-specific executables issued with the product. The relevant libraries are:</p>
         <ul>
-          <li>HtmlAgilityPack</li>
+          <li>AngleSharp</li>
           <li>ICU4N</li>
           <li>ICU4N.Collation</li>
           <li>ICU4N.CurrencyData</li>
