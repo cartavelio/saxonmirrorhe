@@ -5,19 +5,16 @@
   version="3.0">
   <doc:doc>
     <p>This simple stylesheet processes embedded xinclude directives in the documentation. Its
-      principal input is the catalog.xml file within
-      userdoc/saxon9/src.<!-- For any
+      principal input is the catalog.xml file within src/userdoc.
+      <!-- For any
         <code>cat:section</code> entry that has <code>@include='yes'</code>, it is assumed that the
       master file, which may contain inclusions, is contained at <code>{@ref}/{@ref}.xml</code> - it
       will be include-processed to generate <code>{@ref}.xml</code> as a sibling of the catalog
       file. --></p>
     <p>It requires execution with the -xi:on option to handle inclusions.</p>
     <p>Modified 2018-09-21: to also remove comment nodes.</p>
+    <p>Modified 2022-01-25: to also expand feature links.</p>
   </doc:doc>
-
-  <!--<xsl:param name="output" as="xs:string?"
-    doc:doc="Possible output URI for use in Ant, which will be resolved relative to base-URI"
-    >../viewer_app/doc/catalog.xml</xsl:param>-->
   
   <xsl:param name="output-uri" select="''"/>  
 
@@ -64,6 +61,14 @@
 
   <xsl:template match="xi:include" xmlns:xi="http://www.w3.org/2001/XInclude">
     <xsl:message>WHAT THE HECK? <xsl:value-of select="@href"/></xsl:message>
+  </xsl:template>
+  
+  <xsl:template match="*:a[@class='feature']">
+    <xsl:copy>
+      <xsl:attribute name="class" select="'bodylink'"/>
+      <xsl:attribute name="href" select="concat('/configuration/config-features@',@href)"/>
+      <xsl:value-of select="@href"/>
+    </xsl:copy>   
   </xsl:template>
   
   <xsl:template match="comment()"/>
