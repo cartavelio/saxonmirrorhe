@@ -362,29 +362,13 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     }
 
 
-    protected Entry register(String name,
-                             int arity,
-                             Class<? extends SystemFunction> implementationClass,
-                             ItemType itemType,
-                             int cardinality,
-                             int properties) {
-        return register(name, arity, () -> {
-            try {
-                return implementationClass.newInstance();
-            } catch (Exception err) {
-                throw new RuntimeException(err);
-            }
-        }, itemType, cardinality, properties);
-
-    }
-
 
     /**
      * Register a system function in the table of function details.
      *
      * @param name                the function name
      * @param arity               the function arity (-1 is treated specially)
-     * @param implementationClass the class used to implement the function
+     * @param functionFactory     a function to instantiate the implementation of the function
      * @param itemType            the item type of the result of the function
      * @param cardinality         the cardinality of the result of the function
      * @param properties          bitwise properties of the function

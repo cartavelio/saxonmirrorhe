@@ -31,23 +31,23 @@ public class UseWhen30FunctionSet extends BuiltInFunctionSet {
 
         addXPathFunctions();
 
-        register("available-system-properties", 0, AvailableSystemProperties.class, BuiltInAtomicType.QNAME,
+        register("available-system-properties", 0, AvailableSystemProperties::new, BuiltInAtomicType.QNAME,
                  STAR, LATE);
 
-        register("element-available", 1, ElementAvailable.class, BuiltInAtomicType.BOOLEAN, ONE, NS)
+        register("element-available", 1, ElementAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
-        register("function-available", 1, FunctionAvailable.class, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
+        register("function-available", 1, FunctionAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
-        register("function-available", 2, FunctionAvailable.class, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
+        register("function-available", 2, FunctionAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("system-property", 1, SystemProperty.class, BuiltInAtomicType.STRING, ONE, NS | LATE)
+        register("system-property", 1, SystemProperty::new, BuiltInAtomicType.STRING, ONE, NS | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
-        register("type-available", 1, TypeAvailable.class, BuiltInAtomicType.BOOLEAN, ONE, NS)
+        register("type-available", 1, TypeAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
 
