@@ -69,7 +69,7 @@
          the query optimizer appropriate to the loaded Saxon edition.</p>
       
       <p>Most applications will manipulate the configuration via the public API in the top-level processing class (for example 
-      the s9api or Saxon.Api <code>Processor</code> class; but applications wanting to take full advantage of Saxon's capabilities
+      the s9api or Saxon.Api <code>Processor</code> class); but applications wanting to take full advantage of Saxon's capabilities
          will often find themselves exposing the lower-level <code>Configuration</code> object.</p>
       
       <p class="javaonly">In the s9api interface on Java, configuration options can be set using a method call such as
@@ -85,7 +85,7 @@
       <p>It's also possible to set the same properties by using lower-level methods on the <code>Configuration</code>
          object itself. The properties all have names in the form of URIs (for example <code>"http://saxon.sf.net/feature/linenumbering"</code>),
       and these names are useful when a property has to be set via an API that expects property names as strings (for example the
-      JAXP <code>TransformerFactory</code>. When boolean values need to be supplied as strings, Saxon accepts the values
+      JAXP <code>TransformerFactory</code>). When boolean values need to be supplied as strings, Saxon accepts the values
       <code>"true"</code>, <code>"on"</code>, <code>"yes"</code>, and <code>"1"</code> to represent true, and
          <code>"false"</code>, <code>"off"</code>, <code>"no"</code>, and <code>"0"</code> to represent false.</p>
 
@@ -201,23 +201,24 @@
                href="net.sf.saxon.query.StaticQueryContext">StaticQueryContext</a> in the case of XQuery.</p>
         
         <aside>When s9api was introduced, the name stood for "Saxon 9 Application Programming Interface".
-          It's a nice snappy name, so we've retained it unchanged for Saxon 10.</aside>
+          It's a nice snappy name, so we've retained it unchanged from Saxon 10.</aside>
          
       </section>
 
       <section id="config-dotnet" title="Configuration using Saxon.Api (C#)" class="csonly">
          <h1>Configuration using Saxon.Api (C#)</h1>
 
-         <p>In the Saxon.Api interface in SaxonCS, the root API object is the <a class="cslink" href="Saxon.Api.Processor">Saxon.Api.Processor</a> object.
-            This is a wrapper around a <code>Saxon.Hej.Configuration</code> object, which should not normally be used directly (though it's exposed
+         <p>In the Saxon.Api interface in SaxonCS, the root API object is the <a class="cslink" href="Saxon.Api.Processor">Saxon.Api.Processor</a>.
+            This is a wrapper around a <code>Saxon.Hej.Configuration</code> (<code
+               java="net.sf.saxon.s9api.Configuration">net.sf.saxon.s9api.Configuration</code>) object, which should not normally be used directly (though it's exposed
             as public, just in case you need to). There are two ways to set configuration properties:</p>
             
             <ul>
-               <li><p><code>processor.SetProperty(Saxon.Api.Feature&lt;bool>.TIMING, true)</code></p></li>
-               <li><p><code>processor.SetProperty("http://saxon.sf.net/feature/timing", "true");</code></p></li>
+               <li><code>processor.SetProperty(Saxon.Api.Feature&lt;bool>.TIMING, true)</code></li>
+               <li><code>processor.SetProperty("http://saxon.sf.net/feature/timing", "true");</code></li>
             </ul>
             
-            <p>There are also two <code>GetProperty()</code> in the same vein.</p>
+            <p>There are also two corresponding <code>GetProperty()</code> methods.</p>
             
             <p>The first form is recommended for type-safety (it is also faster, though this is rarely going to make a difference). The second
                form may be needed when the property name is not known statically, for example if it is being read from a configuration file
@@ -250,9 +251,9 @@
          
          <p>For full details, including lists of the available command line options for each of
             these interfaces, see the following:</p>
-         <ul><li><a class="bodylink" href="/using-xsl/commandline">Running XSLT from the Command Line</a></li>
-            <li><a class="bodylink" href="/using-xquery/commandline">Running XQuery from the Command Line</a></li>
-            <li><a class="bodylink" href="/schema-processing/commandline">Running Validation from the Command Line</a></li>
+         <ul><li><a class="bodylink" href="/using-xsl/commandline">XSLT from the Command Line</a></li>
+            <li><a class="bodylink" href="/using-xquery/commandline">XQuery from the Command Line</a></li>
+            <li><a class="bodylink" href="/schema-processing/commandline">Validation from the Command Line</a></li>
          </ul>
 
          <p>For more specialized options, there is also a fallback mechanism. Each configuration property has a URI, which is always of the form

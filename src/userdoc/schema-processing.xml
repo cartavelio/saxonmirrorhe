@@ -3,7 +3,7 @@
    <h1>Using XML Schema (XSD)</h1>
 
 
-   <aside>Schema processing is available (a) with SaxonCS, and (b) with the Enterprise Edition of the Java product, Saxon-EE. </aside>
+   <aside>Schema processing is available only with the Enterprise Edition of the product, Saxon-EE. </aside>
 
    <p>Saxon can be used as a free-standing schema processor in its own right, either from the
       command line or from a Java or C# application. In addition, Saxon can be used as a schema-aware XSLT
@@ -22,7 +22,7 @@
 
    
    <section id="commandline" title="Validation from the Command Line">
-      <h1>Running Validation from the Command Line</h1>
+      <h1>Validation from the Command Line</h1>
 
 
       
@@ -455,7 +455,7 @@
    </section>
   
    <section id="validation-api" title="Validation from Java" class="javaonly">
-         <h1>Running Validation from Java</h1>
+         <h1>Validation from Java</h1>
 
 
       <p>Schema validation can be controlled either using the standard JAXP Java interface, or using
@@ -702,7 +702,7 @@
    </section>
    
    <section id="schema-dotnet" title="Validation from C#" class="csonly">
-         <h1>Running Validation from C#</h1>
+         <h1>Validation from C#</h1>
          
          
          <p>The Saxon.Api interface allows schemas to be loaded into a <a class="cslink"
@@ -764,7 +764,7 @@
    
    
    <section id="validation-from-ant" title="Validation from Ant" class="javaonly">
-      <h1>Running Validation from Ant</h1>
+      <h1>Validation from Ant</h1>
 
 
       <p>It is possible to use the Saxon schema validator using the standard Ant tasks
@@ -869,17 +869,18 @@
       <ul>
          <li><p>Using
             the <a class="bodylink code" href="/xsl-elements/import-schema">xsl:import-schema</a>
-            declaration in an XSLT stylesheet;</p></li>
-         <li><p>Using the <code>import schema</code> declaration in an XQuery prolog;</p></li>
+            declaration in an XSLT stylesheet.</p></li>
+         <li><p>Using the <code>import schema</code> declaration in an XQuery prolog.</p></li>
          <li><p>Using <code>xsi:schemaLocation</code> (or
-            <code>xsi:noNamespaceSchemaLocation</code>) attributes within the source documents;</p></li>
+            <code>xsi:noNamespaceSchemaLocation</code>) attributes within the source documents.</p></li>
          <li><p>Using the <code>-xsd</code> option on the command line.</p></li>
-         <li><p>Loading a schema into the configuration using the 
-            <a class="bodylink" href="/schema-processing/validation-api">Java API</a> 
-            or the <a class="bodylink" href="/schema-processing/schema-dotnet">C# API</a>.</p></li>
+         <li><p>Loading a schema into the configuration using the Java API (see
+            <a class="bodylink" href="/schema-processing/validation-api">Validation from Java</a>)  
+            or the C# API (see <a class="bodylink" href="/schema-processing/schema-dotnet">Validation from
+               C#</a>).</p></li>
       </ul>
      
-      <p>Although you can load multiple schema documents into a single <code>Configuration</code>, they
+      <p>Although you can load multiple schema documents into a single <code java="net.sf.saxon.Configuration">Configuration</code>, they
       are assembled into a single schema (that is, a collection of schema definitions) which must be internally 
       consistent. For example, you cannot have
       two different definitions of the same type. This creates limitations: if you want to write a transformation
@@ -901,7 +902,7 @@
          temporary trees), using the <code>validation</code> and <code>type</code>
          attributes. Similarly, XQuery allows you to validate constructed elements using the
          <code>validate{}</code> instruction. Validation of constructed nodes
-         is done on-the-fly as they are created, so if the stylesheet attempts to produce invalid output, you will
+         is done on-the-fly as they are created, so if the query or stylesheet attempts to produce invalid output, you will
          usually get an error message that identifies the offending instruction in the query or stylesheet.</p>
       
 
@@ -909,8 +910,10 @@
       <h1>Schema-Aware XSLT and XQuery from the Command Line</h1>
 
 
-      <p>To run a schema-aware transformation from the command line, use appropriate options on the 
-         <code>Transform</code> or <code>Query</code> command, for example
+      <p>To run a schema-aware transformation or query from the command line, use appropriate options on the 
+         <code>Transform</code> or <code>Query</code> command
+         (see <a class="bodylink" href="/using-xsl/commandline">XSLT from the Command Line</a> and <a class="bodylink"
+            href="/using-xquery/commandline">XQuery from the Command Line</a> respectively), for example
             <code>-val:strict</code> to request strict validation of the source document, or
             <code>-val:lax</code> for lax validation. This applies not only to the principal source
          document loaded from the command line, but to all documents loaded via the <a
@@ -1004,11 +1007,11 @@
       
       
       <p>Saxon provides the ability to export or import a compiled schema. The export format is an
-         XML file, known as an SCM file (for schema component model). Using SCM files has three benefits:</p>
+         XML file, known as an <strong>SCM file</strong> (for schema component model). Using SCM files has three benefits:</p>
       
       <ul>
          <li><p>An SCM file is faster to load than the corresponding source schema documents.</p></li>
-         <li><p>An SCM file is much easier for applications to process that the corresponding source documents:
+         <li><p>An SCM file is much easier for applications to process than the corresponding source documents:
             whether written in Java, XSLT, or XQuery, applications that need access to schema information can find
             it much more readily in an SCM document than in the source schema.</p></li>
          <li><p>An SCM file may contain an embedded license key, enabling it to be used for validating source documents on
@@ -1016,7 +1019,7 @@
       </ul>
       
       <p>The simplest way to create an SCM file is from the command line, as
-         described in <a class="bodylink" href="../commandline">Running Validation from the Command
+         described in <a class="bodylink" href="../commandline">Validation from the Command
             Line</a>: use the <code>-export</code> option. 
          Alternatively, an SCM file can be generated programmatically:</p>
       
@@ -1026,7 +1029,7 @@
          <li class="csonly">From C#, use the <code>ExportComponents()</code> method of the <a class="cslink"
             href="Saxon.Api.SchemaManager">Saxon.Api.SchemaManager</a> class.</li>
       </ul>
-      <p>The export is unselective: it will output an SCM containing all the schema
+      <p>The export is unselective: it will output an SCM file containing all the schema
          components that have been loaded into the <code>Configuration</code>, other than built-in
          schema components.</p>
       
@@ -1039,9 +1042,10 @@
             href="net.sf.saxon.s9api.SchemaManager">net.sf.saxon.s9api.SchemaManager</a>.</p></li>
          <li class="csonly"><p>The <code>Compile()</code> method of <a class="cslink"
             href="Saxon.Api.SchemaManager">Saxon.Api.SchemaManager</a>.</p></li>
-         <li class="javaonly"><p>The JAXP <code>SchemaFactory.newSchema()</code> method</p></li>
+         <li class="javaonly"><p>The JAXP <code>SchemaFactory.newSchema()</code> method.</p></li>
          <li><p>The <code>xsi:schemaLocation</code> and <code>xsi:noNamespaceSchemaLocation</code> attributes in
-            an instance document (the SCM file contains components for multiple namespaces, and it should only be loaded once)</p></li>
+            an instance document (the SCM file contains components for multiple namespaces, and it should only
+            be loaded once).</p></li>
          <li><p>An <code>xsl:import-schema</code> declaration in XSLT, or an <code>import schema</code> declaration in XQuery.</p></li>
       </ul>
       
@@ -1059,7 +1063,7 @@
          change their effective meaning by adding new members to substitution groups, or deriving new types
          by extension. The components within an SCM file may be referenced from other components (loaded from a normal
          XSD document): for example types within an SCM file may be referred to from new element declarations.
-         However, and SCM file will always be self-contained: it cannot contain external references to components
+         However, an SCM file will always be self-contained: it cannot contain external references to components
          loaded from elsewhere. It is possible to load two SCM files only if their components are non-overlapping, and 
          neither refers to components in the other.</p>
       
@@ -1104,7 +1108,7 @@
       </ul>
       
       <p>The following sections describe some of the new features in XSD 1.1, with a particular focus on how they
-      are implemented in Saxon.</p>
+      are implemented in Saxon:</p>
       <nav>
          <ul/>
       </nav>
@@ -1905,7 +1909,7 @@
   </xs:appinfo>
 </xs:annotation>]]></samp>
          
-         <p>This declaration allows the variable <code>$currency</code> to appear in any XPath
+         <p>This declaration allows the variable <code>$accepted-currencies</code> to appear in any XPath
             expression appearing in the remainder of the same schema document. Typically it will be
             used in an assertion or in an expression controlling conditional type assignment, for
             example:</p>

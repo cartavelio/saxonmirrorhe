@@ -130,7 +130,7 @@
             is available via API and configuration options. For more information see <a class="bodylink" href="/configuration/config-features">Configuration Features</a>.</p>
         
         <p>When the <code>-qs</code> option is used on the command line, the static base URI of the query is the current working
-            directory. (See <a href="/using-xquery/commandline" class="bodylink">Running XQuery from the Command Line</a>.)</p>
+            directory. (See <a href="/using-xquery/commandline" class="bodylink">XQuery from the Command Line</a>.)</p>
         
         <p>Type checking on maps has been improved. In particular, the static type of the expression <code>map:get(M, K)</code> (or equivalent
             constructs such as <code>M(K)</code> or <code>M?K</code> is now deduced from the type of the map if known. The checking is even
