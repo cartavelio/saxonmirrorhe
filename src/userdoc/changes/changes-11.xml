@@ -148,9 +148,11 @@
                 interface <code>XmlResolver</code> that allows the actual resolution logic to be written as a lambda expression,
                 for example <code>XmlResolver resolver = new SimpleUriResolver(uri => new WebClient().OpenRead(uri))</code>.</p>
             
-            <p>The <code cs="Saxon.Api.XsltCompiler">XsltCompiler</code> class (and others????) no longer has an
-                <code>ErrorList</code> property.
-                Replace <code>compiler.ErrorList = errorList;</code> by <code>compiler.ErrorReporter = errorList.Add;</code>.</p>
+            <p>The classes <code cs="Saxon.Api.SchemaValidator">SchemaValidator</code>, <code
+                cs="Saxon.Api.XQueryCompiler">XQueryCompiler</code>, and <code cs="Saxon.Api.XsltCompiler">XsltCompiler</code> no
+                longer have an <code>ErrorList</code> property. To accumulate error details in a list, change the declaration of
+                the error list to <code>IList&lt;Saxon.Api.Error&gt;</code>, and replace <code>compiler.ErrorList =
+                    errorList;</code> by <code>compiler.ErrorReporter = errorList.Add;</code>.</p>
             
             <p>The class <code>XmlProcessingError</code> is renamed as <code cs="Saxon.Api.Error">Error</code> to avoid conflicts
                 with the s9api class <code java="net.sf.saxon.s9api.XmlProcessingError">XmlProcessingError</code>.</p>
