@@ -308,9 +308,11 @@ public class Chain implements GroundedValue {
                     Item current = ui.next();
                     if (current != null) {
                         return current;
+                    } else if (queue.isEmpty()) {
+                        break;
                     } else {
-                        queue.removeFirst();
                         ui = queue.getFirst();
+                        queue.removeFirst();
                     }
                 }
             }
