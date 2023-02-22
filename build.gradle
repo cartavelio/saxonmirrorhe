@@ -1,3 +1,9 @@
+buildscript {
+  repositories {
+    mavenLocal()
+  }
+}
+
 plugins {
   id "java"
   id "maven-publish"
