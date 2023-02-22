@@ -447,8 +447,8 @@ public class Compilation {
             reporter.report(err);
         }
         errorCount++;
-        if (err.getFatalErrorMessage() != null) {
-            throw new XmlProcessingAbort(err.getFatalErrorMessage());
+        if (err.getTerminationMessage() != null) {
+            throw new XmlProcessingAbort(err.getTerminationMessage());
         }
     }
 

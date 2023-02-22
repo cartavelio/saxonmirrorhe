@@ -174,7 +174,16 @@ public class StringToDouble extends StringConverter {
             if (containsDisallowedChars) {
                 throw new NumberFormatException("invalid floating point value: " + s);
             }
-            return Double.parseDouble(n);
+            try {
+                return Double.parseDouble(n);
+            } catch (NumberFormatException nfe) {
+                throw nfe;
+            //#if CSHARP==true
+            } catch (Throwable err) {
+                // C# throws a different exception
+                throw new NumberFormatException(err.getMessage());
+            //#endif
+            }
         }
     }
 

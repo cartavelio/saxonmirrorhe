@@ -16,7 +16,6 @@ import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingAbort;
-import net.sf.saxon.transpile.CSharpInjectMembers;
 
 import javax.xml.transform.ErrorListener;
 import java.io.*;
@@ -37,11 +36,11 @@ import java.util.List;
  * @since 9.0
  */
 
-@CSharpInjectMembers(code = {
-        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
-                + "    }"
-})
+//@CSharpInjectMembers(code = {
+//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+//                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
+//                + "    }"
+//})
 
 public class XQueryCompiler {
 
@@ -678,6 +677,7 @@ public class XQueryCompiler {
         return staticQueryContext;
     }
 
+    //#if CSHARP==false
     /**
      * List of errors. The caller should supply an empty list before calling Compile; the processor will then populate
      * the list with error information obtained during the compilation. Each error will be included as an object of type
@@ -699,6 +699,7 @@ public class XQueryCompiler {
         //noinspection Convert2MethodRef
         setErrorReporter(err -> errorList.add(err));
     }
+    //#endif
 
 }
 

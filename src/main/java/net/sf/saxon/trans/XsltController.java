@@ -347,6 +347,7 @@ public class XsltController extends Controller {
         return messageHandler;
     }
 
+    //#if CSHARP==false
     /**
      * Supply a factory function that is called every time xsl:message is executed.
      * @param messageReceiverFactory a factory function whose job it is to create a {@link Outputter} for
@@ -445,6 +446,7 @@ public class XsltController extends Controller {
         return null;
     }
 
+    //#endif
     /**
      * Increment a counter in the message counters. This method is called automatically
      * when xsl:message is executed, to increment the counter associated with a given

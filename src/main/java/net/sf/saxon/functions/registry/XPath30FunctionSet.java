@@ -153,7 +153,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.INTEGER, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null);
-
+        
         register("format-number", 2, FormatNumber.class, BuiltInAtomicType.STRING, ONE, LATE)
                 .arg(0, NumericType.getInstance(), OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);

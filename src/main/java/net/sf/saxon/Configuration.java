@@ -2083,6 +2083,7 @@ public class Configuration implements SourceResolver, NotationSet {
         return false;
     }
 
+    //#if CSHARP==false
     /**
      * Get the name of the class that will be instantiated to create a MessageEmitter,
      * to process the output of xsl:message instructions in XSLT.
@@ -2107,6 +2108,7 @@ public class Configuration implements SourceResolver, NotationSet {
     public void setMessageEmitterClass(String messageReceiverClassName) {
         defaultXsltCompilerInfo.setMessageReceiverClassName(messageReceiverClassName);
     }
+    //#endif
 
     /**
      * Get the name of the class that will be instantiated to create an XML parser
@@ -3201,7 +3203,7 @@ public class Configuration implements SourceResolver, NotationSet {
     /*@Nullable*/
     public SchemaType getSchemaType(StructuredQName name) {
         if (name.hasURI(NamespaceConstant.SCHEMA)) {
-             BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
+             return BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
         }
         return null;
     }
@@ -4422,13 +4424,14 @@ public class Configuration implements SourceResolver, NotationSet {
                     setLineNumbering(b);
                     break;
                 }
+                //#if CSHARP==false
                 case FeatureCode.MESSAGE_EMITTER_CLASS:
                     if (!(value instanceof String)) {
                         throw new IllegalArgumentException("MESSAGE_EMITTER_CLASS class must be a String");
                     }
                     setMessageEmitterClass((String) value);
                     break;
-
+                //#endif
                 case FeatureCode.MODULE_URI_RESOLVER:
                     if (!(value instanceof ModuleURIResolver)) {
                         throw new IllegalArgumentException(
@@ -5101,8 +5104,10 @@ public class Configuration implements SourceResolver, NotationSet {
             case FeatureCode.LINE_NUMBERING:
                 return isLineNumbering();
 
+            //#if CSHARP==false
             case FeatureCode.MESSAGE_EMITTER_CLASS:
                 return getMessageEmitterClass();
+            //#endif
 
             case FeatureCode.MODULE_URI_RESOLVER:
                 return getModuleURIResolver();

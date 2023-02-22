@@ -17,7 +17,6 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryLibrary;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.packages.PackageLibrary;
-import net.sf.saxon.transpile.CSharpInjectMembers;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
@@ -29,11 +28,11 @@ import javax.xml.transform.URIResolver;
  * and this class exists to support that.
  */
 
-@CSharpInjectMembers(code = {
-        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-      + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
-      + "    }"
-})
+//@CSharpInjectMembers(code = {
+//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+//      + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
+//      + "    }"
+//})
 public class CompilerInfo {
 
     private Configuration config;
@@ -42,7 +41,6 @@ public class CompilerInfo {
     private CodeInjector codeInjector;
     private int recoveryPolicy = Mode.RECOVER_WITH_WARNINGS;
     private boolean schemaAware;
-    private String messageReceiverClassName = "net.sf.saxon.serialize.MessageEmitter";
     private StructuredQName defaultInitialMode;
     private StructuredQName defaultInitialTemplate;
     private GlobalParameterSet suppliedParameters = new GlobalParameterSet();
@@ -59,6 +57,7 @@ public class CompilerInfo {
     private int languageVersion = 30;
 
     //#if CSHARP==false
+    private String messageReceiverClassName = "net.sf.saxon.serialize.MessageEmitter";
     private OutputURIResolver outputURIResolver = StandardOutputResolver.getInstance();
     //#endif
 
@@ -98,7 +97,6 @@ public class CompilerInfo {
         codeInjector = info.codeInjector;
         recoveryPolicy = info.recoveryPolicy;
         schemaAware = info.schemaAware;
-        messageReceiverClassName = info.messageReceiverClassName;
         defaultInitialMode = info.defaultInitialMode;
         defaultInitialTemplate = info.defaultInitialTemplate;
         suppliedParameters = new GlobalParameterSet(info.suppliedParameters);
@@ -115,6 +113,7 @@ public class CompilerInfo {
 
         //#if CSHARP==false
         outputURIResolver = info.outputURIResolver;
+        messageReceiverClassName = info.messageReceiverClassName;
         //#endif
     }
 
@@ -445,7 +444,7 @@ public class CompilerInfo {
         return this.errorReporter;
     }
 
-
+    //#if CSHARP==false
     /**
      * Get the name of the class that will be instantiated to create a MessageEmitter,
      * to process the output of xsl:message instructions in XSLT.
@@ -470,6 +469,7 @@ public class CompilerInfo {
     public void setMessageReceiverClassName(String messageReceiverClassName) {
         this.messageReceiverClassName = messageReceiverClassName;
     }
+    //#endif
 
     /**
      * Set the name of the default collation

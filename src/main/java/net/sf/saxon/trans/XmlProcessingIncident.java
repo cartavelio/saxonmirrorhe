@@ -108,7 +108,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
      */
 
     @Override
-    public void setFatal(String message) {
+    public void setTerminationMessage(String message) {
         fatalErrorMessage = message;
     }
 
@@ -119,7 +119,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
      */
 
     @Override
-    public String getFatalErrorMessage() {
+    public String getTerminationMessage() {
         return fatalErrorMessage;
     }
 

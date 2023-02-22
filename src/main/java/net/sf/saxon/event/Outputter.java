@@ -368,6 +368,7 @@ public abstract class Outputter implements Receiver {
                 }
 
                 @Override
+                @CSharpModifiers(code = {"public", "override"})
                 public void close() throws XPathException {
                     Outputter.this.characters(buffer.toUnicodeString(), Loc.NONE, ReceiverOption.NONE);
                 }
@@ -385,6 +386,7 @@ public abstract class Outputter implements Receiver {
                 }
 
                 @Override
+                @CSharpModifiers(code = {"public", "override"})
                 public void close() throws XPathException {
                     Outputter.this.append(new StringItem(buffer.toUnicodeString()));
                 }

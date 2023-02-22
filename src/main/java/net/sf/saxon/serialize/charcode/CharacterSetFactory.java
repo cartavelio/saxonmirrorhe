@@ -122,13 +122,9 @@ public class CharacterSetFactory {
                 characterSets.put(encodingKey, res);
                 return res;
             } catch (IllegalCharsetNameException err) {
-                XPathException e = new XPathException("Invalid encoding name: " + encoding);
-                e.setErrorCode("SESU0007");
-                throw e;
+                throw new XPathException("Invalid encoding name: " + encoding, "SESU0007");
             } catch (UnsupportedCharsetException err) {
-                XPathException e = new XPathException("Unknown encoding requested: " + encoding);
-                e.setErrorCode("SESU0007");
-                throw e;
+                throw new XPathException("Unknown encoding requested: " + encoding, "SESU0007");
             }
 //#endif
         }
@@ -136,7 +132,7 @@ public class CharacterSetFactory {
 
     //#if CSHARP==true
     public CharacterSet unknownEncoding(String encoding) throws XPathException {
-        throw new net.sf.saxon.trans.XPathException("Unknown encoding requested: " + encoding);
+        throw new net.sf.saxon.trans.XPathException("Unknown encoding requested: " + encoding, "SESU0007");
     }
     //#endif
 

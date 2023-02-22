@@ -207,12 +207,14 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
             } else if (uri.isEmpty()) {
                 // Delete the entry for the prefix
                 NamespaceMap n2 = makeNamespaceMap();
-                n2.prefixes = new String[prefixes.length - 1];
-                System.arraycopy(prefixes, 0, n2.prefixes, 0,position);
-                System.arraycopy(prefixes, position+1, n2.prefixes, position+1, prefixes.length - position);
-                n2.uris = new String[uris.length - 1];
-                System.arraycopy(uris, 0, n2.uris, 0, position);
-                System.arraycopy(uris, position + 1, n2.uris, position + 1, uris.length - position);
+                if (prefixes.length > 1) {
+                    n2.prefixes = new String[prefixes.length - 1];
+                    System.arraycopy(prefixes, 0, n2.prefixes, 0, position);
+                    System.arraycopy(prefixes, position + 1, n2.prefixes, position + 1, prefixes.length - position);
+                    n2.uris = new String[uris.length - 1];
+                    System.arraycopy(uris, 0, n2.uris, 0, position);
+                    System.arraycopy(uris, position + 1, n2.uris, position + 1, uris.length - position);
+                }
                 return n2;
             } else {
                 // Replace the entry for the prefix
