@@ -8,6 +8,7 @@ using NUnit.Framework;
 using System.Collections;
 using System.Net;
 using System.Text;
+using System.Xml.Linq;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.functions;
 
@@ -131,6 +132,63 @@ namespace SaxonCS_NUnit {
                 XsltTransformer xsl = exec.Load();
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 XdmNode node = builder.Build(xml);
+                xsl.InitialContextNode = node;
+                StringWriter writer = new StringWriter();
+                Serializer outi = proc.NewSerializer(writer);
+
+                xsl.Run(outi);
+                Assert.True(writer.ToString().Contains("<f/>"), "");
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message + e.StackTrace);
+            }
+        }
+        
+        [Test]
+        public void TestLinqDocumentNode() {
+            try {
+                string sr = "<?xml version='1.0'?> \n" +
+                            "<Document> <e> <f/><f/> </e> </Document>";
+
+                // Read an XML file to Linq
+                XDocument xml = XDocument.Parse(sr);
+
+                Processor proc =  new();
+                XsltCompiler comp = proc.NewXsltCompiler();
+                XsltExecutable exec = comp.Compile(new Uri(ConfigTest.DataDirUri, "identity.xsl"));
+                XsltTransformer xsl = exec.Load();
+                DocumentBuilder builder = proc.NewDocumentBuilder();
+                XdmNode node = builder.Build(xml);
+                Assert.That(node.NodeKind == XdmNodeKind.Document);
+                xsl.InitialContextNode = node;
+                StringWriter writer = new StringWriter();
+                Serializer outi = proc.NewSerializer(writer);
+
+                xsl.Run(outi);
+                Assert.True(writer.ToString().Contains("<f/>"), "");
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message + e.StackTrace);
+            }
+        }
+        
+        [Test]
+        public void TestLinqElementNode() {
+            try {
+                string sr = "<?xml version='1.0'?> \n" +
+                            "<Document> <e> <f/><f/> </e> </Document>";
+
+                // Read an XML file to Linq
+                XDocument xml = XDocument.Parse(sr);
+                XElement outermost = xml.Root;
+                Processor proc =  new();
+                XsltCompiler comp = proc.NewXsltCompiler();
+                XsltExecutable exec = comp.Compile(new Uri(ConfigTest.DataDirUri, "identity.xsl"));
+                XsltTransformer xsl = exec.Load();
+                DocumentBuilder builder = proc.NewDocumentBuilder();
+                XdmNode node = builder.Build(outermost);
+                Assert.That(node.NodeKind == XdmNodeKind.Element);
+                Assert.That(node.NodeName.LocalName == "Document");
                 xsl.InitialContextNode = node;
                 StringWriter writer = new StringWriter();
                 Serializer outi = proc.NewSerializer(writer);
