@@ -110,14 +110,14 @@ task buildCWrappers (
   dependsOn: ['buildTransform', 'buildQuery', 'buildValidate']){
 }
 
-["he", "pe", "ee"].each { saxonEdition ->
-  def graalEdition = saxonEdition == "he" ? "ce" : "ee"
+["he", "pe", "ee"].each { edition ->
+  def graalEdition = edition == "he" ? "ce" : "ee"
   
-  task "setup_${saxonEdition}c_graalJar"(
-    dependsOn: ["graal_${saxonEdition}c_jar"],
-    description: "Setup the ${saxonEdition.toUpperCase()} jar file for GraalVM"
+  task "setup_${edition}c_graalJar"(
+    dependsOn: ["graal_${edition}c_jar"],
+    description: "Setup the ${edition.toUpperCase()} jar file for GraalVM"
   ) {
-    inputs.file "${buildDir}/c/jars/${saxonEdition}c/saxon-${saxonEdition}-${saxonVersion}.jar"
+    inputs.file "${buildDir}/c/jars/${edition}c/saxon-${edition}-${saxonVersion}.jar"
     inputs.files fileTree(dir: "${projectDir}/src/graalvm/META-INF")
     outputs.files fileTree(dir: "${buildDir}/graalvm/META-INF");
 
@@ -126,7 +126,7 @@ task buildCWrappers (
     }
     doLast {
       copy {
-        def zipFile = file("${buildDir}/c/jars/${saxonEdition}c/saxon-${saxonEdition}-${saxonVersion}.jar")
+        def zipFile = file("${buildDir}/c/jars/${edition}c/saxon-${edition}-${saxonVersion}.jar")
         def outputDir = "${buildDir}/graalvm"
         from(zipTree(zipFile)) {
           exclude "META-INF/TE*"
@@ -142,17 +142,17 @@ task buildCWrappers (
     }
   }
 
-  task "${saxonEdition}c_graalJar"(
+  task "${edition}c_graalJar"(
     type: Jar,
-    dependsOn: ["setup_${saxonEdition}c_graalJar"],
-    description: "Build the ${saxonEdition.toUpperCase()} jar file for GraalVM"
+    dependsOn: ["setup_${edition}c_graalJar"],
+    description: "Build the ${edition.toUpperCase()} jar file for GraalVM"
   ) {
     inputs.files fileTree(dir: "${buildDir}/graalvm")
-    outputs.file "${buildDir}/libs/libsaxon-${saxonEdition}c-${saxonVersion}.jar"
+    outputs.file "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar"
 
     def prefixLen = "${buildDir}/graalvm".length()
 
-    archiveBaseName = "libsaxon-${saxonEdition}c-${saxonVersion}"
+    archiveBaseName = "libsaxon-${edition}c-${saxonVersion}"
     manifest {
       from "${buildDir}/graalvm/META-INF/MANIFEST.MF"
     }
@@ -160,20 +160,20 @@ task buildCWrappers (
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   }
 
-  task "${saxonEdition}c_graalImage"(
-    dependsOn: ["${saxonEdition}c_graalJar", "graal_${graalEdition}_home"],
+  task "${edition}c_graalImage"(
+    dependsOn: ["${edition}c_graalJar", "graal_${graalEdition}_home"],
     description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
   ) {
-    inputs.file "${buildDir}/libs/libsaxon-${saxonEdition}c-${saxonVersion}.jar"
+    inputs.file "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar"
     outputs.files fileTree(dir: "${buildDir}/c",
-                           include: "libsaxon-${saxonEdition}c-${saxonVersion}.*")
+                           include: "libsaxon-${edition}c-${saxonVersion}.*")
 
     doLast {
       def bin = graalEdition == "ce" ? graalCeBin : graalEeBin
       exec {
         commandLine "${bin}/native-image",
-          "-cp", "${buildDir}/libs/libsaxon-${saxonEdition}c-${saxonVersion}.jar",
-          "-o","${buildDir}/c/libsaxon-${saxonEdition}c-${saxonVersion}",
+          "-cp", "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar",
+          "-o","${buildDir}/c/libsaxon-${edition}c-${saxonVersion}",
           "--no-fallback", "-H:Path=${buildDir}/c",
           "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
           "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
@@ -188,15 +188,15 @@ task buildCWrappers (
     }
   }
 
-  task "${saxonEdition}c_graalImageExe"(
+  task "${edition}c_graalImageExe"(
     type: Exec,
-    dependsOn: ["${saxonEdition}c_graalJar", "graal_${graalEdition}_home"],
+    dependsOn: ["${edition}c_graalJar", "graal_${graalEdition}_home"],
     description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
   ) {
     def bin = graalEdition == "ce" ? graalCeBin : graalEeBin
     commandLine "${bin}/native-image",
-      "-cp", "${buildDir}/libs/libsaxon-${saxonEdition}c-${saxonVersion}.jar",
-      "net.sf.saxon.Transform", "-o","${buildDir}/c/saxon-${saxonEdition}c-${saxonVersion}",
+      "-cp", "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar",
+      "net.sf.saxon.Transform", "-o","${buildDir}/c/saxon-${edition}c-${saxonVersion}",
       "--no-fallback", "-H:Path=${buildDir}/c",
       "-H:+AllowVMInspection",
       "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
@@ -601,122 +601,128 @@ task graal_eec_jar(
   }
 }
 
-task setup_eec_pypi(
-  dependsOn: ["graal_ee_home"]
-) {
-  inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
-  outputs.files fileTree(dir: "${buildDir}/pypi", exclude: "dist/**")
+["he", "pe", "ee"].each { edition ->
+  def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
+  def pypiDir = "${buildDir}/${edition}c_pypi"
 
-  doLast {
-    copy {
-      into "${buildDir}/pypi"
-      from "${projectDir}/src/main/c/Saxon.C.API/python-saxon/pypi_saxonc-ee"
+  task "setup_${edition}c_pypi"(
+    dependsOn: [graalEdition, "${edition}c_graalImage"]
+  ) {
+    inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
+    outputs.files fileTree(dir: pypiDir, exclude: "dist/**")
+
+    doLast {
+      copy {
+        into pypiDir
+        from "${projectDir}/src/main/c/Saxon.C.API/python-saxon/pypi_saxonc-${edition}"
+      }
     }
-  }
-
-  def SAXONC_HOME = null
-  if (systemOs.isMacOsX()) {
-    SAXONC_HOME = "${buildDir}/pypi/libs/darwin"
-  } else if (systemOs.isLinux()) {
-    SAXONC_HOME = "${buildDir}/pypi/libs/nix"
-  } else {
-    throw GradleException("Don't know how to create Python packages on this OS.");
-  }
-
-  doLast {
-    copy {
-      into SAXONC_HOME
-      from "${buildDir}/c"
-      include "libsaxon-eec-*"
+    
+    def SAXONC_HOME = null
+    if (systemOs.isMacOsX()) {
+      SAXONC_HOME = "${pypiDir}/libs/darwin"
+    } else if (systemOs.isLinux()) {
+      SAXONC_HOME = "${pypiDir}/libs/nix"
     }
-  }
 
-  doLast {
-    copy {
-      from SAXONC_HOME
-      into "${buildDir}/pypi/src/saxonc_home"
+    doLast {
+      if (SAXONC_HOME == null) {
+        throw GradleException("Don't know how to create Python packages on this OS.");
+      }
+      copy {
+        into SAXONC_HOME
+        from "${buildDir}/c"
+        include "libsaxon-${edition}c-*"
+      }
     }
-  }
+
+    doLast {
+      copy {
+        from SAXONC_HOME
+        into "${buildDir}/${edition}c_pypi/src/saxonc_home"
+      }
+    }
       
-  doLast {
-    copy {
-      from "${projectDir}/src/main/c/Saxon.C.API/graalvm"
-      into "${buildDir}/pypi/Saxon.C.API/graalvm"
+    doLast {
+      copy {
+        from "${projectDir}/src/main/c/Saxon.C.API/graalvm"
+        into "${buildDir}/${edition}c_pypi/Saxon.C.API/graalvm"
+      }
+    }
+    
+    doLast {
+      copy {
+        from "${projectDir}/src/main/c/Saxon.C.API/python-saxon"
+        into "${buildDir}/${edition}c_pypi/python_saxon"
+        include "saxonc.pyx"
+        include "saxoncClasses.pxd"
+        include "nodekind.py"
+        include "readme.txt"
+      }
+    }
+
+    doLast {
+      copy {
+        from "${projectDir}/src/main/c/Saxon.C.API"
+        into "${buildDir}/${edition}c_pypi/Saxon.C.API"
+        include "SaxonProcessor.cpp"
+        include "SaxonCGlue.c"
+        include "SaxonCProcessor.c"
+        include "SaxonCXPath.c"
+        include "XdmValue.cpp"
+        include "XdmItem.cpp"
+        include "XdmNode.cpp"
+        include "XdmAtomicValue.cpp"
+        include "XdmFunctionItem.cpp"
+        include "XdmMap.cpp"
+        include "XdmArray.cpp"
+        include "DocumentBuilder.cpp"
+        include "Xslt30Processor.cpp"
+        include "XsltExecutable.cpp"
+        include "XQueryProcessor.cpp"
+        include "XPathProcessor.cpp"
+        include "SchemaValidator.cpp"
+        include "SaxonApiException.cpp"
+        include "SaxonProcessor.h"
+        include "SaxonCGlue.h"
+        include "SaxonCProcessor.h"
+        include "SaxonCXPath.h"
+        include "XdmValue.h"
+        include "XdmItem.h"
+        include "XdmNode.h"
+        include "XdmAtomicValue.h"
+        include "XdmFunctionItem.h"
+        include "XdmMap.h"
+        include "XdmArray.h"
+        include "DocumentBuilder.h"
+        include "Xslt30Processor.h"
+        include "XsltExecutable.h"
+        include "XQueryProcessor.h"
+        include "XPathProcessor.h"
+        include "SchemaValidator.h"
+        include "SaxonApiException.h"
+      }
     }
   }
 
-  doLast {
-    copy {
-      from "${projectDir}/src/main/c/Saxon.C.API/python-saxon"
-      into "${buildDir}/pypi/python_saxon"
-      include "saxonc.pyx"
-      include "saxoncClasses.pxd"
-      include "nodekind.py"
-      include "readme.txt"
+  task "saxon_${edition}c_pypi"(
+    dependsOn: ["setup_${edition}c_pypi"]
+  ) {
+    inputs.files tasks.findByName("setup_${edition}c_pypi").outputs.getFiles()
+    outputs.files fileTree(dir: "${buildDir}/${edition}c_pypi/dist")
+
+    doLast {
+      exec {
+        workingDir "${buildDir}/${edition}c_pypi"
+        commandLine "python3", "-mpip", "install", "-r", "requirements.txt"
+      }
     }
-  }
 
-  doLast {
-    copy {
-      from "${projectDir}/src/main/c/Saxon.C.API"
-      into "${buildDir}/pypi/Saxon.C.API"
-      include "SaxonProcessor.cpp"
-      include "SaxonCGlue.c"
-      include "SaxonCProcessor.c"
-      include "SaxonCXPath.c"
-      include "XdmValue.cpp"
-      include "XdmItem.cpp"
-      include "XdmNode.cpp"
-      include "XdmAtomicValue.cpp"
-      include "XdmFunctionItem.cpp"
-      include "XdmMap.cpp"
-      include "XdmArray.cpp"
-      include "DocumentBuilder.cpp"
-      include "Xslt30Processor.cpp"
-      include "XsltExecutable.cpp"
-      include "XQueryProcessor.cpp"
-      include "XPathProcessor.cpp"
-      include "SchemaValidator.cpp"
-      include "SaxonApiException.cpp"
-      include "SaxonProcessor.h"
-      include "SaxonCGlue.h"
-      include "SaxonCProcessor.h"
-      include "SaxonCXPath.h"
-      include "XdmValue.h"
-      include "XdmItem.h"
-      include "XdmNode.h"
-      include "XdmAtomicValue.h"
-      include "XdmFunctionItem.h"
-      include "XdmMap.h"
-      include "XdmArray.h"
-      include "DocumentBuilder.h"
-      include "Xslt30Processor.h"
-      include "XsltExecutable.h"
-      include "XQueryProcessor.h"
-      include "XPathProcessor.h"
-      include "SchemaValidator.h"
-      include "SaxonApiException.h"
-    }
-  }
-}
-
-task saxon_eec_pypi(
-  dependsOn: ["setup_eec_pypi"]
-) {
-  inputs.files setup_eec_pypi.outputs.getFiles()
-  outputs.files fileTree(dir: "${buildDir}/pypi/dist")
-
-  doLast {
-    exec {
-      workingDir "${buildDir}/pypi"
-      commandLine "python3", "-mpip", "install", "-r", "requirements.txt"
-    }
-  }
-
-  doLast {
-    exec {
-      workingDir "${buildDir}/pypi"
-      commandLine "python3", "setup.py", "bdist_wheel"
+    doLast {
+      exec {
+        workingDir "${buildDir}/${edition}c_pypi"
+        commandLine "python3", "setup.py", "bdist_wheel"
+      }
     }
   }
 }
