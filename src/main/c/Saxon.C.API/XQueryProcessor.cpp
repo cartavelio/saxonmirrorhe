@@ -22,9 +22,7 @@
         SaxonProcessor::attachCurrentThread();
         clearProperties();
         clearParameters();
-        if(!cppXQ) {
-            SaxonProcessor::sxn_environ->env->DeleteGlobalRef(cppXQ);
-        }
+        cppXQ = -1;
         cwdXQ.erase();
         exceptionClear();
     }
@@ -33,19 +31,19 @@
         SaxonProcessor::attachCurrentThread();
     proc = p;
         exception = nullptr;
-     cppClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XQueryEngine");
+        cppXQ = createXQueryEngineWithProcessor(SaxonProcessor::sxn_environ->thread, p->procRef);
 
 
-    jobject tempcppXQ = createSaxonProcessor2 (SaxonProcessor::sxn_environ->env, cppClass, "(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);
-    if(tempcppXQ) {
-        cppXQ = SaxonProcessor::sxn_environ->env->NewGlobalRef(tempcppXQ);
-    } else {
-        createException("Error: Failed to create the Xslt30Processor internal object");
-    }
+        if(cppXP == -1) {
+
+            std::cerr<<"Error: Failed to create the XPathProcessor internal object"<<std::endl;
+
+            return;
+        }
     
 #ifdef DEBUG
-	jmethodID debugMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass, "setDebugMode", "(Z)V");
-	SaxonProcessor::sxn_environ->env->CallStaticVoidMethod(cppClass, debugMID, (jboolean)true);
+	//jmethodID debugMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass, "setDebugMode", "(Z)V");
+	//SaxonProcessor::sxn_environ->env->CallStaticVoidMethod(cppClass, debugMID, (jboolean)true);
 #endif
 
 
@@ -62,8 +60,8 @@
 XQueryProcessor::XQueryProcessor(const XQueryProcessor &other) {
     cwdXQ = other.cwdXQ;
 	proc = other.proc; //TODO check thread safety
-	jclass  cppClass;
-	jobject cppXQ;
+	
+	cppXQ = other.cppXQ;
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
 	std::map<std::string,std::string> properties;
 
