@@ -17,6 +17,7 @@ import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
+import net.sf.saxon.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.HashTrieMap;
@@ -352,6 +353,7 @@ public final class EvaluateInstr extends Expression {
 
             // Expression needs to be compiled. First create the static context...
 
+            int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
             MapItem options = (optionsOp == null  ? new HashTrieMap() :(MapItem)optionsOp.getChildExpression().evaluateItem(context));
 
             IndependentContext env = new IndependentContext(config);
@@ -361,7 +363,7 @@ public final class EvaluateInstr extends Expression {
             });
             env.setBaseURI(baseUri);
             env.setExecutable(context.getController().getExecutable());
-            env.setXPathLanguageLevel(31);
+            env.setXPathLanguageLevel(version == 40 ? 40 : config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT));
             env.setDefaultCollationName(getRetainedStaticContext().getDefaultCollationName());
             if (getNamespaceContextExpr() != null) {
                 env.setNamespaces(namespaceContextBase);
@@ -375,7 +377,7 @@ public final class EvaluateInstr extends Expression {
             for (FunctionLibrary lib : libraryList0.getLibraryList()) {
                 if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet)lib).getNamespace().equals(NamespaceConstant.FN)) {
                     // Exclude XSLT-defined functions
-                    libraryList1.addFunctionLibrary(XPath31FunctionSet.getInstance());
+                    libraryList1.addFunctionLibrary(version == 40 ? XPath40FunctionSet.getInstance() : XPath31FunctionSet.getInstance());
                 } else if (lib instanceof StylesheetFunctionLibrary || lib instanceof ExecutableFunctionLibrary) {
                     libraryList1.addFunctionLibrary(new PublicStylesheetFunctionLibrary(lib));
                 } else {
@@ -384,7 +386,7 @@ public final class EvaluateInstr extends Expression {
             }
             env.setFunctionLibrary(libraryList1);
             env.setDecimalFormatManager(getRetainedStaticContext().getDecimalFormatManager());
-            env.setXPathLanguageLevel(config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT));
+            //env.setXPathLanguageLevel(config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT));
             if (isSchemaAware) {
                 GroundedValue allowAny = options.get(StringValue.bmp("allow-any-namespace"));
                 if (allowAny != null && allowAny.effectiveBooleanValue()) {
