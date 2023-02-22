@@ -1,4 +1,5 @@
 using System;
+using Saxon.Hej.s9api;
 
 namespace Saxon.Api {
     /// <summary>
@@ -67,8 +68,8 @@ namespace Saxon.Api {
         /// use of the Saxon .NET API with direct use of the underlying objects
         /// and methods offered by the Java implementation.
         /// </summary>
-		public Saxon.Hej.s9api.Destination GetUnderlyingDestination() {
-            return jDestination;
+        public Destination UnderlyingDestination {
+            get { return jDestination; }
         }
 
         /// <summary>

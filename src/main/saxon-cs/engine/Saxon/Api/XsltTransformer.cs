@@ -282,12 +282,13 @@ namespace Saxon.Api {
         /// The underlying implementation object. Although this method is public, it is intended
         /// for advanced applications only, and should not be considered stable from release to release.
         /// </summary>
-        /// <returns>The underlying implementation object, which will be an instance of the class
-        /// <c>Saxon.Hej.s9api.XsltTransformer</c>. Information about this class is available in the
-        /// Saxon-EE Javadoc documentation for the very similar Java class <c>net.sf.saxon.s9api.XsltTransformer</c>.
-        /// </returns>
-		public Saxon.Hej.s9api.Destination GetUnderlyingDestination() {
-            return s9Transformer;
+        /// <value>
+        ///     The underlying implementation object, which will be an instance of the class
+        ///     <c>Saxon.Hej.s9api.XsltTransformer</c>. Information about this class is available in the
+        ///     Saxon-EE Javadoc documentation for the very similar Java class <c>net.sf.saxon.s9api.XsltTransformer</c>.
+        /// </value>
+        public Destination UnderlyingDestination {
+            get { return s9Transformer; }
         }
 
         /// <summary>
@@ -303,7 +304,7 @@ namespace Saxon.Api {
             get => this.xmlDestination;
             set {
                 this.xmlDestination = value;
-                s9Transformer.setDestination(value.GetUnderlyingDestination());
+                s9Transformer.setDestination(value.UnderlyingDestination);
             }
         }
 
@@ -334,7 +335,7 @@ namespace Saxon.Api {
         internal Receiver GetDestinationReceiver(IDestination destination) {
             Controller controller = s9Transformer.getUnderlyingController();
             PipelineConfiguration pipe = makePipelineConfiguration();
-            Receiver r = destination.GetUnderlyingDestination()
+            Receiver r = destination.UnderlyingDestination
                 .getReceiver(pipe, controller.getExecutable().getPrimarySerializationProperties());
             pipe.setController(controller);
             return r;
@@ -360,7 +361,7 @@ namespace Saxon.Api {
                 throw new SaxonApiException("Destination is null");
             }
 
-            s9Transformer.setDestination(destination.GetUnderlyingDestination());
+            s9Transformer.setDestination(destination.UnderlyingDestination);
             s9Transformer.transform();
         }
 

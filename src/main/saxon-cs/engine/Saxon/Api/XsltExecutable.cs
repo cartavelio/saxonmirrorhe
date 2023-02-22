@@ -81,7 +81,7 @@ namespace Saxon.Api {
 
         public void Explain(IDestination destination)
         {
-            jExecutable.explain(destination.GetUnderlyingDestination());
+            jExecutable.explain(destination.UnderlyingDestination);
         }
 
         /// <summary>
