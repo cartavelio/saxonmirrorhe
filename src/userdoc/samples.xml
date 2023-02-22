@@ -132,9 +132,7 @@
 
         <div class="javaonly">
         <p>The stylesheet <code>styles/total.xsl</code> is used by the <a class="bodylink"
-                href="/samples/jdom2">JDOM2 example</a> application, and the query
-                <code>query/books-to-html.xq</code> is used by one of the examples in the
-                <code>QueryAPIExamples.java</code> application.</p>
+                href="/samples/jdom2">JDOM2 example</a> application.</p>
 
         <p>The sample program <code>XPathExampleSA.java</code> illustrates the use of the JAXP XPath
             API, extended by Saxon to allow schema-aware XPath 2.0 processing. The program is
