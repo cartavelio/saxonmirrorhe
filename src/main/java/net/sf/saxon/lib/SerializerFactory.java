@@ -74,27 +74,6 @@ public class SerializerFactory {
         return config;
     }
 
-    //#if CSHARP==false
-    /**
-     * Create a serializer with given output properties, and return
-     * an XMLStreamWriter that can be used to feed events to the serializer.
-     *
-     * @param result     the destination of the serialized output (wraps a Writer, an OutputStream, or a File)
-     * @param properties the serialization properties to be used
-     * @return a serializer in the form of an XMLStreamWriter
-     * @throws net.sf.saxon.trans.XPathException
-     *          if any error occurs
-     */
-
-    public StreamWriterToReceiver getXMLStreamWriter(
-            StreamResult result,
-            Properties properties) throws XPathException {
-        Receiver r = getReceiver(result, new SerializationProperties(properties));
-        r = new NamespaceReducer(r);
-        return new StreamWriterToReceiver(r);
-    }
-    //#endif
-
     /**
      * Get a Receiver that wraps a given Result object. Saxon calls this method to construct
      * a serialization pipeline. The method can be overridden in a subclass; alternatively, the
@@ -1387,6 +1366,27 @@ public class SerializerFactory {
     protected Comparator<AtomicValue> getPropertySorter(String sortSpecification) throws XPathException {
         throw new XPathException("Serialization property saxon:property-order is not available in Saxon-HE");
     }
+
+    //#if CSHARP==false
+
+    /**
+     * Create a serializer with given output properties, and return
+     * an XMLStreamWriter that can be used to feed events to the serializer.
+     *
+     * @param result     the destination of the serialized output (wraps a Writer, an OutputStream, or a File)
+     * @param properties the serialization properties to be used
+     * @return a serializer in the form of an XMLStreamWriter
+     * @throws net.sf.saxon.trans.XPathException if any error occurs
+     */
+
+    public StreamWriterToReceiver getXMLStreamWriter(
+            StreamResult result,
+            Properties properties) throws XPathException {
+        Receiver r = getReceiver(result, new SerializationProperties(properties));
+        r = new NamespaceReducer(r);
+        return new StreamWriterToReceiver(r);
+    }
+    //#endif
 
 
 }
