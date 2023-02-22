@@ -16,6 +16,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -222,13 +223,13 @@ public class KeyDefinition extends Actor implements ContextOriginator {
     /**
      * Set the system Id and line number of the source xsl:key definition
      *
-     * @param systemId   the URI of the module containing the key definition
-     * @param lineNumber the line number of the key definition
+     * @param loc the location
      */
 
-    public void setLocation(String systemId, int lineNumber) {
-        setSystemId(systemId);
-        setLineNumber(lineNumber);
+    public void setLocation(Location loc) {
+        setSystemId(loc.getSystemId());
+        setLineNumber(loc.getLineNumber());
+        setColumnNumber(loc.getColumnNumber());
     }
 
     /**

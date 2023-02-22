@@ -1728,6 +1728,7 @@ public class XQueryParser extends XPathParser {
         GlobalVariable var = new GlobalVariable();
         var.setPackageData(env.getPackageData());
         var.setLineNumber(t.getLineNumber() + 1);
+        var.setColumnNumber(t.getColumnNumber() + 1);
         var.setSystemId(env.getSystemId());
         if (annotations != null) {
             var.setPrivate(annotations.includes(Annotation.PRIVATE));
@@ -1768,6 +1769,7 @@ public class XQueryParser extends XPathParser {
                 par.setPackageData(env.getPackageData());
                 //par.setExecutable(var.getExecutable());
                 par.setLineNumber(var.getLineNumber());
+                par.setColumnNumber(var.getColumnNumber());
                 par.setSystemId(var.getSystemId());
                 par.setVariableQName(var.getVariableQName());
                 par.setRequiredType(var.getRequiredType());

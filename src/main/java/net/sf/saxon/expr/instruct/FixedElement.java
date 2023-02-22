@@ -18,6 +18,7 @@ import net.sf.saxon.pattern.CombinedNodeTest;
 import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 
@@ -63,7 +64,12 @@ public class FixedElement extends ElementCreator {
         setValidationAction(validation, schemaType);
         preservingTypes = schemaType == null && validation == Validation.PRESERVE;
     }
-    
+
+    @Override
+    public void setLocation(Location id) {
+        super.setLocation(id);
+    }
+
     @Override
     public Iterable<Operand> operands() {
         return contentOp;

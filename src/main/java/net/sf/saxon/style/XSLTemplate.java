@@ -662,6 +662,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         compiledNamedTemplate.setStackFrameMap(stackFrameMap);
         compiledNamedTemplate.setSystemId(getSystemId());
         compiledNamedTemplate.setLineNumber(getLineNumber());
+        compiledNamedTemplate.setColumnNumber(getColumnNumber());
         compiledNamedTemplate.setHasRequiredParams(hasRequiredParams);
         compiledNamedTemplate.setRequiredType(requiredType);
         compiledNamedTemplate.setContextItemRequirements(requiredContextItemType, mayOmitContextItem, absentFocus);

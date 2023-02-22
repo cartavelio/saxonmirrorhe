@@ -2182,7 +2182,9 @@ public abstract class StyleElement extends ElementImpl {
      */
 
     protected static void setInstructionLocation(StyleElement source, Expression child) {
-        child.setLocation(source.allocateLocation());
+        if (child.getLocation() == null || child.getLocation() == Loc.NONE) {
+            child.setLocation(source.saveLocation());
+        }
     }
 
     /**
