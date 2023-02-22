@@ -134,6 +134,10 @@ public class MetaTagAdjuster extends ProxyReceiver {
                             found = true;
                             break;
                         }
+                    } else if (comparesEqual(name, "charset")) {
+                        // See QT4 issue 318, Saxon bug 5852
+                        found = true;
+                        break;
                     }
                 }
                 inMetaTag = found;
