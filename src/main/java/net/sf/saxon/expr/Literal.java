@@ -845,16 +845,17 @@ public class Literal extends Expression {
 
         @Override
         public PushEvaluator elaborateForPush() {
+            Literal expr = (Literal)getExpression();
             GroundedValue value = ((Literal) getExpression()).getGroundedValue();
             if (value instanceof Item) {
                 return (out, context) -> {
-                    out.append((Item)value);
+                    out.append((Item)value, expr.getLocation(), ReceiverOption.ALL_NAMESPACES);
                     return null;
                 };
             } else {
                 return (out, context) -> {
                     for (Item item : value.asIterable()) {
-                         out.append(item);
+                         out.append(item, expr.getLocation(), ReceiverOption.ALL_NAMESPACES);
                     }
                     return null;
                 };
