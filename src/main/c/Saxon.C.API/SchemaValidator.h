@@ -203,7 +203,7 @@ public:
 
 
     //! Get the underlying java object of the C++ schema validator
-    jobject getUnderlyingValidator() {
+    int64_t getUnderlyingValidator() {
         return cppV;
     }
 
@@ -212,8 +212,8 @@ private:
     bool lax; /*!< flag to indicate lax mode for the Schema valdiation */
 	SaxonProcessor * proc; /*!< Saxon Processor Pointer, which created this SchemaValidator */
 	XdmItem * sourceNode; /*!< source node to run against schema validation */
-	jclass  cppClass; /*!< JNI object where the SchemaValidator method will be invoked */
-	jobject cppV; /*!< The underlying SchemaValidator Java object */
+	//jclass  cppClass; /*!< JNI object where the SchemaValidator method will be invoked */
+	int64_t cppV; /*!< The underlying SchemaValidator Java object */
 	std::string cwdV; /*!< current working directory */
 	std::string outputFile; /*!< The output file name for the exported schema validator */
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */

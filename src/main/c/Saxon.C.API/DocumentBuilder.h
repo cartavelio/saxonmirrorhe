@@ -221,7 +221,7 @@ class DocumentBuilder {
           @param proc - Supplied pointer to the SaxonProcessor object
           cwd - The current working directory
         */
-        DocumentBuilder(SaxonProcessor* p, jobject docBuilderObject, std::string cwd);
+        DocumentBuilder(SaxonProcessor* p, int64_t docBuilderObject, std::string cwd);
 
     	/**
     	 * Xslt30Processor copy constructor.
@@ -236,10 +236,11 @@ class DocumentBuilder {
         SaxonProcessor * proc;
         SaxonApiException * exception;
         std::string cwdXP; /*!< current working directory */
-        jobject docBuilderObject;
-        jclass  docBuilderClass, procClass;
-        jclass saxonCAPIClass;
-        std::string cwdDB, baseURI; /*!< current working directory */
+        int64_t docBuilderObject;
+        //jclass  docBuilderClass, procClass;
+        //jclass saxonCAPIClass;
+        std::string baseURI;
+        std::string cwdDB;/*!< current working directory */
         bool lineNumbering, dtdVal;
 } ;
 

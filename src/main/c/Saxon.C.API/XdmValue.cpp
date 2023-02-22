@@ -37,7 +37,8 @@ const char * XdmValue::toString() {
             jValues = getUnderlyingValue();
 
         }
-        toStringValue = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread, jValues);
+       char * resulti = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread, (void *)jValues);
+        toStringValue = resulti;
 
     }
     return toStringValue.c_str();
@@ -61,12 +62,12 @@ XdmValue::XdmValue(int64_t valRef) {
 }
 
 //TODO handle the construction of arrays
-XdmValue::XdmValue(jobject val, bool arr){
+XdmValue::XdmValue(int64_t val, bool arr){
 	xdmSize = 0;
 	values.resize(0);
 	jValues = -1;
 	valueType = nullptr;
-	jclass xdmValueForcppClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmValueForCpp");
+	/*jclass xdmValueForcppClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmValueForCpp");
 	jmethodID xvfMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmValueForcppClass, "makeArrayFromXdmValue", "(Lnet/sf/saxon/s9api/XdmValue;)[Lnet/sf/saxon/s9api/XdmItem;");
 
 	if(!xvfMID){
@@ -123,7 +124,7 @@ XdmValue::XdmValue(jobject val, bool arr){
 		}
 	}
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(results);
-	}	
+	}	*/
 }
 
 
@@ -201,15 +202,16 @@ int64_t XdmValue::getUnderlyingValue() {
 
 		int count = values.size();
 		if (count == 0) {
-			return nullptr;
+			return -1;
 		}
-        jValues = createProcessorData(SaxonProcessor::sxn_environ->thread, count);
+        jValues = createProcessorDataWithCapacity(SaxonProcessor::sxn_environ->thread, count);
 
           #ifdef DEBUG
           	std::cerr<<std::endl<<"XdmValue-getUnderlyingValue cp0"<<std::endl;
           #endif
 		for (i = 0; i < count; i++) {
-            addProcessorValue(SaxonProcessor::sxn_environ->thread, jValues, values[i]->getUnderlyingValue());
+		    int64_t ivalue = values[i]->getUnderlyingValue();
+            addProcessorValue(SaxonProcessor::sxn_environ->thread, (void *)jValues, (void *)ivalue);
 		}
 
 

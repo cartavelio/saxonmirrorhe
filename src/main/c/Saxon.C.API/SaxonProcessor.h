@@ -27,7 +27,7 @@
 #define CVERSION "12.1"
 #define CVERSION_API_NO 1210
 
-
+typedef void* (*allocFn)(size_t length);
 
 
 #include <string>
@@ -438,7 +438,7 @@ public:
      * @param obj - The Java object representation of the XdmNode
      * @return the kind of node, for example ELEMENT or ATTRIBUTE
      */
-    int getNodeKind(jobject obj);
+    int getNodeKind(int64_t obj);
 
     //! Test whether this processor is schema-aware
     /**

@@ -46,7 +46,7 @@ public:
      * @param obj - The internal Java object for the XdmNode is wrapped here in the C++ XdmNode
      * @param kind - The  kind of node, for example <code>XdmNodeKind#ELEMENT</code> or <code>XdmNodeKind#ATTRIBUTE</code>
      */
-	XdmNode(XdmNode *parent, jobject, XDM_NODE_KIND kind);
+	XdmNode(XdmNode *parent, int64_t , XDM_NODE_KIND kind);
 
     //! Destructor.
     /**
@@ -194,6 +194,7 @@ public:
      */
 	XdmNode** getAttributeNodes(bool cache=false);
 
+
 	//! Get the underlying JNI Java object for the XdmNode
 	/**
 	 *
@@ -223,7 +224,7 @@ public:
     * @return pointer array of XdmNode objects
     */
 
-	XdmNode** getChildren(bool cache = false);
+	XdmNode** getChildren(bool cache = true);
 
 
 
@@ -233,7 +234,7 @@ public:
     * @return a pointer to the ith child node
     */
 
-    XdmNode* getChild(int i, bool cache = false);
+    XdmNode* getChild(int i, bool cache = true);
 
 
     //! Get the count of child nodes from thie current node

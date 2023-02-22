@@ -401,8 +401,8 @@ void SaxonProcessor::applyConfigurationProperties() {
     SaxonProcessor::attachCurrentThread();
     if (configProperties.size() > 0) {
         int size = configProperties.size();
-        char ** cnames = new char[size];
-        char ** cvalues = new char[size];
+        int64_t processorDataRef = createProcessorDataWithCapacity(SaxonProcessor::sxn_environ->thread, size);
+
         /*jclass stringClass = lookForClass(SaxonProcessor::sxn_environ->env, "java/lang/String");
         jobjectArray stringArray1 = SaxonProcessor::sxn_environ->env->NewObjectArray((jint) size, stringClass, 0);
         jobjectArray stringArray2 = SaxonProcessor::sxn_environ->env->NewObjectArray((jint) size, stringClass, 0);
@@ -420,17 +420,17 @@ void SaxonProcessor::applyConfigurationProperties() {
         int i = 0;
         std::map<std::string, std::string>::iterator iter = configProperties.begin();
         for (iter = configProperties.begin(); iter != configProperties.end(); ++iter, i++) {
-            cnames[i] = (iter->first).c_str();
-            cvalues[i] = (iter->second).c_str();
+            //cnames[i] = (iter->first).c_str();
+            //cvalues[i] = (iter->second).c_str();
+            addProcessorPropertyPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (iter->first).c_str(), (iter->second).c_str());
 
         }
 
         /* if (exceptionOccurred()) {
             createException();
         } */
-        j_applyToConfiguration(SaxonProcessor::sxn_environ->thread, procRef, cnames, cvalues,size);
-        delete cnames;
-        delete cvalues;
+        j_applyToConfiguration(SaxonProcessor::sxn_environ->thread, procRef, (void *) processorDataRef);
+
 
     }
 }
@@ -476,10 +476,7 @@ int64_t SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue *> 
 
 
     int size = parameters.size() + properties.size() + additions;
-    int64_t processorDataRef = createProcessorData(SaxonProcessor::sxn_environ->thread, size);
-    JParameters comboArrays;
-    comboArrays.stringArray = nullptr;
-    comboArrays.objectArray = nullptr;
+    int64_t processorDataRef = createProcessorDataWithCapacity(SaxonProcessor::sxn_environ->thread, size);
 
 
 #ifdef DEBUG
@@ -524,8 +521,7 @@ int64_t SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue *> 
 
         for (std::map<std::string, std::string>::iterator iter =
                 properties.begin(); iter != properties.end(); ++iter, i++) {
-
-            addProcessorProperties(SaxonProcessor::sxn_environ->thread, processorDataRef, (iter->first).c_str(),(iter->second).c_str());
+            addProcessorPropertyPair(SaxonProcessor::sxn_environ->thread, processorDataRef, (iter->first).c_str(),(iter->second).c_str());
         }
 
         return processorDataRef;
@@ -539,10 +535,6 @@ int64_t SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValue *>
 
     int size = parameters.size();
     int64_t processorDataRef = createProcessorData(SaxonProcessor::sxn_environ->thread, size);
-    JParameters comboArrays;
-    comboArrays.stringArray = nullptr;
-    comboArrays.objectArray = nullptr;
-
 
 
 #ifdef DEBUG
@@ -562,11 +554,8 @@ int64_t SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValue *>
 
 
 #endif
-            SaxonProcessor::sxn_environ->env->SetObjectArrayElement(comboArrays.stringArray, i,
-                                                                    SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                            (iter->first).c_str()));
 
-            addProcessorParameters(SaxonProcessor::sxn_environ->thread, processorDataRef, (iter->first).c_str(),(iter->second)->getUnderlyingValue());
+            addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, (iter->first).c_str(),(iter->second)->getUnderlyingValue());
 #ifdef DEBUG
             std::string s1 = typeid(iter->second).name();
             std::cerr<<"Type of itr:"<<s1<<std::endl;
@@ -664,7 +653,7 @@ const char *SaxonProcessor::version() {
 
     if (versionStr.empty()) {
 
-        char * resultStr = getProductVersion(SaxonProcessor::sxn_environ->thread);
+        char * resultStr = getProductVersion(SaxonProcessor::sxn_environ->thread, (void *)procRef);
 
         versionStr += resultStr;
 
@@ -714,7 +703,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
         return;
     }
 
-    setCatalogFile(sxn_environ->thread,catalogFile);
+    setCatalogFile(sxn_environ->thread, (void *)catalogFile);
 }
 
 

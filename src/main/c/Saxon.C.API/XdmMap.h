@@ -54,7 +54,7 @@ public:
     /**
      * @param obj - The internal Java object for the XdmMap is wrapped here in the C++ XdmMap
      */
-    XdmMap(jobject obj);
+    XdmMap(int64_t obj);
 
     //! Create an XdmMap supplying the entries in the form of a std::map, where the keys and values in the std::map are XDM values
     /**

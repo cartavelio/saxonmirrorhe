@@ -17,36 +17,19 @@ XdmMap::XdmMap(const XdmMap &d) {
       map_size = d.map_size;
     }
 
-XdmMap::XdmMap(jobject obj): XdmFunctionItem(obj) {
+XdmMap::XdmMap(int64_t obj): XdmFunctionItem(obj) {
      map_size = -1;
 
 }
 
 const char * XdmMap::toString(){
-    jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
-    jmethodID strbbMID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmMapClass,
-                                                                                  "toString",
-                                                                                  "()Ljava/lang/String;");
-    if (!strbbMID) {
-        std::cerr << "Error: Saxonc." << "toString"
-                  << " not found\n" << std::endl;
-        return nullptr;
-    } else {
-        jstring result = (jstring) (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, strbbMID));
-        if(result) {
-            const char * str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
-            stringValue = str;
-            return str;
-        }
-        return nullptr;
-    }
-
+   return xdmMapToString(SaxonProcessor::sxn_environ->thread, (void *)value);
 }
 
 
 
     int XdmMap::mapSize(){
-       if(map_size == -1) {
+      /* if(map_size == -1) {
         jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
         static jmethodID tbiimapID = nullptr;
 
@@ -63,13 +46,13 @@ const char * XdmMap::toString(){
         		jint result = (jint)(SaxonProcessor::sxn_environ->env->CallIntMethod(value, tbiimapID));
         		map_size =(int)result;
         }
-      }
+      }*/
 
         return map_size;
     }
 
     XdmValue * XdmMap::get(XdmAtomicValue* key) {
-    jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
+   /* jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
     static jmethodID tbmapID = nullptr;
 
     if(tbmapID == nullptr) {
@@ -134,12 +117,12 @@ const char * XdmMap::toString(){
                         }
        			}
        			return nullptr;
-    }
-
+    }*/
+        return nullptr;
     }
 
     XdmValue * XdmMap::get(const char * key) {
-        jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
+        /*jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
         static jmethodID tbsmapID = nullptr;
 
         if(tbsmapID == nullptr) {
@@ -204,13 +187,15 @@ const char * XdmMap::toString(){
                         }
        			}
        			return nullptr;
-        }
+        }*/
+
+        return nullptr;
 
 
     }
 
     XdmValue * XdmMap::get(int key) {
-        jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
+        /*jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
         static jmethodID tbimapID = nullptr;
 
         if(tbimapID == nullptr) {
@@ -274,13 +259,15 @@ const char * XdmMap::toString(){
                         }
        			}
        			return nullptr;
-        }
+        }*/
+
+        return nullptr;
 
 
     }
 
     XdmValue *  XdmMap::get(double key) {
-        jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
+        /*jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
         static jmethodID tbdmapID = nullptr;
 
         if(tbdmapID == nullptr) {
@@ -344,13 +331,14 @@ const char * XdmMap::toString(){
                         }
        			}
        			return nullptr;
-        }
+        }*/
+        return nullptr;
 
 
     }
 
     XdmValue * XdmMap::get(long key) {
-        jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
+        /*jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
         static jmethodID tbdmapID = nullptr;
 
         if(tbdmapID == nullptr) {
@@ -414,13 +402,15 @@ const char * XdmMap::toString(){
                         }
        			}
        			return nullptr;
-        }
+        }*/
+
+        return nullptr;
 
     }
 
 //TODO test this method
     XdmMap * XdmMap::put(XdmAtomicValue* key, XdmValue * valuei) {
-        if(key == nullptr || valuei == nullptr) {
+       /* if(key == nullptr || valuei == nullptr) {
             std::cerr << "Error: Saxonc.XdmMap." << "key or value is nullptr" << std::endl;
             return nullptr;
         }
@@ -443,12 +433,14 @@ const char * XdmMap::toString(){
                				return newValue;
                			}
                			return nullptr;
-                }
+                }*/
+
+    return nullptr;
 
     }
 
     XdmMap * XdmMap::remove(XdmAtomicValue* key){
-                jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
+              /*  jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
                 static jmethodID removemapID = nullptr;
 
                 if(removemapID == nullptr) {
@@ -467,16 +459,18 @@ const char * XdmMap::toString(){
                				return newValue;
                			}
                			return nullptr;
-                }
+                }*/
+
+        return nullptr;
 
 
 
     }
 
     std::set<XdmAtomicValue*> XdmMap::keySet(){
-        std::set<XdmAtomicValue *> myset;
+       std::set<XdmAtomicValue *> myset;
 
-        jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
+        /*jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
         static jmethodID keySetmID = nullptr;
 
         if(keySetmID == nullptr) {
@@ -501,11 +495,12 @@ const char * XdmMap::toString(){
                    			tempValue->addUnderlyingValue(resulti);
                    			myset.insert(tempValue);
                    		}
-        }
+        }*/
 
 
 
          return myset;
+
     }
 
 
@@ -513,7 +508,7 @@ const char * XdmMap::toString(){
         XdmAtomicValue ** XdmMap::keys(){
             XdmAtomicValue ** keysArr = nullptr;
 
-            jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
+            /*jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
             static jmethodID keySetmID = nullptr;
 
             if(keySetmID == nullptr) {
@@ -538,7 +533,7 @@ const char * XdmMap::toString(){
                        			tempValue = new XdmAtomicValue(resulti);
                        			keysArr[p] =tempValue;
                        	}
-            }
+            }*/
 
 
 
@@ -548,7 +543,7 @@ const char * XdmMap::toString(){
     //std::map<XdmAtomicValue*, XdmValue*> XdmMap::asMap();
 
     bool XdmMap::isEmpty() {
-                jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
+               /* jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
                 static jmethodID isEmptyMapID = nullptr;
 
                 if(isEmptyMapID == nullptr) {
@@ -563,11 +558,12 @@ const char * XdmMap::toString(){
                 } else {
                 		jboolean result = (SaxonProcessor::sxn_environ->env->CallBooleanMethod(value, isEmptyMapID));
                 		return result;
-                }
+                }*/
+               return false;
     }
 
     bool XdmMap::containsKey(XdmAtomicValue * key) {
-                jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
+               /* jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
                 static jmethodID containsMapID = nullptr;
 
                 if(containsMapID == nullptr) {
@@ -582,16 +578,16 @@ const char * XdmMap::toString(){
                 } else {
                 		jboolean result = (SaxonProcessor::sxn_environ->env->CallBooleanMethod(value, containsMapID, ((XdmItem *)key)->getUnderlyingValue()));
                 		return result;
-                }
+                }*/
 
-
+        return false;
 
     }
 
     std::list<XdmValue *> XdmMap::valuesAsList() {
          std::list<XdmValue *> mylist;
 
-            jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
+         /*   jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
             jmethodID xmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getXdmMapValues",
                         					"(Lnet/sf/saxon/s9api/XdmMap;)[Lnet/sf/saxon/s9api/XdmValue;");
             if (!xmID) {
@@ -616,7 +612,7 @@ const char * XdmMap::toString(){
                     SaxonProcessor::sxn_environ->env->DeleteLocalRef(results);
             }
 
-
+*/
          return mylist;
     }
 
@@ -627,7 +623,7 @@ const char * XdmMap::toString(){
         //TODO: We need a strategy of the memory management of the values returned
              XdmValue ** valuesArr = nullptr;
 
-                jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
+              /* jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
                 jmethodID xmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getXdmMapValues",
                             					"(Lnet/sf/saxon/s9api/XdmMap;)[Lnet/sf/saxon/s9api/XdmValue;");
                 if (!xmID) {
@@ -692,7 +688,7 @@ const char * XdmMap::toString(){
 
 
                     }
-                }
+                }*/
 
 
              return valuesArr;

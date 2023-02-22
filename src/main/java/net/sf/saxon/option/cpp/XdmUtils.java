@@ -124,6 +124,18 @@ public class XdmUtils {
         return holder.get();
     }
 
+    @CEntryPoint(name = "xdmMapToString")
+    public static CCharPointer toString_XdmMap(IsolateThread thread, ObjectHandle value){
+        XdmMap map = SaxonCAPI.objectHandles.get(value);
+        /*
+        TODO how do we return null?
+        if(item == null) {
+            return null;
+        }   */
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(map.toString());
+        return holder.get();
+    }
+
     /**
      * Attempt to Downcast XdmItem to XdmNode. If this is not possible then return null
      */
@@ -474,6 +486,10 @@ public class XdmUtils {
 
 
 
+
+
+
+
     /**
      * Get the string value of a named attribute of the element passed
      *
@@ -566,7 +582,7 @@ public class XdmUtils {
 
 
     @CEntryPoint(name = "j_getChild")
-    public static XdmNode getChild(IsolateThread thread, ObjectHandle nodeRef, int i) {
+    public static long getChild(IsolateThread thread, ObjectHandle nodeRef, int i) {
         
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
 
@@ -575,11 +591,13 @@ public class XdmUtils {
         int pos = 0;
         while (iter.hasNext()) {
             if(pos == i) {
-                 return (XdmNode) iter.next();
+                 XdmNode childi = (XdmNode) iter.next();
+                 ObjectHandle handle = SaxonCAPI.objectHandles.create(childi);
+                 return handle.rawValue();
             }
             pos++ ;
         }
-        return null;
+        return -1;
     }
 
     @CEntryPoint(name = "j_getChildCount")
