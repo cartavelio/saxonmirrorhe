@@ -59,7 +59,7 @@ public class TestXQueryThreads {
             Thread.sleep(1000);
         }
 
-        String msg = "number of threads increased from " + threads0.size() + " to " + threads1.size();
+        String msg = "Number of threads increased from " + threads0.size() + " to " + threads1.size();
         System.err.println(msg);
         for (Thread thread : threads1) {
             if (!threads0.contains(thread)) {

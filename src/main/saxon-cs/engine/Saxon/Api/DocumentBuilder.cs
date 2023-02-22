@@ -475,7 +475,7 @@ namespace Saxon.Api {
                 documentBaseUri = this.BaseUri.ToString();
             }
             source.setSystemId(documentBaseUri);
-            ParseOptions options = new ParseOptions(config.getParseOptions());
+            ParseOptions options = config.getParseOptions();
 
             source = augmentSource(source, options);
             XdmNode doc = s9Builder.build(source);
