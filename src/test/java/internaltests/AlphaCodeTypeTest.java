@@ -29,9 +29,9 @@ public class AlphaCodeTypeTest {
             Configuration config = new EnterpriseConfiguration();
             IndependentContext ic = new IndependentContext(config);
             ic.declareNamespace("foo", "http://foo.com/");
+            ic.setXPathLanguageLevel(31);
             XPathParser parser = new XPathParser();
             parser.setParserExtension(new SaxonSyntaxExtension());
-            parser.setLanguage(XPathParser.ParsedLanguage.XPATH, 31);
             String[] testCases = new String[]{
                     "item()",
                     "item()*",
