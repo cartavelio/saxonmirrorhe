@@ -1060,6 +1060,25 @@
       OF THE POSSIBILITY OF SUCH DAMAGE.<br/></aside>
     
     <p>Applicable notice: JLINE2.txt</p>
+      
+      <p>
+        <strong>XmlResolver</strong>
+      </p>
+      
+      <p>See <a class="bodylink" href="https://github.com/xmlresolver/xmlresolver">https://github.com/xmlresolver/xmlresolver</a> 
+        and <a class="bodylink" href="https://github.com/xmlresolver/xmlresolverdata">https://github.com/xmlresolver/xmlresolverdata</a></p>
+      
+      <p>The <code>xmlresolver</code> library
+      provides an advanced implementation of the SAX <code>EntityResolver</code>,
+      the JAXP <code>URIResolver</code>, and a new <code>NamespaceResolver</code>; the
+      implementation uses the OASIS XML Catalogs V1.1 Standard to provide a mapping from public
+      identifiers to local resources.</p>
+      
+      <p>The <code>xmlresolverdata</code> JAR file contains standard DTDs, schemas, and URIs for
+      use with the XML Resolver. These resources carry individual copyright statements; most
+      of them are <emph>Copyright W3C (MIT, ERCIM, Keio)</emph>, with a variety of dates, 
+        and are distributed under the 
+        <a href="https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document">W3C Software and Document Notice and License</a>.</p>
 
 
     </div>
