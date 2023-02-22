@@ -284,9 +284,9 @@
       </xsl:if>
       <xsl:if test="members/member[@nodeType='MethodDeclaration']/name/@identifier='computeHashCode'">
          <!-- Subclasses of Expression have a method computeHashCode(), called by hashCode() on the superclass,
-              which computes the hash code and causes it to be cached. This means that the C# warning indicating
+              which computes the hash code and causes it to be cached. This means that the C# warning CS0659 indicating
               that GetHashCode() is not implemented is in fact spurious, so we suppress the warning -->
-         <xsl:text>#pragma warning disable {@value}{$NL}</xsl:text>
+         <xsl:text>#pragma warning disable 659{$NL}</xsl:text>
          <xsl:call-template name="indent"/>
       </xsl:if>
       <xsl:choose>
@@ -923,7 +923,7 @@
                   <xsl:call-template name="indent"/>
                   <xsl:text>  case </xsl:text>
                   <xsl:choose>
-                     <xsl:when test="$selectorElem = 'net.sf.saxon.s9api.HostLanguage'">Saxon.Api.HostLanguage.{name/@identifier}</xsl:when>
+                     <xsl:when test="$selectorElem/@RESOLVED_TYPE = 'net.sf.saxon.s9api.HostLanguage'">Saxon.Api.HostLanguage.{name/@identifier}</xsl:when>
                      <xsl:when test="$enumType and exists($firstLabel/@RESOLVED_TYPE)">{f:renameType($firstLabel/@RESOLVED_TYPE)}.{if (not($isSimpleEnum)) then 'InnerEnum.' else ''}{name/@identifier}</xsl:when>
                      <xsl:otherwise>
                         <xsl:apply-templates select="."/>
@@ -1266,11 +1266,11 @@
       <xsl:text>{f:extract-type-arguments(@RESOLVED_TYPE)}</xsl:text>
    </xsl:template>
    
-   <xsl:template match="*[@nodeType = 'ClassOrInterfaceType'][starts-with(@RESOLVED_TYPE, 'java.util.Optional')]" priority="30">
-      <!-- Optional<X> translates to `X?` -->
-      <!-- If used in a module, the module must be annotated with @CSharpNullable("enable") -->
+   <!--<xsl:template match="*[@nodeType = 'ClassOrInterfaceType'][starts-with(@RESOLVED_TYPE, 'java.util.Optional')]" priority="30">
+      <!-\- Optional<X> translates to `X?` -\->
+      <!-\- If used in a module, the module must be annotated with @CSharpNullable("enable") -\->
       <xsl:text>{f:extract-type-arguments(@RESOLVED_TYPE)}?</xsl:text>
-   </xsl:template>
+   </xsl:template>-->
    
    
    <xsl:template match="*[@nodeType = 'ArrayType']">
