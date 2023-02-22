@@ -784,6 +784,10 @@ task graal_eec_jar(
                      + 'skip = ["cp36*", "cp37*", "pp37*", "cp*musl*"]\n'
                      + 'archs = ["x86_64"]\n'
                      + 'environment.LD_LIBRARY_PATH = "/project/libs/nix"\n')
+  } else if (systemOsName == 'windows') {
+    lastLinePatch = ('[tool.cibuildwheel]\n'
+                     + 'build = "*"\n'
+                     + 'skip = ["cp36*", "cp37*", "pp37*", "cp*musl*"]\n')
   }
 
   task "setup_${edition}c_pypi"(
