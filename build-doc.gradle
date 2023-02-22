@@ -984,9 +984,10 @@ task saxonc_doxygen(dependsOn: ['saxonc_doc_pypi']) {
       into "${buildDir}/doc_pypi/Saxon.C.API"
       from "${projectDir}/src/main/c/Saxon.C.API"
       include "Doxyfile"
-      include "readme.md"
+      include "README.md"
       filter { line ->
         line.replaceAll('@@VERSION@@', saxonVersion)
+          .replace('@@EDITION@@', 'EE')
           .replace('@@LOGO@@', '/img/saxonica_logo.gif')
           .replace('@@SOURCES@@', 'src')
           .replace('@@OUTPUT@@', 'documentation')
