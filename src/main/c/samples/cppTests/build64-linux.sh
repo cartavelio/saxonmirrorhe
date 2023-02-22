@@ -59,7 +59,7 @@ g++  -std=c++14 -m64 -fPIC -I.  -c ../../Saxon.C.API/XPathProcessor.cpp -o bin/X
 #g++  -std=c++14 -m64 -fPIC -I.  -c ../../Saxon.C.API/SchemaValidator.cpp -o bin/SchemaValidator.o -ldl -lc -llibgraalvm-ee-12.1  $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
 #g++  -std=c++14 -m64 -fPIC -pthread bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o bin/cppExtensionFunction.o testXSLT30.cpp -o testXSLT30 -ldl -lc -llibgraalvm-ee-12.1  $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
-
+g++  -std=c++14 -m64 -fPIC -I. -pthread bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o  bin/SaxonApiException.o  testXSLT30.cpp -o testXSLT30 -ldl -lc -lgraalvm-ee-12.1  $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 #g++  -std=c++14 -m64 -fPIC bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/Xslt30Processor.o bin/XsltExecutable.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmFunctionItem.o bin/XdmMap.o bin/SchemaValidator.o bin/SaxonApiException.o testXQuery.cpp -o testXQuery -ldl -lc -llibgraalvm-ee-12.1  $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
 

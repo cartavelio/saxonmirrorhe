@@ -38,11 +38,11 @@
 		    return valType.c_str();
 	    }
 
-	    char * result = j_getPrimitiveTypeName(SaxonProcessor::sxn_environ->thread, value);
+	    char * result = j_getPrimitiveTypeName(SaxonProcessor::sxn_environ->thread, (void *)value);
 
-	    f(result != nullptr) {
+	    if(result != nullptr) {
 	        valType = std::string(result);
-            return stri;
+            return valType.c_str();
 	    }
 
 
@@ -51,19 +51,19 @@
     }
 
     bool XdmAtomicValue::getBooleanValue(){
-        byte result = j_getBooleanValue(SaxonProcessor::sxn_environ->thread, value);
+        char result = j_getBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)value);
         return result!=0;
     }
 
 
     int XdmAtomicValue::getHashCode(){
-        int result = j_getHashCode(SaxonProcessor::sxn_environ->thread, value);
+        int result = j_getHashCode(SaxonProcessor::sxn_environ->thread, (void *)value);
         return result;
 
     }
 
     double XdmAtomicValue::getDoubleValue(){
-        double result = j_getDoubleValue(SaxonProcessor::sxn_environ->thread, value);
+        double result = j_getDoubleValue(SaxonProcessor::sxn_environ->thread, (void *)value);
         return result;
     }
 
@@ -74,6 +74,6 @@
     }
 
     long XdmAtomicValue::getLongValue(){
-        long result = j_getLongValue(SaxonProcessor::sxn_environ->thread, value);
+        long result = j_getLongValue(SaxonProcessor::sxn_environ->thread, (void *)value);
         return result;
      }

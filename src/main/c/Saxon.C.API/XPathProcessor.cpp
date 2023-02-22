@@ -301,8 +301,8 @@ bool XPathProcessor::effectiveBooleanValue(const char * xpathStr) {
 
     setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    bool resultsi = (bool)j_effectiveBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)processorDataRef);
-    return resultsi;
+    //bool resultsi = (bool)j_effectiveBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)processorDataRef);
+    return false;//resultsi;
 }
 
 

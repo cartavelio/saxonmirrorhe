@@ -46,7 +46,7 @@ XsltExecutable::~XsltExecutable() {
         saxonMessageListenerRef = -1;
     }
     if(saxonResultDocRef != -1) {
-        SaxonResultDocRef = -1;
+        saxonResultDocRef = -1;
     }
 
 }
@@ -115,11 +115,11 @@ void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
 
 void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
     SaxonProcessor::attachCurrentThread();
-    if(selection != nullptr) {
-        selectionRef = -1;
-    }
+    //TODO remove selectRef from objectHandles pool in Java
+    selectionRef = -1;
+
     if (filename != nullptr) {
-        selectionRef = j_createStringObject(SaxonProcessor::sxn_environ->thread, (char *)filename);
+        //selectionRef = j_createStringObject(SaxonProcessor::sxn_environ->thread, (char *)filename);
 
     }   else {
        selectionRef = -1;
@@ -995,11 +995,11 @@ void XsltExecutable::setSaveXslMessage(bool create, const char * filename) {
 
         if (filename == nullptr) {
             std::string optionStr = "-:on";
-            saxonMessageListenerRef = createSaxonCMessageListener(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwdXE.c_str(), (char *)optionStr.c_str());
+            //saxonMessageListenerRef = createSaxonCMessageListener(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwdXE.c_str(), (char *)optionStr.c_str());
 
             //setProperty("m", "on");
         } else {
-            saxonMessageListenerRef = createSaxonCMessageListener(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwdXE.c_str(), (char *)filename);
+            //saxonMessageListenerRef = createSaxonCMessageListener(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwdXE.c_str(), (char *)filename);
 
         }
 

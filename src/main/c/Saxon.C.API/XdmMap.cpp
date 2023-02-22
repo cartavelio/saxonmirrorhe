@@ -23,7 +23,7 @@ XdmMap::XdmMap(int64_t obj): XdmFunctionItem(obj) {
 }
 
 const char * XdmMap::toString(){
-   return xdmMapToString(SaxonProcessor::sxn_environ->thread, (void *)value);
+   return "";//xdmMapToString(SaxonProcessor::sxn_environ->thread, (void *)value);
 }
 
 

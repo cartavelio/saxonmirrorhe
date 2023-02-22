@@ -231,7 +231,7 @@ public:
      *
      * @return a new SchemaValidator
      */
-    SchemaValidator *newSchemaValidator();
+    //SchemaValidator *newSchemaValidator();
 
     //! Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
     /*!
@@ -353,7 +353,7 @@ public:
         * @param length - the number of items in the array
         * @return an XdmArray whose members are xs:boolean values corresponding one-to-one with the input
    */
-    XdmArray *makeArray(long *input, int length);
+    XdmArray *makeArray(long long *input, int length);
 
     /**
         * Make an XdmArray whose members are xs:boolean values

@@ -27,10 +27,13 @@ Xslt30Processor::Xslt30Processor() {
 
 Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 
+    std::cerr<<"xslt30 constructor cp0: "<<proc->procRef<<std::endl;
 	proc = p;
     jitCompilation = false;
     exception = nullptr;
     cppXT = createXslt30WithProcessor(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef);
+
+    std::cerr<<"xslt30 constructor cp1"<<std::endl;
 
 #ifdef DEBUG
 	//jmethodID debugMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass, "setDebugMode", "(Z)V");
@@ -180,7 +183,6 @@ void Xslt30Processor::exceptionClear(){
  if(exception != nullptr) {
  	delete exception;
  	exception = nullptr;
-	SaxonProcessor::sxn_environ->env->ExceptionClear();
  }
   
  }
@@ -211,7 +213,7 @@ void Xslt30Processor::createException(const char * message) {
 
 
 void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* filename) {
-    j_compileFromXdmNodeAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (void *)node->getUnderlyingValue(), (char *)filename);
+    j_compileFromXdmNodeAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT,  (void *)node->getUnderlyingValue(),  (char *)cwdXT.c_str(), (char *)filename);
 
 }
 
@@ -225,9 +227,10 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
         j_compileFromFileAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)xslFilename, (char *)filename);
 }
 
-XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {4
+XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
         int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-	    int64_t  objRef = j_compileFromString(SaxonProcessor::sxn_environ->thread, cppXT, (char *)cwdXT.c_str(), (char *)stylesheetStr, (void *)processorDataRef);
+        std::cout<<"compileFromString-cp2 processorDataRef:"<<processorDataRef<<std::endl;
+	    int64_t  objRef = j_compileFromString(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheetStr, (int)jitCompilation, (void *)processorDataRef);
         XsltExecutable * executable = new XsltExecutable(proc->procRef, objRef, cwdXT, proc->getResourcesDirectory());
 		return executable;
 
@@ -252,7 +255,8 @@ XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) 
 
 
 XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
-    int64_t  objRef = j_compileFromFile(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheet);
+    int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
+    int64_t  objRef = j_compileFromFile(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheet, (int)jitCompilation, (void *)processorDataRef);
     XsltExecutable * executable = new XsltExecutable(proc->procRef,objRef, cwdXT, proc->getResourcesDirectory());
     return executable;
 }
@@ -272,7 +276,7 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
 
 
     if (result > -1) {
-                int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,result);
+                int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
 
 			    XdmValue * value = new XdmValue();
           		XdmItem * xdmItem = nullptr;
