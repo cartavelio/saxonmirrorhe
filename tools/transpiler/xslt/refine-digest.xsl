@@ -38,21 +38,15 @@
       <xsl:param name="root" as="document-node()"/>
       <xsl:for-each select="$root//method[not(@static='1')]">
          <xsl:variable name="this-method-name" select="f:full-method-name(.)"/>
-         <!--<xsl:if test="@name='itemAt'">
-            <xsl:message>*** PROCESS-METHODS - Full method name: {$this-method-name}</xsl:message>
-         </xsl:if>-->
-         <xsl:variable name="overridden-methods" select="f:overridden-methods(., .., false())"/>
-         <!--<xsl:if test="@name='itemAt'">
-            <xsl:message>Overridden method name: {$overridden-methods}</xsl:message>
-         </xsl:if>-->
+         <xsl:variable name="overridden-methods" select="f:overridden-methods(., ..)"/>
          <xsl:for-each select="$overridden-methods">
-            <xsl:sequence select="map{'method':f:full-method-name(.), 'virtual':true()}"/>
-            <xsl:sequence select="map{'method':$this-method-name, 'override':true()}"/>
-         </xsl:for-each>
-         <xsl:variable name="implemented-methods" select="f:overridden-methods(., .., true())"/>
-         <xsl:for-each select="$implemented-methods[not(@returns = current()/@returns)]">
-            <xsl:sequence select="map{'method':$this-method-name, 'csReturns':string(@returns)}"/>
-         </xsl:for-each>
+            <xsl:if test="not(parent::interface)">
+               <xsl:if test="not(@abstract='1')">
+                  <xsl:sequence select="map{'method':f:full-method-name(.), 'virtual':true()}"/>
+               </xsl:if>
+               <xsl:sequence select="map{'method':$this-method-name, 'override':true()}"/>
+            </xsl:if>
+         </xsl:for-each>        
       </xsl:for-each>
    </xsl:function>
 
@@ -67,20 +61,12 @@
             <xsl:with-param name="override-methods"
                select="map:merge(($method-details[?override]?method)!map{.:true()}, map{'duplicates':'use-last'})"
                tunnel="yes"/>
-            <xsl:with-param name="csReturns" as="map(*)" tunnel="yes">
-               <xsl:map>
-                  <xsl:for-each-group select="$method-details[?csReturns]" group-by="?method">
-                     <xsl:map-entry key="?method" select="current-group()[last()]?csReturns"/>
-                  </xsl:for-each-group>
-               </xsl:map>
-            </xsl:with-param>
          </xsl:apply-templates>      
    </xsl:template>
 
    <xsl:template match="method[not(@static='1')]">
       <xsl:param name="virtual-methods" tunnel="yes" as="map(*)" select="map{}"/>
       <xsl:param name="override-methods" tunnel="yes" as="map(*)" select="map{}"/>
-      <xsl:param name="csReturns" tunnel="yes" as="map(*)" select="map{'dummy':()}"/>
       <xsl:variable name="full-name" select="f:full-method-name(.)"/>
       <xsl:copy>
          <xsl:copy-of select="@*"/>
@@ -90,45 +76,95 @@
          <xsl:if test="$override-methods($full-name)">
             <xsl:attribute name="override" select="1"/>
          </xsl:if>
-         <xsl:if test="map:contains($csReturns, $full-name)">
-            <xsl:attribute name="csReturns" select="$csReturns($full-name)"/>
+         <xsl:variable name="supermethods" select="f:all-supermethods(.)"/>
+         <xsl:variable name="covariant-supermethods" select="$supermethods[@returns != current()/@returns]"/>
+         <xsl:if test="@name='copy'">
+            <xsl:message>Processing {../@name}.copy(): Supermethods on classes {$supermethods/../@name} return types {$supermethods/@returns} covariant={count($covariant-supermethods)}</xsl:message>
+         </xsl:if>
+         <xsl:if test="exists($covariant-supermethods)">
+            <xsl:choose>
+               <xsl:when test="count(distinct-values($covariant-supermethods/@returns)) = 1">
+                  <xsl:attribute name="csReturns" select="$covariant-supermethods[1]/@returns"/>
+                  <xsl:attribute name="unique" select="1"/>
+               </xsl:when>
+               <xsl:otherwise>
+                  <!-- find one that has no supermethods -->
+                  <xsl:for-each select="$covariant-supermethods">
+                     <xsl:message>Candidate {../@name} returns {@returns} supermethods {f:all-supermethods(.)/@name}</xsl:message>
+                  </xsl:for-each>
+                  <xsl:variable name="retain" select="$covariant-supermethods[empty(f:all-supermethods(.))]"/>
+                  <xsl:for-each select="$retain">
+                     <xsl:message>Retained Candidate {../@name} returns {@returns} supermethods {f:all-supermethods(.)/@name}</xsl:message>
+                  </xsl:for-each>
+                  <xsl:attribute name="csReturns" select="$retain[1]/@returns"/>
+                  <xsl:attribute name="candidates" select="count($retain)"/>
+               </xsl:otherwise>
+            </xsl:choose>
          </xsl:if>
          <xsl:apply-templates/>
       </xsl:copy>
    </xsl:template>
+   
+   <!-- For a given method, find any method that it directly overrides or implements.
+        This may return more than one method in the case of multiple inheritance. -->
 
    <xsl:function name="f:overridden-methods" as="element(method)*">
       <xsl:param name="method" as="element(method)"/>
       <xsl:param name="class" as="element(*)"/>
-      <xsl:param name="include-abstract" as="xs:boolean"/>
-      <!--<xsl:if test="$method/@name = 'itemAt'">
-         <xsl:message>Looking for overrides of itemAt in class {$class/@name}</xsl:message>
-      </xsl:if>-->
-      <xsl:for-each select="($class/extends | $class/implements[$include-abstract])[string(@name)]">
+      <xsl:for-each select="($class/extends | $class/implements)[string(@name)]">
          <xsl:variable name="superclass" select="key('classKey', @name)" as="element(*)?"/>
-         <xsl:choose>
-            <xsl:when test="empty($superclass)">
-               <!--<xsl:if test="$method/@name = 'compute'">
-                  <xsl:message>*** Class {@name} not found ***</xsl:message>
-               </xsl:if>-->
-            </xsl:when>
-            <xsl:otherwise>
-               <!--<xsl:if test="$method/@name = 'itemAt'">
-                  <xsl:message>Examining superclass {@name} (with {count($superclass/method)} methods)</xsl:message>
-               </xsl:if>-->
-               <xsl:variable name="supermethod"
-                  select="$superclass/method[@name = $method/@name and string(@sig) = string($method/@sig)]"/>
-               <!--<xsl:if test="$method/@name = 'compute'">
-                  <xsl:message>Found supermethods: {count($supermethod)} </xsl:message>
-               </xsl:if>-->
-               <xsl:sequence select="$supermethod[$include-abstract or parent::class]"/>
-               <!-- TODO: digest needs to record which methods are abstract... -->
-               <xsl:sequence select="f:overridden-methods($method, $superclass, $include-abstract)"
-               />
-            </xsl:otherwise>
-         </xsl:choose>
+         <xsl:if test="exists($superclass)">
+            <xsl:variable name="supermethod"
+               select="$superclass/method[@name = $method/@name and string(@sig) = string($method/@sig)]"/>
+            <xsl:choose>
+               <xsl:when test="exists($supermethod)">
+                  <xsl:sequence select="$supermethod"/>
+               </xsl:when>
+               <xsl:when test="$superclass/@abstract='1'">
+                  <!-- If the class inherits from an abstract superclass that does not define the method,
+                     but inherits it from an interface, then the abstract class in C# will acquire a 
+                     "stub" implementation of the method (that throws NotImplementedException()), and 
+                     the method in the subclass will override this stub). To handle this we
+                     return a constructed method with @injected='1'-->
+                  <xsl:variable name="remoteDeclarations" select="f:overridden-methods($method, $superclass)"/>
+                  <xsl:choose>
+                     <xsl:when test="exists($remoteDeclarations[parent::class])">
+                        <xsl:sequence select="$remoteDeclarations"/>
+                     </xsl:when>
+                     <xsl:when test="exists($remoteDeclarations[parent::interface])">
+                        <method name="{@name}" injected="1" returns="{$remoteDeclarations[1]/@returns}"/>
+                     </xsl:when>
+                     <xsl:otherwise>
+                        <xsl:sequence select="f:overridden-methods($method, $superclass)"/>
+                     </xsl:otherwise>
+                  </xsl:choose>
+               </xsl:when>
+               <xsl:otherwise>
+                  <xsl:sequence select="f:overridden-methods($method, $superclass)"/>
+               </xsl:otherwise>
+            </xsl:choose>
+         </xsl:if>
       </xsl:for-each>
    </xsl:function>
-
+   
+   <!-- For a given method, get the return type of the method from which it ultimately
+      derives. We return potentially multiple methods, to handle multiple inheritance,
+      and hope for the best if these are different.
+   --> 
+   
+   <xsl:function name="f:all-superclasses" as="element(*(:class|interface:))*">
+      <xsl:param name="class"  as="element(*(:class|interface:))"/>
+      <xsl:for-each select="($class/extends | $class/implements)[string(@name)]">
+         <xsl:variable name="superclass" select="key('classKey', @name)" as="element(*)?"/>   
+         <xsl:sequence select="$superclass ! (., f:all-superclasses(.))"/>
+      </xsl:for-each>
+   </xsl:function>
+   
+   <xsl:function name="f:all-supermethods" as="element(method)*">
+      <xsl:param name="method" as="element(method)"/>
+      <xsl:sequence select="f:all-superclasses($method/..)/method[@name = $method/@name and string(@sig) = string($method/@sig)]"/>
+   </xsl:function>
+      
+ 
 
 </xsl:stylesheet>
