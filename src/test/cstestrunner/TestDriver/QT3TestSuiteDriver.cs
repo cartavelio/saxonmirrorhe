@@ -612,18 +612,7 @@ namespace TestDriver {
                                 selector.XmlDocumentResolver = env.GetXmlDocumentResolver();
 
                                 if (env.unparsedTextResolver != null) {
-                                    selector.Implementation.setUnparsedTextURIResolver(
-                                        (uri, enc, config) => {
-                                            Encoding encoding;
-                                            try {
-                                                encoding = enc == null ? null : Encoding.GetEncoding(enc);
-                                            }
-                                            catch (System.ArgumentException e) {
-                                                throw new XPathException("Unknown encoding " + enc, "FOUT1170");
-                                            }
-
-                                            return new StringReader(env.unparsedTextResolver.Invoke(uri, encoding).Content);
-                                        });
+                                    selector.TextResolver = env.unparsedTextResolver;
                                 }
 
                                 XdmValue result = selector.Evaluate();
