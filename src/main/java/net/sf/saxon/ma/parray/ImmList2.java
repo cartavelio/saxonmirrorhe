@@ -140,8 +140,7 @@ public class ImmList2<E> extends ImmList<E> {
         }
         ImmList<E> l2 = left;
         ImmList<E> r2 = right;
-        //System.err.println("Rebalance l=" + left.size() + " r=" + right.size());
-        System.err.println("Rebalance " + size() + " - " + showBalance(this, 3));
+        //System.err.println("Rebalance " + size() + " - " + showBalance(this, 3));
         if (size() > THRESHOLD) {
             if (l2 instanceof ImmList2 && l2.size() > THRESHOLD * r2.size()) {
                 return new ImmList2<>(((ImmList2<E>) l2).left, new ImmList2<>(((ImmList2<E>) l2).right, r2));
