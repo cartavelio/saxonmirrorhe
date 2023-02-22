@@ -246,7 +246,6 @@ SaxonProcessor::SaxonProcessor(bool l) {
 
     cwd = "";
     licensei = l;
-    versionStr = nullptr;
     exception = nullptr;
     proc = nullptr;
     if (SaxonProcessor::jvmCreatedCPP == 0) {
@@ -296,7 +295,6 @@ SaxonProcessor::SaxonProcessor(bool l) {
 
 SaxonProcessor::SaxonProcessor(const char *configFile) {
     cwd = "";
-    versionStr = nullptr;
     proc = nullptr;
     if (SaxonProcessor::jvmCreatedCPP == 0) {
         SaxonProcessor::jvmCreatedCPP = 1;
@@ -354,9 +352,8 @@ SaxonProcessor::~SaxonProcessor() {
     	SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);
 	proc = nullptr;
     }
-    if (versionStr != nullptr) {
-        delete versionStr;
-        versionStr = nullptr;
+    if (!versionStr.empty()) {
+        versionStr.clear();
     }
     exceptionClear();
 }
@@ -682,7 +679,7 @@ SchemaValidator *SaxonProcessor::newSchemaValidator() {
 
 
 const char *SaxonProcessor::version() {
-    if (versionStr == nullptr) {
+    if (versionStr.empty()) {
 
         static jmethodID MID_version = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass,
                                                                                                        "getProductVersion",
@@ -699,16 +696,13 @@ const char *SaxonProcessor::version() {
 
         jstring jstr = (jstring) (SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, MID_version,
                                                                                            proc));
-        const char *tempVersionStr = SaxonProcessor::sxn_environ->env->GetStringUTFChars(jstr, nullptr);
-        int verLen = strlen(tempVersionStr) + 1;
-        versionStr = new char[verLen];
-        snprintf(versionStr, verLen, tempVersionStr);
-        SaxonProcessor::sxn_environ->env->ReleaseStringUTFChars(jstr, tempVersionStr);
+        versionStr += SaxonProcessor::sxn_environ->env->GetStringUTFChars(jstr, nullptr);
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(jstr);
 
 
     }
 
-    return versionStr;
+    return versionStr.c_str();
 }
 
 void SaxonProcessor::setcwd(const char *dir) {
