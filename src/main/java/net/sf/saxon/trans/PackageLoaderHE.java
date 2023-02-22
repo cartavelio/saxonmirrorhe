@@ -1222,20 +1222,6 @@ public class PackageLoaderHE implements IPackageLoader {
             return null;
         }
         return StructuredQName.fromEQName((val));
-//        int openBrace = val.indexOf('{');
-//        if (openBrace >= 0) {
-//            String prefix = val.substring(0, openBrace);
-//            int closeBrace = val.indexOf('}', openBrace+1);
-//            String uri = val.substring(openBrace+1, closeBrace);
-//            if (uri.equals("~")) {
-//                uri = NamespaceConstant.getUriForConventionalPrefix(prefix);
-//            }
-//            String local = val.substring(closeBrace+1);
-//            return new StructuredQName(prefix, uri, local);
-//        } else {
-//            return new StructuredQName("", "", val);
-//        }
-//        //return resolveQName(val, element);
     }
 
     public List<StructuredQName> getListOfQNameAttribute(NodeInfo element, String localName) throws XPathException {
@@ -2144,7 +2130,6 @@ public class PackageLoaderHE implements IPackageLoader {
             NamespaceMap bindings = NamespaceMap.emptyMap();
             if (ns != null && !ns.isEmpty()) {
                 String[] pairs = ns.split(" ");
-                int i = 0;
                 for (String pair : pairs) {
                     int eq = pair.indexOf('=');
                     if (eq >= 0) {

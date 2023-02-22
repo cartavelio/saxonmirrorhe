@@ -21,6 +21,7 @@ import net.sf.saxon.str.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
@@ -330,6 +331,7 @@ public final class ValueOf extends SimpleNodeConstructor {
                 }
 
                 @Override
+                @CSharpModifiers(code = {"public", "override"})
                 public UniStringConsumer getStringReceiver(boolean asTextNode) {
                     return getNextOutputter().getStringReceiver(true);
                 }

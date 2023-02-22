@@ -250,9 +250,6 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
         // If the first operand is a singleton boolean,
         // compare it with the effective boolean value of the other operand
 
-        //boolean iter0used = false;
-        boolean iter1used = false;
-
         if (maybeBoolean0) {
             Item i01 = iter0.next();
             Item i02 = i01 == null ? null : iter0.next();

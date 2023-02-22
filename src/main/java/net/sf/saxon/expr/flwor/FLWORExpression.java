@@ -262,13 +262,10 @@ public class FLWORExpression extends Expression {
     @Override
     public Iterable<Operand> operands() {
         final List<Operand> list = new ArrayList<>(5);
-        boolean repeatable = false;
         try {
             for (Clause c : clauses) {
+                //noinspection Convert2MethodRef
                 c.processOperands(op -> list.add(op));
-                if (c instanceof ForClause) {
-                    repeatable = true;
-                }
             }
         } catch (XPathException e) {
             throw new IllegalStateException(e);

@@ -9,10 +9,11 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.ItemType;

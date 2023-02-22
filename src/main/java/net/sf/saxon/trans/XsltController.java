@@ -459,9 +459,8 @@ public class XsltController extends Controller {
 
     public void incrementMessageCounter(StructuredQName code) {
         synchronized(messageCounters) {
-            Integer c = messageCounters.get(code);
-            int n = c == null ? 1 : c + 1;
-            messageCounters.put(code, n);
+            int n = messageCounters.getOrDefault(code, 0);
+            messageCounters.put(code, n+1);
         }
     }
 
@@ -639,12 +638,6 @@ public class XsltController extends Controller {
             }
 
             warningIfStreamable(mode);
-
-            // Determine whether we need to close the output stream at the end. We
-            // do this if the Result object is a StreamResult and is supplied as a
-            // system ID, not as a Writer or OutputStream
-
-            boolean mustClose = false;
 
             // Process the source document by applying template rules to the initial context node
 

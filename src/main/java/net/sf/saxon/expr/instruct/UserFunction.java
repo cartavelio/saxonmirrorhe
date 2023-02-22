@@ -790,7 +790,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
     @Override
     public boolean isExportable() {
         return refCount > 0 ||
-                (getDeclaredVisibility() != null && getDeclaredVisibility() != Visibility.PRIVATE) ||
+                (getDeclaredVisibility() != Visibility.UNDEFINED && getDeclaredVisibility() != Visibility.PRIVATE) ||
                 ((StylesheetPackage) getPackageData()).isRetainUnusedFunctions();
     }
 

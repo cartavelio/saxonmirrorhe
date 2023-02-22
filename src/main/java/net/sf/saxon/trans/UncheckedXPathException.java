@@ -7,6 +7,8 @@
 
 package net.sf.saxon.trans;
 
+import net.sf.saxon.transpile.CSharpModifiers;
+
 /**
  * When implementing certain interfaces Saxon is not able to throw a checked exception because
  * the interface definition does not allow it. In these circumstances the checked exception
@@ -25,6 +27,7 @@ public class UncheckedXPathException extends RuntimeException {
         super(cause);
     }
 
+    @CSharpModifiers(code = {"public", "override"})
     public UncheckedXPathException(String message) {
         super(new XPathException(message));
     }

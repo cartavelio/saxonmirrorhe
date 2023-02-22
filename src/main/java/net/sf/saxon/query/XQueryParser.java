@@ -3298,7 +3298,6 @@ public class XQueryParser extends XPathParser {
         }
 
         boolean validateType = false;
-        boolean streaming = false;
         StructuredQName pragmaName = makeStructuredQName(qname, "");
         assert pragmaName != null;
         String uri = pragmaName.getURI();

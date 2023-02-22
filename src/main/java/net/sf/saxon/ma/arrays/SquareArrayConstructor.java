@@ -152,7 +152,6 @@ public class SquareArrayConstructor extends Expression {
     }
 
     private Expression preEvaluate(ExpressionVisitor visitor) {
-        boolean allFixed = false;
         for (Operand o : operands()) {
             if (!(o.getChildExpression() instanceof Literal)) {
                 return this;

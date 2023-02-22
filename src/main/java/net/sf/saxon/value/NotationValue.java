@@ -139,6 +139,11 @@ public final class NotationValue extends QualifiedNameValue {
     }
 
     @Override
+    public int hashCode() {
+        return qName.hashCode();
+    }
+
+    @Override
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
         return null;
     }
