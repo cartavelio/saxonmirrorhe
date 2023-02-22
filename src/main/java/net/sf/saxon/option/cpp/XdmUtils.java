@@ -18,6 +18,7 @@ import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
 
 import java.net.URI;
@@ -47,6 +48,26 @@ public class XdmUtils {
         return new QName(sname);
 
     }
+
+
+    @CEntryPoint(name = "getBaseURIForXdmNode")
+    public static CCharPointer getBaseURIForXdmNode(IsolateThread thread, ObjectHandle value) {
+        XdmNode node = SaxonCAPI.objectHandles.get(value);
+        URI uri = node.getBaseURI();
+
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(uri.toString());
+        return holder.get();
+    }
+
+    @CEntryPoint(name = "getParentForXdmNode")
+    public static long getParentForXdmNode(IsolateThread thread, ObjectHandle value) {
+        XdmNode node = SaxonCAPI.objectHandles.get(value);
+        XdmNode parent = node.getParent();
+
+        ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(parent);
+        return objectHandle.rawValue();
+    }
+
 
     @CEntryPoint(name = "getStringValueForXdmValue")
     public static CCharPointer getStringValue_XdmValue(IsolateThread thread, ObjectHandle value) {
@@ -78,6 +99,18 @@ public class XdmUtils {
         final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(item.toString());
         return holder.get();
     }
+    
+    @CEntryPoint(name = "xdmNodeToString")
+    public static CCharPointer toString_XdmNode(IsolateThread thread, ObjectHandle value) {
+        XdmNode node = SaxonCAPI.objectHandles.get(value);
+        /*
+        TODO how do we return null?
+        if(item == null) {
+            return null;
+        }   */
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(node.toString());
+        return holder.get();
+    }
 
     /**
      * Attempt to Downcast XdmItem to XdmNode. If this is not possible then return null
@@ -89,8 +122,13 @@ public class XdmUtils {
         return null;
     }
 
-    public static String getPrimitiveTypeName(XdmAtomicValue value) {
-        return getEQName(value.getPrimitiveTypeName());
+
+    @CEntryPoint(name = "j_getPrimitiveTypeName")
+    public static CCharPointer getPrimitiveTypeName(IsolateThread thread, ObjectHandle valueRef) {
+        XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
+
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(getEQName(value.getPrimitiveTypeName()));
+        return holder.get();
     }
 
     public static String getFunctionName(XdmFunctionItem item) {
@@ -244,28 +282,34 @@ public class XdmUtils {
     }
 
 
-
-    public static String getLocalName(XdmNode node) {
+    @CEntryPoint(name = "j_getLocalName")
+    public static CCharPointer getLocalName(IsolateThread thread, ObjectHandle nodeRef) {
+        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         QName qname = node.getNodeName();
         if (qname == null) {
             return null;
         }
-        return qname.getLocalName();
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(qname.getLocalName());
+        return holder.get();
     }
 
     /**
      * Get the name of the node, as a EQName
      *
-     * @param node
+     * @param thread
+     * @param nodeRef
      * @return the name of the node. In the case of unnamed nodes (for example, text and comment nodes)
      * return null.
      */
-    public static String getNodeName(XdmNode node) {
+    @CEntryPoint(name = "j_getNodeName")
+    public static CCharPointer getNodeName(IsolateThread thread, ObjectHandle nodeRef) {
+        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         QName qname = node.getNodeName();
         if (qname == null) {
             return null;
         }
-        return XdmUtils.getEQName(qname);
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(XdmUtils.getEQName(qname));
+        return holder.get();
 
     }
 
@@ -313,49 +357,83 @@ public class XdmUtils {
     /**
      * Get the string value of a named attribute of the element passed
      *
-     * @param node   the element in question
-     * @param eqname the name of the required attribute
+     * @param thread
+     * @param nodeRef
+     * @param c_eqname
      * @return null if this node is not an element, or if this element has no
      * attribute with the specified name. Otherwise return the string value of the
      * selected attribute node.
      */
-    public static String getAttributeValue(XdmNode node, String eqname) {
-
+    @CEntryPoint(name = "j_getAttributeValue")
+    public static CCharPointer getAttributeValue(IsolateThread thread, ObjectHandle nodeRef, CCharPointer c_eqname) {
+        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
+        String eqname = CTypeConversion.toJavaString(c_eqname);
         QName name = QName.fromEQName(eqname);
         if (SaxonCAPI.debug) {
             System.err.println("EQName= " + eqname);
             System.err.println("Java-Call Att-name=" + name.getClarkName() + " Value=" + node.getAttributeValue(name));
         }
-        return node.getAttributeValue(name);
+
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(node.getAttributeValue(name));
+        return holder.get();
     }
 
-    public static XdmNode[] getAttributeNodes(XdmNode node) {
+    @CEntryPoint(name = "j_getAttributeNodes")
+    public static CLongPointer getAttributeNodes(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle nodeRef) {
+        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
+
         List<XdmNode> children = new ArrayList<XdmNode>();
+        List<Long> childrenRefs = new ArrayList<Long>();
         XdmSequenceIterator iter = node.axisIterator(Axis.ATTRIBUTE);
         while (iter.hasNext()) {
-            children.add((XdmNode) iter.next());
+            //children.add((XdmNode) iter.next());
+            ObjectHandle objectHandle = SaxonCAPI.objectHandles.create( iter.next());
+            childrenRefs.add(objectHandle.rawValue());
         }
-        if (children.size() == 0) {
-            return null;
-        }
-        return children.toArray(new XdmNode[0]);
+        /*if (children.size() == 0) {
+            return -1;
+        }   */
+        long[] childRefs= iter.stream().mapToLong( i ->{
+            ObjectHandle objectHandle = SaxonCAPI.objectHandles.create( iter.next());
+            return objectHandle.rawValue();
+        }).toArray();
+        //SaxonCAPI.DataWrapper wrapper = new SaxonCAPI.DataWrapper(childRefs);
+
+        CLongPointer addr = SaxonCAPI.longArrayToNative(alloc, childRefs);
+        return addr;
     }
 
-    public static XdmNode[] getChildren(XdmNode node) {
+    @CEntryPoint(name = "j_getChildren")
+    public static CLongPointer getChildren(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle nodeRef) {
+
+        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
+
         List<XdmNode> children = new ArrayList<XdmNode>();
         XdmSequenceIterator iter = node.axisIterator(Axis.CHILD);
         while (iter.hasNext()) {
             children.add((XdmNode) iter.next());
         }
-        if (children.size() == 0) {
+        /*if (children.size() == 0) {
             return null;
-        }
-        return children.toArray(new XdmNode[0]);
+        }  */
+
+        long[] childRefs= iter.stream().mapToLong( i ->{
+            ObjectHandle objectHandle = SaxonCAPI.objectHandles.create( iter.next());
+            return objectHandle.rawValue();
+        }).toArray();
+
+       // return children.toArray(new XdmNode[0]);
+        CLongPointer addr = SaxonCAPI.longArrayToNative(alloc, childRefs);
+        return addr;
     }
 
 
+    @CEntryPoint(name = "j_getChild")
+    public static XdmNode getChild(IsolateThread thread, ObjectHandle nodeRef, int i) {
+        
+        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
 
-    public static XdmNode getChild(XdmNode node, int i) {
+
         XdmSequenceIterator iter = node.axisIterator(Axis.CHILD);
         int pos = 0;
         while (iter.hasNext()) {
@@ -367,8 +445,10 @@ public class XdmUtils {
         return null;
     }
 
-    public static int getChildCount(XdmNode node) {
+    @CEntryPoint(name = "j_getChildCount")
+    public static int getChildCount(IsolateThread thread, ObjectHandle nodeRef) {
         int num = 0;
+        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         XdmSequenceIterator iter = node.axisIterator(Axis.CHILD);
         while (iter.hasNext()) {
             iter.next();
@@ -378,8 +458,10 @@ public class XdmUtils {
         return num;
     }
 
-    public static int getAttributeCount(XdmNode node) {
+    @CEntryPoint(name = "j_getAttributeCount")
+    public static int getAttributeCount(IsolateThread thread, ObjectHandle nodeRef) {
         int num = 0;
+        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         XdmSequenceIterator iter = node.axisIterator(Axis.ATTRIBUTE);
         while (iter.hasNext()) {
             iter.next();

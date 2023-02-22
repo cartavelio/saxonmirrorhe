@@ -17,6 +17,10 @@ import net.sf.saxon.type.Converter;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.StringValue;
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CTypeConversion;
 
 import java.math.BigInteger;
 
@@ -73,16 +77,57 @@ public class XdmValueForCpp {
     }
 
 
-    public static XdmItem[] makeArrayFromXdmValue(XdmValue value) {
+    public static ProcessorDataAccumulator makeArrayFromXdmValue(XdmValue value) {
         XdmItem[] items = new XdmItem[value.size()];
 
         for(int i=0;i<value.size();i++) {
             XdmItem item = value.itemAt(i);
             items[i] = item;
         }
-        return items;
+        ProcessorDataAccumulator dataAccumulator = new ProcessorDataAccumulator(items);
+        return dataAccumulator;
 
     }
+
+
+    @CEntryPoint(name = "j_getTypedValue")
+    public static long getTypedValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
+        XdmNode value = SaxonCAPI.objectHandles.get(valueRef);
+        XdmValue resultValue = value.getTypedValue();
+        ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(resultValue);
+        return objectHandle.rawValue();
+    }
+
+
+
+    @CEntryPoint(name = "j_getBooleanValue")
+    public static byte getBooleanValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
+        XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
+
+        byte result =CTypeConversion.toCBoolean(value.getBooleanValue());
+        return result;
+    }
+
+
+    @CEntryPoint(name = "j_getDoubleValue")
+    public static double getDoubleValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
+        XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
+        return value.getDoubleValue();
+    }
+
+
+    @CEntryPoint(name = "j_getLongValue")
+    public static long getLongValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
+        XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
+        return value.getLongValue();
+    }
+
+    @CEntryPoint(name = "j_getHashCode")
+    public static int getHashCode(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
+        XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
+        return value.hashCode();
+    }
+
 
     public static Processor getProcessor(Object node){
         return (Processor) ((XdmNode)node).getUnderlyingNode().getConfiguration().getProcessor();

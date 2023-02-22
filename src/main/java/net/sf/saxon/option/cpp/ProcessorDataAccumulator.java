@@ -1,6 +1,7 @@
 package net.sf.saxon.option.cpp;
 
 import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.XdmValue;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
@@ -8,6 +9,7 @@ import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ProcessorDataAccumulator {
     private ArrayList<String> paramNames;
@@ -21,6 +23,21 @@ public class ProcessorDataAccumulator {
     public ProcessorDataAccumulator(int cap){
         paramNames = new ArrayList<String>(cap);
         values = new ArrayList(cap);
+    }
+
+
+    public ProcessorDataAccumulator(XdmValue[] ivalues){
+        values =  new ArrayList<XdmValue>(Arrays.asList(ivalues));
+
+    }
+
+    @CEntryPoint(name = "createProcessorDataWithArray")
+    public static long createProcessorDataWithArray(IsolateThread thread, ObjectHandle arrayRef){
+
+        
+        ProcessorDataAccumulator processorData = new ProcessorDataAccumulator();
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(processorData);
+        return handle.rawValue();
     }
 
 

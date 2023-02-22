@@ -32,6 +32,7 @@ import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.function.CFunctionPointer;
 import org.graalvm.nativeimage.c.function.InvokeCFunctionPointer;
 import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.xml.sax.InputSource;
 
@@ -130,6 +131,42 @@ public class SaxonCAPI {
         return -1;
     }
 
+    public static class DataWrapper{
+        long [] valueRefs;
+
+        public DataWrapper(long [] vals){
+            this.valueRefs = vals;
+        }
+
+        public long [] getDataRefs(){
+            return valueRefs;
+        }
+
+
+    };
+
+
+    interface AllocatorFn extends CFunctionPointer {
+       @InvokeCFunctionPointer
+       CLongPointer call(long size);
+     }
+
+     @CEntryPoint
+     static CLongPointer getLongArray(IsolateThread thread, AllocatorFn alloc, ObjectHandle refsObj) {
+        DataWrapper obj = objectHandles.get(refsObj);
+       return longArrayToNative(alloc, obj.getDataRefs());
+     }
+
+    static CLongPointer longArrayToNative(AllocatorFn alloc, long [] refs) {
+
+      CLongPointer a =  alloc.call(refs.length + 1);
+      for (int i = 0; i < refs.length; i++) {
+        a.write(i, refs[i]);
+      }
+      a.write(refs.length, (long) 0);
+      return a;
+    }
+
 
     /**
      * Static method to create Processor object given a configuration file
@@ -157,12 +194,7 @@ public class SaxonCAPI {
         return handle.rawValue();
 
     }
-
-    interface AllocatorFn extends CFunctionPointer {
-      @InvokeCFunctionPointer
-      CCharPointer call(long size);
-    }
-
+    
 
     /**
      * Error Listener to capture errors
