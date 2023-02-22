@@ -506,7 +506,11 @@ namespace TestRunner {
                     }
                     else {
                         Uri resourceUri = new Uri(((XdmNode) env).BaseUri, href);
-                        resources.Add(new Uri(uri), () => {
+                        Uri alias = new Uri(uri, UriKind.RelativeOrAbsolute);
+                        if (!alias.IsAbsoluteUri) {
+                            alias = new Uri(((XdmNode) env).BaseUri, alias);
+                        }
+                        resources.Add(alias, () => {
                             WebClient wc = new WebClient();
                             string str = wc.DownloadString(resourceUri);
                             return new StringReader(str);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using net.sf.saxon.ma.arrays;
 using net.sf.saxon.z;
 using Saxon.Impl.Helpers;
 using GroundedValue = net.sf.saxon.om.GroundedValue;
@@ -48,12 +49,12 @@ namespace Saxon.Impl.DataModel {
             if ((other.arrayLength()==0)) {
                 return this;
             }
-
             if (other is ImmArray) {
                 return new ImmArray(backing.AddRange(((ImmArray) other).backing));
             }
             else {
-                throw new NotImplementedException();
+                Saxon.Impl.DataModel.ImmArray a2 = new Saxon.Impl.DataModel.ImmArray((SimpleArrayItem)other);
+                return concat(a2);
             }
         }
         public override net.sf.saxon.ma.arrays.ArrayItem remove(int index) {
@@ -70,8 +71,8 @@ namespace Saxon.Impl.DataModel {
                 positionArray[p++] = iter.next();
             }
             Array.Sort(positionArray);
-            for (p = positionArray.Length; p >= 0; p--) {
-                vec = vec.RemoveAt(p);
+            for (p = positionArray.Length-1; p >= 0; p--) {
+                vec = vec.RemoveAt(positionArray[p]);
             }
             return new ImmArray(vec);
         }
