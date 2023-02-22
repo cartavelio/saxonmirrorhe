@@ -149,7 +149,14 @@ namespace Saxon.Impl.Dom {
         }
 
         public override string getLocalPart() {
-            return node.LocalName;
+            switch (node.NodeType) {
+                case XmlNodeType.Element:
+                case XmlNodeType.Attribute:
+                case XmlNodeType.ProcessingInstruction:
+                    return node.LocalName;
+                default:
+                    return "";
+            }
         }
 
         public override string getURI() {
