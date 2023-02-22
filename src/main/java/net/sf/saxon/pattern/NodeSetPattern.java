@@ -16,6 +16,7 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.AlphaCode;
@@ -192,7 +193,7 @@ public class NodeSetPattern extends Pattern {
                 }
             } catch (XPathException.Circularity | XPathException.StackOverflow e) {
                 throw e;
-            } catch (XPathException e) {
+            } catch (XPathException | UncheckedXPathException e) {
                 // treat pattern matching errors as a non-match
                 return false;
             }
