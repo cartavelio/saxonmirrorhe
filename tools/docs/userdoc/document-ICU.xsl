@@ -246,7 +246,7 @@
           select="."/>"); </xsl:for-each> } </xsl:result-document>
 
     <xsl:result-document href="{$output-root}-numbering.xml" expand-text="yes">
-      <section id="ICU-numbering-dates" title="Numbers and Dates from ICU">
+      <section id="ICU-numbers-and-dates" title="Numbers and Dates from ICU">
         <xsl:comment>AUTO-GENERATED: do not edit</xsl:comment>
         <xsl:comment>{$audit}</xsl:comment>
         <h1>Numbers and Dates from ICU</h1>
