@@ -176,7 +176,7 @@ public class Playground extends PerformanceTestCase {
     }
 
     @Test
-    //@Tag("performance")
+    @Tag("performance")
     public void testStringJoin() {
 
         List<UnicodeString> result = new ArrayList<>();
