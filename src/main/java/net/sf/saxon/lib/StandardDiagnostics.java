@@ -246,7 +246,7 @@ public class StandardDiagnostics {
     public void logStackTrace(XPathContext context, Logger out, int level) {
         if (level > 0) {
             int depth = 20;
-            while (depth-- > 0) {
+            while (depth-- > 0 && context != null) {
                 Component component = context.getCurrentComponent();
                 if (component != null) {
                     if (component.getActor() instanceof Mode) {
@@ -274,9 +274,7 @@ public class StandardDiagnostics {
                 } catch (Exception e) {
                     // no action
                 }
-                while (!(context instanceof XPathContextMajor)) {
-                    context = context.getCaller();
-                }
+                context = context.getMajorContext();
 
                 ContextOriginator originator = ((XPathContextMajor) context).getOrigin();
                 if (originator == null || originator instanceof Controller) {
@@ -303,6 +301,12 @@ public class StandardDiagnostics {
             sb.append("unknown caller (null)");
         } else if (originator instanceof Instruction) {
             sb.append(getInstructionName((Instruction) originator));
+            if (originator instanceof CallTemplate && ((CallTemplate)originator).usesTailRecursion()) {
+                sb.append(" (tail calls omitted)");
+            }
+            if (originator instanceof ApplyTemplates && ((ApplyTemplates) originator).useTailRecursion()) {
+                sb.append(" (tail calls omitted)");
+            }
         } else if (originator instanceof UserFunctionCall) {
             sb.append("function call");
         } else if (originator instanceof Controller) {

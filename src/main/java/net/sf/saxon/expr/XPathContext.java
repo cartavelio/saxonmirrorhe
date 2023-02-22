@@ -117,6 +117,14 @@ public interface XPathContext {
     XPathContext getCaller();
 
     /**
+     * Get the nearest XPathContextMajor (the next one down the stack, or this one if currently positioned
+     * on an XPathContextMajor). This will be null if unknown, or if the bottom of the stack has been reached.
+     * @return the nearest XPathContextMajor
+     */
+
+    XPathContextMajor getMajorContext();
+
+    /**
      * Create, set, and return a focus tracking iterator that wraps a supplied sequence iterator.
      *
      * @param iter the current iterator. The context item, position, and size are determined by reference

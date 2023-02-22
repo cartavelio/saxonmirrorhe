@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
@@ -546,10 +547,13 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
 
         @Override
         public TailCall processLeavingTail() throws XPathException {
+
             // TODO: the idea of tail call optimization is to reuse the caller's stack frame rather than
-            // creating a new one. We're doing this for the Java stack, but not for the context stack where
-            // local variables are held. It should be possible to avoid creating a new context, and instead
-            // to update the existing one in situ.
+            //  creating a new one. We're doing this for the Java stack, but not for the context stack where
+            //  local variables are held. It should be possible to avoid creating a new context, and instead
+            //  to update the existing one in situ. Experimented with this June 2022 (MHK) and it looks possible
+            //  in principle, but I hit trouble getting the current component right.
+
             NamedTemplate template = (NamedTemplate)targetComponent.getActor();
             XPathContextMajor c2 = evaluationContext.newContext();
             c2.setCurrentComponent(targetComponent);
@@ -558,6 +562,9 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
             c2.setTunnelParameters(tunnelParams);
             c2.openStackFrame(template.getStackFrameMap());
             c2.setCurrentMergeGroupIterator(null);
+
+            // Drop the link to the caller, so it can be garbage-collected
+            c2.setCaller(evaluationContext.getMajorContext().getCaller());
 
             // System.err.println("Tail call on template");
 

@@ -138,10 +138,7 @@ public class XPathContextMajor extends XPathContextMinor {
 
     public static XPathContextMajor newContext(XPathContextMinor prev) {
         XPathContextMajor c = new XPathContextMajor();
-        XPathContext p = prev;
-        while (!(p instanceof XPathContextMajor)) {
-            p = p.getCaller();
-        }
+        XPathContextMajor p = prev.getMajorContext();
         c.controller = p.getController();
         c.currentIterator = prev.getCurrentIterator();
         c.stackFrame = prev.getStackFrame();
@@ -156,10 +153,10 @@ public class XPathContextMajor extends XPathContextMinor {
         c.currentMergeGroupIterator = p.getCurrentMergeGroupIterator();
         c.caller = prev;
         c.tailCallInfo = null;
-        c.threadManager = ((XPathContextMajor) p).threadManager;
-        c.currentComponent = ((XPathContextMajor) p).currentComponent;
-        c.errorReporter = ((XPathContextMajor) p).errorReporter;
-        c.resourceResolver = ((XPathContextMajor) p).resourceResolver;
+        c.threadManager = p.threadManager;
+        c.currentComponent = p.currentComponent;
+        c.errorReporter = p.errorReporter;
+        c.resourceResolver = p.resourceResolver;
         c.temporaryOutputState = prev.temporaryOutputState;
         return c;
     }
@@ -662,7 +659,7 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setCurrentComponent(Component component) {
-        //System.err.println("Set current component := " + (component==null ? "null" : component.getCode()));
+        //System.err.println(this + " Set current component := " + (component==null ? "null" : component.getActor().toString()));
         currentComponent = component;
     }
 
