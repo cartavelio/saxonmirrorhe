@@ -17,7 +17,7 @@ namespace Saxon.Api {
         /// If the collection() or uri-collection() function
         /// was called with no arguments(to get the "default collection") this
         /// will be the URI of the default collection registered with the Configuration.</returns>
-        String CollectionURI();
+        string CollectionURI { get; }
 
         /// <summary>
         /// Get the URIs of the resources in the collection. This supports the fn:uri-collection()
@@ -31,7 +31,7 @@ namespace Saxon.Api {
         /// <param name="context">context the XPath evaluation context</param>
         /// <returns>an iterator over the URIs of the resources in the collection. The URIs are represented
         /// as Strings.They should preferably be absolute URIs.</returns>
-        List<String> GetResourceURIs(DynamicContext context);
+        IEnumerator<string> GetResourceURIs(DynamicContext context);
 
         /// <summary>
         /// Get the resources in the collection. This supports the fn:collection() function. It is not
@@ -41,8 +41,9 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="context">the XPath evaluation context</param>
         /// <returns>a List over the resources in the collection. This returns objects of class
-        /// <c>Riesource</c>.</returns>
-        List<IResource> GetResources(DynamicContext context);
+        /// <c>IResource</c>.</returns>
+        IEnumerator<IResource> GetResources(DynamicContext context);
+        
 
 
     }

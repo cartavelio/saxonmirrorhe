@@ -12,6 +12,7 @@ namespace System.Impl.Helpers {
         private net.sf.saxon.pull.PullEvent? currentEvent = net.sf.saxon.pull.PullEvent.START_OF_INPUT;
         private bool expandDefaults = true;
         private readonly SysCollGen.Stack<net.sf.saxon.om.NamespaceMap> namespaceStack = new SysCollGen.Stack<net.sf.saxon.om.NamespaceMap>();
+        public bool AcceptFragment { get; set; }
         public DotNetPullProvider(XmlReader parser)  {
             this.parser = parser;
             namespaceStack.Push(net.sf.saxon.om.NamespaceMap.emptyMap());
@@ -114,7 +115,10 @@ namespace System.Impl.Helpers {
                 try {
                     parser.Read();
                 } catch (XmlException e) {
-                    net.sf.saxon.trans.XPathException de = new net.sf.saxon.trans.XPathException(("Error reported by XML parser: "+e.Message), e);
+                    net.sf.saxon.trans.XPathException de = new net.sf.saxon.trans.XPathException(
+                        ("Error reported by XML parser"
+                         + (baseURI == null ? ": " : " processing " + baseURI + ": ")
+                         + e.Message), e);
                     net.sf.saxon.expr.parser.Loc loc = new net.sf.saxon.expr.parser.Loc(getSystemId(), e.LineNumber, e.LinePosition);
                     de.setLocator(loc);
                     throw de;
@@ -124,7 +128,10 @@ namespace System.Impl.Helpers {
                     de.setLocator(loc);
                     throw de;
                 } catch (System.Exception e) {
-                    net.sf.saxon.trans.XPathException de = new net.sf.saxon.trans.XPathException(("Error reported by XML parser: "+e.Message), e);
+                    net.sf.saxon.trans.XPathException de = new net.sf.saxon.trans.XPathException(
+                        ("Error reported by XML parser"
+                         + (baseURI == null ? ": " : " processing " + baseURI + ": ")
+                         + e.Message), e);
                     net.sf.saxon.expr.parser.Loc loc = new net.sf.saxon.expr.parser.Loc(getSystemId(), -1, -1);
                     de.setLocator(loc);
                     throw de;
@@ -139,7 +146,7 @@ namespace System.Impl.Helpers {
                     currentEvent = null;
                 } else {
                     currentEvent = mapInputKindToOutputKind(intype);
-                    if (((currentEvent==net.sf.saxon.pull.PullEvent.TEXT)&&(parser.Depth==0))) {
+                    if (currentEvent==net.sf.saxon.pull.PullEvent.TEXT && parser.Depth==0 && !AcceptFragment) {
                         currentEvent = null;
                     } else if ((currentEvent==net.sf.saxon.pull.PullEvent.START_ELEMENT)) {
                         net.sf.saxon.om.NamespaceMap nsMap = namespaceStack.Peek();

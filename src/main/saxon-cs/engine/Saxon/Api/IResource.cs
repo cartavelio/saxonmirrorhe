@@ -15,7 +15,7 @@ namespace Saxon.Api {
         /// Get a URI that identifies this resource
         /// </summary>
         /// <returns>a URI identifying the resource</returns>
-        String GetResourceURI();
+        string ResourceURI { get; }
 
         /// <summary>
         /// Get an XDM Item holding the contents of this resource.
@@ -32,6 +32,6 @@ namespace Saxon.Api {
         /// Get the media type (MIME type) of the resource if known
         /// </summary>
         /// <returns>the media type if known; otherwise null</returns>
-        String GetContentType();
+        string ContentType { get; }
     }
 }

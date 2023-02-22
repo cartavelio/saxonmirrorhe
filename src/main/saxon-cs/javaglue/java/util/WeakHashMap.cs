@@ -22,7 +22,7 @@ namespace java.util {
 
         public V put(K key, V value) {
             V current = get(key);
-            dict.Add(key, value);
+            dict.AddOrUpdate(key, value);
             return current;
         }
 

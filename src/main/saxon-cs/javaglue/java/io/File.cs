@@ -9,15 +9,25 @@ using System = java.lang.System;
 namespace java.io {
     public class File {
         private readonly string fileName;
+        private readonly string fullPath;
         public File(string name) {
             this.fileName = name;
+            this.fullPath = SysIO.Path.GetFullPath(name);
         }
 
         public File(SysUri uri) {
-            if (!uri.IsFile) {
-                throw new ArgumentException("URI " + uri + " is not a file URI");
+            if (SysUri.IsWellFormedUriString(uri.ToString(), UriKind.Relative)) {
+                this.fileName = uri.ToString();
+                this.fullPath = SysIO.Path.GetFullPath(this.fileName);
             }
-            fileName = uri.LocalPath;
+            else {
+                if (!uri.IsFile) {
+                    throw new ArgumentException("URI " + uri + " is not a file URI");
+                }
+
+                this.fileName = uri.LocalPath;
+                this.fullPath = SysIO.Path.GetFullPath(this.fileName);
+            }
         }
         
         public File(File dir, string name) {
@@ -53,18 +63,18 @@ namespace java.io {
         }
 
         public string getPath() {
-            return fileName;
+            return this.fullPath;
         }
 
         public string getAbsolutePath() {
-            return this.fileName;
+            return this.fullPath;
         }
         public string getCanonicalPath() {
-            return this.fileName;
+            return this.fullPath;
         }
 
         public bool exists() {
-            return SysIOFile.Exists(this.fileName);
+            return SysIOFile.Exists(this.fullPath);
         }
 
         public bool canRead() {
@@ -174,6 +184,10 @@ namespace java.io {
             // Probably not good enough in the long term, but for now we can ignore the
             // distinction between java.io.File and java.nio.Path.
             return this;
+        }
+
+        public override string ToString() {
+            return fileName;
         }
     }
 }

@@ -107,8 +107,11 @@ namespace Saxon.Api {
         /// </summary>
 
         public XmlResolver InputXmlResolver {
-            get => ((DotNetURIResolver) evaluator.getURIResolver()).getXmlResolver();
-            set => evaluator.setURIResolver(new DotNetURIResolver(value));
+            get => ((StandardURIResolver) evaluator.getURIResolver()).getXmlResolver();
+            set => evaluator.setURIResolver(
+                new StandardURIResolver(
+                    evaluator.getUnderlyingQueryContext().getConfiguration(), 
+                    value));
         }
 
         /// <summary>

@@ -4,6 +4,7 @@ using System.Xml;
 using net.sf.saxon.s9api;
 using net.sf.saxon.trans;
 using Saxon.Api.Support;
+using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
 
 namespace Saxon.Api {
@@ -82,8 +83,11 @@ namespace Saxon.Api {
         /// </summary>
 
         public XmlResolver InputXmlResolver {
-            get => ((DotNetURIResolver) selector.getURIResolver()).getXmlResolver();
-            set => selector.setURIResolver(new DotNetURIResolver(value));
+            get => ((StandardURIResolver) selector.getURIResolver()).getXmlResolver();
+            set => selector.setURIResolver(
+                new StandardURIResolver(
+                    selector.getUnderlyingXPathContext().getXPathContextObject().getConfiguration(), 
+                    value));
         }
 
         /// <summary>

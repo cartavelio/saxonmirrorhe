@@ -69,5 +69,51 @@ namespace Saxon.Impl.Helpers {
             input.RemoveFirst();
             return first.Value;
         }
+
+        public static bool EqualLists<T>(SysCollGen.IList<T> one, SysCollGen.IList<T> two) {
+            if (one.Count != two.Count) {
+                return false;
+            }
+
+            SysCollGen.IEnumerator<T> iter1 = one.GetEnumerator();
+            SysCollGen.IEnumerator<T> iter2 = two.GetEnumerator();
+            while (iter1.MoveNext() && iter2.MoveNext()) {
+                if (iter1.Current != null && !iter1.Current.Equals(iter2.Current)) {
+                    iter1.Dispose();
+                    iter2.Dispose();
+                    return false;
+                }
+            }
+            iter1.Dispose();
+            iter2.Dispose();
+            return true;
+        }
+
+        public static int ListHashCode<T>(SysCollGen.IList<T> list) {
+            int h = 531642;
+            foreach (T t in list) {
+                h ^= t.GetHashCode();
+            }
+            return h;
+        }
     }
+
+    // public class ComparableList<T> : SysCollGen.List<T> {
+    //     public override bool Equals(object other) {
+    //         if (other is ComparableList<T>) {
+    //             return ListUtils.EqualLists(this, (ComparableList<T>) other);
+    //         }
+    //         else {
+    //             return this == other;
+    //         }
+    //     }
+    //
+    //     public override int GetHashCode() {
+    //         int h = 654321;
+    //         foreach (T t in this) {
+    //             h ^= t.GetHashCode();
+    //         }
+    //         return h;
+    //     }
+    // }
 }
