@@ -9,13 +9,6 @@ var enableScroll = function() {
     dScroll = false;
 }
 
-/* scrollToElement used for javadoc and dotnetdoc links */
-var scrollToElement = function(elementItem) {
-    if (elementItem != null) {
-        elementItem.scrollIntoView(true);
-    }
-};
-
 /* item is the currently highlighted item in the nav list
     i.e. the span element with @class= "hot" */
 var item;

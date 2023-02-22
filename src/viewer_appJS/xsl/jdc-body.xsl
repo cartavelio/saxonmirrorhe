@@ -691,7 +691,6 @@
 
 
     <xsl:template match="class|interface|enum" mode="show-class">
-        <xsl:param name="subpage" as="xs:string*" select="''"/>
         <!-- Construct main page content for a javadoc class.
             May need additional package documents for superclasses, if comments are missing;
             so load these first. -->
@@ -710,15 +709,11 @@
         <xsl:choose>
             <xsl:when test="exists($reqDocs)">
                 <ixsl:schedule-action document="{string-join($reqDocs, ' ')}">
-                    <xsl:call-template name="show-class2">
-                        <xsl:with-param name="subpage" select="$subpage"/>
-                    </xsl:call-template>
+                    <xsl:call-template name="show-class2"/>
                 </ixsl:schedule-action>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:call-template name="show-class2">
-                    <xsl:with-param name="subpage" select="$subpage"/>
-                </xsl:call-template>
+                <xsl:call-template name="show-class2"/>
             </xsl:otherwise>
         </xsl:choose>
         
@@ -728,7 +723,6 @@
         <!-- Delegates only appear in C# API. 
             Process these separately because they are sufficiently different to 
             Classes, Interfaces, etc. -->
-        <xsl:param name="subpage" as="xs:string*" select="''"/>
         
         <xsl:result-document href="#main" method="ixsl:replace-content">
             
@@ -753,7 +747,6 @@
     </xsl:template>
     
     <xsl:template name="show-class2">
-        <xsl:param name="subpage"/> 
         <!-- The context item is the class|interface|enum -->
         <xsl:variable name="isDotNetApiMember" select="/package/@id eq 'Saxon.Api'" as="xs:boolean"/>
         
@@ -1088,8 +1081,6 @@
         </xsl:if>
             
         </xsl:result-document>
-        
-        <xsl:sequence select="f:scrollpage($subpage)"/>
     </xsl:template>
     
     <xsl:template match="enumConstant|field|property|indexer" mode="detail">
