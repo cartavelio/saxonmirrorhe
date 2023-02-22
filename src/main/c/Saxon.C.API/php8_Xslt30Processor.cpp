@@ -463,7 +463,7 @@ PHP_METHOD(Xslt30Processor,  setTargetEdition)
     }
 }
 
-PHP_METHOD(Xslt30Processor,  setRelocate)
+PHP_METHOD(Xslt30Processor,  setRelocatable)
 {
     Xslt30Processor *xslt30Processor;
     bool relocate = false;
@@ -476,7 +476,7 @@ PHP_METHOD(Xslt30Processor,  setRelocate)
     xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
     xslt30Processor = obj->xslt30Processor;
     if (xslt30Processor != nullptr) {
-        xslt30Processor->setRelocate(relocate);
+        xslt30Processor->setRelocatable(relocate);
     }
 }
 
@@ -627,6 +627,10 @@ zend_function_entry Xslt30Processor_methods[] = {
         PHP_ME(Xslt30Processor, compileFromFileAndSave, arginfo_saxonc_xp_compileFromFileAndSave, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor, compileFromAssociatedFile, arginfo_saxonc_xp_compileFromAssociatedFile, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  setJustInTimeCompilation, arginfo_saxonc_xp_setJustInTimeCompilation, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor,  setRelocatable, arginfo_saxonc_xp_setRelocatable, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor,  setFastCompilation, arginfo_saxonc_xp_setFastCompilation, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor,  setXsltLanguageVersion, arginfo_saxonc_xp_setXsltLanguageVersion, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor,  setTargetEdition, arginfo_saxonc_xp_setTargetEdition, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  setParameter, arginfo_saxonc_xp_setParameter, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  clearParameters, arginfo_saxonc_xp_clearParameters, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  exceptionOccurred, arginfo_saxonc_xp_exceptionOccurred, ZEND_ACC_PUBLIC)
