@@ -276,12 +276,10 @@ public class ComputedElement extends ElementCreator {
      * for the element name
      *
      * @param context    The evaluation context (not used)
-     * @param copiedNode Not applicable to this overload
      * @return the name code for the element name
      */
 
-    @Override
-    public NodeName getElementName(XPathContext context, NodeInfo copiedNode)
+    public NodeName getElementName(XPathContext context)
             throws XPathException {
 
         Controller controller = context.getController();
@@ -410,19 +408,51 @@ public class ComputedElement extends ElementCreator {
         return allowNameAsQName;
     }
 
+    /**
+     * Evaluate the instruction to produce a new element node. This method is typically used when there is
+     * a parent element or document in a result tree, to which the new element is added.
+     *
+     * @param output  the destination for the result
+     * @param context XPath dynamic evaluation context
+     * @return null (this instruction never returns a tail call)
+     * @throws XPathException if a dynamic error occurs
+     */
     @Override
-    public String getNewBaseURI(XPathContext context, NodeInfo copiedNode) {
-        return getStaticBaseURIString();
+    public TailCall processLeavingTail(Outputter output, XPathContext context)
+            throws XPathException {
+        ElementCreationDetails details = makeElementCreationDetails();
+        specificProcess(output, context, details);
+        return null;
+    }
+
+    @Override
+    public ElementCreationDetails makeElementCreationDetails() {
+        return new ElementCreationDetails() {
+            @Override
+            public NodeName getNodeName(XPathContext context) throws XPathException {
+                return getElementName(context);
+            }
+
+            @Override
+            public String getSystemId(XPathContext context) {
+                return getStaticBaseURIString();
+            }
+
+            @Override
+            public void processContent(Outputter out, XPathContext context) throws XPathException {
+                getContentExpression().process(out, context);
+            }
+        };
     }
 
     /**
      * Callback to output namespace nodes for the new element.
      * @param out        the Outputter where the namespace nodes are to be written
      * @param nodeName   The name of the element node being output
-     * @param copiedNode Where this is a copied node, the node being copied
+     * @param details Where this is a copied node, the node being copied
      */
     @Override
-    public void outputNamespaceNodes(Outputter out, NodeName nodeName, NodeInfo copiedNode)
+    public void outputNamespaceNodes(Outputter out, NodeName nodeName, ElementCreationDetails details)
             throws XPathException {
         // no action
     }

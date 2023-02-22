@@ -355,19 +355,19 @@ public class FixedElement extends ElementCreator {
         return itemType;
     }
 
-    /**
-     * Callback from the superclass ElementCreator to get the nameCode
-     * for the element name
-     *
-     * @param context    The evaluation context (not used)
-     * @param copiedNode For the benefit of the xsl:copy instruction, the node to be copied
-     * @return the name code for the element name
-     */
-
-    @Override
-    public NodeName getElementName(XPathContext context, NodeInfo copiedNode) {
-        return elementName;
-    }
+//    /**
+//     * Callback from the superclass ElementCreator to get the nameCode
+//     * for the element name
+//     *
+//     * @param context    The evaluation context (not used)
+//     * @param copiedNode For the benefit of the xsl:copy instruction, the node to be copied
+//     * @return the name code for the element name
+//     */
+//
+//    @Override
+//    public NodeName getElementName(XPathContext context, NodeInfo copiedNode) {
+//        return elementName;
+//    }
 
     public NodeName getFixedElementName() {
         return elementName;
@@ -387,11 +387,11 @@ public class FixedElement extends ElementCreator {
     }
 
 
-
-    @Override
-    public String getNewBaseURI(XPathContext context, NodeInfo copiedNode) {
-        return getStaticBaseURIString();
-    }
+//
+//    @Override
+//    public String getNewBaseURI(XPathContext context, NodeInfo copiedNode) {
+//        return getStaticBaseURIString();
+//    }
 
     /**
      * Determine whether the element constructor creates a fixed xsi:type attribute, and if so, return the
@@ -521,14 +521,51 @@ public class FixedElement extends ElementCreator {
     }
 
     /**
+     * Evaluate the instruction to produce a new element node. This method is typically used when there is
+     * a parent element or document in a result tree, to which the new element is added.
+     *
+     * @param output  the destination for the result
+     * @param context XPath dynamic evaluation context
+     * @return null (this instruction never returns a tail call)
+     * @throws XPathException if a dynamic error occurs
+     */
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context)
+            throws XPathException {
+        ElementCreationDetails details = makeElementCreationDetails();
+        specificProcess(output, context, details);
+        return null;
+    }
+
+    @Override
+    public ElementCreationDetails makeElementCreationDetails() {
+        return new ElementCreationDetails() {
+            @Override
+            public NodeName getNodeName(XPathContext context) {
+                return getFixedElementName();
+            }
+
+            @Override
+            public String getSystemId(XPathContext context) {
+                return getStaticBaseURIString();
+            }
+
+            @Override
+            public void processContent(Outputter out, XPathContext context) throws XPathException {
+                getContentExpression().process(out, context);
+            }
+        };
+    }
+
+    /**
      * Callback from the superclass ElementCreator to output the namespace nodes
      * @param out        The receiver to handle the output
      * @param nodeName   the name of this element
-     * @param copiedNode in the case of xsl:copy, the node being copied
+     * @param details in the case of xsl:copy, the node being copied
      */
 
     @Override
-    public void outputNamespaceNodes(Outputter out, NodeName nodeName, NodeInfo copiedNode)
+    public void outputNamespaceNodes(Outputter out, NodeName nodeName, ElementCreationDetails details)
             throws XPathException {
         for (NamespaceBinding ns : namespaceBindings) {
             out.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);

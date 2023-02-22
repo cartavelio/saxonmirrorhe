@@ -706,7 +706,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      * @throws XPathException if a dynamic error occurs
      */
 
-    private boolean evaluateOneToOne(AtomicValue value0, AtomicValue value1, XPathContext context) throws XPathException {
+    public boolean evaluateOneToOne(AtomicValue value0, AtomicValue value1, XPathContext context) throws XPathException {
         try {
             return !(value0 == null || value1 == null) &&
                     compare(value0, singletonOperator, value1, comparer.provideContext(context),
@@ -730,7 +730,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      * @throws XPathException if a dynamic error occurs
      */
 
-    private boolean evaluateManyToOne(SequenceIterator iter0, AtomicValue value1, XPathContext context) throws XPathException {
+    public boolean evaluateManyToOne(SequenceIterator iter0, AtomicValue value1, XPathContext context) throws XPathException {
         try {
             if (value1 == null) {
                 return false;

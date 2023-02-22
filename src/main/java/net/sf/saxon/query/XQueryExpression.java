@@ -375,7 +375,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
 
             context.openStackFrame(stackFrameMap);
 
-            SequenceIterator iterator = expression.iterate(context);
+            SequenceIterator iterator = getExpressionIterator(context);
             if (iterator instanceof GroundedIterator && ((GroundedIterator) iterator).isActuallyGrounded()) {
                 return iterator;
             } else {
@@ -390,6 +390,10 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             controller.reportFatalError(de);
             throw de;
         }
+    }
+
+    protected SequenceIterator getExpressionIterator(XPathContext context) throws XPathException {
+        return expression.iterate(context);
     }
 
     /**

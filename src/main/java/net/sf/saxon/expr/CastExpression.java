@@ -352,7 +352,7 @@ public class CastExpression extends CastingExpression implements Callable {
         return SequenceTool.itemOrEmpty(result);
     }
 
-    private AtomicValue doCast(AtomicValue value, XPathContext context) throws XPathException {
+    public AtomicValue doCast(AtomicValue value, XPathContext context) throws XPathException {
         if (value == null) {
             if (allowsEmpty()) {
                 return null;

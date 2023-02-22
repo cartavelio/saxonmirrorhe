@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr.instruct;
 
+import com.saxonica.ee.elab.eval.PushEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -45,6 +48,12 @@ public abstract class Actor implements ExpressionOwner, Location {
     private Component declaringComponent;
     private Visibility declaredVisibility = Visibility.UNDEFINED;
     private RetainedStaticContext retainedStaticContext;
+
+    private static boolean useElaboration = false;
+    //#if EE=true
+    static {
+        useElaboration = true;
+    }
 
     public Actor() {
     }
@@ -301,6 +310,24 @@ public abstract class Actor implements ExpressionOwner, Location {
     @Override
     public void setChildExpression(Expression expr) {
         setBody(expr);
+    }
+
+    private PushEvaluator pushEvaluator = (out, context) -> body.process(out, context);
+
+
+    protected void process(Outputter out, XPathContext context) throws XPathException {
+        //#if EE==true
+        if (useElaboration) {
+            if (pushEvaluator == null) {
+                pushEvaluator = Elaborator.makeElaborator(body).elaborateForPush();
+            }
+            pushEvaluator.process(out, context);
+        } else {
+            //#endif
+            body.process(out, context);
+            //#if EE==true
+        }
+        //#endif
     }
 }
 

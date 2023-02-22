@@ -215,6 +215,10 @@ public final class CardinalityChecker extends UnaryExpression {
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
         SequenceIterator base = getBaseExpression().iterate(context);
+        return checkCardinality(base, context);
+    }
+
+    public SequenceIterator checkCardinality(SequenceIterator base, XPathContext context) throws XPathException {
 
         // If the base iterator knows how many items there are, then check it now rather than wasting time
 

@@ -230,8 +230,12 @@ public final class ItemChecker extends UnaryExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
+        SequenceIterator base = getBaseExpression().iterate(context);
+        return checkSequence(base, context);
+    }
+
+    public SequenceIterator checkSequence(SequenceIterator base, XPathContext context) {
         final Expression baseExpr = getBaseExpression();
-        SequenceIterator base = baseExpr.iterate(context);
         final TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         Consumer<Item> checker = item -> {
             if (requiredItemType.matches(item, th)) {
@@ -258,8 +262,12 @@ public final class ItemChecker extends UnaryExpression {
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        final TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         Item item = getBaseExpression().evaluateItem(context);
+        return checkItem(item, context);
+    }
+
+    public Item checkItem(Item item, XPathContext context) throws XPathException {
+        final TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         if (item == null) {
             return null;
         }

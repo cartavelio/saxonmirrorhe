@@ -76,6 +76,11 @@ public final class IsLastExpression extends Expression {
         return BooleanValue.get(condition == c.isAtLast());
     }
 
+    @Override
+    public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
+        return condition == context.isAtLast();
+    }
+
     /**
      * Determine the data type of the expression
      *

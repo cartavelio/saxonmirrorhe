@@ -12,6 +12,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -362,6 +363,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
     @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
+        Instrumentation.count("VC (INT)");
         try {
             AtomicValue v0 = (AtomicValue) getLhsExpression().evaluateItem(context);
             if (v0 == null) {
