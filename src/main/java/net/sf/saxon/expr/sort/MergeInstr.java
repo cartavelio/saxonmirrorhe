@@ -9,14 +9,12 @@ package net.sf.saxon.expr.sort;
 
 import com.saxonica.ee.stream.adjunct.MergeInstrAdjunct;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorManager;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.Instruction;
-import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.lib.Feature;
@@ -844,25 +842,6 @@ public class MergeInstr extends Instruction {
         out.endElement();
     }
 
-
-    /*@Nullable*/
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context)
-            throws XPathException {
-        SequenceIterator iter = iterate(context);
-        try {
-            SequenceTool.supply(iter, /*(ItemConsumer<? super Item>)*/ it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES));
-        } catch (UncheckedXPathException err) {
-            iter.close();
-            XPathException e = err.getXPathException();
-            e.maybeSetLocation(getLocation());
-            e.maybeSetContext(context);
-            throw e;
-        } finally {
-            iter.close();
-        }
-        return null;
-    }
 
     /**
      * Make an elaborator for this expression

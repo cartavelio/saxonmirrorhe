@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
@@ -554,11 +553,6 @@ public class ForEachGroup extends Instruction
     @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         getActionExpression().checkPermittedContents(parentType, false);
-    }
-
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     /**

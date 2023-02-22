@@ -290,11 +290,6 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
         return true;
     }
 
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
-    }
-
     /**
      * Establish the target mode, at run-time. This (a) resolves overrides across packages,
      * and (b) handles mode="#current".

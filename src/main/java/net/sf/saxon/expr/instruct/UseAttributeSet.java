@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PushElaborator;
@@ -319,53 +318,6 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
 
     public StructuredQName getTargetAttributeSetName() {
         return targetName;
-    }
-
-    /**
-     * ProcessLeavingTail: called to do the real work of this instruction. This method
-     * must be implemented in each subclass. The results of the instruction are written
-     * to the current Receiver, which can be obtained via the Controller.
-     *
-     *
-     * @param output the destination for the result
-     * @param context The dynamic context of the transformation, giving access to the current node,
-     *                the current variables, etc.
-     * @return null if the instruction has completed execution; or a TailCall indicating
-     * a function call or template call that is delegated to the caller, to be made after the stack has
-     * been unwound so as to save stack space.
-     */
-
-    /*@Nullable*/
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        Component target;
-
-        if (bindingSlot < 0) {
-            target = getFixedTarget();
-        } else {
-            target = context.getTargetComponent(bindingSlot);
-            if (target.isHiddenAbstractComponent()) {
-                XPathException err = new XPathException("Cannot expand an abstract attribute set ("
-                                                                + targetName.getDisplayName()
-                                                                + ") with no implementation", "XTDE3052");
-                err.setLocation(getLocation());
-                throw err;
-            }
-        }
-        if (target == null) {
-            throw new AssertionError("Failed to locate attribute set " + getTargetAttributeSetName().getEQName());
-        }
-        AttributeSet as = (AttributeSet) target.getActor();
-        XPathContextMajor c2 = context.newContext();
-        c2.setCurrentComponent(target);
-        c2.setOrigin(this);
-        SlotManager sm = as.getStackFrameMap();
-        if (sm == null) {
-            sm = SlotManager.EMPTY;
-        }
-        c2.openStackFrame(sm);
-        as.expand(output, c2);
-        return null;
     }
 
     /**

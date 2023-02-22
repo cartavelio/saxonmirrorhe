@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
@@ -462,67 +461,6 @@ public final class LocalParam extends Instruction implements LocalBinding {
     @Override
     public Iterable<Operand> operands() {
         return operandSparseList(selectOp, conversionOp);
-    }
-
-    /**
-     * Process the local parameter declaration
-     *
-     *
-     * @param output the destination for the result
-     * @param context the dynamic context
-     * @return either null if processing is complete, or a tailcall if one is left outstanding
-     * @throws net.sf.saxon.trans.XPathException
-     *          if a dynamic error occurs in the evaluation
-     */
-
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
-//        int wasSupplied = context.useLocalParameter(variableQName, slotNumber, isTunnelParam());
-//        switch (wasSupplied) {
-//            case ParameterSet.SUPPLIED_AND_CHECKED:
-//                // No action needed
-//                break;
-//
-//            case ParameterSet.SUPPLIED:
-//                // if a parameter was supplied by the caller, with no type-checking by the caller,
-//                // then we may need to convert it to the type required
-//                if (conversionOp != null) {
-//                    context.setLocalVariable(slotNumber, conversionEvaluator.evaluate(context));
-//                    // We do an eager evaluation here for safety, because the result of the
-//                    // type conversion overwrites the slot where the actual supplied parameter
-//                    // is contained.
-//                }
-//                break;
-//
-//            // don't evaluate the default if a value has been supplied or if it has already been
-//            // evaluated by virtue of a forwards reference
-//
-//            case ParameterSet.NOT_SUPPLIED:
-//                if (isRequiredParam() || isImplicitlyRequiredParam()) {
-//                    String name = "$" + getVariableQName().getDisplayName();
-//                    int suppliedAsTunnel = context.useLocalParameter(variableQName, slotNumber, !isTunnelParam());
-//                    String message = "No value supplied for required parameter " + name;
-//                    if (isImplicitlyRequiredParam()) {
-//                        message += ". A value is required because " +
-//                                "the default value is not a valid instance of the required type";
-//                    }
-//                    if (suppliedAsTunnel != ParameterSet.NOT_SUPPLIED) {
-//                        if (isTunnelParam()) {
-//                            message += ". A non-tunnel parameter with this name was supplied, but a tunnel parameter is required";
-//                        } else {
-//                            message += ". A tunnel parameter with this name was supplied, but a non-tunnel parameter is required";
-//                        }
-//                    }
-//                    XPathException e = new XPathException(message);
-//                    e.setXPathContext(context);
-//                    e.setErrorCode("XTDE0700");
-//                    throw e;
-//                }
-//                context.setLocalVariable(slotNumber, getSelectValue(context));
-//                break;
-//        }
-//        return null;
     }
 
     /**

@@ -20,7 +20,6 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
@@ -399,60 +398,6 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
         }
     }
 
-    /**
-     * Process this instruction. If the called template contains a tail call (which may be
-     * an xsl:call-template or xsl:apply-templates instruction) then the tail call will not
-     * actually be evaluated, but will be returned in a TailCall object for the caller to execute.
-     *
-     *
-     * @param output the destination for the result
-     * @param context the dynamic context for this transformation
-     * @return an object containing information about the tail call to be executed by the
-     *         caller. Returns null if there is no tail call.
-     */
-
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        if (useTailRecursion) {
-            Component targetComponent;
-            if (bindingSlot >= 0) {
-                targetComponent = context.getTargetComponent(bindingSlot);
-            } else {
-                targetComponent = getFixedTarget();
-            }
-            if (targetComponent == null) {
-                throw new XPathException("Internal Saxon error: No binding available for call-template instruction", SaxonErrorCode.SXPK0001, this.getLocation());
-            }
-            if (targetComponent.isHiddenAbstractComponent()) {
-                throw new XPathException("Cannot call an abstract template (" +
-                                                 calledTemplateName.getDisplayName() +
-                                                 ") with no implementation", "XTDE3052", this.getLocation());
-            }
-
-            // handle parameters if any
-
-            ParameterSet params = assembleParams(context, actualParams);
-            ParameterSet tunnels = assembleTunnelParams(context, tunnelParams);
-
-            // Call the named template. Actually, don't call it; rather construct a call package
-            // and return it to the caller, who will then process this package.
-
-            //System.err.println("Call template using tail recursion");
-            if (params == null) {                  // bug 490967
-                params = ParameterSet.EMPTY_PARAMETER_SET;
-            }
-
-            // clear all the local variables: they are no longer needed
-            Arrays.fill(context.getStackFrame().getStackFrameValues(), null);
-
-            return new CallTemplatePackage(targetComponent, params, tunnels, this, output, context);
-
-        } else {
-            process(output, context);
-            return null;
-        }
-    }
-
     @Override
     public StructuredQName getObjectName() {
         return template == null ? null : template.getTemplateName();
@@ -623,47 +568,80 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
         @Override
         public PushEvaluator elaborateForPush() {
             CallTemplate expr = (CallTemplate)getExpression();
+            final int bindingSlot = expr.getBindingSlot();
             if (expr.useTailRecursion) {
-                return CSharp.methodRef(expr::processLeavingTail);
-//
-//                    Component targetComponent;
-//                    if (bindingSlot >= 0) {
-//                        targetComponent = context.getTargetComponent(bindingSlot);
-//                    } else {
-//                        targetComponent = fixedTarget;
-//                    }
-//                    if (targetComponent == null) {
-//                        throw new XPathException("Internal Saxon error: No binding available for call-template instruction",
-//                                                 SaxonErrorCode.SXPK0001, expr.getLocation());
-//                    }
-//                    if (targetComponent.isHiddenAbstractComponent()) {
-//                        throw new XPathException("Cannot call an abstract template (" +
-//                                                         expr.calledTemplateName.getDisplayName() +
-//                                                         ") with no implementation", "XTDE3052", expr.getLocation());
-//                    }
-//
-//                    // handle parameters if any
-//
-//                    ParameterSet params = assembleParams(context, expr.actualParams);
-//                    ParameterSet tunnels = assembleTunnelParams(context, expr.tunnelParams);
-//
-//                    // Call the named template. Actually, don't call it; rather construct a call package
-//                    // and return it to the caller, who will then process this package.
-//
-//                    //System.err.println("Call template using tail recursion");
-//                    if (params == null) {                  // bug 490967
-//                        params = ParameterSet.EMPTY_PARAMETER_SET;
-//                    }
-//
-//                    // clear all the local variables: they are no longer needed
-//                    Arrays.fill(context.getStackFrame().getStackFrameValues(), null);
-//
-//                    return new CallTemplatePackage(targetComponent, params, tunnels, expr, output, context);
+                return (output, context) -> {
+                    Component targetComponent;
+                    if (bindingSlot >= 0) {
+                        targetComponent = context.getTargetComponent(bindingSlot);
+                    } else {
+                        targetComponent = expr.getFixedTarget();
+                    }
+                    if (targetComponent == null) {
+                        throw new XPathException("Internal Saxon error: No binding available for call-template instruction",
+                                                 SaxonErrorCode.SXPK0001, expr.getLocation());
+                    }
+                    if (targetComponent.isHiddenAbstractComponent()) {
+                        throw new XPathException("Cannot call an abstract template (" +
+                                                         expr.calledTemplateName.getDisplayName() +
+                                                         ") with no implementation", "XTDE3052", expr.getLocation());
+                    }
 
+                    // handle parameters if any
+
+                    ParameterSet params = assembleParams(context, expr.actualParams);
+                    ParameterSet tunnels = assembleTunnelParams(context, expr.tunnelParams);
+
+                    // Call the named template. Actually, don't call it; rather construct a call package
+                    // and return it to the caller, who will then process this package.
+
+                    //System.err.println("Call template using tail recursion");
+                    if (params == null) {                  // bug 490967
+                        params = ParameterSet.EMPTY_PARAMETER_SET;
+                    }
+
+                    // clear all the local variables: they are no longer needed
+                    Arrays.fill(context.getStackFrame().getStackFrameValues(), null);
+
+                    return new CallTemplatePackage(targetComponent, params, tunnels, expr, output, context);
+                };
 
             } else {
                 return (output, context) -> {
-                    expr.process(output, context);
+                    NamedTemplate t;
+                    Component target = expr.getFixedTarget();
+                    if (bindingSlot >= 0) {
+                        target = context.getTargetComponent(bindingSlot);
+                        if (target.isHiddenAbstractComponent()) {
+                            XPathException err = new XPathException("Cannot call an abstract template (" +
+                                                                            expr.calledTemplateName.getDisplayName() +
+                                                                            ") with no implementation", "XTDE3052");
+                            err.setLocation(expr.getLocation());
+                            throw err;
+                        }
+                    }
+                    t = (NamedTemplate) target.getActor();
+                    XPathContextMajor c2 = context.newContext();
+                    c2.setCurrentComponent(target);
+                    c2.setOrigin(expr);
+                    c2.openStackFrame(t.getStackFrameMap());
+                    c2.setLocalParameters(assembleParams(context, expr.actualParams));
+                    c2.setTunnelParameters(assembleTunnelParams(context, expr.tunnelParams));
+                    if (expr.isWithinDeclaredStreamableConstruct) {
+                        c2.setCurrentGroupIterator(null);
+                    }
+                    c2.setCurrentMergeGroupIterator(null);
+
+                    try {
+                        TailCall tc = t.expand(output, c2);
+                        dispatchTailCall(tc);
+                    } catch (StackOverflowError e) {
+                        XPathException err = new XPathException.StackOverflow(
+                                "Too many nested template or function calls. The stylesheet may be looping.",
+                                SaxonErrorCode.SXLM0001, expr.getLocation());
+                        err.setXPathContext(context);
+                        throw err;
+                    }
                     return null;
                 };
             }

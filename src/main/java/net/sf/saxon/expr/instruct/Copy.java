@@ -416,11 +416,6 @@ public class Copy extends ElementCreator {
         }
     }
 
-    @Override
-    public TailCall processLeavingTail(Outputter out, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(out, context);
-    }
-
     @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public static void copyUnparsedEntities(NodeInfo source, Outputter out) throws XPathException {
         Iterator<String> unparsedEntities = source.getTreeInfo().getUnparsedEntityNames();

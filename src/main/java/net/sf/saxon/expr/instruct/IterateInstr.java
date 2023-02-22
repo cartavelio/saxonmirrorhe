@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
@@ -314,13 +313,6 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
                 getOnCompletion().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
-    }
-
-
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        PushEvaluator push = makeElaborator().elaborateForPush();
-        return push.processLeavingTail(output, context);
     }
 
 

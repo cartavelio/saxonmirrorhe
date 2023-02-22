@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.expr.elab.*;
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.BooleanFn;
@@ -948,24 +947,6 @@ public class Choose extends Instruction implements ConditionalInstruction {
             getAction(i).export(out);
         }
         out.endElement();
-    }
-
-    /**
-     * Process this instruction, that is, choose an xsl:when or xsl:otherwise child
-     * and process it.
-     *
-     *
-     * @param output the destination for the result
-     * @param context the dynamic context of this transformation
-     * @return a TailCall, if the chosen branch ends with a call of call-template or
-     *         apply-templates. It is the caller's responsibility to execute such a TailCall.
-     *         If there is no TailCall, returns null.
-     * @throws XPathException if any non-recoverable dynamic error occurs
-     */
-
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     /**

@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.EagerEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
@@ -119,23 +118,6 @@ public class LocalParamBlock extends Instruction {
         out.endElement();
     }
 
-
-    /*@Nullable*/
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
-//        for (Operand o : operands()) {
-//            LocalParam param = (LocalParam)o.getChildExpression();
-//            try {
-//                context.setLocalVariable(param.getSlotNumber(), param.getSelectValue(context));
-//            } catch (XPathException e) {
-//                e.maybeSetLocation(param.getLocation());
-//                e.maybeSetContext(context);
-//                throw e;
-//            }
-//        }
-//        return null;
-    }
 
     /**
      * An implementation of Expression must provide at least one of the methods evaluateItem(), iterate(), or process().

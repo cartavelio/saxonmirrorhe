@@ -7,17 +7,15 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.expr.elab.*;
-import net.sf.saxon.Controller;
-import net.sf.saxon.event.Outputter;
-import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.lib.TraceListener;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.FocusIterator;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.PrependSequenceIterator;
@@ -66,7 +64,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
         if (threads != null) {
             threadsOp = new Operand(this, threads, OperandRole.SINGLE_ATOMIC);
         }
-        this.containsTailCall = containsTailCall && action instanceof TailCallReturner;
+        //this.containsTailCall = containsTailCall && action instanceof TailCallReturner;
     }
 
     /**
@@ -470,74 +468,74 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
         getAction().checkPermittedContents(parentType, false);
     }
 
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        Controller controller = context.getController();
-        assert controller != null;
-
-        XPathContextMajor c2 = context.newContext();
-        c2.setOrigin(this);
-        FocusIterator iter = c2.trackFocus(getSelect().iterate(context));
-        c2.setCurrentTemplateRule(null);
-
-        Expression action = getAction();
-        if (containsTailCall) {
-            if (controller.isTracing()) {
-                TraceListener listener = controller.getTraceListener();
-                assert listener != null;
-                Item item = iter.next();
-                if (item == null) {
-                    return null;
-                }
-                listener.startCurrentItem(item);
-                TailCall tc = ((TailCallReturner) action).processLeavingTail(output, c2);
-                listener.endCurrentItem(item);
-                return tc;
-            } else {
-                Item item = iter.next();
-                if (item == null) {
-                    return null;
-                }
-                return ((TailCallReturner) action).processLeavingTail(output, c2);
-            }
-        } else {
-            PipelineConfiguration pipe = output.getPipelineConfiguration();
-            pipe.setXPathContext(c2);
-            NodeInfo separator = null;
-            if (separatorOp != null) {
-                separator = makeSeparator(context);
-            }
-            if (controller.isTracing() || separator != null) {
-                TraceListener listener = controller.getTraceListener();
-                boolean first = true;
-                for (Item item; (item = iter.next()) != null; ) {
-                    if (controller.isTracing()) {
-                        assert listener != null;
-                        listener.startCurrentItem(item);
-                    }
-                    if (separator != null) {
-                        if (first) {
-                            first = false;
-                        } else {
-                            output.append(separator);
-                        }
-                    }
-                    action.process(output, c2);
-                    if (controller.isTracing()) {
-                        listener.endCurrentItem(item);
-                    }
-                }
-            } else {
-                try {
-                    SequenceTool.supply(iter, (ItemConsumer<? super Item>) item -> action.process(output, c2));
-                } catch (UncheckedXPathException err) {
-                    throw err.getXPathException();
-                }
-            }
-            pipe.setXPathContext(context);
-        }
-        return null;
-    }
+//    @Override
+//    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
+//        Controller controller = context.getController();
+//        assert controller != null;
+//
+//        XPathContextMajor c2 = context.newContext();
+//        c2.setOrigin(this);
+//        FocusIterator iter = c2.trackFocus(getSelect().iterate(context));
+//        c2.setCurrentTemplateRule(null);
+//
+//        Expression action = getAction();
+//        if (containsTailCall) {
+//            if (controller.isTracing()) {
+//                TraceListener listener = controller.getTraceListener();
+//                assert listener != null;
+//                Item item = iter.next();
+//                if (item == null) {
+//                    return null;
+//                }
+//                listener.startCurrentItem(item);
+//                TailCall tc = ((TailCallReturner) action).processLeavingTail(output, c2);
+//                listener.endCurrentItem(item);
+//                return tc;
+//            } else {
+//                Item item = iter.next();
+//                if (item == null) {
+//                    return null;
+//                }
+//                return ((TailCallReturner) action).processLeavingTail(output, c2);
+//            }
+//        } else {
+//            PipelineConfiguration pipe = output.getPipelineConfiguration();
+//            pipe.setXPathContext(c2);
+//            NodeInfo separator = null;
+//            if (separatorOp != null) {
+//                separator = makeSeparator(context);
+//            }
+//            if (controller.isTracing() || separator != null) {
+//                TraceListener listener = controller.getTraceListener();
+//                boolean first = true;
+//                for (Item item; (item = iter.next()) != null; ) {
+//                    if (controller.isTracing()) {
+//                        assert listener != null;
+//                        listener.startCurrentItem(item);
+//                    }
+//                    if (separator != null) {
+//                        if (first) {
+//                            first = false;
+//                        } else {
+//                            output.append(separator);
+//                        }
+//                    }
+//                    action.process(output, c2);
+//                    if (controller.isTracing()) {
+//                        listener.endCurrentItem(item);
+//                    }
+//                }
+//            } else {
+//                try {
+//                    SequenceTool.supply(iter, (ItemConsumer<? super Item>) item -> action.process(output, c2));
+//                } catch (UncheckedXPathException err) {
+//                    throw err.getXPathException();
+//                }
+//            }
+//            pipe.setXPathContext(context);
+//        }
+//        return null;
+//    }
 
     protected NodeInfo makeSeparator(XPathContext context) throws XPathException {
         NodeInfo separator;
@@ -655,17 +653,41 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
 
     public static class ForEachElaborator extends PullElaborator {
 
+        private NodeInfo makeSeparator(UnicodeStringEvaluator evaluator, XPathContext context) throws XPathException {
+            UnicodeString sepValue = evaluator.eval(context);
+            Orphan orphan = new Orphan(context.getConfiguration());
+            orphan.setNodeKind(Type.TEXT);
+            orphan.setStringValue(sepValue);
+            return orphan;
+        }
+
         @Override
         public PullEvaluator elaborateForPull() {
             ForEach forEach = (ForEach) getExpression();
             PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
             PullEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPull();
-            ContextMappingFunction mapper = CSharp.methodRef(action::iterate);
-            return context -> {
-                XPathContextMinor c2 = context.newMinorContext();
-                c2.trackFocus(select.iterate(context));
-                return new ContextMappingIterator(mapper, c2);
-            };
+            if (forEach.getSeparatorExpression() == null) {
+                ContextMappingFunction mapper = CSharp.methodRef(action::iterate);
+                return context -> {
+                    XPathContextMinor c2 = context.newMinorContext();
+                    c2.trackFocus(select.iterate(context));
+                    return new ContextMappingIterator(mapper, c2);
+                };
+            } else {
+                UnicodeStringEvaluator sepEval = forEach.getSeparatorExpression().makeElaborator().elaborateForUnicodeString(true);
+                return context -> {
+                    NodeInfo separator = makeSeparator(sepEval, context);
+                    ContextMappingFunction mapper = cxt -> {
+                        if (cxt.getCurrentIterator().position() == 1) {
+                            return action.iterate(cxt);
+                        } else {
+                            return new PrependSequenceIterator(separator, action.iterate(cxt));
+                        }
+                    };
+                    return new ContextMappingIterator(mapper, context);
+                };
+
+            }
         }
 
         @Override
@@ -673,16 +695,36 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             ForEach forEach = (ForEach)getExpression();
             PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
             PushEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPush();
-            return (out, context) -> {
-                XPathContextMinor c2 = context.newMinorContext();
-                FocusIterator iter = c2.trackFocus(select.iterate(context));
-                TailCall tc = null;
-                while (iter.next() != null) {
-                    dispatchTailCall(tc);
-                    tc = action.processLeavingTail(out, c2);
-                }
-                return tc;
-            };
+            if (forEach.getSeparatorExpression() == null) {
+                return (out, context) -> {
+                    XPathContextMinor c2 = context.newMinorContext();
+                    FocusIterator iter = c2.trackFocus(select.iterate(context));
+                    TailCall tc = null;
+                    while (iter.next() != null) {
+                        dispatchTailCall(tc);
+                        tc = action.processLeavingTail(out, c2);
+                    }
+                    return tc;
+                };
+            } else {
+                UnicodeStringEvaluator sepEval = forEach.getSeparatorExpression().makeElaborator().elaborateForUnicodeString(true);
+                return (out, context) -> {
+                    NodeInfo separator = makeSeparator(sepEval, context);
+                    XPathContextMinor c2 = context.newMinorContext();
+                    FocusIterator iter = c2.trackFocus(select.iterate(context));
+                    TailCall tc = null;
+                    if (iter.next() != null) {
+                        dispatchTailCall(tc);
+                        tc = action.processLeavingTail(out, c2);
+                    }
+                    while (iter.next() != null) {
+                        out.append(separator);
+                        dispatchTailCall(tc);
+                        tc = action.processLeavingTail(out, c2);
+                    }
+                    return tc;
+                };
+            }
 
         }
 

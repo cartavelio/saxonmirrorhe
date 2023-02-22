@@ -10,8 +10,6 @@ package net.sf.saxon.expr;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.DocumentInstr;
-import net.sf.saxon.expr.instruct.TailCall;
-import net.sf.saxon.expr.instruct.TailCallReturner;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -36,7 +34,7 @@ import java.util.function.Supplier;
  */
 
 public class LetExpression extends Assignation
-        implements TailCallReturner, Consumer<MemoClosure.MemoClosureStatistics> {
+        implements Consumer<MemoClosure.MemoClosureStatistics> {
 
     //private int evaluationMode = ExpressionTool.UNDECIDED;
     private SequenceEvaluator evaluator = null;
@@ -751,41 +749,6 @@ public class LetExpression extends Assignation
         Expression newAction = getAction().copy(rebindings);
         let.setAction(newAction);
         return let;
-    }
-
-    /**
-     * ProcessLeavingTail: called to do the real work of this instruction.
-     * The results of the instruction are written
-     * to the current Receiver, which can be obtained via the Controller.
-     *
-     *
-     * @param output the destination for the result
-     * @param context The dynamic context of the transformation, giving access to the current node,
-     *                the current variables, etc.
-     * @return null if the instruction has completed execution; or a TailCall indicating
-     *         a function call or template call that is delegated to the caller, to be made after the stack has
-     *         been unwound so as to save stack space.
-     */
-
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        // minimize stack consumption by evaluating nested LET expressions iteratively
-        LetExpression let = this;
-        while (true) {
-            Sequence val = let.eval(context);
-            context.setLocalVariable(let.getLocalSlotNumber(), val);
-            if (let.getAction() instanceof LetExpression) {
-                let = (LetExpression) let.getAction();
-            } else {
-                break;
-            }
-        }
-        if (let.getAction() instanceof TailCallReturner) {
-            return ((TailCallReturner) let.getAction()).processLeavingTail(output, context);
-        } else {
-            let.getAction().process(output, context);
-            return null;
-        }
     }
 
 

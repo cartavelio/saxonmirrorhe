@@ -11,7 +11,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.NamespaceReducer;
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
@@ -378,11 +377,6 @@ public class ResultDocument extends Instruction
         return new PathMap.PathMapNodeSet(pathMap.makeNewRoot(this));
     }
 
-
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
-    }
 
     public void process(PushEvaluator content, XPathContext context) throws XPathException {
         checkNotTemporaryOutputState(context);

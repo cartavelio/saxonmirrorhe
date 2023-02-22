@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.SignificantItemDetector;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
@@ -344,55 +343,6 @@ public class ConditionalBlock extends Instruction {
         return "(" + getChildExpression(0).toShortString() + ", ...)";
     }
 
-
-
-    @Override
-    @SuppressWarnings("StatementWithEmptyBody")
-    public TailCall processLeavingTail(Outputter output, final XPathContext context) throws XPathException {
-
-        final List<OnNonEmptyExpr> onNonEmptyPending = new ArrayList<>();
-
-        Action action = () -> {
-            for (Expression e : onNonEmptyPending) {
-                e.process(output, context);
-            }
-        };
-
-        SignificantItemDetector significantItemDetector = new SignificantItemDetector(output, action);
-
-        for (Operand o : operands()) {
-            Expression child = o.getChildExpression();
-            try {
-                if (child instanceof OnEmptyExpr) {
-                    // Ignore on-empty instructions until the end
-                } else if (child instanceof OnNonEmptyExpr) {
-                    if (significantItemDetector.isEmpty()) {
-                        onNonEmptyPending.add((OnNonEmptyExpr)child);
-                    } else {
-                        child.process(output, context);
-                    }
-                } else {
-                    child.process(significantItemDetector, context);
-                }
-
-            } catch (XPathException e) {
-                e.maybeSetLocation(child.getLocation());
-                e.maybeSetContext(context);
-                throw e;
-            }
-        }
-
-        // At the end, if the content produced until now is empty, process the on-empty instructions
-        if (significantItemDetector.isEmpty()) {
-            for (Operand o : operands()) {
-                Expression child = o.getChildExpression();
-                if (child instanceof OnEmptyExpr) {
-                    child.process(output, context);
-                }
-            }
-        }
-        return null;
-    }
 
     /**
      * An implementation of Expression must provide at least one of the methods evaluateItem(), iterate(), or process().

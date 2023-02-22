@@ -186,11 +186,6 @@ public class MessageInstr extends Instruction {
         return super.optimize(visitor, contextInfo);
     }
 
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
-    }
-
     @CSharpReplaceBody(code="return new Saxon.Api.Message((Saxon.Api.XdmNode) Saxon.Api.XdmValue.Wrap(content), new Saxon.Api.QName(errorCode), abort, new Saxon.Api.Location(getLocation()));")
     private Message makeMessage(boolean abort, StructuredQName errorCode, NodeInfo content) {
         return new Message((XdmNode) XdmNode.wrap(content), new QName(errorCode), abort, getLocation());

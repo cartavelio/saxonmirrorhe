@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.RebindingMap;
@@ -164,22 +163,6 @@ public class TraceExpression extends Instruction {
     @Override
     public int getImplementationMethod() {
         return getChild().getImplementationMethod();
-    }
-
-    /**
-     * Execute this instruction, with the possibility of returning tail calls if there are any.
-     * This outputs the trace information via the registered TraceListener,
-     * and invokes the instruction being traced.
-     *
-     *
-     * @param output the destination for the result
-     * @param context the dynamic execution context
-     * @return either null, or a tail call that the caller must invoke on return
-     * @throws XPathException if execution of the target expression fails
-     */
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     /**

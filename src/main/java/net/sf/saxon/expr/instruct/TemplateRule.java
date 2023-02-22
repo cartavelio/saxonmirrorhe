@@ -52,7 +52,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
     protected PushEvaluator bodyEvaluator;
     protected Pattern matchPattern;
     private boolean _hasRequiredParams;
-    private boolean bodyIsTailCallReturner;
+    //private boolean bodyIsTailCallReturner;
     private SequenceType requiredType;
     private boolean declaredStreamable;
     private ItemType requiredContextItemType = AnyItemType.getInstance();
@@ -154,7 +154,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
     @Override
     public void setBody(Expression body) {
         this.body = body;
-        bodyIsTailCallReturner = (body instanceof TailCallReturner);
+        //bodyIsTailCallReturner = (body instanceof TailCallReturner);
     }
 
     public void setStackFrameMap(SlotManager map) {
@@ -506,7 +506,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
             tr.matchPattern = matchPattern.copy(new RebindingMap());
         }
         tr._hasRequiredParams = _hasRequiredParams;
-        tr.bodyIsTailCallReturner = bodyIsTailCallReturner;
+        //tr.bodyIsTailCallReturner = bodyIsTailCallReturner;
         tr.requiredType = requiredType;
         tr.declaredStreamable = declaredStreamable; // ? this can vary from one mode to another
         tr.requiredContextItemType = requiredContextItemType;

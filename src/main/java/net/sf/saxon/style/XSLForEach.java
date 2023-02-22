@@ -85,12 +85,12 @@ public class XSLForEach extends StyleElement {
             String value = att.getValue();
             if (f.equals("select")) {
                 select = makeExpression(value, att);
-            } else if (f.equals("array")) {
-                requireXslt40("array");
-                select = arrayToSequence(makeExpression(value, att));
-            } else if (f.equals("map")) {
-                requireXslt40("map");
-                select = mapToSequence(makeExpression(value, att));
+//            } else if (f.equals("array")) {
+//                requireXslt40("array");
+//                select = arrayToSequence(makeExpression(value, att));
+//            } else if (f.equals("map")) {
+//                requireXslt40("map");
+//                select = mapToSequence(makeExpression(value, att));
             } else if (f.equals("separator")) {
                 requireXslt40("separator");
                 separator = makeAttributeValueTemplate(value, att);
@@ -111,11 +111,7 @@ public class XSLForEach extends StyleElement {
         }
 
         if (select == null) {
-            if (getEffectiveVersion() >= 40) {
-                compileError("One of the attributes select|array|map must be present");
-            } else {
-                reportAbsence("select");
-            }
+            reportAbsence("select");
             select = Literal.makeEmptySequence();
         }
 
