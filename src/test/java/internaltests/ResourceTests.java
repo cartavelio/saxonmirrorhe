@@ -16,6 +16,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static com.ibm.icu.impl.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -24,6 +25,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 
 public class ResourceTests {
+
+    public static int javaMajorVersion() {
+        String vn = System.getProperty("java.version");
+        if (vn.startsWith("1.")) {
+            vn = vn.substring(2);
+        }
+        int dot = vn.indexOf('.');
+        if (dot >= 0) {
+            vn = vn.substring(0, dot);
+        }
+        return Integer.parseInt(vn);
+    }
 
     /**
      * Test that the file opened by an UnparsedTextIterator gets closed
@@ -47,7 +60,12 @@ public class ResourceTests {
                 // no action
             }
             // Test whether reader is closed
-            assertTrue(isReaderClosed(reader));
+            if (javaMajorVersion() >= 9) {
+                assertTrue(isReaderClosed(reader));
+            } else {
+                // It doesn't get closed under Java 8 because the Cleaner isn't available
+                assertFalse(isReaderClosed(reader));
+            }
         } catch (FileNotFoundException e) {
             fail(e);
         }

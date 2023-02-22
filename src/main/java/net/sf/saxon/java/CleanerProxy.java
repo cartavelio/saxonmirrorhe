@@ -7,6 +7,8 @@
 
 package net.sf.saxon.java;
 
+import net.sf.saxon.Configuration;
+
 import java.lang.ref.Cleaner;
 
 /**
@@ -21,16 +23,26 @@ import java.lang.ref.Cleaner;
 
 public class CleanerProxy {
 
+    
     private final Cleaner cleaner;
 
-    public CleanerProxy() {
+    private CleanerProxy(Cleaner cleaner) {
+        this.cleaner = cleaner;
+    }
+
+    public static CleanerProxy makeCleanerProxy(Configuration config) {
+        try {
+            Class.forName("java.lang.ref.Cleaner", true, config.getClass().getClassLoader());
+        } catch (ClassNotFoundException e) {
+            return new CleanerProxy(null);
+        }
         Cleaner c = null;
         try {
             c = Cleaner.create();
         } catch (Exception e) {
             System.err.println("Warning: no Cleaner available (this is expected on Java 8)");
         }
-        cleaner = c;
+        return new CleanerProxy(c);
     }
 
     public CleanableProxy registerCleanupAction(Object obj, Runnable runnable) {
