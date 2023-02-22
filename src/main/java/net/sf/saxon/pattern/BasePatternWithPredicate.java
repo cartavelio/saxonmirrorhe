@@ -26,6 +26,8 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
 
+import java.util.ArrayList;
+
 /**
  * Class for handling patterns with simple non-positional boolean predicates
  */
@@ -251,7 +253,7 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
     public boolean isMotionless() {
         ContextItemStaticInfoEE cio = (ContextItemStaticInfoEE)getConfiguration().makeContextItemStaticInfo(getItemType(), false);
         cio.setContextPostureStriding();
-        Streamability.getStreamability(getPredicate(), cio, null);
+        Streamability.getStreamability(getPredicate(), cio, new ArrayList<>());
         return getBasePattern().isMotionless() &&
                 Streamability.getSweep(getPredicate()) == Sweep.MOTIONLESS;
     }
