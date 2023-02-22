@@ -58,11 +58,18 @@ public interface Numberer {
      * @param groupSeparator string to appear between groups of digits
      * @param letterValue    The letter-value specified to xsl:number: "alphabetic" or
      *                       "traditional". Can also be an empty string or null.
-     * @param ordinal        The value of the ordinal attribute specified to xsl:number
-     *                       The value "yes" indicates that ordinal numbers should be used; "" or null indicates
-     *                       that cardinal numbers
+     * @param cardinal       When called from xsl:number, the value is set to an empty string.
+     *                       When called from format-integer, the value is the value within
+     *                       parentheses after "c", for example "c(%spellout-masculine)"  supplies
+     *                       the value "%spellout-masculine".
+     * @param ordinal        When called from xsl:number, the value of the ordinal attribute ("true"
+     *                       and "1" are normalized to "yes").
+     *                       When called from format-integer, the value is the value within
+     *                       parentheses after "o", for example "o(%spellout-masculine)"  supplies
+     *                       the value "%spellout-masculine".
      * @return the formatted number. Note that no errors are reported; if the request
-     *         is invalid, the number is formatted as if the string() function were used.
+     * is invalid, the number is formatted as if the string() function were used.
+     * @since 12.0 - the "cardinal" argument was added in 12.0
      */
 
     String format(long number,
@@ -70,6 +77,7 @@ public interface Numberer {
                   int groupSize,
                   String groupSeparator,
                   String letterValue,
+                  String cardinal,
                   String ordinal);
 
     /**
@@ -81,17 +89,25 @@ public interface Numberer {
      * @param numGrpFormatter an object that handles insertion of grouping separators into the formatted number
      * @param letterValue     The letter-value specified to xsl:number: "alphabetic" or
      *                        "traditional". Can also be an empty string or null.
-     * @param ordinal         The value of the ordinal attribute specified to xsl:number
-     *                        The value "yes" indicates that ordinal numbers should be used; "" or null indicates
-     *                        that cardinal numbers
+     * @param cardinal       When called from xsl:number, the value is set to an empty string.
+     *                       When called from format-integer, the value is the value within
+     *                       parentheses after "c", for example "c(%spellout-masculine)"  supplies
+     *                       the value "%spellout-masculine".
+     * @param ordinal        When called from xsl:number, the value of the ordinal attribute ("true"
+     *                       and "1" are normalized to "yes").
+     *                       When called from format-integer, the value is the value within
+     *                       parentheses after "o", for example "o(%spellout-masculine)"  supplies
+     *                       the value "%spellout-masculine".
      * @return the formatted number. Note that no errors are reported; if the request
-     *         is invalid, the number is formatted as if the string() function were used.
+     * is invalid, the number is formatted as if the string() function were used.
+     * @since 12.0 - the "cardinal" argument was added in 12.0
      */
 
     String format(long number,
                   UnicodeString picture,
                   NumericGroupFormatter numGrpFormatter,
                   String letterValue,
+                  String cardinal,
                   String ordinal);
 
     /**

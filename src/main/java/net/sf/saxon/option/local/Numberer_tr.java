@@ -115,12 +115,12 @@ public class Numberer_tr extends AbstractNumberer {
     }
 
     @Override
-    public String toWords(long l) {
+    public String toWords(String cardinal, long l) {
         return numberer(l, LOWER_CASE);
     }
 
     @Override
-    public String toWords(long l, int format) {
+    public String toWords(String cardinal, long l, int format) {
         return numberer(l, format);
     }
 
@@ -296,13 +296,13 @@ public class Numberer_tr extends AbstractNumberer {
 
         System.out.println("Running some tests...");
 
-        System.out.println(Long.MAX_VALUE + " (Long.MAX_VALUE) in words: '" + tn.toWords(Long.MAX_VALUE, TITLE_CASE) + "'");
-        System.out.println(4425408 + " in words: '" + tn.toWords(4425408, TITLE_CASE) + "'");
-        System.out.println(5323156550L + " in words: '" + tn.toWords(5323156550L, TITLE_CASE) + "'");
-        System.out.println(10101010101L + " in words: '" + tn.toWords(10101010101L, TITLE_CASE) + "'");
-        System.out.println(101010101010L + " in words: '" + tn.toWords(101010101010L, TITLE_CASE) + "'");
-        System.out.println(111111111111L + " in words: '" + tn.toWords(111111111111L, TITLE_CASE) + "'");
-        System.out.println(156156L + " in words: '" + tn.toWords(156156L, TITLE_CASE) + "'");
+        System.out.println(Long.MAX_VALUE + " (Long.MAX_VALUE) in words: '" + tn.toWords("", Long.MAX_VALUE, TITLE_CASE) + "'");
+        System.out.println(4425408 + " in words: '" + tn.toWords("", 4425408, TITLE_CASE) + "'");
+        System.out.println(5323156550L + " in words: '" + tn.toWords("", 5323156550L, TITLE_CASE) + "'");
+        System.out.println(10101010101L + " in words: '" + tn.toWords("", 10101010101L, TITLE_CASE) + "'");
+        System.out.println(101010101010L + " in words: '" + tn.toWords("", 101010101010L, TITLE_CASE) + "'");
+        System.out.println(111111111111L + " in words: '" + tn.toWords("", 111111111111L, TITLE_CASE) + "'");
+        System.out.println(156156L + " in words: '" + tn.toWords("", 156156L, TITLE_CASE) + "'");
 
         System.out.println();
 

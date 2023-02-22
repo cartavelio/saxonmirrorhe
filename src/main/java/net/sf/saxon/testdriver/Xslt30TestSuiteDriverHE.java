@@ -1212,6 +1212,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         alwaysOn.add("feature/HTML5");
 
         needsPE.add("feature/Saxon-PE");
+        needsPE.add("feature/ICU_spellout");
 
         needsEE.add("languages_for_numbering");
         needsEE.add("feature/streaming");

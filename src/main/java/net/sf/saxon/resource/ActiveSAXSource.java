@@ -196,7 +196,7 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
                 }
                 errs = ((StandardErrorHandler) errorHandler).getErrorCount();
                 if (errs > 0) {
-                    String message = "The XML parser reported " + new Numberer_en().toWords(errs).toLowerCase() +
+                    String message = "The XML parser reported " + new Numberer_en().toWords("", errs).toLowerCase() +
                             " validation error" + (errs == 1 ? "" : "s");
                     if (dtdRecover) {
                         message += ". Processing continues, because recovery from validation errors was requested";

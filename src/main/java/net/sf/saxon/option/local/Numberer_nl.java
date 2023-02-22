@@ -64,23 +64,23 @@ public class Numberer_nl extends AbstractNumberer {
         } else if (number >= 1000000000) {
 
             long rem = number % 1000000000;
-            s = toWords(number / 1000000000) + " Miljard" +
+            s = toWords("", number / 1000000000) + " Miljard" +
                     (rem == 0 ? "" : (rem < 100 ? " en " : " ") +
                             toOrdinalWords(ordinalParam, rem, wordCase));
         } else if (number >= 1000000) {
 
             long rem = number % 1000000;
-            s = toWords(number / 1000000) + " Miljoen" +
+            s = toWords("", number / 1000000) + " Miljoen" +
                     (rem == 0 ? "" : (rem < 100 ? " en " : " ") +
                             toOrdinalWords(ordinalParam, rem, wordCase));
         } else if (number >= 1000) {
 
             long rem = number % 1000;
-            s = (number / 1000 == 1 ? "" : toWords(number / 1000)) + "Duizend" + " " +
+            s = (number / 1000 == 1 ? "" : toWords("", number / 1000)) + "Duizend" + " " +
                     toOrdinalWords(ordinalParam, rem, wordCase);
         } else if (number >= 100) {
             long rem = number % 100;
-            s = (number / 100 == 1 ? "" : toWords(number / 100)) + "Honderd" + toOrdinalWords(ordinalParam, rem, wordCase);
+            s = (number / 100 == 1 ? "" : toWords("", number / 100)) + "Honderd" + toOrdinalWords(ordinalParam, rem, wordCase);
         } else {
             if (number < 20) {
                 s = dutchOrdinalUnits[(int) number];
@@ -103,22 +103,22 @@ public class Numberer_nl extends AbstractNumberer {
     }
 
     @Override
-    public String toWords(long number) {
+    public String toWords(String cardinal, long number) {
         if (number >= 1000000000) {
             long rem = number % 1000000000;
-            return toWords(number / 1000000000) + " Miljard" +
-                    (rem == 0 ? "" : (rem < 100 ? "en" : " ") + toWords(rem));
+            return toWords(cardinal, number / 1000000000) + " Miljard" +
+                    (rem == 0 ? "" : (rem < 100 ? "en" : " ") + toWords(cardinal, rem));
         } else if (number >= 1000000) {
             long rem = number % 1000000;
-            return toWords(number / 1000000) + " Miljoen" +
-                    (rem == 0 ? "" : (rem < 100 ? "en" : " ") + toWords(rem));
+            return toWords(cardinal, number / 1000000) + " Miljoen" +
+                    (rem == 0 ? "" : (rem < 100 ? "en" : " ") + toWords(cardinal, rem));
         } else if (number >= 1000) {
             long rem = number % 1000;
-            return (number / 1000 == 1 ? "" : toWords(number / 1000)) + "Duizend" +
-                    (rem == 0 ? "" : (rem < 100 ? "en" : " ") + toWords(rem));
+            return (number / 1000 == 1 ? "" : toWords(cardinal, number / 1000)) + "Duizend" +
+                    (rem == 0 ? "" : (rem < 100 ? "en" : " ") + toWords(cardinal, rem));
         } else if (number >= 100) {
             long rem = number % 100;
-            return (number / 100 == 1 ? "" : toWords(number / 100)) + "Honderd" + toWords(rem);
+            return (number / 100 == 1 ? "" : toWords(cardinal, number / 100)) + "Honderd" + toWords(cardinal, rem);
         } else {
             if (number < 20) {
                 return dutchUnits[(int) number];
@@ -136,12 +136,12 @@ public class Numberer_nl extends AbstractNumberer {
     }
 
     @Override
-    public String toWords(long number, int wordCase) {
+    public String toWords(String cardinal, long number, int wordCase) {
         String s;
         if (number == 0) {
             s = "nul";
         } else {
-            s = toWords(number);
+            s = toWords(cardinal, number);
         }
         if (wordCase == UPPER_CASE) {
             return s.toUpperCase();

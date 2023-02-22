@@ -144,7 +144,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
             modifier = "";
         }
 
-        //boolean cardinal = modifier.startsWith("c");
+        boolean cardinal = modifier.startsWith("c");
         boolean ordinal = modifier.startsWith("o");
         //boolean traditional = modifier.endsWith("t");
         boolean alphabetic = modifier.endsWith("a");
@@ -156,7 +156,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
 
         String letterValue = alphabetic ? "alphabetic" : "traditional";
         String ordinalValue = ordinal ? "".equals(parenthetical) ? "yes" : parenthetical : "";
-
+        String cardinalValue = cardinal ? "".equals(parenthetical) ? "yes" : parenthetical : "";
 
         UnicodeString primary = StringView.tidy(primaryToken);
         Categories.Category isDecimalDigit = Categories.getCategory("Nd");
@@ -178,7 +178,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
             UnicodeString adjustedPicture = picGroupFormat.getAdjustedPicture();
             return num -> {
                 try {
-                    String s = numb.format(num.abs().longValue(), adjustedPicture, picGroupFormat, letterValue, ordinalValue);
+                    String s = numb.format(num.abs().longValue(), adjustedPicture, picGroupFormat, letterValue, "", ordinalValue);
                     return num.signum() < 0 ? ("-" + s) : s;
                 } catch (XPathException e) {
                     throw new UncheckedXPathException(e);
@@ -188,7 +188,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
             UnicodeString token = StringView.tidy(primaryToken);
             return num -> {
                 try {
-                    String s = numb.format(num.abs().longValue(), token, null, letterValue, ordinalValue);
+                    String s = numb.format(num.abs().longValue(), token, null, letterValue, cardinalValue, ordinalValue);
                     return num.signum() < 0 ? ("-" + s) : s;
                 } catch (XPathException e) {
                     throw new UncheckedXPathException(e);

@@ -69,7 +69,7 @@ public class Numberer_frBE extends AbstractNumberer {
       * @see net.sf.saxon.expr.number.Numberer_en#toWords(long)
       */
     @Override
-    public String toWords(long number) {
+    public String toWords(String cardinal, long number) {
         return toWords(number, true);
     }
 
@@ -79,8 +79,8 @@ public class Numberer_frBE extends AbstractNumberer {
       * @see net.sf.saxon.expr.number.Numberer_en#toWords(long, int)
       */
     @Override
-    public String toWords(long number, int wordCase) {
-        String s = toWords(number);
+    public String toWords(String cardinal, long number, int wordCase) {
+        String s = toWords(cardinal, number);
         if (wordCase == UPPER_CASE) {
             return s.toUpperCase();
         } else if (wordCase == LOWER_CASE) {
@@ -179,7 +179,7 @@ public class Numberer_frBE extends AbstractNumberer {
                 ord = frenchOrdinalTens[(int) int10];
             } else {
                 String link = (mod10 == 1 || mod10 == 11) ? ((int10 == 8) ? "-" : " et ") : "-";
-                String prefix = toWords(int10 * 10);
+                String prefix = toWords("", int10 * 10);
                 if (int10 == 8) {
                     prefix = prefix.substring(0, prefix.length() - 1);
                 }

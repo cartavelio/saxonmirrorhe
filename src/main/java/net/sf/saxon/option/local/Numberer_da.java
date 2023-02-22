@@ -56,19 +56,19 @@ public class Numberer_da extends AbstractNumberer {
             s = "hundrede";
         } else if (number >= 1000000000) {
             long rem = number % 1000000000;
-            s = (number / 1000000000 == 1 ? "en" : toWords(number / 1000000000)) + " milliard " +
+            s = (number / 1000000000 == 1 ? "en" : toWords("", number / 1000000000)) + " milliard " +
                     toOrdinalWords(ordinalParam, rem, wordCase);
         } else if (number >= 1000000) {
             long rem = number % 1000000;
-            s = (number / 1000000 == 1 ? "en" : toWords(number / 1000000)) + " million " +
+            s = (number / 1000000 == 1 ? "en" : toWords("", number / 1000000)) + " million " +
                     toOrdinalWords(ordinalParam, rem, wordCase);
         } else if (number >= 1000) {
             long rem = number % 1000;
-            s = (number / 1000 == 1 ? "et" : toWords(number / 1000)) + "tusind" + " " +
+            s = (number / 1000 == 1 ? "et" : toWords("", number / 1000)) + "tusind" + " " +
                     toOrdinalWords(ordinalParam, rem, wordCase);
         } else if (number >= 100) {
             long rem = number % 100;
-            s = (number / 100 == 1 ? "" : toWords(number / 100)) + "hundred" +
+            s = (number / 100 == 1 ? "" : toWords("", number / 100)) + "hundred" +
                     (rem == 0 || rem > 19 ? "" : "en") +
                     toOrdinalWords(ordinalParam, rem, wordCase);
         } else {
@@ -93,22 +93,22 @@ public class Numberer_da extends AbstractNumberer {
     }
 
     @Override
-    public String toWords(long number) {
+    public String toWords(String cardinal, long number) {
         if (number >= 1000000000) {
             long rem = number % 1000000000;
-            return (number / 1000000000 == 1 ? "en " : toWords(number / 1000000000)) + "milliard" +
-                    (rem == 0 ? "" : " ") + toWords(rem);
+            return (number / 1000000000 == 1 ? "en " : toWords(cardinal, number / 1000000000)) + "milliard" +
+                    (rem == 0 ? "" : " ") + toWords(cardinal, rem);
         } else if (number >= 1000000) {
             long rem = number % 1000000;
-            return (number / 1000000 == 1 ? "en " : toWords(number / 1000000)) + "million" +
-                    (rem == 0 ? "" : " ") + toWords(rem);
+            return (number / 1000000 == 1 ? "en " : toWords(cardinal, number / 1000000)) + "million" +
+                    (rem == 0 ? "" : " ") + toWords(cardinal, rem);
         } else if (number >= 1000) {
             long rem = number % 1000;
-            return toWords(number / 1000) + "tusind" +
-                    (rem == 0 ? "" : " ") + toWords(rem);
+            return toWords(cardinal, number / 1000) + "tusind" +
+                    (rem == 0 ? "" : " ") + toWords(cardinal, rem);
         } else if (number >= 100) {
             long rem = number % 100;
-            return toWords(number / 100) + "hundred" + (rem > 0 ? "og" + toWords(rem) : "");
+            return toWords(cardinal, number / 100) + "hundred" + (rem > 0 ? "og" + toWords(cardinal, rem) : "");
         } else {
             if (number < 20) return danishUnits[(int) number];
             int rem = (int) (number % 10);
@@ -117,12 +117,12 @@ public class Numberer_da extends AbstractNumberer {
     }
 
     @Override
-    public String toWords(long number, int wordCase) {
+    public String toWords(String cardinal, long number, int wordCase) {
         String s;
         if (number == 0) {
             s = "nul";
         } else {
-            s = toWords(number);
+            s = toWords(cardinal, number);
         }
         if (wordCase == UPPER_CASE) {
             return s.toUpperCase();

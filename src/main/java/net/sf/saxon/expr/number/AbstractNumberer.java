@@ -86,7 +86,7 @@ public abstract class AbstractNumberer implements Numberer {
      * Format a number into a string. This method is provided for backwards compatibility. It merely
      * calls the other format method after constructing a RegularGroupFormatter. The method is final;
      * localization subclasses should implement the method
-     * {@link net.sf.saxon.lib.Numberer#format(long, UnicodeString, NumericGroupFormatter, String, String)}
+     * {@link Numberer#format(long, UnicodeString, NumericGroupFormatter, String, String, String)}
      * rather than this method.
      *
      * @param number         The number to be formatted
@@ -96,11 +96,17 @@ public abstract class AbstractNumberer implements Numberer {
      * @param groupSeparator string to appear between groups of digits
      * @param letterValue    The letter-value specified to xsl:number: "alphabetic" or
      *                       "traditional". Can also be an empty string or null.
-     * @param ordinal        The value of the ordinal attribute specified to xsl:number
-     *                       The value "yes" indicates that ordinal numbers should be used; "" or null indicates
-     *                       that cardinal numbers
+     * @param cardinal       When called from xsl:number, the value is set to an empty string.
+     *                       When called from format-integer, the value is the value within
+     *                       parentheses after "c", for example "c(%spellout-masculine)"  supplies
+     *                       the value "%spellout-masculine".
+     * @param ordinal        When called from xsl:number, the value of the ordinal attribute ("true"
+     *                       and "1" are normalized to "yes").
+     *                       When called from format-integer, the value is the value within
+     *                       parentheses after "o", for example "o(%spellout-masculine)"  supplies
+     *                       the value "%spellout-masculine".
      * @return the formatted number. Note that no errors are reported; if the request
-     *         is invalid, the number is formatted as if the string() function were used.
+     * is invalid, the number is formatted as if the string() function were used.
      */
 
     @Override
@@ -109,11 +115,12 @@ public abstract class AbstractNumberer implements Numberer {
                                int groupSize,
                                String groupSeparator,
                                String letterValue,
+                               String cardinal,
                                String ordinal) {
 
         return format(number, picture,
-                new RegularGroupFormatter(groupSize, groupSeparator, EmptyUnicodeString.getInstance()),
-                letterValue, ordinal);
+                      new RegularGroupFormatter(groupSize, groupSeparator, EmptyUnicodeString.getInstance()),
+                      letterValue, cardinal, ordinal);
     }
 
     /**
@@ -125,17 +132,23 @@ public abstract class AbstractNumberer implements Numberer {
      * @param numGroupFormatter object contains separators to appear between groups of digits
      * @param letterValue       The letter-value specified to xsl:number: "alphabetic" or
      *                          "traditional". Can also be an empty string or null.
-     * @param ordinal           The value of the ordinal attribute specified to xsl:number
-     *                          The value "yes" indicates that ordinal numbers should be used; "" or null indicates
-     *                          cardinal numbers. A value such as "-er" indicates ordinal with a particular gender.
-     * @return the formatted number. Note that no errors are reported; if the request
-     *         is invalid, the number is formatted as if the string() function were used.
+     * @param cardinal       When called from xsl:number, the value is set to an empty string.
+     *                       When called from format-integer, the value is the value within
+     *                       parentheses after "c", for example "c(%spellout-masculine)"  supplies
+     *                       the value "%spellout-masculine".
+     * @param ordinal        When called from xsl:number, the value of the ordinal attribute ("true"
+     *                       and "1" are normalized to "yes").
+     *                       When called from format-integer, the value is the value within
+     *                       parentheses after "o", for example "o(%spellout-masculine)"  supplies
+     *                       the value "%spellout-masculine".     * @return the formatted number. Note that no errors are reported; if the request
+     * is invalid, the number is formatted as if the string() function were used.
      */
     @Override
     public String format(long number,
                          UnicodeString picture,
                          NumericGroupFormatter numGroupFormatter,
                          String letterValue,
+                         String cardinal,
                          String ordinal) {
 
 
@@ -190,7 +203,7 @@ public abstract class AbstractNumberer implements Numberer {
                 if (ordinal != null && !ordinal.isEmpty()) {
                     return toOrdinalWords(ordinal, number, wordCase);
                 } else {
-                    return toWords(number, wordCase);
+                    return toWords(cardinal, number, wordCase);
                 }
 
             case 'i':
@@ -733,27 +746,29 @@ public abstract class AbstractNumberer implements Numberer {
      * Show the number as words in title case. (We choose title case because
      * the result can then be converted algorithmically to lower case or upper case).
      *
-     * @param number the number to be formatted
+     * @param cardinal the value of the "cardinal" attribute as supplied by the user
+     * @param number   the number to be formatted
      * @return the number formatted as English words
      */
 
-    public abstract String toWords(long number);
+    public abstract String toWords(String cardinal, long number);
 
     /**
      * Format a number as English words with specified case options
      *
+     * @param cardinal the value of the "cardinal" attribute as supplied by the user
      * @param number   the number to be formatted
      * @param wordCase the required case for example {@link #UPPER_CASE},
      *                 {@link #LOWER_CASE}, {@link #TITLE_CASE}
      * @return the formatted number
      */
 
-    public String toWords(long number, int wordCase) {
+    public String toWords(String cardinal, long number, int wordCase) {
         String s;
         if (number == 0) {
             s = zero();
         } else {
-            s = toWords(number);
+            s = toWords(cardinal, number);
         }
         switch (wordCase) {
             case UPPER_CASE:
