@@ -189,11 +189,8 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * @param evalModes the argument evaluation modes to be used
      */
 
-    public void setArgumentEvaluationModes(EvaluationMode[] evalModes) {
+    public void setArgumentEvaluators(Evaluator[] evalModes) {
         argumentEvaluators = new Evaluator[evalModes.length];
-        for (int i=0; i<evalModes.length; i++) {
-            argumentEvaluators[i] = evalModes[i].getEvaluator();
-        }
     }
 
 
@@ -210,16 +207,16 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
             int cardinality = required.getCardinality();
 
             if (i == 0 && function.getDeclaredStreamability().isConsuming()) {
-                argumentEvaluators[i] = Evaluator.STREAMING_ARGUMENT.INSTANCE;
+                argumentEvaluators[i] = Evaluator.StreamingArgument.INSTANCE;
             } else if (function.getParameterDefinitions()[i].isIndexedVariable()) {
-                argumentEvaluators[i] = Evaluator.MAKE_INDEXED_VARIABLE.INSTANCE;
+                argumentEvaluators[i] = Evaluator.MakeIndexedVariable.INSTANCE;
             } else {
                 if (arg instanceof Literal) {
-                    argumentEvaluators[i] = Evaluator.LITERAL.INSTANCE;
+                    argumentEvaluators[i] = Evaluator.Literal.INSTANCE;
                 } else if (arg instanceof VariableReference) {
-                    argumentEvaluators[i] = Evaluator.VARIABLE.INSTANCE;
+                    argumentEvaluators[i] = Evaluator.Variable.INSTANCE;
                 } else if (cardinality == StaticProperty.EXACTLY_ONE) {
-                    argumentEvaluators[i] = Evaluator.SINGLE_ITEM.INSTANCE;
+                    argumentEvaluators[i] = Evaluator.SingleItem.INSTANCE;
                 } else if ((arg.getDependencies() & UNHANDLED_DEPENDENCIES) != 0) {
                     // If the argument contains a call to a user-defined function, then it might be a recursive call.
                     // It's better to evaluate it now, rather than waiting until we are on a new stack frame, as
@@ -227,12 +224,12 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     // If the argument contains calls to position(), last(), regex-group(), current-group(),
                     // current-merge-group(), etc, then in general we can't save the values in a Closure
                     // so we need to evaluate the argument eagerly. (Tests position-0103, merge-096).
-                    argumentEvaluators[i] = new Evaluator.EAGER_SEQUENCE();
+                    argumentEvaluators[i] = new Evaluator.EagerSequence();
                 } else if (!Cardinality.allowsMany(arg.getCardinality()) && arg.getCost() < 20) {
                     // the argument is cheap to evaluate and doesn't use much memory...
-                    argumentEvaluators[i] = new Evaluator.EAGER_SEQUENCE();
+                    argumentEvaluators[i] = new Evaluator.EagerSequence();
                 } else if (cardinality == StaticProperty.ALLOWS_ZERO_OR_ONE) {
-                    argumentEvaluators[i] = Evaluator.OPTIONAL_ITEM.INSTANCE;
+                    argumentEvaluators[i] = Evaluator.OptionalItem.INSTANCE;
                 } else if (arg instanceof Block && ((Block) arg).isCandidateForSharedAppend()) {
                     // If the expression is a Block, that is, it is appending a value to a sequence,
                     // then we have the opportunity to use a shared list underpinning the old value and
@@ -241,9 +238,9 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     // reference as one of its subexpressions. The most common case is that the first argument is a reference
                     // to an argument of recursive function, where the recursive function returns the result of
                     // appending to the sequence.
-                    argumentEvaluators[i] = Evaluator.SHARED_APPEND.INSTANCE;
+                    argumentEvaluators[i] = Evaluator.SharedAppend.INSTANCE;
                 } else {
-                    argumentEvaluators[i] = Evaluator.MEMO_CLOSURE.INSTANCE;
+                    argumentEvaluators[i] = Evaluator.MemoClosure.INSTANCE;
                 }
             }
             i++;
@@ -654,8 +651,8 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         }
         for (int i = 0; i < numArgs; i++) {
             Evaluator eval = argumentEvaluators[i];
-            if (eval == Evaluator.STREAMING_ARGUMENT.INSTANCE && !streamed) {
-                eval = Evaluator.EAGER_SEQUENCE.INSTANCE;
+            if (eval == Evaluator.StreamingArgument.INSTANCE && !streamed) {
+                eval = Evaluator.EagerSequence.INSTANCE;
             }
             actualArgs[i] = eval.evaluate(getArg(i), c);
 
@@ -683,7 +680,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         if (argumentEvaluators != null && getArity() > 0) {
             StringBuilder fsb = new StringBuilder(64);
             for (Evaluator e : argumentEvaluators) {
-                fsb.append(e.getEvaluationMode().getCode() + " ");
+                fsb.append(e.getCode() + " ");
             }
             out.emitAttribute("eval", Whitespace.trim(fsb.toString()));
         }

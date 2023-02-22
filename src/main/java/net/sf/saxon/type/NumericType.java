@@ -455,6 +455,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * name is returned
      */
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public StructuredQName getStructuredQName() {
         return new StructuredQName("xs", NamespaceConstant.SCHEMA, "numeric");
     }

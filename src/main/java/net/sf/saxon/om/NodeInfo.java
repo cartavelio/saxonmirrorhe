@@ -12,11 +12,11 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -56,7 +56,13 @@ import javax.xml.transform.SourceLocator;
  * a new implementation of this interface.
  */
 
-public interface NodeInfo extends ActiveSource, Item, Location {
+public interface NodeInfo extends Item, Location
+    // On Saxon-CS, NodeInfo doesn't implement Source because of multiple-inheritance problems
+    // Instead, use the asActiveSource() method to get a Source (this also works on Java)
+    //#if CSHARP==false
+    , ActiveSource
+    //#endif
+{
 
     /**
      * Get information about the tree to which this NodeInfo belongs
@@ -520,16 +526,31 @@ public interface NodeInfo extends ActiveSource, Item, Location {
         Navigator.copy(this, out, copyOptions, locationId);
     }
 
+    //#if CSHARP==false
+
     /**
      * Implement the {@link ActiveSource} interface by delivering the document to a
      * {@link Receiver}
+     *
      * @throws XPathException if the receiver reports a failure, for example a validation failure
      */
-
     @Override
     default void deliver(Receiver receiver, ParseOptions options) throws XPathException {
-        Sender.sendDocumentInfo(this, receiver,new Loc(getSystemId(), -1, -1));
+        Sender.sendDocumentInfo(this, receiver, new Loc(getSystemId(), -1, -1));
     }
+    //#endif
+
+    /**
+     * Obtain an {@link ActiveSource} object that allows the node to be used as input
+     * to any method that expects a {@code Source}
+     * @return an {@code ActiveSource} object representing this node
+     */
+
+    default ActiveSource asActiveSource() {
+        return new NodeSource(this);
+    }
+
+    void setSystemId(String systemId);
 
     /**
      * Get all namespace declarations and undeclarations defined on this element.

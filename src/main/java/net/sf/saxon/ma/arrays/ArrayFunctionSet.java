@@ -13,6 +13,7 @@ import net.sf.saxon.functions.FoldingFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
@@ -146,11 +147,21 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         register("tail", 1, ArrayTail.class, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
 
+        // TODO: the following functions should be private
+
         register("_to-sequence", 1, ArrayToSequence.class, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
 
         register("_from-sequence", 1, ArrayFromSequence.class, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | INS, null);
+
+        // TODO: the following functions should be XPath 4.0 only
+
+        register("of", 1, ArrayOf.class, ArrayItemType.ANY_ARRAY_TYPE, ONE, SEQV)
+                .arg(0, Parcel.TYPE, STAR, null);
+
+        register("members", 1, ArrayMembers.class, Parcel.TYPE, STAR, SEQV)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
 
 
     }
@@ -400,6 +411,40 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 array = array.concat(nextArray);
             }
             return array;
+        }
+
+    }
+
+    /**
+     * Implementation of the proposed XP40 function array:members(array(*)) =&gt; parcel*
+     */
+    public static class ArrayMembers extends SystemFunction {
+
+        @Override
+        public GroundedValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem input = (ArrayItem)arguments[0].head();
+            List<Parcel> parcels = new ArrayList<>(input.arrayLength());
+            for (GroundedValue member : input.members()) {
+                parcels.add(new Parcel(member));
+            }
+            return SequenceExtent.makeSequenceExtent(parcels);
+        }
+
+    }
+
+    /**
+     * Implementation of the proposed XP40 function array:of(parcel*) =&gt; array
+     */
+    public static class ArrayOf extends SystemFunction {
+
+        @Override
+        public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+            List<GroundedValue> members = new ArrayList<>();
+            SequenceIterator parcels = arguments[0].iterate();
+            for (Item parcel; (parcel = parcels.next()) != null;) {
+                members.add(((Parcel)parcel).getObject());
+            }
+            return new SimpleArrayItem(members);
         }
 
     }

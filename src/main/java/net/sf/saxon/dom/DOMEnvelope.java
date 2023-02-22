@@ -185,7 +185,7 @@ public class DOMEnvelope implements ExternalObjectModel {
         if (supplied instanceof DOMSource) {
             Node startNode = ((DOMSource) supplied).getNode();
             if (startNode instanceof NodeOverNodeInfo) {
-                return ((NodeOverNodeInfo) startNode).getUnderlyingNodeInfo();
+                return ((NodeOverNodeInfo) startNode).getUnderlyingNodeInfo().asActiveSource();
             }
         }
         return null;

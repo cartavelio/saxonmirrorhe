@@ -22,7 +22,6 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpInnerClass;
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 
 import javax.xml.transform.ErrorListener;
@@ -537,7 +536,6 @@ public abstract class AbstractXsltTransformer {
             boolean closed = false;
 
             @Override
-            @CSharpModifiers(code="public")
             public void close() throws XPathException {
                 if (!closed) {
                     try {

@@ -9,6 +9,7 @@ package net.sf.saxon;
 
 
 import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 /**
  * The Version class holds the SAXON version information.
@@ -113,8 +114,17 @@ public final class Version {
      */
 
     public static String getProductTitle() {
-        return getProductName() + '-' + softwareEdition + ' ' +
-            getProductVersion() + (platform.isJava() ? 'J' : 'N') + " from Saxonica";
+        return getProductName() + '-' + getSoftwarePlatform() + '-' + softwareEdition + ' ' +
+            getProductVersion()  + " from Saxonica";
+    }
+
+    /**
+     * Get a string identifying the execution platform: "J" for "Java", "CS" for C#, etc
+     */
+
+    @CSharpReplaceBody(code="return \"CS\";")
+    public static String getSoftwarePlatform() {
+        return "J";
     }
 
     /**

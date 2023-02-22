@@ -18,6 +18,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.BooleanValue;
 
 
@@ -49,6 +50,7 @@ public class StartsWith extends CollatingFunctionFixed {
             return new SystemFunctionCall.Optimized(this, arguments) {
                 
                 @Override
+                @CSharpModifiers(code = {"public", "override"})
                 public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
                     String s0 = getArg(0).evaluateAsString(context).toString();
                     String s1 = getArg(1).evaluateAsString(context).toString();

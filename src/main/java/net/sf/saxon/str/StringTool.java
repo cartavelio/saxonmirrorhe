@@ -2,7 +2,6 @@ package net.sf.saxon.str;
 
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.transpile.CSharpInnerClass;
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntIterator;
 
@@ -88,13 +87,11 @@ public class StringTool {
             boolean expectingLowSurrogate;
 
             @Override
-            @CSharpModifiers(code={"public"})
             public boolean hasNext() {
                 return i < value.length();
             }
 
             @Override
-            @CSharpModifiers(code = {"public"})
             public int next() {
                 int c = value.charAt(i++);
                 if (UTF16CharacterSet.isHighSurrogate(c)) {

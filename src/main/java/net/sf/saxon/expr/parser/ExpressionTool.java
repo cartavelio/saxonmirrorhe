@@ -190,13 +190,13 @@ public class ExpressionTool {
 
     public static Evaluator lazyEvaluator(Expression exp, boolean repeatable) {
         if (exp instanceof Literal) {
-            return Evaluator.LITERAL.INSTANCE;
+            return Evaluator.Literal.INSTANCE;
 
         } else if (exp instanceof VariableReference) {
-            return Evaluator.VARIABLE.INSTANCE;
+            return Evaluator.Variable.INSTANCE;
 
         } else if (exp instanceof SuppliedParameterReference) {
-            return Evaluator.SUPPLIED_PARAMETER.INSTANCE;
+            return Evaluator.SuppliedParameter.INSTANCE;
 
         } else if ((exp.getDependencies() &
                             (StaticProperty.DEPENDS_ON_POSITION |
@@ -209,7 +209,7 @@ public class ExpressionTool {
             return eagerEvaluator(exp);
 
         } else if (exp instanceof ErrorExpression) {
-            return Evaluator.SINGLE_ITEM.INSTANCE;
+            return Evaluator.SingleItem.INSTANCE;
             // evaluateItem() on an error expression throws the latent exception
 
         } else if (!Cardinality.allowsMany(exp.getCardinality())) {
@@ -222,11 +222,11 @@ public class ExpressionTool {
             TailExpression tail = (TailExpression) exp;
             Expression base = tail.getBaseExpression();
             if (base instanceof VariableReference) {
-                return Evaluator.LAZY_TAIL.INSTANCE;
+                return Evaluator.LazyTail.INSTANCE;
             } else if (repeatable) {
-                return Evaluator.MEMO_CLOSURE.INSTANCE;
+                return Evaluator.MemoClosure.INSTANCE;
             } else {
-                return Evaluator.LAZY_SEQUENCE.INSTANCE;
+                return Evaluator.LazySequence.INSTANCE;
             }
 
         } else if (exp instanceof Block && ((Block) exp).isCandidateForSharedAppend()) {
@@ -237,13 +237,13 @@ public class ExpressionTool {
             // reference as one of its subexpressions. The most common case is that the first argument is a reference
             // to an argument of recursive function, where the recursive function returns the result of
             // appending to the sequence.
-            return Evaluator.SHARED_APPEND.INSTANCE;
+            return Evaluator.SharedAppend.INSTANCE;
 
         } else if (repeatable) {
             // create a Closure, a wrapper for the expression and its context
-            return Evaluator.MEMO_CLOSURE.INSTANCE;
+            return Evaluator.MemoClosure.INSTANCE;
         } else {
-            return Evaluator.LAZY_SEQUENCE.INSTANCE;
+            return Evaluator.LazySequence.INSTANCE;
         }
     }
 
@@ -259,23 +259,23 @@ public class ExpressionTool {
 
     public static Evaluator eagerEvaluator(Expression exp) {
         if (exp instanceof Literal && !(((Literal) exp).getGroundedValue() instanceof Closure)) {
-            return Evaluator.LITERAL.INSTANCE;
+            return Evaluator.Literal.INSTANCE;
         }
         if (exp instanceof VariableReference) {
-            return Evaluator.VARIABLE.INSTANCE;
+            return Evaluator.Variable.INSTANCE;
         }
         int m = exp.getImplementationMethod();
         if ((m & Expression.EVALUATE_METHOD) != 0 && !Cardinality.allowsMany(exp.getCardinality())) {
             if (Cardinality.allowsZero(exp.getCardinality())) {
-                return Evaluator.OPTIONAL_ITEM.INSTANCE;
+                return Evaluator.OptionalItem.INSTANCE;
             } else {
-                return Evaluator.SINGLE_ITEM.INSTANCE;
+                return Evaluator.SingleItem.INSTANCE;
             }
 
         } else if ((m & Expression.ITERATE_METHOD) != 0) {
-            return Evaluator.EAGER_SEQUENCE.INSTANCE;
+            return Evaluator.EagerSequence.INSTANCE;
         } else {
-            return Evaluator.PROCESS.INSTANCE;
+            return Evaluator.Process.INSTANCE;
         }
     }
 
@@ -1402,7 +1402,7 @@ public class ExpressionTool {
         // now avoids generating warnings for this case.
         if (start instanceof RootExpression &&
                 step instanceof AxisExpression && ((AxisExpression) step).getAxis() == AxisInfo.PARENT) {
-            return Literal.makeEmptySequence();
+            return net.sf.saxon.expr.Literal.makeEmptySequence();
         }
 
         SlashExpression expr = new SlashExpression(start, step);

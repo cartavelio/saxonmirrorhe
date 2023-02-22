@@ -41,7 +41,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
     public SystemFunctionCall(SystemFunction target, Expression[] arguments) {
         super(target, arguments);
         argumentEvaluators = new Evaluator[arguments.length];
-        Arrays.fill(argumentEvaluators, Evaluator.LAZY_SEQUENCE.INSTANCE);
+        Arrays.fill(argumentEvaluators, Evaluator.LazySequence.INSTANCE);
     }
 
     /**
@@ -103,15 +103,15 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
             Expression arg = arguments[i];
             int cardinality = getTargetFunction().getDetails().argumentTypes[Math.min(i, lastExplicitArg)].getCardinality();
             if (arg instanceof Literal) {
-                argumentEvaluators[i] = Evaluator.LITERAL.INSTANCE;
+                argumentEvaluators[i] = Evaluator.Literal.INSTANCE;
             } else if (arg instanceof VariableReference) {
-                argumentEvaluators[i] = Evaluator.VARIABLE.INSTANCE;
+                argumentEvaluators[i] = Evaluator.Variable.INSTANCE;
             } else if (cardinality == StaticProperty.EXACTLY_ONE) {
-                argumentEvaluators[i] = Evaluator.SINGLE_ITEM.INSTANCE;
+                argumentEvaluators[i] = Evaluator.SingleItem.INSTANCE;
             } else if (cardinality == StaticProperty.ALLOWS_ZERO_OR_ONE) {
-                argumentEvaluators[i] = Evaluator.OPTIONAL_ITEM.INSTANCE;
+                argumentEvaluators[i] = Evaluator.OptionalItem.INSTANCE;
             } else {
-                argumentEvaluators[i] = Evaluator.LAZY_SEQUENCE.INSTANCE;
+                argumentEvaluators[i] = Evaluator.LazySequence.INSTANCE;
             }
         }
     }
@@ -276,8 +276,8 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
             if (getArity() <= details.resultIfEmpty.length) {
                 // the condition eliminates concat, which is a special case.
                 for (int i = 0; i < getArity(); i++) {
-                    if (Literal.isEmptySequence(getArg(i)) && details.resultIfEmpty[i] != null) {
-                        return Literal.makeLiteral(details.resultIfEmpty[i].materialize(), this);
+                    if (net.sf.saxon.expr.Literal.isEmptySequence(getArg(i)) && details.resultIfEmpty[i] != null) {
+                        return net.sf.saxon.expr.Literal.makeLiteral(details.resultIfEmpty[i].materialize(), this);
                     }
                 }
             }

@@ -37,6 +37,8 @@ import java.net.*;
 import java.nio.charset.*;
 import java.util.*;
 
+import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
+import static net.sf.saxon.s9api.streams.Predicates.not;
 import static net.sf.saxon.s9api.streams.Steps.child;
 import static net.sf.saxon.testdriver.Xslt30TestSuiteDriverHE.isTrue;
 
@@ -276,8 +278,10 @@ public class Environment implements URIResolver {
 
         // compile any stylesheet packages defined as part of the environment
         // Support this only in EE - an unusable environment in PE/HE
-        for (XdmItem stylesheet : xpc.evaluate("package[@role='secondary']", env)) {
-            String fileName = ((XdmNode) stylesheet).attribute("file");
+        for (XdmNode stylesheet : env.select(child("package")
+                                     .where(attributeEq("role", "secondary")))
+                                     .asList()) {
+            String fileName = stylesheet.attribute("file");
             Source styleSource = new StreamSource(env.getBaseURI().resolve(fileName).toString());
             try {
                 XsltPackage pkg = environment.xsltCompiler.compilePackage(styleSource);
@@ -299,8 +303,8 @@ public class Environment implements URIResolver {
 
         // compile any stylesheet defined as part of the environment (only one allowed)
         // use the XSLT processor version associated with the stylesheet/@version attribute
-        for (XdmItem stylesheet : xpc.evaluate("stylesheet[not(@role='secondary')]", env)) {
-            String fileName = ((XdmNode) stylesheet).attribute("file");
+        for (XdmNode stylesheet : env.select(child("stylesheet").where(not(attributeEq("role", "secondary")))).asList()) {
+            String fileName = stylesheet.attribute("file");
             Source styleSource = new StreamSource(env.getBaseURI().resolve(fileName).toString());
             try {
                 if (driver.export) {

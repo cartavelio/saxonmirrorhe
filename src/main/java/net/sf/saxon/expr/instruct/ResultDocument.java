@@ -473,6 +473,9 @@ public class ResultDocument extends Instruction
         if (out == null) {
             try {
                 resolver = controller.getResultDocumentResolver();
+                if (resolver == null) {
+                    resolver = StandardResultDocumentResolver.getInstance();
+                }
                 out = makeReceiver(hrefValue, getStaticBaseURIString(), context,
                                    resolver, serParams, resolveAgainstStaticBase);
                 traceDestination(context, out);

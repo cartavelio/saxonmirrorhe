@@ -68,15 +68,12 @@ public class XSLSequence extends StyleElement {
     @Override
     protected void prepareAttributes() {
 
-        String selectAtt = null;
-
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
             String value = att.getValue();
             String f = attName.getDisplayName();
             if (f.equals("select")) {
-                selectAtt = value;
-                select = makeExpression(selectAtt, att);
+                select = makeExpression(value, att);
             } else {
                 checkUnknownAttribute(attName);
             }

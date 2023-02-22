@@ -19,6 +19,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.z.IntPredicateProxy;
 
 import java.io.IOException;
@@ -185,6 +186,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      * @throws XPathException if the file contains illegal characters
      */
 
+    @CSharpReplaceException(from="java.lang.IllegalStateException", to="System.Text.DecoderFallbackException")
     public static void readFile(IntPredicateProxy checker, Reader reader, UniStringConsumer output) throws IOException, XPathException {
         char[] buffer = new char[2048];
         boolean first = true;
@@ -193,7 +195,12 @@ public abstract class UnparsedTextFunction extends SystemFunction {
         int column = 1;
         int mask = 0;
         while (true) {
-            actual = reader.read(buffer, 0, buffer.length);
+            try {
+                actual = reader.read(buffer, 0, buffer.length);
+            } catch (IllegalStateException e) {
+                // Proxy for C# System.Text.DecoderFallbackException
+                throw new IOException(e.getMessage(), e);
+            }
             if (isEndOfFile(actual)) {
                 break;
             }

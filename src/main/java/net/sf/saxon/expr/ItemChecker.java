@@ -265,7 +265,8 @@ public final class ItemChecker extends UnaryExpression {
         }
         if (requiredItemType.matches(item, th)) {
             return item;
-        } else if (requiredItemType.getUType().subsumes(UType.STRING) && BuiltInAtomicType.ANY_URI.matches(item, th)) {
+        } else if (requiredItemType.getUType().subsumes(UType.STRING) &&
+                (BuiltInAtomicType.ANY_URI.matches(item, th) || BuiltInAtomicType.UNTYPED_ATOMIC.matches(item, th))) {
             return item;
         } else {
             String message = role.composeErrorMessage(requiredItemType, item, th);

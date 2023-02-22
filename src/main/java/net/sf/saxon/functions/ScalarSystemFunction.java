@@ -14,6 +14,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 
@@ -69,6 +70,7 @@ public abstract class ScalarSystemFunction extends SystemFunction {
     public Expression makeFunctionCall(Expression[] arguments) {
         SystemFunctionCall call = new SystemFunctionCall(this, arguments) {
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public AtomicValue evaluateItem(XPathContext context) throws XPathException {
                 // cut out some of the call overhead
                 Item val = getArg(0).evaluateItem(context);

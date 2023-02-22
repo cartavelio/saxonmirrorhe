@@ -8,10 +8,8 @@
 package net.sf.saxon.functions.registry;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.CodepointsToString;
-import net.sf.saxon.functions.Concat;
-import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.*;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
@@ -21,7 +19,6 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.functions.Parts;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
@@ -123,6 +120,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null);
 
+        register("parcel", 1, ParcelFn.class, Parcel.TYPE, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null);
+
         register("parts", 1, Parts.class, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null);
 
@@ -148,6 +148,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("some", 2, SefFunction.class, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, predicate, ONE, null);
+
+        register("unparcel", 1, UnparcelFn.class, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, Parcel.TYPE, ONE, null);
     }
 
     public static class HighestOrLowest extends SefFunction {

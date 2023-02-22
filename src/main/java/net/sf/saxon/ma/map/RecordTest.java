@@ -88,6 +88,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
      * @return the Genre to which this type belongs, specifically {@link Genre#MAP}
      */
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public Genre getGenre() {
         return Genre.MAP;
     }

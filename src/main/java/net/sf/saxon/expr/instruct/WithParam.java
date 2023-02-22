@@ -196,14 +196,14 @@ public class WithParam  {
     /**
      * Get the evaluation mode of the variable
      *
-     * @return the evaluation mode (a constant in {@link EvaluationMode}
+     * @return the evaluator object
      */
 
-    public EvaluationMode getEvaluationMode() {
+    public Evaluator getEvaluationMode() {
         if (evaluator == null) {
             computeEvaluator();
         }
-        return evaluator.getEvaluationMode();
+        return evaluator;
     }
 
 

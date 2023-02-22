@@ -19,6 +19,7 @@ import net.sf.saxon.str.UnicodeWriter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BigDecimalValue;
 import net.sf.saxon.value.StringValue;
@@ -185,6 +186,7 @@ public class SerializerFactory {
      * @throws XPathException if a serializer cannot be created
      */
 
+    @CSharpModifiers(code = {"public", "virtual"})
     public Receiver getReceiver(Result result,
                                 SerializationProperties params,
                                 PipelineConfiguration pipe)
