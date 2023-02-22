@@ -545,6 +545,9 @@ cdef extern from "../XdmItem.h":
 
         bool isNode()
 
+
+
+
 cdef extern from "../XdmNode.h":
     cdef cppclass XdmNode(XdmItem):
         bool isAtomic()
@@ -571,6 +574,7 @@ cdef extern from "../XdmNode.h":
         int getChildCount()
 
 
+
 cdef extern from "../XdmAtomicValue.h":
     cdef cppclass XdmAtomicValue(XdmItem):
         XdmAtomicValue() except +
@@ -585,6 +589,7 @@ cdef extern from "../XdmAtomicValue.h":
 
         int getHashCode()
 
+
         
 
 cdef extern from "../XdmFunctionItem.h":
@@ -598,6 +603,7 @@ cdef extern from "../XdmFunctionItem.h":
         XdmValue * call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length)
 
         XdmValue ** createXdmValueArray(int len)
+
 
 
 
@@ -634,6 +640,7 @@ cdef extern from "../XdmMap.h":
         list[XdmValue*] valuesAsList()
 
         XdmValue** values()
+
 
 
 cdef extern from "../XdmArray.h":

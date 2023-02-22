@@ -76,6 +76,28 @@ XdmValue* XdmArray::get(int n){
     }
 }
 
+
+const char * XdmArray::toString(){
+    jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmArray");
+    jmethodID strbbMID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmArrayClass,
+                                                                                   "toString",
+                                                                                   "()Ljava/lang/String;");
+    if (!strbbMID) {
+        std::cerr << "Error: Saxonc." << "toString"
+                  << " not found\n" << std::endl;
+        return nullptr;
+    } else {
+        jstring result = (jstring) (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, strbbMID));
+        if(result) {
+            const char * str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
+            stringValue = str;
+            return str;
+        }
+        return nullptr;
+    }
+
+}
+
 XdmArray* XdmArray::put(int n, XdmValue * valuei) {
     jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
     static jmethodID tbpmID = nullptr;

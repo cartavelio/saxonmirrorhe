@@ -44,6 +44,7 @@ const char * XdmMap::toString(){
 }
 
 
+
     int XdmMap::mapSize(){
        if(map_size == -1) {
         jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
