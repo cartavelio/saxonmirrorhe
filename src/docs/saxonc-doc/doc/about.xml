@@ -14,13 +14,13 @@
    <p>SaxonC 11 is built from the SaxonJ 11 Java product using Excelsior JET Enterprise 15.3
       edition (MP1). The APIs support the current W3C Recommendations: XSLT 3.0, XQuery 3.1, XPath
       3.1 and Schema Validation 1.0/1.1. See the main Saxon 11 documentation <a
-         href="https://saxonica.com/documentation11/index.html#!conformance">Standards Conformance</a>
+         href="https://www.saxonica.com/documentation11/index.html#!conformance">Standards Conformance</a>
       section for full details.</p>
 
    <p>SaxonC is released in three separate editions, as on the Java and .NET platforms: the commercial
       products Enterprise Edition (SaxonC-EE) and Professional Edition (SaxonC-PE), and the
       opensource product Home Edition (SaxonC-HE). See the <a target="_blank"
-         href="https://saxonica.com/products/feature-matrix-11.xml">feature matrix</a> to compare
+         href="https://www.saxonica.com/products/feature-matrix-11.xml">feature matrix</a> to compare
       the features of the HE, PE and EE products.</p>
 
    <p>Versions are available for the following platforms: Linux 64-bit, Mac OS and Windows 64-bit.
