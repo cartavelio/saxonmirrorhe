@@ -120,7 +120,7 @@ public class ReceiverOption {
     public static final int TERMINATE = 0x4000;
 
     /**
-     * Flag set on startDocument() to indicate that the constructed document must be updateable
+     * Flag set on startDocument() to indicate that the constructed document must be updatable
      */
 
     public static final int MUTABLE_TREE = 0x8000;
