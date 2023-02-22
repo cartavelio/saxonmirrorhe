@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -194,6 +194,7 @@ public class MemoSequence implements Sequence {
 
         /**
          * Create a ProgressiveIterator
+         * @param container the containing MemoSequence
          */
 
         public ProgressiveIterator(MemoSequence container) {
@@ -202,7 +203,7 @@ public class MemoSequence implements Sequence {
 
         /**
          * Get the containing MemoSequence
-         *
+         * @return the containing MemoSequence
          */
 
         public MemoSequence getMemoSequence() {

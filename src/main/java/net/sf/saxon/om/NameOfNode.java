@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -186,8 +186,8 @@ public class NameOfNode implements NodeName {
      * test than equality (even schema-equality); for example two dateTime values are not identical unless
      * they are in the same timezone.
      *
-     * @param other
-     * @return true if the two values are indentical, false otherwise
+     * @param other the value to be compared with
+     * @return true if the two values are identical, false otherwise
      */
     @Override
     public boolean isIdentical(IdentityComparable other) {
