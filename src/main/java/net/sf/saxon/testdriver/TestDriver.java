@@ -245,7 +245,7 @@ public abstract class TestDriver {
         System.gc();
         Thread mainThread = null;
         for (Thread t: threadSet) {
-            if ("system".equals(t.getThreadGroup().getName())) {
+            if (t.getThreadGroup() != null && "system".equals(t.getThreadGroup().getName())) {
                 System.err.println("System thread: " + t);
             } else {
                 if ("main".equals(t.getName())) {
@@ -256,6 +256,8 @@ public abstract class TestDriver {
                         System.err.println("UNEXPECTED main thread: " + t);
                     }
                 } else if ("Common-Cleaner".equals(t.getName())) {
+                    System.err.println("Common Cleaner thread: " + t);
+                } else if ("Cleaner".equals(t.getName())) {
                     System.err.println("Cleaner thread: " + t);
                 } else {
                     System.err.println("Unexpected thread: " + t);
