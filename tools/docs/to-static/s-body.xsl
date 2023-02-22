@@ -4,9 +4,11 @@
      version="2.0">
 
      <xsl:output method="html"/>
-
+     
+     <xsl:variable name="javadoc-available" select="doc-available('../../../build/userdoc/viewer_appJS/javadoc-xml/javadoc-types.xml')"/>
      <xsl:variable name="javadoc-types" select="doc('../../../build/userdoc/viewer_appJS/javadoc-xml/javadoc-types.xml')"/>
      
+     <xsl:variable name="dotnetdoc-available" select="doc-available('../../../build/userdoc/viewer_appJS/dotnetdoc-xml/types.xml')"/>
      <xsl:variable name="dotnetdoc-types" select="doc('../../../build/userdoc/viewer_appJS/dotnetdoc-xml/types.xml')"/>
 
      <xsl:key name="jd-types" match="j" use="string-join(ancestor-or-self::j/@id, '.')"/>
@@ -89,7 +91,8 @@
           <xsl:variable name="javaclass" select="if (local-name() = 'a') then @href else @java" as="xs:string"/>
           <!--<xsl:message select="'javaclass is ', $javaclass"/>-->
           <xsl:variable name="item-id" select="translate($javaclass, '#','.')"/>
-          <xsl:variable name="found" select="exists(key('jd-types', $item-id, $javadoc-types))"
+          <xsl:variable name="found" select="if ($javadoc-available) then (exists(key('jd-types', $item-id, $javadoc-types)))
+               else true()"
                as="xs:boolean"/>
           <xsl:if test="not($found)">
                <xsl:message>*** Warning: javadoc ref <xsl:value-of select="$item-id"/> not found</xsl:message>
@@ -109,7 +112,8 @@
           <xsl:variable name="csclass" select="if (local-name() = 'a') then @href else @cs" as="xs:string"/>
           <!--<xsl:message select="'csclass is ', $csclass"/>-->
           <xsl:variable name="item-id" select="translate($csclass, '#','.')"/>
-          <xsl:variable name="founddotnet" select="exists(key('jd-types', $item-id, $dotnetdoc-types))"
+          <xsl:variable name="founddotnet" select="if ($dotnetdoc-available) then (exists(key('jd-types',
+               $item-id, $dotnetdoc-types))) else true()"
                as="xs:boolean"/>
           <!--<xsl:variable name="founddotnet" select="false()" as="xs:boolean"/>--><!-- Temporary pre 10 .NET release-->
           <xsl:if test="not($founddotnet)">
