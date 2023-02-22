@@ -8,7 +8,7 @@ import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
@@ -67,7 +67,6 @@ public class ZenoSequence implements GroundedValue {
     }
 
     @Override
-    @CSharpModifiers(code = {"public", "override"})
     public UnicodeString getUnicodeStringValue() throws XPathException {
         switch (getLength()) {
             case 0:
@@ -87,7 +86,6 @@ public class ZenoSequence implements GroundedValue {
     }
 
     @Override
-    @CSharpModifiers(code = {"public", "override"})
     public String getStringValue() throws XPathException {
         switch (getLength()) {
             case 0:
@@ -144,7 +142,10 @@ public class ZenoSequence implements GroundedValue {
 
         public ZenoSequenceIterator(ZenoSequence sequence) {
             this.sequence = sequence;
-            this.chainIterator = sequence.chain.iterator();;
+            //#if CSHARP==false
+            this.chainIterator = sequence.chain.iterator();
+            //#endif
+            CSharp.emitCode("this.chainIterator = sequence.chain.GetEnumerator();");
         }
 
         @Override

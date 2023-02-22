@@ -33,7 +33,11 @@ import javax.xml.transform.Result;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static net.sf.saxon.event.RegularSequenceChecker.State.*;
+import static net.sf.saxon.event.RegularSequenceChecker.State.CONTENT;
+import static net.sf.saxon.event.RegularSequenceChecker.State.START_TAG;
+import static net.sf.saxon.event.RegularSequenceChecker.State.INITIAL;
+import static net.sf.saxon.event.RegularSequenceChecker.State.OPEN;
+import static net.sf.saxon.event.RegularSequenceChecker.State.FINAL;
 
 /**
  * This class is used for generating complex content, that is, the content of an

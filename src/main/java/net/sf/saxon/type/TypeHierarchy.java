@@ -32,7 +32,11 @@ import net.sf.saxon.z.IntUniversalSet;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static net.sf.saxon.type.Affinity.*;
+import static net.sf.saxon.type.Affinity.DISJOINT;
+import static net.sf.saxon.type.Affinity.SUBSUMES;
+import static net.sf.saxon.type.Affinity.SUBSUMED_BY;
+import static net.sf.saxon.type.Affinity.OVERLAPS;
+import static net.sf.saxon.type.Affinity.SAME_TYPE;
 
 /**
  * This class exists to provide answers to questions about the type hierarchy. Because

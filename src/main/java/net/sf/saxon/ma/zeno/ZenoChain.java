@@ -265,27 +265,7 @@ public class ZenoChain<T> implements Iterable<T> {
      */
 
     public @NotNull Iterator<T> iterator() {
-        return new Iterator<T>() {
-            int majorIndex = 0;
-            int minorIndex = 0;
-
-            @Override
-            public boolean hasNext() {
-                return majorIndex < masterList.size() && minorIndex < masterList.get(majorIndex).size();
-            }
-
-            @Override
-            public T next() {
-                ArrayList<T> currentSegment = masterList.get(majorIndex);
-                T result = currentSegment.get(minorIndex);
-                if (++minorIndex >= currentSegment.size()) {
-                    majorIndex++;
-                    minorIndex = 0;
-                    // Assumes no zero-length segments
-                }
-                return result;
-            }
-        };
+        return new ZenoChainIterator<T>(masterList);
     }
 
 
@@ -320,5 +300,7 @@ public class ZenoChain<T> implements Iterable<T> {
             System.err.println(integer);
         }
     }
+
+
 }
 

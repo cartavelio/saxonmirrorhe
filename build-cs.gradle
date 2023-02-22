@@ -41,6 +41,7 @@ if (nuget == null) {
   println("WARNING: Failed to find nuget[.exe]!")
 }
 
+
 task build_transpiler(
   type: JavaCompile,
   dependsOn: ["hecs_featureKeys", "hejJar"],
@@ -59,14 +60,14 @@ task build_transpiler(
 
 task transpile_to_xml(
   type: JavaExec,
-  dependsOn: ["hecs_preprocess", "build_transpiler"],
+  dependsOn: ["hecs_sources", "build_transpiler"],
   description: "Transpile the Java to XML"
 ) {
-  inputs.files fileTree(dir: "${buildDir}/preprocess/hecs")
+  inputs.files fileTree(dir: "${buildDir}/src/hecs")
   outputs.files fileTree(dir: "${buildDir}/xmlout")
   classpath = configurations.transpiler
   main = "ToXml"
-  args "-j:${buildDir}/preprocess/hecs",
+  args "-j:${buildDir}/src/hecs",
     "-xml:${buildDir}/xmlout",
     "-h:${projectDir}/src/main/java"
     "-src:${projectDir}/src/main/java"
@@ -153,6 +154,7 @@ task hecs_setupPreprocess(
   exclude "net/sf/saxon/dotnet/**"
   exclude "net/sf/saxon/event/ContentHandlerProxy.java"
   exclude "net/sf/saxon/event/ContentHandlerProxyLocator.java"
+  exclude "net/sf/saxon/event/PIGrabber.java"
   exclude "net/sf/saxon/event/PushToReceiver.java"
   exclude "net/sf/saxon/event/ReceivingContentHandler.java"
   exclude "net/sf/saxon/event/RepairingContentHandler.java"
@@ -161,16 +163,26 @@ task hecs_setupPreprocess(
   exclude "net/sf/saxon/expr/JPConverter.java"
   exclude "net/sf/saxon/expr/PJConverter.java"
   exclude "net/sf/saxon/expr/SimpleExpression.java"
+  exclude "net/sf/saxon/expr/sort/CustomSet.java"
+  exclude "net/sf/saxon/expr/sort/CustomMap.java"
+  exclude "net/sf/saxon/expr/sort/ItemOrderComparer.java"
   exclude "net/sf/saxon/expr/sort/RuleBasedSubstringMatcher.java"
-  exclude "net/sf/saxon/expr/sort/UcaCollatorUsingJava"
+  exclude "net/sf/saxon/expr/sort/UcaCollatorUsingJava.java"
   exclude "net/sf/saxon/functions/registry/OnDemandFunctionSet.java"
   exclude "net/sf/saxon/lib/ErrorReporterToListener.java"
   exclude "net/sf/saxon/lib/ExternalObjectModel.java"
   exclude "net/sf/saxon/lib/InvalidityHandlerWrappingErrorListener.java"
   exclude "net/sf/saxon/lib/ResourceCollection.java"
+  exclude "net/sf/saxon/lib/ResourceFactory.java"
   exclude "net/sf/saxon/lib/StandardEntityResolver.java"
   exclude "net/sf/saxon/lib/StandardErrorHandler.java"
   exclude "net/sf/saxon/lib/StandardErrorListener.java"
+  exclude "net/sf/saxon/lib/StandardLogger.java"
+  exclude "net/sf/saxon/lib/StandardModuleURIResolver.java"
+  exclude "net/sf/saxon/lib/StandardOutputResolver.java"
+  exclude "net/sf/saxon/lib/StandardUnparsedTextResolver.java"
+  exclude "net/sf/saxon/lib/StandardURIResolver.java"
+  exclude "net/sf/saxon/lib/SystemLogger.java"
   exclude "net/sf/saxon/ma/arrays/ImmutableArrayItem.java"
   exclude "net/sf/saxon/ma/map/HashTrieMap.java"
   exclude "net/sf/saxon/ma/map/RangeKey.java"
@@ -180,14 +192,22 @@ task hecs_setupPreprocess(
   exclude "net/sf/saxon/om/OneOrMore.java"
   exclude "net/sf/saxon/om/ZeroOrMore.java"
   exclude "net/sf/saxon/om/ZeroOrOne.java"
+  exclude "net/sf/saxon/pull/ActiveStAXSource.java"
   exclude "net/sf/saxon/pull/NamespaceContextImpl.java"
   exclude "net/sf/saxon/pull/StaxBridge.java"
   exclude "net/sf/saxon/resource/**"
+  exclude "net/sf/saxon/s9api/BuildingContentHandler.java"
+  exclude "net/sf/saxon/s9api/BuildingStreamWriter.java"
+  exclude "net/sf/saxon/s9api/BuildingStreamWriterImpl.java"
   exclude "net/sf/saxon/s9api/DOMDestination.java"
+  exclude "net/sf/saxon/s9api/ItemType.java"
+  exclude "net/sf/saxon/s9api/ItemTypeFactory.java"
   exclude "net/sf/saxon/s9api/Push.java"
+  exclude "net/sf/saxon/s9api/SAXDestination.java"
+  exclude "net/sf/saxon/s9api/SequenceType.java"
   exclude "net/sf/saxon/s9api/streams/**"
   exclude "net/sf/saxon/s9api/QName.java"
-  exclude "net/sf/saxon/s9api/WhitespaceStrippingPolicy"
+  exclude "net/sf/saxon/s9api/WhitespaceStrippingPolicy.java"
   exclude "net/sf/saxon/s9api/XdmExternalObject.java"
   exclude "net/sf/saxon/s9api/XdmArray.java"
   exclude "net/sf/saxon/s9api/XdmAtomicValue.java"
@@ -198,18 +218,16 @@ task hecs_setupPreprocess(
   exclude "net/sf/saxon/s9api/XdmMap.java"
   exclude "net/sf/saxon/s9api/XdmNode.java"
   exclude "net/sf/saxon/s9api/XdmValue.java"
-  exclude "net/sf/saxon/s9api/SAXDestination.java"
-  exclude "net/sf/saxon/s9api/BuildingContentHandler.java"
-  exclude "net/sf/saxon/s9api/BuildingStreamWriter.java"
-  exclude "net/sf/saxon/s9api/BuildingStreamWriterImpl.java"
   exclude "net/sf/saxon/serialize/charcode/JavaCharacterSet.java"
   exclude "net/sf/saxon/serialize/codenorm/NormalizerData.java"
   exclude "net/sf/saxon/sort/ItemOrderComparer.java"
   exclude "net/sf/saxon/trace/TimingTraceListener.java"
   exclude "net/sf/saxon/trace/TracingFilter.java"
+  exclude "net/sf/saxon/trans/DynamicLoader.java"
   exclude "net/sf/saxon/trans/XmlCatalogResolver.java"
   exclude "net/sf/saxon/tree/iter/NodeWrappingAxisIterator.java"
   exclude "net/sf/saxon/tree/iter/NodeWrappingFunction.java"
+  exclude "net/sf/saxon/tree/jiter/TopDownStackIterable.java"
   exclude "net/sf/saxon/tree/lib/StandardEntityResolver.java"
   exclude "net/sf/saxon/tree/lib/StandardErrorHandler.java"
   exclude "net/sf/saxon/tree/util/AttributeCollectionImpl.java"
@@ -428,8 +446,8 @@ task hecs_sources(
         || line.contains("import net.sf.saxon.jaxp")
         || line.contains("net.sf.saxon.xpath.JAXPXPathStaticContext")) {
       null    
-    } else if (line.contains("//C#//")) {
-      line.replace("//C#//", "")
+    //} else if (line.contains("//C#//")) {
+    //  line.replace("//C#//(.*)$", "net.sf.saxon.transpile.CSharp.emitCode()")
     } else {
       line
     } 
@@ -496,7 +514,76 @@ task singulink(
   }
 }
 
+task immutable(
+  description: "Install System.Collections.Immutable libraries"
+) {
+  doLast {
+    if (nuget == null) {
+      throw new GradleException("Cannot build: failed to find nuget[.exe] on path.")
+    }
+    
+    def args = [nuget,
+                "install",
+                "System.Collections.Immutable"]
+    exec {
+      workingDir = buildDir
+      commandLine args
+    }
+  }
+  doFirst {
+    mkdir "${buildDir}"
+  }
+}
+
+task netstandard(
+  description: "Install .NET standard libraries"
+) {
+  doLast {
+    if (nuget == null) {
+      throw new GradleException("Cannot build: failed to find nuget[.exe] on path.")
+    }
+    
+    def args = [nuget,
+                "install",
+                "NETStandard.Library.Ref",
+                "-Version", "2.1.0"]
+    exec {
+      workingDir = buildDir
+      commandLine args
+    }
+  }
+  doFirst {
+    mkdir "${buildDir}"
+  }
+}
+
+task hecs_project_files (
+  type: Copy,
+  dependsOn: ["generateCSharp"],
+  description: "Prepare the project files used for dotnet build"
+) {
+  from "src/main/saxon-cs/csproj/*.csproj"
+  into "${buildDir}/cs"
+}
+
+//dependsOn: ["hecs_project_files"],
+//'/usr/local/share/dotnet/dotnet'
+//src/main/saxon-cs/csproj/engine.csproj
 task hecs_dll(
+  //dependsOn: ["hecs_project_files"],
+  description: "Compile Saxon-CS DLL for HE"
+) {
+  doLast {
+    exec {
+        workingDir = buildDir
+        commandLine 'dotnet', 'build', '--nologo', '-o', 'csout', 'cs/engine.csproj'
+    }
+  }
+}
+
+
+//dependsOn: ["generateCSharp", "singulink"],
+task hecs_dllXX(
     dependsOn: ["generateCSharp"],
     description: "Compile Saxon-CS DLL for HE"
   ) {
@@ -513,7 +600,14 @@ task hecs_dll(
                   "-target:library", 
                   "-doc:${buildDir}/cs/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
                   "-keyfile:${ikvmDir}/saxondotnet.snk",
-                  "-reference:build/Singulink.Numerics.BigDecimal.${singulinkBigDecimalVersion}/lib/netstandard2.1/Singulink.Numerics.BigDecimal.dll"]
+                  "-reference:nuget/Singulink.Numerics.BigDecimal.${singulinkBigDecimalVersion}/lib/netstandard2.1/Singulink.Numerics.BigDecimal.dll",
+                  "-reference:nuget/System.Collections.Immutable.5.0.0/lib/netstandard2.0/System.Collections.Immutable.dll",
+                  //"-reference:nuget/NETStandard.Library.2.0.3/build/netstandard2.0/ref/netstandard.dll",
+                  //"-reference:nuget/NETStandard.Library.2.0.3/build/netstandard2.0/ref/mscorlib.dll",
+                  //"-reference:nuget/NETStandard.Library.2.0.3/build/netstandard2.0/ref/System.dll",
+                  //"-reference:nuget/NETStandard.Library.2.0.3/build/netstandard2.0/ref/System.Linq.dll",
+                  "-reference:nuget/NETStandard.Library.2.0.3/build/netstandard2.0/ref/System.Numerics.dll"]
+                  //netstandard, Version=2.1.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
 
       //fileTree(dir: "${buildDir}/n/bin/he",
       //         include: "*.dll").each { dll ->
@@ -531,6 +625,7 @@ task hecs_dll(
                include: "**/*.cs").each { cs ->
         args += [cs]
       }
+
 
       exec {
         commandLine args
@@ -564,7 +659,7 @@ task hecs_dll(
     }
   }
 
-  task hen_csharpQuery(
+  task hecs_exe_Query(
     dependsOn: ["hecs_dll"],
     description: "Compile Query.exe for HE"
   ) {
