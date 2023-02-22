@@ -114,9 +114,16 @@ public class AugmentedSource implements Source {
     }
 
     /**
-     * Add a filter to the list of filters to be applied to the raw input
+     * Add a filter to the list of filters to be applied to the raw input.
      *
-     * @param filter a factory for the filter to be added
+     * <p>User-supplied filters are applied to the input stream after
+     * applying any system-defined filters such as the whitespace stripper
+     * and the schema validator.</p>
+     *
+     * <p>Example: <code>addFilter(receiver -> new MyFilter(receiver)</code>, where
+     * <code>MyFilter</code> extends {@link net.sf.saxon.event.ProxyReceiver}</p>
+     *
+     * @param filter a factory for the filter to be added.
      */
 
     public void addFilter(FilterFactory filter) {
