@@ -435,7 +435,6 @@ public abstract class Mode extends Actor {
             traceListener = controller.getTraceListener();
         }
 
-
         // Iterate over this sequence
 
         boolean lookahead = iterator instanceof LookaheadIterator && ((LookaheadIterator)iterator).supportsHasNext();
@@ -473,25 +472,9 @@ public abstract class Mode extends Actor {
             }
 
             if (mustBeTyped) {
-                if (item instanceof NodeInfo) {
-                    int kind = ((NodeInfo) item).getNodeKind();
-                    if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
-                        SchemaType annotation = ((NodeInfo) item).getSchemaType();
-                        if (annotation == Untyped.getInstance() || annotation == BuiltInAtomicType.UNTYPED_ATOMIC) {
-                            throw new XPathException(getModeTitle(true) + " requires typed nodes, but the input is untyped", "XTTE3100");
-                        }
-                    }
-                }
+                checkMustBeTyped(item);
             } else if (mustBeUntyped) {
-                if (item instanceof NodeInfo) {
-                    int kind = ((NodeInfo) item).getNodeKind();
-                    if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
-                        SchemaType annotation = ((NodeInfo) item).getSchemaType();
-                        if (!(annotation == Untyped.getInstance() || annotation == BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                            throw new XPathException(getModeTitle(true) + " requires untyped nodes, but the input is typed", "XTTE3110");
-                        }
-                    }
-                }
+               checkMustByUntyped(item);
             }
 
             // find the template rule for this node
@@ -501,21 +484,14 @@ public abstract class Mode extends Actor {
             }
 
             Rule rule = getRule(item, context);
+
             if (traceListener != null) {
-                if (rule == null) {
-                    traceListener.endRuleSearch(getBuiltInRuleSet(), this, item);
-                } else {
-                    traceListener.endRuleSearch(rule, this, item);
-                }
+                handleTraceListener(rule, item, traceListener);
             }
+
             TemplateRuleTraceListener ruleTraceListener = null;
             if (modeTracing) {
-                ruleTraceListener = ((XsltController)controller).getTemplateRuleTraceListener();
-                if (ruleTraceListener == null) {
-                    ruleTraceListener = new TemplateRuleTraceListener(controller.getConfiguration().getLogger());
-                    ((XsltController) controller).setTemplateRuleTraceListener(ruleTraceListener);
-                }
-                ruleTraceListener.enter("apply-templates", locationId, item, rule==null ? null : (TemplateRule)rule.getAction());
+                ruleTraceListener = handleRuleTraceListener(ruleTraceListener, controller, locationId, item, rule);
             }
 
             if (rule == null) {             // Use the default action for the node
@@ -523,32 +499,9 @@ public abstract class Mode extends Actor {
                 getBuiltInRuleSet().process(item, parameters, tunnelParameters, output, context, locationId);
 
             } else {
-
-                TemplateRule template = (TemplateRule) rule.getAction();
-                if (template != previousTemplate) {
-                    // Reuse the previous stackframe unless it's a different template rule
-                    previousTemplate = template;
-                    template.initialize();
-                    context.openStackFrame(template.getStackFrameMap());
-                    context.setLocalParameters(parameters);
-                    context.setTunnelParameters(tunnelParameters);
-                    context.setCurrentMergeGroupIterator(null);
-                }
-                context.setCurrentTemplateRule(rule);
-                if (traceListener != null) {
-                    traceListener.startCurrentItem(item);
-                    tc = template.applyLeavingTail(output, context);
-                    if (tc != null) {
-                        // disable tail call optimization while tracing
-                        do {
-                            tc = tc.processLeavingTail();
-                        } while (tc != null);
-                    }
-
-                    traceListener.endCurrentItem(item);
-                } else {
-                    tc = template.applyLeavingTail(output, context);
-                }
+                Object[] result = handleRuleNotNull(rule, traceListener, context, item, previousTemplate, parameters, tunnelParameters, output);
+                tc = (TailCall) result[0];
+                previousTemplate = (TemplateRule) result[1];
             }
             if (modeTracing) {
                 ruleTraceListener.leave();
@@ -558,6 +511,87 @@ public abstract class Mode extends Actor {
         // return the TailCall returned from the last node processed
         return tc;
     }
+
+    private void checkMustBeTyped(Item item) throws XPathException
+    {
+        if (item instanceof NodeInfo) {
+            int kind = ((NodeInfo) item).getNodeKind();
+            if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
+                SchemaType annotation = ((NodeInfo) item).getSchemaType();
+                if (annotation == Untyped.getInstance() || annotation == BuiltInAtomicType.UNTYPED_ATOMIC) {
+                    throw new XPathException(getModeTitle(true) + " requires typed nodes, but the input is untyped", "XTTE3100");
+                }
+            }
+        }
+    }
+
+    private void checkMustByUntyped(Item item) throws XPathException
+    {
+        if (item instanceof NodeInfo) {
+            int kind = ((NodeInfo) item).getNodeKind();
+            if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
+                SchemaType annotation = ((NodeInfo) item).getSchemaType();
+                if (!(annotation == Untyped.getInstance() || annotation == BuiltInAtomicType.UNTYPED_ATOMIC)) {
+                    throw new XPathException(getModeTitle(true) + " requires untyped nodes, but the input is typed", "XTTE3110");
+                }
+            }
+        }
+    }
+
+    private Object[] handleRuleNotNull(Rule rule, TraceListener traceListener, XPathContextMajor context, Item item, TemplateRule previousTemplate, ParameterSet parameters,
+            ParameterSet tunnelParameters, Outputter output) throws XPathException
+    {
+        TemplateRule template = (TemplateRule) rule.getAction();
+        if (template != previousTemplate) {
+            // Reuse the previous stackframe unless it's a different template rule
+            previousTemplate = template;
+            template.initialize();
+            context.openStackFrame(template.getStackFrameMap());
+            context.setLocalParameters(parameters);
+            context.setTunnelParameters(tunnelParameters);
+            context.setCurrentMergeGroupIterator(null);
+        }
+        context.setCurrentTemplateRule(rule);
+        TailCall tc;
+        if (traceListener != null) {
+            traceListener.startCurrentItem(item);
+            tc = template.applyLeavingTail(output, context);
+            if (tc != null) {
+                // disable tail call optimization while tracing
+                do {
+                    tc = tc.processLeavingTail();
+                } while (tc != null);
+            }
+
+            traceListener.endCurrentItem(item);
+        } else {
+            tc = template.applyLeavingTail(output, context);
+        }
+
+        return new Object[]{tc, previousTemplate};
+    }
+
+    private TemplateRuleTraceListener handleRuleTraceListener(TemplateRuleTraceListener ruleTraceListener, Controller controller, Location locationId, Item item, Rule rule)
+    {
+        ruleTraceListener = ((XsltController)controller).getTemplateRuleTraceListener();
+        if (ruleTraceListener == null) {
+            ruleTraceListener = new TemplateRuleTraceListener(controller.getConfiguration().getLogger());
+            ((XsltController) controller).setTemplateRuleTraceListener(ruleTraceListener);
+        }
+        ruleTraceListener.enter("apply-templates", locationId, item, rule==null ? null : (TemplateRule)rule.getAction());
+
+        return ruleTraceListener;
+    }
+
+    private void handleTraceListener(Rule rule, Item item, TraceListener traceListener)
+    {
+        if (rule == null) {
+            traceListener.endRuleSearch(getBuiltInRuleSet(), this, item);
+        } else {
+            traceListener.endRuleSearch(rule, this, item);
+        }
+    }
+
 
     public abstract int getStackFrameSlotsNeeded();
 
