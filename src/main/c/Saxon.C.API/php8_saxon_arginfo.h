@@ -539,6 +539,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_getErrorMessage,  0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setLanguageVersion,  0, 0, 1)
+ZEND_END_ARG_INFO()
+
 //====================   XPathProcessor
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_destruct, 0, 0, 0)

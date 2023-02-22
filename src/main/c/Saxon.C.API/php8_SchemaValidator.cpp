@@ -49,7 +49,7 @@ PHP_METHOD(SchemaValidator, registerSchemaFromNode)
     SchemaValidator *schemaValidator;
     zval* oth;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), , "O", &oth, xdmNode_ce) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &oth, xdmNode_ce) == FAILURE) {
         RETURN_NULL();
     }
     zend_object* pobj = Z_OBJ_P(getThis());

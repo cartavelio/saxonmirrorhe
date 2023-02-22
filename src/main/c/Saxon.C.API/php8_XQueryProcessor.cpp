@@ -205,7 +205,7 @@ PHP_METHOD(XQueryProcessor, setStreaming){
     xqueryProcessor_object *obj = (xqueryProcessor_object *)((char *)pobj - XtOffsetOf(xqueryProcessor_object, std));
     xqueryProcessor = obj->xqueryProcessor;
     if (xqueryProcessor != nullptr) {
-	    xqueryProcessor->setStreaming(isCaching);
+	    xqueryProcessor->setStreaming(isStreaming);
 	 }
 }
 
@@ -216,7 +216,7 @@ PHP_METHOD(XQueryProcessor, isStreaming)
    char * xpathStr;
    zval* oth;
    size_t len1, myint;
-    if ((ZEND_NUM_ARGS() != 0) {
+    if (ZEND_NUM_ARGS() != 0) {
         RETURN_BOOL(false);
     }
     zend_object* pobj = Z_OBJ_P(getThis());
