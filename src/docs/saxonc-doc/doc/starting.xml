@@ -94,7 +94,7 @@ provide any other feedback.</p>
     <h1>Installing on Mac OS</h1>
 
     <aside>In the following, [EDITION] means one of: HE, PE, EE; and [VERSION] is the
-    maintenance release version number (for instance 11.1). </aside>
+    maintenance release version number (for instance 12.1). </aside>
          
     <ol>
       <li>
@@ -155,7 +155,7 @@ provide any other feedback.</p>
     <h1>Installing on Windows</h1>
 
     <aside>In the following, [EDITION] means one of: HE, PE, EE; and [VERSION] is the
-    maintenance release version number (for instance 11.1). </aside>
+    maintenance release version number (for instance 12.1). </aside>
          
     <ol>
       <li>
@@ -307,22 +307,22 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       <kbd>./validate [options] source.xml</kbd>
 
       <p>The same command line options as in the Java products are available in the SaxonC command
-         line tool. Please see the relevant sections of the Saxon 11 documentation for details:</p>
+         line tool. Please see the relevant sections of the Saxon 12 documentation for details:</p>
 
       <ul>
          <li>
             <a target="_blank"
-               href="https://www.saxonica.com/documentation11/index.html#!using-xsl/commandline">XSLT from the
+               href="https://www.saxonica.com/documentation12/index.html#!using-xsl/commandline">XSLT from the
                command line</a>
          </li>
          <li>
             <a target="_blank"
-               href="https://www.saxonica.com/documentation11/index.html#!using-xquery/commandline"
+               href="https://www.saxonica.com/documentation12/index.html#!using-xquery/commandline"
                >XQuery from the command line</a>
          </li>
          <li>
             <a target="_blank"
-               href="https://www.saxonica.com/documentation11/index.html#!schema-processing/commandline"
+               href="https://www.saxonica.com/documentation12/index.html#!schema-processing/commandline"
                >Validation from the command line</a>
          </li>
       </ul>
@@ -342,8 +342,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
       <p>Please have the following packages on your machine to build
       SaxonC for the PHP language: <code>make</code>,
-      <code>php-devel</code>, (<code>php7.X-dev</code>, tested on 7.1,
-      7.2 and 7.4), <code>apache2</code> or <code>httpd</code>,
+      <code>php-devel</code>, (<code>php8.X-dev</code>, tested on 8.1.11), <code>apache2</code> or <code>httpd</code>,
       <code>gcc-c++</code> or <code>g++</code> (minimum C++14).</p>
 
       <p>SaxonC should already have been installed following the instructions at <a
@@ -351,9 +350,9 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
       <h2 class="subtitle">Installing on Linux and Mac OS</h2>
 
-      <h3>Building with PHP7</h3>
+      <h3>Building with PHP8</h3>
 
-      <p>The PHP extension is in the form of a C/C++ PHP7 extension to
+      <p>The PHP extension is in the form of a C/C++ PHP8 extension to
       SaxonC created using the Zend module API. (To use the extension
       with PHP5, see the "Building with PHP5" note below.)</p>
 
@@ -368,7 +367,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
       <p>Next create a module conf file: </p>
 
-      <kbd>nano /etc/php/7.X/mods-available/20-saxon.ini</kbd>
+      <kbd>nano /etc/php/8.X/mods-available/20-saxon.ini</kbd>
 
       <p>with content:</p>
 
@@ -381,7 +380,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
       <p>Alternatively, you can update the <code>php.ini</code> file or add the
             <code>20-saxon.ini</code> file under the <code>conf.d</code> directory (if using Ubuntu
-         it is usually in the location <code>/etc/php/7.X/apache2/</code>) to contain the PHP
+         it is usually in the location <code>/etc/php/8.X/apache2/</code>) to contain the PHP
          extension. Insert the code <code>extension=saxon.so</code> in the Dynamic Extensions
          section, then run the following commands:</p>
 
@@ -410,14 +409,6 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
          Environment="SAXONC_HOME=/usr/lib”</code></li>
       </ul>
 
-      <div id="php5" class="note">
-        <h3>Building with PHP5</h3>
-        <p>The SaxonC PHP extension is built for PHP7. To instead
-        build with PHP5, first replace the <code>config.m4</code> file
-        in the <code>Saxon-C-API/</code> directory with the one held
-        in <code>Saxon-C-API/PHP5-Build</code>. Then run the
-        installation steps above.</p>
-      </div>
 
       <h2 class="subtitle">Installing on Windows</h2>
 
@@ -442,9 +433,22 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       <h1>Python extension</h1>
 
       <p>The Python extension is an interface module that allows SaxonC to be invoked from Python
-         applications.</p>
+         applications. SaxonC is now officially available as a wheel package available on pypi.</p>
 
-      <h2 class="subtitle">Prerequisites</h2>
+       <h2 class="subtitle">Prerequisites</h2>
+
+       <p>Please have the following packages on your machine to build SaxonC for the Python
+          language: <code>Python3</code> (64-bit).</p>
+
+       <h2 class="subtitle">Installing (pip)</h2>
+       <p>Choose the product:</p>
+       <kbd>pip install saxoncee</kbd>
+       <kbd>pip install saxoncpe</kbd>
+       <kbd>pip install saxonche</kbd>
+
+       <h2 class="subtitle">Installing (without pip)</h2>
+
+      <h3 class="subtitle">Prerequisites</h3>
 
       <p>Please have the following packages on your machine to build SaxonC for the Python
          language: <code>Python3</code> (64-bit) and <code>Cython</code>.</p>
@@ -468,7 +472,11 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
       <h3>Windows platform</h3>
 
-      <p>The Python extension on the Windows platform can be built using the following instructions:</p>
+       <p>The SaxonC Python extension on the Windows platform is available as pypi wheel package. The three products can be installed as follows:</p>
+
+       <kbd>pip install saxonc[ee|pe|he]</kbd>
+
+       <p>SaxonC can also be built using the following instructions:</p>
        <p>Install Python 3.X (64-bit) with VS 2017 or 2019 which can then be run
           with command "py" from Powershell.</p>
 
@@ -494,31 +502,8 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
          usually has useful information on errors reported and crashes. See below for a description
          of some of the common errors and crashes, and their solutions:</p>
       <ol>
-         <li>
-            <p>
-               <code>FATAL ERROR: Unable to load /usr/lib64/rt/lib/amd64/libjava.so (libjvm.so
-                  cannot open shared object file: No such file or directory) JNI_CreateJavaVM()
-                  failed with result-1</code>
-            </p>
-            <p><b>Solution:</b> Running the following command should resolve the error:</p>
-            <kbd>sudo ldconfig</kbd>
-            <p>Ignore the message 'file /lib/libsaxon[EDITION].so is truncated'. The library was created using
-            Excelsior JET.</p>
-            <p>Alternatively create a symlink to the java virtual machine. This is not required to
-               install or compile, but it is required for PHP code. The following command should
-               resolve the issue on a 64-bit machine:</p>
-            <kbd>ln -s $JAVA_HOME/jre/lib/amd64/server/libjvm.so /lib64/libjvm.so<br/></kbd>
-            <p>Alternatively, it is possible to link the libjvm.so from the 'rt/lib/jetjvm'
-               directory.</p>
-         </li>
-         <li>
-            <p>
-               <code>/usr/lib/Saxon-C-API/SaxonProcessor.h:3:17: fatal error: jni.h: No such file or
-                  directory <br/>#include &lt;jni.h&gt; compilation terminated.</code>
-            </p>
-            <p><b>Solution:</b> Link the <code>jni.h</code> on the machine or simply install
-                  <code>gcj-jdk</code> which should resolve this error. </p>
-         </li>
+
+
          <li>
             <p>
                <code>PHP Warning: PHP Startup: Unable to load dynamic library
@@ -533,26 +518,19 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
             <kbd>chcon system_u:object_r:lib_t:s0 /usr/lib/php/modules/saxon.so</kbd>
          </li>
          <li>
-            <p>Some 64-bit Linux flavors do not run the 32-bit JET libraries by default.</p>
-            <p><b>Solution:</b> For instance, <code>ia32-libs</code> must be installed on
-               Ubuntu/Debian, e.g. using the following command:<br/>
-            </p>
-            <kbd>sudo apt-get install ia32-libs</kbd>
-         </li>
-         <li>
             <p><code>Unable to load C:\Program Files\Saxonica\SaxonHEC1.2.1\libsaxonhec.dll Error: : No error</code></p>
             <p>Caused by attempting to run SaxonC in 32-bit environments, including 32-bit Python
                and PHP builds. SaxonC can only run with 64-bit builds.</p>
             <p><b>Solution:</b> 
             The machine operating system must be 64-bit, and Python and PHP builds must be 64-bit to run with SaxonC.</p>
          </li>
-         <li>
+        <!-- <li>
             <p>When building the SaxonC PHP extension after calling <code>sudo make</code> we have had users report the following
                error:</p>
             <p><code>.libs/SchemaValidator.o: No such file or directory</code></p>
             <p><b>Solution:</b>
                Run the command <code>sudo make clean</code> followed by <code>sudo make</code> again seems to have resolved the issue.</p>
-         </li>
+         </li>    -->
       </ol>
 
 

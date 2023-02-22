@@ -25,18 +25,18 @@
             </td>
             <td>
                <p>A <code>SaxonProcessor</code> acts as a factory for generating XSLT, XQuery, XPath
-                  and Schema compilers. This class creates the JET run time in a static struct
+                  and Schema compilers. This class creates the Graalvm native-image run time data structure for a thread in a static struct
                   object which is shared across all <code>SaxonProcessor</code> objects created. For
                   C++ programs the static method <code>SaxonProcessor::release()</code> needs to be
-                  called at the end of a program to clean up the JET threads. In the SaxonC Python
+                  called at the end of a program to clean up the Graalvm threads. In the SaxonC Python
                   and PHP extensions this release method is called internally.</p>
             </td>
             <td>
                <p>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/classSaxonProcessor.html"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html"
                      >C++</a><br/>
                   <a href="/api/saxon_c_php_api/saxon_c_php_saxonprocessor">PHP</a><br/>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PySaxonProcessor"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonProcessor"
                      >Python</a>
                </p>
             </td>
@@ -55,10 +55,10 @@
             </td>
             <td>
                <p>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/classXslt30Processor.html"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/classXslt30Processor.html"
                      >C++</a><br/>
                   <a href="/api/saxon_c_php_api/saxon_c_php_xslt30processor">PHP</a><br/>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXslt30Processor"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXslt30Processor"
                      >Python</a>
                </p>
             </td>
@@ -75,10 +75,10 @@
             </td>
             <td>
                <p>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/classXsltExecutable.html"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/classXsltExecutable.html"
                      >C++</a><br/>
                   <a href="/api/saxon_c_php_api/saxon_c_php_xsltexecutable">PHP</a><br/>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXsltExecutable"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXsltExecutable"
                      >Python</a>
                </p>
             </td>
@@ -95,10 +95,10 @@
             </td>
             <td>
                <p>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/classXQueryProcessor.html"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/classXQueryProcessor.html"
                      >C++</a><br/>
                   <a href="/api/saxon_c_php_api/saxon_c_php_xqueryprocessor">PHP</a><br/>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXQueryProcessor"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXQueryProcessor"
                      >Python</a>
                </p>
             </td>
@@ -115,10 +115,10 @@
             </td>
             <td>
                <p>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/classXPathProcessor.html"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/classXPathProcessor.html"
                      >C++</a><br/>
                   <a href="/api/saxon_c_php_api/saxon_c_php_xpathprocessor">PHP</a><br/>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXPathProcessor"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXPathProcessor"
                      >Python</a>
                </p>
             </td>
@@ -135,10 +135,10 @@
             </td>
             <td>
                <p>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/classschemavalidator.html"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/classschemavalidator.html"
                      >C++</a><br/>
                   <a href="/api/saxon_c_php_api/saxon_c_php_schemavalidator">PHP</a><br/>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PySchemaValidator"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySchemaValidator"
                      >Python</a>
                </p>
             </td>
@@ -150,44 +150,44 @@
    <section id="saxon_c_cpp_api" title="SaxonC C++ API">
       <h1>SaxonC C++ API</h1>
 
-      <p>SaxonC 11 is built from the SaxonJ 11 Java product by cross compiling using Excelsior
-         JET Enterprise 15.3 edition (MP1). This generates platform specific machine code, which is
-         interfaced with C/C++ using the Java Native Interace (JNI). The following SaxonC API
+      <p>SaxonC 12 is built from the SaxonJ 12 Java product by cross compiling using Graalvm native-image.
+         This generates platform specific machine code, which is
+         interfaced with C/C++ using the Native image C API. The following SaxonC API
          classes are available in C++ to process XSLT, XQuery, XPath and Schema validation:</p>
       <ul>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classSaxonProcessor.html"
+               href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html"
                >SaxonProcessor</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXslt30Processor.html"
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXslt30Processor.html"
                >Xslt30Processor</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXsltExecutable.html"
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXsltExecutable.html"
                >XsltExecutable</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXQueryProcessor.html"
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXQueryProcessor.html"
                >XQueryProcessor</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXPathProcessor.html"
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXPathProcessor.html"
                >XPathProcessor</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classSchemaValidator.html"
+               href="https://www.saxonica.com/saxon-c/doc12/html/classSchemaValidator.html"
                >SchemaValidator</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classDocumentBuilder.html"
+               href="https://www.saxonica.com/saxon-c/doc12/html/classDocumentBuilder.html"
                >DocumentBuilder</a>
          </li>
       </ul>
@@ -195,35 +195,35 @@
       <ul>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXdmValue.html">XdmValue</a>
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXdmValue.html">XdmValue</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXdmItem.html">XdmItem</a>
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXdmItem.html">XdmItem</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXdmAtomicValue.html"
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXdmAtomicValue.html"
                >XdmAtomicValue</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXdmNode.html">XdmNode</a>
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXdmNode.html">XdmNode</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXdmFunctionItem.html">XdmFunctionItem</a>
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXdmFunctionItem.html">XdmFunctionItem</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXdmArray.html">XdmArray</a>
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXdmArray.html">XdmArray</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXdmMap.html">XdmMap</a>
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXdmMap.html">XdmMap</a>
          </li>
       </ul>
-      <p>See the API class list: <a href="https://www.saxonica.com/saxon-c/doc11/html/annotated.html"
+      <p>See the API class list: <a href="https://www.saxonica.com/saxon-c/doc12/html/annotated.html"
             >C++ documentation</a></p>
    </section>
 
@@ -2834,37 +2834,37 @@
       <ul>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PySaxonProcessor"
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonProcessor"
                >PySaxonProcessor</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXslt30Processor"
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXslt30Processor"
                >PyXslt30Processor</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXsltExecutable"
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXsltExecutable"
                >PyXsltExecutable</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXQueryProcessor"
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXQueryProcessor"
                >PyXQueryProcessor</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXPathProcessor"
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXPathProcessor"
                >PyXPathProcessor</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PySchemaValidator"
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySchemaValidator"
                >PySchemaValidator</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyDocumentBuilder"
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyDocumentBuilder"
                >PyDocumentBuilder</a>
          </li>
       </ul>
@@ -2873,34 +2873,34 @@
       <ul>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmValue"
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmValue"
                >PyXdmValue</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmItem">PyXdmItem</a>
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmItem">PyXdmItem</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmAtomicValue"
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmAtomicValue"
                >PyXdmAtomicValue</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmNode">PyXdmNode</a>
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmNode">PyXdmNode</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmFunctionItem"
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmFunctionItem"
                >PyXdmFunctionItem</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmArray">PyXdmArray</a>
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmArray">PyXdmArray</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmMap">PyXdmMap</a>
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmMap">PyXdmMap</a>
          </li>
       </ul>
 
