@@ -1891,6 +1891,12 @@ cdef class PyXsltExecutable:
         """
         cdef const char * c_sourcefile = NULL
         cdef PyXdmValue value_ = None
+        cdef PyXdmItem valuei_ = None
+        cdef PyXdmNode valuen_ = None
+        cdef PyXdmAtomicValue valueav_ = None
+        cdef PyXdmFunctionItem valuef_ = None
+        cdef PyXdmMap valuem_ = None
+        cdef PyXdmArray valuear_ = None
         py_source_string = None
         py_stylesheet_string = None
         for key, value in kwds.items():
@@ -1905,10 +1911,28 @@ cdef class PyXsltExecutable:
               py_string_string = value.encode('utf-8') if value is not None else None
               c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
-          elif key == "xdm_value":
-            if isinstance(value, PyXdmValue):
-              value_ = value
-              self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+          elif key == "xdm_value" or key == "xdm_node":
+              if isinstance(value, PyXdmValue):
+                value_ = value
+                self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+              elif isinstance(value, PyXdmItem):
+                  valuei_ = value
+                  self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
+              elif isinstance(value, PyXdmNode):
+                  valuen_ = value
+                  self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
+              elif isinstance(value, PyXdmAtomicValue):
+                      valueav_ = value
+                      self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
+              elif isinstance(value, PyXdmFunctionItem):
+                      valuef_ = value
+                      self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
+              elif isinstance(value, PyXdmMap):
+                      valuem_ = value
+                      self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
+              elif isinstance(value, PyXdmArray):
+                      valuear_ = value
+                      self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
         cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
@@ -1971,6 +1995,12 @@ cdef class PyXsltExecutable:
         """
         cdef const char * c_sourcefile = NULL
         cdef PyXdmValue value_ = None
+        cdef PyXdmItem valuei_ = None
+        cdef PyXdmNode valuen_ = None
+        cdef PyXdmAtomicValue valueav_ = None
+        cdef PyXdmFunctionItem valuef_ = None
+        cdef PyXdmMap valuem_ = None
+        cdef PyXdmArray valuear_ = None
         py_source_string = None
         py_stylesheet_string = None
         for key, value in kwds.items():
@@ -1985,10 +2015,28 @@ cdef class PyXsltExecutable:
               py_string_string = value.encode('utf-8') if value is not None else None
               c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
-          elif key == "xdm_value":
-            if isinstance(value, PyXdmValue):
-              value_ = value
-              self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+          elif key == "xdm_value" or key == "xdm_node":
+              if isinstance(value, PyXdmValue):
+                value_ = value
+                self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+              elif isinstance(value, PyXdmItem):
+                  valuei_ = value
+                  self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
+              elif isinstance(value, PyXdmNode):
+                  valuen_ = value
+                  self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
+              elif isinstance(value, PyXdmAtomicValue):
+                      valueav_ = value
+                      self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
+              elif isinstance(value, PyXdmFunctionItem):
+                      valuef_ = value
+                      self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
+              elif isinstance(value, PyXdmMap):
+                      valuem_ = value
+                      self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
+              elif isinstance(value, PyXdmArray):
+                      valuear_ = value
+                      self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
         cdef const char* c_string  = self.thisxptr.applyTemplatesReturningString()
         return make_py_str(c_string)
 
@@ -2012,6 +2060,12 @@ cdef class PyXsltExecutable:
         cdef const char * c_sourcefile = NULL
         cdef const char * c_outputfile = NULL
         cdef PyXdmValue value_ = None
+        cdef PyXdmItem valuei_ = None
+        cdef PyXdmNode valuen_ = None
+        cdef PyXdmAtomicValue valueav_ = None
+        cdef PyXdmFunctionItem valuef_ = None
+        cdef PyXdmMap valuem_ = None
+        cdef PyXdmArray valuear_ = None
         py_source_string = None
         py_stylesheet_string = None
         py_output_string = None
@@ -2030,10 +2084,29 @@ cdef class PyXsltExecutable:
             if key == "output_file":
               py_output_string = value.encode('UTF-8') if value is not None else None
               c_outputfile = py_output_string if value is not None else ""
-          elif key == "xdm_value":
-            if isinstance(value, PyXdmNode):
-              value_ = value
-              self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+          elif key == "xdm_value" or key == "xdm_node":
+              if isinstance(value, PyXdmValue):
+                value_ = value
+                self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+              elif isinstance(value, PyXdmItem):
+                  valuei_ = value
+                  self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
+              elif isinstance(value, PyXdmNode):
+                  valuen_ = value
+                  self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
+              elif isinstance(value, PyXdmAtomicValue):
+                      valueav_ = value
+                      self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
+              elif isinstance(value, PyXdmFunctionItem):
+                      valuef_ = value
+                      self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
+              elif isinstance(value, PyXdmMap):
+                      valuem_ = value
+                      self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
+              elif isinstance(value, PyXdmArray):
+                      valuear_ = value
+                      self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
+
         self.thisxptr.applyTemplatesReturningFile(c_outputfile)
 
      def call_template_returning_value(self, str template_name=None, **kwds):
@@ -2057,6 +2130,12 @@ cdef class PyXsltExecutable:
         cdef const char * c_sourcefile = NULL
         cdef const char * c_stylesheetfile = NULL
         cdef PyXdmValue value_ = None
+        cdef PyXdmItem valuei_ = None
+        cdef PyXdmNode valuen_ = None
+        cdef PyXdmAtomicValue valueav_ = None
+        cdef PyXdmFunctionItem valuef_ = None
+        cdef PyXdmMap valuem_ = None
+        cdef PyXdmArray valuear_ = None
         py_source_string = None
         py_template_name_str = None
         py_stylesheet_string = None
@@ -2072,10 +2151,28 @@ cdef class PyXsltExecutable:
               py_string_string = value.encode('utf-8') if value is not None else None
               c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
-          elif key == "xdm_node":
-            if isinstance(value, PyXdmValue):
-              value_ = value
-              self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+          elif key == "xdm_node" or key == "xdm_value":
+              if isinstance(value, PyXdmValue):
+                value_ = value
+                self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+              elif isinstance(value, PyXdmItem):
+                  valuei_ = value
+                  self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
+              elif isinstance(value, PyXdmNode):
+                  valuen_ = value
+                  self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
+              elif isinstance(value, PyXdmAtomicValue):
+                      valueav_ = value
+                      self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
+              elif isinstance(value, PyXdmFunctionItem):
+                      valuef_ = value
+                      self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
+              elif isinstance(value, PyXdmMap):
+                      valuem_ = value
+                      self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
+              elif isinstance(value, PyXdmArray):
+                      valuear_ = value
+                      self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
         c_templateName = make_c_str(template_name)
         cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
@@ -2141,7 +2238,13 @@ cdef class PyXsltExecutable:
         """
         cdef const char * c_sourcefile = NULL
         cdef const char * c_templateName = NULL
-        cdef PyXdmNode value_ = None
+        cdef PyXdmValue value_ = None
+        cdef PyXdmItem valuei_ = None
+        cdef PyXdmNode valuen_ = None
+        cdef PyXdmAtomicValue valueav_ = None
+        cdef PyXdmFunctionItem valuef_ = None
+        cdef PyXdmMap valuem_ = None
+        cdef PyXdmArray valuear_ = None
         py_source_string = None
         py_template_name_str = None
         py_stylesheet_string = None
@@ -2158,10 +2261,28 @@ cdef class PyXsltExecutable:
               py_string_string = value.encode('utf-8') if value is not None else None
               c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
-          elif key == "xdm_value":
-            if isinstance(value, PyXdmValue):
-              value_ = value
-              self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+          elif key == "xdm_value" or key == "xdm_node":
+              if isinstance(value, PyXdmValue):
+                value_ = value
+                self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+              elif isinstance(value, PyXdmItem):
+                  valuei_ = value
+                  self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
+              elif isinstance(value, PyXdmNode):
+                  valuen_ = value
+                  self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
+              elif isinstance(value, PyXdmAtomicValue):
+                      valueav_ = value
+                      self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
+              elif isinstance(value, PyXdmFunctionItem):
+                      valuef_ = value
+                      self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
+              elif isinstance(value, PyXdmMap):
+                      valuem_ = value
+                      self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
+              elif isinstance(value, PyXdmArray):
+                      valuear_ = value
+                      self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
         c_templateName = make_c_str(template_name)
         c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
         return make_py_str(c_string)
@@ -2188,6 +2309,12 @@ cdef class PyXsltExecutable:
         cdef const char * c_templateName = NULL
         cdef const char * c_sourcefile = NULL
         cdef PyXdmValue value_ = None
+        cdef PyXdmItem valuei_ = None
+        cdef PyXdmNode valuen_ = None
+        cdef PyXdmAtomicValue valueav_ = None
+        cdef PyXdmFunctionItem valuef_ = None
+        cdef PyXdmMap valuem_ = None
+        cdef PyXdmArray valuear_ = None
         py_source_string = None
         py_template_name_str = None
         py_stylesheet_string = None
@@ -2207,10 +2334,28 @@ cdef class PyXsltExecutable:
             if key == "output_file":
               py_output_string = value.encode('UTF-8') if value is not None else None
               c_outputfile = py_output_string if value is not None else ""
-          elif key == "xdm_value":
-            if isinstance(value, PyXdmValue):
-              value_ = value
-              self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+          elif key == "xdm_value" or key == "xdm_node":
+              if isinstance(value, PyXdmValue):
+                value_ = value
+                self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+              elif isinstance(value, PyXdmItem):
+                  valuei_ = value
+                  self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
+              elif isinstance(value, PyXdmNode):
+                  valuen_ = value
+                  self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
+              elif isinstance(value, PyXdmAtomicValue):
+                      valueav_ = value
+                      self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
+              elif isinstance(value, PyXdmFunctionItem):
+                      valuef_ = value
+                      self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
+              elif isinstance(value, PyXdmMap):
+                      valuem_ = value
+                      self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
+              elif isinstance(value, PyXdmArray):
+                      valuear_ = value
+                      self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
         c_templateName = make_c_str(template_name)
         self.thisxptr.callTemplateReturningFile(c_templateName, c_outputfile)
 
@@ -2236,6 +2381,12 @@ cdef class PyXsltExecutable:
         cdef const char * c_sourcefile = NULL
 
         cdef PyXdmValue value_ = None
+        cdef PyXdmItem valuei_ = None
+        cdef PyXdmNode valuen_ = None
+        cdef PyXdmAtomicValue valueav_ = None
+        cdef PyXdmFunctionItem valuef_ = None
+        cdef PyXdmMap valuem_ = None
+        cdef PyXdmArray valuear_ = None
         py_source_string = None
         py_template_name_str = None
         py_stylesheet_string = None
@@ -2246,10 +2397,28 @@ cdef class PyXsltExecutable:
               py_source_string = value.encode('UTF-8') if value is not None else None
               c_sourcefile = py_source_string if value is not None else ""
               self.thisxptr.setInitialMatchSelectionAsFile(c_sourcefile)
-          elif key == "xdm_value":
-            if isinstance(value, PyXdmValue):
-              value_ = value
-              self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+          elif key == "xdm_value" or key == "xdm_node":
+              if isinstance(value, PyXdmValue):
+                value_ = value
+                self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+              elif isinstance(value, PyXdmItem):
+                  valuei_ = value
+                  self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
+              elif isinstance(value, PyXdmNode):
+                  valuen_ = value
+                  self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
+              elif isinstance(value, PyXdmAtomicValue):
+                      valueav_ = value
+                      self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
+              elif isinstance(value, PyXdmFunctionItem):
+                      valuef_ = value
+                      self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
+              elif isinstance(value, PyXdmMap):
+                      valuem_ = value
+                      self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
+              elif isinstance(value, PyXdmArray):
+                      valuear_ = value
+                      self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
         cdef int len_= 0;
         len_ = len(args)
         """ TODO handle memory when finished with XdmValues """
@@ -2324,6 +2493,12 @@ cdef class PyXsltExecutable:
         cdef const char * c_sourcefile = NULL
         cdef const char * c_stylesheetfile = NULL
         cdef PyXdmValue value_ = None
+        cdef PyXdmItem valuei_ = None
+        cdef PyXdmNode valuen_ = None
+        cdef PyXdmAtomicValue valueav_ = None
+        cdef PyXdmFunctionItem valuef_ = None
+        cdef PyXdmMap valuem_ = None
+        cdef PyXdmArray valuear_ = None
         py_source_string = None
         py_template_name_str = None
         py_stylesheet_string = None
@@ -2345,10 +2520,28 @@ cdef class PyXsltExecutable:
               c_stylesheetfile = py_s_string if value is not None else ""
               '''if isfile(value) == False:
                 raise Exception("Stylesheet file does not exist")'''
-          elif key == "xdm_value":
-            if isinstance(value, PyXdmValue):
-              value_ = value
-              self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+          elif key == "xdm_value" or key == "xdm_node":
+              if isinstance(value, PyXdmValue):
+                value_ = value
+                self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+              elif isinstance(value, PyXdmItem):
+                  valuei_ = value
+                  self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
+              elif isinstance(value, PyXdmNode):
+                  valuen_ = value
+                  self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
+              elif isinstance(value, PyXdmAtomicValue):
+                      valueav_ = value
+                      self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
+              elif isinstance(value, PyXdmFunctionItem):
+                      valuef_ = value
+                      self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
+              elif isinstance(value, PyXdmMap):
+                      valuem_ = value
+                      self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
+              elif isinstance(value, PyXdmArray):
+                      valuear_ = value
+                      self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
         cdef int _len = len(args)
         """ TODO handle memory when finished with XdmValues """
         cdef saxoncClasses.XdmValue ** argumentV = self.thisxptr.createXdmValueArray(_len)
@@ -2391,6 +2584,12 @@ cdef class PyXsltExecutable:
         cdef const char * c_outputfile = NULL
         cdef const char * c_stylesheetfile = NULL
         cdef PyXdmValue value_ = None
+        cdef PyXdmItem valuei_ = None
+        cdef PyXdmNode valuen_ = None
+        cdef PyXdmAtomicValue valueav_ = None
+        cdef PyXdmFunctionItem valuef_ = None
+        cdef PyXdmMap valuem_ = None
+        cdef PyXdmArray valuear_ = None
         cdef PyXdmValue valueArgs_ = None
         py_source_string = None
         py_template_name_str = None
@@ -2416,10 +2615,28 @@ cdef class PyXsltExecutable:
               c_stylesheetfile = py_s_string if value is not None else ""
               '''if isfile(value) == False:
                 raise Exception("Stylesheet file does not exist")'''
-          elif key == "xdm_value":
-            if isinstance(value, PyXdmValue):
-              value_ = value
-              self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+          elif key == "xdm_value" or key == "xdm_node":
+              if isinstance(value, PyXdmValue):
+                value_ = value
+                self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+              elif isinstance(value, PyXdmItem):
+                  valuei_ = value
+                  self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
+              elif isinstance(value, PyXdmNode):
+                  valuen_ = value
+                  self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
+              elif isinstance(value, PyXdmAtomicValue):
+                      valueav_ = value
+                      self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
+              elif isinstance(value, PyXdmFunctionItem):
+                      valuef_ = value
+                      self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
+              elif isinstance(value, PyXdmMap):
+                      valuem_ = value
+                      self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
+              elif isinstance(value, PyXdmArray):
+                      valuear_ = value
+                      self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
         cdef int _len = len(args)
         """ TODO handle memory when finished with XdmValues """
         cdef saxoncClasses.XdmValue ** argumentV = self.thisxptr.createXdmValueArray(_len)

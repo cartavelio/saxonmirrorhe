@@ -18,7 +18,7 @@
 #define new new(__FILE__, __LINE__)
 #endif
 
-XsltExecutable::XsltExecutable(int64_t procRefi, int64_t exRef, std::string curr, std::string resources) {
+XsltExecutable::XsltExecutable(SaxonProcessor * proci, int64_t exRef, std::string curr, std::string resources) {
 
 
 
@@ -27,13 +27,14 @@ XsltExecutable::XsltExecutable(int64_t procRefi, int64_t exRef, std::string curr
 
 
 #endif
+    proc = proci;
     tunnel = false;
     rawResultsFlag = false;
     selectionRef = -1;
     saxonMessageListenerRef = -1;
     saxonResultDocRef = -1;
     executableRef = exRef;
-    procRef = procRefi;
+    procRef = proc->procRef;
     cwdXE = curr;
     resources_dir = resources;
     exceptionFound = false;
@@ -104,7 +105,7 @@ void XsltExecutable::setGlobalContextFromFile(const char *ifile) {
 }
 
 void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
-    
+
     if(_selection == nullptr) {
         selectionRef = -1;
     } else {
@@ -370,6 +371,7 @@ void XsltExecutable::exportStylesheet(const char *filename) {
 }
 
 void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
+    proc->attachCurrentThread();
     if (selectionRef == -1) {
         std::cerr
                 << "Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionFile."
@@ -416,8 +418,8 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 }
 
 const char *XsltExecutable::applyTemplatesReturningString() {
-    
 
+    proc->attachCurrentThread();
     if (selectionRef == -1) {
         std::cerr
                 << "Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionFile."
@@ -462,7 +464,7 @@ const char *XsltExecutable::applyTemplatesReturningString() {
 }
 
 XdmValue *XsltExecutable::applyTemplatesReturningValue() {
-    
+    proc->attachCurrentThread();
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
@@ -508,9 +510,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
 void XsltExecutable::callFunctionReturningFile(const char *functionName, XdmValue **arguments, int argument_length,
                                                const char *outfile) {
 
-    
-
-
+        proc->attachCurrentThread();
     	setProperty("resources", resources_dir.c_str());
 
         int additions = 0;
@@ -552,8 +552,8 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName, XdmValu
 const char *
 XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue **arguments, int argument_length) {
 
-    
 
+    proc->attachCurrentThread();
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
@@ -598,7 +598,7 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
 XdmValue *
 XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **arguments, int argument_length) {
 
-    
+    proc->attachCurrentThread();
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
@@ -648,7 +648,7 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
 
 void XsltExecutable::callTemplateReturningFile(const char *templateName, const char *outfile) {
 
-    
+    proc->attachCurrentThread();
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
@@ -682,7 +682,7 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName, const c
 
 
 const char * XsltExecutable::callTemplateReturningString(const char *templateName) {
-    
+    proc->attachCurrentThread();
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
@@ -717,7 +717,7 @@ const char * XsltExecutable::callTemplateReturningString(const char *templateNam
 }
 
 XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
-    
+    proc->attachCurrentThread();
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;

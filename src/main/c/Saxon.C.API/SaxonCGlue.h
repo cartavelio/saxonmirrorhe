@@ -71,8 +71,7 @@ extern char * resources_dir;
 
 // Static variable used to track when jvm has been created. Used to prevent creation more than once.
 extern int jvmCreated; //TODO this might not be required in graalvm - remove
-//graal_isolate_t *isolate;
-//graal_isolatethread_t *thread;
+
 
 //===============================================================================================//
 /*! <code>Environment</code>. This struct captures the Graalvm properties assocated with the cross compiled SaxonC library.
@@ -81,6 +80,7 @@ extern int jvmCreated; //TODO this might not be required in graalvm - remove
 typedef struct {
     graal_isolate_t *isolate;
     graal_isolatethread_t *thread;
+    graal_isolatethread_t *mainthread;
 } sxnc_environment;
 
 
@@ -162,6 +162,8 @@ char * _getResourceDirectory();
 int create_graalvm_isolate(sxnc_environment * env);
 
 int attach_graalvm_thread(sxnc_environment * env);
+
+int detach_graalvm_thread(sxnc_environment * env);
 
 
 int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license);
