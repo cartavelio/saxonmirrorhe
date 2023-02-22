@@ -657,7 +657,7 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// Obtain an selector that atomizes an item to produce a <c>XdmValue</c> of atomic values. Atomizing a node will
+        /// Obtain a <c>Step</c> that atomizes an item to produce a <c>XdmValue</c> of atomic values. Atomizing a node will
         /// usually produce a single atomic value, but in the case of schema-typed nodes using a list type, there may
         /// be more than one atomic value. Atomizing an array also returns multiple atomic values.
         /// </summary>
