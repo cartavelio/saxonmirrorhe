@@ -1,4 +1,4 @@
-<!-- This stylesheet demonstrates the use of element extensibility with SAXON 
+<!-- This stylesheet demonstrates the use of element extensibility with SAXON
        It uses both the SQL extensions and saxon:assign -->
 
 <!-- sql001, was saxon051 -->
@@ -9,16 +9,10 @@
 	xmlns:saxon="http://saxon.sf.net/"
  	extension-element-prefixes="saxon sql">
 
-<!-- insert your database details here, or supply them in parameters -->
-<!--<xsl:param name="database" select="'jdbc:hsqldb:file:db/test'"/>  
-    <xsl:param name="user" select="'mike'"/>
-<xsl:param name="password" select="'saxonxxx'"/>
-<xsl:param name="driver" select="'org.hsqldb.jdbc.JDBCDriver'"/>
-    -->
-<xsl:param name="database" select="'jdbc:mysql://localhost/saxontest'"/>  
-<xsl:param name="user" select="'jwl'"/>
-<xsl:param name="password" select="'john'"/>
-<xsl:param name="driver" select="'com.mysql.jdbc.Driver'"/>
+  <xsl:param name="driver" select="'org.postgresql.Driver'"/>
+  <xsl:param name="database" select="'jdbc:postgresql://localhost/sample'"/>  
+  <xsl:param name="user" select="'testeditor'"/>
+  <xsl:param name="password" select="'sekrit'"/>
 
 <!-- This stylesheet writes the book list to a SQL database -->
 
@@ -38,7 +32,7 @@
         </sql:connect>
     </xsl:variable>
     <xsl:message>Connected...</xsl:message>
-    <sql:execute connection="$connection" statement="drop table book"/>    
+    <sql:execute connection="$connection" statement="drop table if exists book"/>
     <sql:execute connection="$connection"
        statement="create table book (title varchar(100), author varchar(100), category varchar(20))"/>
     <xsl:apply-templates select="BOOKS">
@@ -60,4 +54,4 @@
     <sql:close connection="$connection"/>
 </xsl:template>
 
-</xsl:stylesheet>	
+</xsl:stylesheet>
