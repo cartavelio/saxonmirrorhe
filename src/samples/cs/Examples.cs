@@ -27,7 +27,6 @@ namespace SaxonEE
 
         public static void Main(string[] argv)
         {
-
             Example[] examples = {
                 new XdmNavigation(),
                 new XPathSimple(),
