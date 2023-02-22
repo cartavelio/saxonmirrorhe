@@ -164,18 +164,22 @@ public class SignatureTest extends XQJTestCase {
     logClass(sb, "XQStackTraceElement");
     logClass(sb, "XQStackTraceVariable");
     logClass(sb, "XQStaticContext");
-    
+
     java.io.InputStream signatureStream = this.getClass().getClassLoader().getResourceAsStream(signatureFile__);
     Assert.assertNotNull("Signature file '" + signatureFile__ + "' not found in classpath.", signatureStream);
-    
+
+    // Rewrite here to make the comparison insensitive to end-of-line changes in the canonical signature file
+    StringBuilder expected = new StringBuilder();
     java.io.InputStreamReader signatureReader = new java.io.InputStreamReader(signatureStream, "UTF-8");
-    Reader in = new BufferedReader(signatureReader);
-    int ch;
-    StringBuffer expected = new StringBuffer();
-    while ((ch = in.read()) > -1) {
-      expected.append((char)ch);
+    BufferedReader in = new BufferedReader(signatureReader);
+    String line = in.readLine();
+    while (line != null) {
+      expected.append(line);
+      expected.append("\r\n");
+      line = in.readLine();
     }
     in.close();
+
     Assert.assertEquals("Signature mismatch, expected " + expected.toString() + ", got " + sb.toString(),
             expected.toString(), sb.toString());
   }
