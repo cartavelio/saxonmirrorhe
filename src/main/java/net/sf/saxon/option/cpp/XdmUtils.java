@@ -322,7 +322,7 @@ public class XdmUtils {
         }
         Processor proc = SaxonCAPI.objectHandles.get(procRef);
         String eqname = CTypeConversion.toJavaString(c_eqname);
-        XdmFunctionItem function = XdmFunctionItem.getSystemFunction(proc, QName.fromClarkName(eqname), arity);
+        XdmFunctionItem function = XdmFunctionItem.getSystemFunction(proc, QName.fromEQName(eqname), arity);
         if(function == null) {
             return -1;
         } else {
