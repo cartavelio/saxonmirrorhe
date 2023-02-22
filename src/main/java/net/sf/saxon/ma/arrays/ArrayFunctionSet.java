@@ -99,6 +99,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         register("head", 1, e -> e.populate( ArrayHead::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
+        register("index-where", 2, e -> e.populate(ArrayIndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                .arg(1, filterFunctionType, ONE | INS, null));
+
         register("insert-before", 3, e -> e.populate( ArrayInsertBefore::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.INTEGER, STAR | ABS, null)
@@ -154,6 +158,12 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         //#if EE==true || PE==true
         if (version >= 40) {
+            register("empty", 1, e -> e.populate(ArrayEmpty::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+
+            register("exists", 1, e -> e.populate(ArrayExists::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+
             register("foot", 1, e -> e.populate(ArrayFoot::new, AnyItemType.getInstance(), STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
@@ -361,6 +371,36 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             }
             return zero;
         }
+    }
+
+    /**
+     * Implementation of the proposed 4.0 function array:exists(array)
+     */
+    public static class ArrayExists extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem array = (ArrayItem) arguments[0].head();
+            assert array != null;
+            int len = array.arrayLength();
+            return BooleanValue.get(len > 0);
+        }
+
+    }
+
+    /**
+     * Implementation of the proposed 4.0 function array:empty(array)
+     */
+    public static class ArrayEmpty extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem array = (ArrayItem) arguments[0].head();
+            assert array != null;
+            int len = array.arrayLength();
+            return BooleanValue.get(len == 0);
+        }
+
     }
 
     /**
@@ -669,6 +709,29 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             return array.remove(len - 1);
         }
     }
+
+    /**
+     * Implementation of the function array:for-each-pair(array, array, function) =&gt; array
+     */
+    public static class ArrayIndexWhere extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem array1 = (ArrayItem) arguments[0].head();
+            assert array1 != null;
+            FunctionItem fn = (FunctionItem) arguments[1].head();
+            List<Int64Value> list = new ArrayList<>();
+            int i;
+            for (i = 0; i < array1.arrayLength(); i++) {
+                GroundedValue result = dynamicCall(fn, context, array1.get(i)).materialize();
+                if (result.effectiveBooleanValue()) {
+                    list.add(new Int64Value(i+1));
+                }
+            }
+            return SequenceExtent.makeSequenceExtent(list);
+        }
+    }
+
     //#endif
 
     /**
