@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using net.sf.saxon.expr.sort;
-using net.sf.saxon.ma.map;
-using net.sf.saxon.om;
-using net.sf.saxon.tree.iter;
-using net.sf.saxon.type;
-using net.sf.saxon.value;
-using KeyValuePair = net.sf.saxon.ma.map.KeyValuePair;
-using Type = net.sf.saxon.type.Type;
+using Saxon.Hej.expr.sort;
+using Saxon.Hej.ma.map;
+using Saxon.Hej.om;
+using Saxon.Hej.tree.iter;
+using Saxon.Hej.type;
+using Saxon.Hej.value;
+using KeyValuePair = Saxon.Hej.ma.map.KeyValuePair;
+using Type = Saxon.Hej.type.Type;
 
 namespace Saxon.Impl.DataModel {
     /**
-     * This is a re-implementation of the Java class net.sf.saxon.ma.map.HashTrieMap,
+     * This is a re-implementation of the Java class Saxon.Hej.ma.map.HashTrieMap,
      * rewritten to use the .NET ImmutableDictionary class in place of the homebrew
      * immutable trie structure used in the Java product.
      */
@@ -23,7 +23,7 @@ namespace Saxon.Impl.DataModel {
         // equals method (to take account of collations, etc). The value in the trie is
         // actually a tuple holding both the real key, and the value.
 
-        private ImmutableDictionary<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair> imap;
+        private ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> imap;
 
         // The following values are maintained incrementally when
         // entries are added to the map. They are not changed when entries are removed,
@@ -56,7 +56,7 @@ namespace Saxon.Impl.DataModel {
          * Create an empty map
          */
         public ImmMap() {
-            this.imap = ImmutableDictionary.Create<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair>();
+            this.imap = ImmutableDictionary.Create<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair>();
             this.entries = 0;
         }
 
@@ -75,7 +75,7 @@ namespace Saxon.Impl.DataModel {
          * Create a map whose contents are a copy of an existing immutable map
          * @param imap the map to be copied
          */
-        public ImmMap(ImmutableDictionary<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair> imap) {
+        public ImmMap(ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> imap) {
             this.imap = imap;
             entries = -1;
         }
@@ -92,7 +92,7 @@ namespace Saxon.Impl.DataModel {
             }
 
             ImmMap m2 = new ImmMap();
-            foreach (net.sf.saxon.ma.map.KeyValuePair pair in map.keyValuePairs()) {
+            foreach (Saxon.Hej.ma.map.KeyValuePair pair in map.keyValuePairs()) {
                 m2 = (ImmMap) m2.addEntry(pair.key, pair.value);
             }
 
@@ -137,7 +137,7 @@ namespace Saxon.Impl.DataModel {
 
             int count = 0;
             //noinspection UnusedDeclaration
-            foreach (net.sf.saxon.ma.map.KeyValuePair entry in keyValuePairs()) {
+            foreach (Saxon.Hej.ma.map.KeyValuePair entry in keyValuePairs()) {
                 count++;
             }
 
@@ -292,8 +292,8 @@ namespace Saxon.Impl.DataModel {
 
             bool isNew = !imap.ContainsKey(amk);
             bool empty = isEmpty();
-            ImmutableDictionary<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair> imap2 =
-                imap.SetItem(amk, new net.sf.saxon.ma.map.KeyValuePair(key, value));
+            ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> imap2 =
+                imap.SetItem(amk, new Saxon.Hej.ma.map.KeyValuePair(key, value));
             ImmMap t2 = new ImmMap(imap2) {
                 valueCardinality = this.valueCardinality,
                 keyUType = keyUType,
@@ -322,7 +322,7 @@ namespace Saxon.Impl.DataModel {
             AtomicMatchKey amk = makeKey(key);
             bool empty = isEmpty();
             bool exists = imap.ContainsKey(amk);
-            imap = imap.SetItem(amk, new net.sf.saxon.ma.map.KeyValuePair(key, value));
+            imap = imap.SetItem(amk, new Saxon.Hej.ma.map.KeyValuePair(key, value));
             updateTypeInformation(key, value, empty);
             entries = -1;
             return exists;
@@ -341,7 +341,7 @@ namespace Saxon.Impl.DataModel {
          *         unchanged if the specified key was not present
          */
         public override MapItem remove(AtomicValue key) {
-            ImmutableDictionary<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair> m2
+            ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> m2
                 = imap.Remove(makeKey(key));
             if (m2 == imap) {
                 // The key is not present; the map is unchanged
@@ -378,7 +378,7 @@ namespace Saxon.Impl.DataModel {
         * @param key     the value of the key
         * @return the key-value-pair associated with the given key, or null if the key is not present in the map
         */
-        public net.sf.saxon.ma.map.KeyValuePair getKeyValuePair(AtomicValue key) {
+        public Saxon.Hej.ma.map.KeyValuePair getKeyValuePair(AtomicValue key) {
             AtomicMatchKey matchKey = makeKey(key);
             if (imap.ContainsKey(matchKey)) {
                 return imap[matchKey];
@@ -400,10 +400,10 @@ namespace Saxon.Impl.DataModel {
         }
 
         public class KeyIterator : AtomicIterator {
-            private IEnumerator<net.sf.saxon.ma.map.KeyValuePair> _enumerator;
-            private net.sf.saxon.ma.map.KeyValuePair _current;
+            private IEnumerator<Saxon.Hej.ma.map.KeyValuePair> _enumerator;
+            private Saxon.Hej.ma.map.KeyValuePair _current;
 
-            public KeyIterator(ImmutableDictionary<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair> dictionary) {
+            public KeyIterator(ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> dictionary) {
                 _enumerator = dictionary.Values.GetEnumerator();
             }
 

@@ -14,11 +14,11 @@ namespace Saxon.Api {
     /// </remarks>    
     [Serializable]
     public class XQueryExecutable {
-        private net.sf.saxon.s9api.XQueryExecutable executable;
+        private Saxon.Hej.s9api.XQueryExecutable executable;
 
         // internal constructor
 
-        internal XQueryExecutable(net.sf.saxon.s9api.XQueryExecutable exec) {
+        internal XQueryExecutable(Saxon.Hej.s9api.XQueryExecutable exec) {
             this.executable = exec;
         }
 
@@ -29,7 +29,7 @@ namespace Saxon.Api {
 
         /// <summary>Escape-hatch method to get the underlying Saxon implementation object if required.
         /// This provides access to methods that may not be stable from release to release.</summary>
-        public net.sf.saxon.s9api.XQueryExecutable getUnderlyingCompiledQuery() {
+        internal Saxon.Hej.s9api.XQueryExecutable getUnderlyingCompiledQuery() {
             return executable;
         }
 

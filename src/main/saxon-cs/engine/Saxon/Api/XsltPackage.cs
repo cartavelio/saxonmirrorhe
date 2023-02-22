@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using net.sf.saxon.style;
-using net.sf.saxon.trace;
+using Saxon.Hej.style;
+using Saxon.Hej.trace;
 
 namespace Saxon.Api {
     /// <summary> An <c>XsltPackage</c> object represents the result of compiling an XSLT 3.0 package, as
@@ -10,10 +10,10 @@ namespace Saxon.Api {
     [Serializable]
     public class XsltPackage
     {
-        private net.sf.saxon.s9api.XsltPackage package;
+        private Saxon.Hej.s9api.XsltPackage package;
         private Processor processor;
         // internal constructor: Initializes a new instance of the <see cref="Saxon.Api.XsltPackage"/> class.
-        internal XsltPackage(Processor p, net.sf.saxon.s9api.XsltPackage pp)
+        internal XsltPackage(Processor p, Saxon.Hej.s9api.XsltPackage pp)
         {
             this.package = pp;
             this.processor = p;
@@ -60,12 +60,12 @@ namespace Saxon.Api {
         {
             try
             {
-                net.sf.saxon.s9api.XsltExecutable jexecutable = package.link();
+                Saxon.Hej.s9api.XsltExecutable jexecutable = package.link();
                 XsltExecutable executable = new XsltExecutable(jexecutable);
                 executable.InternalProcessor = processor;
                 return executable;
             }
-            catch (net.sf.saxon.trans.XPathException e)
+            catch (Saxon.Hej.trans.XPathException e)
             {
                 throw new Saxon.Api.SaxonApiException(e);
             }
@@ -76,12 +76,12 @@ namespace Saxon.Api {
 
         public void Save(Stream stream)
         {
-            ExpressionPresenter outp = new ExpressionPresenter(package.getProcessor().getUnderlyingConfiguration(), new javax.xml.transform.stream.StreamResult(stream), true);
+            ExpressionPresenter outp = new ExpressionPresenter(package.getProcessor().getUnderlyingConfiguration(), new Saxon.Ejavax.xml.transform.stream.StreamResult(stream), true);
             try
             {
                 package.getUnderlyingPreparedPackage().export(outp);
             }
-            catch (net.sf.saxon.trans.XPathException e)
+            catch (Saxon.Hej.trans.XPathException e)
             {
                 throw new Saxon.Api.SaxonApiException(e);
             }
@@ -97,7 +97,7 @@ namespace Saxon.Api {
             return package.getUnderlyingPreparedPackage();
         }
 
-        internal net.sf.saxon.s9api.XsltPackage GetUnderlyingXsltPackage() {
+        internal Saxon.Hej.s9api.XsltPackage GetUnderlyingXsltPackage() {
             return package;
         }
         

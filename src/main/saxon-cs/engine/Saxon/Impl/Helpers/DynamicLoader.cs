@@ -1,17 +1,17 @@
 using System;
 using System.IO;
-using java.lang;
-using net.sf.saxon.lib;
+using Saxon.Ejava.lang;
+using Saxon.Hej.lib;
 
-namespace SaxonCS3.Saxon.Impl.Helpers {
+namespace Saxon.Impl.Helpers {
     public class DynamicLoader : IDynamicLoader{
         public void setClassLoader(ClassLoader classLoader) {
             // No action
         }
 
         public Type getClass(string className, Logger traceOut, ClassLoader classLoader) {
-            if (className == "net.sf.saxon.serialize.MessageEmitter") {
-                return typeof(net.sf.saxon.serialize.MessageEmitter);
+            if (className == "Saxon.Hej.serialize.MessageEmitter") {
+                return typeof(Saxon.Hej.serialize.MessageEmitter);
             }
             throw new NotImplementedException();
         }

@@ -32,7 +32,7 @@ namespace Saxon.Impl.Helpers {
             return builder.Uri;
         }
         
-        public static java.net.URL ToURL(System.Uri uri) {
+        public static Saxon.Ejava.net.URL ToURL(System.Uri uri) {
             throw new(uri.ToString());
         }
 

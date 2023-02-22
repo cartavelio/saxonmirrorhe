@@ -13,9 +13,9 @@ namespace Saxon.Api {
     /// </remarks>
     public class ValidationFailure
     {
-        private net.sf.saxon.type.ValidationFailure failure;
+        private Saxon.Hej.type.ValidationFailure failure;
 
-        internal ValidationFailure(net.sf.saxon.type.ValidationFailure failure) {
+        internal ValidationFailure(Saxon.Hej.type.ValidationFailure failure) {
             this.failure = failure; 
         }
 

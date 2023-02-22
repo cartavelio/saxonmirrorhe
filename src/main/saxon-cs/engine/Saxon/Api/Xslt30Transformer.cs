@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-using java.util.function;
-using javax.xml.transform.stream;
-using net.sf.saxon.@event;
-using net.sf.saxon.lib;
-using net.sf.saxon.s9api;
-using net.sf.saxon.trans;
+using Saxon.Ejava.util.function;
+using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej.@event;
+using Saxon.Hej.lib;
+using Saxon.Hej.s9api;
+using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
@@ -70,12 +70,12 @@ namespace Saxon.Api {
     public class Xslt30Transformer {
         private ResultDocumentHandler resultDocumentHandler;
         private StandardLogger traceFunctionDestination;
-        private net.sf.saxon.s9api.Xslt30Transformer s9Transformer;
+        private Saxon.Hej.s9api.Xslt30Transformer s9Transformer;
         private readonly StandardMessageHandler _standardMessageHandler;
 
         // internal constructor
 
-        internal Xslt30Transformer(net.sf.saxon.s9api.Xslt30Transformer transformer) {
+        internal Xslt30Transformer(Saxon.Hej.s9api.Xslt30Transformer transformer) {
             this.s9Transformer = transformer;
             _standardMessageHandler = new StandardMessageHandler(transformer.controller.getConfiguration());
             transformer.controller.setMessageHandler(message => _standardMessageHandler.accept(message));
@@ -98,7 +98,7 @@ namespace Saxon.Api {
 
         public XsltController GetUnderlyingController => s9Transformer.getUnderlyingController();
 
-        internal net.sf.saxon.s9api.Xslt30Transformer GetUnderlyingXslt30Transformer => s9Transformer;
+        internal Saxon.Hej.s9api.Xslt30Transformer GetUnderlyingXslt30Transformer => s9Transformer;
 
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace Saxon.Api {
             try {
                 s9Transformer.setStylesheetParameters(parameters);
             }
-            catch (net.sf.saxon.trans.XPathException e) {
+            catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);
             }
         }
@@ -366,7 +366,7 @@ namespace Saxon.Api {
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="Saxon.Hej.s9api.DocumentBuilder"/>.</param>
         /// <param name="destination">The destination of the result document produced by wrapping the result 
         /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
         /// then the serialization parameters set in the serializer are combined with those defined in the 
@@ -386,7 +386,7 @@ namespace Saxon.Api {
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="Saxon.Hej.s9api.DocumentBuilder"/>.</param>
         /// <param name="baseUri">Base URI used for the input document</param>
         /// <param name="destination">The destination of the result document produced by wrapping the result 
         /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
@@ -407,7 +407,7 @@ namespace Saxon.Api {
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="Saxon.Hej.s9api.DocumentBuilder"/>.</param>
         /// <param name="destination">The destination of the result document produced by wrapping the result 
         /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
         /// then the serialization parameters set in the serializer are combined with those defined in the 
@@ -428,7 +428,7 @@ namespace Saxon.Api {
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="Saxon.Hej.s9api.DocumentBuilder"/>.</param>
         /// <param name="baseUri">Base URI used for the input document</param>
         /// <param name="destination">The destination of the result document produced by wrapping the result 
         /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
@@ -449,7 +449,7 @@ namespace Saxon.Api {
         /// It also uses any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="Saxon.Hej.s9api.DocumentBuilder"/>.</param>
         /// <param name="destination">The destination of the principal result of the transformation.
         /// If the destination is a <see cref="Serializer"/>, then the serialization
         /// parameters set in the serializer are combined with those defined in the stylesheet
@@ -467,7 +467,7 @@ namespace Saxon.Api {
         /// It also uses any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="Saxon.Hej.s9api.DocumentBuilder"/>.</param>
         /// <param name="baseUri">Base URI used for the input document</param>
         /// <param name="destination">The destination of the principal result of the transformation.
         /// If the destination is a <see cref="Serializer"/>, then the serialization
@@ -486,7 +486,7 @@ namespace Saxon.Api {
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="Saxon.Hej.s9api.DocumentBuilder"/>.</param>
         /// <param name="baseUri">Base URI</param>
         /// <returns>the raw result of applying templates to the supplied selection value, without wrapping in
         /// a document node or serializing the result. If there is more than one item in the selection, the result
@@ -505,7 +505,7 @@ namespace Saxon.Api {
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="Saxon.Hej.s9api.DocumentBuilder"/>.</param>
         /// <param name="baseUri">Base URI</param>
         /// <returns>the raw result of applying templates to the supplied selection value, without wrapping in
         /// a document node or serializing the result. If there is more than one item in the selection, the result

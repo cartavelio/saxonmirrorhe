@@ -1,5 +1,5 @@
 using System;
-using net.sf.saxon.s9api;
+using Saxon.Hej.s9api;
 
 namespace Saxon.Api {
     /// <summary>
@@ -9,11 +9,11 @@ namespace Saxon.Api {
     /// option <code>build-tree="no"</code>.
     /// </summary>
     public class RawDestination : IDestination {
-        private readonly net.sf.saxon.s9api.RawDestination destination;
+        private readonly Saxon.Hej.s9api.RawDestination destination;
 
         /// <summary>Construct a <c>RawDestination</c></summary>
         public RawDestination() {
-            destination = new net.sf.saxon.s9api.RawDestination();
+            destination = new Saxon.Hej.s9api.RawDestination();
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Saxon.Api {
         /// considered to be less stable than the classes in the Saxon.Api namespace.</para> 
         /// <para>The internal methods follow
         /// Java naming conventions rather than .NET conventions.</para>
-        /// <para>Information about the returned <see cref="net.sf.saxon.Configuration"/> object 
+        /// <para>Information about the returned <see cref="Saxon.Hej.Configuration"/> object 
         /// (and the objects it provides access to) is included in the Saxon JavaDoc docmentation.
         /// </para>
         /// </remarks>
@@ -37,7 +37,7 @@ namespace Saxon.Api {
         /// <summary>
         /// Close the destination and notify all registered listeners that it has been closed.
         /// This method is intended for internal use by Saxon. The method first calls
-        /// <see cref="Close"/> to close the destination, then it calls <c>java.util.function.Consumer.accept()</c>
+        /// <see cref="Close"/> to close the destination, then it calls <c>Saxon.Ejava.util.function.Consumer.accept()</c>
         /// on each of the listeners in turn to notify the fact that it has been closed.
         /// </summary>
         public void CloseAndNotify() {

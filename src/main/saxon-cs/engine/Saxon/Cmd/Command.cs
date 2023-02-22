@@ -1,34 +1,34 @@
 using System;
-using net.sf.saxon;
-using net.sf.saxon.expr.instruct;
+using Saxon.Hej;
+using Saxon.Hej.expr.instruct;
 using Saxon.Impl.Overrides;
 using Version = System.Version;
 
-namespace SaxonCS3.Saxon.Cmd {
+namespace Saxon.Cmd {
     public static class Command {
         public static void Main(string[] args) {
             if (args.Length == 0) {
-                Console.Error.WriteLine("Subcommand missing (query, transform, help, ...)");
+                Console.Error.WriteLine("Subcommand missing (query, transform, validate, help, ...)");
             }
             else {
                 string subCommand = args[0];
                 string[] tail = new string[args.Length - 1];
                 Array.Copy(args, 1, tail, 0, tail.Length);
                 if (subCommand == "query") {
-                    net.sf.saxon.Query.main(tail);
+                    Saxon.Hej.Query.main(tail);
                 } else if (subCommand == "transform") {
-                    net.sf.saxon.Transform.main(tail);
+                    Saxon.Hej.Transform.main(tail);
                 } else if (subCommand == "validate") {
-                    com.saxonica.Validate.main(tail);
+                    Saxon.Eej.Validate.main(tail);
                 } else if (subCommand == "version") {
-                    net.sf.saxon.Version.main(tail);
+                    Saxon.Hej.Version.main(tail);
                 } else if (subCommand == "help") {
                     Console.Error.WriteLine("saxon (query|transform|validate|version) -?");
                 // } else if (subCommand == "verify") {
                 //     Verifier.main(args);
                 }
                 else {
-                    Console.Error.WriteLine("Unknown subcommand: " + subCommand);
+                    Console.Error.WriteLine("Unknown subcommand: " + subCommand + " (use query, transform, validate, help, ...)");
                 }
             }
         }

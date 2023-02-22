@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using net.sf.saxon.lib;
-using net.sf.saxon.om;
+using Saxon.Hej.lib;
+using Saxon.Hej.om;
 
 namespace Saxon.Api {
     /// <summary>
@@ -72,10 +72,10 @@ namespace Saxon.Api {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="failure">net.sf.saxon.type.ValidationFailure.</param>
+        /// <param name="failure">Saxon.Hej.type.ValidationFailure.</param>
         public void reportInvalidity(Invalidity failure)
         {
-            ValidationFailure se = new ValidationFailure((net.sf.saxon.type.ValidationFailure)failure);
+            ValidationFailure se = new ValidationFailure((Saxon.Hej.type.ValidationFailure)failure);
             errorList.Add(se);
 
             //invalidityHandler.reportInvalidity (se);

@@ -4,7 +4,7 @@ namespace Saxon.Api.Support {
 using System;
 using System.Collections.Generic;
 
-    public class ComparingCollation : net.sf.saxon.lib.SubstringMatcher {
+    public class ComparingCollation : Saxon.Hej.lib.SubstringMatcher {
         private readonly CompareInfo comparer;
         private readonly CompareOptions options;
         private readonly string collationURI;
@@ -16,27 +16,27 @@ using System.Collections.Generic;
         public string getCollationURI() {
             return collationURI;
         }
-        public int compareStrings(net.sf.saxon.str.UnicodeString o1, net.sf.saxon.str.UnicodeString o2) {
+        public int compareStrings(Saxon.Hej.str.UnicodeString o1, Saxon.Hej.str.UnicodeString o2) {
             return comparer.Compare(o1.ToString(), o2.ToString(), options);
         }
-        public bool comparesEqual(net.sf.saxon.str.UnicodeString s1, net.sf.saxon.str.UnicodeString s2) {
+        public bool comparesEqual(Saxon.Hej.str.UnicodeString s1, Saxon.Hej.str.UnicodeString s2) {
             return (comparer.Compare(s1.ToString(), s2.ToString(), options)==0);
         }
-        public bool contains(net.sf.saxon.str.UnicodeString s1, net.sf.saxon.str.UnicodeString s2) {
+        public bool contains(Saxon.Hej.str.UnicodeString s1, Saxon.Hej.str.UnicodeString s2) {
             return (comparer.IndexOf(s1.ToString(), s2.ToString(), options)>=0);
         }
-        public bool endsWith(net.sf.saxon.str.UnicodeString s1, net.sf.saxon.str.UnicodeString s2) {
+        public bool endsWith(Saxon.Hej.str.UnicodeString s1, Saxon.Hej.str.UnicodeString s2) {
             return comparer.IsSuffix(s1.ToString(), s2.ToString(), options);
         }
-        public bool startsWith(net.sf.saxon.str.UnicodeString s1, net.sf.saxon.str.UnicodeString s2) {
+        public bool startsWith(Saxon.Hej.str.UnicodeString s1, Saxon.Hej.str.UnicodeString s2) {
             return comparer.IsPrefix(s1.ToString(), s2.ToString(), options);
         }
-        public net.sf.saxon.str.UnicodeString substringAfter(net.sf.saxon.str.UnicodeString s1, net.sf.saxon.str.UnicodeString s2) {
+        public Saxon.Hej.str.UnicodeString substringAfter(Saxon.Hej.str.UnicodeString s1, Saxon.Hej.str.UnicodeString s2) {
             string g1 = s1.ToString();
             string g2 = s2.ToString();
             int i = comparer.IndexOf(g1, g2, options);
             if ((i<0)) {
-                return net.sf.saxon.str.EmptyUnicodeString.getInstance();
+                return Saxon.Hej.str.EmptyUnicodeString.getInstance();
             }
             int pivot = (i+s2.length32());
             if ((comparer.Compare(g1.Substring(i, pivot), g2, options)==0)) {
@@ -56,31 +56,31 @@ using System.Collections.Generic;
                     return s1.substring((pivot-z));
                 }
                 if ((reachedStart&&reachedEnd)) {
-                    return net.sf.saxon.str.EmptyUnicodeString.getInstance();
+                    return Saxon.Hej.str.EmptyUnicodeString.getInstance();
                 }
             }
         }
-        private net.sf.saxon.value.StringValue stringValueFrom(string s, int from) {
-            return new net.sf.saxon.value.StringValue(s.Substring(from));
+        private Saxon.Hej.value.StringValue stringValueFrom(string s, int from) {
+            return new Saxon.Hej.value.StringValue(s.Substring(from));
         }
-        public net.sf.saxon.str.UnicodeString substringBefore(net.sf.saxon.str.UnicodeString s1, net.sf.saxon.str.UnicodeString s2) {
+        public Saxon.Hej.str.UnicodeString substringBefore(Saxon.Hej.str.UnicodeString s1, Saxon.Hej.str.UnicodeString s2) {
             string g1 = s1.ToString();
             string g2 = s2.ToString();
             int j = comparer.IndexOf(g1, g2, options);
             if ((j<0)) {
-                return net.sf.saxon.str.EmptyUnicodeString.getInstance();
+                return Saxon.Hej.str.EmptyUnicodeString.getInstance();
             }
             return s1.substring(0, j);
         }
-        public net.sf.saxon.expr.sort.AtomicMatchKey getCollationKey(net.sf.saxon.str.UnicodeString value) {
+        public Saxon.Hej.expr.sort.AtomicMatchKey getCollationKey(Saxon.Hej.str.UnicodeString value) {
             SortKey sortKey = comparer.GetSortKey(value.ToString(), options);
             return new ComparingCollation.SortKeyWrapper(sortKey);
         }
-        public net.sf.saxon.expr.sort.AtomicMatchKey getCollationKey(string value) {
+        public Saxon.Hej.expr.sort.AtomicMatchKey getCollationKey(string value) {
             SortKey sortKey = comparer.GetSortKey(value, options);
             return new ComparingCollation.SortKeyWrapper(sortKey);
         }
-        private class SortKeyWrapper : net.sf.saxon.expr.sort.AtomicMatchKey {
+        private class SortKeyWrapper : Saxon.Hej.expr.sort.AtomicMatchKey {
             private readonly SortKey key;
             public SortKeyWrapper(SortKey key)  {
                 this.key = key;
@@ -112,8 +112,8 @@ using System.Collections.Generic;
                 }
                 return true;
             }
-            public net.sf.saxon.value.AtomicValue asAtomic() {
-                return new net.sf.saxon.value.Base64BinaryValue(key.KeyData);
+            public Saxon.Hej.value.AtomicValue asAtomic() {
+                return new Saxon.Hej.value.Base64BinaryValue(key.KeyData);
             }
         }
     }

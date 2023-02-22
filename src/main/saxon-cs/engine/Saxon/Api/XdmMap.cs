@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using net.sf.saxon.ma.map;
-using net.sf.saxon.om;
-using net.sf.saxon.value;
+using Saxon.Hej.ma.map;
+using Saxon.Hej.om;
+using Saxon.Hej.value;
 using Saxon.Impl.DataModel;
-using KeyValuePair = net.sf.saxon.ma.map.KeyValuePair;
+using KeyValuePair = Saxon.Hej.ma.map.KeyValuePair;
 
 namespace Saxon.Api {
     /// <summary inherits="XdmFunctionItem">
@@ -84,7 +84,7 @@ namespace Saxon.Api {
         public Dictionary<XdmAtomicValue, XdmValue> AsDictionary() {
             Dictionary<XdmAtomicValue, XdmValue> map = new Dictionary<XdmAtomicValue, XdmValue>();
             MapItem jmap = (MapItem) value;
-            foreach (net.sf.saxon.ma.map.KeyValuePair pair in jmap.keyValuePairs()) {
+            foreach (Saxon.Hej.ma.map.KeyValuePair pair in jmap.keyValuePairs()) {
                 map.Add((XdmAtomicValue) XdmValue.Wrap(pair.key), XdmValue.Wrap(pair.value));
             }
             return map;
@@ -97,7 +97,7 @@ namespace Saxon.Api {
         /// <returns>a set of the keys present in this map, with no defined ordering.</returns>
         public HashSet<XdmAtomicValue> KeySet() {
             HashSet<XdmAtomicValue> result = new HashSet<XdmAtomicValue>();
-            foreach (net.sf.saxon.ma.map.KeyValuePair pair in ((MapItem) value).keyValuePairs()) {
+            foreach (Saxon.Hej.ma.map.KeyValuePair pair in ((MapItem) value).keyValuePairs()) {
                 result.Add((XdmAtomicValue) Wrap(pair.key));
             }
             return result;
@@ -177,7 +177,7 @@ namespace Saxon.Api {
         /// order of results is unpredictable.</returns>
         public ICollection<XdmValue> Values() {
             List<XdmValue> result = new List<XdmValue>();
-            foreach (net.sf.saxon.ma.map.KeyValuePair pair in ((MapItem) value).keyValuePairs()) {
+            foreach (Saxon.Hej.ma.map.KeyValuePair pair in ((MapItem) value).keyValuePairs()) {
                 result.Add((XdmAtomicValue) Wrap(pair.value));
             }
             return result;
@@ -190,7 +190,7 @@ namespace Saxon.Api {
         /// <returns>a set view of the mappings contained in this map</returns>
         public HashSet<DictionaryEntry> EntrySet() {
             HashSet<DictionaryEntry> result = new HashSet<DictionaryEntry>();
-            foreach (net.sf.saxon.ma.map.KeyValuePair pair in ((MapItem) value).keyValuePairs()) {
+            foreach (Saxon.Hej.ma.map.KeyValuePair pair in ((MapItem) value).keyValuePairs()) {
                 result.Add(new DictionaryEntry(pair.key, pair.value));
             }
             return result;

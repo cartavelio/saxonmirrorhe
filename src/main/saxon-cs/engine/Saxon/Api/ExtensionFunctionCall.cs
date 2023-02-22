@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using net.sf.saxon.expr;
-using net.sf.saxon.om;
-using net.sf.saxon.value;
+using Saxon.Hej.expr;
+using Saxon.Hej.om;
+using Saxon.Hej.value;
 
 namespace Saxon.Api {
     /// <summary>

@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using net.sf.saxon.om;
+using Saxon.Hej.om;
 
 namespace Saxon.Api.Support {
     /// <summary>

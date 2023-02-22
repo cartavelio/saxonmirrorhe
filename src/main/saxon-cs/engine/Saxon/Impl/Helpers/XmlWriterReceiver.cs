@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using net.sf.saxon.@event;
-using net.sf.saxon.om;
-using net.sf.saxon.s9api;
-using net.sf.saxon.type;
+using Saxon.Hej.@event;
+using Saxon.Hej.om;
+using Saxon.Hej.s9api;
+using Saxon.Hej.type;
 
 
 namespace Saxon.Impl.Helpers {
@@ -19,7 +19,7 @@ namespace Saxon.Impl.Helpers {
     /// redundant namespace declarations being output.
     /// <remarks>
     /// 
-    public class XmlWriterReceiver : net.sf.saxon.@event.TreeReceiver {
+    public class XmlWriterReceiver : Saxon.Hej.@event.TreeReceiver {
         private readonly XmlWriter writer;
         private bool closeAfterUse = true;
         public XmlWriterReceiver(XmlWriter writer, PipelineConfiguration pipe) : base(new Sink(pipe)) {
@@ -29,7 +29,7 @@ namespace Saxon.Impl.Helpers {
             closeAfterUse = close;
         }
         
-        public override void characters(net.sf.saxon.str.CodePoints chars, net.sf.saxon.s9api.Location locationId, int properties) {
+        public override void characters(Saxon.Hej.str.CodePoints chars, Saxon.Hej.s9api.Location locationId, int properties) {
             writer.WriteString(chars.ToString());
         }
         public override void close() {
@@ -40,7 +40,7 @@ namespace Saxon.Impl.Helpers {
             }
         }
         
-        public override void comment(net.sf.saxon.str.CodePoints content, net.sf.saxon.s9api.Location locationId, int properties) {
+        public override void comment(Saxon.Hej.str.CodePoints content, Saxon.Hej.s9api.Location locationId, int properties) {
             writer.WriteComment(content.ToString());
         }
         public override void endDocument() {
@@ -52,7 +52,7 @@ namespace Saxon.Impl.Helpers {
 
         public override void open() {
         }
-        public override void processingInstruction(string name, net.sf.saxon.str.CodePoints data, net.sf.saxon.s9api.Location locationId, int properties) {
+        public override void processingInstruction(string name, Saxon.Hej.str.CodePoints data, Saxon.Hej.s9api.Location locationId, int properties) {
             writer.WriteProcessingInstruction(name, data.ToString());
         }
         

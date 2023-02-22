@@ -3,13 +3,13 @@ using SysCollGen = System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using com.saxonica.ee.config;
-using net.sf.saxon.expr;
-using net.sf.saxon.om;
+using Saxon.Eej.ee.config;
+using Saxon.Hej.expr;
+using Saxon.Hej.om;
 
 namespace Saxon.Impl.Parallel {
 
-    public class MultithreadedItemMappingIterator00 : net.sf.saxon.expr.ItemMappingIterator {
+    public class MultithreadedItemMappingIterator00 : Saxon.Hej.expr.ItemMappingIterator {
         private readonly ConcurrentQueue<Item> resultQueue = new();
         private readonly CancellationTokenSource tokenSource = new();
         
@@ -41,7 +41,7 @@ namespace Saxon.Impl.Parallel {
             int maxThreads = Environment.ProcessorCount;
             return ((maxThreads>0) ? maxThreads : 1);
         }
-        public override net.sf.saxon.om.Item next() {
+        public override Saxon.Hej.om.Item next() {
             bool success = resultQueue.TryDequeue(out Item nextItem);
             //Console.Error.WriteLine("After Dequeue, size = " + resultQueue.Count + ", success=" + success + ", nextItem=" + nextItem?.getGenre());
             return success ? nextItem : null;

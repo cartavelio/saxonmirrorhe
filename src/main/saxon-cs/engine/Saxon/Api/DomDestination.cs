@@ -1,5 +1,5 @@
 using System.Xml;
-using net.sf.saxon.s9api;
+using Saxon.Hej.s9api;
 using Saxon.Impl.Dom;
 
 namespace Saxon.Api {
@@ -104,7 +104,7 @@ namespace Saxon.Api {
         /// considered to be less stable than the classes in the Saxon.Api namespace.</para> 
         /// <para>The internal methods follow
         /// Java naming conventions rather than .NET conventions.</para>
-        /// <para>Information about the returned <see cref="net.sf.saxon.Configuration"/> object 
+        /// <para>Information about the returned <see cref="Saxon.Hej.Configuration"/> object 
         /// (and the objects it provides access to) is included in the Saxon JavaDoc docmentation.
         /// </para>
         /// </remarks>

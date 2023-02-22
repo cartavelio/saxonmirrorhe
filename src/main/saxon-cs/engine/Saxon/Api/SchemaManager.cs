@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
-using javax.xml.transform.stream;
-using net.sf.saxon;
-using net.sf.saxon.pull;
-using net.sf.saxon.s9api;
-using net.sf.saxon.type;
+using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej;
+using Saxon.Hej.pull;
+using Saxon.Hej.s9api;
+using Saxon.Hej.type;
 using Saxon.Api.Support;
 
 
@@ -36,7 +36,7 @@ namespace Saxon.Api {
     [Serializable]
     public class SchemaManager
     {
-        private net.sf.saxon.s9api.SchemaManager s9schemaManager;
+        private Saxon.Hej.s9api.SchemaManager s9schemaManager;
         private Configuration config;
         private Processor processor;
         
@@ -74,7 +74,7 @@ namespace Saxon.Api {
         {
             set {
                 throw new NotSupportedException("Saxon-CS does not support catalogs");
-                //net.sf.saxon.trans.XmlCatalogResolver.setCatalog(value, this.config, false);
+                //Saxon.Hej.trans.XmlCatalogResolver.setCatalog(value, this.config, false);
             }
         }
 

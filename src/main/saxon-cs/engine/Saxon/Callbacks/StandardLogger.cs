@@ -1,22 +1,22 @@
 using System;
 
 namespace Saxon.Callbacks {
-    public class StandardLogger : net.sf.saxon.lib.Logger {
-        private int threshold = net.sf.saxon.lib.Logger.INFO;
+    public class StandardLogger : Saxon.Hej.lib.Logger {
+        private int threshold = Saxon.Hej.lib.Logger.INFO;
         private bool mustClose = false;
         public StandardLogger()  {
         }
-        public StandardLogger(java.io.PrintStream stream)  {
+        public StandardLogger(Saxon.Ejava.io.PrintStream stream)  {
             
         }
         public StandardLogger(System.IO.TextWriter writer)  {
             
         }
-        public StandardLogger(java.io.File fileName)  {
+        public StandardLogger(Saxon.Ejava.io.File fileName)  {
             
         }
 
-        public void setPrintStream(java.io.PrintStream output) {
+        public void setPrintStream(Saxon.Ejava.io.PrintStream output) {
             
         }
 
@@ -28,8 +28,8 @@ namespace Saxon.Callbacks {
             return 0;
         }
         
-        public override javax.xml.transform.stream.StreamResult asStreamResult() {
-            return new javax.xml.transform.stream.StreamResult(Console.Error);
+        public override Saxon.Ejavax.xml.transform.stream.StreamResult asStreamResult() {
+            return new Saxon.Ejavax.xml.transform.stream.StreamResult(Console.Error);
         }
         public override void println(string message, int severity) {
             if ((severity>=threshold)) {

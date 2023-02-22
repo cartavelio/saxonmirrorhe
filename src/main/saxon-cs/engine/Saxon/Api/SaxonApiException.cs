@@ -1,6 +1,6 @@
 using System;
-using javax.xml.transform;
-using net.sf.saxon.trans;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Hej.trans;
 
 namespace Saxon.Api {
     /// <summary>
@@ -24,11 +24,11 @@ namespace Saxon.Api {
                                 : XPathException.makeXPathException(err));
         }
 
-        public SaxonApiException(string message) : this(new java.lang.Exception(message)) {
+        public SaxonApiException(string message) : this(new Saxon.Ejava.lang.Exception(message)) {
             
         }
         
-        public SaxonApiException(string message, Exception err) : this(new java.lang.Exception(message, err)) {
+        public SaxonApiException(string message, Exception err) : this(new Saxon.Ejava.lang.Exception(message, err)) {
             
         }
 

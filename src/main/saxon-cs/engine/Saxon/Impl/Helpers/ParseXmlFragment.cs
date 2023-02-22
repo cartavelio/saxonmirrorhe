@@ -2,15 +2,15 @@ using System;
 using System.Impl.Helpers;
 using System.Xml;
 using System.Xml.XPath;
-using net.sf.saxon.functions;
-using net.sf.saxon.pull;
-using net.sf.saxon.value;
+using Saxon.Hej.functions;
+using Saxon.Hej.pull;
+using Saxon.Hej.value;
 
 namespace Saxon.Impl.Helpers {
     public class ParseXmlFragment : SystemFunction {
-        public override net.sf.saxon.om.Sequence call(net.sf.saxon.expr.XPathContext context, net.sf.saxon.om.Sequence[] arguments) {
-            net.sf.saxon.Controller controller = context.getController();
-            net.sf.saxon.Configuration config = controller.getConfiguration();
+        public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+            Saxon.Hej.Controller controller = context.getController();
+            Saxon.Hej.Configuration config = controller.getConfiguration();
             AtomicValue arg = (AtomicValue)arguments[0].head();
 
             if (arg == null) {
@@ -27,13 +27,13 @@ namespace Saxon.Impl.Helpers {
                     string decl = content.Substring(5, index - 5);
                     string encoding = ProcInstParser.getPseudoAttribute(decl, "encoding");
                     if (encoding == null) {
-                        throw new net.sf.saxon.trans.XPathException(
+                        throw new Saxon.Hej.trans.XPathException(
                             "Encoding attribute in XML fragment declaration is required", "FODC006");
                     }
 
                     string standalone = ProcInstParser.getPseudoAttribute(decl, "standalone");
                     if (standalone != null) {
-                        throw new net.sf.saxon.trans.XPathException(
+                        throw new Saxon.Hej.trans.XPathException(
                             "Standalone attribute in XML fragment declaration is not allowed", "FODC0006");
                     }
                 }

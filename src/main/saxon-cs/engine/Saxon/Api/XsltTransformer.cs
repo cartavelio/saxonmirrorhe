@@ -1,15 +1,15 @@
 using System;
 using System.IO;
 using System.Xml;
-using java.util.function;
+using Saxon.Ejava.util.function;
 using Sys = System;
-using javax.xml.transform.stream;
-using net.sf.saxon;
-using net.sf.saxon.@event;
-using net.sf.saxon.lib;
-using net.sf.saxon.om;
-using net.sf.saxon.s9api;
-using net.sf.saxon.trans;
+using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej;
+using Saxon.Hej.@event;
+using Saxon.Hej.lib;
+using Saxon.Hej.om;
+using Saxon.Hej.s9api;
+using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
@@ -37,12 +37,12 @@ namespace Saxon.Api {
         private ResultDocumentHandler resultDocumentHandler;
         private QName initialTemplateName;
         private XdmNode initialContextNode;
-        private net.sf.saxon.s9api.XsltTransformer transformer;
+        private Saxon.Hej.s9api.XsltTransformer transformer;
         private readonly StandardMessageHandler _standardMessageHandler;
 
         // internal constructor
 
-        internal XsltTransformer(net.sf.saxon.s9api.XsltTransformer transformer) {
+        internal XsltTransformer(Saxon.Hej.s9api.XsltTransformer transformer) {
             this.transformer = transformer;
             this._standardMessageHandler = new StandardMessageHandler(transformer.controller.getConfiguration());
             transformer.controller.setMessageHandler(message => this._standardMessageHandler.accept(message));

@@ -1,11 +1,11 @@
 using System;
-using net.sf.saxon.@event;
-using net.sf.saxon.om;
-using net.sf.saxon.trace;
-using net.sf.saxon.type;
+using Saxon.Hej.@event;
+using Saxon.Hej.om;
+using Saxon.Hej.trace;
+using Saxon.Hej.type;
 
 namespace Saxon.Api.Support {
-    internal class SpaceStrippingRule : net.sf.saxon.om.SpaceStrippingRule
+    internal class SpaceStrippingRule : Saxon.Hej.om.SpaceStrippingRule
     {
         private System.Predicate<QName> elementTest;
 
@@ -29,7 +29,7 @@ namespace Saxon.Api.Support {
 
         public ProxyReceiver makeStripper(Receiver r)
         {
-            return new net.sf.saxon.@event.Stripper(this, r);
+            return new Saxon.Hej.@event.Stripper(this, r);
         }
     }
 }

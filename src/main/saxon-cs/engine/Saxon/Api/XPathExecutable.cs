@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using net.sf.saxon.expr;
-using net.sf.saxon.sxpath;
+using Saxon.Hej.expr;
+using Saxon.Hej.sxpath;
 
 namespace Saxon.Api {
     /// <summary>
@@ -18,11 +18,11 @@ namespace Saxon.Api {
     /// </remarks>    
     [Serializable]
     public class XPathExecutable {
-        private net.sf.saxon.s9api.XPathExecutable executable;
+        private Saxon.Hej.s9api.XPathExecutable executable;
 
         // internal constructor
 
-        internal XPathExecutable(net.sf.saxon.s9api.XPathExecutable executable) {
+        internal XPathExecutable(Saxon.Hej.s9api.XPathExecutable executable) {
             this.executable = executable;
         }
 
@@ -39,10 +39,10 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Escape hatch to the <c>net.sf.saxon.s9api.XPathExecutable</c> object in the underlying Java implementation
+        /// Escape hatch to the <c>Saxon.Hej.s9api.XPathExecutable</c> object in the underlying Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.XPathExecutable Implementation => executable;
+        private Saxon.Hej.s9api.XPathExecutable Implementation => executable;
 
         /// <summary>
         /// Get a list of external variables used by the expression. This will include both variables that were explicitly
@@ -73,10 +73,10 @@ namespace Saxon.Api {
         /// any item type.</para>
         /// <para>If the variable was explicitly declared, this will be the occurrence indicator that was set when the
         /// variable was declared. If no item type was set, it will be 
-        /// <see cref="net.sf.saxon.s9api.OccurrenceIndicator#ZERO_OR_MORE"/>.</para>
+        /// <see cref="Saxon.Hej.s9api.OccurrenceIndicator#ZERO_OR_MORE"/>.</para>
         /// <para>If the variable was implicitly declared by reference (which can happen only when the
         /// <c>allowUndeclaredVariables</c> option is set), the returned type will be
-        /// <see cref="net.sf.saxon.s9api.OccurrenceIndicator#ZERO_OR_MORE"/>.</para>
+        /// <see cref="Saxon.Hej.s9api.OccurrenceIndicator#ZERO_OR_MORE"/>.</para>
         /// <para>If no variable with the specified <c>QName</c> has been declared either explicitly or implicitly,
         /// the method returns '0'.</para>
         /// </remarks>
@@ -133,7 +133,7 @@ namespace Saxon.Api {
         /// set up the dynamic context, and then to evaluate the expression.
         /// </returns>
         public XPathSelector Load() {
-            net.sf.saxon.s9api.XPathSelector selector = executable.load();
+            Saxon.Hej.s9api.XPathSelector selector = executable.load();
             return new XPathSelector(selector);
         }
     }

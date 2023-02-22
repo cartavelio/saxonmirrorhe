@@ -1,12 +1,12 @@
-using net.sf.saxon.lib;
-using net.sf.saxon.om;
+using Saxon.Hej.lib;
+using Saxon.Hej.om;
 
 namespace Saxon.Api {
     /// <summary>
     /// This class <c>InvalidityHandlerWrapper</c> extends the standard error handler for errors found during
     /// validation of an instance document against a schema, used if a user specifies the -report option on validate.
     /// Its effect is to output the validation errors found into the filename specified, in an XML format.
-    /// This is a wrapper class to wrap a .NET <c>InvalidityHandler</c> class for interfacing within Java.
+    /// This is a wrapper class to wrap a .NET <c>InvalidityHandler</c> class for interfacing within Saxon.Ejava.
     /// </summary>
     public class InvalidityHandlerWrapper : InvalidityHandler
     {
@@ -47,8 +47,8 @@ namespace Saxon.Api {
         /// <param name="i">Information about the nature of the invalidity.</param>
         public void reportInvalidity(Invalidity i)
         {
-            if (i is net.sf.saxon.type.ValidationFailure) { 
-                ValidationFailure error = new ValidationFailure((net.sf.saxon.type.ValidationFailure)i);
+            if (i is Saxon.Hej.type.ValidationFailure) { 
+                ValidationFailure error = new ValidationFailure((Saxon.Hej.type.ValidationFailure)i);
                 inHandler.reportInvalidity(error);
             }
 

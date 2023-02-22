@@ -1,5 +1,5 @@
-using net.sf.saxon.om;
-using net.sf.saxon.type;
+using Saxon.Hej.om;
+using Saxon.Hej.type;
 
 namespace Saxon.Api {
     /// <summary>

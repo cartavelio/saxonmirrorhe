@@ -2,11 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
-using net.sf.saxon.lib;
-using net.sf.saxon.om;
-using net.sf.saxon.query;
-using net.sf.saxon.s9api;
-using net.sf.saxon.trans;
+using Saxon.Hej.lib;
+using Saxon.Hej.om;
+using Saxon.Hej.query;
+using Saxon.Hej.s9api;
+using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
@@ -25,7 +25,7 @@ namespace Saxon.Api {
     /// </remarks>     
     [Serializable]
     public class XQueryEvaluator : IEnumerable<XdmItem> {
-        private net.sf.saxon.s9api.XQueryEvaluator evaluator;
+        private Saxon.Hej.s9api.XQueryEvaluator evaluator;
         private StandardLogger traceFunctionDestination;
 
         //private JXQueryExpression exp;
@@ -35,7 +35,7 @@ namespace Saxon.Api {
 
         // internal constructor
 
-        internal XQueryEvaluator(net.sf.saxon.s9api.XQueryEvaluator eval) {
+        internal XQueryEvaluator(Saxon.Hej.s9api.XQueryEvaluator eval) {
             this.evaluator = eval;
         }
 
@@ -190,12 +190,7 @@ namespace Saxon.Api {
         /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if any run-time failure
         /// occurs while evaluating the expression.</exception>
         public IEnumerator GetEnumerator() {
-            try {
-                return evaluator.GetEnumerator();
-            }
-            catch (net.sf.saxon.s9api.SaxonApiUncheckedException err) {
-                throw new SaxonApiException(XPathException.makeXPathException(err));
-            }
+            return evaluator.GetEnumerator();
         }
         
         /// <summary>
@@ -281,10 +276,10 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// Escape hatch to the <c>net.sf.saxon.query.DynamicQueryContext</c> object in the underlying Java implementation
+        /// Escape hatch to the <c>Saxon.Hej.query.DynamicQueryContext</c> object in the underlying Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.XQueryEvaluator Implementation {
+        private Saxon.Hej.s9api.XQueryEvaluator Implementation {
             get { return evaluator; }
         }
     }

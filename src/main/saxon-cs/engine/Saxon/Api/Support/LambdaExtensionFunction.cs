@@ -1,6 +1,6 @@
 using System;
-using java.util;
-using net.sf.saxon.value;
+using Saxon.Ejava.util;
+using Saxon.Hej.value;
 
 
 

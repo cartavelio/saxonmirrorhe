@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Xml.XPath;
-using java.io;
-using java.net;
+using Saxon.Ejava.io;
+using Saxon.Ejava.net;
 using IOException = System.IO.IOException;
 
 namespace Saxon.Impl.Overrides {

@@ -1,13 +1,13 @@
 using HtmlAgilityPack;
-using net.sf.saxon.om;
-using net.sf.saxon.str;
-using net.sf.saxon.tree.iter;
-using net.sf.saxon.tree.util;
-using net.sf.saxon.tree.wrapper;
+using Saxon.Hej.om;
+using Saxon.Hej.str;
+using Saxon.Hej.tree.iter;
+using Saxon.Hej.tree.util;
+using Saxon.Hej.tree.wrapper;
 
 namespace Saxon.Impl.Dom {
     /// <summary>
-    /// Implements net.sf.saxon.om.NodeInfo as a wrapper over an attribute node in the HtmlAgilityPack
+    /// Implements Saxon.Hej.om.NodeInfo as a wrapper over an attribute node in the HtmlAgilityPack
     /// HTML document tree. The attribute node always has a parent element, and is always part of a tree
     /// rooted at a document node. There are no namespaces, and names comprise a local name only. The
     /// attributes of an element have an arbitrary ordering (document order), represented by an
@@ -26,11 +26,11 @@ namespace Saxon.Impl.Dom {
 
         protected internal static HtmlAttributeWrapper makeWrapper(HtmlAttribute node, HtmlNodeWrapper elementWrapper) {
             if ((node == null)) {
-                throw new java.lang.NullPointerException("HtmlAttributeWrapper#makeWrapper: Node must not be null");
+                throw new Saxon.Ejava.lang.NullPointerException("HtmlAttributeWrapper#makeWrapper: Node must not be null");
             }
 
             if ((elementWrapper == null)) {
-                throw new java.lang.NullPointerException("HtmlAttributeWrapper#makeWrapper: elementWrapper must not be null");
+                throw new Saxon.Ejava.lang.NullPointerException("HtmlAttributeWrapper#makeWrapper: elementWrapper must not be null");
             }
 
             return new HtmlAttributeWrapper(node, elementWrapper, -1);
@@ -45,7 +45,7 @@ namespace Saxon.Impl.Dom {
         }
 
         public override int getNodeKind() {
-            return net.sf.saxon.type.Type.ATTRIBUTE;
+            return Saxon.Hej.type.Type.ATTRIBUTE;
         }
 
         public override bool Equals(object other) {
@@ -53,7 +53,7 @@ namespace Saxon.Impl.Dom {
         }
 
         public override int GetHashCode() {
-            java.lang.StringBuilder buffer = new java.lang.StringBuilder(64);
+            Saxon.Ejava.lang.StringBuilder buffer = new Saxon.Ejava.lang.StringBuilder(64);
             generateId(buffer);
             return buffer.ToString().GetHashCode();
         }
@@ -71,7 +71,7 @@ namespace Saxon.Impl.Dom {
             return htmlAttribute.Value;
         }
         
-        public override net.sf.saxon.str.UnicodeString getUnicodeStringValue() {
+        public override Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
             return StringView.wrap(htmlAttribute.Value);
         }
 
@@ -110,19 +110,19 @@ namespace Saxon.Impl.Dom {
             return index;
         }
 
-        protected internal override AxisIterator iterateAttributes(net.sf.saxon.pattern.NodeTest nodeTest) {
+        protected internal override AxisIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
             return EmptyIterator.ofNodes();
         }
 
-        protected internal override AxisIterator iterateChildren(net.sf.saxon.pattern.NodeTest nodeTest) {
+        protected internal override AxisIterator iterateChildren(Saxon.Hej.pattern.NodeTest nodeTest) {
             return EmptyIterator.ofNodes();
         }
 
-        protected internal override AxisIterator iterateSiblings(net.sf.saxon.pattern.NodeTest nodeTest, bool forwards) {
+        protected internal override AxisIterator iterateSiblings(Saxon.Hej.pattern.NodeTest nodeTest, bool forwards) {
             return EmptyIterator.ofNodes();
         }
 
-        protected override AxisIterator iterateDescendants(net.sf.saxon.pattern.NodeTest nodeTest, bool includeSelf) {
+        protected override AxisIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest, bool includeSelf) {
             return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
         }
 
@@ -134,12 +134,12 @@ namespace Saxon.Impl.Dom {
             return false;
         }
 
-        public override void generateId(java.lang.StringBuilder buffer) {
+        public override void generateId(Saxon.Ejava.lang.StringBuilder buffer) {
             Navigator.appendSequentialKey(this, buffer, true);
         }
 
-        public override void copy(net.sf.saxon.@event.Receiver @out, int copyOptions, net.sf.saxon.s9api.Location locationId) {
-            net.sf.saxon.@event.Receiver r = new net.sf.saxon.@event.NamespaceReducer(@out);
+        public override void copy(Saxon.Hej.@event.Receiver @out, int copyOptions, Saxon.Hej.s9api.Location locationId) {
+            Saxon.Hej.@event.Receiver r = new Saxon.Hej.@event.NamespaceReducer(@out);
             Navigator.copy(this, r, copyOptions, locationId);
         }
 

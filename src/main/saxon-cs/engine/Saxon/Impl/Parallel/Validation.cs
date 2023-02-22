@@ -1,11 +1,12 @@
 using System.Collections.Generic;
-using com.saxonica.ee.s9api;
-using com.saxonica.ee.validate;
-using javax.xml.transform;
-using net.sf.saxon.lib;
+
+using Saxon.Ejavax.xml.transform;
+using Saxon.Hej.lib;
 using Saxon.Api;
-using Processor = net.sf.saxon.s9api.Processor;
-using XdmDestination = net.sf.saxon.s9api.XdmDestination;
+using Saxon.Eej.ee.s9api;
+using Saxon.Eej.ee.validate;
+using Processor = Saxon.Hej.s9api.Processor;
+using XdmDestination = Saxon.Hej.s9api.XdmDestination;
 
 namespace Saxon.Impl.Parallel {
     public class Validation {
@@ -13,7 +14,7 @@ namespace Saxon.Impl.Parallel {
                     InvalidityHandler invalidityHandler, SchemaValidatorImpl.ReportList reportDocs) {
             System.Threading.Tasks.Parallel.ForEach(sources, source => {
             //foreach (Source source in sources) {
-                net.sf.saxon.s9api.SchemaValidator validator = processor.getSchemaManager().newSchemaValidator();
+                Saxon.Hej.s9api.SchemaValidator validator = processor.getSchemaManager().newSchemaValidator();
                 InvalidityHandler localHandler = invalidityHandler;
                 if (invalidityHandler is InvalidityReportGenerator) {
                     InvalidityReportGeneratorEE singleReporter = (InvalidityReportGeneratorEE)processor.getUnderlyingConfiguration().createValidityReporter();

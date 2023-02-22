@@ -1,15 +1,15 @@
-using net.sf.saxon.expr;
+using Saxon.Eej.config;
+using Saxon.Eej.ee.trans;
+using Saxon.Hej.expr;
 
 namespace Saxon.Impl.Parallel {
     using System;
     using System.Threading;
     using System.Threading.Channels;
     using System.Threading.Tasks;
-    using com.saxonica.config;
-    using com.saxonica.ee.trans;
-    using net.sf.saxon.om;
-    using net.sf.saxon.trans;
-    using net.sf.saxon.value;
+    using Saxon.Hej.om;
+    using Saxon.Hej.trans;
+    using Saxon.Hej.value;
 
     /// <summary>
     /// A C# rewrite of the class com.saxonica.ee.parallel.PushToPull.
@@ -30,26 +30,26 @@ namespace Saxon.Impl.Parallel {
         private readonly Channel<Outcome<Item>> channel = Channel.CreateBounded<Outcome<Item>>(50);
 
         public PushToPull(PushToPull.Pusher pusher,
-            net.sf.saxon.expr.XPathContext context) {
+            Saxon.Hej.expr.XPathContext context) {
             this.pusher = pusher;
             this.context = context;
         }
 
         public interface Pusher {
-            void push(net.sf.saxon.@event.Outputter output, net.sf.saxon.expr.XPathContext context);
+            void push(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context);
         }
 
-        private class QueueWriter : net.sf.saxon.@event.SequenceWriter {
+        private class QueueWriter : Saxon.Hej.@event.SequenceWriter {
             private readonly Channel<Outcome<Item>> queue;
 
-            public QueueWriter(Channel<Outcome<Item>> queue, net.sf.saxon.@event.PipelineConfiguration pipe) :
+            public QueueWriter(Channel<Outcome<Item>> queue, Saxon.Hej.@event.PipelineConfiguration pipe) :
                 base(pipe) {
                 this.queue = queue;
             }
 
-            public override void write(net.sf.saxon.om.Item item) {
-                if (java.lang.Thread.currentThread().isInterrupted()) {
-                    throw new net.sf.saxon.trans.QuitParsingException(true);
+            public override void write(Saxon.Hej.om.Item item) {
+                if (Saxon.Ejava.lang.Thread.currentThread().isInterrupted()) {
+                    throw new Saxon.Hej.trans.QuitParsingException(true);
                 }
 
                 try {
@@ -57,7 +57,7 @@ namespace Saxon.Impl.Parallel {
                     //Console.WriteLine("HAVE WRITTEN " + item.getStringValue());
                 }
                 catch (System.Threading.ThreadInterruptedException e) {
-                    throw new net.sf.saxon.trans.QuitParsingException(true);
+                    throw new Saxon.Hej.trans.QuitParsingException(true);
                 }
             }
 
@@ -72,7 +72,7 @@ namespace Saxon.Impl.Parallel {
 
         private class Provider  {
             private readonly XPathContext context;
-            private readonly Channel<com.saxonica.ee.trans.Outcome<net.sf.saxon.om.Item>> queue;
+            private readonly Channel<Outcome<Saxon.Hej.om.Item>> queue;
             private readonly PushToPull.Pusher pusher;
 
             public Provider(PushToPull.Pusher pusher,
@@ -83,31 +83,31 @@ namespace Saxon.Impl.Parallel {
             }
 
             public void run() {
-                net.sf.saxon.@event.PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
+                Saxon.Hej.@event.PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
                 pipe.setXPathContext(context);
                 PushToPull.QueueWriter q = new PushToPull.QueueWriter(queue, pipe);
                 try {
-                    pusher.push(new net.sf.saxon.@event.ComplexContentOutputter(q), context);
+                    pusher.push(new Saxon.Hej.@event.ComplexContentOutputter(q), context);
                     queue.Writer.WriteAsync(new Outcome<Item>(STOPPER));
                     //queue.Writer.Complete();
                 }
-                catch (net.sf.saxon.trans.QuitParsingException quit) {
+                catch (Saxon.Hej.trans.QuitParsingException quit) {
                     if (!(quit.isNotifiedByConsumer())) {
                         try {
                             queue.Writer.Complete();
                         }
-                        catch (net.sf.saxon.trans.XPathException e) {
+                        catch (Saxon.Hej.trans.XPathException e) {
                             System.Console.Error.WriteLine(e);
                         }
                     }
                 }
-                catch (net.sf.saxon.trans.XPathException err) {
+                catch (Saxon.Hej.trans.XPathException err) {
                     q.notify(err);
                 }
             }
         }
 
-        public net.sf.saxon.om.SequenceIterator getIterator() {
+        public Saxon.Hej.om.SequenceIterator getIterator() {
             EnterpriseConfiguration config = (EnterpriseConfiguration) context.getConfiguration();
             PushToPull.Provider provider = new PushToPull.Provider(pusher, channel, context);
             Thread thread = new Thread(() => provider.run());
@@ -115,9 +115,9 @@ namespace Saxon.Impl.Parallel {
             return new PushToPull.PushToPullIterator(thread, channel);
         }
 
-        private class PushToPullIterator : net.sf.saxon.om.SequenceIterator, java.io.Closeable {
+        private class PushToPullIterator : Saxon.Hej.om.SequenceIterator, Saxon.Ejava.io.Closeable {
             private readonly Thread provider;
-            private readonly Channel<Outcome<net.sf.saxon.om.Item>> queue;
+            private readonly Channel<Outcome<Saxon.Hej.om.Item>> queue;
             private bool allDone = false;
 
             public PushToPullIterator(Thread provider, Channel<Outcome<Item>> queue) {
@@ -125,7 +125,7 @@ namespace Saxon.Impl.Parallel {
                 this.queue = queue;
             }
 
-            public net.sf.saxon.om.Item next() {
+            public Saxon.Hej.om.Item next() {
                 if (allDone) {
                     return null;
                 }
@@ -147,9 +147,9 @@ namespace Saxon.Impl.Parallel {
                         return item == STOPPER ? null : item;
                     }
                     else {
-                        net.sf.saxon.trans.XPathException xpe =
-                            net.sf.saxon.trans.XPathException.makeXPathException(next.getException());
-                        throw new net.sf.saxon.trans.UncheckedXPathException(xpe);
+                        Saxon.Hej.trans.XPathException xpe =
+                            Saxon.Hej.trans.XPathException.makeXPathException(next.getException());
+                        throw new Saxon.Hej.trans.UncheckedXPathException(xpe);
                     }
                 }
                 catch (ChannelClosedException e) {
@@ -157,8 +157,8 @@ namespace Saxon.Impl.Parallel {
                     return null;
                 }
                 catch (System.Threading.ThreadInterruptedException e) {
-                    net.sf.saxon.trans.XPathException xpie = net.sf.saxon.trans.XPathException.makeXPathException(e);
-                    throw new net.sf.saxon.trans.UncheckedXPathException(xpie);
+                    Saxon.Hej.trans.XPathException xpie = Saxon.Hej.trans.XPathException.makeXPathException(e);
+                    throw new Saxon.Hej.trans.UncheckedXPathException(xpie);
                 }
             }
 

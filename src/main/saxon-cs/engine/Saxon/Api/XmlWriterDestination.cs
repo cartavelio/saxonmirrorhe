@@ -1,7 +1,7 @@
 using System.Xml;
-using net.sf.saxon.@event;
-using net.sf.saxon.s9api;
-using net.sf.saxon.serialize;
+using Saxon.Hej.@event;
+using Saxon.Hej.s9api;
+using Saxon.Hej.serialize;
 using Saxon.Impl.Helpers;
 
 namespace Saxon.Api {
@@ -18,7 +18,7 @@ namespace Saxon.Api {
     /// is to be controlled from the stylesheet or query, use a <c>Serializer</c> as the
     /// <c>Destination</c>.</para>
     /// </remarks>
-    public class XmlWriterDestination : net.sf.saxon.s9api.AbstractDestination, IDestination {
+    public class XmlWriterDestination : Saxon.Hej.s9api.AbstractDestination, IDestination {
         private readonly XmlWriter writer;
         private bool closeAfterUse = true;
 
@@ -105,7 +105,7 @@ namespace Saxon.Api {
         /// considered to be less stable than the classes in the Saxon.Api namespace.</para> 
         /// <para>The internal methods follow
         /// Java naming conventions rather than .NET conventions.</para>
-        /// <para>Information about the returned <see cref="net.sf.saxon.Configuration"/> object 
+        /// <para>Information about the returned <see cref="Saxon.Hej.Configuration"/> object 
         /// (and the objects it provides access to) is included in the Saxon JavaDoc docmentation.
         /// </para>
         /// </remarks>

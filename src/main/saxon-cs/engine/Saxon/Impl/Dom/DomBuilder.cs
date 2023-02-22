@@ -1,23 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
-using net.sf.saxon.value;
+using Saxon.Hej.value;
 
 namespace Saxon.Impl.Dom {
-    public class DomBuilder : net.sf.saxon.@event.Receiver {
-        private net.sf.saxon.@event.PipelineConfiguration pipe;
-        private net.sf.saxon.om.NamePool namePool;
+    public class DomBuilder : Saxon.Hej.@event.Receiver {
+        private Saxon.Hej.@event.PipelineConfiguration pipe;
+        private Saxon.Hej.om.NamePool namePool;
         private string _systemId;
         private XmlNode _currentNode;
         private XmlDocument _document;
-        public void setPipelineConfiguration(net.sf.saxon.@event.PipelineConfiguration pipe) {
+        public void setPipelineConfiguration(Saxon.Hej.@event.PipelineConfiguration pipe) {
             this.pipe = pipe;
             this.namePool = pipe.getConfiguration().getNamePool();
         }
-        public net.sf.saxon.@event.PipelineConfiguration getPipelineConfiguration() {
+        public Saxon.Hej.@event.PipelineConfiguration getPipelineConfiguration() {
             return pipe;
         }
-        public net.sf.saxon.Configuration getConfiguration() {
+        public Saxon.Hej.Configuration getConfiguration() {
             return pipe.getConfiguration();
         }
         public void setSystemId(string systemId) {
@@ -38,7 +38,7 @@ namespace Saxon.Impl.Dom {
         }
         public void endDocument() {
         }
-        public void startElement(net.sf.saxon.om.NodeName elemName, net.sf.saxon.type.SchemaType type, net.sf.saxon.om.AttributeMap attributes, net.sf.saxon.om.NamespaceMap namespaces, net.sf.saxon.s9api.Location location, int properties) {
+        public void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
             if ((_document==null)) {
                 _document = new XmlDocument();
                 _currentNode = _document;
@@ -50,10 +50,10 @@ namespace Saxon.Impl.Dom {
                 XmlElement element = _document.CreateElement(prefix, local, uri);
                 _currentNode.AppendChild(element);
                 _currentNode = element;
-                foreach (net.sf.saxon.om.NamespaceBinding ns in namespaces) {
+                foreach (Saxon.Hej.om.NamespaceBinding ns in namespaces) {
                     string nsprefix = ns.getPrefix();
                     string nsuri = ns.getURI();
-                    if (!(nsuri.Equals(net.sf.saxon.lib.NamespaceConstant.XML))) {
+                    if (!(nsuri.Equals(Saxon.Hej.lib.NamespaceConstant.XML))) {
                         if ((nsprefix.Length==0)) {
                             element.SetAttribute("xmlns", uri);
                         } else {
@@ -63,21 +63,21 @@ namespace Saxon.Impl.Dom {
                         }
                     }
                 }
-                foreach (net.sf.saxon.om.AttributeInfo att in attributes) {
-                    net.sf.saxon.om.NodeName attName = att.getNodeName();
+                foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
+                    Saxon.Hej.om.NodeName attName = att.getNodeName();
                     XmlAttribute attr = _document.CreateAttribute(attName.getPrefix(), attName.getLocalPart(), attName.getURI());
                     attr.Value = att.getValue();
                     element.Attributes.Append(attr);
                 }
             } catch (System.Exception err) {
-                throw new net.sf.saxon.trans.XPathException(err);
+                throw new Saxon.Hej.trans.XPathException(err);
             }
         }
         public void endElement() {
             _currentNode.Normalize();
             _currentNode = _currentNode.ParentNode;
         }
-        public void characters(net.sf.saxon.str.CodePoints chars, net.sf.saxon.s9api.Location locationId, int properties) {
+        public void characters(Saxon.Hej.str.CodePoints chars, Saxon.Hej.s9api.Location locationId, int properties) {
             try {
                 XmlText text = _document.CreateTextNode(chars.ToString());
                 _currentNode.AppendChild(text);
@@ -85,23 +85,23 @@ namespace Saxon.Impl.Dom {
                 if (Whitespace.isAllWhite(chars) && _currentNode == _document) {
                     return; // No error when adding top-level whitespace text; just ignore it
                 }
-                throw new net.sf.saxon.trans.XPathException(err);
+                throw new Saxon.Hej.trans.XPathException(err);
             }
         }
-        public void processingInstruction(string target, net.sf.saxon.str.CodePoints data, net.sf.saxon.s9api.Location locationId, int properties) {
+        public void processingInstruction(string target, Saxon.Hej.str.CodePoints data, Saxon.Hej.s9api.Location locationId, int properties) {
             try {
                 XmlProcessingInstruction pi = _document.CreateProcessingInstruction(target, data.ToString());
                 _currentNode.AppendChild(pi);
             } catch (System.Exception err) {
-                throw new net.sf.saxon.trans.XPathException(err);
+                throw new Saxon.Hej.trans.XPathException(err);
             }
         }
-        public void comment(net.sf.saxon.str.CodePoints chars, net.sf.saxon.s9api.Location locationId, int properties) {
+        public void comment(Saxon.Hej.str.CodePoints chars, Saxon.Hej.s9api.Location locationId, int properties) {
             try {
                 XmlComment comment = _document.CreateComment(chars.ToString());
                 _currentNode.AppendChild(comment);
             } catch (System.Exception err) {
-                throw new net.sf.saxon.trans.XPathException(err);
+                throw new Saxon.Hej.trans.XPathException(err);
             }
         }
         public bool usesTypeAnnotations() {
@@ -122,13 +122,13 @@ namespace Saxon.Impl.Dom {
         }
     
         /* Expanding default method append from interface Receiver */
-        public void append(net.sf.saxon.om.Item item, net.sf.saxon.s9api.Location locationId, int properties) {
-            throw new java.lang.UnsupportedOperationException();
+        public void append(Saxon.Hej.om.Item item, Saxon.Hej.s9api.Location locationId, int properties) {
+            throw new Saxon.Ejava.lang.UnsupportedOperationException();
         }
 
         /* Expanding default method append from interface Receiver */
-        public void append(net.sf.saxon.om.Item item) {
-            append(item, net.sf.saxon.expr.parser.Loc.NONE, net.sf.saxon.@event.ReceiverOption.ALL_NAMESPACES);
+        public void append(Saxon.Hej.om.Item item) {
+            append(item, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES);
         }
 
         /* Expanding default method handlesAppend from interface Receiver */

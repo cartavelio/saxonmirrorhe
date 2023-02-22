@@ -1,12 +1,12 @@
 using System;
 using System.Reflection.Metadata;
-using net.sf.saxon.@event;
-using net.sf.saxon.om;
-using net.sf.saxon.s9api;
-using net.sf.saxon.str;
-using net.sf.saxon.trans;
-using net.sf.saxon.type;
-using Action = net.sf.saxon.s9api.Action;
+using Saxon.Hej.@event;
+using Saxon.Hej.om;
+using Saxon.Hej.s9api;
+using Saxon.Hej.str;
+using Saxon.Hej.trans;
+using Saxon.Hej.type;
+using Action = Saxon.Hej.s9api.Action;
 
 namespace Saxon.Api {
     /// <summary>
@@ -22,12 +22,12 @@ namespace Saxon.Api {
     /// if the <c>Reset</c> method is first called to reset its state.</para>
     /// </remarks>
     public class XdmDestination : IDestination {
-        internal net.sf.saxon.s9api.XdmDestination destination;
+        internal Saxon.Hej.s9api.XdmDestination destination;
         internal Action<XdmNode> closeAction;
 
         /// <summary>Construct an <c>XdmDestination</c></summary>
         public XdmDestination() {
-            destination = new net.sf.saxon.s9api.XdmDestination();
+            destination = new Saxon.Hej.s9api.XdmDestination();
         }
 
         ///<summary>
@@ -38,7 +38,7 @@ namespace Saxon.Api {
 
         public TreeModel TreeModel {
             get => (TreeModel) destination.getTreeModel().getSymbolicValue();
-            set => destination.setTreeModel(net.sf.saxon.om.TreeModel.getTreeModel((int) value));
+            set => destination.setTreeModel(Saxon.Hej.om.TreeModel.getTreeModel((int) value));
         }
 
         /// <summary>This property determines the base URI of the constructed <c>XdmNode</c>. 

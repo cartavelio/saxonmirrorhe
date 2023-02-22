@@ -1,4 +1,4 @@
-namespace SaxonCS3.Impl.Helpers {
+namespace Saxon.Impl.Helpers {
     public class UcaCollationUtils {
         
     }

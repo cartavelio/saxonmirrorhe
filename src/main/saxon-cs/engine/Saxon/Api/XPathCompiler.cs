@@ -1,6 +1,6 @@
 using System;
-using net.sf.saxon.s9api;
-using net.sf.saxon.trans;
+using Saxon.Hej.s9api;
+using Saxon.Hej.trans;
 using Saxon.Api.Support;
 
 namespace Saxon.Api {
@@ -27,13 +27,13 @@ namespace Saxon.Api {
     /// </remarks>
     [Serializable]
     public class XPathCompiler {
-        private net.sf.saxon.s9api.XPathCompiler compiler;
+        private Saxon.Hej.s9api.XPathCompiler compiler;
         private Processor processor;
 
         // internal constructor: the public interface is a factory method
         // on the Processor object
 
-        internal XPathCompiler(Processor processor, net.sf.saxon.s9api.XPathCompiler compiler) {
+        internal XPathCompiler(Processor processor, Saxon.Hej.s9api.XPathCompiler compiler) {
             this.compiler = compiler;
             this.processor = processor;
         }
@@ -101,7 +101,7 @@ namespace Saxon.Api {
         /// if there is no known binding for the prefix used in the lexical QName.</returns>
         public string GetNamespaceURI(string lexicalName, Boolean useDefault) {
             String[] parts =
-                net.sf.saxon.om.NameChecker.checkQNameParts(net.sf.saxon.value.Whitespace.trim(lexicalName));
+                Saxon.Hej.om.NameChecker.checkQNameParts(Saxon.Hej.value.Whitespace.trim(lexicalName));
 
             return compiler.getUnderlyingStaticContext().getNamespaceResolver().getURIForPrefix(parts[0], useDefault);
         }
@@ -137,10 +137,10 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// Escape hatch to the <c>net.sf.saxon.s9api.XPathCompiler</c> object in the underlying Java implementation
+        /// Escape hatch to the <c>Saxon.Hej.s9api.XPathCompiler</c> object in the underlying Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.XPathCompiler Implementation {
+        private Saxon.Hej.s9api.XPathCompiler Implementation {
             get { return compiler; }
         }
 
@@ -340,7 +340,7 @@ namespace Saxon.Api {
         /// (for example, a syntax error, or a reference to an undeclared function or variable).
         /// </exception>
         public XPathExecutable Compile(string source) {
-            net.sf.saxon.s9api.XPathExecutable executable = compiler.compile(source);
+            Saxon.Hej.s9api.XPathExecutable executable = compiler.compile(source);
             return new XPathExecutable(executable);
         }
 

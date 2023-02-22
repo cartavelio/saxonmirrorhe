@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Xml;
-using javax.xml.transform.stream;
+using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Impl.Overrides;
 
 namespace Saxon.Callbacks {
@@ -15,7 +15,7 @@ namespace Saxon.Callbacks {
                     return response.Content.ReadAsStream();
                 }
                 catch (System.Net.Http.HttpRequestException e) {
-                    throw new net.sf.saxon.trans.XPathException("Failed to retrieve HTTP resource " + absoluteUri, e);
+                    throw new Saxon.Hej.trans.XPathException("Failed to retrieve HTTP resource " + absoluteUri, e);
                 }
             }
             return base.GetEntity(absoluteUri, role, ofObjectToReturn);

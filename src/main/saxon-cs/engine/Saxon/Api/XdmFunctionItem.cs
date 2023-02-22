@@ -1,7 +1,7 @@
 using System;
-using net.sf.saxon;
-using net.sf.saxon.expr;
-using net.sf.saxon.om;
+using Saxon.Hej;
+using Saxon.Hej.expr;
+using Saxon.Hej.om;
 
 namespace Saxon.Api {
     /// <summary inherits="XdmItem">
@@ -86,8 +86,8 @@ namespace Saxon.Api {
             }
 
             Function function = (Function) value;
-            net.sf.saxon.Configuration config = processor.Implementation;
-            net.sf.saxon.Controller controller = new net.sf.saxon.Controller(config);
+            Saxon.Hej.Configuration config = processor.Implementation;
+            Saxon.Hej.Controller controller = new Saxon.Hej.Controller(config);
             XPathContext context = controller.newXPathContext();
             context = function.makeNewContext(context, controller);
 
@@ -95,7 +95,7 @@ namespace Saxon.Api {
             GroundedValue groundedResult = result.materialize();
             // TODO: check the result type
             // if (!function.isTrustedResultType()) {
-            //     net.sf.saxon.value.SequenceType required = type.getResultType();
+            //     Saxon.Hej.value.SequenceType required = type.getResultType();
             //     if (!required.matches(groundedResult, th)) {
             //         RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "", 0);
             //         groundedResult = th.applyFunctionConversionRules(groundedResult, required, role, Loc.NONE);

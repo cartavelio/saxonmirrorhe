@@ -7,24 +7,24 @@ namespace Saxon.Callbacks {
     using System.Linq;
 
     public class StandardMessageHandler {
-        private readonly net.sf.saxon.Configuration config;
-        private net.sf.saxon.str.UnicodeWriter writer;
-        private readonly net.sf.saxon.serialize.SerializationProperties serializationProperties;
+        private readonly Saxon.Hej.Configuration config;
+        private Saxon.Hej.str.UnicodeWriter writer;
+        private readonly Saxon.Hej.serialize.SerializationProperties serializationProperties;
 
-        public StandardMessageHandler(net.sf.saxon.Configuration config) {
+        public StandardMessageHandler(Saxon.Hej.Configuration config) {
             this.config = config;
-            java.util.Properties props = new java.util.Properties();
-            props.setProperty(javax.xml.transform.OutputKeys.METHOD, "xml");
-            props.setProperty(javax.xml.transform.OutputKeys.INDENT, "yes");
-            props.setProperty(javax.xml.transform.OutputKeys.OMIT_XML_DECLARATION, "yes");
-            serializationProperties = new net.sf.saxon.serialize.SerializationProperties(props);
+            Saxon.Ejava.util.Properties props = new Saxon.Ejava.util.Properties();
+            props.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.METHOD, "xml");
+            props.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.INDENT, "yes");
+            props.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.OMIT_XML_DECLARATION, "yes");
+            serializationProperties = new Saxon.Hej.serialize.SerializationProperties(props);
         }
 
-        public void setUnicodeWriter(net.sf.saxon.str.UnicodeWriter writer) {
+        public void setUnicodeWriter(Saxon.Hej.str.UnicodeWriter writer) {
             this.writer = writer;
         }
 
-        public net.sf.saxon.str.UnicodeWriter getUnicodeWriter() {
+        public Saxon.Hej.str.UnicodeWriter getUnicodeWriter() {
             return this.writer;
         }
 
@@ -35,19 +35,19 @@ namespace Saxon.Callbacks {
                     System.Diagnostics.Debug.Assert((node.NodeKind == XdmNodeKind.Document));
                     if ((writer == null)) {
                         System.IO.TextWriter w = config.getLogger().asWriter();
-                        writer = new net.sf.saxon.str.UnicodeWriterToWriter(w);
+                        writer = new Saxon.Hej.str.UnicodeWriterToWriter(w);
                     }
 
-                    net.sf.saxon.serialize.UnicodeWriterResult result =
-                        new net.sf.saxon.serialize.UnicodeWriterResult(writer, null);
-                    net.sf.saxon.@event.Receiver output = config.getSerializerFactory()
+                    Saxon.Hej.serialize.UnicodeWriterResult result =
+                        new Saxon.Hej.serialize.UnicodeWriterResult(writer, null);
+                    Saxon.Hej.@event.Receiver output = config.getSerializerFactory()
                         .getReceiver(result, serializationProperties);
                     output.open();
-                    output.append(((net.sf.saxon.om.NodeInfo) node.Unwrap()));
+                    output.append(((Saxon.Hej.om.NodeInfo) node.Unwrap()));
                     output.close();
                     writer.writeCodePoint(10);
                 }
-                catch (Exception e) when (e is net.sf.saxon.trans.XPathException || e is System.IO.IOException) {
+                catch (Exception e) when (e is Saxon.Hej.trans.XPathException || e is System.IO.IOException) {
                 }
             }
         }

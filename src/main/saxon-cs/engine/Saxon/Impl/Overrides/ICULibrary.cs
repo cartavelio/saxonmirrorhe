@@ -1,7 +1,7 @@
 using System;
-using com.saxonica.expr.sort;
-using net.sf.saxon;
-using net.sf.saxon.lib;
+using Saxon.Eej.expr.sort;
+using Saxon.Hej;
+using Saxon.Hej.lib;
 
 namespace Saxon.Impl.Overrides {
     // Saxon-CS override for com.saxonica.config.ICULibrary
@@ -19,7 +19,7 @@ namespace Saxon.Impl.Overrides {
             return new UcaCollatorUsingIcu(uri);
         }
 
-        public static String getLanguageTag(java.util.Locale locale) {
+        public static String getLanguageTag(Saxon.Ejava.util.Locale locale) {
             string rep = locale.ToString();
             int firstUnderscore = rep.IndexOf('_');
             if (firstUnderscore < 0) {

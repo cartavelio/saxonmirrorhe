@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using net.sf.saxon.resource;
+using Saxon.Hej.resource;
 using Saxon.Impl.Overrides;
 
 namespace Saxon.Api {
