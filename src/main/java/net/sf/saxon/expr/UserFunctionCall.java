@@ -8,14 +8,16 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
-import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.*;
+import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.Visibility;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
@@ -685,39 +687,19 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
 
     private static class UserFunctionCallElaborator extends UserFunctionCallAbstractElaborator {
 
-        private Sequence callTargetFunction(
-                UserFunctionCall expr, Component target, XPathContext context) throws XPathException {
-            try {
-                Sequence[] actualArgs = evaluateArguments(context);
-                UserFunction targetFunction = (UserFunction) target.getActor();
-                XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
-                c2.setCurrentComponent(target);
-                return targetFunction.call(c2, actualArgs);
-            } catch (UncheckedXPathException e) {
-                XPathException xe = e.getXPathException();
-                xe.maybeSetLocation(expr.getLocation());
-                throw xe;
-            } catch (StackOverflowError err) {
-                throw new XPathException.StackOverflow("Too many nested function calls. May be due to infinite recursion",
-                                                       SaxonErrorCode.SXLM0001, expr.getLocation());
+        private void testNotAbstract(UserFunctionCall expr, Component target) throws XPathException {
+            if (target.isHiddenAbstractComponent()) {
+                throw new XPathException("Cannot call an abstract function (" +
+                                                 expr.getFunctionName().getDisplayName() +
+                                                 ") with no implementation", "XTDE3052");
             }
         }
 
-        private Sequence callTargetFunction(
-                UserFunctionCall expr, UserFunction targetFunction, XPathContext context) throws XPathException {
-            try {
-                Sequence[] actualArgs = evaluateArguments(context);
-                XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
-                return targetFunction.call(c2, actualArgs);
-            } catch (UncheckedXPathException e) {
-                XPathException xe = e.getXPathException();
-                xe.maybeSetLocation(expr.getLocation());
-                throw xe;
-            } catch (StackOverflowError err) {
-                throw new XPathException.StackOverflow("Too many nested function calls. May be due to infinite recursion",
-                                                       SaxonErrorCode.SXLM0001, expr.getLocation());
-            }
+        private XPathException.StackOverflow reportStackOverflow(Expression expr)  {
+            return new XPathException.StackOverflow("Too many nested function calls. May be due to infinite recursion",
+                                                   SaxonErrorCode.SXLM0001, expr.getLocation());
         }
+
         /**
          * Get a function that evaluates the underlying expression in the form of
          * a {@link SequenceIterator}
@@ -729,27 +711,30 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
 
             if (expr.bindingSlot >= 0) {
+                // XSLT packages in general need dynamic binding
                 return context -> {
                     Component target = expr.getTargetComponent(context);
-                    if (target.isHiddenAbstractComponent()) {
-                        throw new XPathException("Cannot call an abstract function (" +
-                                                         expr.getFunctionName().getDisplayName() +
-                                                         ") with no implementation", "XTDE3052");
+                    testNotAbstract(expr, target);
+                    try {
+                        Sequence[] actualArgs = evaluateArguments(context);
+                        UserFunction targetFunction = (UserFunction) target.getActor();
+                        XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
+                        c2.setCurrentComponent(target);
+                        return targetFunction.call(c2, actualArgs).iterate();
+                    } catch (StackOverflowError err) {
+                        throw reportStackOverflow(expr);
                     }
-                    SequenceIterator result = callTargetFunction(expr, target, context).iterate();
-                    return result;
                 };
             } else {
                 // Non-package case (XQuery)
                 UserFunction targetFunction = expr.getFunction();
                 return context -> {
                     try {
-                        return callTargetFunction(expr, targetFunction, context).iterate();
-                    } catch (UncheckedXPathException e) {
-                        XPathException xpe = e.getXPathException();
-                        xpe.maybeSetContext(context);
-                        xpe.maybeSetLocation(expr.getLocation());
-                        throw xpe;
+                        Sequence[] actualArgs = evaluateArguments(context);
+                        XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
+                        return targetFunction.call(c2, actualArgs).iterate();
+                    } catch (StackOverflowError err) {
+                        throw reportStackOverflow(expr);
                     }
                 };
             }
@@ -766,57 +751,73 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         public PushEvaluator elaborateForPush() {
 
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
-
-            if (Cardinality.allowsMany(expr.getCardinality())) {
-                PullEvaluator pullEval = elaborateForPull();
-                return (output, context) -> {
-                    SequenceIterator iter = pullEval.iterate(context);
-                    SequenceTool.supply(iter, (ItemConsumer<? super Item>) it ->
-                            output.append(it, expr.getLocation(), ReceiverOption.ALL_NAMESPACES));
-                    return null;
-                };
-            } else {
-                ItemEvaluator itemEval = elaborateForItem();
-                return (output, context) -> {
-                    Item item = itemEval.eval(context);
-                    if (item != null) {
-                        output.append(item, expr.getLocation(), ReceiverOption.ALL_NAMESPACES);
-                    }
-                    return null;
-                };
+            if (expr.isTailCall()) {
+                throw new AssertionError("Not using tail call path");
             }
 
-        }
-
-        /**
-         * Get a function that evaluates the underlying expression in the form of
-         * a {@link Item}. This must only be called for expressions whose result
-         * has cardinality zero or one.
-         *
-         * @return an evaluator for the expression that returns an {@link Item}.
-         */
-        @Override
-        public ItemEvaluator elaborateForItem() {
-
-            final UserFunctionCall expr = (UserFunctionCall) getExpression();
-
+            // If the function call is evaluated in push mode, evaluate the function itself in push mode
             if (expr.bindingSlot >= 0) {
-                return context -> {
+                // XSLT packages in general need dynamic binding
+                return (output, context) -> {
                     Component target = expr.getTargetComponent(context);
-                    if (target.isHiddenAbstractComponent()) {
-                        throw new XPathException("Cannot call an abstract function (" +
-                                                         expr.getFunctionName().getDisplayName() +
-                                                         ") with no implementation", "XTDE3052");
+                    testNotAbstract(expr, target);
+                    try {
+                        Sequence[] actualArgs = evaluateArguments(context);
+                        UserFunction targetFunction = (UserFunction) target.getActor();
+                        XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
+                        c2.setCurrentComponent(target);
+                        targetFunction.process(c2, actualArgs, output);
+                    } catch (StackOverflowError err) {
+                        throw reportStackOverflow(expr);
                     }
-                    return callTargetFunction(expr, target, context).head();
+                    return null;
                 };
             } else {
                 // Non-package case (XQuery)
                 UserFunction targetFunction = expr.getFunction();
-                return context -> callTargetFunction(expr, targetFunction, context).head();
+                return (output, context) -> {
+                    try {
+                        Sequence[] actualArgs = evaluateArguments(context);
+                        XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
+                        targetFunction.process(c2, actualArgs, output);
+                    } catch (StackOverflowError err) {
+                        throw reportStackOverflow(expr);
+                    }
+                    return null;
+                };
             }
-
+            
         }
+
+//        /**
+//         * Get a function that evaluates the underlying expression in the form of
+//         * a {@link Item}. This must only be called for expressions whose result
+//         * has cardinality zero or one.
+//         *
+//         * @return an evaluator for the expression that returns an {@link Item}.
+//         */
+//        @Override
+//        public ItemEvaluator elaborateForItem() {
+//
+//            final UserFunctionCall expr = (UserFunctionCall) getExpression();
+//
+//            if (expr.bindingSlot >= 0) {
+//                return context -> {
+//                    Component target = expr.getTargetComponent(context);
+//                    if (target.isHiddenAbstractComponent()) {
+//                        throw new XPathException("Cannot call an abstract function (" +
+//                                                         expr.getFunctionName().getDisplayName() +
+//                                                         ") with no implementation", "XTDE3052");
+//                    }
+//                    return callTargetFunction(expr, target, context).head();
+//                };
+//            } else {
+//                // Non-package case (XQuery)
+//                UserFunction targetFunction = expr.getFunction();
+//                return context -> callTargetFunction(expr, targetFunction, context).head();
+//            }
+//
+//        }
 
         @Override
         public UpdateEvaluator elaborateForUpdate() {
