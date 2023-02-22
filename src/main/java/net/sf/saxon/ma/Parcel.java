@@ -19,7 +19,7 @@ public class Parcel extends SingleEntryMap {
         return result;
     }
 
-    public static final StringValue key = new StringValue(new Twine8("parcel"));
+    private static final StringValue parcelKey = new StringValue(new Twine8("parcel"));
     public static RecordTest TYPE = new RecordTest(
             singletonList("parcel"),
             singletonList(SequenceType.ANY_SEQUENCE),
@@ -27,7 +27,7 @@ public class Parcel extends SingleEntryMap {
             false);
 
     public Parcel(GroundedValue content) {
-        super(key, content);
+        super(parcelKey, content);
     }
 
 }

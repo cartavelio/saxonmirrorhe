@@ -15,6 +15,7 @@ import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.StringValue;
+import net.sf.saxon.transpile.*;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
@@ -143,8 +144,8 @@ public class AlphanumericCollator implements StringCollator {
                 byte[] bin = n.toByteArray();
                 int len = bin.length;
                 // Assume max length of numeric part 255
-                baos.write(0); // separator from previous alpha part
-                baos.write((byte)len);
+                writeByte(baos, (byte)0); // separator from previous alpha part
+                writeByte(baos, (byte)len);
                 baos.write(bin, 0, bin.length); // written this way to avoid checked exceptions
             } else {
                 Base64BinaryValue b64 = CollationKeyFn.getCollationKey(sv.getUnicodeStringValue(), baseCollator);
@@ -154,6 +155,11 @@ public class AlphanumericCollator implements StringCollator {
             }
         }
         return new Base64BinaryValue(baos.toByteArray());
+    }
+
+    @CSharpReplaceBody(code="baos.WriteByte(val);")
+    private static void writeByte(ByteArrayOutputStream baos, byte val) {
+        baos.write(val);
     }
 
 }

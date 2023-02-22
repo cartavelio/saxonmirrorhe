@@ -149,6 +149,7 @@ public interface NodeInfo extends Item, Location
 
     int hashCode();
     //#endif
+ 
     /**
      * Get the System ID for the node. Note this is not the
      * same as the base URI: the base URI can be modified by xml:base, but
@@ -245,7 +246,7 @@ public interface NodeInfo extends Item, Location
     default int getColumnNumber() {
         return -1;
     }
-
+    
     /**
      * Determine the relative position of this node and another node, in document order.
      * <p>The other node must always be in the same tree; the effect of calling this method

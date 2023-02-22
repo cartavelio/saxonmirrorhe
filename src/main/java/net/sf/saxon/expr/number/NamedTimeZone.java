@@ -12,6 +12,7 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.CalendarValue;
 import net.sf.saxon.value.DateTimeValue;
+import net.sf.saxon.transpile.*;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -41,7 +42,7 @@ public class NamedTimeZone {
      * time zones
      *
      * @param country the two-character code for the country
-     * @param zoneId  the Olsen timezone name for the timezone
+     * @param zoneId  the Olson timezone name for the timezone
      */
 
     static void tz(String country, String zoneId) {
@@ -59,7 +60,7 @@ public class NamedTimeZone {
      * time zones
      *
      * @param country the two-character code for the country
-     * @param zoneId  the Olsen timezone name for the timezone
+     * @param zoneId  the Olson timezone name for the timezone
      * @param major true if this is a major world timezone, meaning that its name is recognized
      *              by people outside its own country
      */
@@ -375,19 +376,19 @@ public class NamedTimeZone {
     /**
      * Try to identify a timezone name corresponding to a given date (including time zone)
      * and a given country. Note that this takes account of Java's calendar of daylight savings time
-     * changes in different countries. The returned value is the Olsen time zone name, for example
+     * changes in different countries. The returned value is the Olson time zone name, for example
      * "Pacific/Los_Angeles", followed by an asterisk (*) if the time is in daylight savings time in that
      * timezone.
      *
      * @param date    the dateTimeValue, including timezone
      * @param country the country, as a two-letter code
-     * @return the Olsen timezone name if a timezone with the given time displacement is in use in the country
+     * @return the Olson timezone name if a timezone with the given time displacement is in use in the country
      * in question (on the appropriate date, if known). In this case an asterisk is appended to the result if the
      * date/time is in daylight savings time. Otherwise, the formatted (numeric) timezone offset. If
      * the dateTimeValue supplied has no timezone, return a zero-length string.
      */
     
-    public static String getOlsenTimeZoneName(DateTimeValue date, String country) {
+    public static String getOlsonTimeZoneName(DateTimeValue date, String country) {
         if (!date.hasTimezone()) {
             return "";
         }
@@ -401,11 +402,11 @@ public class NamedTimeZone {
         ZoneId exampleZone = ZoneId.of(exampleId);
         boolean inSummerTime = inDaylightTime(exampleZone, date.secondsSinceEpoch().longValue());
         int tzMinutes = date.getTimezoneInMinutes();
-        for (String olsen : possibleIds) {
-            ZoneId possibleTimeZone = ZoneId.of(olsen);
+        for (String olson : possibleIds) {
+            ZoneId possibleTimeZone = ZoneId.of(olson);
             int offsetSeconds = getOffsetInSecondsAtDateTime(possibleTimeZone, date);
             if (offsetSeconds == tzMinutes * 60) {
-                return inSummerTime ? olsen + "*" : olsen;
+                return inSummerTime ? olson + "*" : olson;
             }
         }
         return formatTimeZoneOffset(date);
@@ -418,7 +419,7 @@ public class NamedTimeZone {
      * reliable when applied to dates in the future.
      *
      * @param date   the date/time in question
-     * @param region either the two-letter ISO country code, or an Olsen timezone name such as
+     * @param region either the two-letter ISO country code, or an Olson timezone name such as
      *               "America/New_York" or "Europe/Lisbon". If the country code denotes a country spanning several
      *               timezones, such as the US, then one of them is chosen arbitrarily.
      * @return true if the date/time is known to be in summer time in the relevant country;
@@ -427,24 +428,28 @@ public class NamedTimeZone {
      */
 
     public static Optional<Boolean> inSummerTime(DateTimeValue date, String region) {
-        String olsenName;
+        String olsonName;
         if (region.length() == 2) {
             List<String> possibleIds = idForCountry.get(region.toLowerCase());
             if (possibleIds == null) {
                 return Optional.empty();
             } else {
-                olsenName = possibleIds.get(0);
+                olsonName = possibleIds.get(0);
             }
         } else {
-            olsenName = region;
+            olsonName = region;
         }
-        ZoneId zone;
-        try {
-            zone = ZoneId.of(olsenName);
-        } catch (ZoneRulesException e) {
-            zone = ZoneId.ofOffset("UTC", ZoneOffset.UTC);
-        }
+        ZoneId zone = olsonZoneOrUtc(olsonName);
         return Optional.of(inDaylightTime(zone, date.secondsSinceEpoch().longValue()));
+    }
+
+    @CSharpReplaceException(from="java.time.zone.ZoneRulesException", to="System.Exception")
+    private static ZoneId olsonZoneOrUtc(String olsonName) {
+        try {
+            return ZoneId.of(olsonName);
+        } catch (java.time.zone.ZoneRulesException e) {
+            return ZoneId.of("Z");
+        }
     }
 
     @CSharpReplaceBody(code="return zone.inDaylightTime(secondsSinceEpoch*1000);")
@@ -460,18 +465,14 @@ public class NamedTimeZone {
      *
      * @param date      the date/time in question. If this has no timezone, it is assumed
      *                  to be in GMT.
-     * @param olsenName the Olsen (or IANA) name of the timezone, for example Europe/Lisbon
+     * @param olsonName the Olson (or IANA) name of the timezone, for example Europe/Lisbon
      * @return the civil time offset, in milliseconds, to be applied to the given
      * date/time. Returns zero if the timezone is not recognized.
      */
 
-    public static int civilTimeOffset(DateTimeValue date, String olsenName) {
-        try {
-            ZoneId zone = ZoneId.of(olsenName);
-            return getOffsetInSecondsAtDateTime(zone, date)*1000;
-        } catch (ZoneRulesException e) {
-            return 0;
-        }
+    public static int civilTimeOffset(DateTimeValue date, String olsonName) {
+        ZoneId zone = olsonZoneOrUtc(olsonName);
+        return getOffsetInSecondsAtDateTime(zone, date)*1000;
     }
 
     /**

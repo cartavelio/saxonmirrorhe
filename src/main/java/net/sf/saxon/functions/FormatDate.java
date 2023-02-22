@@ -820,7 +820,7 @@ public class FormatDate extends SystemFunction implements Callable {
                 }
                 return tzname;
             } else {
-                return NamedTimeZone.getOlsenTimeZoneName(value, country);
+                return NamedTimeZone.getOlsonTimeZoneName(value, country);
             }
         }
         UnicodeBuilder sbz = new UnicodeBuilder();
