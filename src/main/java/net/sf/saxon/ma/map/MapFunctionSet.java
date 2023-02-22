@@ -50,7 +50,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        register("merge", 1, MapMerge.class, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("merge", 1, () -> new MapMerge(), MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR | INS, null);
 
         SpecificFunctionType ON_DUPLICATES_CALLBACK_TYPE = new SpecificFunctionType(
@@ -71,20 +71,20 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         mergeOptionDetails.addAllowedOption(MapMerge.onDuplicatesKey, oneOnDuplicatesFunction, null);
 
 
-        register("merge", 2, MapMerge.class, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("merge", 2, () -> new MapMerge(), MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
                 .setOptionDetails(mergeOptionDetails);
 
-        register("entry", 2, MapEntry.class, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("entry", 2, () -> new MapEntry(), MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null);
 
-        register("find", 2, MapFind.class, ArrayItemType.getInstance(), ONE, 0)
+        register("find", 2, () -> new MapFind(), ArrayItemType.getInstance(), ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
 
-        register("get", 2, MapGet.class, AnyItemType.getInstance(), STAR, 0)
+        register("get", 2, () -> new MapGet(), AnyItemType.getInstance(), STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
 
@@ -92,41 +92,41 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.SINGLE_ATOMIC);
 
-        register("index", 2, MapIndex.class, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("index", 2, () -> new MapIndex(), MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, indexArg, ONE, null);
 
-        register("put", 3, MapPut.class, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("put", 3, () -> new MapPut(), MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
                 .arg(2, AnyItemType.getInstance(), STAR | NAV, null);
 
-        register("contains", 2, MapContains.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("contains", 2, () -> new MapContains(), BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
 
-        register("remove", 2, MapRemove.class, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("remove", 2, () -> new MapRemove(), MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR | ABS, null);
 
-        register("keys", 1, MapKeys.class, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
+        register("keys", 1, () -> new MapKeys(), BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
 
-        register("size", 1, MapSize.class, BuiltInAtomicType.INTEGER, ONE, 0)
+        register("size", 1, () -> new MapSize(), BuiltInAtomicType.INTEGER, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
 
         ItemType actionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
 
-        register("for-each", 2, MapForEach.class, AnyItemType.getInstance(), STAR, 0)
+        register("for-each", 2, () -> new MapForEach(), AnyItemType.getInstance(), STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, actionType, ONE | INS, null);
 
-        register("entries", 1, MapEntries.class, MapType.ANY_MAP_TYPE, STAR, 0)
+        register("entries", 1, () -> new MapEntries(), MapType.ANY_MAP_TYPE, STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
 
-        register("untyped-contains", 2, MapUntypedContains.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("untyped-contains", 2, () -> new MapUntypedContains(), BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
 
