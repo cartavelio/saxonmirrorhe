@@ -142,8 +142,7 @@
                <p>Alternatively, the commercial versions of the
                   product (SaxonJ-PE and SaxonJ-EE) can be downloaded from <a
                      href="https://www.saxonica.com/" class="bodylink">www.saxonica.com</a>.</p> 
-               <p>Because
-                  the software is pure Java, the same software us used whether you are running on
+               <p>Because the software is pure Java, the same software is used whether you are running on
                   Windows, Linux, or Mac OS/X.</p>
             </li>
             <li>
@@ -155,12 +154,12 @@
                <p>To check that the software is working, try running a simple query from the command
                   line, as follows. The filename after the "-cp" flag should match the location
                   where you installed the software. The file will be called
-                     <code>saxon-he-12.1.jar</code> for Saxon Home Edition, <code>saxon-pe-12.1.jar</code> for
-                  the Professional Edition, or <code>saxon-ee-12.1.jar</code> for the Enterprise
-                  Edition (where the "12.1" in the name will change to "12.2", "12.3", etc. in
+                     <code>saxon-he-12.0.jar</code> for Saxon Home Edition, <code>saxon-pe-12.0.jar</code> for
+                  the Professional Edition, or <code>saxon-ee-12.0.jar</code> for the Enterprise
+                  Edition (where the "12.0" in the name will change to "12.1", "12.2", etc. in
                   subsequent maintenance releases):</p>
 
-               <kbd>java -cp c:\saxon\saxon-he-12.1.jar net.sf.saxon.Query -t -qs:"current-date()"</kbd>
+               <kbd>java -cp c:\saxon\saxon-he-12.0.jar net.sf.saxon.Query -t -qs:"current-date()"</kbd>
 
                <p>Here:</p>
                   <ul>
@@ -219,13 +218,13 @@
          <p>
             <i>for XSLT (all on one line):</i>
          </p>
-         <kbd>java -cp saxon-he-12.1.jar net.sf.saxon.Transform -t -s:samples\data\books.xml 
+         <kbd>java -cp saxon-he-12.0.jar net.sf.saxon.Transform -t -s:samples\data\books.xml 
      -xsl:samples\styles\books.xsl -o:c:\temp.html</kbd>
 
          <p>
             <i>for XQuery (all on one line):</i>
          </p>
-         <kbd>java -cp saxon-he-12.1.jar net.sf.saxon.Query -t 
+         <kbd>java -cp saxon-he-12.0.jar net.sf.saxon.Query -t 
    -s:samples\data\books.xml -q:samples\query\books-to-html.xq -o:c:\temp.html</kbd>
 
          <p>Now open <code>c:\temp.html</code> in your browser to check that it worked.</p>
@@ -255,7 +254,7 @@
          <ol>
             <li>
                <p>SaxonCS is targeted at .NET 6, which you will need to install separately.
-                  For details, see <a class="bodylink" href="https://dotnet.microsoft.com/download/dotnet/6.0">https://dotnet.microsoft.com/download/dotnet/5.0</a>.
+                  For details, see <a class="bodylink" href="https://dotnet.microsoft.com/en-us/download/dotnet/6.0">https://dotnet.microsoft.com/en-us/download/dotnet/6.0</a>.
                There's a bewildering variety of options. Choose the latest version of the SDK (for example, SDK 6.0.403)
                corresponding to your chosen operating system (Windows, MacOS, or Linux) and CPU 
                architecture (for example Arm64, x64, or x86).</p>
@@ -577,9 +576,9 @@
 
 
          <p>One of the files that will be created in this directory is the principal JAR file. This
-            is <strong>saxon-he-12.1.jar</strong>, <strong>saxon-pe-12.0.jar</strong>, or
-               <strong>saxon-ee-12.1.jar</strong> depending on which Saxon edition you are using.
-         The "12.1" in the name will change to "12.2", "12.3", etc. in subsequent maintenance releases.</p>
+            is <strong>saxon-he-12.0.jar</strong>, <strong>saxon-pe-12.0.jar</strong>, or
+               <strong>saxon-ee-12.0.jar</strong> depending on which Saxon edition you are using.
+         The "12.0" in the name will change to "12.1", "12.2", etc. in subsequent maintenance releases.</p>
 
          <p>There are some additional JAR files to support optional features such as the SQL
             interface and the ICU localization library. When running SaxonJ, the principal JAR file
@@ -823,7 +822,7 @@
             variable, or it can be included in the <code>java</code> command that invokes the
             application.</p>
          
-         <p>The manifest of the main Saxon JAR file (for example <code>saxon-he-12.1.jar</code>)
+         <p>The manifest of the main Saxon JAR file (for example <code>saxon-he-12.0.jar</code>)
             includes a <code>Class-Path</code> entry that automatically brings in the <code>jline</code>
             and <code>xmlresolver</code> dependencies, so you should not normally need to add these
             to the classpath manually. In fact these dependencies are present in two forms: a versioned
@@ -909,13 +908,13 @@ any version number.</p>
             can use to verify that the files have not been tampered with. The signatures are based on a digital certificate 
             issued to Saxonica by the security company GlobalSign.</p>
          
-         <p>You can verify that a particular JAR file (for example <code>saxon-ee-12.1.jar</code>) has a valid signature using the command:</p>
+         <p>You can verify that a particular JAR file (for example <code>saxon-ee-12.0.jar</code>) has a valid signature using the command:</p>
          
-         <kbd>jarsigner -verify saxon-ee-12.1.jar</kbd>
+         <kbd>jarsigner -verify saxon-ee-12.0.jar</kbd>
          
          <p>More usefully, you can check that it was signed by Saxonica with the command:</p>
          
-         <kbd>jarsigner -verify -verbose saxon-ee-12.1.jar</kbd>
+         <kbd>jarsigner -verify -verbose saxon-ee-12.0.jar</kbd>
          
          <p>This produces voluminous information about the contents of the JAR file, ending with details of the security certificate, 
             something like this:</p>
@@ -1224,8 +1223,8 @@ any version number.</p>
          
          <p>To check that a valid license for SaxonJ-PE or SaxonJ-EE has been found and Saxon is
             running with full functionality, try running one of the following simple commands.</p>
-         <div class="javaonly"><p>On Java (for example, for SaxonJ-EE 12.1):</p>
-         <kbd>java -cp saxon-ee-12.1.jar net.sf.saxon.Query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
+         <div class="javaonly"><p>On Java (for example, for SaxonJ-EE 12.0):</p>
+         <kbd>java -cp saxon-ee-12.0.jar net.sf.saxon.Query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
          </div>
          <div class="csonly"><p>On .NET:</p>
          <kbd>dotnet SaxonCS query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
