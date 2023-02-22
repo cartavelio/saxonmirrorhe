@@ -26,6 +26,7 @@ import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
+import net.sf.saxon.functions.registry.XPath30FunctionSet;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
@@ -2307,8 +2308,10 @@ public class PackageLoaderHE implements IPackageLoader {
                 // encountered in files exported by Saxon 9.7
                 name = "string-join";
             }
-            Expression e = SystemFunction.makeCall(name, rsc, args);
-            if (e == null) {
+            Expression e;
+            try {
+                e = SystemFunction.makeCall(name, rsc, args);
+            } catch (IllegalArgumentException err) {
                 throw new XPathException("Unknown system function " + name + "#" + args.length);
             }
 
@@ -2511,8 +2514,13 @@ public class PackageLoaderHE implements IPackageLoader {
             } else if (name.hasURI(NamespaceUri.ARRAY_FUNCTIONS)) {
                 exp = ArrayFunctionSet.getInstance().makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
             } else if (name.hasURI(NamespaceUri.SAXON)) {
-                loader.needsPELicense("Saxon extension functions");
-                exp = null;
+                if (name.getLocalPart().equals("apply")) {
+                    // legacy saxon:apply function for dynamic function calls: generate fn:apply
+                    exp = XPath30FunctionSet.getInstance().makeFunction("apply", 2).makeFunctionCall(args);
+                } else {
+                    loader.needsPELicense("Saxon extension functions");
+                    exp = null;
+                }
             }
             if (exp == null) {
                 SymbolicName.F sName = new SymbolicName.F(name, args.length);
