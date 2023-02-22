@@ -32,19 +32,18 @@ public class XSLOutputCharacter extends StyleElement {
             String f = attName.getDisplayName();
             String value = att.getValue();
             if (f.equals("character")) {
-                String s = value;
-                switch (s.length()) {
+                switch (value.length()) {
                     case 0:
                         compileError("character attribute must not be zero-length", "XTSE0020");
                         codepoint = 256; // for error recovery
                         break;
                     case 1:
-                        codepoint = s.charAt(0);
+                        codepoint = value.charAt(0);
                         break;
                     case 2:
-                        if (UTF16CharacterSet.isHighSurrogate(s.charAt(0)) &&
-                                UTF16CharacterSet.isLowSurrogate(s.charAt(1))) {
-                            codepoint = UTF16CharacterSet.combinePair(s.charAt(0), s.charAt(1));
+                        if (UTF16CharacterSet.isHighSurrogate(value.charAt(0)) &&
+                                UTF16CharacterSet.isLowSurrogate(value.charAt(1))) {
+                            codepoint = UTF16CharacterSet.combinePair(value.charAt(0), value.charAt(1));
                         } else {
                             compileError("character attribute must be a single XML character", "XTSE0020");
                             codepoint = 256; // for error recovery
@@ -63,11 +62,13 @@ public class XSLOutputCharacter extends StyleElement {
         }
         if (codepoint == -1) {
             reportAbsence("character");
+            codepoint = 256; // for error recovery
             return;
         }
 
         if (replacementString == null) {
             reportAbsence("string");
+            replacementString = ""; // for error recovery
         }
 
     }
