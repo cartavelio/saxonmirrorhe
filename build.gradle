@@ -5,11 +5,12 @@ plugins {
 //  id "com.cdsap.talaiot" version "1.3.5"
 }
 
-import org.gradle.internal.os.OperatingSystem;
-
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+
+import org.gradle.internal.os.OperatingSystem;
+import Docker
 
 repositories {
   mavenLocal()
@@ -207,7 +208,6 @@ ext {
   signJarArgs = null
   makeSignedJars = false
   // Docker containers
-  containers = [:]
   c_sqlserver = "sqlserver"
 }
 
@@ -1730,108 +1730,54 @@ publishing {
 // ============================================================
 // Docker tasks related to running an SQL server
 
-def dockerExec = null
-// Laboriously construct a search path that includes some default locations
-// plus the users actual path.
-def spath = ["/usr/local/bin"]
-System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
-  spath += [dir]
-}
-spath.each { dir ->
-  if (dockerExec == null) {
-    def fn = new File(dir + "/docker")
-    if (fn.exists() && fn.canExecute()) {
-      dockerExec = fn.toString()
-    } else {
-      fn = new File(dir + "/docker.exe")
-      if (fn.exists() && fn.canExecute()) {
-        dockerExec = fn.toString()
-      }
-    }
+task dockerup() {
+  doLast {
+    Docker.assertRunning(c_sqlserver)
   }
 }
 
-if (dockerExec == null) {
-  // No docker for you
-  task sqlServerStart() {
-    doLast {
-      println("Docker is not available, ignoring attempt to start server!")
+task dockerdown() {
+  doLast {
+    Docker.assertNotRunning(c_sqlserver)
+  }
+}
+
+task sqlServerStart(dependsOn: ["dockerdown"]) {
+  doFirst {
+    Docker.assertDockerAvailable()
+    Docker.assertDockerComposeAvailable()
+    mkdir "${buildDir}/derby/data"
+  }
+
+  doLast {
+    exec {
+      workingDir "docker"
+      commandLine Docker.dockerCompose(), "up", "-d"
+    }
+    exec {
+      commandLine Docker.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
     }
   }
+}
 
-  task sqlServerLogs() {
-    doLast {
-      println("Docker is not available, ignoring attempt to view logs!")
+task sqlServerLogs(dependsOn: ["dockerup"]) {
+  def id = "NA"
+  doFirst {
+    id = Docker.containerid(c_sqlserver)
+  }
+  doLast {
+    exec {
+      commandLine Docker.docker(), "logs", id, "-f"
     }
   }
+}
 
-  task sqlServerStop() {
-    doLast {
-      println("Docker is not available, ignoring attempt to stop server!")
+task sqlServerStop(dependsOn: ["dockerup"]) {
+  doLast {
+    exec {
+      workingDir "docker"
+      commandLine Docker.dockerCompose(), "down"
     }
-  }
-} else {
-  def docker_stdout = new ByteArrayOutputStream()
-  exec {
-    commandLine dockerExec, "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
-    standardOutput = docker_stdout;
-  }
-  docker_stdout.toString().split("\n").each { line ->
-    def parts = line.split(" ")
-    if (parts.length > 2) {
-      def id = parts[0]
-      def name = parts[1]
-      def status = parts[2]
-
-      if (name.contains(":")) {
-        name = name.split(":")[0];
-      }
-
-      if (!status.startsWith("Exited")) {
-        containers[name] = id
-      }
-    }
-  }
-
-  task dockerup() {
-    doLast {
-      if (!containers.containsKey(c_sqlserver)) {
-        throw new GradleException("Docker containers are not available")
-      }
-    }
-  }
-
-  task dockerdown() {
-    doLast {
-      if (containers.containsKey(c_sqlserver)) {
-        throw new GradleException("Docker containers already running?")
-      }
-    }
-  }
-
-  task sqlServerStart(type: Exec, dependsOn: ["dockerdown", "do_start_derby"]) {
-    commandLine dockerExec, "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
-  }
-
-  task do_start_derby(type: Exec) {
-    workingDir "docker"
-    commandLine "docker-compose", "up", "-d"
-    doFirst {
-      mkdir "${buildDir}/derby/data"
-    }
-  }
-
-  task sqlServerLogs(type: Exec, dependsOn: ["dockerup"]) {
-    def id = "NA"
-    if (containers[c_sqlserver] != null) {
-      id = containers[c_sqlserver]
-    }
-    commandLine dockerExec, "logs", id, "-f"
-  }
-
-  task sqlServerStop(type: Exec, dependsOn: ["dockerup"]) {
-    workingDir "docker"
-    commandLine "docker-compose", "down"
   }
 }
 
