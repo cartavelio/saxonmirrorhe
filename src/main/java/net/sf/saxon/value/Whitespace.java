@@ -481,6 +481,11 @@ public class Whitespace {
         private final UnicodeString input;
         private long position;
 
+        public Tokenizer(String input) {
+            this.input = StringView.tidy(input);
+            this.position = 0;
+        }
+
         public Tokenizer(UnicodeString input) {
             this.input = input.tidy();
             this.position = 0;
