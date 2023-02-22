@@ -150,7 +150,8 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
                 return NamespaceUri.NULL;
             }
         } else {
-            return NamespaceUri.of(namespaceContext.getNamespaceURI(prefix));
+            String uri = namespaceContext.getNamespaceURI(prefix);
+            return uri == null ? null : NamespaceUri.of(uri);
         }
     }
 
