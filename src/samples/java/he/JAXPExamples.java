@@ -1,6 +1,8 @@
 package he;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.jaxp.TransformerImpl;
+import net.sf.saxon.jaxp.SaxonTransformerFactory;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
@@ -74,6 +76,10 @@ public class JAXPExamples {
      *             which runs all tests.
      */
     public static void main(String[] argv) {
+        System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl");
+
+        SaxonTransformerFactory tfactory = (SaxonTransformerFactory) TransformerFactory.newInstance();
+        System.out.println("Saxon edition: " + tfactory.getConfiguration().getEditionCode());
 
         if (!new File("data/books.xml").exists()) {
             throw new IllegalStateException("These tests must be run with the samples folder as the current directory");
@@ -83,9 +89,6 @@ public class JAXPExamples {
         if (argv.length > 0) {
             test = argv[0];
         }
-
-        System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl");
-
 
         if (test.equals("all") || test.equals("ParseOnly")) {
             System.out.println("\n\n==== ParseOnly ====");
@@ -642,7 +645,6 @@ public class JAXPExamples {
 
         if (tfactory.getFeature(SAXSource.FEATURE)) {
             XMLReader reader = ((SAXTransformerFactory) tfactory).newXMLFilter(new StreamSource(new File(xslID)));
-
             reader.setContentHandler(new ExampleContentHandler());
             reader.parse(new InputSource(new File(sourceID).toURI().toString()));
         } else {
@@ -1199,6 +1201,7 @@ public class JAXPExamples {
         DocumentBuilder docBuilder = dfactory.newDocumentBuilder();
         Node doc =
                 docBuilder.parse(new InputSource(sourceID));
+        Configuration config = new Configuration();
         TransformerFactory tfactory = TransformerFactory.newInstance();
 
         // This creates a transformer that does a simple identity transform,
@@ -1208,8 +1211,10 @@ public class JAXPExamples {
 
         oprops.setProperty("method", "html");
 
-        // The following property setting should be ignored in Saxon-HE
-        oprops.setProperty("{http://saxon.sf.net/}indent-spaces", "2");
+        if (!config.getEditionCode().equals("HE")) {
+            // The indent-spaces property is not available in Saxon-HE
+            oprops.setProperty("{http://saxon.sf.net/}indent-spaces", "2");
+        }
 
         serializer.setOutputProperties(oprops);
         serializer.transform(new DOMSource(doc),
