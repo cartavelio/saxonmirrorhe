@@ -19,8 +19,10 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.Untyped;
 
 /**
  * The built-in rule set introduced in XSLT 3.0, which is effectively an identity template.
@@ -79,12 +81,13 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
                     return;
                 }
                 case Type.ELEMENT: {
+                    boolean schemaAware = context.getController().getExecutable().isSchemaAware();
                     PipelineConfiguration pipe = out.getPipelineConfiguration();
                     if (out.getSystemId() == null) {
                         out.setSystemId(node.getBaseURI());
                     }
                     NodeName fqn = NameOfNode.makeName(node);
-                    out.startElement(fqn, node.getSchemaType(), locationId, ReceiverOption.NONE);
+                    out.startElement(fqn, schemaAware ? AnyType.getInstance() : Untyped.getInstance(), locationId, ReceiverOption.NONE);
                     for (NamespaceBinding ns : node.getAllNamespaces()) {
                         out.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
                     }
