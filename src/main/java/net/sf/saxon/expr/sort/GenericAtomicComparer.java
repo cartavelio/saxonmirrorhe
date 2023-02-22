@@ -112,10 +112,31 @@ public class GenericAtomicComparer implements AtomicComparer {
         return new GenericAtomicComparer(collator, context);
     }
 
+    /**
+     * An {@code AtomicComparisonFunction} compares two atomic values to return a result
+     * of true or false. This means it is committed to a particular comparison operator (such
+     * as equals or less than). The supplied atomic values must be non-null.
+     */
     @FunctionalInterface
     public interface AtomicComparisonFunction {
+        /**
+         * Compare two atomic values
+         * @param v0 the first atomic value: must not be null
+         * @param v1 the second atomic value: must not be null
+         * @param context the XPath evaluation context, in case the comparison is context-sensitive
+         * @return the result of the comparison
+         * @throws XPathException if the values are not comparable, or if the context does not
+         * supply the information needed to compare them (such as implicit timezone or collation)
+         */
         boolean compare(AtomicValue v0, AtomicValue v1, XPathContext context) throws XPathException;
     }
+
+    /**
+     * Get an atomic comparison function for two atomic values that implement the
+     * {@link XPathComparable} interface
+     * @param operator the operator to be used for the comparison, for example {@link Token#FEQ}
+     * @return a function to perform the comparison
+     */
 
     private static AtomicComparisonFunction getContextFreeComparisonFunction(int operator) {
         return (a, b, context) -> {
@@ -123,6 +144,12 @@ public class GenericAtomicComparer implements AtomicComparer {
             return CompareToConstant.interpretComparisonResult(operator, comp);
         };
     }
+
+    /**
+     * Get an atomic comparison function for two xs:float or xs:double values
+     * @param operator the operator to be used for the comparison, for example {@link Token#FEQ}
+     * @return a function to perform the comparison
+     */
 
     private static AtomicComparisonFunction getFloatingPointComparisonFunction(int operator) {
         return (a, b, context) -> {
@@ -133,6 +160,14 @@ public class GenericAtomicComparer implements AtomicComparer {
             return CompareToConstant.interpretComparisonResult(operator, comp);
         };
     }
+
+    /**
+     * Return the integer fingerprint of a type, after promoting the type fpr comparison
+     * purposes. Numeric types are promoted to xs:double, while xs:anyURI and xs:untypedAtomic
+     * are promoted to xs:string
+     * @param type the input type
+     * @return the fingerprint of the type after promotion
+     */
 
     private static int applyPromotion(BuiltInAtomicType type) {
         if (type.isPrimitiveNumeric()) {
@@ -227,6 +262,7 @@ public class GenericAtomicComparer implements AtomicComparer {
         }
 
         if (type0.isDurationType() && type1.isDurationType()) {
+            // different subtypes of xs:duration - only equality comparison allowed
             switch (operator) {
                 case Token.FEQ:
                     return (a, b, context) -> a.equals(b);
@@ -238,45 +274,40 @@ public class GenericAtomicComparer implements AtomicComparer {
             }
         }
 
-        return (a, b, context) -> {
-            int comp;
-            if (a instanceof StringValue && b instanceof StringValue) {
-                comp = collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
-                return CompareToConstant.interpretComparisonResult(operator, comp);
-
-            } else if (allowRecursion) {
-                // Get a comparison function using the run-time types rather than the static types
+        if (allowRecursion) {
+            // Get a comparison function using the run-time types rather than the static types
+            // We remember the function used the first time through, and reuse it if the types are the same
+            final BuiltInAtomicType[] firstTimeTypes = new BuiltInAtomicType[2];
+            final AtomicComparisonFunction[] firstTimeFunction = new AtomicComparisonFunction[1];
+            return (a, b, context) -> {
                 BuiltInAtomicType at = a.getPrimitiveType();
                 BuiltInAtomicType bt = b.getPrimitiveType();
-                AtomicComparisonFunction comparisonFunction = makeAtomicComparisonFunction(at, bt, collator, operator, false);
-                return comparisonFunction.compare(a, b, context);
-            } else if (a.isNaN() || b.isNaN()) {
-                return operator == Token.FNE;
-            } else if (a instanceof XPathComparable && b instanceof XPathComparable) {
-                XPathComparable ac = (XPathComparable) a;
-                XPathComparable bc = (XPathComparable) b;
-                try {
-                    comp = ac.compareTo(bc);
-                } catch (ClassCastException e) {
-                    throw new XPathException(e.getMessage(), "XPTY0004", context);
-                }
-                return CompareToConstant.interpretComparisonResult(operator, comp);
-            } else {
-                int implicitTimezone = context.getImplicitTimezone();
-                XPathComparable ac = a.getXPathComparable(collator, implicitTimezone);
-                XPathComparable bc = b.getXPathComparable(collator, implicitTimezone);
-                if (ac == null || bc == null) {
-                    throw new XPathException("Values are not comparable (" +
-                                                                  Type.displayTypeName(a) + ", " + Type.displayTypeName(b) + ')', "XPTY0004", context);
-                } else {
-                    try {
-                        return CompareToConstant.interpretComparisonResult(operator, ac.compareTo(bc));
-                    } catch (Exception e) {
-                        throw new XPathException(e.getMessage(), "XPTY0004", context);
+                synchronized(firstTimeFunction) {
+                    if (firstTimeFunction[0] == null) {
+                        AtomicComparisonFunction comparisonFunction =
+                                makeAtomicComparisonFunction(at, bt, collator, operator, false);
+                        firstTimeFunction[0] = comparisonFunction;
+                        firstTimeTypes[0] = at;
+                        firstTimeTypes[1] = bt;
+                        return comparisonFunction.compare(a, b, context);
+                    } else {
+                        if (firstTimeTypes[0] == at && firstTimeTypes[1] == bt) {
+                            return firstTimeFunction[0].compare(a, b, context);
+                        } else {
+                            AtomicComparisonFunction comparisonFunction =
+                                    makeAtomicComparisonFunction(at, bt, collator, operator, false);
+                            return comparisonFunction.compare(a, b, context);
+                        }
                     }
                 }
-            }
-        };
+            };
+        } else {
+            return (a, b, context) -> {
+                throw new XPathException("Values are not comparable (" +
+                              Type.displayTypeName(a) + ", " + Type.displayTypeName(b) + ')', "XPTY0004", context);
+
+            };
+        }
     }
 
     @Override

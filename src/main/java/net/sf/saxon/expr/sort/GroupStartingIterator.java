@@ -7,8 +7,8 @@
 
 package net.sf.saxon.expr.sort;
 
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.Pattern;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 public class GroupStartingIterator extends GroupMatchingIterator implements LookaheadIterator, GroupIterator {
 
-    public GroupStartingIterator(Expression select, Pattern startPattern,
+    public GroupStartingIterator(PullEvaluator select, Pattern startPattern,
                                  XPathContext context)
             throws XPathException {
         this.select = select;
