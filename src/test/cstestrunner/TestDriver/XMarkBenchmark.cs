@@ -37,7 +37,7 @@ namespace TestRunner {
         static bool checkResults = false;
         static bool val = false;
         static int test = -1;
-        static string programPath = "//home//ond1//work//development//xmark//";
+        static string programPath = Environment.CurrentDirectory;
         static string dataPath = "";
 
         private static TreeModel treeModel = TreeModel.TinyTree;
