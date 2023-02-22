@@ -923,6 +923,10 @@ public class Transform {
                     // report on hotspot bytecode generation
                     config.createByteCodeReport(options.getOptionValue("TB"));
                 }
+                if (Instrumentation.ACTIVE && !run) {
+                    Instrumentation.report();
+                    Instrumentation.reset();
+                }
             }
         } catch (TerminationException err) {
             quit(err.getMessage(), 1);
