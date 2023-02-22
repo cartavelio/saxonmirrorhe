@@ -81,7 +81,11 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         // Shouldn't be called; but we handle it if it is
-        return evaluate(context.getContextItem(), context);
+        final Item contextItem = context.getContextItem();
+        if (contextItem == null) {
+            throw new XPathException("Dynamic call to context-dependent function with no bound context", "XPDY0002");
+        }
+        return evaluate(contextItem, context);
     }
 
     /**
