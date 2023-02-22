@@ -168,16 +168,17 @@ provide any other feedback.</p>
         <p>The core SaxonC library is located under the <code>libs/win</code> directory, named
           <code>libsaxon-[EDITION]c-[VERSION].dll</code>.</p>
         <p>The <code>libs/win</code> path must be added to the environment variable <code>PATH</code>.</p>
+          <p>On Windows, this can be done in various ways. The environment variable can be set
+                  from Window Settings &gt; System Properties &gt; Environment Variables; or from
+                  the command line using a set command like:</p>
+                  <kbd>set PATH="%PATH%;C:\Program Files\Saxonica\Saxon[EDITION][VERSION]\libs\win"</kbd>
       </li>
       <li>
-        <p><b>Set the SAXONC_HOME environment variable</b></p>
+        <!-- <p><b>Set the SAXONC_HOME environment variable</b></p>
         <p>If the SaxonC files were installed to a location other than the default
         <code>C:\Program Files\Saxonica\Saxon[EDITION][VERSION]</code>, then the
-        SAXONC_HOME variable must be set to the correct location.</p>
-        <p>On Windows, this can be done in various ways. The environment variable can be set
-        from Window Settings &gt; System Properties &gt; Environment Variables; or from
-        the command line using a set command like:</p>
-        <kbd>set SAXONC_HOME="C:\Program Files\Saxonica\Saxon[EDITION][VERSION]"</kbd>
+        SAXONC_HOME variable must be set to the correct location.</p> -->
+
       </li>
     </ol>
 
@@ -207,9 +208,9 @@ provide any other feedback.</p>
 
       <p>SaxonC looks in the path relative to where the main library has been installed. For
          example, in <code>/usr/lib</code> if this is where <code>libsaxon[EDITION]c.so</code> has
-         been installed. Alternatively, Saxon also looks for the license according to the
+          been installed.</p> <!-- Alternatively, Saxon also looks for the license according to the
          environment variable <code>SAXONC_HOME</code>, if this has been set.</p>
-      <!--<p>The license file can also be placed in the same directory as the stylesheet, but we advise
+      <p>The license file can also be placed in the same directory as the stylesheet, but we advise
          against this for PHP servers where the license might be compromised.</p>-->
 
       <p>Alternatively the <code>licenseFileLocation</code> configuration property can be used to
@@ -385,8 +386,21 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
          script execution time using the code: <code>dl(“saxon.so”);</code>. However this is not
          recommended as the loading and unloading can be slow.</p>
 
-      <p>When working with PHP, the environment variables <code>LD_LIBRARY_PATH</code> and
-            <code>SAXONC_HOME</code> should be added to the apache environment variables. The
+       <p>When working with PHP the SaxonC library file must be available for linking to the SaxonC PHP extension. Usually
+           if the library is installed under <code>/usr/lib</code> for Linux or <code>/usr/local/lib</code> for MacOS it should all work fine.
+           If this does not work then you should add the library path to the apache environment variables. The
+                apache2 config file is located in one of the following locations depending on your linux
+                distribution: </p>
+
+       <ul>
+                <li>Ubuntu server: <code>/etc/apache2/envvars</code></li>
+                <li>SUSE server: <code>/etc/sysconfig/apache2</code></li>
+                <li>Centos server (&lt; RHEL 7): <code>/etc/sysconfig/httpd</code></li>
+                <li>Centos server (&gt; RHEL 7): Update or create the file env.conf in the location <code>/etc/systemd/system/php-X.service.d/</code></li>
+             </ul>
+
+      <!-- <p>When working with PHP, the environment variables <code>LD_LIBRARY_PATH</code>
+          should be added to the apache environment variables. The
          apache2 config file is located in one of the following locations depending on your linux
          distribution: </p>
       <ul>
@@ -397,7 +411,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
             Add the followong content:
          <br/><code>[Service]<br/>
          Environment="SAXONC_HOME=/usr/lib”</code></li>
-      </ul>
+      </ul>  -->
 
 
       <h2 class="subtitle">Installing on Windows</h2>
