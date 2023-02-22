@@ -161,8 +161,9 @@
         resource using a conventional system identifier (URI) or public identifier, and a local
         catalog is used to map the system and public identifiers to an actual location.</p>
       
-        <p>When using Saxon from the command line, it is possible to specify a catalog to be used using
-          the option <code>-catalog:<i>files</i></code>. Here <code><i>files</i></code> is the catalog
+        <p>When
+using Saxon from the command line, it is possible to specify a catalog to be used using
+          the option <code>-&#xfeff;catalog:<i>files</i></code>. Here <code><i>files</i></code> is the catalog
           file to be searched, or a list of filenames separated by semicolons. This catalog will be used
           to locate DTDs and external entities required by the XML parser, XSLT stylesheet modules
           requested using <code>xsl:import</code> and <code>xsl:include</code>, documents requested
