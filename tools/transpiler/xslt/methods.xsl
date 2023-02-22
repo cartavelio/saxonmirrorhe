@@ -687,16 +687,17 @@
          'mod#1':       'Saxon.Impl.Helpers.BigIntegerUtils.Mod(%scope%, %args%)',
          'remainder#1': 'Saxon.Impl.Helpers.BigIntegerUtils.Remainder(%scope%, %args%)',
          'divideAndRemainder#1': 'Saxon.Impl.Helpers.BigIntegerUtils.DivideAndRemainder(%scope%, %args%)',
-         'signum#0':    'Saxon.Impl.Helpers.BigIntegerUtils.Signum(%scope%)',
-         'valueOf#1':   'Saxon.Impl.Helpers.BigIntegerUtils.ValueOf(%args%)',
-         'longValue#0': '((long)%scope%)',
-         'longValueExact#0': 'Saxon.Impl.Helpers.BigIntegerUtils.LongValueExact(%scope%)',
-         'intValue#0': '((int)%scope%)',
-         'intValueExact#0': 'Saxon.Impl.Helpers.BigIntegerUtils.IntValueExact(%scope%)',
-         'doubleValue#0': '((double)%scope%)',
-         'pow#1':       'System.Numerics.BigInteger.Pow(%scope%, %args%)',
-         'shiftLeft#1': '((%scope%) &lt;&lt; (%args%))',
-         '*':           '%scope%.%Name%(%args%)'
+         'signum#0':             'Saxon.Impl.Helpers.BigIntegerUtils.Signum(%scope%)',
+         'valueOf#1':            'Saxon.Impl.Helpers.BigIntegerUtils.ValueOf(%args%)',
+         'longValue#0':          '((long)%scope%)',
+         'longValueExact#0':     'Saxon.Impl.Helpers.BigIntegerUtils.LongValueExact(%scope%)',
+         'intValue#0':           '((int)%scope%)',
+         'intValueExact#0':      'Saxon.Impl.Helpers.BigIntegerUtils.IntValueExact(%scope%)',
+         'doubleValue#0':        '((double)%scope%)',
+         'pow#1':                'System.Numerics.BigInteger.Pow(%scope%, %args%)',
+         'shiftLeft#1':          '((%scope%) &lt;&lt; (%args%))',
+         'toByteArray#0':        '%scope%.ToByteArray(isUnsigned: false, isBigEndian: true)',
+         '*':                    '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
    
