@@ -1,20 +1,20 @@
-// Find pydoc
-def pydoc = null
+// Find pydocex
+def pydocex = null
 System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
-  if (pydoc == null) {
+  if (pydocex == null) {
     def fn = new File(dir + "/pydoc3")
     if (fn.exists() && fn.canExecute()) {
-      pydoc = fn.toString()
+      pydocex = fn.toString()
     } else {
       fn = new File(dir + "/pydoc")
       if (fn.exists() && fn.canExecute()) {
-        pydoc = fn.toString()
+        pydocex = fn.toString()
       }
     }
   }
 }
 
-if (pydoc == null) {
+if (pydocex == null) {
   println("WARNING: Failed to find pydoc!")
 }
 
@@ -1087,7 +1087,7 @@ task saxonc_pydoc3(dependsOn: ['saxonc_doc_pypi']) {
   doLast {
     exec {
       workingDir "${buildDir}/doc_pypi"
-      commandLine pydoc3, '-w', 'saxonc'
+      commandLine pydocex, '-w', 'saxonc'
     }
   }
 }
