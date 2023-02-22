@@ -434,6 +434,12 @@ public class SaxonErrorCode {
 
     public static final String SXWN9017 = "SXWN9017";
 
+    /**
+     * SXWN9018: warning during schema processing
+     */
+
+    public static final String SXWN9018 = "SXWN9018";
+
 
 }
 

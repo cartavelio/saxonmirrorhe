@@ -24,96 +24,12 @@ if (dotnet == null) {
   println("WARNING: Failed to find dotnet[.exe]!")
 }
 
-task build_transpiler(
-  type: JavaCompile,
-  dependsOn: ["hecs_featureKeys", "hejJar"],
-  description: "Compile the ToXml transpiler}"
-) {
-  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/src")
-  outputs.files fileTree(dir: "${buildDir}/transpiler")
-  source("${projectDir}/tools/transpiler/src/ToXml.java")
-  source("${projectDir}/tools/transpiler/src/XmlPrinterMHK.java")
-  classpath = configurations.transpiler
-  destinationDirectory = new File("${buildDir}/transpiler")
-  doFirst {
-    mkdir("build")
-  }
-}
-
-task transpile_to_xml(
-  type: JavaExec,
-  dependsOn: ["hecs_sources", "build_transpiler"],
-  description: "Transpile the Java to XML"
-) {
-  inputs.files fileTree(dir: "${buildDir}/src/hecs")
-  outputs.files fileTree(dir: "${buildDir}/xmlout")
-  classpath = configurations.transpiler
-  main = "ToXml"
-  args "-j:${buildDir}/src/hecs",
-    "-xml:${buildDir}/xmlout",
-    "-h:${projectDir}/src/main/java"
-    "-src:${projectDir}/src/main/java"
-  doFirst {
-    mkdir("${buildDir}/xmlout")
-  }
-}
-
-task xml_digest(
-  type: JavaExec,
-  dependsOn: ["transpile_to_xml"],
-  description: "Make a digest of the transpiled XML"
-) {
-  inputs.files fileTree(dir: "${buildDir}/xmlout")
-  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
-  inputs.file "${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl"
-  outputs.files "${buildDir}/digest.xml"
-  classpath = configurations.preprocessor
-  main = "net.sf.saxon.Transform"
-  args "-it",
-    "-xsl:${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl",
-    "-o:${buildDir}/digest.xml",
-    "xmlDir=../../../build/xmlout"
-}
-
-task refine_digest(
-  type: JavaExec,
-  dependsOn: ["xml_digest"],
-  description: "Refine the digest of the transpiled XML"
-) {
-  inputs.file "${buildDir}/digest.xml"
-  inputs.file "${projectDir}/tools/transpiler/xslt/refine-digest.xsl"
-  outputs.files "${buildDir}/refined-digest.xml"
-  classpath = configurations.preprocessor
-  main = "net.sf.saxon.Transform"
-  args "-xsl:${projectDir}/tools/transpiler/xslt/refine-digest.xsl",
-    "-s:${buildDir}/digest.xml",
-    "-o:${buildDir}/refined-digest.xml",
-    "xmlDir=${buildDir}/xmlout"
-}
-
-task generateCSharp(
-  type: JavaExec,
-  dependsOn: ["refine_digest"],
-  description: "Create the CS files"
-) {
-  inputs.file "${buildDir}/refined-digest.xml"
-  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
-  outputs.files fileTree(dir: "${buildDir}/cs")
-  classpath = configurations.transpiler
-  main = "ToXml"
-  args "-cs:${buildDir}/cs",
-    "-xml:${buildDir}/xmlout",
-    "-digest:${buildDir}/refined-digest.xml",
-    "-debug"
-  doFirst {
-    mkdir("${buildDir}/cs")
-  }
-}
 
 task hecs_featureKeys(
   type: JavaExec,
-  description: "Construct the feature keys for HE"
+  description: "Construct the feature keys for Saxon-CS"
 ) {
+  // Task name is misleading: the output is used unchanged for HE and PE
   inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
   outputs.file "${projectDir}/src/main/saxon-cs/engine/Saxon/Api/Feature.cs"
   outputs.file "${projectDir}/src/main/saxon-cs/engine/Saxon/Api/FeatureKeys.cs"
@@ -288,7 +204,7 @@ task pecs_setupPreprocess(
   exclude "com/saxonica/config/JavaPlatformPE.java" 
   exclude "com/saxonica/config/JavaPlatformEE.java" 
   exclude "com/saxonica/config/JavaPlatformC.java"
-    exclude "com/saxonica/config/NativePlatformPE.java"
+  exclude "com/saxonica/config/NativePlatformPE.java"
   exclude "com/saxonica/config/ee/**" 
   exclude "com/saxonica/stream/**" 
   exclude "com/saxonica/schema/**" 
@@ -316,50 +232,151 @@ task eecs_setupPreprocess(
   dependsOn: ["hecs_featureKeys"],
   description: "Copy EE sources for preprocessing EE"
 ) {
+  inputs.files fileTree(dir: "${projectDir}/src/main/java")
   from "${projectDir}/src/main/java"
   into "${buildDir}/filtered/eecs"
   include "net/sf/saxon/**/*.java"
+  include "com/saxonica/**/*.java"
   include "net/sf/saxon/data/**"
-  exclude "net/sf/saxon/TransformerFactoryImpl.java"
+  
+  exclude "**/packageInfo.java"
+  
+  exclude "net/sf/saxon/dotnet/**"
+  exclude "net/sf/saxon/event/ContentHandlerProxy.java"
+  exclude "net/sf/saxon/event/ContentHandlerProxyLocator.java"
+  exclude "net/sf/saxon/event/PIGrabber.java"
+  //exclude "net/sf/saxon/event/PushToReceiver.java"
+  exclude "net/sf/saxon/event/ReceivingContentHandler.java"
+  exclude "net/sf/saxon/event/RepairingContentHandler.java"
+  exclude "net/sf/saxon/event/StreamWriterToReceiver.java"
+  exclude "net/sf/saxon/expr/JavaExtensionFunctionCall.java"
+  exclude "net/sf/saxon/expr/JPConverter.java"
+  exclude "net/sf/saxon/expr/PJConverter.java"
+  exclude "net/sf/saxon/expr/SimpleExpression.java"
+  //exclude "net/sf/saxon/expr/sort/CustomSet.java"
+  //exclude "net/sf/saxon/expr/sort/CustomMap.java"
+  exclude "net/sf/saxon/expr/sort/ItemOrderComparer.java"
+  exclude "net/sf/saxon/expr/sort/RuleBasedSubstringMatcher.java"
+  exclude "net/sf/saxon/expr/sort/UcaCollatorUsingJava.java"
+  exclude "net/sf/saxon/functions/registry/OnDemandFunctionSet.java"
+  exclude "net/sf/saxon/lib/ErrorReporterToListener.java"
+  exclude "net/sf/saxon/lib/ExternalObjectModel.java"
+  exclude "net/sf/saxon/lib/InvalidityHandlerWrappingErrorListener.java"
+  //exclude "net/sf/saxon/lib/ResourceCollection.java"
+  exclude "net/sf/saxon/lib/ResourceFactory.java"
+  exclude "net/sf/saxon/lib/StandardEntityResolver.java"
+  exclude "net/sf/saxon/lib/StandardErrorHandler.java"
+  exclude "net/sf/saxon/lib/StandardErrorListener.java"
+  exclude "net/sf/saxon/lib/StandardLogger.java"
+  exclude "net/sf/saxon/lib/StandardMessageHandler.java"
+  exclude "net/sf/saxon/lib/StandardModuleURIResolver.java"
+  exclude "net/sf/saxon/lib/StandardOutputResolver.java"
+  exclude "net/sf/saxon/lib/StandardUnparsedTextResolver.java"
+  exclude "net/sf/saxon/lib/StandardURIResolver.java"
+  exclude "net/sf/saxon/lib/SystemLogger.java"
+  exclude "net/sf/saxon/ma/arrays/ImmutableArrayItem.java"
+  exclude "net/sf/saxon/ma/map/HashTrieMap.java"
+  //exclude "net/sf/saxon/ma/map/RangeKey.java"
+  exclude "net/sf/saxon/ma/trie/**"
+  exclude "net/sf/saxon/om/EnumSetTool.java"
+  exclude "net/sf/saxon/om/One.java"
+  exclude "net/sf/saxon/om/OneOrMore.java"
+  exclude "net/sf/saxon/om/ZeroOrMore.java"
+  exclude "net/sf/saxon/om/ZeroOrOne.java"
+  exclude "net/sf/saxon/pull/ActiveStAXSource.java"
+  exclude "net/sf/saxon/pull/NamespaceContextImpl.java"
+  exclude "net/sf/saxon/pull/StaxBridge.java"
+  exclude "net/sf/saxon/resource/**"
+  exclude "net/sf/saxon/s9api/BuildingContentHandler.java"
+  exclude "net/sf/saxon/s9api/BuildingStreamWriter.java"
+  exclude "net/sf/saxon/s9api/BuildingStreamWriterImpl.java"
+  exclude "net/sf/saxon/s9api/DOMDestination.java"
+  exclude "net/sf/saxon/s9api/ItemType.java"
+  exclude "net/sf/saxon/s9api/ItemTypeFactory.java"
+  exclude "net/sf/saxon/s9api/MessageListener2Proxy.java"
+  //exclude "net/sf/saxon/s9api/Push.java"
+  exclude "net/sf/saxon/s9api/SAXDestination.java"
+  exclude "net/sf/saxon/s9api/SequenceType.java"
+  exclude "net/sf/saxon/s9api/streams/**"
+  exclude "net/sf/saxon/s9api/QName.java"
+  exclude "net/sf/saxon/s9api/WhitespaceStrippingPolicy.java"
+  exclude "net/sf/saxon/s9api/XdmExternalObject.java"
+  exclude "net/sf/saxon/s9api/XdmArray.java"
+  exclude "net/sf/saxon/s9api/XdmAtomicValue.java"
+  exclude "net/sf/saxon/s9api/XdmEmptySequence.java"
+  exclude "net/sf/saxon/s9api/XdmFunctionItem.java"
+  exclude "net/sf/saxon/s9api/XdmItem.java"
+  exclude "net/sf/saxon/s9api/XdmItemType.java"
+  exclude "net/sf/saxon/s9api/XdmMap.java"
+  exclude "net/sf/saxon/s9api/XdmNode.java"
+  exclude "net/sf/saxon/s9api/XdmValue.java"
+  exclude "net/sf/saxon/serialize/charcode/JavaCharacterSet.java"
+  exclude "net/sf/saxon/serialize/codenorm/NormalizerData.java"
+  exclude "net/sf/saxon/sort/ItemOrderComparer.java"
+  exclude "net/sf/saxon/trace/TimingTraceListener.java"
+  exclude "net/sf/saxon/trace/TracingFilter.java"
+  exclude "net/sf/saxon/trans/DynamicLoader.java"
+  exclude "net/sf/saxon/trans/XmlCatalogResolver.java"
+  exclude "net/sf/saxon/tree/iter/NodeWrappingAxisIterator.java"
+  exclude "net/sf/saxon/tree/iter/NodeWrappingFunction.java"
+  exclude "net/sf/saxon/tree/jiter/TopDownStackIterable.java"
+  exclude "net/sf/saxon/tree/lib/StandardEntityResolver.java"
+  exclude "net/sf/saxon/tree/lib/StandardErrorHandler.java"
+  exclude "net/sf/saxon/tree/util/AttributeCollectionImpl.java"
+  exclude "net/sf/saxon/tree/util/ProcInstParser.java"
+  exclude "net/sf/saxon/value/SaxonDuration.java"
+  exclude "net/sf/saxon/value/SaxonXMLGregorianCalendar.java"
+  
+  exclude "**/TransformerFactoryImpl.java"
   exclude "net/sf/saxon/BasicTransformerFactory.java"
-  exclude "net/sf/saxon/option/cpp/**"
-  exclude "net/sf/saxon/jetonnet/**"
-  exclude "net/sf/saxon/gizmo/**"
-  exclude "**/axiom/**"
+  exclude "net/sf/saxon/Gizmo.java"
+  exclude "net/sf/saxon/ma/parray/**"
+  exclude "**/ant/**"
   exclude "**/dom/**"
   exclude "**/dom4j/**"
+  exclude "**/gizmo/**"
   exclude "**/java/**"
+  exclude "**/option/**"
+  exclude "**/testdriver/**"
   exclude "**/jaxp/**"
   exclude "**/jdom/**"
-  exclude "**/jdom2/**" 
-  exclude "**/s9api/DOMDestination.java"
-  exclude "**/s9api/SAXDestination.java"
-  exclude "**/s9api/BuildingContentHandler.java"
-  exclude "**/s9api/BuildingStreamWriter.java"
-  exclude "**/s9api/BuildingStreamWriterImpl.java"
-  exclude "**/s9api/streams/**"
+  exclude "**/jdom2/**"
+  exclude "**/axiom/**"
+  //exclude "**/sapling/**"
   exclude "**/sql/**"
+  exclude "**/transpile/**"
   exclude "**/xom/**"
   exclude "**/xpath/**"
   exclude "**/xqj/**"
   exclude "**/stax/**"
-  include "com/saxonica/**/*.java"
-  exclude "com/saxonica/functions/extfn/cpp/*.java"
-  exclude "com/saxonica/testdriver/**/*.java"
-  exclude "net/sf/saxon/testdriver/**/*.java"
-  exclude "com/saxonica/ee/jaxp/*.java"
-  exclude "com/saxonica/js/**"
-  exclude "com/saxonica/ee/domino/**/*.java"
-  exclude "com/saxonica/config/JavaPlatformPE.java"
-  exclude "com/saxonica/config/JavaPlatformEE.java"
-  exclude "com/saxonica/config/JavaPlatformC.java"
-  exclude "com/saxonica/config/ProfessionalXPathFactory.java"
-  exclude "com/saxonica/config/EnterpriseXPathFactory.java"
-  exclude "com/saxonica/config/ProfessionalTransformerFactory.java"
+  
   exclude "com/saxonica/config/EnterpriseTransformerFactory.java"
+  exclude "com/saxonica/config/EnterpriseXPathFactory.java"
+  exclude "com/saxonica/config/JavaExtensionFunctionFactory.java"
+  exclude "com/saxonica/config/JavaExtensionLibrary.java"
+  exclude "com/saxonica/config/JavaPlatformEE.java"
+  exclude "com/saxonica/config/JavaPlatformPE.java"
+  exclude "com/saxonica/config/ProfessionalTransformerFactory.java"
+  exclude "com/saxonica/config/ProfessionalXPathFactory.java"
   exclude "com/saxonica/config/StreamingTransformerFactory.java"
-  exclude "com/saxonica/config/NativePlatformPE.java"
-  exclude "**/xqj/**"
+  exclude "com/saxonica/config/pe/DotNetExtensionFunctionFactory.java"
+  exclude "com/saxonica/config/pe/DotNetExtensionLibrary.java"
+  exclude "com/saxonica/config/pe/ICULibrary.java"
+  exclude "com/saxonica/config/pe/NativePlatformPE.java"
+  exclude "com/saxonica/ee/bytecode/**"
+  exclude "com/saxonica/ee/domino/**"
+  exclude "com/saxonica/ee/extfn/ExperimentalSequenceTypeMarshaller.java"
+  exclude "com/saxonica/ee/extfn/ExperimentalXPathCompiler.java"
+  exclude "com/saxonica/ee/jaxp/**"
+  exclude "com/saxonica/ee/schema/sdoc/LSSchemaResolver.java"
+  exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+  exclude "com/saxonica/expr/JavaExtensionFunctionCall.java"
+  exclude "com/saxonica/expr/ObjectLookupExpression.java"
+  exclude "com/saxonica/expr/sort/UcaCollationKeyUsingICU.java"
+  exclude "com/saxonica/expr/sort/UcaCollatorUsingICU.java"
+  exclude "com/saxonica/functions/sql/**"
+  exclude "com/saxonica/functions/extfn/SendMail.java"
+  exclude "com/saxonica/xqj/**"
 }
 
 task hecs_preprocess(
@@ -410,7 +427,7 @@ task eecs_preprocess(
   args "/c",
     "/i:${buildDir}/filtered/eecs", "/o:${buildDir}/preprocess/eecs",
     "/p:EE=true", "/p:PE=false", "/p:DOTNET=true",
-    "/p:SAXONC=false", "/p:BYTECODE=true", "/p:HOF=true",
+    "/p:SAXONC=false", "/p:BYTECODE=false", "/p:HOF=true",
     "/p:STREAM=true", "/p:SCHEMA=true", "/p:CSHARP=true"
   doFirst {
     mkdir "${buildDir}/preprocess/eecs"
@@ -436,6 +453,9 @@ task hecs_sources(
       line
     } 
   }
+  doFirst {
+    mkdir "${buildDir}/src/hecs"
+  }
 }
 
 task pecs_sources(
@@ -456,6 +476,9 @@ task pecs_sources(
       line
     }
   }
+  doFirst {
+    mkdir "${buildDir}/src/pecs"
+  }
 }
 
 task eecs_sources(
@@ -475,21 +498,210 @@ task eecs_sources(
       line
     }
   }
+  doFirst {
+    mkdir "${buildDir}/src/eecs"
+  }
 }
+
+task build_transpiler(
+  type: JavaCompile,
+  dependsOn: ["hecs_featureKeys", "eejJar"],
+  description: "Compile the ToXml transpiler}"
+) {
+  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/src")
+  outputs.files fileTree(dir: "${buildDir}/transpiler")
+  source("${projectDir}/tools/transpiler/src/ToXml.java")
+  source("${projectDir}/tools/transpiler/src/XmlPrinterMHK.java")
+  classpath = configurations.transpiler
+  destinationDirectory = new File("${buildDir}/transpiler")
+  doFirst {
+    mkdir("build")
+  }
+}
+
+task hecs_transpile_to_xml(
+  type: JavaExec,
+  dependsOn: ["hecs_sources", "build_transpiler"],
+  description: "Transpile the HECS Java to XML"
+) {
+  inputs.files fileTree(dir: "${buildDir}/src/hecs")
+  outputs.files fileTree(dir: "${buildDir}/he_xmlout")
+  classpath = configurations.transpiler
+  main = "ToXml"
+  args "-j:${buildDir}/src/hecs",
+    "-xml:${buildDir}/he_xmlout",
+    "-h:${projectDir}/src/main/java"
+    "-src:${projectDir}/src/main/java"
+  doFirst {
+    mkdir("${buildDir}/he_xmlout")
+  }
+}
+
+task eecs_transpile_to_xml(
+  type: JavaExec,
+  dependsOn: ["eecs_sources", "build_transpiler"],
+  description: "Transpile the EECS Java to XML"
+) {
+  inputs.files fileTree(dir: "${buildDir}/src/eecs")
+  outputs.files fileTree(dir: "${buildDir}/ee_xmlout")
+  classpath = configurations.transpiler
+  main = "ToXml"
+  args "-j:${buildDir}/src/eecs",
+    "-xml:${buildDir}/ee_xmlout",
+    "-h:${projectDir}/src/main/java"
+    "-src:${projectDir}/src/main/java"
+  doFirst {
+    mkdir("${buildDir}/ee_xmlout")
+  }
+}
+
+
+task hecs_xml_digest(
+  type: JavaExec,
+  dependsOn: ["hecs_transpile_to_xml"],
+  description: "Make a digest of the transpiled XML for HECS"
+) {
+  inputs.files fileTree(dir: "${buildDir}/he_xmlout")
+  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
+  inputs.file "${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl"
+  outputs.files "${buildDir}/he_digest.xml"
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "-it",
+    "-xsl:${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl",
+    "-o:${buildDir}/he_digest.xml",
+    "xmlDir=../../../build/he_xmlout"
+}
+
+task eecs_xml_digest(
+  type: JavaExec,
+  dependsOn: ["eecs_transpile_to_xml"],
+  description: "Make a digest of the transpiled XML for EECS"
+) {
+  inputs.files fileTree(dir: "${buildDir}/ee_xmlout")
+  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
+  inputs.file "${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl"
+  outputs.files "${buildDir}/ee_digest.xml"
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "-it",
+    "-xsl:${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl",
+    "-o:${buildDir}/ee_digest.xml",
+    "xmlDir=../../../build/ee_xmlout"
+}
+
+task hecs_refine_digest(
+  type: JavaExec,
+  dependsOn: ["hecs_xml_digest"],
+  description: "Refine the digest of the transpiled XML for HECS"
+) {
+  inputs.file "${buildDir}/he_digest.xml"
+  inputs.file "${projectDir}/tools/transpiler/xslt/refine-digest.xsl"
+  outputs.files "${buildDir}/he_refined-digest.xml"
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "-xsl:${projectDir}/tools/transpiler/xslt/refine-digest.xsl",
+    "-s:${buildDir}/he_digest.xml",
+    "-o:${buildDir}/he_refined-digest.xml",
+    "xmlDir=${buildDir}/he_xmlout"
+}
+
+task eecs_refine_digest(
+  type: JavaExec,
+  dependsOn: ["eecs_xml_digest"],
+  description: "Refine the digest of the transpiled XML for EECS"
+) {
+  inputs.file "${buildDir}/ee_digest.xml"
+  inputs.file "${projectDir}/tools/transpiler/xslt/refine-digest.xsl"
+  outputs.files "${buildDir}/ee_refined-digest.xml"
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "-xsl:${projectDir}/tools/transpiler/xslt/refine-digest.xsl",
+    "-s:${buildDir}/ee_digest.xml",
+    "-o:${buildDir}/ee_refined-digest.xml",
+    "xmlDir=${buildDir}/ee_xmlout"
+}
+
+
+task hecs_generateCSharp(
+  type: JavaExec,
+  dependsOn: ["hecs_refine_digest"],
+  description: "Create the CS files for HE"
+) {
+  inputs.file "${buildDir}/he_refined-digest.xml"
+  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
+  outputs.files fileTree(dir: "${buildDir}/cs")
+  classpath = configurations.transpiler
+  main = "ToXml"
+  args "-cs:${buildDir}/cs",
+    "-xml:${buildDir}/he_xmlout",
+    "-digest:${buildDir}/he_refined-digest.xml",
+    "-debug"
+  doFirst {
+    mkdir("${buildDir}/cs")
+  }
+}
+
+task eecs_generateCSharp(
+  type: JavaExec,
+  dependsOn: ["eecs_refine_digest"],
+  description: "Create the CS files for EE"
+) {
+  inputs.file "${buildDir}/ee_refined-digest.xml"
+  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
+  outputs.files fileTree(dir: "${buildDir}/cs")
+  classpath = configurations.transpiler
+  main = "ToXml"
+  args "-cs:${buildDir}/cs",
+    "-xml:${buildDir}/ee_xmlout",
+    "-digest:${buildDir}/ee_refined-digest.xml",
+    "-debug"
+  doFirst {
+    mkdir("${buildDir}/cs")
+  }
+}
+
 
 task hecs_project_files (
   type: Copy,
-  dependsOn: ["generateCSharp"],
-  description: "Prepare the project files used for dotnet build"
+  dependsOn: ["hecs_generateCSharp"],
+  description: "Prepare the project files used for HECS build"
 ) {
   from "src/main/saxon-cs/csproj"
   into "${buildDir}/cs"
   include "*.csproj"
 }
 
+task eecs_project_files (
+  type: Copy,
+  dependsOn: ["eecs_generateCSharp"],
+  description: "Prepare the project files used for EECS build"
+) {
+  from "src/main/saxon-cs/csproj"
+  into "${buildDir}/cs"
+  include "*.csproj"
+}
+
+
 task hecs_dll(
   dependsOn: ["hecs_project_files"],
   description: "Compile Saxon-CS DLL for HE"
+) {
+  doLast {
+    if (dotnet == null) {
+      throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
+    }
+
+    exec {
+        workingDir = "${buildDir}/cs"
+        commandLine dotnet, 'build', '--nologo', '-o', '../csout', 'engine.csproj'
+    }
+  }
+}
+
+task eecs_dll(
+  dependsOn: ["eecs_project_files"],
+  description: "Compile Saxon-CS DLL for EE"
 ) {
   doLast {
     if (dotnet == null) {
@@ -514,7 +726,23 @@ task hecs_hello_world(
 
     exec {
         workingDir = "${buildDir}/csout"
-        commandLine dotnet, "engine.dll", "query", "qs:'Hello World'" 
+        commandLine dotnet, "engine.dll", "query", "-qs:'Hello World'", "-t" 
+    }
+  }
+}
+
+task eecs_hello_world(
+  dependsOn: ["eecs_dll"],
+  description: "Execute a Hello World query"
+) {
+  doLast {
+    if (dotnet == null) {
+      throw new GradleException("Cannot run: failed to find dotnet[.exe] on path.")
+    }
+
+    exec {
+        workingDir = "${buildDir}/csout"
+        commandLine dotnet, "engine.dll", "query", "-qs:'Hello World'", "-t" 
     }
   }
 }
