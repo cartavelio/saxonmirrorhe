@@ -23,6 +23,8 @@ import java.util.Map;
  */
 public class PrefixPool {
 
+    private final static int LIMIT = 2047;
+
     String[] prefixes = new String[8];
     int used = 0;
     Map<String, Integer> index = null;
@@ -61,6 +63,9 @@ public class PrefixPool {
         }
         // Allocate a new code
         int code = used++;
+        if (used > LIMIT) {
+            throw new IllegalStateException("Too many namespace prefixes - limit is " + LIMIT + " per document");
+        }
         if (used >= prefixes.length) {
             prefixes = Arrays.copyOf(prefixes, used * 2);
         }
