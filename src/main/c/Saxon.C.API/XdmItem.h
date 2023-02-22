@@ -14,7 +14,7 @@ class SaxonProcessor;
 
 /**
  * The class XdmItem represents an item in a sequence, as defined by the XDM data model.
- * An item is either an atomic value or a node.
+ * An item is either an atomic value, a node, or a function item.
  * <p>An item is a member of a sequence, but it can also be considered as a sequence
  * (of length one) in its own right. <tt>XdmItem</tt> is a subtype of <tt>XdmValue</tt> because every
  * Item in the XDM data model is also a value.</p>

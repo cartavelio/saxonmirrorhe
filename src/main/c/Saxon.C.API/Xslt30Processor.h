@@ -20,7 +20,7 @@ class XdmValue;
 class XdmItem;
 class XdmNode;
 
-/*! An <code>Xslt30Processor</code> represents factory to compile, load and execute a stylesheet.
+/*! An <code>Xslt30Processor</code> represents a factory to compile, load and execute stylesheets.
  * It is possible to cache the context and the stylesheet in the <code>Xslt30Processor</code>.
  */
 class Xslt30Processor {

@@ -20,7 +20,7 @@ class SaxonApiException;
 class XdmValue;
 class XdmItem;
 
-/*! An <code>XQueryProcessor</code> represents factory to compile, load and execute the query.
+/*! An <code>XQueryProcessor</code> represents a factory to compile, load and execute queries.
  * <p/>
  */
 class XQueryProcessor {

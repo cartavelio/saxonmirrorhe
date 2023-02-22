@@ -21,7 +21,7 @@ class SaxonApiException;
 class XdmValue;
 class XdmItem;
 
-/*! An <code>XPathProcessor</code> represents factory to compile, load and execute the XPath query.
+/*! An <code>XPathProcessor</code> represents a factory to compile, load and execute XPath expressions.
  * <p/>
  */
 class XPathProcessor {
