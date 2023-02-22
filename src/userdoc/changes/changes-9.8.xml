@@ -360,8 +360,8 @@
         still be surprises when the function is used to time program execution.</p>
         
         <p>The new extension function <a class="bodylink code" href="/functions/saxon/array-member">saxon:array-member()</a> takes
-            a single argument, which evaluates to an arbitrary sequence, and it returns an external object of type <code
-                java="com.saxonica.functions.extfn.ArrayMemberValue">ArrayMemberValue</code> wrapping this sequence. The
+            a single argument, which evaluates to an arbitrary sequence, and it returns an external
+            object of type <code>ArrayMemberValue</code> wrapping this sequence. The
             significance of this external object is that it is specially recognized by operations that construct an array,
             indicating that the sequence contained by the <code>ArrayMemberValue</code>
             is to become a single member of the resulting array, rather than having each item treated independently.</p>
@@ -413,8 +413,7 @@
         
         <p>The new instruction <a class="bodylink code"
             href="/extensions/instructions/array-member">&lt;saxon:array-member&gt;</a> has the same content model as
-            <code>&lt;xsl:sequence&gt;</code>, but builds an external object of type <code
-                java="com.saxonica.functions.extfn.ArrayMemberValue">ArrayMemberValue</code> wrapping the
+            <code>&lt;xsl:sequence&gt;</code>, but builds an external object of type <code>ArrayMemberValue</code> wrapping the
             constructed sequence. The significance of this external object is that it is specially recognized by operations that
             construct an array, indicating that the sequence contained by the <code>ArrayMemberValue</code>
             is to become a single member of the resulting array, rather than having each item treated independently.</p>

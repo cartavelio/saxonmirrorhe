@@ -106,7 +106,7 @@
         <p>The <code cs="Saxon.Api.XPathExecutable">XPathExecutable</code> class now has the method
             <code>EnumerateExternalVariable2</code> which returns <code>IEnumerator&lt;QName&gt;</code>.</p>
 
-        <p>We have added the interface class <code cs="Saxon.Api.ExtensionFunction">ExtensionFunction</code> for
+        <p>We have added the interface class <code>ExtensionFunction</code> for
             simple external/extension functions. Users can implement
             this interface and register the implementation with the <code cs="Saxon.Api.Processor">Processor</code>.</p>
 
@@ -121,7 +121,7 @@
         <p>The <code cs="Saxon.Api.DocumentBuilder">DocumentBuilder</code> class now contains the <code>SchemaValidator</code> property to set and get the <code cs="Saxon.Api.SchemaValidator">SchemaValidator</code>
         to be used.</p>
 
-        <p><code cs="Saxon.Api.XmlDestination">XmlDestination</code> is now an interface instead of abstract class. This interface has the method <code>GetUnderlyingDestination</code> which
+        <p><code>XmlDestination</code> is now an interface instead of abstract class. This interface has the method <code>GetUnderlyingDestination</code> which
             returns a Java <code>Destination</code> class supported by Saxon internals.</p>
 
         <p>The class <code cs="Saxon.Api.Serializer">Serializer</code> is no longer available as a free standing
@@ -157,7 +157,7 @@
             value of a given type given as an <code cs="Saxon.Api.XdmAtomicType">XdmAtomicType</code>.</p>
 
         <p>The interface <code>IXdmEnumerator</code> and <code>IXdmEnumerable</code> now use generic type parameter <code cs="Saxon.Api.XdmItem">XdmItem</code>.
-            This change affects the implemented classes <code cs="Saxon.Api.SequenceEnumerator">SequenceEnumerator</code>, <code cs="Saxon.Api.DotNetSequenceIterator">DotNetSequenceIterator</code> and <code cs="Saxon.Api.EmptyIterator">EmptyIterator</code>.</p>
+            This change affects the implemented classes <code>SequenceEnumerator</code>, <code>DotNetSequenceIterator</code> and <code>EmptyIterator</code>.</p>
     </category>
     
     <category name="optimization">
