@@ -16,6 +16,7 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.ItemType;
@@ -265,11 +266,11 @@ public abstract class ElementCreator extends ParentNodeConstructor {
                 } else if ((foundChild || foundPossibleChild) && possibleNodeKinds == UType.ATTRIBUTE) {
                     env.issueWarning(
                             "Creating an attribute here will fail if previous instructions create any children",
-                            component.getLocation());
+                            SaxonErrorCode.SXWN9030, component.getLocation());
                 } else if ((foundChild || foundPossibleChild) && possibleNodeKinds == UType.NAMESPACE) {
                     env.issueWarning(
                             "Creating a namespace node here will fail if previous instructions create any children",
-                            component.getLocation());
+                            SaxonErrorCode.SXWN9030, component.getLocation());
                 }
             }
 

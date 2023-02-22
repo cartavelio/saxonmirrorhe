@@ -223,10 +223,10 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
             ItemType itemType = pattern.getItemType();
             if (itemType instanceof NodeTest) {
                 if (!itemType.getUType().overlaps(UType.DOCUMENT.union(UType.CHILD_NODE_KINDS))) {
-                    rule.compileWarning("An accumulator rule that matches attribute or namespace nodes has no effect", "SXWN9999");
+                    rule.issueWarning("An accumulator rule that matches attribute or namespace nodes has no effect", "SXWN9999");
                 }
             } else if (itemType instanceof AtomicType) {
-                rule.compileWarning("An accumulator rule that matches atomic values has no effect", "SXWN9999");
+                rule.issueWarning("An accumulator rule that matches atomic values has no effect", "SXWN9999");
             }
 
             accumulator.addChildExpression(newValueExp);
@@ -386,7 +386,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
         boolean fallback = getConfiguration().getBooleanProperty(Feature.STREAMING_FALLBACK);
         if (fallback) {
             message += ". Falling back to non-streaming implementation";
-            rule.compileWarning(message, "XTSE3430");
+            rule.issueWarning(message, "XTSE3430");
             rule.getCompilation().setFallbackToNonStreaming(true);
         } else {
             rule.compileError(message, "XTSE3430");

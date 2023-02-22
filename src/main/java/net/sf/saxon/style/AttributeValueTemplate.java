@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -91,7 +92,7 @@ public abstract class AttributeValueTemplate {
                 if (env instanceof ExpressionContext && ((ExpressionContext)env).getStyleElement() instanceof XSLAnalyzeString
                         && isIntegerOrIntegerPair(exp)) {
                     env.issueWarning("Found {" + showIntegers(exp) + "} in regex attribute: perhaps {{" +
-                        showIntegers(exp) + "}} was intended? (The attribute is an AVT, so curly braces should be doubled)", exp.getLocation());
+                        showIntegers(exp) + "}} was intended? (The attribute is an AVT, so curly braces should be doubled)", SaxonErrorCode.SXWN9036, exp.getLocation());
                 }
 
                 if (env.isInBackwardsCompatibleMode()) {

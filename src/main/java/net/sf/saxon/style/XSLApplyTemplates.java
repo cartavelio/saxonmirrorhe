@@ -105,7 +105,7 @@ public class XSLApplyTemplates extends StyleElement {
             // give a warning if we're not inside an xsl:template
             if (iterateAxis(AxisInfo.ANCESTOR, new NameTest(Type.ELEMENT, StandardNames.XSL_TEMPLATE, getNamePool())).next() == null) {
                 issueWarning("Specifying mode=\"#current\" when not inside an xsl:template serves no useful purpose",
-                             SaxonErrorCode.SXWN9023, this);
+                             SaxonErrorCode.SXWN9023);
             }
         } else {
             PrincipalStylesheetModule psm = getPrincipalStylesheetModule();

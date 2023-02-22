@@ -113,7 +113,7 @@ public class XSLAnalyzeString extends StyleElement {
                 pattern = getConfiguration().compileRegularExpression(
                         regex, flagstr, getEffectiveVersion() >= 30 ? "XP30" : "XP20", warnings);
                 for (String w : warnings) {
-                    issueWarning(w, SaxonErrorCode.SXWN9022, this);
+                    issueWarning(w, SaxonErrorCode.SXWN9022);
                 }
             } catch (XPathException err) {
                 if ("FORX0001".equals(err.getErrorCodeLocalPart())) {

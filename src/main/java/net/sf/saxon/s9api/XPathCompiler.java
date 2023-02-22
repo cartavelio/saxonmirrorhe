@@ -276,8 +276,8 @@ public class XPathCompiler {
      */
 
     public void setWarningHandler(ErrorReporter reporter) {
-        env.setWarningHandler((message, location) -> {
-            reporter.report(new XmlProcessingIncident(message, SaxonErrorCode.SXWN9000, location).asWarning());
+        env.setWarningHandler((message, code, location) -> {
+            reporter.report(new XmlProcessingIncident(message, code, location).asWarning());
         });
     }
 

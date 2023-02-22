@@ -82,7 +82,7 @@ public final class XSLCopyOf extends StyleElement {
         } else {
             copyAccumulators = processBooleanAttribute("copy-accumulators", copyAccumulatorsAtt);
             if (copyAccumulators && isConstructingComplexContent()) {
-                compileWarning("Copying accumulators is pointless when the copied element "
+                issueWarning("Copying accumulators is pointless when the copied element "
                                        + "is immediately attached to a new parent, since that action "
                                        + "will lose the accumulator values", SaxonErrorCode.SXWN9017);
                 copyAccumulators = false;

@@ -138,8 +138,8 @@ public class ExpressionContext implements StaticContext {
      */
 
     @Override
-    public void issueWarning(String s, Location locator) {
-        element.compileWarning(s, SaxonErrorCode.SXWN9000, locator);
+    public void issueWarning(String s, String errorCode, Location locator) {
+        element.issueWarning(s, errorCode, locator);
     }
 
     /**

@@ -1901,7 +1901,7 @@ public class XQueryParser extends XPathParser {
 
         if (annotations.includes(SAXON_MEMO_FUNCTION)) {
             if (env.getConfiguration().getEditionCode().equals("HE")) {
-                warning("saxon:memo-function option is ignored under Saxon-HE");
+                warning("saxon:memo-function option is ignored under Saxon-HE", SaxonErrorCode.SXJX0001);
             } else {
                 memoFunction = true;
             }
@@ -2103,22 +2103,22 @@ public class XQueryParser extends XPathParser {
                         case "true":
                             memoFunction = true;
                             if (env.getConfiguration().getEditionCode().equals("HE")) {
-                                warning("saxon:memo-function option is ignored under Saxon-HE");
+                                warning("saxon:memo-function option is ignored under Saxon-HE", SaxonErrorCode.SXJX0001);
                             }
                             break;
                         case "false":
                             memoFunction = false;
                             break;
                         default:
-                            warning("Value of saxon:memo-function must be 'true' or 'false'");
+                            warning("Value of saxon:memo-function must be 'true' or 'false'", SaxonErrorCode.SXWN9042);
                             break;
                     }
                     break;
                 case "allow-cycles":
-                    warning("Value of saxon:allow-cycles is ignored");
+                    warning("Value of saxon:allow-cycles is ignored", SaxonErrorCode.SXWN9042);
                     break;
                 default:
-                    warning("Unknown Saxon option declaration: " + varName.getDisplayName());
+                    warning("Unknown Saxon option declaration: " + varName.getDisplayName(), SaxonErrorCode.SXWN9042);
                     break;
             }
         }
@@ -2221,7 +2221,7 @@ public class XQueryParser extends XPathParser {
     }
 
     private void badOutputProperty(String s) {
-        warning("Invalid serialization property (" + s + ")");
+        warning("Invalid serialization property (" + s + ")", SaxonErrorCode.SXWN9043);
     }
 
     /**
@@ -2457,7 +2457,7 @@ public class XQueryParser extends XPathParser {
             }
 
             if (explicitType && !allowingEmpty && !forMember && type.getCardinality() != StaticProperty.EXACTLY_ONE) {
-                warning("Occurrence indicator on singleton range variable has no effect");
+                warning("Occurrence indicator on singleton range variable has no effect", SaxonErrorCode.SXWN9039);
                 type = SequenceType.makeSequenceType(type.getPrimaryType(), StaticProperty.EXACTLY_ONE);
             }
 
@@ -2502,7 +2502,7 @@ public class XQueryParser extends XPathParser {
         }
         SequenceType type = clause.getRangeVariable().getRequiredType();
         if (!Cardinality.allowsZero(type.getCardinality())) {
-            warning("When 'allowing empty' is specified, the occurrence indicator on the range variable type should be '?'");
+            warning("When 'allowing empty' is specified, the occurrence indicator on the range variable type should be '?'", SaxonErrorCode.SXWN9039);
         }
     }
 
@@ -3345,7 +3345,7 @@ public class XQueryParser extends XPathParser {
             if ("validate-type".equals(localName)) {
                 if (!env.getConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
                     warning("Ignoring saxon:validate-type. To use this feature " +
-                                    "you need the Saxon-EE processor from http://www.saxonica.com/");
+                                    "you need the Saxon-EE processor from http://www.saxonica.com/", SaxonErrorCode.SXWN9042);
                 } else {
                     String typeName = Whitespace.trim(pragmaContents);
                     if (!NameChecker.isQName(StringTool.codePoints(typeName))) {
@@ -3359,7 +3359,7 @@ public class XQueryParser extends XPathParser {
                     validateType = true;
                 }
             } else {
-                warning("Ignored pragma " + qname + " (unrecognized Saxon pragma)");
+                warning("Ignored pragma " + qname + " (unrecognized Saxon pragma)", SaxonErrorCode.SXWN9042);
             }
         }
 
@@ -3780,7 +3780,7 @@ public class XQueryParser extends XPathParser {
             makeSimpleContent(attContent, att2, offset);
             return makeTracer(att2, attributeName.getStructuredQName());
         } else {
-            warning(warningMessage);
+            warning(warningMessage, "XQDY0044");
             return new ErrorExpression(warningMessage, "XQDY0044", false);
         }
     }
@@ -3880,7 +3880,7 @@ public class XQueryParser extends XPathParser {
             makeSimpleContent(piContent, pi2, offset);
             return makeTracer(pi2, null);
         } else {
-            warning(warningMessage);
+            warning(warningMessage, "XQDY0064");
             return new ErrorExpression(warningMessage, "XQDY0064", false);
         }
     }

@@ -15,6 +15,7 @@ import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.ItemType;
@@ -232,7 +233,7 @@ public class SortExpression extends Expression
             if (sortKeyDef.isSetContextForSortKey() && !ExpressionTool.dependsOnFocus(sortKey)) {
                 visitor.getStaticContext().issueWarning(
                         "Sort key will have no effect because its value does not depend on the context item",
-                        sortKey.getLocation());
+                        SaxonErrorCode.SXWN9033, sortKey.getLocation());
             }
 
         }

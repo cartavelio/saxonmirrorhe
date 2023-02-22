@@ -14,6 +14,7 @@ import net.sf.saxon.functions.BooleanFn;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -586,7 +587,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
                     !Literal.isConstantBoolean(getCondition(i), true)) {
                 // Bug 3933: avoid the warning for an implicit xsl:otherwise branch (constant condition = true)
                 visitor.issueWarning("Branch " + (i + 1) + " of conditional will fail with a type error if executed. "
-                        + ((ErrorExpression) getAction(i)).getMessage(), getAction(i).getLocation());
+                        + ((ErrorExpression) getAction(i)).getMessage(), SaxonErrorCode.SXWN9027, getAction(i).getLocation());
             }
             if (Literal.hasEffectiveBooleanValue(getCondition(i), true)) {
                 // Don't bother with optimisation of subsequent branches if the code won't be executed: bug 4537

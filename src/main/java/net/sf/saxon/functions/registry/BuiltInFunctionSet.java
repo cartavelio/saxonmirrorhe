@@ -258,7 +258,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         entry.ensurePopulated();
         SystemFunction f = entry.implementationFactory.get();
         f.setDetails(entry);
-        f.setArity(entry.maxArity);
+        f.setArity(arity);
         return f;
     }
 

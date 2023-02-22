@@ -23,9 +23,8 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.sxpath.AbstractStaticContext;
 import net.sf.saxon.trans.DecimalFormatManager;
-import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.ItemType;
 
 import java.util.Collections;
@@ -93,9 +92,9 @@ public class UseWhenStaticContext extends AbstractStaticContext implements Stati
      */
 
     @Override
-    public void issueWarning(String s, Location locator) {
+    public void issueWarning(String s, String errorCode, Location locator) {
         compilation.getCompilerInfo().getErrorReporter().report(
-                new XmlProcessingIncident(s, SaxonErrorCode.SXWN9000, locator).asWarning());
+                new XmlProcessingIncident(s, errorCode, locator).asWarning());
     }
 
     /**

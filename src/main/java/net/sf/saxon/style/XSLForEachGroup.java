@@ -253,7 +253,7 @@ public final class XSLForEachGroup extends StyleElement {
             }
         }
         if (!hasChildNodes()) {
-            compileWarning("An empty xsl:for-each-group instruction has no effect", SaxonErrorCode.SXWN9009);
+            issueWarning("An empty xsl:for-each-group instruction has no effect", SaxonErrorCode.SXWN9009);
         }
 
     }

@@ -22,6 +22,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.iter.RangeIterator;
@@ -280,8 +281,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                             which = "the second";
                         }
                         visitor.getStaticContext().issueWarning(
-                            message + ". The comparison can succeed only if " + which +
-                                " operand is empty, and in that case will always be false", getLocation());
+                                message + ". The comparison can succeed only if " + which +
+                                " operand is empty, and in that case will always be false", SaxonErrorCode.SXWN9025, getLocation());
                     }
                 } else {
                     XPathException err = new XPathException(message);

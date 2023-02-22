@@ -22,6 +22,7 @@ import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -323,7 +324,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments) throws XPathException {
             if (pendingWarning != null && !pendingWarning.equals("DONE")) {
-                visitor.issueWarning(pendingWarning, arguments[0].getLocation());
+                visitor.issueWarning(pendingWarning, SaxonErrorCode.SXWN9038, arguments[0].getLocation());
                 pendingWarning = "DONE";
             }
             return null;

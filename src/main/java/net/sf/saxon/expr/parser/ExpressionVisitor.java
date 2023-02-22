@@ -86,14 +86,14 @@ public class ExpressionVisitor  {
 
     /**
      * Issue a warning message
-     *
-     * @param message the message
+     *  @param message the message
+     * @param errorCode the error code associated with the message
      * @param locator the query/stylesheet location associated with the message
      */
 
-    public void issueWarning(String message, Location locator) {
+    public void issueWarning(String message, String errorCode, Location locator) {
         if (!isSuppressWarnings()) {
-            staticContext.issueWarning(message, locator);
+            staticContext.issueWarning(message, errorCode, locator);
         }
     }
 

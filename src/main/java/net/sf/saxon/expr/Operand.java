@@ -11,6 +11,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -225,7 +226,7 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
             e.maybeSetLocation(getChildExpression().getLocation());
             if (!e.isReportableStatically()) {
                 visitor.getStaticContext().issueWarning(
-                        "Evaluation will always throw a dynamic error: " + e.getMessage(), getChildExpression().getLocation());
+                        "Evaluation will always throw a dynamic error: " + e.getMessage(), SaxonErrorCode.SXWN9027, getChildExpression().getLocation());
                 setChildExpression(new ErrorExpression(new XmlProcessingException(e)));
             } else {
                 throw e;
@@ -249,7 +250,7 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
             e.maybeSetLocation(getChildExpression().getLocation());
             if (!e.isReportableStatically()) {
                 visitor.getStaticContext().issueWarning(
-                        "Evaluation will always throw a dynamic error: " + e.getMessage(), getChildExpression().getLocation());
+                        "Evaluation will always throw a dynamic error: " + e.getMessage(), SaxonErrorCode.SXWN9027, getChildExpression().getLocation());
                 setChildExpression(new ErrorExpression(new XmlProcessingException(e)));
             } else {
                 throw e;

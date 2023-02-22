@@ -8,7 +8,7 @@
 package net.sf.saxon.functions.registry;
 
 import com.saxonica.functions.extfn.CharactersFn;
-import com.saxonica.functions.extfn.ExpandedQNameFn;
+import net.sf.saxon.functions.ExpandedQNameFn;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.ma.Parcel;
@@ -193,6 +193,18 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("unparcel", 1, e -> e.populate( UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, Parcel.TYPE, ONE, null));
+
+        SpecificFunctionType valuePredicate = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE},
+                SequenceType.SINGLE_BOOLEAN);
+        SpecificFunctionType valueAction = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE},
+                SequenceType.ANY_SEQUENCE);
+
+        register("while", 3, e -> e.populate(WhileFn::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, valuePredicate, ONE, null)
+                .arg(2, valueAction, ONE, null));
     }
 
 }

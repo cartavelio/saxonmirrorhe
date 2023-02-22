@@ -118,7 +118,7 @@ public class XSLIterate extends StyleElement {
         //checkParamComesFirst(false);
         select = typeCheck("select", select);
         if (!hasChildNodes()) {
-            compileWarning("An empty xsl:iterate instruction has no effect", SaxonErrorCode.SXWN9009);
+            issueWarning("An empty xsl:iterate instruction has no effect", SaxonErrorCode.SXWN9009);
         }
     }
 

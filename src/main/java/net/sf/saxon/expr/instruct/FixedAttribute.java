@@ -27,6 +27,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
@@ -136,7 +137,7 @@ public final class FixedAttribute extends AttributeCreator {
                 } else {
                     visitor.getStaticContext().issueWarning(
                             "Lax validation has no effect: there is no global attribute declaration for " +
-                                    nodeName.getDisplayName(), getLocation());
+                                    nodeName.getDisplayName(), SaxonErrorCode.SXWN9031, getLocation());
                 }
             }
         }
