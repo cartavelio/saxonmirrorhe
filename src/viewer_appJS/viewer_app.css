@@ -543,11 +543,18 @@ div.foundP p.hot {
 }
 .langChoice{
     margin:0px;
-    padding:6px;
+    padding-top:5px;
     cursor:pointer; /* Safari Mobile bug, not cursor:default;*/
     position: absolute;
     left: 50%;
     border:none; 
+}
+input[type="checkbox"] {
+    background-color:initial;
+    cursor:pointer;
+    appearance:auto;
+    box-sizing:border-box;
+    margin:0px 3px 3px 3px;
 }
 .arrowLeft,
 .arrowRight,
