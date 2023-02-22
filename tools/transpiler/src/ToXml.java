@@ -180,7 +180,7 @@ public class ToXml {
     public void processJavaFileToXml(File directory, String filename, File xmlDir, File srcDir) throws Exception {
         File file = new File(directory, filename);
         if (file.isDirectory()) {
-            processJavaDirToXml(file, new File(xmlDir, filename), srcDir);
+            processJavaDirToXml(file, new File(xmlDir, filename), new File(srcDir, filename));
         } else if (filename.endsWith(".java") && file.canRead()) {
             try {
                 xmlDir.mkdirs();
