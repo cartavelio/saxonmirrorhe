@@ -108,9 +108,8 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
 
 
 	setProperty("resources", proc->getResourcesDirectory());
-    allocFn fn = operator new;
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties,0);
-    int64_t results = j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    int64_t results = j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(processorDataRef > 0) {
         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
         processorDataRef = -1;
