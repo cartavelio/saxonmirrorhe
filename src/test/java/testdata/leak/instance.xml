@@ -1,0 +1,6 @@
+<?xml version="1.1"?>
+<eg:body xmlns:eg="http://example.org"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://example.org schema.xsd">
+  <foo xmlns:foo="http://foo.com">foo:bar</foo>
+</eg:body>

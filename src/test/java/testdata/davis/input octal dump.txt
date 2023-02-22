@@ -1,0 +1,43 @@
+0000000   <   ?   x   m   l       v   e   r   s   i   o   n   =   "   1
+0000020   .   0   "       e   n   c   o   d   i   n   g   =   "   U   T
+0000040   F   -   8   "   ?   >  \n   <   t   e   s   t   D   a   t   a
+0000060   >  \n                   <   t   e   s   t   R   o   w       d
+0000100   a   t   a   =   "   A       l   i   n   e       o   f       t
+0000120   e   x   t       c   o   n   t   a   i   n   i   n   g       o
+0000140   n   l   y       a   s   c   i   i       c   h   a   r   a   c
+0000160   t   e   r   s   .   "   /   >  \n                   <   t   e
+0000200   s   t   R   o   w       d   a   t   a   =   " 303 237       T
+0000220   h   e       f   i   r   s   t       c   h   a   r       o   f
+0000240       t   h   i   s       l   i   n   e       i   s       s   h
+0000260   a   r   p   -   S   ,       U   +   0   0   D   F   ,       w
+0000300   h   i   c   h       i   s       c   3       9   f       i   n
+0000320       U   T   F   -   8   ,       0   x   0   0   D   F       i
+0000340   n       U   T   F   -   1   6   .   "   /   >  \n
+0000360       <   t   e   s   t   R   o   w       d   a   t   a   =   "
+0000400 341 200 252       t   h   e       f   i   r   s   t       c   h
+0000420   a   r       o   f       t   h   i   s       l   i   n   e
+0000440   i   s       U   +   1   0   2   A   ,       e   1       8   0
+0000460       a   a   ,       0   x   1   0   2   A       i   n       U
+0000500   T   F   -   1   6   .   "   /   >  \n                   <   t
+0000520   e   s   t   R   o   w       d   a   t   a   =   " 360 237 222
+0000540 251       t   h   e       f   i   r   s   t       c   h   a   r
+0000560       o   f       t   h   i   s       l   i   n   e       i   s
+0000600       p   o   o   ,       U   +   1   F   4   A   9   ,       f
+0000620   0       9   f       9   2       a   9   ,       o   r       a
+0000640       s   u   r   r   o   g   a   t   e       p   a   i   r
+0000660   o   f       0   x   D   8   3   D   ,       0   x   D   C   A
+0000700   9       i   n       U   T   F   -   1   6   .           &   a
+0000720   m   p   ;   #   1   2   8   1   6   9   ;       i   n       d
+0000740   e   c   i   m   a   l   .   "   /   >  \n                   <
+0000760   t   e   s   t   R   o   w       d   a   t   a   =   " 360 237
+0001000 230 201       i   t       w   o   r   k   s   !           1   2
+0001020   7   3   7   8   "   /   >  \n                   <   t   e   s
+0001040   t   R   o   w       d   a   t   a   =   "   W   e   '   l   l
+0001060       p   u   t       a   n   o   t   h   e   r       s   i   n
+0001100   g   l   e       p   o   o       o   n       t   h   i   s
+0001120   l   i   n   e   :     360 237 222 251   "   /   >  \n
+0001140           <   t   e   s   t   R   o   w       d   a   t   a   =
+0001160   "   a   n   d       a   n   o   t   h   e   r       s   i   n
+0001200   g   l   e       C   O   O   L       o   n       t   h   i   s
+0001220       l   i   n   e   :     360 237 206 222   "   /   >  \n   <
+0001240   /   t   e   s   t   D   a   t   a   >

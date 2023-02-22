@@ -1,0 +1,84 @@
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE19
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest18
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE19
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest18
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest18
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE19
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE19
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest18
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest18
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE19
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE19
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest18
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE19
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest18
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE19
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest18
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE19
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest18
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE19
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest18
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE19
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest18
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE19
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest18
+}

@@ -1,0 +1,9 @@
+<?xml version="1.0"?> 
+
+<doc cat="b">
+    <para id="1" cat="a"/>
+    <para id="2" cat="a"/>
+    <para id="3" cat="b"/>
+    <para id="4" cat="b"/>
+    <para id="5" cat="b"/>    
+</doc>

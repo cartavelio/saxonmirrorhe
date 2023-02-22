@@ -1,0 +1,7 @@
+<?xml version="1.0"?> 
+
+<doc>
+  <foo att="x">text</foo>
+  <?pling flip=no?>
+  <!--really!-->
+</doc>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://example.org" xmlns:eg="http://example.org">
+
+  <xs:element name="body">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element type="eg:aQName" name="foo" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:simpleType name="aQName">
+    <xs:restriction base="xs:QName">
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

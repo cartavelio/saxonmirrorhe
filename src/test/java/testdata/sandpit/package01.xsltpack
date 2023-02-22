@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns='http://ns.saxonica.com/xslt/export' xmlns:fn='http://www.w3.org/2005/xpath-functions' xmlns:java-type='http://saxon.sf.net/java-type' xmlns:vv='http://saxon.sf.net/generated-variable' xmlns:xs='http://www.w3.org/2001/XMLSchema' when='2020-12-01T11:59:54.711Z' id='0' name='package-002.xsl' version='30' declaredModes='1' packageVersion='2.1.0.5' saxonProduct='SAXON-EE' saxonVersion='11.0' buildDateTime='2020-12-01T11:59:54.711Z' target='EE' targetVersion='1' relocatable='false' implicit='false'>
+ <co id='0' binds=''>
+  <globalParam name='Q{}c' as='*' line='5' module='' visibility='PUBLIC'>
+   <int val='2'/>
+  </globalParam>
+ </co>
+ <co id='1' vis='PUBLIC' binds='2'>
+  <template name='Q{}main' flags='os' line='9' module='' slots='0'>
+   <callT role='body' baseUri='' ns='xsl=~ xml=~' line='10' name='Q{}go' bSlot='0' flags='t'>
+    <withParam name='Q{}p1' flags='c' as='1ADI'>
+     <int val='22'/>
+    </withParam>
+   </callT>
+  </template>
+ </co>
+ <co id='2' binds='0'>
+  <template name='Q{}go' flags='os' line='5' module='' slots='3'>
+   <let role='body' baseUri='' ns='xsl=~ xml=~' line='7' var='Q{http://saxon.sf.net/generated-variable}v0' as='?A' slot='1' eval='13'>
+    <cvUntyped to='AO'>
+     <atomSing card='?' diag='1|1||+'>
+      <gVarRef name='Q{}c' bSlot='0'/>
+     </atomSing>
+    </cvUntyped>
+    <sequence line='6'>
+     <param name='Q{}p1' slot='0'>
+      <str role='select' val=''/>
+      <supplied role='conversion' slot='0'/>
+     </param>
+     <elem line='7' name='out' nsuri=''>
+      <valueOf flags='l'>
+       <fn name='string-join'>
+        <convert from='A n~numeric' to='AS'>
+         <for var='Q{}i' as='ADI' slot='2'>
+          <range role='in' from='1' to='5'/>
+          <arith role='return' op='+' calc='a+a'>
+           <arith op='+' calc='a+a'>
+            <varRef name='Q{}i' slot='2'/>
+            <varRef name='Q{http://saxon.sf.net/generated-variable}v0' slot='1'/>
+           </arith>
+           <cvUntyped to='AO'>
+            <atomSing card='?' diag='1|1||+'>
+             <varRef name='Q{}p1' slot='0'/>
+            </atomSing>
+           </cvUntyped>
+          </arith>
+         </for>
+        </convert>
+        <str val=' '/>
+       </fn>
+      </valueOf>
+     </elem>
+    </sequence>
+   </let>
+  </template>
+ </co>
+ <co id='3' binds=''>
+  <mode onNo='TC' flags='dWe' patternSlots='0'/>
+ </co>
+ <overridden/>
+ <output>
+  <property name='Q{http://saxon.sf.net/}stylesheet-version' value='30'/>
+ </output>
+ <decimalFormat/>
+</package>
+<?Σ 8b1dad2e?>

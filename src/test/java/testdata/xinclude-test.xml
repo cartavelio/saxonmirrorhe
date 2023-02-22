@@ -1,0 +1,6 @@
+<a> 
+ <xi:include href="non-existent.xml"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <xi:fallback>There are no files today ... </xi:fallback>
+ </xi:include>
+</a>

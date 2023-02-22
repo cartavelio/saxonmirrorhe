@@ -1,0 +1,12 @@
+<project name="testproject" default="test" basedir=".">
+  <target name="test">
+    <xslt in="out.xml" out="out2.xml" style="test2.xsl" force="true">
+      <factory name="net.sf.saxon.TransformerFactoryImpl"/>
+      <xmlcatalog>
+        <catalogpath>
+          <fileset dir="." includes="**/catalog.xml"/>
+        </catalogpath>
+      </xmlcatalog>
+    </xslt>
+  </target>
+</project>
