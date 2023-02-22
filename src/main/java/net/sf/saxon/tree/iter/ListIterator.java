@@ -9,6 +9,7 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.functions.Reverse;
+import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -27,7 +28,9 @@ import java.util.List;
  * the generics are confined to this abstract class.</p>
  */
 
-public abstract class ListIterator implements SequenceIterator, LastPositionFinder, LookaheadIterator, GroundedIterator, ReversibleIterator {
+public abstract class ListIterator implements SequenceIterator, FocusIterator,
+        LastPositionFinder, LookaheadIterator, GroundedIterator,
+        ReversibleIterator {
 
     @Override
     public boolean supportsHasNext() {
@@ -73,6 +76,16 @@ public abstract class ListIterator implements SequenceIterator, LastPositionFind
         @Override
         public int getLength() {
             return list.size();
+        }
+
+        @Override
+        public Item current() {
+            return list.get(index-1);
+        }
+
+        @Override
+        public int position() {
+            return index;
         }
 
         public boolean isActuallyGrounded() {
