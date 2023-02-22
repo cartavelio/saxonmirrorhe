@@ -24,7 +24,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void explicitCatalogResourceResolverClass() {
             Processor proc = new();
-            proc.SetProperty(Feature.COMMON_RESOURCE_RESOLVER, new CatalogResourceResolver());
+            proc.SetProperty(Feature.RESOURCE_RESOLVER, new CatalogResourceResolver());
             Configuration config = proc.Implementation;
             Assert.NotNull(config.getCommonResourceResolver());
             Assert.That(config.getCommonResourceResolver() is CatalogResourceResolver);
@@ -39,7 +39,7 @@ namespace SaxonCS_NUnit {
 
             MyResolver resolver = new MyResolver(underlyingResolver);
 
-            proc.SetProperty(Feature.COMMON_RESOURCE_RESOLVER, resolver);
+            proc.SetProperty(Feature.RESOURCE_RESOLVER, resolver);
             Assert.NotNull(config.getCommonResourceResolver());
             Assert.That(config.getCommonResourceResolver() is CommonResourceResolver);
             Assert.That(config.getCommonResourceResolver() is MyResolver);
@@ -51,7 +51,7 @@ namespace SaxonCS_NUnit {
             Configuration config = proc.Implementation;
 
             try {
-                proc.SetProperty(Feature.COMMON_RESOURCE_RESOLVER, "Hello");
+                proc.SetProperty(Feature.RESOURCE_RESOLVER, "Hello");
                 Assert.Fail();
             }
             catch (IllegalArgumentException ex) {
