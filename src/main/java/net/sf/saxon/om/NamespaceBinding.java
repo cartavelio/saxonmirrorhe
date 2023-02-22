@@ -8,7 +8,6 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.tree.jiter.MonoIterator;
-import net.sf.saxon.lib.NamespaceConstant;
 
 import java.util.Iterator;
 
@@ -48,27 +47,6 @@ public final class NamespaceBinding implements NamespaceBindingSet {
     @Override
     public NamespaceUri getNamespaceUri(String prefix) {
         return prefix.equals(this.prefix) ? uri : null;
-    }
-
-    /**
-     * Create a binding of a prefix to a URI. Static factory method for the convenience of compiled bytecode;
-     * reuses standard NamespaceBinding objects where possible
-     *
-     * @param prefix the prefix: either an NCName, or a zero-length string to bind the default namespace.
-     *               Must not be null.
-     * @param uri    the namespace URI: either a URI, or a zero-length string to unbind the prefix. Must
-     *               not be null.
-     * @return the namespace binding object
-     */
-
-    public static NamespaceBinding makeNamespaceBinding(CharSequence prefix, CharSequence uri) {
-        if (prefix.length()==0 && uri.length()==0) {
-            return DEFAULT_UNDECLARATION;
-        } else if (prefix.equals("xml") && uri.equals(NamespaceConstant.XML)) {
-            return XML;
-        } else {
-            return new NamespaceBinding(prefix.toString(), NamespaceUri.of(uri.toString()));
-        }
     }
 
     /**
@@ -121,7 +99,7 @@ public final class NamespaceBinding implements NamespaceBindingSet {
      */
     @Override
     public Iterator<NamespaceBinding> iterator() {
-        return new MonoIterator<NamespaceBinding>(this);
+        return new MonoIterator<>(this);
     }
 
     /**
