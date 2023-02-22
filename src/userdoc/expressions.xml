@@ -94,8 +94,8 @@
       <p>The argument to a constructor can contain leading or trailing whitespace, as determined by
          the whitespace facet for the target data type.</p>
    </section>
-   <section id="variables" title="Variable References">
-      <h1>Variable References</h1>
+   <section id="variables" title="Variable references">
+      <h1>Variable references</h1>
 
       <p>The value of a variable (local or global variable, local or global parameter) may be
          referred to using the construct <code>$<i>name</i></code>, where <code><i>name</i></code>
@@ -123,8 +123,8 @@
             class="bodylink" href="../let">let expression</a>, as well as in the signature of an
          inline function.</p>
    </section>
-   <section id="functioncalls" title="Function Calls">
-      <h1>Function Calls</h1>
+   <section id="functioncalls" title="Function calls">
+      <h1>Function calls</h1>
 
       <p>A function call in XPath 2.0 takes the form <code>F ( arg1, arg2, ...)</code>. In general,
          the function name is a QName. A library of core functions is defined in the XPath and XSLT
@@ -873,8 +873,8 @@
          way of trapping the error if the cast is attempted and fails. (Note however that XQuery 3.0
          and XSLT 3.0 both introduce a try/catch mechanism.)</p>
    </section>
-   <section id="conditionals" title="Conditional Expressions">
-      <h1>Conditional Expressions</h1>
+   <section id="conditionals" title="Conditional expressions">
+      <h1>Conditional expressions</h1>
 
 
       <p>XPath 2.0 introduced a conditional expression of the form <code>if ( E1 ) then E2 else
@@ -884,8 +884,8 @@
       <p>It's also worth noting the coding pattern <code>(@price, 5)[1]</code> which returns the
          value of <code>@price</code> if it exists, or 5 otherwise.</p>
    </section>
-   <section id="quantified" title="Quantified Expressions">
-      <h1>Quantified Expressions</h1>
+   <section id="quantified" title="Quantified expressions">
+      <h1>Quantified expressions</h1>
 
 
       <p>The expression <code>some $x in E1 satisfies E2</code> returns true if there is an item in
@@ -898,8 +898,8 @@
       <p>Similarly, the expression <code>every $x in E1 satisfies E2</code> returns true if every
          item in the sequence given by <code>E1</code> satisfies the condition.</p>
    </section>
-   <section id="for" title="For Expressions">
-      <h1>For Expressions</h1>
+   <section id="for" title="For expressions">
+      <h1>For expressions</h1>
 
 
       <p>The expression <code>for $x in E1 return E2</code> returns the sequence that results from
@@ -909,8 +909,8 @@
             return $v/price * $v/quantity)</code> returns the total value of (price times quantity)
          for all the selected <code>order-item</code> elements.</p>
    </section>
-   <section id="let" title="Let Expressions">
-      <h1>Let Expressions</h1>
+   <section id="let" title="Let expressions">
+      <h1>Let expressions</h1>
 
       <p>XPath 3.0 allows <code>let</code> expressions, previously available only in XQuery. For
          example the expression <code>let $x := . return //a[@status=$x]</code> binds the variable
