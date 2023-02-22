@@ -71,8 +71,10 @@ public class StandardDiagnostics {
                 nodeMessage += "/@" + saLoc.getAttributeName();
             }
             nodeMessage += ' ';
+        //#if CSHARP==false
         } else if (loc instanceof DOMLocator) {
             nodeMessage = "at " + ((DOMLocator) loc).getOriginatingNode().getNodeName() + ' ';
+        //#endif
         } else if (loc instanceof NodeInfo) {
             node = (NodeInfo) loc;
             nodeMessage = "at " + node.getDisplayName() + ' ';
@@ -241,7 +243,7 @@ public class StandardDiagnostics {
      *                2=values of variables
      */
 
-    public void printStackTrace(XPathContext context, Logger out, int level) {
+    public void logStackTrace(XPathContext context, Logger out, int level) {
         if (level > 0) {
             int depth = 20;
             while (depth-- > 0) {
@@ -491,7 +493,7 @@ public class StandardDiagnostics {
      * @return the expanded message
      */
 
-    public CharSequence expandSpecialCharacters(CharSequence in, int threshold) {
+    public String expandSpecialCharacters(String in, int threshold) {
         if (threshold >= UTF16CharacterSet.NONBMP_MAX) {
             return in;
         }
@@ -508,7 +510,7 @@ public class StandardDiagnostics {
                 fsb.append("]");
             }
         }
-        return fsb;
+        return fsb.toString();
     }
 
 

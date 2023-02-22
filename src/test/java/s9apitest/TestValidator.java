@@ -1347,5 +1347,66 @@ public class TestValidator {
     }
 
 
+    @Test
+    public void testErrorListenerBug4744() {
+
+        // This validation run should report exactly two validation errors.
+
+
+        final List<TransformerException> errorList = new ArrayList<>();
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            StreamSource source_xsd = new StreamSource(new File("/Users/mike/bugs/2020/4744-Skorek/UniqueKeyBug.xsd"));
+            StreamSource source_xml = new StreamSource(new File("/Users/mike/bugs/2020/4744-Skorek/UniqueKeyBug.xml"));
+            ErrorListener listener = new ErrorListener() {
+                @Override
+                public void error(TransformerException exception) {
+                    errorList.add(exception);
+                }
+
+                @Override
+                public void fatalError(TransformerException exception) throws TransformerException {
+                    throw exception;
+                }
+
+                @Override
+                public void warning(TransformerException exception) {
+                    errorList.add(exception);
+                }
+            };
+
+            SchemaValidator sv = sm.newSchemaValidator();
+            sv.setErrorListener(listener);
+            sm.load(source_xsd);
+
+
+            Serializer serializer = proc.newSerializer();
+            serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+            serializer.setOutputStream(out);
+            sv.setDestination(serializer);
+
+
+            sv.validate(source_xml);
+
+            out.close();
+            //fail("Validation errors not detected");
+
+        } catch (SaxonApiException sapie) {
+            try {
+                out.close();
+            } catch (IOException ee) {
+                fail();
+            }
+            assertEquals(1, errorList.size());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+
 }
 
