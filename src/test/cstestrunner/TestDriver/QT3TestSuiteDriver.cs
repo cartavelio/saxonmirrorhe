@@ -594,7 +594,8 @@ namespace TestDriver {
                             selector.InputXmlResolver = new TestUriResolver(env);
 
                             if (env.unparsedTextResolver != null) {
-                                //selector.getUnderlyingXPathContext().setUnparsedTextURIResolver(env.unparsedTextResolver); //TODO
+                                // TODO
+                                //selector.Implementation.setUnparsedTextResolver(env.unparsedTextResolver);
                             }
 
                             XdmValue result = selector.Evaluate();
