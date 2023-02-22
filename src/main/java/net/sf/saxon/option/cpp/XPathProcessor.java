@@ -16,6 +16,7 @@ import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
 
 import javax.xml.transform.Source;
@@ -243,7 +244,7 @@ public class XPathProcessor extends SaxonCAPI {
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
     @CEntryPoint(name = "j_evaluate")
-    public static XdmValue[] evaluate(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static CLongPointer evaluate(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
         String cwd = CTypeConversion.toJavaString(ccwd);
@@ -268,13 +269,15 @@ public class XPathProcessor extends SaxonCAPI {
         if (value.size() == 0) {
             return null;
         }
-        XdmValue[] xdmValues = new XdmValue[value.size()];
+        long[] valueRefs = new long[value.size()];
         int i = 0;
         for (XdmItem item : value) {
-            xdmValues[i] = item;
+            ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(item);
+            valueRefs[i] = objectHandle.rawValue();
             i++;
         }
-        return xdmValues;
+        CLongPointer addr = SaxonCAPI.longArrayToNative(alloc, valueRefs);
+        return addr;
 
     }
 
@@ -366,7 +369,7 @@ public class XPathProcessor extends SaxonCAPI {
      * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
-    public static boolean effectiveBooleanValue(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_cwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static byte effectiveBooleanValue(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_cwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         Map<QName, XdmValue> parameters = new HashMap<>();
         Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
@@ -394,7 +397,7 @@ public class XPathProcessor extends SaxonCAPI {
         } catch (SaxonApiException e) {
             throw e;
         }
-        return result;
+        return CTypeConversion.toCBoolean(result);
 
 
     }
