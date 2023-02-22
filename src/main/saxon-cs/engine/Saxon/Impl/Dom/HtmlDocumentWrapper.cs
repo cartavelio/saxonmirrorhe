@@ -1,6 +1,3 @@
-using System.Xml;
-using HtmlAgilityPack;
-using Saxon.Api;
 using Saxon.Hej.om;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
@@ -14,17 +11,17 @@ namespace Saxon.Impl.Dom {
         
         
 
-        private readonly HtmlDocument htmlDocument;
+        private readonly AngleSharp.Dom.IDocument htmlDocument;
         private readonly HtmlNodeWrapper outermostElement;
         
 
-        public HtmlDocumentWrapper(HtmlDocument doc, string baseURI, Saxon.Hej.Configuration config) {
+        public HtmlDocumentWrapper(AngleSharp.Dom.IDocument doc, string baseURI, Saxon.Hej.Configuration config) {
             htmlDocument = doc;
             treeInfo = new GenericTreeInfo(config);
             ((GenericTreeInfo) treeInfo).setSystemId(baseURI);
             ((GenericTreeInfo) treeInfo).setRootNode(this);
-            foreach (HtmlNode node in doc.DocumentNode.ChildNodes) {
-                if (node.NodeType == HtmlNodeType.Element) {
+            foreach (AngleSharp.Dom.INode node in doc.ChildNodes) {
+                if (node.NodeType == AngleSharp.Dom.NodeType.Element) {
                     outermostElement = HtmlNodeWrapper.makeWrapper(node, this, this, 0);
                     break;
                 }
