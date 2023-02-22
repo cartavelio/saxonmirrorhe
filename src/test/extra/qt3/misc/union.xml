@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="us-ascii"?>
 <test-set xmlns="http://www.w3.org/2010/09/qt-fots-catalog" name="union">
-   <description>Tests for union types of the form union:hexBinary-base64Binary</description>
+   <description>Tests for union types (4.0 proposed extension)</description>
    <link type="spec" document="http://www.w3.org/TR/xpath-functions-11/"
          idref="func-abs"/>
          
@@ -50,7 +50,6 @@
    <test-case name="union-004">
       <description>function argument test</description>
       <created by="Michael Kay" on="2016-10-07"/>
-      <dependency type="spec" value="XQ31"/>
       <environment ref="union"/>
       <test><![CDATA[
       	declare function local:f($a as union(xs:dateTime, xs:date, xs:time)) as xs:string {
@@ -70,7 +69,6 @@
    <test-case name="union-005">
       <description>function argument test, failure case</description>
       <created by="Michael Kay" on="2016-10-07"/>
-      <dependency type="spec" value="XQ31"/>
       <environment ref="union"/>
       <test><![CDATA[
       	declare function local:f($a as union(xs:dateTime, xs:date, xs:time)) as xs:string {
@@ -91,7 +89,6 @@
    <test-case name="union-007">
       <description>polymorphic function test</description>
       <created by="Michael Kay" on="2016-10-07"/>
-      <dependency type="spec" value="XQ31"/>
       <environment ref="union"/>
       <test><![CDATA[
    declare function local:format($in as union(xs:dateTime, xs:date, xs:time, xs:string), $fmt as xs:string) as xs:string {
@@ -112,7 +109,6 @@
    <test-case name="union-008">
       <description>polymorphic function test - error case</description>
       <created by="Michael Kay" on="2016-10-07"/>
-      <dependency type="spec" value="XQ31"/>
       <environment ref="union"/>
       <test><![CDATA[
       	declare namespace union="http://saxonica.com/ns/union";
