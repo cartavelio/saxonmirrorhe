@@ -31,7 +31,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// Applications using the class <c>Saxon.Hej.value.AtomicValue</c> should be aware that it is subject to occasional
         /// changes from one release to the next. For documentation on this class, see the Saxon-EE Javadoc documentation
-        /// for the very similar class <c>net.sf.saxon.value.AtomicValue</c>.
+        /// for the very similar class <see cref="Saxon.Hej.value.AtomicValue"/>.
         /// </remarks>
         /// <param name="atomicValue">The object to be wrapped</param>
 		public XdmAtomicValue(Saxon.Hej.value.AtomicValue atomicValue) : base(atomicValue) {

@@ -41,7 +41,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// Applications using the class <c>Saxon.Hej.om.NodeInfo</c> should be aware that it is subject to occasional
         /// changes from one release to the next. For documentation on this class, see the Saxon-EE Javadoc documentation
-        /// for the very similar class <c>net.sf.saxon.om.NodeInfo</c>.
+        /// for the very similar class <see cref="Saxon.Hej.om.NodeInfo"/>.
         /// </remarks>
         /// <param name="node">The object to be wrapped</param>
 		public XdmNode(Saxon.Hej.om.NodeInfo node) : base(node) {

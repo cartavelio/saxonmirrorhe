@@ -324,12 +324,6 @@
     </xsl:copy>
   </xsl:template>
   
-  <xsl:template match="c|code" mode="comment">
-    <xsl:copy>
-      <xsl:value-of select="replace(replace(text(), 'Saxon.Hej.', 'net.sf.saxon.'), 'Saxon.Eej.', 'com.saxonica.')"/>
-    </xsl:copy>
-  </xsl:template>
-  
   <xsl:template match="exception" mode="comment">
     <xsl:copy>
       <xsl:attribute name="name" select="if (@name) then @name else (substring-after(@cref,':'))"/>

@@ -274,7 +274,7 @@ namespace Saxon.Api {
         /// <value>
         ///     The underlying implementation object, which will be an instance of the class
         ///     <c>Saxon.Hej.s9api.XsltTransformer</c>. Information about this class is available in the
-        ///     Saxon-EE Javadoc documentation for the very similar Java class <c>net.sf.saxon.s9api.XsltTransformer</c>.
+        ///     Saxon-EE Javadoc documentation for the very similar Java class <see cref="Saxon.Hej.s9api.XsltTransformer"/>.
         /// </value>
         public Saxon.Hej.s9api.Destination UnderlyingDestination {
             get { return s9Transformer; }
