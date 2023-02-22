@@ -122,7 +122,7 @@ public class IntBlockSet extends IntSet {
     public int hashCode() {
         // Note, hashcodes are NOT the same as those used by IntHashSet and IntArraySet
         if (cachedHashCode == -1) {
-            cachedHashCode = 0x836a89f1 ^ (startPoint + (endPoint << 3));
+            cachedHashCode = 0x236a89f1 ^ (startPoint + (endPoint << 3));
         }
         return cachedHashCode;
     }

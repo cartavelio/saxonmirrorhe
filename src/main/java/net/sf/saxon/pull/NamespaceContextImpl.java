@@ -20,7 +20,11 @@ import java.util.List;
  * NamespaceResolver to be wrapped as a JAXP NamespaceContext.
  */
 
-public class NamespaceContextImpl implements NamespaceContext, NamespaceResolver {
+public class NamespaceContextImpl implements NamespaceResolver
+        //#if CSHARP==false
+        , NamespaceContext
+        //#endif
+{
 
     NamespaceResolver resolver;
 

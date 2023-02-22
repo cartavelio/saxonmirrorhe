@@ -353,14 +353,14 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                    break;
                 {
                     final DOM4JNodeWrapper parent = getParent();
-                    final List children;
+                    final List<Node> children;
                     if (parent.getNodeKind() == Type.DOCUMENT) {
-                        children = ((Document) parent.node).content();
+                        children = (List<Node>)((Document) parent.node).content();
                     } else {
                         // Beware: dom4j content() contains Namespace nodes (which is broken)!
-                        children = ((Element) parent.node).content();
+                        children = (List<Node>)((Element) parent.node).content();
                     }
-                    for (final Object n : children) {
+                    for (Node n : children) {
                         if (n == node) {
                             index = ix;
                             return index;

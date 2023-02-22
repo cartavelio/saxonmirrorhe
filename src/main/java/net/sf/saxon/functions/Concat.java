@@ -81,7 +81,7 @@ public class Concat extends SystemFunction implements PushableFunction {
                     SequenceIterator iter = o.getChildExpression().iterate(context);
                     Item item;
                     while ((item = iter.next()) != null) {
-                        buffer.append(item.getUnicodeStringValue());
+                        buffer.accept(item.getUnicodeStringValue());
                     }
                 }
                 return buffer.toUnicodeString();
@@ -116,7 +116,7 @@ public class Concat extends SystemFunction implements PushableFunction {
             SequenceIterator iter = arg.iterate();
             Item item;
             while ((item = iter.next()) != null) {
-                output.append(item.getUnicodeStringValue());
+                output.accept(item.getUnicodeStringValue());
             }
         }
         output.close();

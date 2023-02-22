@@ -13,9 +13,9 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.QNameValue;
 
 /**
@@ -34,18 +34,17 @@ public class FunctionName extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Function f = (Function) arguments[0].head();
         assert f != null;
         StructuredQName name = f.getFunctionName();
         if (name == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         } else if (name.hasURI(NamespaceConstant.ANONYMOUS)) {
             // Used for inline functions
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         } else {
-            QNameValue result = new QNameValue(name, BuiltInAtomicType.QNAME);
-            return new ZeroOrOne(result);
+            return new QNameValue(name, BuiltInAtomicType.QNAME);
         }
     }
 }

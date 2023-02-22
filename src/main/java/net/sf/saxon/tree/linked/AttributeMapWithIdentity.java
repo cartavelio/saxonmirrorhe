@@ -10,7 +10,7 @@ package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.iter.NodeListIterator;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -60,7 +60,7 @@ public class AttributeMapWithIdentity implements AttributeMap {
                 list.add(new AttributeImpl(owner, i));
             }
         }
-        return new ListIterator.OfNodes(list);
+        return new NodeListIterator(list);
     }
 
     private boolean isDeleted(AttributeInfo info) {

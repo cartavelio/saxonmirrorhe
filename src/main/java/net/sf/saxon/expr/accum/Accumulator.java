@@ -17,8 +17,9 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.*;
-import net.sf.saxon.trans.rules.Rule;
+import net.sf.saxon.trans.SimpleMode;
+import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Map;
@@ -326,19 +327,16 @@ public class Accumulator extends Actor {
         out.setChildRole("init");
         initialValueExpression.export(out);
 
-        SimpleMode.RuleAction action = new SimpleMode.RuleAction() {
-            @Override
-            public void processRule(Rule r) throws XPathException {
-                out.startElement("accRule");
-                out.emitAttribute("slots", ((AccumulatorRule)r.getAction()).getStackFrameMap().getNumberOfVariables()+"");
-                out.emitAttribute("rank", ""+r.getRank());
-                if (((AccumulatorRule) r.getAction()).isCapturing()) {
-                    out.emitAttribute("flags", "c");
-                }
-                r.getPattern().export(out);
-                r.getAction().export(out);
-                out.endElement();
+        SimpleMode.RuleAction action = r -> {
+            out.startElement("accRule");
+            out.emitAttribute("slots", ((AccumulatorRule)r.getAction()).getStackFrameMap().getNumberOfVariables()+"");
+            out.emitAttribute("rank", ""+r.getRank());
+            if (((AccumulatorRule) r.getAction()).isCapturing()) {
+                out.emitAttribute("flags", "c");
             }
+            r.getPattern().export(out);
+            r.getAction().export(out);
+            out.endElement();
         };
         try {
             out.startElement("pre");

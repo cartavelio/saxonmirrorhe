@@ -8,9 +8,9 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -19,7 +19,7 @@ import java.util.List;
  * checking in the same way as for a native XSLT/XQuery function declaring the type as xs:integer+.
  */
 
-public class OneOrMore<T extends Item> extends SequenceExtent {
+public class OneOrMore<T extends Item> extends ZeroOrMore<T> {
 
     /**
      * Create a sequence containing zero or one items
@@ -28,7 +28,7 @@ public class OneOrMore<T extends Item> extends SequenceExtent {
      */
 
     public OneOrMore(T[] content) {
-        super(content);
+        super(Arrays.asList(content));
         if (content.length == 0) {
             throw new IllegalArgumentException();
         }
@@ -49,5 +49,4 @@ public class OneOrMore<T extends Item> extends SequenceExtent {
         }
         return new OneOrMore<>(content);
     }
-
 }

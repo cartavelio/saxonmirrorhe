@@ -9,12 +9,14 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpDelegate;
 
 /**
  * Interface representing a visitor of the clauses of a FLWOR expession that can process and
  * modify the operands of each clause
  */
 @FunctionalInterface
+@CSharpDelegate(true)
 public interface OperandProcessor {
 
     void processOperand(Operand expr) throws XPathException;

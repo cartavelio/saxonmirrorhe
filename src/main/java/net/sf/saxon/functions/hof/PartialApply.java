@@ -196,7 +196,7 @@ public class PartialApply extends Expression {
 
     @Override
     protected int computeHashCode() {
-        int h = 0x836b92a0;
+        int h = 0x236b92a0;
         int i = 0;
         for (Operand o : operands()) {
             h ^= o == null ? i++ : o.getChildExpression().hashCode();

@@ -353,24 +353,39 @@ public abstract class Outputter implements Receiver {
      */
 
     public UniStringConsumer getStringReceiver(boolean asTextNode) {
-        return new UniStringConsumer() {
+        if (asTextNode) {
+            return new UniStringConsumer() {
 
-            final UnicodeBuilder buffer = new UnicodeBuilder();
-            @Override
-            public UniStringConsumer append(CodePoints chars) {
-                buffer.append(chars);
-                return this;
-            }
+                final UnicodeBuilder buffer = new UnicodeBuilder();
 
-            @Override
-            public void close() throws XPathException {
-                if (asTextNode) {
+                @Override
+                public UniStringConsumer accept(CodePoints chars) {
+                    buffer.accept(chars);
+                    return this;
+                }
+
+                @Override
+                public void close() throws XPathException {
                     Outputter.this.characters(buffer.toUnicodeString(), Loc.NONE, ReceiverOption.NONE);
-                } else {
+                }
+            };
+        } else {
+            return new UniStringConsumer() {
+
+                final UnicodeBuilder buffer = new UnicodeBuilder();
+
+                @Override
+                public UniStringConsumer accept(CodePoints chars) {
+                    buffer.accept(chars);
+                    return this;
+                }
+
+                @Override
+                public void close() throws XPathException {
                     Outputter.this.append(new StringItem(buffer.toUnicodeString()));
                 }
-            }
-        };
+            };
+        }
     }
 
     /**

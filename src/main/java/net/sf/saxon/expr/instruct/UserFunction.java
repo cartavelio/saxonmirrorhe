@@ -26,6 +26,7 @@ import net.sf.saxon.trans.FunctionStreamability;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
@@ -46,6 +47,7 @@ import java.util.function.BiConsumer;
 
 public class UserFunction extends Actor implements Function, ContextOriginator, TraceableComponent {
 
+    @CSharpSimpleEnum
     public enum Determinism {DETERMINISTIC, PROACTIVE, ELIDABLE}
     private final static int MAX_INLININGS = 100;
 
@@ -190,7 +192,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
     @Override
     public OperandRole[] getOperandRoles() {
         OperandRole[] roles = new OperandRole[getArity()];
-        OperandUsage first = null;
+        OperandUsage first = OperandUsage.TRANSMISSION;
         switch (declaredStreamability) {
             case UNCLASSIFIED:
                 SequenceType required = getArgumentType(0);
@@ -871,7 +873,8 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
      */
     @Override
     public GroundedValue subsequence(int start, int length) {
-        return start <= 0 && (start + length) > 0 ? this : EmptySequence.getInstance();
+        //noinspection RedundantCast
+        return start <= 0 && (start + length) > 0 ? (GroundedValue)this : (GroundedValue)EmptySequence.getInstance();
     }
 
     /**

@@ -379,6 +379,7 @@ public class DocumentBuilder {
         return build(new StreamSource(file));
     }
 
+    //#if CSHARP==false
     /**
      * Get an {@link org.xml.sax.ContentHandler} that may be used to build the document programmatically.
      *
@@ -407,7 +408,8 @@ public class DocumentBuilder {
         r = injectValidator(r, builder);
         return new BuildingContentHandlerImpl(r, builder);
     }
-
+    //#endif
+    
     private Receiver injectValidator(Receiver r, Builder builder) throws SaxonApiException {
         if (schemaValidator != null) {
             PipelineConfiguration pipe = builder.getPipelineConfiguration();
@@ -421,6 +423,7 @@ public class DocumentBuilder {
         return r;
     }
 
+    //#if CSHARP==false
     /**
      * Private implementation of BuildingContentHandler
      */
@@ -464,6 +467,7 @@ public class DocumentBuilder {
         r = injectValidator(r, builder);
         return new BuildingStreamWriterImpl(r, builder);
     }
+    //#endif
 
     /**
      * Create a node by wrapping a recognized external node from a supported object model.

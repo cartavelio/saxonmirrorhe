@@ -11,7 +11,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import javax.xml.stream.XMLStreamWriter;
 
 /**
  * This class <code>InvalidityReportGenerator</code> extends the standard error handler for errors found during validation
@@ -79,9 +78,9 @@ public class InvalidityReportGenerator extends StandardInvalidityHandler {
 
     }
 
-    public XMLStreamWriter getWriter() {
-        return null;
-    }
+    //public XMLStreamWriter getWriter() {
+    //    return null;
+    //}
 
     /**
      * Receive notification of a validity error.

@@ -195,7 +195,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
             if (!(member instanceof AtomicValue)) {
                 return false;
             }
-            totalSize += ((AtomicValue) member).getUnicodeStringValue().estimatedLength() + 1;
+            totalSize += (int)((AtomicValue) member).getUnicodeStringValue().estimatedLength() + 1;
             if (totalSize > maxLineLength) {
                 return false;
             }
@@ -210,9 +210,9 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
         }
         for (KeyValuePair entry : map.keyValuePairs()) {
             if (entry.value instanceof AtomicValue) {
-                totalSize += entry.key.getUnicodeStringValue().estimatedLength() + ((AtomicValue) entry.value).getUnicodeStringValue().estimatedLength() + 4;
+                totalSize += (int)entry.key.getUnicodeStringValue().estimatedLength() + ((AtomicValue) entry.value).getUnicodeStringValue().estimatedLength() + 4;
             } else if (entry.value.getLength() == 0) {
-                totalSize += entry.key.getUnicodeStringValue().estimatedLength() + 6; // ": null"
+                totalSize += (int)entry.key.getUnicodeStringValue().estimatedLength() + 6; // ": null"
             } else {
                 return false;
             }

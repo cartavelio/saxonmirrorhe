@@ -29,14 +29,13 @@ import java.util.List;
 public class JDOM2Transform extends Transform {
 
     @Override
-    public List preprocess(List sources) throws XPathException {
+    public List<Source> preprocess(List<Source> sources) throws XPathException {
         try {
-            ArrayList jdomSources = new ArrayList(sources.size());
-            for (int i = 0; i < sources.size(); i++) {
-                Source src = (Source) sources.get(i);
+            ArrayList<Source> jdomSources = new ArrayList<>(sources.size());
+            for (Source src : sources) {
                 InputSource is;
                 if (src instanceof SAXSource) {
-                    SAXSource ss = (SAXSource) sources.get(i);
+                    SAXSource ss = (SAXSource) src;
                     is = ss.getInputSource();
                 } else if (src instanceof StreamSource) {
                     StreamSource ss = (StreamSource) src;
@@ -54,13 +53,11 @@ public class JDOM2Transform extends Transform {
                 SAXBuilder builder = new SAXBuilder();
                 org.jdom2.Document doc = builder.build(is);
                 doc.setBaseURI(is.getSystemId());
-                net.sf.saxon.option.jdom2.JDOM2DocumentWrapper jdom = new JDOM2DocumentWrapper(doc, getConfiguration());
+                JDOM2DocumentWrapper jdom = new JDOM2DocumentWrapper(doc, getConfiguration());
                 jdomSources.add(jdom);
             }
             return jdomSources;
-        } catch (JDOMException e) {
-            throw new XPathException(e);
-        } catch (IOException e) {
+        } catch (JDOMException | IOException e) {
             throw new XPathException(e);
         }
     }

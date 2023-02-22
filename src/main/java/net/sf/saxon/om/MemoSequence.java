@@ -9,6 +9,7 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
@@ -25,11 +26,12 @@ import java.util.EnumSet;
 
 public class MemoSequence implements Sequence {
 
-    SequenceIterator inputIterator;
+    private final SequenceIterator inputIterator;
 
     private Item[] reservoir = null;
     private int used;
 
+    @CSharpSimpleEnum
     private enum State {
         // State in which no items have yet been read
         UNREAD,
@@ -44,7 +46,7 @@ public class MemoSequence implements Sequence {
         // State in which we know that the value is an empty sequence
         EMPTY}
 
-    protected State state = State.UNREAD;
+    private State state = State.UNREAD;
 
     public MemoSequence(SequenceIterator iterator) {
         this.inputIterator = iterator;
@@ -69,10 +71,10 @@ public class MemoSequence implements Sequence {
                 reservoir = new Item[50];
                 used = 0;
                 state = State.MAYBE_MORE;
-                return new ProgressiveIterator();
+                return new ProgressiveIterator(this);
 
             case MAYBE_MORE:
-                return new ProgressiveIterator();
+                return new ProgressiveIterator(this);
 
             case ALL_READ:
                 switch (used) {
@@ -183,17 +185,19 @@ public class MemoSequence implements Sequence {
      * copying them into the reservoir as they are read.
      */
 
-    public final class ProgressiveIterator
+    public final static class ProgressiveIterator
             implements SequenceIterator, LastPositionFinder, GroundedIterator {
 
-        int position = -1;  // zero-based position in the reservoir of the
+        private MemoSequence container;
+        private int position = -1;  // zero-based position in the reservoir of the
         // item most recently read
 
         /**
          * Create a ProgressiveIterator
          */
 
-        public ProgressiveIterator() {
+        public ProgressiveIterator(MemoSequence container) {
+            this.container = container;
         }
 
         /**
@@ -202,36 +206,36 @@ public class MemoSequence implements Sequence {
          */
 
         public MemoSequence getMemoSequence() {
-            return MemoSequence.this;
+            return container;
         }
 
         /*@Nullable*/
         @Override
         public Item next() throws XPathException {
-            synchronized (MemoSequence.this) {
+            synchronized (container) {
                 // synchronized for the case where a multi-threaded xsl:for-each is reading the variable
                 if (position == -2) {   // means we've already returned null once, keep doing so if called again.
                     return null;
                 }
-                if (++position < used) {
-                    assert reservoir != null;
-                    return reservoir[position];
-                } else if (state == State.ALL_READ) {
+                if (++position < container.used) {
+                    assert container.reservoir != null;
+                    return container.reservoir[position];
+                } else if (container.state == State.ALL_READ) {
                     // someone else has read the input to completion in the meantime
                     position = -2;
                     return null;
                 } else {
-                    assert inputIterator != null;
-                    Item i = inputIterator.next();
+                    assert container.inputIterator != null;
+                    Item i = container.inputIterator.next();
                     if (i == null) {
-                        state = State.ALL_READ;
-                        condense();
+                        container.state = State.ALL_READ;
+                        container.condense();
                         position = -2;
                         return null;
                     }
-                    position = used;
-                    append(i);
-                    state = State.MAYBE_MORE;
+                    position = container.used;
+                    container.append(i);
+                    container.state = State.MAYBE_MORE;
                     return i;
                 }
             }
@@ -247,9 +251,9 @@ public class MemoSequence implements Sequence {
 
         @Override
         public int getLength() throws XPathException {
-            if (state == State.ALL_READ) {
-                return used;
-            } else if (state == State.EMPTY) {
+            if (container.state == State.ALL_READ) {
+                return container.used;
+            } else if (container.state == State.EMPTY) {
                 return 0;
             } else {
                 // save the current position
@@ -259,7 +263,7 @@ public class MemoSequence implements Sequence {
                 // reset the current position
                 position = savePos;
                 // return the total number of items
-                return used;
+                return container.used;
             }
         }
 
@@ -273,9 +277,9 @@ public class MemoSequence implements Sequence {
         /*@Nullable*/
         @Override
         public GroundedValue materialize() throws XPathException {
-            if (state == State.ALL_READ) {
+            if (container.state == State.ALL_READ) {
                 return makeExtent();
-            } else if (state == State.EMPTY) {
+            } else if (container.state == State.EMPTY) {
                 return EmptySequence.getInstance();
             } else {
                 // save the current position
@@ -291,25 +295,27 @@ public class MemoSequence implements Sequence {
         }
 
         private GroundedValue makeExtent() {
-            if (used == reservoir.length) {
-                if (used == 0) {
+            if (container.used == container.reservoir.length) {
+                if (container.used == 0) {
                     return EmptySequence.getInstance();
-                } else if (used == 1) {
-                    return reservoir[0];
+                } else if (container.used == 1) {
+                    return container.reservoir[0];
                 } else {
-                    return new SequenceExtent(reservoir);
+                    return new SequenceExtent(container.reservoir);
                 }
             } else {
-                return SequenceExtent.makeSequenceExtent(Arrays.asList(reservoir).subList(0, used));
+                return SequenceExtent.makeSequenceExtent(
+                        Arrays.asList(container.reservoir).subList(0, container.used));
             }
         }
 
         @Override
         public GroundedValue getResidue() throws XPathException {
-            if (state == State.EMPTY || position >= used || position == -2) {
+            if (container.state == State.EMPTY || position >= container.used || position == -2) {
                 return EmptySequence.getInstance();
-            } else if (state == State.ALL_READ) {
-                return SequenceExtent.makeSequenceExtent(Arrays.asList(reservoir).subList(position + 1, used));
+            } else if (container.state == State.ALL_READ) {
+                return SequenceExtent.makeSequenceExtent(
+                        Arrays.asList(container.reservoir).subList(position + 1, container.used));
             } else {
                 // save the current position
                 int savePos = position;
@@ -319,7 +325,8 @@ public class MemoSequence implements Sequence {
                 // reset the current position
                 position = savePos;
                 // return all the items
-                return SequenceExtent.makeSequenceExtent(Arrays.asList(reservoir).subList(position + 1, used));
+                return SequenceExtent.makeSequenceExtent(
+                        Arrays.asList(container.reservoir).subList(position + 1, container.used));
             }
         }
 

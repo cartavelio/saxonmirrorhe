@@ -153,12 +153,12 @@ public class ConversionRules {
      * Ask whether a string is a valid instance of xs:anyURI according to the rules
      * defined by the current URIChecker
      *
-     * @param string the string to be checked against the rules for URIs
+     * @param str the string to be checked against the rules for URIs
      * @return true if the string represents a valid xs:anyURI value
      */
 
-    public boolean isValidURI(String string) {
-        return uriChecker == null || uriChecker.isValidURI(string);
+    public boolean isValidURI(String str) {
+        return uriChecker == null || uriChecker.isValidURI(str);
     }
 
     /**

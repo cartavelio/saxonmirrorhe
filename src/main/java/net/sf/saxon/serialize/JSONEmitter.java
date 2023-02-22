@@ -291,11 +291,11 @@ public class JSONEmitter {
             String s = characterMap.map(StringView.of(cs).tidy(), true).toString();
             int prev = 0;
             while (true) {
-                int start = s.indexOf(0, prev);
+                int start = s.indexOf((char)0, prev);
                 if (start >= 0) {
                     out.append(simpleEscape(s.substring(prev, start)));
-                    int end = s.indexOf(0, start + 1);
-                    out.append(s.substring(start + 1, end));
+                    int end = s.indexOf((char)0, start + 1);
+                    out.append(s, start + 1, end);
                     prev = end + 1;
                 } else {
                     out.append(simpleEscape(s.substring(prev)));

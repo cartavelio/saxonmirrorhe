@@ -110,18 +110,7 @@ public class DictionaryMap extends MapItem {
      */
     @Override
     public AtomicIterator keys() {
-        Iterator<String> base = hashMap.keySet().iterator();
-        //noinspection Convert2Lambda
-        return new AtomicIterator() {
-            @Override
-            public AtomicValue next() {
-                if (base.hasNext()) {
-                    return new StringItem(base.next());
-                } else {
-                    return null;
-                }
-            }
-        };
+        return new KeyIterator(hashMap);
     }
 
     /**
@@ -245,6 +234,20 @@ public class DictionaryMap extends MapItem {
             target.initialPut(new StringItem(entry.getKey()), entry.getValue());
         }
         return target;
+    }
+
+    private class KeyIterator implements AtomicIterator {
+        Iterator<String> keyIter;
+        public KeyIterator(Map<String, GroundedValue> hashMap) {
+            this.keyIter = hashMap.keySet().iterator();
+        }
+        public AtomicValue next() {
+            if (this.keyIter.hasNext()) {
+                return new StringItem(this.keyIter.next());
+            } else {
+                return null;
+            }
+        }
     }
 }
 

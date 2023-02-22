@@ -1,6 +1,7 @@
 package net.sf.saxon.functions.registry;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Version;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.functions.SystemFunction;
@@ -57,8 +58,7 @@ public class SefFunction extends SystemFunction {
             Configuration config = context.getConfiguration();
             PackageLoaderHE loader = new PackageLoaderHE(config);
             List<String> messages = new ArrayList<>();
-            List<ClassLoader> classLoaders = new ArrayList<>();
-            InputStream is = Configuration.locateResource("sef/function-library.sef.xml", messages, classLoaders);
+            InputStream is = Version.platform.locateResource("sef/function-library.sef.xml", messages);
             if (is == null) {
                 throw new XPathException("Failed to load built-in function library: " + messages.get(0));
             }

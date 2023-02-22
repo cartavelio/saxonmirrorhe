@@ -15,6 +15,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Converter;
@@ -121,6 +122,7 @@ public final class FloatValue extends NumericValue {
      *          if the value cannot be converted, for example if it is NaN or infinite
      */
     @Override
+    @CSharpReplaceBody(code="return System.Numerics.BigDecimal.Parse(value.toString());")
     public BigDecimal getDecimalValue() throws ValidationException {
         return new BigDecimal(value);
     }
@@ -303,6 +305,7 @@ public final class FloatValue extends NumericValue {
      * @return true if this value is float or double negative zero
      */
     @Override
+    @CSharpReplaceBody(code="return value == 0.0 && double.IsNegativeInfinity(1.0 / value);")  // Better solutions exist but have dependencies
     public boolean isNegativeZero() {
         return value == 0.0 && (Float.floatToIntBits(value) & FloatingPointConverter.FLOAT_SIGN_MASK) != 0;
     }

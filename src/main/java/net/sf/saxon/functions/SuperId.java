@@ -130,7 +130,7 @@ public abstract class SuperId extends SystemFunction {
     private static class IdMappingFunction implements MappingFunction {
 
         public TreeInfo document;
-        private int operation;
+        public int operation;
 
         /**
          * Evaluate the function for a single string value

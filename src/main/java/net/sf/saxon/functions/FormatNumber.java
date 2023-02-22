@@ -17,6 +17,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.DecimalSymbols;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.value.*;
 
 import java.math.BigDecimal;
@@ -148,7 +149,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
             absN = number.negate();
             if (subPictures[1] == null) {
                 pic = subPictures[0];
-                minusSign = new String(new int[]{dfs.getMinusSign()}, 0, 1);
+                minusSign = stringFromCodepoint(dfs.getMinusSign());
             } else {
                 pic = subPictures[1];
             }
@@ -157,6 +158,12 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
         }
 
         return pic.format(absN, dfs, minusSign);
+    }
+
+    private static String stringFromCodepoint(int codepoint) {
+        StringBuilder sb = new StringBuilder();
+        sb.appendCodePoint(codepoint);
+        return sb.toString();
     }
 
     private static void grumble(String s) throws XPathException {
@@ -330,6 +337,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                             if (foundExponentSeparator) {
                                 grumble("Cannot have exponent-separator as well as percent or per-mille character in a sub-picture");
                             }
+                            CSharp.emitCode("goto case 6;");
                         case 6:
                             phase = 6;
                             suffixBuilder.appendCodePoint(c);
@@ -485,6 +493,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                                 suffixBuilder.appendCodePoint(c);
                                 break;
                             }
+                            CSharp.emitCode("goto case 6;");
                         case 6:
                             phase = 6;
                             suffixBuilder.appendCodePoint(c);

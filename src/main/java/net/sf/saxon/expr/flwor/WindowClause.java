@@ -177,7 +177,7 @@ public class WindowClause extends Clause {
         }
     }
 
-    public void checkWindowContents(Window w) throws XPathException {
+    protected void checkWindowContents(Window w) throws XPathException {
         if (windowMustBeSingleton && w.contents.size() > 1) {
             throw new XPathException("Required type of window allows only a single item; window has length " + w.contents.size(),
                                      "XPTY0004", getLocation());

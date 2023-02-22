@@ -24,6 +24,7 @@ import net.sf.saxon.trans.packages.IPackageLoader;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.trans.packages.VersionedPackageName;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.tree.linked.DocumentImpl;
 
 import javax.xml.transform.ErrorListener;
@@ -63,6 +64,12 @@ import java.util.Objects;
  *
  * @since 9.0
  */
+
+@CSharpInjectMembers(code = {
+        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "    }"
+})
 public class XsltCompiler {
 
     private final Processor processor;
@@ -199,7 +206,8 @@ public class XsltCompiler {
      */
 
     public void setErrorList(List<? super StaticError> errorList) {
-        compilerInfo.setErrorReporter(errorList::add);
+        //noinspection Convert2MethodRef
+        compilerInfo.setErrorReporter(err -> errorList.add(err));
     }
 
     /**
@@ -787,7 +795,8 @@ public class XsltCompiler {
             throw new SaxonApiException("No package with alias " + alias + " found in package library");
         }
         try {
-            StylesheetPackage pack = getPackageLibrary().obtainLoadedPackage(details, new ArrayList<>());
+            List<VersionedPackageName> packageNames = new ArrayList<>();
+            StylesheetPackage pack = getPackageLibrary().obtainLoadedPackage(details, packageNames);
             return new XsltPackage(this, pack);
         } catch (XPathException e) {
             throw new SaxonApiException(e);

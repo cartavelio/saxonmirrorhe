@@ -28,16 +28,16 @@ import java.util.ArrayList;
  */
 public class PackageVersionRanges {
 
-    ArrayList<PackageVersionRange> ranges;
+    private final ArrayList<PackageVersionRange> ranges;
 
-    private class PackageVersionRange {
-        String display;
-        PackageVersion low;
-        PackageVersion high;
-        boolean all = false;
-        boolean prefix = false;
+    private static class PackageVersionRange {
+        private final String display;
+        private PackageVersion low;
+        private PackageVersion high;
+        private boolean all = false;
+        private boolean prefix = false;
 
-        PackageVersionRange(String s) throws XPathException {
+        public PackageVersionRange(String s) throws XPathException {
             display = s;
             if ("*".equals(s)) {
                 all = true;
@@ -107,12 +107,11 @@ public class PackageVersionRanges {
     @Override
     public String toString() {
         if (ranges.size() == 1) {
-            return ranges.get(0).display;
+            return ranges.get(0).toString();
         } else {
             StringBuilder buffer = new StringBuilder(256);
             for (PackageVersionRange r : ranges) {
-                buffer.append(r.display);
-                buffer.append(",");
+                buffer.append(r.toString()).append(",");
             }
             buffer.setLength(buffer.length()-1);
             return buffer.toString();

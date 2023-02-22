@@ -52,9 +52,9 @@ public class AdjacentTextNodeMergingIterator implements LookaheadIterator {
 
         if (AdjacentTextNodeMerger.isTextNode(current)) {
             UnicodeBuilder ub = new UnicodeBuilder();
-            ub.append(current.getUnicodeStringValue());
+            ub.accept(current.getUnicodeStringValue());
             while (AdjacentTextNodeMerger.isTextNode(_next)) {
-                ub.append(_next.getUnicodeStringValue() /*.toString() */);
+                ub.accept(_next.getUnicodeStringValue() /*.toString() */);
                 // NOTE: toString() shouldn't be necessary - added 2011-05-05 for bug workaround; removed again 2011-07-14
                 _next = base.next();
             }

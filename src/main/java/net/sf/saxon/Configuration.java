@@ -49,6 +49,7 @@ import net.sf.saxon.trace.TraceCodeInjector;
 import net.sf.saxon.trace.XSLTTraceCodeInjector;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.packages.IPackageLoader;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.tree.tiny.TreeStatistics;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
 import net.sf.saxon.type.*;
@@ -72,7 +73,6 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -121,7 +121,11 @@ import java.util.function.Predicate;
  * @since 8.4
  */
 
-
+@CSharpInjectMembers(code = {
+        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "    }"
+})
 public class Configuration implements SourceResolver, NotationSet {
 
     protected static Set<Feature<Boolean>> booleanFeatures = new HashSet<>(40);
@@ -277,112 +281,6 @@ public class Configuration implements SourceResolver, NotationSet {
      */
     public void bindExtensions(String uri , cli.System.Type type) { }
 //#endif
-
-    /**
-     * Read a resource file issued with the Saxon product
-     *
-     * @param filename the filename of the file to be read
-     * @param messages List to be populated with messages in the event of failure
-     * @param loaders  List to be populated with the ClassLoader that succeeded in loading the resource
-     * @return an InputStream for reading the file/resource
-     */
-
-    /*@Nullable*/
-    public static InputStream locateResource(String filename, List<String> messages, List<ClassLoader> loaders) {
-        filename = "net/sf/saxon/data/" + filename;
-        ClassLoader loader = null;
-        try {
-            loader = Thread.currentThread().getContextClassLoader();
-        } catch (Exception err) {
-            messages.add("Failed to getContextClassLoader() - continuing\n");
-        }
-
-        InputStream in = null;
-
-        if (loader != null) {
-            URL u = loader.getResource(filename);
-            in = loader.getResourceAsStream(filename);
-            if (in == null) {
-                messages.add("Cannot read " + filename + " file located using ClassLoader " +
-                                     loader + " - continuing\n");
-            }
-        }
-
-        if (in == null) {
-            loader = Configuration.class.getClassLoader();
-            if (loader != null) {
-                in = loader.getResourceAsStream(filename);
-                if (in == null) {
-                    messages.add("Cannot read " + filename + " file located using ClassLoader " +
-                                         loader + " - continuing\n");
-                }
-            }
-        }
-
-        if (in == null) {
-            // Means we're in a very strange class-loading environment, things are getting desperate
-            URL url = ClassLoader.getSystemResource(filename);
-            if (url != null) {
-                try {
-                    in = url.openStream();
-                } catch (IOException ioe) {
-                    messages.add("IO error " + ioe.getMessage() +
-                                         " reading " + filename + " located using getSystemResource(): using defaults");
-                    in = null;
-                }
-            }
-        }
-        loaders.add(loader);
-        return in;
-
-    }
-
-    /**
-     * Read a resource file issued with the Saxon product, returning a StreamSource with bound systemId
-     * This means it can be an XSLT stylesheet which uses inclusions etc.
-     *
-     * @param filename the filename of the file to be read
-     * @param messages List to be populated with messages in the event of failure
-     * @param loaders  List to be populated with the ClassLoader that succeeded in loading the resource
-     * @return a StreamSource for reading the file/resource, with URL set appropriately
-     */
-
-    /*@Nullable*/
-    public static StreamSource locateResourceSource(String filename, List<String> messages, List<ClassLoader> loaders) {
-        ClassLoader loader = null;
-        try {
-            loader = Thread.currentThread().getContextClassLoader();
-        } catch (Exception err) {
-            messages.add("Failed to getContextClassLoader() - continuing\n");
-        }
-
-        InputStream in = null;
-        URL url = null;
-        if (loader != null) {
-            url = loader.getResource(filename);
-            in = loader.getResourceAsStream(filename);
-            if (in == null) {
-                messages.add("Cannot read " + filename + " file located using ClassLoader " +
-                                     loader + " - continuing\n");
-            }
-        }
-
-        if (in == null) {
-            loader = Configuration.class.getClassLoader();
-            if (loader != null) {
-                in = loader.getResourceAsStream(filename);
-                if (in == null) {
-                    messages.add("Cannot read " + filename + " file located using ClassLoader " +
-                                         loader + " - continuing\n");
-                }
-            }
-        }
-
-
-        loaders.add(loader);
-        return new StreamSource(in, url.toString());
-
-    }
 
     /**
      * Factory method to construct a Configuration object by reading a configuration file.

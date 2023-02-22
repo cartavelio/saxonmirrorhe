@@ -10,6 +10,7 @@ package net.sf.saxon.lib;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeModel;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.type.SchemaType;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.XMLReader;
@@ -36,7 +37,11 @@ import java.util.List;
  *
  * @since 8.8
  */
-
+@CSharpInjectMembers(code = {
+        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "    }"
+})
 public class AugmentedSource implements Source {
 
     private final Source source;

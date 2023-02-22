@@ -493,7 +493,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
     }
 
     @Override
-    public String tag() {
+    protected String tag() {
         return "vc";
     }
 

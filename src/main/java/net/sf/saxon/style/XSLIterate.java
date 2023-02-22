@@ -7,15 +7,17 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.expr.instruct.IterateInstr;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.instruct.IterateInstr;
 import net.sf.saxon.expr.instruct.LocalParam;
 import net.sf.saxon.expr.instruct.LocalParamBlock;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.iter.NodeListIterator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,7 +150,7 @@ public class XSLIterate extends StyleElement {
             }
         }
         LocalParamBlock paramBlock = new LocalParamBlock(compiledParams);
-        Expression action = compileSequenceConstructor(exec, decl, new ListIterator(nonFinallyChildren), false);
+        Expression action = compileSequenceConstructor(exec, decl, new NodeListIterator(nonFinallyChildren), false);
         if (action == null) {
             // body of xsl:iterate is empty: it's a no-op.
             return Literal.makeEmptySequence();

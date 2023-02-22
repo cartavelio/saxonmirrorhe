@@ -164,7 +164,7 @@ public class RECompiler {
      * @throws Error Thrown in the event of an internal error.
      */
     void internalError() throws Error {
-        throw new Error("Internal error!");
+        throw new AssertionError("Internal error!");
     }
 
     /**
@@ -345,7 +345,8 @@ public class RECompiler {
                 } else {
                     syntaxError("In XSD, '$' must not be escaped");
                 }
-
+                break;
+                
             case 's':
                 return Categories.ESCAPE_s;
 
@@ -429,6 +430,7 @@ public class RECompiler {
 
             case '0':
                 syntaxError("Octal escapes not allowed");
+                break;
 
             case '1':
             case '2':
@@ -468,11 +470,13 @@ public class RECompiler {
                 } else {
                     syntaxError("digit not allowed after \\");
                 }
+                break;
 
             default:
 
                 // Other characters not allowed in XSD regexes
                 syntaxError("Escape character '" + (char) escapeChar + "' not allowed");
+                break;
         }
         return null;
     }
@@ -918,7 +922,7 @@ public class RECompiler {
                     predicate = IntSetPredicate.ALWAYS_TRUE;
                 } else {
                     // in XSD, "." matches everything except \n and \r. See also bug 15594.
-                    predicate = value -> value != '\n' && value != '\r';
+                    predicate = IntPredicateLambda.of(value -> value != '\n' && value != '\r');
                 }
                 return trace(new Operation.OpCharClass(predicate));
 
@@ -931,21 +935,26 @@ public class RECompiler {
 
             case ')':
                 syntaxError("Unexpected closing ')'");
+                break;
 
             case '|':
                 internalError();
+                break;
 
             case ']':
                 syntaxError("Unexpected closing ']'");
+                break;
 
             case 0:
                 syntaxError("Unexpected end of input");
+                break;
 
             case '?':
             case '+':
             case '{':
             case '*':
                 syntaxError("No expression before quantifier");
+                break;
 
             case '\\': {
                 // Don't forget, escape() advances the input stream!
@@ -969,6 +978,7 @@ public class RECompiler {
                 } else {
                     return trace(new Operation.OpCharClass(esc));
                 }
+                break;
 
             }
         }
@@ -1013,7 +1023,8 @@ public class RECompiler {
                 idx++;
 
                 // Drop through
-
+                CSharp.emitCode("goto case '{';");
+                
             case '{':
 
                 if (quantifierType == '{') {

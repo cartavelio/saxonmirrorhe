@@ -205,7 +205,7 @@ public class TryCatch extends Expression {
 
     @Override
     protected int computeHashCode() {
-        int h = 0x836b12a0;
+        int h = 0x636b12a0;
         for (int i = 0; i < catchClauses.size(); i++) {
             h ^= catchClauses.get(i).hashCode()<<i;
         }
@@ -273,7 +273,7 @@ public class TryCatch extends Expression {
     public SequenceIterator iterate(XPathContext c) throws XPathException {
         XPathContextMajor c1 = c.newContext();
         c1.createThreadManager();
-        c1.setErrorReporter(new FilteringErrorReporter(c.getErrorReporter()));
+        c1.setErrorReporter(new FilteringErrorReporter(c.getErrorReporter(), catchClauses));
         try {
             // Need to do eager iteration of the first argument to flush any errors out
             Sequence v = ExpressionTool.eagerEvaluate(tryOp.getChildExpression(), c1);
@@ -317,7 +317,7 @@ public class TryCatch extends Expression {
         PipelineConfiguration pipe = output.getPipelineConfiguration();
         XPathContextMajor c1 = context.newContext();
         c1.createThreadManager();
-        c1.setErrorReporter(new FilteringErrorReporter(context.getErrorReporter()));
+        c1.setErrorReporter(new FilteringErrorReporter(context.getErrorReporter(), catchClauses));
         //Outputter original = context.getReceiver();
         Outputter o2;
         if (rollbackOutput) {
@@ -431,12 +431,14 @@ public class TryCatch extends Expression {
      * An error listener that filters out reporting of any errors that are caught be the try/catch
      */
 
-    private class FilteringErrorReporter implements ErrorReporter {
+    private static class FilteringErrorReporter implements ErrorReporter {
 
         private final ErrorReporter base;
+        private final List<CatchClause> catchClauses;
 
-        FilteringErrorReporter(ErrorReporter base) {
+        FilteringErrorReporter(ErrorReporter base, List<CatchClause> catchClauses) {
             this.base = base;
+            this.catchClauses = catchClauses;
         }
 
         private boolean isCaught(XmlProcessingError err) {

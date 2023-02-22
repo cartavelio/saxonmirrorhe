@@ -17,13 +17,13 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.iter.AtomicListIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
@@ -228,7 +228,7 @@ public class NumberInstruction extends Expression {
 
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        List<IntegerValue> vec = new ArrayList<>(1);
+        List<AtomicValue> vec = new ArrayList<>(1);
         NodeInfo source = (NodeInfo) selectOp.getChildExpression().evaluateItem(context);
 
         switch (level) {
@@ -261,7 +261,7 @@ public class NumberInstruction extends Expression {
             }
         }
 
-        return new ListIterator(vec);
+        return new AtomicListIterator(vec);
     }
 
     @Override

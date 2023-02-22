@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpDelegate;
 
 /**
  * An export agent performs the job of exporting an expression to a SEF file. Normally
@@ -19,6 +20,8 @@ import net.sf.saxon.trans.XPathException;
  * in particular includes custom export methods to handle different cases.
  */
 
+@FunctionalInterface
+@CSharpDelegate(false)
 public interface ExportAgent {
 
     /**

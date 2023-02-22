@@ -10,10 +10,7 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.Mode;
-import net.sf.saxon.trans.SymbolicName;
-import net.sf.saxon.trans.Visibility;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.type.Type;
 
 /**
@@ -100,8 +97,9 @@ public class XSLOverride extends StyleElement {
                             ((StyleElement) curr).compileError(
                                     "The " + StandardNames.getLocalName(name.getComponentKind()) +
                                         " named " + name.getShortName()
-                                            + " in the used package cannot be overridden because its visibility is " + overriddenVis.show(),
-                                                               "XTSE3060");
+                                            + " in the used package cannot be overridden because its visibility is "
+                                            + Err.describeVisibility(overriddenVis),
+                                                                     "XTSE3060");
                             return;
                         }
                         procedure.checkCompatibility(overridden);

@@ -39,6 +39,7 @@ import net.sf.saxon.trans.packages.IPackageLoader;
 import net.sf.saxon.trans.rules.BuiltInRuleSet;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleManager;
+import net.sf.saxon.transpile.CSharpDelegate;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.Orphan;
@@ -1485,10 +1486,14 @@ public class PackageLoaderHE implements IPackageLoader {
         }
     }
 
+    @FunctionalInterface
+    @CSharpDelegate(true)
     public interface ExpressionLoader {
         Expression loadFrom(PackageLoaderHE loader, NodeInfo element) throws XPathException;
     }
 
+    @FunctionalInterface
+    @CSharpDelegate(true)
     public interface PatternLoader {
         Pattern loadFrom(PackageLoaderHE loader, NodeInfo element) throws XPathException;
     }
@@ -3317,21 +3322,22 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     private static int getLevelCode(String levelAtt) {
-        int level;
         if (levelAtt == null) {
-            level = NumberInstruction.SINGLE;
-        } else if (levelAtt.equals("single")) {
-            level = NumberInstruction.SINGLE;
-        } else if (levelAtt.equals("multi")) {
-            level = NumberInstruction.MULTI;
-        } else if (levelAtt.equals("any")) {
-            level = NumberInstruction.ANY;
-        } else if (levelAtt.equals("simple")) {
-            level = NumberInstruction.SIMPLE;
+            return NumberInstruction.SINGLE;
         } else {
-            throw new AssertionError();
+            switch (levelAtt) {
+                case "single":
+                    return NumberInstruction.SINGLE;
+                case "multi":
+                    return NumberInstruction.MULTI;
+                case "any":
+                    return NumberInstruction.ANY;
+                case "simple":
+                    return NumberInstruction.SIMPLE;
+                default:
+                    throw new AssertionError();
+            }
         }
-        return level;
     }
 
     protected static List<Expression> getChildExpressionList(PackageLoaderHE loader, NodeInfo element) throws XPathException {

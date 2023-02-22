@@ -24,6 +24,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
@@ -31,6 +32,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
+import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 import java.util.Properties;
 
@@ -198,7 +200,7 @@ public class Message extends Instruction {
             // fallback code allowing xsl:message to do something useful when called from
             // the XSLT function library within free-standing XPath or XQuery, typically when debugging
             SequenceIterator iter = getSelect().iterate(context);
-            QueryResult.serializeSequence(iter, context.getConfiguration(), new StreamResult(System.err), new Properties());
+            QueryResult.serializeSequence(iter, context.getConfiguration(), standardErrorResult(), new Properties());
             return null;
         }
         XsltController controller = (XsltController)context.getController();
@@ -302,6 +304,11 @@ public class Message extends Instruction {
         }
         return null;
 
+    }
+
+    @CSharpReplaceBody(code="return new javax.xml.transform.stream.StreamResult(new net.sf.saxon.dotnet.DotNetWriter(System.Console.Error));")
+    private static Result standardErrorResult() {
+        return new StreamResult(System.err);
     }
 
     /**

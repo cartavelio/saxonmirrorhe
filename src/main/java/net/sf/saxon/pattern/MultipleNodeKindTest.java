@@ -12,6 +12,7 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 
 import net.sf.saxon.type.*;
+import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.LinkedList;
@@ -98,13 +99,13 @@ public final class MultipleNodeKindTest extends NodeTest {
     @Override
     public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
-        return nodeNr -> {
+        return IntPredicateLambda.of(nodeNr -> {
             int nodeKind = nodeKindArray[nodeNr] & 0x0f;
             if (nodeKind == Type.WHITESPACE_TEXT) {
                 nodeKind = Type.TEXT;
             }
             return (nodeKindMask & (1 << nodeKind)) != 0;
-        };
+        });
     }
 
     /**

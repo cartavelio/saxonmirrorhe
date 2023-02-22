@@ -151,7 +151,7 @@ public class CDATAFilter extends ProxyReceiver {
             if (getNextReceiver() instanceof UnicodeNormalizer) {
                 CodePoints normal = ((UnicodeNormalizer) getNextReceiver()).normalize(buffer.toUnicodeString(), true);
                 buffer = new UnicodeBuilder();
-                buffer.append(normal);
+                buffer.accept(normal);
                 end = (int)buffer.length();
             }
 

@@ -274,7 +274,7 @@ public class Chain implements GroundedValue {
             }
         }
 
-        private final Queue<UnfailingIterator> queue = new LinkedList<>();
+        private final LinkedList<UnfailingIterator> queue = new LinkedList<>();
 
         private final Stack<ChainPosition> stack;
 

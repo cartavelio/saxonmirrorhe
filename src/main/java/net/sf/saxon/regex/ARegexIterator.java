@@ -31,8 +31,8 @@ import java.util.Objects;
 public class ARegexIterator implements RegexIterator, LastPositionFinder {
 
     private final UnicodeString theString;   // the input string being matched
-    private final UnicodeString regex;
-    private final REMatcher matcher;    // the Matcher object that does the matching, and holds the state
+    private final UnicodeString _regex;
+    private final REMatcher _matcher;    // the Matcher object that does the matching, and holds the state
     private UnicodeString current;     // the string most recently returned by the iterator
     private UnicodeString nextSubstring;        // if the last string was a matching string, null; otherwise the next substring
     //        matched by the regex
@@ -47,23 +47,23 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
      * to obtain each matching substring. But the iterator also returns non-matching substrings
      * if these appear between the matching substrings.
      *
-     * @param string  the string to be analysed
+     * @param str  the string to be analysed
      * @param matcher a matcher for the regular expression
      */
 
-    public ARegexIterator(UnicodeString string, UnicodeString regex, REMatcher matcher) {
-        Objects.requireNonNull(string);
+    public ARegexIterator(UnicodeString str, UnicodeString regex, REMatcher matcher) {
+        Objects.requireNonNull(str);
         Objects.requireNonNull(regex);
         Objects.requireNonNull(matcher);
-        theString = string;
-        this.regex = regex;
-        this.matcher = matcher;
+        theString = str;
+        this._regex = regex;
+        this._matcher = matcher;
         nextSubstring = null;
     }
 
     @Override
     public int getLength() throws XPathException {
-        ARegexIterator another = new ARegexIterator(theString, regex, new REMatcher(matcher.getProgram()));
+        ARegexIterator another = new ARegexIterator(theString, _regex, new REMatcher(_matcher.getProgram()));
         int n = 0;
         while (another.next() != null) {
             n++;
@@ -97,9 +97,9 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                         }
                     }
                 }
-                if (matcher.match(theString, searchStart)) {
-                    int start = matcher.getParenStart(0);
-                    int end = matcher.getParenEnd(0);
+                if (_matcher.match(theString, searchStart)) {
+                    int start = _matcher.getParenStart(0);
+                    int end = _matcher.getParenEnd(0);
                     skip = start == end;
                     if (prevEnd == start) {
                         // there's no intervening non-matching string to return
@@ -129,7 +129,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                 if (prevEnd >= 0) {
                     current = nextSubstring;
                     nextSubstring = null;
-                    prevEnd = matcher.getParenEnd(0);
+                    prevEnd = _matcher.getParenEnd(0);
                 } else {
                     current = null;
                     return null;
@@ -189,8 +189,8 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
         if (!isMatching()) {
             return null;
         }
-        if (number >= matcher.getParenCount() || number < 0) return "";
-        UnicodeString us = matcher.getParen(number);
+        if (number >= _matcher.getParenCount() || number < 0) return "";
+        UnicodeString us = _matcher.getParen(number);
         return (us == null ? "" : us.toString());
     }
 
@@ -199,7 +199,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
      */
     @Override
     public int getNumberOfGroups() {
-        return matcher.getParenCount();
+        return _matcher.getParenCount();
     }
 
     /**
@@ -213,7 +213,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
 
     @Override
     public void processMatchingSubstring(RegexMatchHandler action) throws XPathException {
-        int c = matcher.getParenCount() - 1;
+        int c = _matcher.getParenCount() - 1;
         if (c == 0) {
             action.characters(current);
         } else {
@@ -221,9 +221,9 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
             // The "actions" in each list are: +N: start group N; -N: end group N.
             IntHashMap<List<Integer>> actions = new IntHashMap<>(c);
             for (int i = 1; i <= c; i++) {
-                int start = matcher.getParenStart(i) - matcher.getParenStart(0);
+                int start = _matcher.getParenStart(i) - _matcher.getParenStart(0);
                 if (start != -1) {
-                    int end = matcher.getParenEnd(i) - matcher.getParenStart(0);
+                    int end = _matcher.getParenEnd(i) - _matcher.getParenStart(0);
                     if (start < end) {
                         // Add the start action after all other actions on the list for the same position
                         List<Integer> s = actions.get(start);
@@ -245,7 +245,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                         // and match("a", "(a)(b?)") will both give the same result for group 2 (start=1, end=1).
                         // So we need to go back to the original regex to determine the group nesting
                         if (nestingTable == null) {
-                            nestingTable = computeNestingTable(regex);
+                            nestingTable = computeNestingTable(_regex);
                         }
                         int parentGroup = nestingTable.get(i);
                         // insert the start and end events immediately before the end event for the parent group,

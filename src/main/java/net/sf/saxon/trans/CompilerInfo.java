@@ -17,6 +17,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryLibrary;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.packages.PackageLibrary;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
@@ -29,6 +30,11 @@ import java.util.Collection;
  * and this class exists to support that.
  */
 
+@CSharpInjectMembers(code = {
+        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+      + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+      + "    }"
+})
 public class CompilerInfo {
 
     private Configuration config;

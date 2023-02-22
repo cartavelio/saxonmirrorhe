@@ -80,6 +80,19 @@ public class DocumentFn extends SystemFunction implements Callable {
         return expr == null ? super.makeFunctionCall(arguments) : expr;
     }
 
+    @SuppressWarnings("RedundantIfStatement")
+    public static boolean sourceIsTree(Source source) {
+        if (source instanceof NodeInfo) {
+            return true;
+        }
+        //#if CSHARP==false
+        if (source instanceof DOMSource) {
+            return true;
+        }
+        //#endif
+        return false;
+    }
+
     /**
      * Evaluate the expression
      *
@@ -253,7 +266,7 @@ public class DocumentFn extends SystemFunction implements Callable {
             //System.err.println("Resolved source " + source.getClass() + " " + source.getSystemId());
 
             TreeInfo newdoc;
-            if (source instanceof NodeInfo || source instanceof DOMSource) {
+            if (sourceIsTree(source)) {
                 NodeInfo startNode = controller.prepareInputTree(source);
                 newdoc = startNode.getTreeInfo();
             } else {
@@ -651,7 +664,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                     r = controller.getStandardURIResolver();
                     source = r.resolve(href, baseURL);
                 }
-                if (source instanceof NodeInfo || source instanceof DOMSource) {
+                if (sourceIsTree(source)) {
                     NodeInfo startNode = controller.prepareInputTree(source);
                     source = startNode.getRoot();
                 }

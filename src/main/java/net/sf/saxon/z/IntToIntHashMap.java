@@ -178,7 +178,7 @@ public class IntToIntHashMap implements IntToIntMap {
     /*@NotNull*/
     @Override
     public IntIterator keyIterator() {
-        return new IntToIntHashMapKeyIterator();
+        return new IntToIntHashMapKeyIterator(this);
     }
 
 
@@ -294,18 +294,20 @@ public class IntToIntHashMap implements IntToIntMap {
     /**
      * Iterator over keys
      */
-    private class IntToIntHashMapKeyIterator implements IntIterator {
+    private static class IntToIntHashMapKeyIterator implements IntIterator {
 
+        private final IntToIntHashMap map;
         private int i = 0;
 
-        public IntToIntHashMapKeyIterator() {
+        public IntToIntHashMapKeyIterator(IntToIntHashMap map) {
+            this.map = map;
             i = 0;
         }
 
         @Override
         public boolean hasNext() {
-            while (i < _key.length) {
-                if (_filled[i]) {
+            while (i < map._key.length) {
+                if (map._filled[i]) {
                     return true;
                 } else {
                     i++;
@@ -316,7 +318,7 @@ public class IntToIntHashMap implements IntToIntMap {
 
         @Override
         public int next() {
-            return _key[i++];
+            return map._key[i++];
         }
     }
 

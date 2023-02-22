@@ -7,6 +7,9 @@
 
 package net.sf.saxon.trans;
 
+import net.sf.saxon.transpile.CSharpSimpleEnum;
+
+@CSharpSimpleEnum
 public enum RecoveryPolicy {
     /**
      * Constant indicating that the processor should take the recovery action

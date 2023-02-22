@@ -16,10 +16,11 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.AtomicArray;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class AvailableSystemProperties extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        List<QNameValue> myList = new ArrayList<>();
+        List<AtomicValue> myList = new ArrayList<>();
         myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "version"));
         myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "vendor"));
         myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "vendor-url"));
@@ -64,7 +65,7 @@ public class AvailableSystemProperties extends SystemFunction {
             }
         }
 
-        return SequenceExtent.makeSequenceExtent(myList);
+        return new AtomicArray(myList);
 
     }
 

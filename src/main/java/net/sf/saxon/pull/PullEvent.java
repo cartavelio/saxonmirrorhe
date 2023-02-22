@@ -1,5 +1,8 @@
 package net.sf.saxon.pull;
 
+import net.sf.saxon.transpile.CSharpSimpleEnum;
+
+@CSharpSimpleEnum
 public enum PullEvent {
     /**
      * START_OF_INPUT is the initial state when the PullProvider is instantiated.
@@ -123,5 +126,13 @@ public enum PullEvent {
      * After this event, the result of any further calls on the next() method is undefined.
      */
 
-    END_OF_INPUT
+    END_OF_INPUT,
+
+    /**
+     * The WORK_IN_PROGRESS event should never be returned to the caller; it represents
+     * an intermediate state during parsing that is not yet ready for delivery to the
+     * application
+     */
+
+    WORK_IN_PROGRESS
 }

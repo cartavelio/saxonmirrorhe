@@ -92,7 +92,8 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
                     source = nextCandidate.getObject().sourceName;
                     currentMembers.add(currentItem);
                     if (source != null) {
-                        List<Item> list = currentSourceMembers.computeIfAbsent(source, k -> new ArrayList<>());
+                        //noinspection Convert2Diamond
+                        List<Item> list = currentSourceMembers.computeIfAbsent(source, k -> new ArrayList<Item>());
                         list.add(currentItem);
                     }
                 } else if (c > 0) {

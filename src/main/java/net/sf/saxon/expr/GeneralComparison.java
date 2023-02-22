@@ -22,6 +22,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.iter.RangeIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -38,6 +39,7 @@ import java.util.List;
 
 public abstract class GeneralComparison extends BinaryExpression implements ComparisonExpression, Callable {
 
+    @CSharpSimpleEnum
     public enum ComparisonCardinality {ONE_TO_ONE, MANY_TO_ONE, MANY_TO_MANY}
     // Note, a one-to-many comparison is inverted into a many-to-one comparison
 
@@ -863,7 +865,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 } else if (a1 instanceof StringItem) {
                     // no conversion needed
                 } else {
-                    StringConverter sc = a1.getItemType().getPrimitiveItemType().getStringConverter(rules);
+                    AtomicType prim = a1.getItemType().getPrimitiveItemType();
+                    StringConverter sc = prim.getStringConverter(rules);
                     if (a1 instanceof QualifiedNameValue) {
                         sc = (StringConverter) sc.setNamespaceResolver(nsResolver);
                     }
@@ -876,7 +879,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 } else if (a0 instanceof StringItem) {
                     // no conversion needed
                 } else {
-                    StringConverter sc = a0.getItemType().getPrimitiveItemType().getStringConverter(rules);
+                    AtomicType prim = a0.getItemType().getPrimitiveItemType();
+                    StringConverter sc = prim.getStringConverter(rules);
                     if (a0 instanceof QualifiedNameValue) {
                         sc = (StringConverter) sc.setNamespaceResolver(nsResolver);
                     }
@@ -967,7 +971,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      */
 
     @Override
-    public String tag() {
+    protected String tag() {
         return "gc";
     }
 

@@ -8,11 +8,11 @@
 package net.sf.saxon.expr;
 
 
-import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
@@ -29,8 +29,6 @@ import net.sf.saxon.value.*;
 
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 
@@ -52,21 +50,6 @@ public class Literal extends Expression {
 
     protected Literal(GroundedValue value) {
         this.value = value.reduce();
-    }
-
-    /**
-     * Create a Literal containing a sequence of strings
-     *
-     * @param strings the strings to be wrapped
-     * @return a Literal of the string sequence
-     */
-    public static Literal makeStringsLiteral(List<String> strings) {
-        List<StringItem> values = new ArrayList<>();
-        for (String s : strings) {
-            values.add(new StringItem(s));
-        }
-        GroundedValue gv = SequenceExtent.makeSequenceExtent(values);
-        return makeLiteral(gv);
     }
 
     /**
@@ -590,6 +573,7 @@ public class Literal extends Expression {
                         break;
                     default:
                         assert false;
+                        break;
 
                 }
             }

@@ -550,8 +550,8 @@ public class XPathCompiler {
             eval = new XPathEvaluator(processor.getUnderlyingConfiguration());
             ic = new IndependentContext(env);
             eval.setStaticContext(ic);
-            for (Iterator iter = env.iterateExternalVariables(); iter.hasNext(); ) {
-                XPathVariable var = (XPathVariable) iter.next();
+            for (Iterator<XPathVariable> iter = env.iterateExternalVariables(); iter.hasNext(); ) {
+                XPathVariable var = iter.next();
                 XPathVariable var2 = ic.declareVariable(var.getVariableQName());
                 var2.setRequiredType(var.getRequiredType());
             }

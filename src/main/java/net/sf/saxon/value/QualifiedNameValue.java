@@ -198,6 +198,7 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
         return "QName(\"" + getNamespaceURI() + "\", \"" + getLocalName() + "\")";
     }
 
+    //#if CSHARP==false
     /**
      * Construct a javax.xml.namespace.QName from this QualifiedNameValue
      *
@@ -207,7 +208,7 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
     public QName toJaxpQName() {
         return qName.toJaxpQName();
     }
-
+    //#endif
     /**
      * Get the equivalent StructuredQName
      *

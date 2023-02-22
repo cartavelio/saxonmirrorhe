@@ -65,7 +65,7 @@ public class RangeKey extends MapItem {
                 return ((NodeInfo)value);
             } else {
                 List<NodeInfo> nodes = (List<NodeInfo>)value;
-                return SequenceExtent.makeSequenceExtent(nodes);
+                return new NodeSequenceExtent(nodes);
             }
         }
         return EmptySequence.getInstance();

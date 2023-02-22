@@ -7,10 +7,13 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.transpile.CSharpSimpleEnum;
+
 /**
  * The usage of an operand defines how the containing expression makes use of the value of the operand,
  * as defined in the XSLT 3.0 specification.
  */
+@CSharpSimpleEnum
 public enum OperandUsage {
 
     ABSORPTION,

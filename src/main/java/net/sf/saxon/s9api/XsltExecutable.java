@@ -197,7 +197,7 @@ public class XsltExecutable {
         Map<StructuredQName, GlobalParam> globals = preparedStylesheet.getGlobalParameters();
         HashMap<QName, ParameterDetails> params = new HashMap<>();
         for (GlobalParam v : globals.values()) {
-            ParameterDetails details = new ParameterDetails(v.getRequiredType(), v.isRequiredParam());
+            ParameterDetails details = new ParameterDetails(processor, v.getRequiredType(), v.isRequiredParam());
             params.put(new QName(v.getVariableQName()), details);
         }
         return params;
@@ -209,12 +209,14 @@ public class XsltExecutable {
      * @since 9.3
      */
 
-    public class ParameterDetails {
+    public static class ParameterDetails {
 
+        private final Processor processor;
         private final SequenceType type;
         private final boolean required;
 
-        protected ParameterDetails(SequenceType type, boolean isRequired) {
+        protected ParameterDetails(Processor processor, SequenceType type, boolean isRequired) {
+            this.processor = processor;
             this.type = type;
             this.required = isRequired;
         }

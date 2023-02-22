@@ -11,6 +11,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
+import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
 
@@ -100,12 +101,12 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
     public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         final int[] nameCodeArray = tree.getNameCodeArray();
-        return nodeNr -> {
+        return IntPredicateLambda.of(nodeNr -> {
             int fp = nameCodeArray[nodeNr] & 0xfffff;
             return fp != -1 &&
                     (nodeKindArray[nodeNr]&0x0f) == nodeKind &&
                     uri.equals(namePool.getURI(fp));
-        };
+        });
     }
 
     /**

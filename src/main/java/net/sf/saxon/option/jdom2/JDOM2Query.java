@@ -25,11 +25,10 @@ import java.util.List;
 
 public class JDOM2Query extends Query {
 
-    public List preprocess(List sources) throws XPathException {
+    public List<JDOM2DocumentWrapper> preprocess(List<SAXSource> sources) throws XPathException {
         try {
-            ArrayList jdomSources = new ArrayList(sources.size());
-            for (int i = 0; i < sources.size(); i++) {
-                SAXSource ss = (SAXSource) sources.get(i);
+            ArrayList<JDOM2DocumentWrapper> jdomSources = new ArrayList<>(sources.size());
+            for (SAXSource ss : sources) {
                 SAXBuilder builder = new SAXBuilder();
                 org.jdom2.Document doc = builder.build(ss.getInputSource());
                 doc.setBaseURI(ss.getSystemId());
@@ -37,9 +36,7 @@ public class JDOM2Query extends Query {
                 jdomSources.add(jdom);
             }
             return jdomSources;
-        } catch (JDOMException e) {
-            throw new XPathException(e);
-        } catch (IOException e) {
+        } catch (JDOMException | IOException e) {
             throw new XPathException(e);
         }
     }

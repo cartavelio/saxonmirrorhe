@@ -104,6 +104,7 @@ public class XdmFunctionItem extends XdmItem {
         }
     }
 
+    //#if CSHARP==false
     /**
      * Get an equivalent Step object representing this XdmFunction.
      * This is possible only for arity-1 functions.
@@ -130,7 +131,7 @@ public class XdmFunctionItem extends XdmItem {
             throw new IllegalStateException("Function arity must be one");
         }
     }
-
+    //#endif
 
     /**
      * Call the function

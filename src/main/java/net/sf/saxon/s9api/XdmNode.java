@@ -216,7 +216,7 @@ public class XdmNode extends XdmItem {
         return getUnderlyingNode();
     }
 
-
+    //#if CSHARP==false
     /**
      * Get the children of this node
      * @return an {@link Iterable} containing all nodes on the child axis
@@ -267,7 +267,8 @@ public class XdmNode extends XdmItem {
     public Iterable<XdmNode> children(Predicate<? super XdmNode> filter) {
         return select(Steps.child(filter)).asListOfNodes();
     }
-
+    //#endif
+    
     /**
      * Get an iterator over the nodes reachable from this node via a given axis.
      *
@@ -525,6 +526,7 @@ public class XdmNode extends XdmItem {
         return XdmSequenceIterator.ofNode(this);
     }
 
+    //#if CSHARP==false
     /**
      * Get a stream comprising the items in this value
      *
@@ -535,7 +537,8 @@ public class XdmNode extends XdmItem {
     public XdmStream<XdmNode> stream() {
         return new XdmStream<>(Stream.of(this));
     }
-
+    //#endif
+    
 
 }
 

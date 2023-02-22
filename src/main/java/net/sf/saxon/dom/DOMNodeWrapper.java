@@ -271,7 +271,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                         UnicodeBuilder fsb = new UnicodeBuilder();
                         Node textNode = node;
                         for (int i = 0; i < span; i++) {
-                            fsb.append(emptyIfNull(textNode.getNodeValue()));
+                            fsb.accept(emptyIfNull(textNode.getNodeValue()));
                             textNode = textNode.getNextSibling();
                         }
                         return fsb.toUnicodeString();
@@ -312,7 +312,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                 case Node.DOCUMENT_TYPE_NODE:
                     break;
                 default:
-                    sb.append(emptyIfNull(child.getNodeValue()));
+                    sb.accept(emptyIfNull(child.getNodeValue()));
                     break;
             }
         }

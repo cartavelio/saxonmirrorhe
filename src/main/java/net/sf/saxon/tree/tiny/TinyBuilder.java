@@ -14,6 +14,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
@@ -29,6 +30,7 @@ import java.util.Stack;
 
 public class TinyBuilder extends Builder {
 
+    @CSharpSimpleEnum
     private enum Eligibility {INELIGIBLE, PRIMED, ELIGIBLE}
 
     private static final int PARENT_POINTER_INTERVAL = 10;
@@ -385,7 +387,7 @@ public class TinyBuilder extends Builder {
             // Collapse a simple element with text content and no attributes or namespaces into a single node
             // of type TRIVIAL_ELEMENT
             //System.err.println("Created textual element");
-            tree.nodeKind[nodeNr-1] = Type.TEXTUAL_ELEMENT;
+            tree.nodeKind[nodeNr-1] = (byte)Type.TEXTUAL_ELEMENT;
             tree.alpha[nodeNr-1] = tree.alpha[nodeNr];
             tree.beta[nodeNr-1] = tree.beta[nodeNr];
             nodeNr--;
@@ -410,7 +412,8 @@ public class TinyBuilder extends Builder {
         if (tree == null) {
             return null;
         }
-        return tree.getNode(currentDepth >= 0 ? prevAtDepth[currentDepth] : 0);
+        //noinspection RedundantCast
+        return (TinyNodeImpl)tree.getNode(currentDepth >= 0 ? prevAtDepth[currentDepth] : 0);
         // Note: reading an incomplete tree needs care if it constructs a prior index, etc.
     }
 
@@ -501,7 +504,7 @@ public class TinyBuilder extends Builder {
 
         textualElementEligibilityState = Eligibility.INELIGIBLE;
         int s = (int)commentBuilder.length();
-        commentBuilder.append(remainder);
+        commentBuilder.accept(remainder);
         int nameCode = namePool.allocateFingerprint("", piname);
 
         nodeNr = tt.addNode(Type.PROCESSING_INSTRUCTION, currentDepth, s, remainder.tidy().length32(),
@@ -537,7 +540,7 @@ public class TinyBuilder extends Builder {
 
         textualElementEligibilityState = Eligibility.INELIGIBLE;
         int s = (int)commentBuilder.length();
-        commentBuilder.append(chars);
+        commentBuilder.accept(chars);
         nodeNr = tt.addNode(Type.COMMENT, currentDepth, s, chars.tidy().length32(), -1);
 
         int prev = prevAtDepth[currentDepth];

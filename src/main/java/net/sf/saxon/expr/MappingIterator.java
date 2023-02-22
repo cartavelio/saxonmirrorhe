@@ -22,6 +22,8 @@ import net.sf.saxon.transpile.CSharpInjectMembers;
  * in a great variety of ways. It underpins the way that "for" expressions and
  * path expressions are evaluated, as well as sequence expressions. It is also
  * used in the implementation of the document(), key(), and id() functions.</p>
+ * <p>In functional programming theory, this iterator implements a "flatMap"
+ * operation.</p>
  */
 
 @CSharpInjectMembers(code = {
@@ -37,13 +39,26 @@ public class MappingIterator implements SequenceIterator {
      * Construct a MappingIterator that will apply a specified MappingFunction to
      * each Item returned by the base iterator.
      *
-     * @param base   the base iterator, which must deliver items of type F
-     * @param action the mapping function to be applied
+     * @param base   the base iterator
+     * @param action the mapping function to be applied: a function from items to SequenceIterators.
      */
 
     public MappingIterator(SequenceIterator base, MappingFunction action) {
         this.base = base;
         this.action = action;
+    }
+
+    /**
+     * Static factory method designed to handle the case where the mapping function is supplied
+     * as a lambda expression. (Although a lambda expression can be used directly as the mapping
+     * function in Java, this is not possible in C#).
+     * @param base   the base iterator
+     * @param mappingExpression the mapping function to be applied: a function from items to SequenceIterators.
+     * @return a flattened iterator
+     */
+
+    public static MappingIterator map(SequenceIterator base, SequenceMapper.Lambda mappingExpression) {
+        return new MappingIterator(base, SequenceMapper.of(mappingExpression));
     }
 
     @Override

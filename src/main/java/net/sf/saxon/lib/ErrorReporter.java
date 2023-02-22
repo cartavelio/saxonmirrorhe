@@ -10,6 +10,7 @@ package net.sf.saxon.lib;
 import net.sf.saxon.s9api.StaticError;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.UncheckedXPathException;
+import net.sf.saxon.transpile.CSharpDelegate;
 import org.xml.sax.ErrorHandler;
 
 import javax.xml.transform.ErrorListener;
@@ -33,6 +34,7 @@ import javax.xml.transform.ErrorListener;
  */
 
 @FunctionalInterface
+@CSharpDelegate(false)
 public interface ErrorReporter {
     /**
      * Report an error. This method is called by Saxon when an error needs to be

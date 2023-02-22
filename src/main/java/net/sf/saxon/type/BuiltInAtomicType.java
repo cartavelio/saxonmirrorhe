@@ -473,7 +473,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
 
     /**
      * Returns the value of the 'block' attribute for this type, as a bit-significant
-     * integer with fields such as {@link Derivatiion#DERIVATION_LIST} and {@link Derivatiion#DERIVATION_EXTENSION}
+     * integer with fields such as {@link Derivation#DERIVATION_LIST} and {@link Derivation#DERIVATION_EXTENSION}
      *
      * @return the value of the 'block' attribute for this type
      */
@@ -499,7 +499,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
      * Determines whether derivation (of a particular kind)
      * from this type is allowed, based on the "final" property
      *
-     * @param derivation the kind of derivation, for example {@link Derivatiion#DERIVATION_LIST}
+     * @param derivation the kind of derivation, for example {@link Derivation#DERIVATION_LIST}
      * @return true if this kind of derivation is allowed
      */
 
@@ -512,7 +512,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
      * Get the types of derivation that are not permitted, by virtue of the "final" property.
      *
      * @return the types of derivation that are not permitted, as a bit-significant integer
-     *         containing bits such as {@link net.sf.saxon.type.Derivatiion#DERIVATION_EXTENSION}
+     *         containing bits such as {@link net.sf.saxon.type.Derivation#DERIVATION_EXTENSION}
      */
     @Override
     public int getFinalProhibitions() {

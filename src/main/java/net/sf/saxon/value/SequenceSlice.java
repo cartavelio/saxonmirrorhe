@@ -13,20 +13,18 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ListIterator;
-
+import net.sf.saxon.tree.iter.UnfailingIterator;
+import net.sf.saxon.tree.jiter.WrappingJavaIterator;
 
 import java.util.Iterator;
-import java.util.List;
 
 
 /**
- * A sequence value implemented extensionally. That is, this class represents a sequence
- * by allocating memory to each item in the sequence.
+ * A sequence value represented as a subsequence of an underlying sequence.
  */
 
 public class SequenceSlice implements GroundedValue {
-    private final List<? extends Item> value;
+    private final GroundedValue value;
     private final int offset;
     private final int length;
 
@@ -34,21 +32,21 @@ public class SequenceSlice implements GroundedValue {
      * Construct an sequence from a slice of a list of items. Note, the list of items is used as is,
      * which means the caller must not subsequently change its contents.
      *
-     * @param value the list of items
+     * @param value the underying list of items
      * @param offset the zero-based position of the first item to be included in the sequence
      * @param length the number of items to be included in the sequence; if this exceeds the number
      *               of items available for inclusion, include all items up to the end of the sequence
      * @throws IndexOutOfBoundsException if offset < 0 or length < 0 or offset + length < value.size()
      */
 
-    public SequenceSlice(List<? extends Item> value, int offset, int length) {
+    public SequenceSlice(GroundedValue value, int offset, int length) {
         this.value = value;
         this.offset = offset;
         if (offset < 0 || length < 0) {
             throw new IndexOutOfBoundsException();
         }
-        if (length > value.size() || offset + length > value.size()) { // carefully written to handle length=Integer.MAX_VALUE
-            this.length = value.size() - offset;
+        if (length > value.getLength() || offset + length > value.getLength()) { // carefully written to handle length=Integer.MAX_VALUE
+            this.length = value.getLength() - offset;
         } else {
             this.length = length;
         }
@@ -118,7 +116,7 @@ public class SequenceSlice implements GroundedValue {
         if (n < 0 || n >= getLength()) {
             return null;
         } else {
-            return value.get(n + offset);
+            return value.itemAt(n + offset);
         }
     }
 
@@ -131,8 +129,14 @@ public class SequenceSlice implements GroundedValue {
 
     /*@NotNull*/
     @Override
-    public ListIterator iterate() {
-        return new ListIterator(value.subList(offset, offset+length));
+    public UnfailingIterator iterate() {
+        return new UnfailingIterator() {
+            int i = offset;
+            @Override
+            public Item next() {
+                return i < length ? value.itemAt(i++) : null;
+            }
+        };
     }
     
     /**
@@ -155,21 +159,21 @@ public class SequenceSlice implements GroundedValue {
             start = 0;
         }
         int newStart = start+offset;
-        if (newStart > value.size()) {
+        if (newStart > value.getLength()) {
             return EmptySequence.getInstance();
         }
         if (length < 0) {
             return EmptySequence.getInstance();
         }
         int newLength = Integer.min(length, this.length);
-        if (newStart + newLength > value.size()) {
-            newLength = value.size() - newStart;
+        if (newStart + newLength > value.getLength()) {
+            newLength = value.getLength() - newStart;
         }
         switch (newLength) {
             case 0:
                 return EmptySequence.getInstance();
             case 1:
-                return value.get(newStart);
+                return value.itemAt(newStart);
             default:
                 return new SequenceSlice(value, newStart, newLength);
         }
@@ -207,23 +211,12 @@ public class SequenceSlice implements GroundedValue {
     }
 
     /**
-     * Get the contents of this value in the form of a Java {@link Iterable},
-     * so that it can be used in a for-each expression
-     * @return an Iterable containing the same sequence of items
-     */
-
-    @Override
-    public Iterable<? extends Item> asIterable() {
-        return value.subList(offset, offset+length);
-    }
-
-    /**
      * Get an iterator (a Java {@link Iterator}) over the items in this sequence.
      * @return an iterator over the items in this sequence.
      */
 
     public Iterator<? extends Item> iterator() {
-        return value.subList(offset, offset + length).iterator();
+        return new WrappingJavaIterator<>(iterate());
     }
 }
 

@@ -64,6 +64,7 @@ public abstract class GDateValue extends CalendarValue {
         return day;
     }
 
+    //#if CSHARP==false
     /*@NotNull*/
     @Override
     public GregorianCalendar getCalendar() {
@@ -89,6 +90,7 @@ public abstract class GDateValue extends CalendarValue {
         calendar.getTime();
         return calendar;
     }
+    //#endif
 
     /**
      * Initialize the DateValue using a character string in the format yyyy-mm-dd and an optional time zone.
@@ -341,7 +343,7 @@ public abstract class GDateValue extends CalendarValue {
     }
 
     public int hashCode() {
-        return DateTimeValue.hashCode(year, month, day, (byte) 12, (byte) 0, (byte) 0, 0, getTimezoneInMinutes());
+        return DateTimeValue.computeHashCode(year, month, day, (byte) 12, (byte) 0, (byte) 0, 0, getTimezoneInMinutes());
     }
 
     /**

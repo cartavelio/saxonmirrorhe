@@ -7,30 +7,23 @@
 
 package net.sf.saxon.om;
 
+import net.sf.saxon.transpile.CSharpSimpleEnum;
+
 /**
  * The Genre of an item is the top-level classification of its item type: one of Atomic, Node, Function,
  * Map, Array, or External
  */
 
+@CSharpSimpleEnum
 public enum Genre {
 
-    ANY("any item"),
-    ATOMIC("an atomic value"),
-    NODE("a node"),
-    FUNCTION("a function"),
-    MAP("a map"),
-    ARRAY("an array"),
-    EXTERNAL("an external object");
-
-    private final String description;
-
-    Genre(String desc) {
-        this.description = desc;
-    }
-
-    public String getDescription() {
-        return description;
-    }
+    ANY,
+    ATOMIC,
+    NODE,
+    FUNCTION,
+    MAP,
+    ARRAY,
+    EXTERNAL;
 
 }
 

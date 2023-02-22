@@ -123,6 +123,11 @@ public class EnumerationType implements AtomicType {
         return null;
     }
 
+    @Override
+    public double getDefaultPriority() {
+        return 0;
+    }
+
     /**
      * Get a StringConverter, an object which converts strings in the lexical space of this
      * data type to instances (in the value space) of the data type.

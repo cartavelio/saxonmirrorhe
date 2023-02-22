@@ -102,7 +102,7 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
         return new TimeValue(hour, minute, second, nanosecond, tz, "");
     }
 
-
+    //#if CSHARP==false
     /**
      * Constructor: create a time value given a Java calendar object
      *
@@ -118,6 +118,7 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
         setTimezoneInMinutes(tz);
         typeLabel = BuiltInAtomicType.TIME;
     }
+    //#endif
 
     /**
      * Static factory method: create a time value from a supplied string, in
@@ -440,6 +441,7 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
         return new DateTimeValue(1972, (byte) 12, (byte) 31, hour, minute, second, nanosecond, getTimezoneInMinutes());
     }
 
+    //#if CSHARP==false
     /**
      * Get a Java Calendar object corresponding to this time, on a reference date
      */
@@ -465,6 +467,7 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
         calendar.getTime();
         return calendar;
     }
+    //#endif
 
     /**
      * Make a copy of this time value,
@@ -639,7 +642,7 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
     }
 
     public int hashCode() {
-        return DateTimeValue.hashCode(
+        return DateTimeValue.computeHashCode(
                 1951, (byte) 10, (byte) 11, hour, minute, second, nanosecond, getTimezoneInMinutes());
     }
 

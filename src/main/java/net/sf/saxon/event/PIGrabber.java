@@ -15,6 +15,7 @@ import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.util.ProcInstParser;
 import net.sf.saxon.type.SchemaType;
 
@@ -165,6 +166,7 @@ public class PIGrabber extends ProxyReceiver {
      */
 
     /*@Nullable*/
+    @CSharpReplaceBody(code="return new javax.xml.transform.Source[0];")
     public Source[] getAssociatedStylesheets() throws TransformerException {
         if (stylesheets.isEmpty()) {
             return null;

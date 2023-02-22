@@ -10,6 +10,7 @@ package net.sf.saxon.tree.wrapper;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -23,7 +24,6 @@ import net.sf.saxon.type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -55,7 +55,8 @@ public class VirtualCopy implements NodeInfo {
 
     protected VirtualCopy(NodeInfo base, NodeInfo root) {
         original = base;
-        systemIdSupplier = base::getBaseURI; // computing the base URI can be expensive, so do it lazily
+        //noinspection Convert2MethodRef
+        systemIdSupplier = () -> base.getBaseURI(); // computing the base URI can be expensive, so do it lazily
         this.root = root;
     }
 
@@ -445,7 +446,7 @@ public class VirtualCopy implements NodeInfo {
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         VirtualCopy newParent = null;
         switch (axisNumber) {
             case AxisInfo.CHILD:
@@ -728,7 +729,7 @@ public class VirtualCopy implements NodeInfo {
      * the original copied node must be truncated.
      */
 
-    protected class VirtualCopier implements AxisIterator {
+    protected static class VirtualCopier implements AxisIterator {
 
         protected AxisIterator base;
         private final VirtualCopy parent;
@@ -752,15 +753,15 @@ public class VirtualCopy implements NodeInfo {
         public NodeInfo next() {
             NodeInfo next = base.next();
             if (next != null) {
-                if (testInclusion && !isIncludedInCopy(next)) {
+                if (testInclusion && !parent.isIncludedInCopy(next)) {
                     // we're only interested in nodes within the subtree that was copied.
                     // Assert: once we find a node outside this subtree, all further nodes will also be outside
                     //         the subtree.
                     return null;
                 }
-                VirtualCopy vc = wrap(next);
+                VirtualCopy vc = parent.wrap(next);
                 vc.parent = parent;
-                vc.systemIdSupplier = systemIdSupplier;
+                vc.systemIdSupplier = parent.systemIdSupplier;
                 next = vc;
             }
             return next;

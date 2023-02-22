@@ -9,14 +9,12 @@ package net.sf.saxon.type;
 
 import com.saxonica.ee.schema.UserSimpleType;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.MappingFunction;
 import net.sf.saxon.expr.MappingIterator;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
@@ -512,12 +510,12 @@ public class BuiltInListType implements ListType {
     @Override
     public AtomicSequence getTypedValue(/*@NotNull*/ UnicodeString value, NamespaceResolver resolver, ConversionRules rules) throws ValidationException {
         Whitespace.Tokenizer iter = new Whitespace.Tokenizer(value);
-        ListTypeMappingFunction map = new ListTypeMappingFunction();
-        map.resolver = resolver;
-        map.atomicType = (AtomicType) getItemType();
-        map.rules = rules;
+        AtomicType atomicType = (AtomicType) getItemType();
         try {
-            return new AtomicArray(new MappingIterator(iter, map));
+            return new AtomicArray(
+                    MappingIterator.map(iter,
+                                        item -> atomicType.getTypedValue(
+                                                item.getUnicodeStringValue(), resolver, rules).iterate()));
         } catch (XPathException err) {
             throw new ValidationException(err); // should not happen
         }
@@ -528,28 +526,6 @@ public class BuiltInListType implements ListType {
         BuiltInListType t = new BuiltInListType(StandardNames.getFingerprint(namespace, lname));
         BuiltInType.register(t.getFingerprint(), t);
         return t;
-    }
-
-    private static class ListTypeMappingFunction implements MappingFunction {
-
-        public NamespaceResolver resolver;
-        /*@Nullable*/ public AtomicType atomicType;
-        public ConversionRules rules;
-
-        /**
-         * The typed value of a list-valued node is obtained by tokenizing the string value and
-         * applying a mapping function to the sequence of tokens.
-         * This method implements the mapping function. It is for internal use only.
-         * For details see {@link net.sf.saxon.expr.MappingFunction}
-         */
-
-        public AtomicIterator map(Item item) throws XPathException {
-            try {
-                return atomicType.getTypedValue(item.getUnicodeStringValue(), resolver, rules).iterate();
-            } catch (ValidationException err) {
-                throw new XPathException(err);
-            }
-        }
     }
 
     /**

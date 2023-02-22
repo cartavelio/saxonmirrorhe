@@ -18,12 +18,14 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeFactory;
 import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.tree.linked.TextImpl;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
+import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
@@ -31,8 +33,6 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
  * Class StyleNodeFactory. <br>
  * A Factory for nodes in the stylesheet tree. <br>
  * Currently only allows Element nodes to be user-constructed.
- *
- * @author Michael H. Kay
  */
 
 public class StyleNodeFactory implements NodeFactory {
@@ -247,7 +247,7 @@ public class StyleNodeFactory implements NodeFactory {
             // Now we work out what class of element we really wanted, and change it if necessary
 
             XmlProcessingIncident reason;
-            Class actualClass;
+            Class<? extends StyleElement> actualClass;
 
             if (uri.equals(NamespaceConstant.XSLT)) {
                 reason = new XmlProcessingIncident("Unknown XSLT element: " + Err.wrap(localname, Err.ELEMENT), "XTSE0010");
@@ -278,17 +278,25 @@ public class StyleNodeFactory implements NodeFactory {
             if (actualClass.equals(assumedClass)) {
                 node = temp;    // the original element will do the job
             } else {
-                try {
-                    node = (StyleElement) actualClass.newInstance();
-                } catch (InstantiationException err1) {
-                    throw new TransformerFactoryConfigurationError(err1, "Failed to create instance of " + actualClass.getName());
-                } catch (IllegalAccessException err2) {
-                    throw new TransformerFactoryConfigurationError(err2, "Failed to access class " + actualClass.getName());
-                }
+                node = makeStyleElement(actualClass);
                 node.substituteFor(temp);   // replace temporary node with the new one
             }
             return node;
         }
+    }
+
+    @NotNull
+    @CSharpReplaceBody(code = "return (net.sf.saxon.style.StyleElement)System.Activator.CreateInstance(actualClass);")
+    private StyleElement makeStyleElement(Class<? extends StyleElement> actualClass) {
+        StyleElement node;
+        try {
+            node = actualClass.newInstance();
+        } catch (InstantiationException err1) {
+            throw new TransformerFactoryConfigurationError(err1, "Failed to create instance of " + actualClass.getName());
+        } catch (IllegalAccessException err2) {
+            throw new TransformerFactoryConfigurationError(err2, "Failed to access class " + actualClass.getName());
+        }
+        return node;
     }
 
     /**
@@ -429,7 +437,8 @@ public class StyleNodeFactory implements NodeFactory {
             case StandardNames.XSL_PACKAGE:
                 return new XSLPackage();
             case StandardNames.XSL_PARAM:
-                return parent instanceof XSLModuleRoot || parent instanceof XSLOverride ? new XSLGlobalParam() : new XSLLocalParam();
+                //noinspection RedundantCast
+                return parent instanceof XSLModuleRoot || parent instanceof XSLOverride ? (StyleElement)new XSLGlobalParam() : (StyleElement)new XSLLocalParam();
             case StandardNames.XSL_PERFORM_SORT:
                 return new XSLPerformSort();
             case StandardNames.XSL_PRESERVE_SPACE:
@@ -448,15 +457,15 @@ public class StyleNodeFactory implements NodeFactory {
             case StandardNames.XSL_STRIP_SPACE:
                 return new XSLPreserveSpace();
             case StandardNames.XSL_STYLESHEET:
-                return topLevelModule ? new XSLPackage() : new XSLStylesheet();
+            case StandardNames.XSL_TRANSFORM:
+                //noinspection RedundantCast
+                return topLevelModule ? (StyleElement)new XSLPackage() : (StyleElement)new XSLStylesheet();
             case StandardNames.XSL_SWITCH:
                 return new XSLSwitch();
             case StandardNames.XSL_TEMPLATE:
                 return new XSLTemplate();
             case StandardNames.XSL_TEXT:
                 return new XSLText();
-            case StandardNames.XSL_TRANSFORM:
-                return topLevelModule ? new XSLPackage() : new XSLStylesheet();
             case StandardNames.XSL_TRY:
                 return new XSLTry();
             case StandardNames.XSL_USE_PACKAGE:
@@ -464,7 +473,9 @@ public class StyleNodeFactory implements NodeFactory {
             case StandardNames.XSL_VALUE_OF:
                 return new XSLValueOf();
             case StandardNames.XSL_VARIABLE:
-                return parent instanceof XSLModuleRoot || parent instanceof XSLOverride ? new XSLGlobalVariable() : new XSLLocalVariable();
+                //noinspection RedundantCast
+                return parent instanceof XSLModuleRoot || parent instanceof XSLOverride
+                        ? (StyleElement)new XSLGlobalVariable() : (StyleElement)new XSLLocalVariable();
             case StandardNames.XSL_WITH_PARAM:
                 return new XSLWithParam();
             case StandardNames.XSL_WHEN:

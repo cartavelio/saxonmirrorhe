@@ -137,7 +137,7 @@ public class NumberFormatter {
         int tok = 0;
         // output first punctuation token
         if (startsWithPunctuation) {
-            sb.append(punctuationTokens.get(tok));
+            sb.accept(punctuationTokens.get(tok));
         }
         // output the list of numbers
         while (num < numbers.size()) {
@@ -147,7 +147,7 @@ public class NumberFormatter {
                     // formatting token. Such a punctuation token is used only once, at the start.
                     sb.append(".");
                 } else {
-                    sb.append(punctuationTokens.get(tok));
+                    sb.accept(punctuationTokens.get(tok));
                 }
             }
             Object o = numbers.get(num++);
@@ -173,7 +173,7 @@ public class NumberFormatter {
         }
         // output the final punctuation token
         if (punctuationTokens.size() > formatTokens.size()) {
-            sb.append(punctuationTokens.get(punctuationTokens.size() - 1));
+            sb.accept(punctuationTokens.get(punctuationTokens.size() - 1));
         }
         return sb.toUnicodeString();
     }

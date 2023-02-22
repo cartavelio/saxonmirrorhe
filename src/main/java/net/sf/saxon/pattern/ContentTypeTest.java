@@ -15,6 +15,7 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.*;
+import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.Optional;
@@ -112,9 +113,9 @@ public class ContentTypeTest extends NodeTest {
     @Override
     public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
-        return nodeNr -> (nodeKindArray[nodeNr]&0x0f) == kind &&
+        return IntPredicateLambda.of(nodeNr -> (nodeKindArray[nodeNr]&0x0f) == kind &&
                 matchesAnnotation(((TinyTree) tree).getSchemaType(nodeNr)) &&
-                (nillable || !((TinyTree) tree).isNilled(nodeNr));
+                (nillable || !((TinyTree) tree).isNilled(nodeNr)));
     }
 
     /**

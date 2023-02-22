@@ -17,7 +17,10 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -25,11 +28,10 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.ExternalObject;
 
 import javax.xml.transform.Result;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static net.sf.saxon.event.RegularSequenceChecker.State.*;
 
@@ -673,28 +675,48 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
     @Override
     public UniStringConsumer getStringReceiver(boolean asTextNode) {
         if (level >= 0) {
-            return new UniStringConsumer() {
-
-                @Override
-                public void open() throws XPathException {
-                    if (previousAtomic && !asTextNode) {
-                        ComplexContentOutputter.this.characters(StringConstants.SINGLE_SPACE, Loc.NONE, ReceiverOption.NONE);
-                    }
-                }
-
-                @Override
-                public UniStringConsumer append(CodePoints chars) throws XPathException {
-                    ComplexContentOutputter.this.characters(chars, Loc.NONE, ReceiverOption.NONE);
-                    return this;
-                }
-
-                @Override
-                public void close() {
-                    previousAtomic = !asTextNode;
-                }
-            };
+            return new UnicodeStringReceiver(this, previousAtomic, asTextNode,
+                                             prev -> {previousAtomic = prev;});
         } else {
             return super.getStringReceiver(asTextNode);
+        }
+    }
+
+    private static class UnicodeStringReceiver implements UniStringConsumer {
+        // Implemented as a static inner class for ease of C# conversion
+        private final ComplexContentOutputter cco;
+        private final boolean previousAtomic;
+        private final boolean asTextNode;
+        private final Consumer<Boolean> resetPreviousAtomic;
+
+        public UnicodeStringReceiver(ComplexContentOutputter cco,
+                                     boolean previousAtomic,
+                                     boolean asTextNode,
+                                     Consumer<Boolean> resetPreviousAtomic
+        ) {
+            this.cco = cco;
+            this.previousAtomic = previousAtomic;
+            this.asTextNode = asTextNode;
+            this.resetPreviousAtomic = resetPreviousAtomic;
+        }
+
+        @Override
+        public void open () throws XPathException {
+            if (previousAtomic && !asTextNode) {
+                cco.characters(StringConstants.SINGLE_SPACE, Loc.NONE, ReceiverOption.NONE);
+            }
+        }
+
+        @Override
+        public UniStringConsumer accept (CodePoints chars) throws XPathException {
+            cco.characters(chars, Loc.NONE, ReceiverOption.NONE);
+            return this;
+        }
+
+        @Override
+        public void close () {
+            //previousAtomic = !asTextNode;
+            resetPreviousAtomic.accept(!asTextNode);
         }
 
     }
@@ -801,70 +823,77 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
 
     protected void decompose(Item item, Location locationId, int copyNamespaces) throws XPathException {
         if (item != null) {
-            if (item instanceof AtomicValue || item instanceof ExternalObject) {
-                if (previousAtomic) {
-                    characters(StringConstants.SINGLE_SPACE, locationId, ReceiverOption.NONE);
-                }
-                characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
-                previousAtomic = true;
-            } else if (item instanceof ArrayItem) {
-                flatten((ArrayItem) item, locationId, copyNamespaces);
-            } else if (item instanceof Function) {
-                String thing = item instanceof MapItem ? "map" : "function item";
-                String errorCode = getErrorCodeForDecomposingFunctionItems();
-                if (errorCode.startsWith("SENR")) {
-                    throw new XPathException("Cannot serialize a " + thing + " using this output method", errorCode, locationId);
-                } else {
-                    throw new XPathException("Cannot add a " + thing + " to an XDM node tree", errorCode, locationId);
-                }
-            } else {
-                NodeInfo node = (NodeInfo) item;
-                switch (node.getNodeKind()) {
+            Genre genre = item.getGenre();
+            switch (genre) {
+                case ATOMIC:
+                case EXTERNAL:
+                    if (previousAtomic) {
+                        characters(StringConstants.SINGLE_SPACE, locationId, ReceiverOption.NONE);
+                    }
+                    characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
+                    previousAtomic = true;
+                    break;
+                case ARRAY:
+                    flatten((ArrayItem) item, locationId, copyNamespaces);
+                    break;
+                case FUNCTION:
+                case MAP:
+                    String thing = item instanceof MapItem ? "map" : "function item";
+                    String errorCode = getErrorCodeForDecomposingFunctionItems();
+                    if (errorCode.startsWith("SENR")) {
+                        throw new XPathException("Cannot serialize a " + thing + " using this output method", errorCode, locationId);
+                    } else {
+                        throw new XPathException("Cannot add a " + thing + " to an XDM node tree", errorCode, locationId);
+                    }
+                case NODE:
+                default:
+                    NodeInfo node = (NodeInfo) item;
+                    switch (node.getNodeKind()) {
 
-                    case Type.TEXT:
-                        int options = ReceiverOption.NONE;
-                        if (node instanceof Orphan && ((Orphan) node).isDisableOutputEscaping()) {
-                            options = ReceiverOption.DISABLE_ESCAPING;
-                        }
-                        characters(item.getUnicodeStringValue(), locationId, options);
-                        break;
+                        case Type.TEXT:
+                            int options = ReceiverOption.NONE;
+                            if (node instanceof Orphan && ((Orphan) node).isDisableOutputEscaping()) {
+                                options = ReceiverOption.DISABLE_ESCAPING;
+                            }
+                            characters(item.getUnicodeStringValue(), locationId, options);
+                            break;
 
-                    case Type.ATTRIBUTE:
-                        if (((SimpleType) node.getSchemaType()).isNamespaceSensitive()) {
-                            XPathException err = new XPathException("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): " +
-                                                                            Err.wrap(node.getDisplayName(), Err.ATTRIBUTE));
-                            err.setErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
-                            throw err;
-                        }
-                        attribute(NameOfNode.makeName(node), (SimpleType) node.getSchemaType(), node.getStringValue(), locationId, ReceiverOption.NONE);
-                        break;
+                        case Type.ATTRIBUTE:
+                            if (((SimpleType) node.getSchemaType()).isNamespaceSensitive()) {
+                                XPathException err = new XPathException("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): " +
+                                                                                Err.wrap(node.getDisplayName(), Err.ATTRIBUTE));
+                                err.setErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
+                                throw err;
+                            }
+                            attribute(NameOfNode.makeName(node), (SimpleType) node.getSchemaType(), node.getStringValue(), locationId, ReceiverOption.NONE);
+                            break;
 
-                    case Type.NAMESPACE:
-                        namespace(node.getLocalPart(), node.getStringValue(), ReceiverOption.NONE);
-                        break;
+                        case Type.NAMESPACE:
+                            namespace(node.getLocalPart(), node.getStringValue(), ReceiverOption.NONE);
+                            break;
 
-                    case Type.DOCUMENT:
-                        startDocument(ReceiverOption.NONE); // needed to ensure that illegal namespaces or attributes in the content are caught
-                        for (NodeInfo child : node.children()) {
-                            append(child, locationId, copyNamespaces);
-                        }
-                        endDocument();
-                        break;
+                        case Type.DOCUMENT:
+                            startDocument(ReceiverOption.NONE); // needed to ensure that illegal namespaces or attributes in the content are caught
+                            for (NodeInfo child : node.children()) {
+                                append(child, locationId, copyNamespaces);
+                            }
+                            endDocument();
+                            break;
 
-                    default:
-                        int copyOptions = CopyOptions.TYPE_ANNOTATIONS;
-                        if (ReceiverOption.contains(copyNamespaces, ReceiverOption.ALL_NAMESPACES)) {
-                            copyOptions |= CopyOptions.ALL_NAMESPACES;
-                        }
-                        ((NodeInfo) item).copy(this, copyOptions, locationId);
-                        break;
-                }
-                previousAtomic = false;
-
-
+                        default:
+                            int copyOptions = CopyOptions.TYPE_ANNOTATIONS;
+                            if (ReceiverOption.contains(copyNamespaces, ReceiverOption.ALL_NAMESPACES)) {
+                                copyOptions |= CopyOptions.ALL_NAMESPACES;
+                            }
+                            ((NodeInfo) item).copy(this, copyOptions, locationId);
+                            break;
+                    }
+                    previousAtomic = false;
+                    break;
             }
         }
     }
+
 
     protected String getErrorCodeForDecomposingFunctionItems() {
         return getPipelineConfiguration().isXSLT() ? "XTDE0450" : "XQTY0105";

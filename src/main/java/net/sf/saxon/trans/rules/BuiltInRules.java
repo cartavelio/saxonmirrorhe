@@ -1,5 +1,8 @@
 package net.sf.saxon.trans.rules;
 
+import net.sf.saxon.transpile.CSharpSimpleEnum;
+
+@CSharpSimpleEnum
 public enum BuiltInRules {
 
     DEEP_COPY,

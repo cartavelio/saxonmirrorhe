@@ -14,6 +14,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.value.ObjectValue;
 
 import java.util.Iterator;
@@ -34,7 +35,7 @@ public class ForMemberClausePull extends ForClausePull {
         Expression sequence = forClause.getSequence();
         arrayItem = (ArrayItem)sequence.evaluateItem(context);
         Iterator<GroundedValue> members = arrayItem.members().iterator();
-        return () -> members.hasNext() ? new ObjectValue<GroundedValue>(members.next()) : null;
+        return new SequenceIteratorOverJavaIterator<>(members, ObjectValue::new);
     }
 
     @Override

@@ -14,12 +14,11 @@ import net.sf.saxon.lib.ErrorReporterToListener;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.serialize.SerializationProperties;
-import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import org.xml.sax.SAXParseException;
 
 import javax.xml.transform.*;
-import java.util.Enumeration;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -182,15 +181,11 @@ public class IdentityTransformer extends Transformer {
 
         Properties newProps = new Properties();
         Properties sheetProperties = getStylesheetOutputProperties();
-        Enumeration keys = sheetProperties.propertyNames();
-        while (keys.hasMoreElements()) {
-            String key = (String) keys.nextElement();
+        for (String key : sheetProperties.stringPropertyNames()) {
             newProps.setProperty(key, sheetProperties.getProperty(key));
         }
         if (localOutputProperties != null) {
-            keys = localOutputProperties.propertyNames();
-            while (keys.hasMoreElements()) {
-                String key = (String) keys.nextElement();
+            for (String key : localOutputProperties.stringPropertyNames()) {
                 newProps.setProperty(key, localOutputProperties.getProperty(key));
             }
         }
