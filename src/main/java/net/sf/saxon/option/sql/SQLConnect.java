@@ -21,7 +21,6 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringItem;
 
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -69,37 +68,15 @@ public class SQLConnect extends ExtensionInstruction {
             if (dbName.length() > 9 && dbName.substring(0, 9).equals("jdbc:odbc")) {
                 dbDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
             } else {
-                reportAbsence("driver");
+                //reportAbsence("driver");
             }
         } else {
             dbDriverName = dbDriver.getValue();
         }
-        driver = makeAttributeValueTemplate(dbDriverName, dbDriver);
-
-
-        // Get and expand user attribute, which defaults to empty string
-
-        AttributeInfo userAtt = atts.get("", "user");
-        if (userAtt == null) {
-            user = new StringLiteral(StringItem.EMPTY_STRING);
+        if (dbDriverName != null) {
+            driver = makeAttributeValueTemplate(dbDriverName, dbDriver);
         } else {
-            user = makeAttributeValueTemplate(userAtt.getValue(), userAtt);
-        }
-
-        // Get and expand password attribute, which defaults to empty string
-
-        AttributeInfo pwdAtt = atts.get("", "password");
-        if (pwdAtt == null) {
-            password = new StringLiteral(StringItem.EMPTY_STRING);
-        } else {
-            password = makeAttributeValueTemplate(pwdAtt.getValue(), pwdAtt);
-        }
-
-        // Get auto-commit attribute if specified
-
-        AttributeInfo autoCommitAtt = atts.get("", "auto-commit");
-        if (autoCommitAtt != null) {
-            autoCommit = makeAttributeValueTemplate(autoCommitAtt.getValue(), autoCommitAtt);
+            driver = Literal.makeEmptySequence();
         }
     }
 
