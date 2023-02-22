@@ -291,7 +291,7 @@ public class XdmUtils {
      * @return a string representation of the value
      */
     @CEntryPoint(name = "xdmValueArrayToString")
-    public static CCharPointer xdmValueArrayToString(ObjectHandle processorDataAccumulatorRef){
+    public static CCharPointer xdmValueArrayToString(IsolateThread thread, ObjectHandle processorDataAccumulatorRef){
         ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
         XdmValue [] values = (XdmValue[]) processorDataAccumulator.getValues();
         if(values == null) {
