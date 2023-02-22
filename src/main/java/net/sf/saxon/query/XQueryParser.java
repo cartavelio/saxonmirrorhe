@@ -4155,6 +4155,9 @@ public class XQueryParser extends XPathParser {
             c = t.nextChar();
             c = skipSpaces(c);
             char delim = c;
+            if (c != '"' && c != '\'') {
+                grumble("Expected ' or \" as attribute delimiter - found '" + c + "'");
+            }
             boolean isNamespace = "xmlns".equals(attName) || attName.startsWith("xmlns:");
             int end;
             if (isNamespace) {
