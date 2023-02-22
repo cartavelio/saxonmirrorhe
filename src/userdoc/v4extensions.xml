@@ -354,7 +354,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             <samp>function($s as xs:string, $form as enum("NFC", "NFD", "NFKC", "NFKD")) as xs:string</samp>
          </section>
 
-         <section id="kindtests" title="KindTests">
+         <section id="kindtests" title="KindTests and NodeTests">
             <h1>KindTests and NodeTests</h1>
 
             <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 10.</aside>
@@ -477,7 +477,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <code>fn:all((1=1, 2=2, 3=4))</code> returns false.</p>
       
       <kbd>fn:all-different(
-         $values	as xs:anyAtomicType**,	
+         $values	as xs:anyAtomicType*,	
          $collation	as xs:string := fn:default-collation()	
          ) as xs:boolean</kbd>
       
@@ -596,7 +596,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          $at	as xs:integer*	
          ) as item()*</kbd>
       
-      <p>Returns the items at the given positions in the input sequence. For example <code>items-at(21 to 30, (3, 2, 1))</code>
+      <p>Returns the items at the given positions in the input sequence. For example <code>fn:items-at(21 to 30, (3, 2, 1))</code>
       returns <code>(23, 22, 21)</code>.</p>
       
       
@@ -628,7 +628,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          ) as item()*</kbd>
       
       <p>Applies the <code>$action</code> function to the <code>$input</code> repeatedly so long as the <code>$predicate</code>
-         function returns true. For example <code>iterate-while(2, ->{. lt 20}, ->{.*.})</code> returns 16.</p>
+         function returns true. For example <code>fn:iterate-while(2, ->{. lt 20}, ->{.*.})</code> returns 16.</p>
      
       
       <kbd>fn:lowest(
@@ -648,10 +648,10 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          $operator	as xs:string	
          ) as function(item()*, item()*) as item()*</kbd>
       
-      <p>Returns an arity-2 function corresponding to a supplied binary operator, for example <code>op("is")</code>
+      <p>Returns an arity-2 function corresponding to a supplied binary operator, for example <code>fn:op("is")</code>
       returns <code>function($x, $y){$x is $y}</code>.</p>
       
-      <kbd>fn:parcel($sequence as item()*) as record(value)</kbd>
+      <kbd>fn:parcel($input as item()*) as record(value)</kbd>
       
       <p>Wraps an arbitrary sequence of items as a <i>parcel</i>: a parcel is a map with a single entry,
       whose key is the string <code>"value"</code> and whose value is the wrapped sequence. Parcels are
@@ -728,12 +728,12 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       
       <p>Returns the last member of an array.</p>
       
-      <kbd>array:members(array(*)) as record(value)*</kbd>
+      <kbd>array:members($array as array(*)) as record(value)*</kbd>
       
       <p>Accepts an array as input, and turns it into a sequence of parcels: the inverse of the <code>array:of()</code>
          function.</p>
       
-      <kbd>array:of(record(value, *)*) as array(*)</kbd>
+      <kbd>array:of($input as record(value, *)*) as array(*)</kbd>
       
       <p>Accepts a sequence of parcels (as produced by the <code>fn:parcel()</code> function), and returns an array
       whose members are the sequences obtained by applying <code>fn:unparcel()</code> to each parcel in turn.</p>
@@ -757,16 +757,16 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       the values are combined using the <code>$combine</code> function.</p>
       
       
-      <kbd>map:entries(map(*)) as map(*)*</kbd>
+      <kbd>map:entries($map as map(*)) as map(*)*</kbd>
       
       <p>Accepts a map as input, and turns it into a sequence of singleton maps representing the key-value pairs contained in the map.
       Equivalent to <code>map:for-each($map, ->($k, $v){map{$k : $v}})</code>.</p>
       
-      <kbd>map:filter(map(*), function($key, $value) as xs:boolean) as map(*)*</kbd>
+      <kbd>map:filter($map as map(*), $predicate as function(xs:anyAtomicType, item()*) as xs:boolean) as map(*)</kbd>
       
       <p>Accepts a map as input, and returns a new map containing those entries from the original map that satisfy the predicate function.</p>
       
-      <kbd>map:key-value-pairs(map(*)) as record(key as xs:anyAtomicType, value as item()*)*</kbd>
+      <kbd>map:key-value-pairs($map as map(*)) as record(key as xs:anyAtomicType, value as item()*)*</kbd>
       
       <p>Accepts a map as input, and turns it into a sequence of maps representing the key-value pairs contained in the map.
          Equivalent to <code>map:for-each($map, ->($k, $v){map{"key":$k, "value":$v}})</code>. This differs from
@@ -869,14 +869,15 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             <ul>
                <li>
                   <p>XQuery syntax:</p>
-                  <p><code>declare function local:f($x as xs:dateTime, $y as xs:duration := xs:duration('PT0S')) as xs:dateTime</code></p>
+                  <samp><![CDATA[declare function local:f($x as xs:dateTime, $y as xs:duration := xs:duration('PT0S'))
+                         as xs:dateTime]]></samp>
                </li>
                <li>
                   <p>XSLT syntax:</p>
-                  <eg><![CDATA[<xsl:function name="local:f" as="xs:dateTime>
-    <xsl:param name="x" as="xs:dateTime" required="yes"/>
-    <xsl:param name="x" as="xs:duration" required="no" select="xs:duration('PT0S')"/>
-</xsl:function>]]></eg>
+                  <samp><![CDATA[<xsl:function name="local:f" as="xs:dateTime>
+  <xsl:param name="x" as="xs:dateTime" required="yes"/>
+  <xsl:param name="x" as="xs:duration" required="no" select="xs:duration('PT0S')"/>
+</xsl:function>]]></samp>
                </li>
             </ul>
             
@@ -889,7 +890,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             </p>
             
             <aside>The rules for XSLT, where different functions may have different import precedence, are more complex:
-            see the spec for details.</aside>
+            see the specification for details.</aside>
             
          </section>
          <section id="keyword-arguments" title="Keyword arguments">
@@ -911,7 +912,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <section id="downcasting" title="Automatic downcasting">
             <h1>Automatic downcasting</h1>
             
-            <p>In 4.0, the term <emph>coercion rules</emph> replaces <emph>function conversion rules</emph>.</p>
+            <p>In 4.0, the term <em>coercion rules</em> replaces <em>function conversion rules</em>.</p>
             
             <p>The coercion rules (which determine how the supplied value for a function argument or XSLT variable can differ
                from the declared type) now allow downcasting. For example, if the required type is declared as <code>xs:positiveInteger</code>
@@ -995,9 +996,11 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                
                <p>will never fail with a divide-by-zero error, even if the operands are evaluated in a different order.</p>
                
-               <p>A similar rule is adopted for expressions with multiple predicates, for example 
-                  <code>@code[. castable as xs:integer][xs:integer(.) = 2]</code> is now guaranteed to return
-               no failure if <code>@code</code> is non-numeric.</p>
+               <p>A similar rule is adopted for expressions with multiple predicates, for example
+                  the following is now guaranteed to return no failure if <code>@code</code> is
+                  non-numeric:</p>
+               
+               <samp>@code[. castable as xs:integer][xs:integer(.) = 2]</samp>
                
                
             </section>
@@ -1210,18 +1213,17 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
          <p>The new <a class="bodylink code" href="/xsl-elements/switch">xsl:switch</a> instruction provides
             an alternative to <code>xsl:choose</code>. It is best illustrated by example:</p>
          
-         <samp><![CDATA[
- <xsl:function name="f:days-in-month" as="xs:integer?">
-    <xsl:param name="month-number" as="xs:integer"/>
-    <xsl:param name="leap-year" as="xs:boolean"/>
-    <xsl:switch select="$month-number">
-      <xsl:when test="1, 3, 5, 7, 8, 10, 12" select="31"/>
-      <xsl:when test="4, 6, 9, 11" select="30"/>
-      <xsl:when test="2">
-         <xsl:if test="$leap-year" then="29" else="28"/>
-      </xsl:when>
-    </xsl:switch>
-  </xsl:function>]]></samp>
+         <samp><![CDATA[<xsl:function name="f:days-in-month" as="xs:integer?">
+  <xsl:param name="month-number" as="xs:integer"/>
+  <xsl:param name="leap-year" as="xs:boolean"/>
+  <xsl:switch select="$month-number">
+    <xsl:when test="1, 3, 5, 7, 8, 10, 12" select="31"/>
+    <xsl:when test="4, 6, 9, 11" select="30"/>
+    <xsl:when test="2">
+      <xsl:if test="$leap-year" then="29" else="28"/>
+    </xsl:when>
+  </xsl:switch>
+</xsl:function>]]></samp>
          
       </section>
       <section id="ext-ins-call-template" title="Extension instructions calling templates">
@@ -1233,8 +1235,8 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
          
          <p>For example, if the template is declared as:</p>
          <samp><![CDATA[<xsl:template name="x:indent">
-   <xsl:param name="spaces" as="xs:integer"/>
-   <xsl:value-of select="'&#xa;' || string-join((1 to $spaces)!' ')"/>
+  <xsl:param name="spaces" as="xs:integer"/>
+  <xsl:value-of select="'&#xa;' || string-join((1 to $spaces)!' ')"/>
 </xsl:template>]]></samp>
          
          <p>Then it may be invoked by writing:</p>
@@ -1244,7 +1246,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
          <p>which (assuming the presence of <code>extension-element-prefixes="x"</code>) is equivalent to:</p>
          
          <samp><![CDATA[<xsl:call-template name="x:indent">
-   <xsl:with-param name="spaces" select="4"/>
+  <xsl:with-param name="spaces" select="4"/>
 </xsl:call-template>]]></samp>
          
          <p>Attributes on the extension instruction are mapped to parameters declared in the named template.
