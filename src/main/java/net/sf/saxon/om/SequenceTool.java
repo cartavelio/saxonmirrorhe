@@ -137,7 +137,7 @@ public class SequenceTool {
      * @param consumer the consumer which will be called to process the remaining items
      *                 in the sequence, in turn
      * @throws UncheckedXPathException if the computation of the input sequence reports an XPathException,
-     * or if the consymer throws an XPathException
+     * or if the consumer throws an XPathException
      */
 
     public static void supply(SequenceIterator iter, ItemConsumer<? super Item> consumer) {
@@ -513,7 +513,13 @@ public class SequenceTool {
      */
 
     public static void process(Sequence value, Outputter output, Location locationId) throws XPathException {
-        supply(value.iterate(), (ItemConsumer<? super Item>) it -> output.append(it, locationId, ReceiverOption.ALL_NAMESPACES));
+        try {
+            supply(value.iterate(), (ItemConsumer<? super Item>) it -> output.append(it, locationId, ReceiverOption.ALL_NAMESPACES));
+        } catch (UncheckedXPathException e) {
+            XPathException xpe = e.getXPathException();
+            xpe.maybeSetLocation(locationId);
+            throw xpe;
+        }
     }
 
     /**

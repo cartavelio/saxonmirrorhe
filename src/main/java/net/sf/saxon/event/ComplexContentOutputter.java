@@ -849,7 +849,11 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
                     if (errorCode.startsWith("SENR")) {
                         throw new XPathException("Cannot serialize a " + thing + " using this output method", errorCode, locationId);
                     } else {
-                        throw new XPathException("Cannot add a " + thing + " to an XDM node tree", errorCode, locationId);
+                        String msg = "Cannot add a " + thing + " (" + Err.depict(item) + ") to an XDM node tree";
+                        if (pendingStartTag != null) {
+                            msg += " (currently writing element " + pendingStartTag.getDisplayName() + ")";
+                        }
+                        throw new XPathException(msg, errorCode, locationId);
                     }
                 case NODE:
                 default:
