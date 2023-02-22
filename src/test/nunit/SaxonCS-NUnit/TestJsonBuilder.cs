@@ -19,7 +19,7 @@ namespace SaxonCS_NUnit {
             try {
                 String sr = "{\"one\": 1, \"two\": 2}";
                 JsonBuilder builder =  new Processor().NewJsonBuilder();
-                XdmValue d = builder.parseJson(sr);
+                XdmValue d = builder.ParseJson(sr);
                 Assert.That(d is XdmMap);
                 XdmMap m = (XdmMap) d;
                 Assert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
@@ -53,7 +53,7 @@ namespace SaxonCS_NUnit {
             try {
                 string sr = "{\"one\": 1, \"two\": 2,}";
                 JsonBuilder builder =  new Processor().NewJsonBuilder();
-                XdmValue d = builder.parseJson(sr);
+                XdmValue d = builder.ParseJson(sr);
                 Assert.Fail("Error not detected");
             }
             catch (SaxonApiException e) {
@@ -69,7 +69,7 @@ namespace SaxonCS_NUnit {
                 String sr = "{\"one\": 1, \"two\": 2, }";
                 JsonBuilder builder =  new Processor().NewJsonBuilder();
                 builder.Liberal = true;
-                XdmValue d = builder.parseJson(sr);
+                XdmValue d = builder.ParseJson(sr);
                 Assert.That(d is XdmMap);
                 XdmMap m = (XdmMap) d;
                 Assert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
