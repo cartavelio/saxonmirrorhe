@@ -11,7 +11,7 @@ public class SaxonCExceptionCCharHandler implements CEntryPoint.ExceptionHandler
 
     @Uninterruptible(reason = "exception handler")
     public static CCharPointer handle(Throwable e) {
-        SaxonCException ex = new SaxonCException(e);
+        SaxonCException.throwable = e;
         return WordFactory.nullPointer();
    	}
 }

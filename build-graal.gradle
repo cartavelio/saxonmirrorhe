@@ -1,7 +1,7 @@
 // Find GraalVM to build the SaxonC releases
 def graalHome = null
 ["${graalVM}",
- "/Library/Java/JavaVirtualMachines/graalvm-ce-java11-22.1.0/Contents/Home/bin",
+ "/Library/Java/JavaVirtualMachines/graalvm-ce-java11-22.1.0/Contents/Home/bin", "/Library/Java/JavaVirtualMachines/graalvm-ce-java11-22.2.0/Contents/Home/bin",
  "c:/irrelevant"].each { graal ->
   if (graalHome == null && graal != "" && pathExists(graal)) {
     graalHome = graal
@@ -75,6 +75,7 @@ task graalImage(
         "--no-fallback", "--allow-incomplete-classpath", "-H:Path=${buildDir}/c",
         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+        "-H:+ReportExceptionStackTraces",
         "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
         "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
         "--trace-class-initialization=jdk.xml.internal.SecuritySupport",

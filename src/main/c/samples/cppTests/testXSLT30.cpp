@@ -2425,10 +2425,17 @@ int main(int argc, char* argv[]) {
     if(argc > 0) {
 	cwd = argv[1];
     }
-
+    int check =0;
+    //cin>>check;
     SaxonProcessor *processor = new SaxonProcessor(true);
     setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
+#if defined (__linux__)
     processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/lib/saxon-license.lic");
+#elif  defined (__APPLE__) && defined(__MACH__)
+    processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/local/lib/saxon-license.lic");
+#else
+    //TODO windows - processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/lib/saxon-license.lic");
+#endif
     cout << "Test: Xslt30Processor with Saxon version=" << processor->version() << endl << endl;
 
     char buff[FILENAME_MAX]; //create string buffer to hold path
@@ -2447,6 +2454,7 @@ int main(int argc, char* argv[]) {
     }
 
     sResultCount *sresult = new sResultCount();
+    if(processor == nullptr)
     std::cerr << "testXSLT30 cp0" << std::endl;
     Xslt30Processor *trans = processor->newXslt30Processor();
 
