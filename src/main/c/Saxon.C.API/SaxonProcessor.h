@@ -237,7 +237,7 @@ public:
      *
      * of a zero-length string (and potentially other strings, in future)
      *
-     * @param value the String value. nullptr is taken as equivalent to "".
+     * @param value the String value. NULL is taken as equivalent to "".
      * @return the corresponding StringValue
      */
     XdmAtomicValue *makeStringValue(std::string str);

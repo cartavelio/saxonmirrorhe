@@ -1468,9 +1468,9 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
                                                                     xdmValueClass, 0);
         valueArray = SaxonProcessor::sxn_environ->env->NewObjectArray((jint) size,
                                                                       xdmAtomicValueClass, 0);
-        int i = 0;
+        int i;
  
-        for (int i = 0; i < size; i++) {
+        for (i = 0; i < size; i++) {
             SaxonProcessor::sxn_environ->env->SetObjectArrayElement(keyArray, i,
                                                                     keys[i]->getUnderlyingValue());
 
