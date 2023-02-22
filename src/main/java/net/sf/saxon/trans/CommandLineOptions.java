@@ -17,6 +17,7 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaException;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
+import org.xmlresolver.ResolverFeature;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
@@ -288,16 +289,7 @@ public class CommandLineOptions {
         //#if CSHARP==false
         optionValue = getOptionValue("catalog");
         if (optionValue != null) {
-            if (getOptionValue("r") != null) {
-                throw new XPathException("Cannot use -catalog and -r together");
-            }
-            if (getOptionValue("x") != null) {
-                throw new XPathException("Cannot use -catalog and -x together");
-            }
-            if (getOptionValue("y") != null) {
-                throw new XPathException("Cannot use -catalog and -y together");
-            }
-            StringBuilder sb = new StringBuilder();
+            ArrayList<String> catalogs = new ArrayList<>();
             if ((getOptionValue("u") != null) || isImplicitURI(optionValue)) {
                 for (String s : optionValue.split(";")) {
                     Source sourceInput = null;
@@ -309,26 +301,19 @@ public class CommandLineOptions {
                     if (sourceInput == null) {
                         sourceInput = config.getSystemURIResolver().resolve(s, null);
                     }
-                    sb.append(sourceInput.getSystemId()).append(';');
+                    catalogs.add(sourceInput.getSystemId());
                 }
-
             } else {
                 for (String s : optionValue.split(";")) {
                     File catalogFile = new File(s);
                     if (!catalogFile.exists()) {
                         throw new XPathException("Catalog file not found: " + s);
                     }
-                    sb.append(catalogFile.toURI().toASCIIString()).append(';');
+                    catalogs.add(catalogFile.toURI().toASCIIString());
                 }
             }
-            optionValue = sb.toString();
 
-            try {
-                config.getClass("org.apache.xml.resolver.CatalogManager", false);
-                XmlCatalogResolver.setCatalog(optionValue, config, getOptionValue("t") != null);
-            } catch (XPathException err) {
-                throw new XPathException("Failed to load Apache catalog resolver library", err);
-            }
+            config.getSaxonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogs);
         }
         //#endif
 

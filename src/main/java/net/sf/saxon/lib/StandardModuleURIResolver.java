@@ -12,6 +12,8 @@ import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.resource.Loader;
 import net.sf.saxon.trans.XPathException;
 
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -33,6 +35,7 @@ import java.net.URLConnection;
  */
 
 public class StandardModuleURIResolver implements ModuleURIResolver {
+    public static final String XQUERY_PURPOSE = "https://www.iana.org/assignments/media-types/application/xquery";
 
     Configuration config = null;
 
@@ -86,6 +89,12 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
     @Override
     public StreamSource[] resolve(String moduleURI, String baseURI, String[] locations) throws XPathException {
         if (locations.length == 0) {
+            StreamSource source = resolvedNamespaceURI(moduleURI, baseURI);
+            if (source != null) {
+                StreamSource[] sources = new StreamSource[1];
+                sources[0] = source;
+                return sources;
+            }
             XPathException err = new XPathException("Cannot locate module for namespace " + moduleURI);
             err.setErrorCode("XQST0059");
             err.setIsStaticError(true);
@@ -97,7 +106,17 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
                 String href = locations[m];
                 URI absoluteURI;
                 try {
-                    absoluteURI = ResolveURI.makeAbsolute(href, baseURI);
+                    Source source = null;
+                    try {
+                        source = config.getSaxonResourceResolver().resolve(href, baseURI);
+                    } catch (TransformerException ex) {
+                        // Sigh. Nevermind then.
+                    }
+                    if (source == null) {
+                        absoluteURI = ResolveURI.makeAbsolute(href, baseURI);
+                    } else {
+                        absoluteURI = new URI(source.getSystemId());
+                    }
                 } catch (URISyntaxException err) {
                     XPathException se = new XPathException("Cannot resolve relative URI " + href, err);
                     se.setErrorCode("XQST0059");
@@ -112,6 +131,22 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
             }
             return sources;
         }
+    }
+
+    private StreamSource resolvedNamespaceURI(String moduleURI, String baseURI) {
+        try {
+            Source source = config.getSaxonResourceResolver().resolveNamespace(moduleURI, XQUERY_PURPOSE, null);
+            if (source == null && baseURI != null) {
+                String resuri = new URI(baseURI).resolve(moduleURI).toString();
+                source = config.getSaxonResourceResolver().resolveNamespace(resuri, XQUERY_PURPOSE, null);
+            }
+            if (source != null) {
+                return getQuerySource(new URI(source.getSystemId()));
+            }
+        } catch (TransformerException | URISyntaxException ex) {
+            // nevermind
+        }
+        return null;
     }
 
     /**
