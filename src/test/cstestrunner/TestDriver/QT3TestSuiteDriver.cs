@@ -193,7 +193,7 @@ namespace TestRunner {
                 }
                 else if ("schemaImport".Equals(value) || "schemaValidation".Equals(value) ||
                          "schemaAware".Equals(value)) {
-                    return inverse;
+                    return makeSchemaAware(env, inverse);
                     //if (!treeModel.isSchemaAware()) {//TODO
                     //  return false; // cannot use the selected tree model for schema-aware tests
                     //}
@@ -303,6 +303,60 @@ namespace TestRunner {
                 return false;
             }
         }
+        
+
+    protected bool makeSchemaAware(Environment env, bool inverse) {
+         // if (!env.processor.SchemaAware) {
+         //     return false; // cannot use the selected tree model for schema-aware tests
+         // }
+
+         if (inverse) {
+             // force use of a non-schema-aware processor by creating a ProfessionalConfiguration
+             Processor savedProcessor = env.processor;
+             com.saxonica.config.ProfessionalConfiguration pConfig = new com.saxonica.config.ProfessionalConfiguration();
+             pConfig.setNamePool(env.processor.Implementation.getNamePool());
+             env.processor = new Processor(pConfig);
+             env.processor.SetProperty(Feature<bool>.STABLE_UNPARSED_TEXT, true);
+
+
+             // Note that at present no variables are copied across
+             bool xpcState = env.xpathCompiler.SchemaAware;
+             bool xqcState = env.xqueryCompiler.SchemaAware;
+             bool xtState = env.xsltCompiler != null && env.xsltCompiler.SchemaAware;
+             env.xpathCompiler = env.processor.NewXPathCompiler();
+             env.xqueryCompiler = env.processor.NewXQueryCompiler();
+             env.xsltCompiler = env.processor.NewXsltCompiler();
+             env.xpathCompiler.SchemaAware = false;
+             env.xqueryCompiler.SchemaAware = false;
+             env.xsltCompiler.SchemaAware = false;
+             env.resetActions.Add((envt) =>  {
+                 envt.xpathCompiler.SchemaAware = (xpcState);
+                 envt.xqueryCompiler.SchemaAware = (xqcState);
+                     if (envt.xsltCompiler != null) {
+                         envt.xsltCompiler.SchemaAware = (xtState);
+                     }
+                 }
+                 );
+         } else {
+             bool xpcState = env.xpathCompiler.SchemaAware;
+             bool xqcState = env.xqueryCompiler.SchemaAware;
+             bool xtState = env.xsltCompiler != null && env.xsltCompiler.SchemaAware;
+             env.xpathCompiler.SchemaAware = (true);
+             env.xqueryCompiler.SchemaAware = (true);
+             if (env.xsltCompiler != null) {
+                env.xsltCompiler.SchemaAware = (true);
+             }
+             env.resetActions.Add((envt) =>  {
+                     envt.xpathCompiler.SchemaAware=(xpcState);
+                     envt.xqueryCompiler.SchemaAware=(xqcState);
+                     if (envt.xsltCompiler != null) {
+                         envt.xsltCompiler.SchemaAware=(xtState);
+                     }
+                 });
+         }
+
+         return true;
+     }
 
         private bool isSlow(String name) {
             return name == "RangeExpr-409d" || name.StartsWith("unicode90");
@@ -328,15 +382,15 @@ namespace TestRunner {
 
             XdmNode resultElement = testCase.Select(Steps.Child("result")).FirstOrDefault();
             ;
-            bool needSerializedResult = resultElement.Select(Steps.Descendant("assert-serialization-error")).Count() > 0
-                                        || resultElement.Select(Steps.Descendant("serialization-matches")).Count() > 0;
+            bool needSerializedResult = resultElement.Select(Steps.Descendant("assert-serialization-error")).Any()
+                                        || resultElement.Select(Steps.Descendant("serialization-matches")).Any();
             bool needResultValue = true;
             if (needSerializedResult) {
                 needResultValue = resultElement.Select(Steps.Descendant(Predicates.IsElement()).Where(Predicates.Not(
                     Predicates.HasLocalName("serialization-matches")
                         .Or(Predicates.HasLocalName("assert-serialization-error"))
                         .Or(Predicates.HasLocalName("any-of"))
-                        .Or(Predicates.HasLocalName("all-of"))))).Count() > 0;
+                        .Or(Predicates.HasLocalName("all-of"))))).Any();
             }
 
 
@@ -781,7 +835,8 @@ namespace TestRunner {
 
 
             public Uri[] GetModules(String moduleUri, Uri baseUri, String[] locationHints) {
-                XdmValue files = catalogXPathCompiler.Evaluate("./module[@uri='" + moduleUri + "']/@file/string()", testCase);
+                XdmValue files =
+                    catalogXPathCompiler.Evaluate("./module[@uri='" + moduleUri + "']/@file/string()", testCase);
                 if (files.Count == 0) {
                     throw new Exception("Failed to find module entry for " + moduleUri);
                 }

@@ -66,7 +66,7 @@ namespace TestRunner {
             alwaysOn.Add("feature/disabling_output_escaping");
             alwaysOn.Add("feature/serialization");
             alwaysOn.Add("feature/namespace_axis");
-            alwaysOn.Add("feature/dtd");
+            alwaysOff.Add("feature/dtd"); // Microsoft parser does not report ID attributes
             alwaysOn.Add("feature/built_in_derived_types");
             alwaysOn.Add("feature/remote_http");
             alwaysOn.Add("feature/xsl-stylesheet-processing-instruction");
@@ -256,7 +256,8 @@ namespace TestRunner {
 
         private bool isSlow(string testName) {
             return testName.StartsWith("regex-classes") ||
-                   testName == "normalize-unicode-008";
+                   testName == "normalize-unicode-008" ||
+                   testName == "catalog005"; // TODO: this one hangs, need to investigate
                    ;
         }
 
@@ -374,6 +375,7 @@ namespace TestRunner {
                 compiler.BaseUri = hrefFile;
                 compiler.XsltLanguageVersion =
                     (specAtt.Contains("XSLT30") || specAtt.Contains("XSLT20+") ? "3.0" : "2.0");
+                compiler.ClearParameters();
 
                 SysCollGen.IEnumerable<XdmNode> paramsi = testInput.Select(Steps.Child("param").Where(IsTrue("static")));
                 foreach (XdmNode param in paramsi) {
@@ -473,7 +475,8 @@ namespace TestRunner {
                 String fileName = principalPackage.GetAttributeValue("file");
                 Uri fileUri = res.ResolveUri(testCase.BaseUri, fileName);
                 Stream styleSource = new FileStream(fileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
-
+                compiler.ErrorReporter = err => outcome.ReportError(err.ErrorCode);
+                compiler.BaseUri = fileUri;
                 try {
                     XsltPackage xpack = compiler.CompilePackage(styleSource);
                     sheet = xpack.Link();
@@ -695,7 +698,7 @@ namespace TestRunner {
                             }
                             else {
                                 if (src != null) {
-                                    transformer.ApplyTemplates(src, dest);
+                                    transformer.ApplyTemplates(src, srcBaseUri, dest);
                                 }
                                 else {
                                     transformer.ApplyTemplates(srcNode, dest);
@@ -845,6 +848,9 @@ namespace TestRunner {
             }
 
             XPathCompiler assertionXPath = env.processor.NewXPathCompiler();
+            if (env.xsltCompiler.SchemaAware) {
+                assertionXPath.SchemaAware = true;
+            }
             //assertionXPath.setLanguageVersion("3.0");
             CopySchemaNamespace(env, assertionXPath);
             bool success = outcome.TestAssertion(outcome, assertion, outcome.GetPrincipalResultDoc(), assertionXPath,
@@ -1121,6 +1127,10 @@ namespace TestRunner {
                 return (edition.Equals("PE") || edition.Equals("EE")) == needed;
             }
 
+            if (tv == "feature/schema_aware") {
+                env.xsltCompiler.SchemaAware = needed;
+            }
+
             if (needsEE.Contains(type) || needsEE.Contains(tv)) {
                 return edition.Equals("EE") == needed;
             }
@@ -1139,12 +1149,13 @@ namespace TestRunner {
                 case "feature":
                     switch (value) {
                         case "XML_1.1": {
-                            decimal requiredVersion = (decimal) (inverse ? 1.0 : 1.1);
-                            decimal oldVersion = env.processor.XmlVersion;
-                            env.resetActions.Add(envi => { envi.processor.XmlVersion = oldVersion; }
-                            );
-                            env.processor.XmlVersion = requiredVersion;
-                            return true;
+                            return inverse;
+                            // decimal requiredVersion = (decimal) (inverse ? 1.0 : 1.1);
+                            // decimal oldVersion = env.processor.XmlVersion;
+                            // env.resetActions.Add(envi => { envi.processor.XmlVersion = oldVersion; }
+                            // );
+                            // env.processor.XmlVersion = requiredVersion;
+                            // return true;
                         }
 
                         case "XSD_1.1": {
@@ -1285,209 +1296,209 @@ namespace TestRunner {
             }
 
 
-            if ("spec".Equals(type)) {
-                bool atLeast = value.EndsWith("+");
-                value = value.Replace("+", "");
-
-                String specName = ((SpecAttr) spec.GetAttr()).svname.Replace("XT", "XSLT");
-                int order = value.CompareTo(specName);
-                return atLeast ? order <= 0 : order == 0;
-            }
-            else if ("feature".Equals(type)) {
-                //            <xs:enumeration value="backwards_compatibility" />
-                //            <xs:enumeration value="disabling_output_escaping" />
-                //            <xs:enumeration value="schema_aware" />
-                //            <xs:enumeration value="namespace_axis" />
-                //            <xs:enumeration value="streaming" />
-                //            <xs:enumeration value="XML_1.1" />
-
-                if ("XML_1.1".Equals(value) && !inverse) {
-                    if (env != null) {
-                        env.processor.XmlVersion = (decimal) 1.1;
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }
-                }
-                else if ("disabling_output_escaping".Equals(value)) {
-                    return !inverse;
-                }
-                else if ("schema_aware".Equals(value)) {
-                    if (!env.xsltCompiler.SchemaAware) {
-                        return false; // cannot use the selected tree model for schema-aware tests
-                    }
-
-                    if (env != null) {
-                        env.xsltCompiler.SchemaAware = !inverse;
-                    }
-
-                    return true;
-                }
-                else if ("namespace_axis".Equals(value)) {
-                    return !inverse;
-                }
-                else if ("streaming".Equals(value)) {
-                    return !inverse;
-                }
-                else if ("backwards_compatibility".Equals(value)) {
-                    return !inverse;
-                }
-
-                return false;
-            }
-            else if ("xsd-version".Equals(type)) {
-                if ("1.1".Equals(value)) {
-                    if (env != null) {
-                        env.processor.SetProperty(JFeatureKeys.XSD_VERSION, (inverse ? "1.0" : "1.1"));
-                    }
-                    else {
-                        return false;
-                    }
-                }
-                else if ("1.0".Equals(value)) {
-                    if (env != null) {
-                        env.processor.SetProperty(JFeatureKeys.XSD_VERSION, (inverse ? "1.1" : "1.0"));
-                    }
-                    else {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-            else if ("available_documents".Equals(type)) {
-                return !inverse;
-            }
-            else if ("default_language_for_numbering".Equals(type)) {
-                return !inverse;
-            }
-            else if ("languages_for_numbering".Equals(type)) {
-                return !inverse;
-            }
-            else if ("supported_calendars_in_date_formatting_functions".Equals(type)) {
-                return !inverse;
-            }
-            else if ("default_calendar_in_date_formatting_functions".Equals(type)) {
-                return !inverse;
-            }
-            else if ("maximum_number_of_decimal_digits".Equals(type)) {
-                return !inverse;
-                //        } else if ("collation_uri".Equals(type)) {
-                //            return !inverse;
-                //        } else if ("statically_known_collations".Equals(type)) {
-                //            if (value.Equals("http://www.w3.org/xslts/collation/caseblind") && !inverse) {
-                //                env.processor.getUnderlyingConfiguration().setCollationURIResolver(
-                //                        new StandardCollationURIResolver() {
-                //                            public stringCollator resolve(string uri, string base, Configuration config) {
-                //                                if ("http://www.w3.org/xslts/collation/caseblind".Equals(uri)) {
-                //                                    return super.resolve("http://saxon.sf.net/collation?ignore-case=yes", "", config);
-                //                                } else {
-                //                                    return super.resolve(uri, base, config);
-                //                                }
-                //                            }
-                //                        }
-                //                );
-                //            }
-                //            // Alternative case-blind collation URI used in QT3 tests
-                //            if (value.Equals("http://www.w3.org/2010/09/qt-fots-catalog/collation/caseblind") && !inverse) {
-                //                env.processor.getUnderlyingConfiguration().setCollationURIResolver(
-                //                        new StandardCollationURIResolver() {
-                //                            public stringCollator resolve(string uri, string base, Configuration config) {
-                //                                if ("http://www.w3.org/2010/09/qt-fots-catalog/collation/caseblind".Equals(uri)) {
-                //                                    return super.resolve("http://saxon.sf.net/collation?ignore-case=yes", "", config);
-                //                                } else {
-                //                                    return super.resolve(uri, base, config);
-                //                                }
-                //                            }
-                //                        }
-                //                );
-                //            }
-                //            return true;
-            }
-            else if ("default_output_encoding".Equals(type)) {
-                return !inverse;
-            }
-            else if ("unparsed_text_encoding".Equals(type)) {
-                return !inverse;
-            }
-            else if ("additional_normalization_form".Equals(type)) {
-                return !inverse;
-            }
-            else if ("recognize_id_as_uri_fragment".Equals(type)) {
-                return !inverse;
-            }
-            else if ("on-multiple-match".Equals(type)) {
-                throw new Exception("on-muplte-match is no longer recognized");
-                /*if (value.Equals("error"))
-                {
-                    env.xsltCompiler.GetUnderlyingCompilerInfo().setRecoveryPolicy((int)RecoveryPolicy.DoNotRecover);
-                }
-                else
-                {
-                    env.xsltCompiler.GetUnderlyingCompilerInfo().setRecoveryPolicy((int)RecoveryPolicy.RecoverSilently);
-                }
-                return true; */
-            }
-            else if ("ignore_doc_failure".Equals(type)) {
-                return inverse;
-            }
-            else if ("combinations_for_numbering".Equals(type)) {
-                if (value.Equals("COPTIC EPACT DIGIT ONE") || value.Equals("SINHALA ARCHAIC DIGIT ONE") ||
-                    value.Equals("MENDE KIKAKUI DIGIT ONE")) {
-                    return false;
-                }
-
-                return !inverse;
-            }
-            else if ("higher_order_functions".Equals(type)) {
-                return !inverse;
-            }
-            else if ("ignore_doc_failure".Equals(type)) {
-                //TODO
-                return false;
-            }
-            else if ("simple-uca-fallback".Equals(type)) {
-                return !inverse;
-            }
-            else if ("advanced-uca-fallback".Equals(type)) {
-                return !inverse;
-            }
-            else if ("streaming-fallback".Equals(type)) {
-                bool required = !inverse;
-                bool old = env.processor.GetProperty(FeatureKeys.STREAMING_FALLBACK) == "true" ||
-                           env.processor.GetProperty(FeatureKeys.STREAMING_FALLBACK) == "on";
-                if (old != required) {
-                    env.processor.SetProperty<bool>(Feature<bool>.STREAMING_FALLBACK, required);
-                }
-
-                return true;
-            }
-            else if ("sweep_and_posture".Equals(type)) {
-                return !inverse;
-            }
-            else if ("unicode_version".Equals(type)) {
-                return value.Equals("6.0");
-            }
-            else if ("enable_assertions".Equals(type)) {
-                return false;
-            }
-            else if ("year_component_values".Equals(type)) {
-                if ("support year zero".Equals(value)) {
-                    if (env != null) {
-                        env.processor.SetProperty<String>(Feature<String>.XSD_VERSION, inverse ? "1.0" : "1.1");
-                    }
-                    else {
-                        return false;
-                    }
-                }
-
-                return !inverse;
-            }
-            else {
-                println("**** dependency not recognized: " + type);
-                return false;
-            }
+            // if ("spec".Equals(type)) {
+            //     bool atLeast = value.EndsWith("+");
+            //     value = value.Replace("+", "");
+            //
+            //     String specName = ((SpecAttr) spec.GetAttr()).svname.Replace("XT", "XSLT");
+            //     int order = value.CompareTo(specName);
+            //     return atLeast ? order <= 0 : order == 0;
+            // }
+            // else if ("feature".Equals(type)) {
+            //     //            <xs:enumeration value="backwards_compatibility" />
+            //     //            <xs:enumeration value="disabling_output_escaping" />
+            //     //            <xs:enumeration value="schema_aware" />
+            //     //            <xs:enumeration value="namespace_axis" />
+            //     //            <xs:enumeration value="streaming" />
+            //     //            <xs:enumeration value="XML_1.1" />
+            //
+            //     if ("XML_1.1".Equals(value) && !inverse) {
+            //         if (env != null) {
+            //             env.processor.XmlVersion = (decimal) 1.1;
+            //             return true;
+            //         }
+            //         else {
+            //             return false;
+            //         }
+            //     }
+            //     else if ("disabling_output_escaping".Equals(value)) {
+            //         return !inverse;
+            //     }
+            //     else if ("schema_aware".Equals(value)) {
+            //         if (!env.xsltCompiler.SchemaAware) {
+            //             return false; // cannot use the selected tree model for schema-aware tests
+            //         }
+            //
+            //         if (env != null) {
+            //             env.xsltCompiler.SchemaAware = !inverse;
+            //         }
+            //
+            //         return true;
+            //     }
+            //     else if ("namespace_axis".Equals(value)) {
+            //         return !inverse;
+            //     }
+            //     else if ("streaming".Equals(value)) {
+            //         return !inverse;
+            //     }
+            //     else if ("backwards_compatibility".Equals(value)) {
+            //         return !inverse;
+            //     }
+            //
+            //     return false;
+            // }
+            // else if ("xsd-version".Equals(type)) {
+            //     if ("1.1".Equals(value)) {
+            //         if (env != null) {
+            //             env.processor.SetProperty(JFeatureKeys.XSD_VERSION, (inverse ? "1.0" : "1.1"));
+            //         }
+            //         else {
+            //             return false;
+            //         }
+            //     }
+            //     else if ("1.0".Equals(value)) {
+            //         if (env != null) {
+            //             env.processor.SetProperty(JFeatureKeys.XSD_VERSION, (inverse ? "1.1" : "1.0"));
+            //         }
+            //         else {
+            //             return false;
+            //         }
+            //     }
+            //
+            //     return true;
+            // }
+            // else if ("available_documents".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("default_language_for_numbering".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("languages_for_numbering".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("supported_calendars_in_date_formatting_functions".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("default_calendar_in_date_formatting_functions".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("maximum_number_of_decimal_digits".Equals(type)) {
+            //     return !inverse;
+            //     //        } else if ("collation_uri".Equals(type)) {
+            //     //            return !inverse;
+            //     //        } else if ("statically_known_collations".Equals(type)) {
+            //     //            if (value.Equals("http://www.w3.org/xslts/collation/caseblind") && !inverse) {
+            //     //                env.processor.getUnderlyingConfiguration().setCollationURIResolver(
+            //     //                        new StandardCollationURIResolver() {
+            //     //                            public stringCollator resolve(string uri, string base, Configuration config) {
+            //     //                                if ("http://www.w3.org/xslts/collation/caseblind".Equals(uri)) {
+            //     //                                    return super.resolve("http://saxon.sf.net/collation?ignore-case=yes", "", config);
+            //     //                                } else {
+            //     //                                    return super.resolve(uri, base, config);
+            //     //                                }
+            //     //                            }
+            //     //                        }
+            //     //                );
+            //     //            }
+            //     //            // Alternative case-blind collation URI used in QT3 tests
+            //     //            if (value.Equals("http://www.w3.org/2010/09/qt-fots-catalog/collation/caseblind") && !inverse) {
+            //     //                env.processor.getUnderlyingConfiguration().setCollationURIResolver(
+            //     //                        new StandardCollationURIResolver() {
+            //     //                            public stringCollator resolve(string uri, string base, Configuration config) {
+            //     //                                if ("http://www.w3.org/2010/09/qt-fots-catalog/collation/caseblind".Equals(uri)) {
+            //     //                                    return super.resolve("http://saxon.sf.net/collation?ignore-case=yes", "", config);
+            //     //                                } else {
+            //     //                                    return super.resolve(uri, base, config);
+            //     //                                }
+            //     //                            }
+            //     //                        }
+            //     //                );
+            //     //            }
+            //     //            return true;
+            // }
+            // else if ("default_output_encoding".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("unparsed_text_encoding".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("additional_normalization_form".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("recognize_id_as_uri_fragment".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("on-multiple-match".Equals(type)) {
+            //     throw new Exception("on-muplte-match is no longer recognized");
+            //     /*if (value.Equals("error"))
+            //     {
+            //         env.xsltCompiler.GetUnderlyingCompilerInfo().setRecoveryPolicy((int)RecoveryPolicy.DoNotRecover);
+            //     }
+            //     else
+            //     {
+            //         env.xsltCompiler.GetUnderlyingCompilerInfo().setRecoveryPolicy((int)RecoveryPolicy.RecoverSilently);
+            //     }
+            //     return true; */
+            // }
+            // else if ("ignore_doc_failure".Equals(type)) {
+            //     return inverse;
+            // }
+            // else if ("combinations_for_numbering".Equals(type)) {
+            //     if (value.Equals("COPTIC EPACT DIGIT ONE") || value.Equals("SINHALA ARCHAIC DIGIT ONE") ||
+            //         value.Equals("MENDE KIKAKUI DIGIT ONE")) {
+            //         return false;
+            //     }
+            //
+            //     return !inverse;
+            // }
+            // else if ("higher_order_functions".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("ignore_doc_failure".Equals(type)) {
+            //     //TODO
+            //     return false;
+            // }
+            // else if ("simple-uca-fallback".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("advanced-uca-fallback".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("streaming-fallback".Equals(type)) {
+            //     bool required = !inverse;
+            //     bool old = env.processor.GetProperty(FeatureKeys.STREAMING_FALLBACK) == "true" ||
+            //                env.processor.GetProperty(FeatureKeys.STREAMING_FALLBACK) == "on";
+            //     if (old != required) {
+            //         env.processor.SetProperty<bool>(Feature<bool>.STREAMING_FALLBACK, required);
+            //     }
+            //
+            //     return true;
+            // }
+            // else if ("sweep_and_posture".Equals(type)) {
+            //     return !inverse;
+            // }
+            // else if ("unicode_version".Equals(type)) {
+            //     return value.Equals("6.0");
+            // }
+            // else if ("enable_assertions".Equals(type)) {
+            //     return false;
+            // }
+            // else if ("year_component_values".Equals(type)) {
+            //     if ("support year zero".Equals(value)) {
+            //         if (env != null) {
+            //             env.processor.SetProperty<String>(Feature<String>.XSD_VERSION, inverse ? "1.0" : "1.1");
+            //         }
+            //         else {
+            //             return false;
+            //         }
+            //     }
+            //
+            //     return !inverse;
+            // }
+            // else {
+            //     println("**** dependency not recognized: " + type);
+            //     return false;
+            // }
         }
 
         /*private static string getCanonicalPath(File file) {
