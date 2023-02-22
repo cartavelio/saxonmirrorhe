@@ -724,7 +724,7 @@ task userdoc_publish_html(
 // ============================================================
 
 task update_documentation(
-  dependsOn: ["copy_xml_documentation", "copy_html_documentation"],
+  dependsOn: ["copy_xml_documentation", "copy_html_documentation", "copy_base_css"],
   description: "Update documentation from viewer app"
 ) {
   // Just a place to hang dependencies
@@ -746,6 +746,14 @@ task copy_html_documentation(
 ) {
   into "${buildDir}/website/html/documentation${saxonMajorVersion}"
   from "${buildDir}/userdoc/html"
+}
+
+task copy_base_css(
+        type: Copy,
+        description: "Copy base CSS for HTML documentation"
+) {
+  into "${buildDir}/website"
+  from "${projectDir}/src/viewer_appJS/saxon-base.css"
 }
 
 // ============================================================
