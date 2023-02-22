@@ -11,10 +11,10 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.flwor.Clause;
-import net.sf.saxon.expr.instruct.Block;
-import net.sf.saxon.expr.instruct.Choose;
-import net.sf.saxon.expr.instruct.ForEach;
+import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.hof.PartialApply;
+import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -29,18 +29,16 @@ import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.str.StringTool;
-import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.SymbolicName;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.style.ExpressionContext;
+import net.sf.saxon.style.SourceBinding;
+import net.sf.saxon.style.StylesheetPackage;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntArraySet;
 import net.sf.saxon.z.IntSet;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.IntPredicate;
 
 import static net.sf.saxon.type.BuiltInAtomicType.*;
@@ -63,6 +61,7 @@ public class XPathParser {
     // Each entry on the stack is a Binding object containing details
     // of the variable.
 
+    public Stack<InlineFunctionDetails> inlineFunctionStack = new Stack<>();
     protected QNameParser qNameParser;
     protected ParserExtension parserExtension = new ParserExtension();
 
@@ -96,6 +95,12 @@ public class XPathParser {
 
     protected int languageVersion = 20;
     protected int catchDepth = 0;
+
+    public static class InlineFunctionDetails {
+        public Stack<LocalBinding> outerVariables;    // Local variables defined in the immediate outer scope (the father scope)
+        public List<LocalBinding> outerVariablesUsed; // Local variables from the outer scope that are actually used
+        public List<UserFunctionParameter> implicitParams; // Parameters corresponding (1:1) with the above
+    }
 
     public interface Accelerator {
 
@@ -838,7 +843,7 @@ public class XPathParser {
                         grumble("Left operand of '" + Token.tokens[t.currentToken] + "' needs parentheses");
                     }
                     break;
-                case Token.ARROW:
+                case Token.FAT_ARROW:
                     lhs = parseArrowPostfix(lhs);
                     break;
                 default:
@@ -954,7 +959,7 @@ public class XPathParser {
                 return 17;
             case Token.CAST_AS:
                 return 18;
-            case Token.ARROW:
+            case Token.FAT_ARROW:
                 return 19;
             // remainder commented out because not used in precedence parsing (but perhaps they could be)
 //            case Token.BANG:
@@ -1681,6 +1686,9 @@ public class XPathParser {
                 case "union":
                     primaryType = parseUnionType(this);
                     break;
+                case "enum":
+                    primaryType = parseEnumType(this);
+                    break;
                 case "empty-sequence":
                     nextToken();
                     expect(Token.RPAR);
@@ -1842,6 +1850,36 @@ public class XPathParser {
         }
         p.nextToken();
         return new LocalUnionType(memberTypes);
+
+    }
+
+    /**
+     * Parse an enum type (XPath 4.0 proposal).
+     * Syntax: "enum" "(" StringLiteral ("," StringLiteral)* ")"
+     */
+
+    public ItemType parseEnumType(XPathParser p) throws XPathException {
+        // The initial "union(" has been read
+        checkLanguageVersion40();
+        Tokenizer t = p.getTokenizer();
+        p.nextToken();
+        Set<String> values = new HashSet<String>(6);
+
+        while (true) {
+            p.expect(Token.STRING_LITERAL);
+            values.add(t.currentTokenValue);
+            p.nextToken();
+            if (t.currentToken == Token.RPAR) {
+                break;
+            } else if (t.currentToken == Token.COMMA) {
+                p.nextToken();
+            } else {
+                p.grumble("Expected ',' or ')' after string literal in enum type, found '" +
+                                  Token.tokens[t.currentToken] + '\'');
+            }
+        }
+        p.nextToken();
+        return new EnumerationType(values);
 
     }
 
@@ -2396,18 +2434,41 @@ public class XPathParser {
 
             case Token.PERCENT: {
                 AnnotationList annotations = parseAnnotationsList();
+                if (t.currentToken == Token.THIN_ARROW) {
+                    checkLanguageVersion40();
+                    nextToken();
+                    annotations.check(env.getConfiguration(), "IF");
+                    if (t.currentToken == Token.LPAR) {
+                        return parseInlineFunction(annotations);
+                    } else if (t.currentToken == Token.LCURLY) {
+                        return parseFocusFunction(annotations);
+                    } else {
+                        grumble("Expected '(' or '{' after '->'");
+                    }
+                }
                 if (!t.currentTokenValue.equals("function")) {
                     grumble("Expected 'function' to follow the annotation assertion");
                 }
                 annotations.check(env.getConfiguration(), "IF");
                 return parseInlineFunction(annotations);
             }
+            case Token.THIN_ARROW: {
+                checkLanguageVersion40();
+                nextToken();
+                if (t.currentToken == Token.LPAR) {
+                    AnnotationList annotations = AnnotationList.EMPTY;
+                    return parseInlineFunction(annotations);
+                } else if (t.currentToken == Token.LCURLY) {
+                    AnnotationList annotations = AnnotationList.EMPTY;
+                    return parseFocusFunction(annotations);
+                } else {
+                    grumble("Expected '(' or '{' after '->'");
+                }
+            }
             case Token.NODEKIND:
                 if (t.currentTokenValue.equals("function")) {
                     AnnotationList annotations = AnnotationList.EMPTY;
                     return parseInlineFunction(annotations);
-//                } else if (t.currentTokenValue.equals("map")) {
-//                    return parseFunctionCall(null);
                 }
                 // fall through!
             case Token.NAME:
@@ -2486,6 +2547,7 @@ public class XPathParser {
                         return parseArrayCurlyConstructor();
                     case "fn":
                     case ".":
+                        warning("The experimental syntax '.{expr}' has changed to '->{expr}");
                         return parserExtension.parseDotFunction(this);
                     case "_":
                         return parserExtension.parseUnderscoreFunction(this);
@@ -3652,20 +3714,425 @@ public class XPathParser {
         return null;
     }
 
+
+    protected Expression parseInlineFunction(AnnotationList annotations) throws XPathException {
+        // the next token should be the < QNAME "("> pair
+
+        int offset = t.currentTokenStartOffset;
+
+        InlineFunctionDetails details = new InlineFunctionDetails();
+        details.outerVariables = new Stack<>();
+        for (LocalBinding lb : getRangeVariables()) {
+            details.outerVariables.push(lb);
+        }
+        details.outerVariablesUsed = new ArrayList<>(4);
+        details.implicitParams = new ArrayList<>(4);
+        inlineFunctionStack.push(details);
+        setRangeVariables(new Stack<>());
+        nextToken();
+        HashSet<StructuredQName> paramNames = new HashSet<>(8);
+        List<UserFunctionParameter> params = new ArrayList<>(8);
+        SequenceType resultType = SequenceType.ANY_SEQUENCE;
+        int paramSlot = 0;
+        while (t.currentToken != Token.RPAR) {
+            //     ParamList   ::=     Param ("," Param)*
+            //     Param       ::=     "$" VarName  TypeDeclaration?
+            expect(Token.DOLLAR);
+            nextToken();
+            expect(Token.NAME);
+            String argName = t.currentTokenValue;
+            StructuredQName argQName = makeStructuredQName(argName, "");
+            if (paramNames.contains(argQName)) {
+                grumble("Duplicate parameter name " + Err.wrap(t.currentTokenValue, Err.VARIABLE), "XQST0039");
+            }
+            paramNames.add(argQName);
+            SequenceType paramType = SequenceType.ANY_SEQUENCE;
+            nextToken();
+            if (t.currentToken == Token.AS) {
+                nextToken();
+                paramType = parseSequenceType();
+            }
+
+            UserFunctionParameter arg = new UserFunctionParameter();
+            arg.setRequiredType(paramType);
+            arg.setVariableQName(argQName);
+            arg.setSlotNumber(paramSlot++);
+            params.add(arg);
+            declareRangeVariable(arg);
+            if (t.currentToken == Token.RPAR) {
+                break;
+            } else if (t.currentToken == Token.COMMA) {
+                nextToken();
+            } else {
+                grumble("Expected ',' or ')' after function argument, found '" +
+                                  Token.tokens[t.currentToken] + '\'');
+            }
+        }
+        t.setState(Tokenizer.BARE_NAME_STATE);
+        nextToken();
+        if (t.currentToken == Token.AS) {
+            t.setState(Tokenizer.SEQUENCE_TYPE_STATE);
+            nextToken();
+            resultType = parseSequenceType();
+        }
+        expect(Token.LCURLY);
+        t.setState(Tokenizer.DEFAULT_STATE);
+        nextToken();
+        Expression body;
+        if (t.currentToken == Token.RCURLY && isAllowXPath31Syntax()) {
+            t.lookAhead();
+            nextToken();
+            body = Literal.makeEmptySequence();
+        } else {
+            body = parseExpression();
+            expect(Token.RCURLY);
+            t.lookAhead();  // must be done manually after an RCURLY
+            nextToken();
+        }
+        ExpressionTool.setDeepRetainedStaticContext(body, getStaticContext().makeRetainedStaticContext());
+
+        int arity = paramNames.size();
+        for (int i = 0; i < arity; i++) {
+            undeclareRangeVariable();
+        }
+
+        Expression result = makeInlineFunctionValue(this, annotations, details, params, resultType, body);
+
+        setLocation(result, offset);
+        // restore the previous stack of range variables
+        setRangeVariables(details.outerVariables);
+        inlineFunctionStack.pop();
+        return result;
+    }
+
+    public static Expression makeInlineFunctionValue(
+            XPathParser p, AnnotationList annotations,
+            InlineFunctionDetails details, List<UserFunctionParameter> params,
+            SequenceType resultType, Expression body) {
+        // Does this function access any outer variables?
+        // If so, we create a UserFunction in which the outer variables are defined as extra parameters
+        // in addition to the declared parameters, and then we return a call to partial-apply() that
+        // sets these additional parameters to the values they have in the calling context.
+        int arity = params.size();
+
+        UserFunction uf = new UserFunction();
+        uf.setFunctionName(new StructuredQName("anon", NamespaceConstant.ANONYMOUS, "f_" + uf.hashCode()));
+        uf.setPackageData(p.getStaticContext().getPackageData());
+        uf.setBody(body);
+        uf.setAnnotations(annotations);
+        uf.setResultType(resultType);
+        uf.incrementReferenceCount();
+
+        if (uf.getPackageData() instanceof StylesheetPackage) {
+            // Add the inline function as a private component to the package, so that it can have binding
+            // slots allocated for any references to global variables or functions, and so that it will
+            // be copied as a hidden component into any using packages
+            StylesheetPackage pack = (StylesheetPackage) uf.getPackageData();
+            Component comp = Component.makeComponent(uf, Visibility.PRIVATE, VisibilityProvenance.DEFAULTED, pack, pack);
+            uf.setDeclaringComponent(comp);
+        }
+
+        Expression result;
+        List<UserFunctionParameter> implicitParams = details.implicitParams;
+        if (!implicitParams.isEmpty()) {
+            int extraParams = implicitParams.size();
+            int expandedArity = params.size() + extraParams;
+            UserFunctionParameter[] paramArray = new UserFunctionParameter[expandedArity];
+            for (int i = 0; i < params.size(); i++) {
+                paramArray[i] = params.get(i);
+            }
+            int k = params.size();
+            for (UserFunctionParameter implicitParam : implicitParams) {
+                paramArray[k++] = implicitParam;
+            }
+            uf.setParameterDefinitions(paramArray);
+            SlotManager stackFrame = p.getStaticContext().getConfiguration().makeSlotManager();
+            for (int i = 0; i < expandedArity; i++) {
+                int slot = stackFrame.allocateSlotNumber(paramArray[i].getVariableQName());
+                paramArray[i].setSlotNumber(slot);
+            }
+
+            ExpressionTool.allocateSlots(body, expandedArity, stackFrame);
+            uf.setStackFrameMap(stackFrame);
+            result = new UserFunctionReference(uf);
+
+            Expression[] partialArgs = new Expression[expandedArity];
+            for (int i = 0; i < arity; i++) {
+                partialArgs[i] = null;
+            }
+            for (int ip = 0; ip < implicitParams.size(); ip++) {
+                UserFunctionParameter ufp = implicitParams.get(ip);
+                LocalBinding binding = details.outerVariablesUsed.get(ip);
+                VariableReference var;
+                if (binding instanceof ParserExtension.TemporaryXSLTVariableBinding) {
+                    var = new LocalVariableReference(binding);
+                    ((ParserExtension.TemporaryXSLTVariableBinding) binding).declaration.registerReference(var);
+                } else {
+                    var = new LocalVariableReference(binding);
+                }
+                var.setStaticType(binding.getRequiredType(), null, 0);
+                ufp.setRequiredType(binding.getRequiredType());
+                partialArgs[ip + arity] = var;
+            }
+            result = new PartialApply(result, partialArgs);
+
+        } else {
+
+            // there are no implicit parameters
+            UserFunctionParameter[] paramArray = params.toArray(new UserFunctionParameter[0]);
+            uf.setParameterDefinitions(paramArray);
+
+            SlotManager stackFrame = p.getStaticContext().getConfiguration().makeSlotManager();
+            for (UserFunctionParameter param : paramArray) {
+                stackFrame.allocateSlotNumber(param.getVariableQName());
+            }
+
+            ExpressionTool.allocateSlots(body, params.size(), stackFrame);
+            uf.setStackFrameMap(stackFrame);
+            result = new UserFunctionReference(uf);
+        }
+
+        if (uf.getPackageData() instanceof StylesheetPackage) {
+            // Note: inline functions in XSLT are registered as components; but not if they
+            // are declared within a static expression, e.g. the initializer of a static
+            // global variable
+            ((StylesheetPackage) uf.getPackageData()).addComponent(uf.getDeclaringComponent());
+        }
+        return result;
+    }
+
+
     /**
-     * Parse an inline function
-     * "function" "(" ParamList? ")" ("as" SequenceType)? EnclosedExpr
-     * On entry, "function (" has already been read
+     * Locate a range variable with a given name. (By "range variable", we mean a
+     * variable declared within the expression where it is used.)
      *
-     * @param annotations the function annotations, which have already been read, or null if there are none
-     * @return the parsed inline function
-     * @throws XPathException if a syntax error is found
+     * @param qName identifies the name of the range variable
+     * @return null if not found (this means the variable is probably a
+     * context variable); otherwise the relevant RangeVariable
      */
 
-    /*@NotNull*/
-    protected Expression parseInlineFunction(AnnotationList annotations) throws XPathException {
-        return parserExtension.parseInlineFunction(this, annotations);
+    /*@Nullable*/
+    public LocalBinding findOuterRangeVariable(XPathParser p, StructuredQName qName) {
+        return findOuterRangeVariable(qName, inlineFunctionStack, p.getStaticContext());
     }
+
+
+    /**
+     * When a variable reference occurs within an inline function, it might be a reference to a variable declared
+     * outside the inline function (which needs to become part of the closure). This code looks for such an outer
+     * variable
+     *
+     * @param qName               the name of the variable
+     * @param inlineFunctionStack the stack of inline functions that we are within
+     * @param env                 the static context
+     * @return a binding for the variable; this will typically be a binding to a newly added parameter
+     * for the innermost function in which the variable reference appears. As a side effect, all the inline
+     * functions between the declaration of the variable and its use will have this variable as an additional
+     * parameter, each one bound to the corresponding parameter in the containing function.
+     */
+
+    public static LocalBinding findOuterRangeVariable(StructuredQName qName, Stack<InlineFunctionDetails> inlineFunctionStack, StaticContext env) {
+        // If we didn't find the variable, it might be defined in an outer scope.
+        LocalBinding b2 = findOuterXPathRangeVariable(qName, inlineFunctionStack);
+        if (b2 != null) {
+            return b2;
+        }
+        // It's not an in-scope range variable. If we're in XSLT, it might be an XSLT-defined local variable
+        if (env instanceof ExpressionContext && !inlineFunctionStack.isEmpty()) {
+            b2 = findOuterXSLTVariable(qName, inlineFunctionStack, env);
+        }
+        return b2;  // if null, it's not an in-scope range variable
+    }
+
+    /**
+     * Look for an XPath/XQuery declaration of a variable used inside an inline function, but declared outside
+     *
+     * @param qName               the name of the variable
+     * @param inlineFunctionStack the stack of inline functions that we are within
+     * @return a binding to the innermost declaration of the variable
+     */
+    private static LocalBinding findOuterXPathRangeVariable(StructuredQName qName, Stack<InlineFunctionDetails> inlineFunctionStack) {
+        for (int s = inlineFunctionStack.size() - 1; s >= 0; s--) {
+            InlineFunctionDetails details = inlineFunctionStack.get(s);
+            Stack<LocalBinding> outerVariables = details.outerVariables;
+            for (int v = outerVariables.size() - 1; v >= 0; v--) {
+                LocalBinding b2 = outerVariables.elementAt(v);
+                if (b2.getVariableQName().equals(qName)) {
+                    for (int bs = s; bs <= inlineFunctionStack.size() - 1; bs++) {
+                        details = inlineFunctionStack.get(bs);
+                        boolean found = false;
+                        for (int p = 0; p < details.outerVariablesUsed.size() - 1; p++) {
+                            if (details.outerVariablesUsed.get(p) == b2) {
+                                // the inner function already uses the outer variable
+                                b2 = details.implicitParams.get(p);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            // Need to add an implicit parameter to the inner function
+                            details.outerVariablesUsed.add(b2);
+                            UserFunctionParameter ufp = new UserFunctionParameter();
+                            ufp.setVariableQName(qName);
+                            ufp.setRequiredType(b2.getRequiredType());
+                            details.implicitParams.add(ufp);
+                            b2 = ufp;
+                        }
+                    }
+                    return b2;
+                }
+            }
+            LocalBinding b2 = bindParametersInNestedFunctions(qName, inlineFunctionStack, s);
+            if (b2 != null) {
+                return b2;
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Look for an XSLT declaration of a variable used inside an inline function, but declared outside
+     *
+     * @param qName               the name of the variable
+     * @param inlineFunctionStack the stack of inline functions that we are within
+     * @return a binding to the innermost declaration of the variable
+     */
+
+    private static LocalBinding findOuterXSLTVariable(
+            StructuredQName qName, Stack<InlineFunctionDetails> inlineFunctionStack, StaticContext env) {
+        SourceBinding decl = ((ExpressionContext) env).getStyleElement().bindLocalVariable(qName);
+        if (decl != null) {
+            InlineFunctionDetails details = inlineFunctionStack.get(0);
+            LocalBinding innermostBinding;
+            boolean found = false;
+            for (int p = 0; p < details.outerVariablesUsed.size(); p++) {
+                if (details.outerVariablesUsed.get(p).getVariableQName().equals(qName)) {
+                    // the inner function already uses the outer variable
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                // Need to add an implicit parameter to the inner function
+                details.outerVariablesUsed.add(new ParserExtension.TemporaryXSLTVariableBinding(decl));
+                UserFunctionParameter ufp = new UserFunctionParameter();
+                ufp.setVariableQName(qName);
+                ufp.setRequiredType(decl.getInferredType(true));
+                details.implicitParams.add(ufp);
+            }
+            // Now do the same for all inner inline functions, but this time binding to the
+            // relevant parameter of the next containing function
+            innermostBinding = bindParametersInNestedFunctions(qName, inlineFunctionStack, 0);
+            return innermostBinding;
+        }
+        return null;
+    }
+
+
+    /**
+     * Given that a variable is referenced within an inline function and is declared outside it,
+     * add implicit parameters to all the functions that appear in the containment stack between
+     * the declaration and the reference, in each case binding the value of the argument to the inner
+     * function to the corresponding declared parameter in its containing function.
+     *
+     * @param qName               the name of the variable
+     * @param inlineFunctionStack the stack of nested inline functions
+     * @param start               the position in this stack of the function that contains the variable
+     *                            declaration
+     * @return a binding to the relevant (newly declared) parameter of the innermost function.
+     */
+
+    private static LocalBinding bindParametersInNestedFunctions(
+            StructuredQName qName, Stack<InlineFunctionDetails> inlineFunctionStack, int start) {
+        InlineFunctionDetails details = inlineFunctionStack.get(start);
+        List<UserFunctionParameter> params = details.implicitParams;
+        for (UserFunctionParameter param : params) {
+            if (param.getVariableQName().equals(qName)) {
+                // The variable reference corresponds to a parameter of an outer inline function
+                // We potentially need to add implicit parameters to any inner inline functions, and
+                // bind the variable reference to the innermost of these implicit parameters
+                LocalBinding b2 = param;
+                for (int bs = start + 1; bs <= inlineFunctionStack.size() - 1; bs++) {
+                    details = inlineFunctionStack.get(bs);
+                    boolean found = false;
+                    for (int p = 0; p < details.outerVariablesUsed.size() - 1; p++) {
+                        if (details.outerVariablesUsed.get(p) == param) {
+                            // the inner function already uses the outer variable
+                            b2 = details.implicitParams.get(p);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        // Need to add an implicit parameter to the inner function
+                        details.outerVariablesUsed.add(param);
+                        UserFunctionParameter ufp = new UserFunctionParameter();
+                        ufp.setVariableQName(qName);
+                        ufp.setRequiredType(param.getRequiredType());
+                        details.implicitParams.add(ufp);
+                        b2 = ufp;
+                    }
+                }
+                if (b2 != null) {
+                    return b2;
+                }
+            }
+        }
+        return null;
+    }
+
+
+    public Expression parseFocusFunction(AnnotationList annotations) throws XPathException {
+        checkLanguageVersion40();
+        //Tokenizer t = getTokenizer();
+        int offset = t.currentTokenStartOffset;
+
+        InlineFunctionDetails details = new InlineFunctionDetails();
+        details.outerVariables = new Stack<>();
+        for (LocalBinding lb : getRangeVariables()) {
+            details.outerVariables.push(lb);
+        }
+        details.outerVariablesUsed = new ArrayList<>(4);
+        details.implicitParams = new ArrayList<>(4);
+        inlineFunctionStack.push(details);
+        setRangeVariables(new Stack<>());
+        nextToken();
+        List<UserFunctionParameter> params = new ArrayList<>(1);
+        SequenceType resultType = SequenceType.ANY_SEQUENCE;
+
+        StructuredQName argQName = new StructuredQName("saxon", NamespaceConstant.SAXON, "dot");
+
+        UserFunctionParameter arg = new UserFunctionParameter();
+        arg.setRequiredType(SequenceType.SINGLE_ITEM);
+        arg.setVariableQName(argQName);
+        arg.setSlotNumber(0);
+        params.add(arg);
+
+        Expression body;
+        if (t.currentToken == Token.RCURLY) {
+            t.lookAhead();  // must be done manually after an RCURLY
+            nextToken();
+            body = Literal.makeEmptySequence();
+        } else {
+            body = parseExpression();
+            expect(Token.RCURLY);
+            t.lookAhead();  // must be done manually after an RCURLY
+            nextToken();
+            body.setRetainedStaticContext(getStaticContext().makeRetainedStaticContext());
+
+            LocalVariableReference ref = new LocalVariableReference(arg);
+            body = new ForEach(ref, body);
+        }
+        Expression result = makeInlineFunctionValue(this, AnnotationList.EMPTY, details, params, resultType, body);
+
+        setLocation(result, offset);
+        // restore the previous stack of range variables
+        setRangeVariables(details.outerVariables);
+        inlineFunctionStack.pop();
+        return result;
+    }
+
 
     /**
      * Process a function call in which one or more of the argument positions are
@@ -3787,7 +4254,7 @@ public class XPathParser {
                 return b;
             }
         }
-        return parserExtension.findOuterRangeVariable(this, qName);
+        return findOuterRangeVariable(this, qName);
     }
 
     /**

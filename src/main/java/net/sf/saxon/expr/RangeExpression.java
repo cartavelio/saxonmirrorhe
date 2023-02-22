@@ -105,11 +105,11 @@ public class RangeExpression extends Expression {
         start.setChildExpression(tc.staticTypeCheck(
                 getStartExpression(), SequenceType.OPTIONAL_INTEGER, role0, visitor));
 
-        RoleDiagnostic role1 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "to", 1);
+        RoleDiagnostic role1 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "by", 1);
         step.setChildExpression(tc.staticTypeCheck(
                 getStepExpression(), SequenceType.OPTIONAL_INTEGER, role1, visitor));
 
-        RoleDiagnostic role2 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "to", 2);
+        RoleDiagnostic role2 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "to", 1);
         end.setChildExpression(tc.staticTypeCheck(
                 getEndExpression(), SequenceType.OPTIONAL_INTEGER, role2, visitor));
 

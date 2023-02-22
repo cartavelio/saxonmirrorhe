@@ -567,13 +567,19 @@ public final class Tokenizer {
                     nextToken = Token.PLUS;
                     return;
                 case '-':
+                    if (inputOffset < inputLength
+                            && input.charAt(inputOffset) == '>') {
+                        inputOffset++;
+                        nextToken = Token.THIN_ARROW;
+                        return;
+                    }
                     nextToken = Token.MINUS;   // not detected if part of a name
                     return;
                 case '=':
                     if (inputOffset < inputLength
                             && input.charAt(inputOffset) == '>') {
                         inputOffset++;
-                        nextToken = Token.ARROW;
+                        nextToken = Token.FAT_ARROW;
                         return;
                     }
                     nextToken = Token.EQUALS;
@@ -658,6 +664,7 @@ public final class Tokenizer {
                         nextToken = Token.DOTDOT;
                         return;
                     }
+                    // TODO: drop this experimental syntax (.{expr} becomes ->{expr})
                     if (inputOffset < inputLength
                             && input.charAt(inputOffset) == '{') {
                         inputOffset++;
@@ -1056,6 +1063,7 @@ public final class Tokenizer {
             case "record":
             case "type":
             case "union":
+            case "enum":
                 return languageLevel == 40 ? Token.NODEKIND : Token.FUNCTION; // Saxon extension types
             case "switch":
                 // Reserved in XPath 3.0, even though only used in XQuery
