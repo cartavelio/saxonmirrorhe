@@ -17,8 +17,8 @@ import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.iter.TwoItemIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
@@ -218,8 +218,8 @@ public final class CardinalityChecker extends UnaryExpression {
 
         // If the base iterator knows how many items there are, then check it now rather than wasting time
 
-        if (base.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
-            int count = ((LastPositionFinder) base).getLength();
+        if (SequenceTool.supportsGetLength(base)) {
+            int count = SequenceTool.getLength(base);
             if (count == 0 && !Cardinality.allowsZero(requiredCardinality)) {
                 typeError("An empty sequence is not allowed as the " +
                         role.getMessage(), role.getErrorCode(), context);
@@ -276,28 +276,32 @@ public final class CardinalityChecker extends UnaryExpression {
     /*@Nullable*/
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        SequenceIterator iter = getBaseExpression().iterate(context);
-        Item first = iter.next();
-        if (first == null) {
-            if (!Cardinality.allowsZero(requiredCardinality)) {
-                typeError("An empty sequence is not allowed as the " +
+        try {
+            SequenceIterator iter = getBaseExpression().iterate(context);
+            Item first = iter.next();
+            if (first == null) {
+                if (!Cardinality.allowsZero(requiredCardinality)) {
+                    typeError("An empty sequence is not allowed as the " +
+                            role.getMessage(), role.getErrorCode(), context);
+                }
+                return null;
+            } else {
+                if (requiredCardinality == StaticProperty.EMPTY) {
+                    typeError("An empty sequence is required as the " +
                         role.getMessage(), role.getErrorCode(), context);
+                    return null;
+                }
+                Item second = iter.next();
+                if (second != null) {
+                    typeError("A sequence of more than one item is not allowed as the " +
+                        role.getMessage() + depictSequenceStart(new TwoItemIterator(first, second), 2), role.getErrorCode(), context);
+                    return null;
+                }
             }
-            return null;
-        } else {
-            if (requiredCardinality == StaticProperty.EMPTY) {
-                typeError("An empty sequence is required as the " +
-                    role.getMessage(), role.getErrorCode(), context);
-                return null;
-            }
-            Item second = iter.next();
-            if (second != null) {
-                typeError("A sequence of more than one item is not allowed as the " +
-                    role.getMessage() + depictSequenceStart(new TwoItemIterator(first, second), 2), role.getErrorCode(), context);
-                return null;
-            }
+            return first;
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
-        return first;
     }
 
     /**

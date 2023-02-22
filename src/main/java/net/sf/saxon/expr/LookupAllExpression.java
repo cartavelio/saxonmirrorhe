@@ -20,12 +20,14 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.TupleType;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.*;
 
@@ -230,7 +232,7 @@ public class LookupAllExpression extends UnaryExpression {
     @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
 
-        return new AbstractSequenceIterator() {
+        return new SequenceIterator() {
 
             final SequenceIterator level0 = getBaseExpression().iterate(context);
             Iterator<GroundedValue> level1forArrays = null;
@@ -239,7 +241,6 @@ public class LookupAllExpression extends UnaryExpression {
             SequenceIterator level2 = null;
 
             @Override
-            @CSharpModifiers(code = {"public", "override"})
             public Item next() {
                 if (level2 == null) {
                     if (level1forArrays == null && level1forMaps == null) {
@@ -284,7 +285,6 @@ public class LookupAllExpression extends UnaryExpression {
             }
 
             @Override
-            @CSharpModifiers(code = {"public", "override"})
             public void close() {
                 if (level0 != null) {
                     level0.close();

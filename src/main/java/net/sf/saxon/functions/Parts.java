@@ -13,8 +13,9 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.tree.iter.*;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
@@ -22,6 +23,7 @@ import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -74,13 +76,13 @@ public class Parts extends SystemFunction implements Callable {
 
     private static class ComponentDetails {
         SequenceType componentType;
-        Function<AtomicValue, UnfailingIterator> supplier;
+        Function<AtomicValue, SequenceIterator> supplier;
     }
 
     private final static Map<AtomicType, Map<String, ComponentDetails>> componentMap = new HashMap<>();
 
     private static void register(BuiltInAtomicType type, String fieldName, SequenceType componentType,
-                                 Function<AtomicValue, UnfailingIterator> supplier) {
+                                 Function<AtomicValue, SequenceIterator> supplier) {
         //noinspection Convert2Diamond
         Map<String, ComponentDetails> typeData =
                 componentMap.computeIfAbsent(type, k -> new HashMap<String, ComponentDetails>());
@@ -90,15 +92,15 @@ public class Parts extends SystemFunction implements Callable {
         typeData.put(fieldName, details);
     }
 
-    static UnfailingIterator oneInt(long x) {
+    static SequenceIterator oneInt(long x) {
         return SingletonIterator.makeIterator(Int64Value.makeIntegerValue(x));
     }
 
-    static UnfailingIterator oneDec(BigDecimal x) {
+    static SequenceIterator oneDec(BigDecimal x) {
         return SingletonIterator.makeIterator(new BigDecimalValue(x));
     }
 
-    static UnfailingIterator timezone(CalendarValue a) {
+    static SequenceIterator timezone(CalendarValue a) {
         if (a.hasTimezone()) {
             try {
                 return SingletonIterator.makeIterator(
@@ -131,7 +133,7 @@ public class Parts extends SystemFunction implements Callable {
         register(BuiltInAtomicType.DATE_TIME, "seconds", SequenceType.SINGLE_INTEGER,
                  a -> {
                      BigDecimal d = BigDecimal.valueOf(((DateTimeValue)a).getNanosecond());
-                     d = d.divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 6, BigDecimal.ROUND_HALF_UP);
+                     d = d.divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 6, RoundingMode.HALF_UP);
                      d = d.add(BigDecimal.valueOf(((DateTimeValue) a).getSecond()));
                      return oneDec(d);
                  }
@@ -162,7 +164,7 @@ public class Parts extends SystemFunction implements Callable {
         register(BuiltInAtomicType.TIME, "seconds", SequenceType.SINGLE_INTEGER,
                  a -> {
                      BigDecimal d = BigDecimal.valueOf(((TimeValue) a).getNanosecond());
-                     d = d.divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 6, BigDecimal.ROUND_HALF_UP);
+                     d = d.divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 6, RoundingMode.HALF_UP);
                      d = d.add(BigDecimal.valueOf(((TimeValue) a).getSecond()));
                      return oneDec(d);
                  }
@@ -358,7 +360,7 @@ public class Parts extends SystemFunction implements Callable {
         if (typeData == null) {
             return EmptyIterator.ofAtomic();
         }
-        Function<AtomicValue, UnfailingIterator> supplier = typeData.get(componentName).supplier;
+        Function<AtomicValue, SequenceIterator> supplier = typeData.get(componentName).supplier;
         return supplier.apply(value);
     }
 

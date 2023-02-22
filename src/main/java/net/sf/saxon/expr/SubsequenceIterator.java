@@ -10,10 +10,8 @@ package net.sf.saxon.expr;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
+import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-
-import java.util.EnumSet;
 
 
 /**
@@ -76,7 +74,7 @@ public class SubsequenceIterator implements SequenceIterator, LastPositionFinder
             return ((ArrayIterator) base).makeSliceIterator(min, max);
         } else if (max == Integer.MAX_VALUE) {
             return TailIterator.make(base, min);
-        } else if (base.getProperties().contains(SequenceIteratorProperty.GROUNDED) && min > 4) {
+        } else if (base instanceof GroundedIterator && ((GroundedIterator)base).isActuallyGrounded() && min > 4) {
             GroundedValue value = SequenceTool.toGroundedValue(base);
             value = value.subsequence(min - 1, max - min + 1);
             return value.iterate();
@@ -84,6 +82,12 @@ public class SubsequenceIterator implements SequenceIterator, LastPositionFinder
             return new SubsequenceIterator(base, min, max);
         }
     }
+
+    @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
 
     /**
      * Test whether there are any more items available in the sequence
@@ -120,32 +124,26 @@ public class SubsequenceIterator implements SequenceIterator, LastPositionFinder
     }
 
     /**
-     * Get properties of this iterator, as a bit-significant integer.
+     * Ask whether this iterator supports use of the {@link #getLength()} method. This
+     * method should always be called before calling {@link #getLength()}, because an iterator
+     * that implements this interface may support use of {@link #getLength()} in some situations
+     * and not in others
      *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
+     * @return true if the {@link #getLength()} method can be called to determine the length
+     * of the underlying sequence.
      */
-
     @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        EnumSet<SequenceIteratorProperty> p = EnumSetTool.intersect(base.getProperties(), EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER));
-        return EnumSetTool.union(p, EnumSet.of(SequenceIteratorProperty.LOOKAHEAD));
+    public boolean supportsGetLength() {
+        return SequenceTool.supportsGetLength(base);
     }
 
     /**
-     * Get the last position (that is, the number of items in the sequence). This method is
-     * non-destructive: it does not change the state of the iterator.
-     * The result is undefined if the next() method of the iterator has already returned null.
-     * This method must not be called unless the result of getProperties() on the iterator
-     * includes the bit setting {@link SequenceIteratorProperty#LAST_POSITION_FINDER}
+     * Get the last position (that is, the number of items in the sequence).
      */
 
     @Override
     public int getLength() {
-        int lastBase = ((LastPositionFinder) base).getLength();
+        int lastBase = SequenceTool.getLength(base);
         int z = Math.min(lastBase, max);
         return Math.max(z - min + 1, 0);
     }

@@ -25,7 +25,7 @@ import net.sf.saxon.value.AtomicValue;
  * an {@link UntypedAtomizingIterator} is used in preference.</p>
  */
                                     
-public class AtomizingIterator implements SequenceIterator /* of AtomicValue */ {
+public class AtomizingIterator implements SequenceIterator {
 
     private final SequenceIterator base;
     /*@Nullable*/ private AtomicSequence currentValue = null;

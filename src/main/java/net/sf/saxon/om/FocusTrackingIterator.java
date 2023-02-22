@@ -19,8 +19,6 @@ import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.value.SequenceExtent;
 
-import java.util.EnumSet;
-
 /**
  * An iterator that maintains the values of position() and current(), as a wrapper
  * over an iterator which does not maintain these values itself.
@@ -134,8 +132,8 @@ public class FocusTrackingIterator
     @Override
     public int getLength() {
         if (last == -1) {
-            if (base.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
-                last = ((LastPositionFinder)base).getLength();
+            if (SequenceTool.supportsGetLength(base)) {
+                last = SequenceTool.getLength(base);
             }
             if (last == -1) {
                 GroundedValue residue = SequenceExtent.makeResidue(base);
@@ -145,6 +143,26 @@ public class FocusTrackingIterator
         }
         return last;
     }
+
+    /**
+     * Ask whether this iterator supports use of the {@link #getLength()} method. This
+     * method should always be called before calling {@link #getLength()}, because an iterator
+     * that implements this interface may support use of {@link #getLength()} in some situations
+     * and not in others
+     *
+     * @return true if the {@link #getLength()} method can be called to determine the length
+     * of the underlying sequence.
+     */
+    @Override
+    public boolean supportsGetLength() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsHasNext() {
+        return base instanceof LookaheadIterator && ((LookaheadIterator)base).supportsHasNext();
+    }
+
 
     /**
      * Determine whether there are more items to come. Note that this operation
@@ -208,19 +226,8 @@ public class FocusTrackingIterator
         base.close();
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     * @since 8.6
-     */
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return base.getProperties();
+    public boolean isActuallyGrounded() {
+        return (base instanceof GroundedIterator && ((GroundedIterator)base).isActuallyGrounded());
     }
 
     /**

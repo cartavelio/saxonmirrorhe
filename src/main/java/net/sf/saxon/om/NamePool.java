@@ -8,6 +8,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -180,12 +181,17 @@ public final class NamePool {
             throw new NamePoolLimitException("Too many distinct names in NamePool");
         }
         Integer existing2 = qNameToInteger.putIfAbsent(qName, next);
-        if (existing2 == null) {
+        if (keyWasAbsent(existing2)) {
             integerToQName.put(next, qName);
             return next;
         } else {
             return existing;
         }
+    }
+
+    @CSharpReplaceBody(code="return result == default(System.Int32);")
+    private static boolean keyWasAbsent(Integer result) {
+        return result == null;
     }
 
     /**

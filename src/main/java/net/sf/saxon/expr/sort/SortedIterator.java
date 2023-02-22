@@ -19,7 +19,7 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.Arrays;
-import java.util.EnumSet;
+import java.util.Comparator;
 
 /**
  * Class to do a sorted iteration
@@ -100,6 +100,11 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
         hostLanguage = language;
     }
 
+    @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
     /**
      * Determine whether there are more items to come. Note that this operation
      * is stateless and it is not necessary (or usual) to call it before calling
@@ -118,7 +123,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
         }
         if (count < 0) {
             // haven't started sorting yet
-            if (base instanceof LookaheadIterator) {
+            if (base instanceof LookaheadIterator && ((LookaheadIterator)base).supportsHasNext()) {
                 return ((LookaheadIterator) base).hasNext();
             } else {
                 try {
@@ -163,6 +168,20 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
         }
     }
 
+    /**
+     * Ask whether this iterator supports use of the {@link #getLength()} method. This
+     * method should always be called before calling {@link #getLength()}, because an iterator
+     * that implements this interface may support use of {@link #getLength()} in some situations
+     * and not in others
+     *
+     * @return true if the {@link #getLength()} method can be called to determine the length
+     * of the underlying sequence.
+     */
+    @Override
+    public boolean supportsGetLength() {
+        return true;
+    }
+
     @Override
     public int getLength() {
         if (count < 0) {
@@ -176,34 +195,13 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
     }
 
     /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER);
-    }
-
-    /**
      * Create an array holding the items to be sorted and the values of their sort keys
      *
      * @throws XPathException if an error occurs for example in evaluating a sort key
      */
 
     protected void buildArray() throws XPathException {
-        int allocated;
-        if (base.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
-            allocated = ((LastPositionFinder) base).getLength();
-        } else {
-            allocated = 100;
-        }
-
+        int allocated = SequenceTool.supportsGetLength(base) ? SequenceTool.getLength(base) : 100;
         values = new ItemToBeSorted[allocated];
         count = 0;
 
@@ -238,6 +236,36 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
         }
     }
 
+
+    private static class SortComparer implements Comparator<ObjectToBeSorted> {
+
+        private AtomicComparer[] comparators;
+
+        public SortComparer(AtomicComparer[] comparators) {
+            this.comparators = comparators;
+        }
+        @Override
+        public int compare(ObjectToBeSorted a, ObjectToBeSorted b) {
+            try {
+                for (int i = 0; i < comparators.length; i++) {
+                    int comp = comparators[i].compareAtomicValues(
+                            a.sortKeyValues[i], b.sortKeyValues[i]);
+                    if (comp != 0) {
+                        // we have found a difference, so we can return
+                        return comp;
+                    }
+                }
+            } catch (NoDynamicContextException e) {
+                throw new AssertionError("Sorting without dynamic context: " + e.getMessage());
+            }
+            // all sort keys equal: return the items in their original order
+            // TODO: unnecessary, we are now using a stable sort routine
+            return a.originalPosition - b.originalPosition;
+        }
+
+
+    }
+
     private void doSort() throws XPathException {
         buildArray();
         if (count < 2) {
@@ -247,25 +275,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
         // sort the array
 
         try {
-            Arrays.sort(values, 0, count, (a, b) -> {
-                try {
-                    for (int i = 0; i < comparators.length; i++) {
-                        int comp = comparators[i].compareAtomicValues(
-                                a.sortKeyValues[i], b.sortKeyValues[i]);
-                        if (comp != 0) {
-                            // we have found a difference, so we can return
-                            return comp;
-                        }
-                    }
-                } catch (NoDynamicContextException e) {
-                    throw new AssertionError("Sorting without dynamic context: " + e.getMessage());
-                }
-
-                // all sort keys equal: return the items in their original order
-                // TODO: unnecessary, we are now using a stable sort routine
-                return a.originalPosition - b.originalPosition;
-            });
-            //GenericSorter.quickSort(0, count, this);
+            Arrays.sort(values, 0, count, new SortComparer(comparators));
         } catch (ClassCastException e) {
             XPathException err = new XPathException("Non-comparable types found while sorting: " + e.getMessage());
             if (hostLanguage == HostLanguage.XSLT) {

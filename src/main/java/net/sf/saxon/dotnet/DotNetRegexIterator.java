@@ -16,7 +16,6 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.regex.RegexMatchHandler;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.regex.ARegexIterator;
 import net.sf.saxon.regex.RegexIterator;
@@ -27,7 +26,6 @@ import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntToIntHashMap;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -62,6 +60,11 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
         this.pattern = pattern;
         matcher = pattern.Matches(str).GetEnumerator();
         nextString = null;
+    }
+
+    @Override
+    public boolean supportsGetLength() {
+        return true;
     }
 
     @Override
@@ -130,17 +133,6 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
 
     public Item current() {
         return StringItem.makeStringValue(currentString);
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER);
     }
 
     /**

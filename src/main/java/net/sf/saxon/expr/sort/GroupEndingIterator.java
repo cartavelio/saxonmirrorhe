@@ -38,6 +38,11 @@ public class GroupEndingIterator extends GroupMatchingIterator implements GroupI
     }
 
     @Override
+    public boolean supportsGetLength() {
+        return true;
+    }
+
+    @Override
     public int getLength() {
         try {
             GroupEndingIterator another = new GroupEndingIterator(select, pattern, baseContext);

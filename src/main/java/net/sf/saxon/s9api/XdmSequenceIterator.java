@@ -40,19 +40,11 @@ public class XdmSequenceIterator<T extends XdmItem> implements Iterator<T> {
         }
     }
 
-    public XdmSequenceIterator(UnfailingIterator base) {
-        try {
-            this.base = LookaheadIteratorImpl.makeLookaheadIterator(base);
-        } catch (XPathException xe) {
-            throw new SaxonApiUncheckedException(xe);
-        }
-    }
-
     public static XdmSequenceIterator<XdmNode> ofNodes(AxisIterator base) {
         return new XdmSequenceIterator<>(base);
     }
 
-    public static XdmSequenceIterator<XdmAtomicValue> ofAtomicValues(UnfailingIterator base) {
+    public static XdmSequenceIterator<XdmAtomicValue> ofAtomicValues(SequenceIterator base) {
         return new XdmSequenceIterator<>(base);
     }
 

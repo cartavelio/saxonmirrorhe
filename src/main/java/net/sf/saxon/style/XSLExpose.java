@@ -33,7 +33,7 @@ public class XSLExpose extends XSLAcceptExpose {
     }
 
     public static boolean isCompatible(Visibility declared, Visibility exposed) {
-        if (declared == null || declared == exposed) {
+        if (declared == null || declared == exposed || declared == Visibility.UNDEFINED) {
             return true;
         }
         switch (declared) {
@@ -68,7 +68,7 @@ public class XSLExpose extends XSLAcceptExpose {
         // The following code checks that explicit references to components (as distinct from
         // wildcards) refer to actual components, and that the exposed visibility is consistent
         // with the declared visibility. It doesn't actually change the component's visibility property.
-        // This is done later, in PrincipalStylesheetModuleEE#adjustExposedVisibility.
+        // This is done later, in PrincipalStylesheetModule#adjustExposedVisibility.
 
         for (ComponentTest test : getExplicitComponentTests()) {
             QNameTest nameTest = test.getQNameTest();

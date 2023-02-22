@@ -13,8 +13,6 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -104,7 +102,7 @@ public class Chain implements GroundedValue {
     }
 
     @Override
-    public UnfailingIterator iterate() {
+    public SequenceIterator iterate() {
         if (extent != null) {
             return new ListIterator.Of<>(extent);
         } else {
@@ -138,7 +136,7 @@ public class Chain implements GroundedValue {
     private void consolidate() {
         if (extent == null) {
             List<Item> list = new ArrayList<>();
-            UnfailingIterator iter = iterate();
+            SequenceIterator iter = iterate();
             Item item;
             while ((item = iter.next()) != null) {
                 list.add(item);
@@ -266,7 +264,7 @@ public class Chain implements GroundedValue {
         return SequenceExtent.makeSequenceExtent(extent);
     }
 
-    private static class ChainIterator implements UnfailingIterator, GroundedIterator {
+    private static class ChainIterator implements SequenceIterator, GroundedIterator {
 
         private static class ChainPosition {
             Chain chain;
@@ -278,7 +276,7 @@ public class Chain implements GroundedValue {
             }
         }
 
-        private final LinkedList<UnfailingIterator> queue = new LinkedList<>();
+        private final LinkedList<SequenceIterator> queue = new LinkedList<>();
 
         private final Stack<ChainPosition> stack;
 
@@ -305,7 +303,7 @@ public class Chain implements GroundedValue {
             // If there are iterators on the queue waiting to be processed, then take the first
             // item from the first iterator on the queue.
             while (!queue.isEmpty()) {
-                UnfailingIterator ui = queue.peek();
+                SequenceIterator ui = queue.peek();
                 while (ui != null) {
                     Item current = ui.next();
                     if (current != null) {
@@ -353,21 +351,6 @@ public class Chain implements GroundedValue {
         }
 
         /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-         *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-         *         acceptable to return the value zero, indicating that there are no known special properties.
-         *         It is acceptable for the properties of the iterator to change depending on its state.
-         */
-
-        @Override
-        public EnumSet<SequenceIteratorProperty> getProperties() {
-            return EnumSet.of(SequenceIteratorProperty.GROUNDED);
-        }
-
-        /**
          * Return a GroundedValue containing all the items in the sequence returned by this
          * SequenceIterator. This should be an "in-memory" value, not a Closure.
          *
@@ -391,6 +374,10 @@ public class Chain implements GroundedValue {
         @Override
         public GroundedValue getResidue() {
             return SequenceExtent.from(this);
+        }
+
+        public boolean isActuallyGrounded() {
+            return true;
         }
     }
 

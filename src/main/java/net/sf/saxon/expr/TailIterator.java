@@ -9,12 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ArrayIterator;
-import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-
-import java.util.EnumSet;
+import net.sf.saxon.tree.iter.*;
 
 /**
  * TailIterator iterates over a base sequence starting at an element other than the first.
@@ -66,7 +61,7 @@ public class TailIterator
             return base;
         } else if (base instanceof ArrayIterator) {
             return ((ArrayIterator) base).makeSliceIterator(start, Integer.MAX_VALUE);
-        } else if (base.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
+        } else if (base instanceof GroundedIterator && ((GroundedIterator)base).isActuallyGrounded()) {
             GroundedValue value = SequenceTool.toGroundedValue(base);
             if (start > value.getLength()) {
                 return EmptyIterator.emptyIterator();
@@ -92,14 +87,25 @@ public class TailIterator
     }
 
     @Override
+    public boolean supportsHasNext() {
+        return base instanceof LookaheadIterator && ((LookaheadIterator)base).supportsHasNext();
+    }
+
+
+    @Override
     public boolean hasNext() {
         return ((LookaheadIterator) base).hasNext();
     }
 
     @Override
+    public boolean supportsGetLength() {
+        return SequenceTool.supportsGetLength(base);
+    }
+
+    @Override
     public int getLength() {
-        int bl = ((LastPositionFinder) base).getLength() - start + 1;
-        return bl > 0 ? bl : 0;
+        int bl = SequenceTool.getLength(base) - start + 1;
+        return Math.max(bl, 0);
     }
 
     @Override
@@ -107,21 +113,5 @@ public class TailIterator
         base.close();
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSetTool.intersect(
-                base.getProperties(),
-                EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER, SequenceIteratorProperty.LOOKAHEAD));
-    }
 }
 

@@ -18,6 +18,7 @@ import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.lib.ModuleURIResolver;
+import net.sf.saxon.lib.StandardEntityResolver;
 import net.sf.saxon.lib.StandardModuleURIResolver;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.NamespaceResolver;
@@ -333,7 +334,11 @@ public class JavaPlatform implements Platform {
         }
         if (source instanceof SAXSource) {
             if (((SAXSource)source).getXMLReader() == null) {
-                ((SAXSource) source).setXMLReader(config.getSourceParser());
+                final XMLReader sourceParser = config.getSourceParser();
+                if (sourceParser.getEntityResolver() == null) {
+                    sourceParser.setEntityResolver(new StandardEntityResolver(config));
+                }
+                ((SAXSource) source).setXMLReader(sourceParser);
             }
             return new ActiveSAXSource((SAXSource)source);
         }

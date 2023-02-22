@@ -109,11 +109,12 @@ public class CharacterSetFactory {
                 return cs;
             }
 
-            // Otherwise see if the Java VM knows anything about the character set
-
-            CSharp.emitCode("throw new net.sf.saxon.trans.XPathException(\"Unknown encoding requested: \" + encoding);");
+            CSharp.emitCode("unknownEncoding(encoding)");
 
 //#if CSHARP==false
+
+            // Otherwise see if the Java VM knows anything about the character set
+
             Charset charset;
             try {
                 charset = Charset.forName(encoding);
@@ -133,6 +134,13 @@ public class CharacterSetFactory {
         }
     }
 
+    //#if CSHARP==true
+    public void unknownEncoding(String encoding) throws XPathException {
+        throw new net.sf.saxon.trans.XPathException("Unknown encoding requested: " + encoding);
+    }
+    //#endif
+
+    //#if CSHARP==false
     /**
      * Main program is a utility to give a list of the character sets supported
      * by the Java VM
@@ -151,6 +159,7 @@ public class CharacterSetFactory {
             System.err.println("    " + e.getKey() + " = " + e.getValue().getClass().getName());
         }
     }
+    //#endif
 
 }
 

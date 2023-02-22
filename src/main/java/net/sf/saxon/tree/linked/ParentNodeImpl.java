@@ -23,12 +23,10 @@ import net.sf.saxon.tree.iter.ArrayIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
-import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 /**
  * ParentNodeImpl is an implementation of a non-leaf node (specifically, an Element node
@@ -90,25 +88,25 @@ public abstract class ParentNodeImpl extends NodeImpl {
         return _children != null;
     }
 
-    /**
-     * Return the sequence of _children of this node, as an {@code Iterable}. This
-     * method is designed to allow iteration over the _children in a Java "for each" loop,
-     * in the form <code>for (NodeInfo child : _children()) {...}</code>
-     *
-     * @return the _children of the node, as an {@code Iterable}.
-     */
-
-    @Override
-    public Iterable<NodeImpl> children() {
-        if (_children == null) {
-            return Collections.emptyList();
-        } else if (_children instanceof NodeImpl) {
-            //noinspection Convert2Diamond
-            return () -> new MonoIterator<NodeImpl>((NodeImpl) _children);
-        } else {
-            return Arrays.asList((NodeImpl[]) _children);
-        }
-    }
+//    /**
+//     * Return the sequence of _children of this node, as an {@code Iterable}. This
+//     * method is designed to allow iteration over the _children in a Java "for each" loop,
+//     * in the form <code>for (NodeInfo child : children()) {...}</code>
+//     *
+//     * @return the _children of the node, as an {@code Iterable}.
+//     */
+//
+//    @Override
+//    public Iterable<NodeImpl> children() {
+//        if (_children == null) {
+//            return Collections.emptyList();
+//        } else if (_children instanceof NodeImpl) {
+//            //noinspection Convert2Diamond
+//            return () -> new MonoIterator<NodeImpl>((NodeImpl) _children);
+//        } else {
+//            return Arrays.asList((NodeImpl[]) _children);
+//        }
+//    }
 
     /**
      * Determine how many _children the node has
@@ -146,7 +144,7 @@ public abstract class ParentNodeImpl extends NodeImpl {
             }
         } else {
             if (test == null || test == AnyNodeTest.getInstance()) {
-                return new ArrayIterator.OfNodes<>((NodeImpl[]) _children);
+                return new ArrayIterator.OfNodes<NodeImpl>((NodeImpl[]) _children);
             } else {
                 return new ChildEnumeration(this, test);
             }

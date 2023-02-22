@@ -15,12 +15,10 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -94,6 +92,11 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
     }
 
     @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
+    @Override
     public boolean hasNext() {
         return nextItem != null;
     }
@@ -118,21 +121,6 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
     @Override
     public void close() {
         population.close();
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     * properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     * and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     * acceptable to return the value zero, indicating that there are no known special properties.
-     * It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
     }
 
     //#if EE==true

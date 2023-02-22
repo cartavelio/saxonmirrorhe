@@ -8,7 +8,6 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -18,7 +17,6 @@ import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.math.BigInteger;
-import java.util.EnumSet;
 
 /**
  * An Iterator that produces numeric values in a monotonic ascending or descending sequence,
@@ -103,6 +101,11 @@ public class BigRangeIterator extends RangeIterator implements AtomicIterator, L
     }
 
     @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
+    @Override
     public boolean hasNext() {
         return test(currentValue.add(step));
     }
@@ -118,6 +121,11 @@ public class BigRangeIterator extends RangeIterator implements AtomicIterator, L
     }
 
     @Override
+    public boolean supportsGetLength() {
+        return true;
+    }
+
+    @Override
     public int getLength() {
         // ((end - start) / step) + 1;
         BigInteger len = limit.subtract(start).divideAndRemainder(step)[0];
@@ -127,19 +135,8 @@ public class BigRangeIterator extends RangeIterator implements AtomicIterator, L
         return len.intValue() + 1;
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER);
+    public boolean isActuallyGrounded() {
+        return true;
     }
 
 }

@@ -15,7 +15,6 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceExtent;
 
-import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -28,7 +27,13 @@ import java.util.List;
  * the generics are confined to this abstract class.
  */
 
-public abstract class ListIterator implements UnfailingIterator, LastPositionFinder, LookaheadIterator, GroundedIterator, ReversibleIterator {
+public abstract class ListIterator implements SequenceIterator, LastPositionFinder, LookaheadIterator, GroundedIterator, ReversibleIterator {
+
+    @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
 
     public static class Of<T extends Item> extends ListIterator {
 
@@ -61,23 +66,17 @@ public abstract class ListIterator implements UnfailingIterator, LastPositionFin
         }
 
         @Override
+        public boolean supportsGetLength() {
+            return true;
+        }
+
+        @Override
         public int getLength() {
             return list.size();
         }
 
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         * properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-         * and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-         * acceptable to return the value zero, indicating that there are no known special properties.
-         * It is acceptable for the properties of the iterator to change depending on its state.
-         */
-
-        @Override
-        public EnumSet<SequenceIteratorProperty> getProperties() {
-            return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.GROUNDED, SequenceIteratorProperty.LAST_POSITION_FINDER);
+        public boolean isActuallyGrounded() {
+            return true;
         }
 
         /**

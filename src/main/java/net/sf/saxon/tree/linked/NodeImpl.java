@@ -234,11 +234,11 @@ public abstract class NodeImpl
         if (seq == -1L) {
             getPhysicalRoot().generateId(buffer);
             buffer.append(NODE_LETTER[getNodeKind()]);
-            buffer.append(Long.toString(seq) + "h" + hashCode());
+            buffer.append(seq + "h" + hashCode());
         } else {
             parent.generateId(buffer);
             buffer.append(NODE_LETTER[getNodeKind()]);
-            buffer.append(Integer.toString(index));
+            buffer.append(index);
         }
     }
 

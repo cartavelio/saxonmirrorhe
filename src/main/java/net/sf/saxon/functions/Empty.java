@@ -13,7 +13,6 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.value.BooleanValue;
@@ -66,7 +65,7 @@ public class Empty extends Aggregate {
 
     private static boolean empty(SequenceIterator iter) throws XPathException {
         boolean result;
-        if (iter.getProperties().contains(SequenceIteratorProperty.LOOKAHEAD)) {
+        if (iter instanceof LookaheadIterator && ((LookaheadIterator) iter).supportsHasNext()) {
             result = !((LookaheadIterator) iter).hasNext();
         } else {
             result = iter.next() == null;
@@ -143,7 +142,7 @@ public class Empty extends Aggregate {
             public boolean effectiveBooleanValue(XPathContext c) throws XPathException {
                 SequenceIterator iter = getArg(0).iterate(c);
                 boolean result;
-                if (iter.getProperties().contains(SequenceIteratorProperty.LOOKAHEAD)) {
+                if (iter instanceof LookaheadIterator && ((LookaheadIterator) iter).supportsHasNext()) {
                     result = !((LookaheadIterator) iter).hasNext();
                 } else {
                     result = iter.next() == null;

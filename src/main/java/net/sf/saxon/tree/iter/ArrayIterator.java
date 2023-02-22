@@ -13,7 +13,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -30,7 +29,7 @@ import java.util.List;
  */
 
 
-public abstract class ArrayIterator implements UnfailingIterator,
+public abstract class ArrayIterator implements SequenceIterator,
         LastPositionFinder, LookaheadIterator, GroundedIterator, ReversibleIterator {
 
     protected int index;          // position in array of current item, zero-based
@@ -52,6 +51,16 @@ public abstract class ArrayIterator implements UnfailingIterator,
      */
 
     public abstract SequenceIterator makeSliceIterator(int min, int max);
+
+    public boolean isActuallyGrounded() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
 
     /**
      * Parameterised subclass to accept items of a particular item type
@@ -149,6 +158,11 @@ public abstract class ArrayIterator implements UnfailingIterator,
             return items[index++];
         }
 
+        @Override
+        public boolean supportsGetLength() {
+            return true;
+        }
+
         /**
          * Get the number of items in the part of the array being processed
          *
@@ -228,20 +242,6 @@ public abstract class ArrayIterator implements UnfailingIterator,
             return Reverse.reverseIterator(Arrays.asList(items));
         }
 
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         * properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-         * and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-         * acceptable to return the value zero, indicating that there are no known special properties.
-         * It is acceptable for the properties of the iterator to change depending on its state.
-         */
-
-        @Override
-        public EnumSet<SequenceIteratorProperty> getProperties() {
-            return EnumSet.of(SequenceIteratorProperty.GROUNDED, SequenceIteratorProperty.LAST_POSITION_FINDER, SequenceIteratorProperty.LOOKAHEAD);
-        }
     }
 
     /**

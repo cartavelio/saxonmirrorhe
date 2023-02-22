@@ -1,12 +1,13 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 
 import java.util.Iterator;
 import java.util.function.Function;
 
-public class SequenceIteratorOverJavaIterator<J> implements UnfailingIterator {
+public class SequenceIteratorOverJavaIterator<J> implements SequenceIterator {
 
     // See also class IteratorWrapper, which does the same thing without mapping,
     // and WrappingJavaIterator, which does the converse.

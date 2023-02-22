@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.transpile.CSharpInjectMembers;
 
 import java.util.Comparator;
 
@@ -18,7 +17,7 @@ import java.util.Comparator;
  * come from the same document
  */
 
-@CSharpInjectMembers(code="public override int Compare(net.sf.saxon.om.NodeInfo a, net.sf.saxon.om.NodeInfo b) { return compare(a, b); }")
+//@CSharpInjectMembers(code="public override int Compare(net.sf.saxon.om.NodeInfo a, net.sf.saxon.om.NodeInfo b) { return compare(a, b); }")
 public final class GlobalOrderComparer implements Comparator<NodeInfo> {
 
     private static final GlobalOrderComparer instance = new GlobalOrderComparer();

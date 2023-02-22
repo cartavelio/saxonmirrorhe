@@ -12,9 +12,6 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-
-import java.util.EnumSet;
 
 /**
  * AttributeAxisIterator is an enumeration of all the attribute nodes of an Element.
@@ -44,6 +41,11 @@ final class AttributeAxisIterator implements AxisIterator, LookaheadIterator {
         length = node.attributes().size();
         advance();
 
+    }
+
+    @Override
+    public boolean supportsHasNext() {
+        return true;
     }
 
     /**
@@ -96,19 +98,5 @@ final class AttributeAxisIterator implements AxisIterator, LookaheadIterator {
         }
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
-    }
 }
 

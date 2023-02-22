@@ -33,8 +33,8 @@ import net.sf.saxon.trace.TraceableComponent;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 
@@ -43,7 +43,10 @@ import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * XQueryExpression represents a compiled query. This object is immutable and thread-safe,
@@ -373,7 +376,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             context.openStackFrame(stackFrameMap);
 
             SequenceIterator iterator = expression.iterate(context);
-            if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
+            if (iterator instanceof GroundedIterator && ((GroundedIterator) iterator).isActuallyGrounded()) {
                 return iterator;
             } else {
                 return new ErrorReportingIterator(iterator, controller.getErrorReporter(), getLocation());

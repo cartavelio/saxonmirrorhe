@@ -291,7 +291,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * @return an iterator over the atomic sequence comprising the typed value. The objects
      *         returned by this SequenceIterator will all be of type {@link net.sf.saxon.value.AtomicValue},
      *         The next() method on the iterator throws no checked exceptions, although it is not actually
-     *         declared as an UnfailingIterator.
+     *         declared as an SequenceIterator.
      * @throws net.sf.saxon.type.ValidationException
      *          if the supplied value is not in the lexical space of the data type
      */

@@ -10,7 +10,6 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.HashSet;
@@ -365,7 +364,7 @@ public class UType {
      */
 
     public static UType getUType(GroundedValue sequence)  {
-        UnfailingIterator iter = sequence.iterate();
+        SequenceIterator iter = sequence.iterate();
         Item item;
         UType u = UType.VOID;
         while ((item = iter.next()) != null) {

@@ -328,7 +328,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
                 Set<MutableNodeInfo> docs = expression.runUpdate(context);
                 updatedDocuments = new HashSet<>();
                 for (MutableNodeInfo doc : docs) {
-                    updatedDocuments.add(XdmNode.wrapItem(doc));
+                    updatedDocuments.add(XdmItem.wrapItem(doc));
                 }
             } else {
                 if (destination == null) {
@@ -621,7 +621,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
         final UserFunction fn = expression.getMainModule().getUserDefinedFunction(
                 function.getNamespaceURI(), function.getLocalName(), arguments.length);
         if (fn == null) {
-            throw new SaxonApiException("No function with name " + function.getClarkName() +
+            throw new SaxonApiException("No function with name " + function.getEQName() +
                     " and arity " + arguments.length + " has been declared in the query");
         }
         try {

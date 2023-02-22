@@ -653,7 +653,7 @@ public class StylesheetPackage extends PackageData {
                 newV = Visibility.HIDDEN;
             } else {
                 Visibility acceptedVisibility = explicitAcceptedVisibility(name, acceptors);
-                if (acceptedVisibility != null) {
+                if (acceptedVisibility != null && acceptedVisibility != Visibility.UNDEFINED) {
                     if (!XSLAccept.isCompatible(oldV, acceptedVisibility)) {
                         throw new XPathException("Cannot accept a " + Err.describeVisibility(oldV) +
                                                          " component (" + name + ") from package " + usedPackage.getPackageName()

@@ -13,14 +13,12 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.EmptySequence;
 
-import java.util.EnumSet;
-
 
 /**
  * SingletonIterator: an iterator over a sequence of zero or one values
  */
 
-public class SingletonIterator implements SequenceIterator, UnfailingIterator,
+public class SingletonIterator implements SequenceIterator,
         ReversibleIterator, LastPositionFinder, GroundedIterator, LookaheadIterator {
 
     private final Item item;
@@ -45,7 +43,7 @@ public class SingletonIterator implements SequenceIterator, UnfailingIterator,
      */
 
     /*@NotNull*/
-    public static UnfailingIterator makeIterator(Item item) {
+    public static SequenceIterator makeIterator(Item item) {
         if (item == null) {
             return EmptyIterator.emptyIterator();
         } else {
@@ -65,6 +63,12 @@ public class SingletonIterator implements SequenceIterator, UnfailingIterator,
         assert item != null;
         return new SingletonIterator(item);
     }
+
+    @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
 
     /**
      * Determine whether there are more items to come. Note that this operation
@@ -92,8 +96,17 @@ public class SingletonIterator implements SequenceIterator, UnfailingIterator,
     }
 
     @Override
+    public boolean supportsGetLength() {
+        return true;
+    }
+
+    @Override
     public int getLength() {
         return 1;
+    }
+
+    public boolean isActuallyGrounded() {
+        return true;
     }
 
     /*@NotNull*/
@@ -126,22 +139,11 @@ public class SingletonIterator implements SequenceIterator, UnfailingIterator,
 
     @Override
     public GroundedValue getResidue() {
-        return gone ? EmptySequence.getInstance() : item;
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.GROUNDED, SequenceIteratorProperty.LAST_POSITION_FINDER);
+        if (gone) {
+            return EmptySequence.getInstance();
+        } else {
+            return item;
+        }
     }
 
 }

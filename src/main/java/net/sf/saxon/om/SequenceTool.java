@@ -21,8 +21,6 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.GroundedIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -51,7 +49,7 @@ public class SequenceTool {
      */
 
     public static GroundedValue toGroundedValue(SequenceIterator iterator) {
-        if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
+        if (iterator instanceof GroundedIterator && ((GroundedIterator)iterator).isActuallyGrounded()) {
             return ((GroundedIterator) iterator).materialize();
         } else {
             return SequenceExtent.from(iterator).reduce();
@@ -72,7 +70,7 @@ public class SequenceTool {
     public static Sequence toMemoSequence(SequenceIterator iterator) throws XPathException {
         if (iterator instanceof EmptyIterator) {
             return EmptySequence.getInstance();
-        } else if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
+        } else if (iterator instanceof GroundedIterator && ((GroundedIterator) iterator).isActuallyGrounded()) {
             return toGroundedValue(iterator);
         } else {
             return new MemoSequence(iterator);
@@ -92,7 +90,7 @@ public class SequenceTool {
      */
 
     public static Sequence toLazySequence(SequenceIterator iterator) throws XPathException {
-        if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED) &&
+        if (iterator instanceof GroundedIterator && ((GroundedIterator) iterator).isActuallyGrounded() &&
                 !(iterator instanceof AscendingRangeIterator) &&
                 !(iterator instanceof DescendingRangeIterator)) {
             return toGroundedValue(iterator);
@@ -101,13 +99,35 @@ public class SequenceTool {
         }
     }
 
-    public static Sequence toLazySequence2(SequenceIterator iterator) throws XPathException {
-        if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED) &&
-                !(iterator instanceof AscendingRangeIterator) &&
-                !(iterator instanceof DescendingRangeIterator)) {
-            return toGroundedValue(iterator);
-        } else {
-            return new LazySequence(iterator);
+    /**
+     * Ask whether a SequenceIterator supports the capability to call {@code getLength()} to establish
+     * the number of items in the sequence.
+     * @param iterator the iterator we are asking about
+     * @return true if the iterator is a {@link LastPositionFinder} with this
+     * capability. Note that some iterators implement this interface, but do not actually have the
+     * capability to determine the length, because they delegate to another iterator.
+     */
+
+    public static boolean supportsGetLength(SequenceIterator iterator) {
+        return iterator instanceof LastPositionFinder && ((LastPositionFinder)iterator).supportsGetLength();
+    }
+
+    /**
+     * Get the number of items in the sequence identified by a {@link SequenceIterator}.
+     * This method can only be used if {@link #supportsGetLength(SequenceIterator)} has been called
+     * and returns true. The length is returned regardless of the current position of the iterator.
+     * The state of the iterator is not changed
+     *
+     * @param iterator the iterator we are asking about
+     * @return the number of items in the sequence
+     * @throws UnsupportedOperationException if the iterator does not have this capability
+     */
+
+    public static int getLength(SequenceIterator iterator) {
+        try {
+            return ((LastPositionFinder)iterator).getLength();
+        } catch (ClassCastException e) {
+            throw new UnsupportedOperationException("getLength() not available");
         }
     }
 
@@ -154,13 +174,16 @@ public class SequenceTool {
     /**
      * Ask whether the length of a sequence is exactly N
      *
+     * @implNote this is more efficient than counting the items and testing whether the result is
+     * N, because the sequence only needs to be read as far as the Nth item.
+     *
      * @param iter   an iterator over the sequence in question (which is typically consumed)
      * @param length the supposed length
      * @return true if and only if the length of the sequence is the supposed length
      */
 
     public static boolean hasLength(SequenceIterator iter, int length) throws XPathException {
-        if (iter.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
+        if (SequenceTool.supportsGetLength(iter)) {
             return ((LastPositionFinder) iter).getLength() == length;
         } else {
             int n = 0;
@@ -181,14 +204,14 @@ public class SequenceTool {
      * length of the shorter sequence. The method consumes the supplied iterators.
      *
      * @param a iterator over the first sequence
-     * @param b iterator over the second sequece
+     * @param b iterator over the second sequence
      * @return true if the lengths of the two sequences are the same
      */
 
     public static boolean sameLength(SequenceIterator a, SequenceIterator b) throws XPathException {
-        if (a.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
+        if (SequenceTool.supportsGetLength(a)) {
             return hasLength(b, ((LastPositionFinder) a).getLength());
-        } else if (b.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
+        } else if (SequenceTool.supportsGetLength(b)) {
             return hasLength(a, ((LastPositionFinder) b).getLength());
         } else {
             while (true) {
@@ -411,7 +434,7 @@ public class SequenceTool {
             return UType.getUType((Item) sequence);
         } else if (sequence instanceof GroundedValue) {
             UType type = UType.VOID;
-            UnfailingIterator iter = ((GroundedValue) sequence).iterate();
+            SequenceIterator iter = ((GroundedValue) sequence).iterate();
             Item item;
             while ((item = iter.next()) != null) {
                 type = type.union(UType.getUType(item));

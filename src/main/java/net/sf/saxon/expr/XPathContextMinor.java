@@ -20,7 +20,6 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.value.DateTimeValue;
 
 import javax.xml.transform.URIResolver;
@@ -262,7 +261,7 @@ public class XPathContextMinor implements XPathContext {
 
     @Override
     public final boolean isAtLast() throws XPathException {
-        if (currentIterator.getProperties().contains(SequenceIteratorProperty.LOOKAHEAD)) {
+        if (currentIterator instanceof LookaheadIterator && ((LookaheadIterator)currentIterator).supportsHasNext()) {
             return !((LookaheadIterator) currentIterator).hasNext();
         }
         try {

@@ -14,13 +14,10 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSetPredicate;
-
-import java.util.EnumSet;
 
 /**
  * This class supports both the child:: and following-sibling:: axes, which are
@@ -189,6 +186,11 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
         }
     }
 
+    @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
     /**
      * Test whether there are any more nodes to come. This method is used only when testing whether the
      * current item is the last in the sequence. It's not especially efficient, but is more efficient than
@@ -218,11 +220,6 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
         }
 
         return n != -1;
-    }
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.ATOMIZING);
     }
 
 }

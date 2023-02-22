@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.URIResolver;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * An XPathSelector represents a compiled and loaded XPath expression ready for execution.
@@ -99,7 +100,8 @@ public class XPathSelector implements Iterable<XdmItem> {
      */
 
     public void setVariable(QName name, XdmValue value) throws SaxonApiException {
-
+        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(value, "value");
         StructuredQName qn = name.getStructuredQName();
         XPathVariable var = declaredVariables.get(qn);
         if (var == null) {

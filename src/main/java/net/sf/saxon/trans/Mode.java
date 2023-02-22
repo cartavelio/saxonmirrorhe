@@ -26,7 +26,6 @@ import net.sf.saxon.trace.TemplateRuleTraceListener;
 import net.sf.saxon.trans.rules.*;
 import net.sf.saxon.transpile.CSharpDelegate;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -440,7 +439,7 @@ public abstract class Mode extends Actor {
 
         // Iterate over this sequence
 
-        boolean lookahead = iterator.getProperties().contains(SequenceIteratorProperty.LOOKAHEAD);
+        boolean lookahead = iterator instanceof LookaheadIterator && ((LookaheadIterator)iterator).supportsHasNext();
         TemplateRule previousTemplate = null;
         boolean first = true;
 

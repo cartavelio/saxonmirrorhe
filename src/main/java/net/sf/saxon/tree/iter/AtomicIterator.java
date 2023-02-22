@@ -7,6 +7,7 @@
 
 package net.sf.saxon.tree.iter;
 
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.AtomicValue;
 
 
@@ -15,7 +16,7 @@ import net.sf.saxon.value.AtomicValue;
  * is a SequenceIterator that returns atomic values and throws no checked exceptions.
  */
 
-public interface AtomicIterator extends UnfailingIterator {
+public interface AtomicIterator extends SequenceIterator {
 
     /**
      * Get the next atomic value in the sequence. <BR>

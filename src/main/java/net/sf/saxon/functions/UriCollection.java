@@ -43,7 +43,7 @@ public class UriCollection extends SystemFunction {
 
         }
         final Iterator<String> sources = rCollection.getResourceURIs(context);
-        return new AbstractSequenceIterator() {
+        return new SequenceIterator() {
 
             @Override
             @CSharpModifiers(code={"public", "override"})
