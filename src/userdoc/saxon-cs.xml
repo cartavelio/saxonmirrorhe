@@ -339,7 +339,7 @@ supplied with the .NET platform.</p>
       
       <h2>Restrictions Relative to Saxon-EE 11 on Java</h2>
       
-      <p>>The <code>xsl:result-document</code> instruction is executed synchronously.</p>
+      <p>The <code>xsl:result-document</code> instruction is executed synchronously.</p>
       
       <h2>Restrictions and Changes Relative to Saxon-EE 10 on .NET</h2>
       
