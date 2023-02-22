@@ -162,7 +162,7 @@ dependencies {
 }
 
 javadoc {
-  classpath = configurations.implementation
+  classpath = configurations.documentation
 }
 
 test {
