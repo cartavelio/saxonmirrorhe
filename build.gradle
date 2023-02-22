@@ -591,7 +591,6 @@ task "hej_preprocess"(
       exclude "net/sf/saxon/testdriver/**"
       exclude "net/sf/saxon/option/sql/**"
       exclude "net/sf/saxon/option/cpp/**"
-      exclude "net/sf/saxon/jetonnet/**"
     }
     .files
 
@@ -645,7 +644,6 @@ task "pej_preprocess"(
       include "net/sf/saxon/**/package.html"
       exclude "net/sf/saxon/testdriver/**"
       exclude "net/sf/saxon/option/cpp/**"
-      exclude "net/sf/saxon/jetonnet/**"
       include "com/saxonica/**/*.java"
       exclude "com/saxonica/functions/extfn/cpp/*.java"
       exclude "com/saxonica/testdriver/**"
@@ -728,8 +726,6 @@ task "eej_preprocess"(
       include "net/sf/saxon/**/package.html"
       exclude "net/sf/saxon/testdriver/**"
       exclude "net/sf/saxon/option/cpp/**"
-      exclude "net/sf/saxon/jetonnet/**"
-      exclude "net/sf/saxon/jetonnet/**"
       include "com/saxonica/**/*.java"
       exclude "com/saxonica/functions/extfn/cpp/*.java"
       exclude "com/saxonica/testdriver/**/*.java"
