@@ -664,7 +664,8 @@ task graal_eec_jar(
       copy {
         from "${buildDir}/c/"
         into "${buildDir}/${edition}c_pypi/Saxon.C.API/graalvm"
-        include "*.h"
+        include "graal*.h"
+        include "libsaxon-${edition}c*.h"
       }
     }
     
