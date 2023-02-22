@@ -8,6 +8,7 @@
 package net.sf.saxon.option.local;
 
 import net.sf.saxon.expr.number.AbstractNumberer;
+import net.sf.saxon.str.BMPString;
 
 /**
  * Class Numberer_de provides localization for format-date() and xsl:number with language = "de" (German)
@@ -38,7 +39,16 @@ public class Numberer_de extends AbstractNumberer {
 
     @Override
     public String toWords(long number) {
-        if (number >= 1000000000) {
+        if (number >= 1000000000000000L) {
+            return format(number, BMPString.of("1.000.000"), 3, ".", "", "");
+        }
+        if (number >= 1000000000000L) {
+            long rem = number % 1000000000000L;
+            long n = number / 1000000000000L;
+            String s = (n == 1 ? "Eine" : toWords(n));
+            return s + " Billion" +
+                    (rem == 0 ? "" : ' ' + toWords(rem));
+        } else if (number >= 1000000000) {
             long rem = number % 1000000000;
             long n = number / 1000000000;
             String s = (n == 1 ? "Eine" : toWords(n));
@@ -50,18 +60,17 @@ public class Numberer_de extends AbstractNumberer {
             String s = (n == 1 ? "Eine" : toWords(n));
             return s + " Million" +
                     (n == 1 ? "" : "en") +
-                    (rem == 0 ? "" : ' ' + toWords(rem));
+                    (rem == 0 ? "" : toWords(rem));
         } else if (number >= 1000) {
             long rem = number % 1000;
             long n = number / 1000;
             String s = (n == 1 ? "Ein" : toWords(n));
-            return s + "tausend" + (rem == 0 ? "" : ' ' + toWords(rem));
+            return s + "tausend" + (rem == 0 ? "" : toWords(rem, LOWER_CASE));
         } else if (number >= 100) {
             long rem = number % 100;
             long n = number / 100;
             String s = (n == 1 ? "Ein" : toWords(n));
-            return s + "hundert" +
-                    (rem == 0 ? "" : (rem > 20 ? "" : "und") + toWords(rem, LOWER_CASE));
+            return s + "hundert" + (rem == 0 ? "" : toWords(rem, LOWER_CASE));
         } else {
             if (number < 20) return (number == 1 ? "Eins" : germanUnits[(int) number]);
             int rem = (int) (number % 10);
@@ -72,9 +81,14 @@ public class Numberer_de extends AbstractNumberer {
         }
     }
 
+    @Override
+    public String zero() {
+        return "Null";
+    }
+
     private static final String[] germanUnits = {
             "", "Ein", "Zwei", "Drei", "Vier", "F\u00fcnf", "Sechs", "Sieben", "Acht", "Neun",
-            "Zehn", "Elf", "Zw\u00f6lf", "Dreizehn", "Vierzehn", "F\u00fcnfzehn", "Sechszehn",
+            "Zehn", "Elf", "Zw\u00f6lf", "Dreizehn", "Vierzehn", "F\u00fcnfzehn", "Sechzehn",
             "Siebzehn", "Achtzehn", "Neunzehn"};
 
     private static final String[] germanTens = {
@@ -109,7 +123,7 @@ public class Numberer_de extends AbstractNumberer {
         } else if (mod100 < 20 && mod100 > 0) {
             return toWords(number - (mod100), wordCase) +
                     toOrdinalWords(ordinalParam, mod100,
-                            (wordCase == TITLE_CASE ? LOWER_CASE : wordCase));
+                                   (wordCase == TITLE_CASE ? LOWER_CASE : wordCase));
         } else {
             String ending = "st" + suffix;
             if (wordCase == UPPER_CASE) {
@@ -183,8 +197,8 @@ public class Numberer_de extends AbstractNumberer {
      * @param component the component specifier from a format-dateTime picture, for
      *                  example "M" for the month or "D" for the day.
      * @return a string that is acceptable in the ordinal attribute of xsl:number
-     *         to achieve the required ordinal representation. For example, "-e" for the day component
-     *         in German, to have the day represented as "dritte August".
+     * to achieve the required ordinal representation. For example, "-e" for the day component
+     * in German, to have the day represented as "dritte August".
      */
 
     @Override
