@@ -277,6 +277,26 @@
          <e:parent name="transform"/>
       </e:allowed-parents>
    </e:element-syntax>
+   
+   <e:element-syntax name="item-type">
+      <e:in-category name="declaration"/>
+      <e:attribute name="name" required="yes">
+         <e:data-type name="eqname"/>
+      </e:attribute>
+      <e:attribute name="as">
+         <e:data-type name="item-type"/>
+      </e:attribute>
+      <e:attribute name="visibility">
+         <e:constant value="private"/>
+         <e:constant value="final"/>
+      </e:attribute>
+      <e:empty/>
+      <e:allowed-parents>
+         <e:parent name="package"/>
+         <e:parent name="stylesheet"/>
+         <e:parent name="transform"/>
+      </e:allowed-parents>
+   </e:element-syntax>
 
    <!-- Data Model -->
 
@@ -516,6 +536,17 @@
       <e:attribute name="select" required="yes">
          <e:data-type name="expression"/>
       </e:attribute>
+      <e:attribute name="array">
+         <e:data-type name="expression"/>
+      </e:attribute>
+      <e:attribute name="map">
+         <e:data-type name="expression"/>
+      </e:attribute>
+      <e:attribute name="separator">
+         <e:attribute-value-template>
+            <e:data-type name="string"/>
+         </e:attribute-value-template>
+      </e:attribute>
       <e:sequence>
          <e:element repeat="zero-or-more" name="sort"/>
          <e:model name="sequence-constructor"/>
@@ -528,6 +559,12 @@
    <e:element-syntax name="iterate">
       <e:in-category name="instruction"/>
       <e:attribute name="select" required="yes">
+         <e:data-type name="expression"/>
+      </e:attribute>
+      <e:attribute name="array">
+         <e:data-type name="expression"/>
+      </e:attribute>
+      <e:attribute name="map">
          <e:data-type name="expression"/>
       </e:attribute>
       <e:sequence>
@@ -609,6 +646,21 @@
       <e:model name="sequence-constructor"/>
       <e:allowed-parents>
          <e:parent name="choose"/>
+      </e:allowed-parents>
+   </e:element-syntax>
+   
+   <e:element-syntax name="switch">
+      <e:in-category name="instruction"/>
+      <e:attribute name="select" required="yes">
+         <e:data-type name="expression"/>
+      </e:attribute>
+      <e:sequence>
+         <e:element repeat="one-or-more" name="when"/>
+         <e:element repeat="zero-or-one" name="otherwise"/>
+         <e:element repeat="zero-or-more" name="fallback"/>
+      </e:sequence>
+      <e:allowed-parents>
+         <e:parent-category name="sequence-constructor"/>
       </e:allowed-parents>
    </e:element-syntax>
 
@@ -1273,6 +1325,12 @@
       <e:attribute name="select" required="yes">
          <e:data-type name="expression"/>
       </e:attribute>
+      <e:attribute name="array">
+         <e:data-type name="expression"/>
+      </e:attribute>
+      <e:attribute name="map">
+         <e:data-type name="expression"/>
+      </e:attribute>
       <e:attribute name="group-by" required="no">
          <e:data-type name="expression"/>
       </e:attribute>
@@ -1284,6 +1342,9 @@
       </e:attribute>
       <e:attribute name="group-ending-with" required="no">
          <e:data-type name="pattern"/>
+      </e:attribute>
+      <e:attribute name="break-when" required="no">
+         <e:data-type name="expression"/>
       </e:attribute>
       <e:attribute name="composite">
          <e:data-type name="boolean"/>
@@ -1563,6 +1624,9 @@
 
    <e:element-syntax name="map">
       <e:in-category name="instruction"/>
+      <e:attribute name="on-duplicates" required="no">
+         <e:data-type name="expression"/>
+      </e:attribute>
       <e:model name="sequence-constructor"/>
       <e:allowed-parents>
          <e:parent-category name="sequence-constructor"/>

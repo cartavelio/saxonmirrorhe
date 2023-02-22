@@ -382,6 +382,10 @@
           represent a doctype declaration as a node on a temporary tree.</p>
       </description>
       <details>
+        <aside>
+          As an alternative, consider using the <code>saxon:internal-dtd-subset</code> serialization parameter:
+          see <a class="bodylink" href="extensions/output-extras/serialization-parameters">Serialization Parameters</a>.
+        </aside>
         <p>The content of the element is a template-body that is instantiated to create an XML
           document that represents the DTD to be generated; this XML document is then serialized
           using a special output method that produces DTD syntax rather than XML syntax.</p>
