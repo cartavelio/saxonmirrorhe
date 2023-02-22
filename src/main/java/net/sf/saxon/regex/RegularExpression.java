@@ -10,6 +10,7 @@ package net.sf.saxon.regex;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
+import net.sf.saxon.value.StringItem;
 
 import java.util.function.Function;
 
@@ -44,7 +45,7 @@ public interface RegularExpression {
      * @return a SequenceIterator containing the resulting tokens, as objects of type StringValue
      */
 
-    AtomicIterator tokenize(UnicodeString input);
+    AtomicIterator<StringItem> tokenize(UnicodeString input);
 
     /**
      * Use this regular expression to analyze an input string, in support of the XSLT

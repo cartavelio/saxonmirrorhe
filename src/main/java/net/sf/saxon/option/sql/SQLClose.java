@@ -33,7 +33,7 @@ public class SQLClose extends ExtensionInstruction {
     /*@Nullable*/ Expression connection = null;
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         AttributeInfo connectAtt = attributes().get("", "connection");
         if (connectAtt == null) {
             reportAbsence("connection");
@@ -78,7 +78,7 @@ public class SQLClose extends ExtensionInstruction {
         }
 
         @Override
-        public int computeCardinality() {
+        protected int computeCardinality() {
             return StaticProperty.ALLOWS_ZERO_OR_ONE;
         }
 

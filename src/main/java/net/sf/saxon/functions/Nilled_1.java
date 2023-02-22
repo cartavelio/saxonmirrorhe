@@ -10,12 +10,11 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.One;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.EmptySequence;
 
 /**
  * This class supports the nilled() function
@@ -63,12 +62,12 @@ public class Nilled_1 extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
 
         NodeInfo node = (NodeInfo)arguments[0].head();
         if (node == null || node.getNodeKind() != Type.ELEMENT) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
-        return One.bool(isNilled(node));
+        return BooleanValue.get(isNilled(node));
     }
 }

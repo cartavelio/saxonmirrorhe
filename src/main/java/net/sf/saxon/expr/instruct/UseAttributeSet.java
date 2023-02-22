@@ -410,7 +410,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return 0x86423719 ^ targetName.hashCode();
     }
 

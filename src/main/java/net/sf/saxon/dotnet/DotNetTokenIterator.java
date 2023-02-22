@@ -18,7 +18,7 @@ import net.sf.saxon.value.StringItem;
  * a string using a regular expression
  */
 
-public class DotNetTokenIterator implements AtomicIterator {
+public class DotNetTokenIterator implements AtomicIterator<StringItem> {
 
     private final String input;
     private final Regex pattern;
@@ -43,13 +43,13 @@ public class DotNetTokenIterator implements AtomicIterator {
             return null;
         }
 
-        CharSequence current;
+        String current;
         if (matches.MoveNext()) {
             Match match = (Match) matches.get_Current();
-            current = input.subSequence(prevEnd, match.get_Index());
+            current = input.substring(prevEnd, match.get_Index());
             prevEnd = match.get_Index() + match.get_Length();
         } else {
-            current = input.subSequence(prevEnd, input.length());
+            current = input.substring(prevEnd);
             prevEnd = -1;
         }
         return StringItem.makeStringValue(current);

@@ -8,13 +8,11 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
-import net.sf.saxon.expr.sort.ComparisonException;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -24,7 +22,7 @@ import net.sf.saxon.type.ValidationFailure;
  * A boolean XPath value
  */
 
-public final class BooleanValue extends AtomicValue implements Comparable, AtomicMatchKey {
+public final class BooleanValue extends AtomicValue implements Comparable<BooleanValue>, AtomicMatchKey {
     private final boolean value;
 
     /**
@@ -250,12 +248,8 @@ public final class BooleanValue extends AtomicValue implements Comparable, Atomi
      */
 
     @Override
-    public int compareTo(Object other) {
-        if (!(other instanceof BooleanValue)) {
-            XPathException e = new XPathException("Boolean values are not comparable to " + other.getClass(), "XPTY0004");
-            throw new ComparisonException(e);
-        }
-        if (value == ((BooleanValue) other).value) {
+    public int compareTo(BooleanValue other) {
+        if (value == other.value) {
             return 0;
         }
         if (value) {

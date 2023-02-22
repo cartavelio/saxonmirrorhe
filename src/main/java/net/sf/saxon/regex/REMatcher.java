@@ -354,7 +354,7 @@ public class REMatcher {
      * at both ends
      *
      * @param search the string to be matched
-     * @return true if the regex matches the whols string
+     * @return true if the regex matches the whole string
      */
 
     public boolean isAnchoredMatch(UnicodeString search) {

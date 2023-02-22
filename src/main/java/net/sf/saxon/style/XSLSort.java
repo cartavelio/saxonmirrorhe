@@ -28,7 +28,7 @@ public class XSLSort extends XSLSortOrMergeKey {
 
 
     @Override
-    public Expression getStable() {
+    protected Expression getStable() {
         return stable;
     }
 

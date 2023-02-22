@@ -24,7 +24,7 @@ public class XSLNamespace extends XSLLeafNodeConstructor {
     /*@Nullable*/ Expression name;
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         name = prepareAttributesNameAndSelect();
     }
 

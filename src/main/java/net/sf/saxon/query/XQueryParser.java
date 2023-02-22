@@ -4827,7 +4827,7 @@ public class XQueryParser extends XPathParser {
             }
             CharSequence commentText = comment.subSequence(0, comment.length() - 2);
             Comment instruction = new Comment();
-            instruction.setSelect(new StringLiteral(new StringItem(commentText)));
+            instruction.setSelect(new StringLiteral(new StringItem(commentText.toString())));
             setLocation(instruction);
             return instruction;
         } catch (StringIndexOutOfBoundsException err) {

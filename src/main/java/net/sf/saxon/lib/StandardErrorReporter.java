@@ -409,14 +409,14 @@ public class StandardErrorReporter
      *     was violated;</li>
      *     <li>For other exceptions, it returns a string comprising two characters
      *     of indentation, followed by the result of calling {@link #getExpandedMessage(XmlProcessingError)}
-     *     and then formatting the result using {@link #wordWrap(String)} and {@link #expandSpecialCharacters(CharSequence)}.</li>
+     *     and then formatting the result using {@link #wordWrap(String)} and {@link #expandSpecialCharacters(String)}.</li>
      * </ul>
      * @param err the original reported exception
      * @return the string to be used as the second line of the error message
      */
 
     public String constructSecondLine(XmlProcessingError err) {
-        return expandSpecialCharacters(wordWrap(getExpandedMessage(err))).toString();
+        return expandSpecialCharacters(wordWrap(getExpandedMessage(err)));
     }
 
     /**
@@ -538,14 +538,14 @@ public class StandardErrorReporter
      * in this way is to mark the logger as being unicode-aware.</p>
      *
      * <p>If messages are expanded, then they will be expanded using the method
-     * {@link #expandSpecialCharacters(CharSequence, int)}, which can be overridden
+     * {@link #expandSpecialCharacters(String, int)}, which can be overridden
      * to define the actual format in which special characters are displayed.</p>
      *
      * @param in the message to be expanded
      * @return the expanded message
      */
 
-    public CharSequence expandSpecialCharacters(CharSequence in) {
+    public String expandSpecialCharacters(String in) {
         if (logger.isUnicodeAware()) {
             return in;
         } else {

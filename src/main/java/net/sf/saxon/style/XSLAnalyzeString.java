@@ -57,7 +57,7 @@ public class XSLAnalyzeString extends StyleElement {
 
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         String selectAtt = null;
         String regexAtt = null;
         String flagsAtt = null;

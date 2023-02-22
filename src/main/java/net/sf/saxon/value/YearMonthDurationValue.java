@@ -97,7 +97,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
         int m = getMonths();
 
         UnicodeBuilder sb = new UnicodeBuilder();
-        if (negative) {
+        if (_negative) {
             sb.append('-');
         }
         sb.append('P');
@@ -118,7 +118,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      */
 
     public int getLengthInMonths() {
-        return months * (negative ? -1 : +1);
+        return _months * (_negative ? -1 : +1);
     }
 
     /**
@@ -130,10 +130,10 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
 
     public static YearMonthDurationValue fromMonths(int months) {
         YearMonthDurationValue mdv = new YearMonthDurationValue();
-        mdv.negative = months < 0;
-        mdv.months = months < 0 ? -months : months;
-        mdv.seconds = 0;
-        mdv.nanoseconds = 0;
+        mdv._negative = months < 0;
+        mdv._months = months < 0 ? -months : months;
+        mdv._seconds = 0;
+        mdv._nanoseconds = 0;
         return mdv;
     }
 
@@ -147,7 +147,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
     @Override
     public YearMonthDurationValue multiply(long factor) throws XPathException {
         // Fast path for simple cases
-        if (Math.abs(factor) < 30_000 && Math.abs(months) < 30_000) {
+        if (Math.abs(factor) < 30_000 && Math.abs(_months) < 30_000) {
             return YearMonthDurationValue.fromMonths((int)factor * getLengthInMonths());
         } else {
             return multiply((double)factor);

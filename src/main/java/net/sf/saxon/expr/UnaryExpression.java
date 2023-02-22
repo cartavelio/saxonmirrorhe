@@ -130,7 +130,7 @@ public abstract class UnaryExpression extends Expression {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return getBaseExpression().getSpecialProperties();
     }
 
@@ -139,7 +139,7 @@ public abstract class UnaryExpression extends Expression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return getBaseExpression().getCardinality();
     }
 
@@ -172,7 +172,7 @@ public abstract class UnaryExpression extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return ("UnaryExpression " + getClass()).hashCode() ^ getBaseExpression().hashCode();
     }
 

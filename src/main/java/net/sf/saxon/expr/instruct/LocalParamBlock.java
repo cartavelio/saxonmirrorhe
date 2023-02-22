@@ -54,7 +54,7 @@ public class LocalParamBlock extends Instruction {
     }
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return 0;
     }
 

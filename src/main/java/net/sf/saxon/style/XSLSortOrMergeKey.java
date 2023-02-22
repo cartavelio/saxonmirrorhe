@@ -47,7 +47,7 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 

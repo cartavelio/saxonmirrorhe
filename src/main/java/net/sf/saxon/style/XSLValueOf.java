@@ -36,7 +36,7 @@ public final class XSLValueOf extends XSLLeafNodeConstructor {
 
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String selectAtt = null;
         String disableAtt = null;

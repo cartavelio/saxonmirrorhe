@@ -106,7 +106,7 @@ public class UniversalPattern extends Pattern {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return 0x7aeccea8;
     }
 

@@ -424,8 +424,8 @@ public final class SequenceType {
 
     public static SequenceType makeSequenceType(ItemType primaryType, int cardinality) {
 
-        if (primaryType instanceof ItemType.WithSequenceTypeCache) {
-            ItemType.WithSequenceTypeCache bat = (ItemType.WithSequenceTypeCache) primaryType;
+        if (primaryType instanceof ItemTypeWithSequenceTypeCache) {
+            ItemTypeWithSequenceTypeCache bat = (ItemTypeWithSequenceTypeCache) primaryType;
             switch (cardinality) {
                 case StaticProperty.EXACTLY_ONE:
                     return bat.one();

@@ -60,7 +60,7 @@ public abstract class SingleItemFilter extends UnaryExpression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_ONE;
     }
 

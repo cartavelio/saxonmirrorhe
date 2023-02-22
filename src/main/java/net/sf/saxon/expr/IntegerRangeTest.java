@@ -126,7 +126,7 @@ public class IntegerRangeTest extends Expression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 
@@ -177,7 +177,7 @@ public class IntegerRangeTest extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         int h = getValue().hashCode() + 77;
         h ^= getMin().hashCode() ^ getMax().hashCode();
         return h;

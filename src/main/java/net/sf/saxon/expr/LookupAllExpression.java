@@ -191,7 +191,7 @@ public class LookupAllExpression extends UnaryExpression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
@@ -212,7 +212,7 @@ public class LookupAllExpression extends UnaryExpression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return "LookupAll".hashCode() ^ getBaseExpression().hashCode();
     }
 

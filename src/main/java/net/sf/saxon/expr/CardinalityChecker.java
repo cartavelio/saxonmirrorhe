@@ -355,7 +355,7 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return requiredCardinality;
     }
 
@@ -366,7 +366,7 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return getBaseExpression().getSpecialProperties();
     }
 
@@ -400,7 +400,7 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return super.computeHashCode() ^ requiredCardinality;
     }
 

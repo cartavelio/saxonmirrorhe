@@ -76,7 +76,7 @@ public class AccumulatorData implements IAccumulatorData {
         values.add(new DataPoint(new Visit(doc, false), val));
         val = visit(doc, val, c2);
         values.add(new DataPoint(new Visit(doc, true), val));
-        ((ArrayList) values).trimToSize();
+        ((ArrayList<DataPoint>) values).trimToSize();
         building = false;
         //diagnosticPrint();
     }
@@ -162,7 +162,7 @@ public class AccumulatorData implements IAccumulatorData {
         c2.setLocalVariable(0, value);
         c2.setCurrentComponent(accumulator.getDeclaringComponent());
         c2.setTemporaryOutputState(StandardNames.XSL_ACCUMULATOR_RULE);
-        value = Evaluator.EAGER_SEQUENCE.evaluate(delta, c2);
+        value = Evaluator.EAGER_SEQUENCE.INSTANCE.evaluate(delta, c2);
         //System.err.println("Node " + ((TinyNodeImpl) node).getNodeNumber() + " : " + value);
         if (node.getParent() == null && !isPostDescent && values.size() == 1) {
             // Overwrite the accumulator's initial value with the "before document start" value. Bug 4786.

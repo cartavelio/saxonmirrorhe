@@ -10,8 +10,8 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.NumericValue;
 
 /**
@@ -39,10 +39,10 @@ public final class Round extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NumericValue val0 = (NumericValue) arguments[0].head();
         if (val0 == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
 
         int scaleRnd = 0;
@@ -50,7 +50,7 @@ public final class Round extends SystemFunction {
             NumericValue scaleVal = (NumericValue) arguments[1].head();
             scaleRnd = (int) scaleVal.longValue();
         }
-        return new ZeroOrOne(val0.round(scaleRnd));
+        return val0.round(scaleRnd);
 
     }
 

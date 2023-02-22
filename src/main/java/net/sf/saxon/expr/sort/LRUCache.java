@@ -37,15 +37,24 @@ public class LRUCache<K, V> {
      *                   be synchronized
      */
     public LRUCache(final int cacheSize, boolean concurrent) {
-        map = new LinkedHashMap<K, V>(cacheSize, 0.75f, true) {
-            @Override
-            protected boolean removeEldestEntry(Map.Entry eldest) {
-                return cacheSize < super.size();
-            }
-        };
+        map = new LRULinkedHashMap<K, V>(cacheSize);
         if (concurrent) {
             map = Collections.synchronizedMap(map);
         }
+    }
+
+    private static class LRULinkedHashMap<K, V> extends LinkedHashMap<K, V> {
+        private final int cacheSize;
+        public LRULinkedHashMap(int cacheSize) {
+            super(cacheSize, 0.75f, true);
+            this.cacheSize = cacheSize;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+            return cacheSize < size();
+        }
+
     }
 
     /**

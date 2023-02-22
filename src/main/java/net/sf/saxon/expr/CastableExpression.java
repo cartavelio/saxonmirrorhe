@@ -123,7 +123,7 @@ public final class CastableExpression extends CastingExpression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return super.computeHashCode() ^ 0x5555;
     }
 
@@ -151,7 +151,7 @@ public final class CastableExpression extends CastingExpression {
 
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 

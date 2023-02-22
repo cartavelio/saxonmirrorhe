@@ -105,19 +105,19 @@ public abstract class GDateValue extends CalendarValue {
         d.hasNoYearZero = !allowYearZero;
         StringTokenizer tok = new StringTokenizer(Whitespace.trim(s).toString(), "-:+TZ", true);
         try {
-            if (!tok.hasMoreElements()) {
+            if (!tok.hasMoreTokens()) {
                 return badDate("Too short", s);
             }
-            String part = (String) tok.nextElement();
+            String part = (String) tok.nextToken();
             int era = +1;
             if ("+".equals(part)) {
                 return badDate("Date must not start with '+' sign", s);
             } else if ("-".equals(part)) {
                 era = -1;
-                if (!tok.hasMoreElements()) {
+                if (!tok.hasMoreTokens()) {
                     return badDate("No year after '-'", s);
                 }
-                part = (String) tok.nextElement();
+                part = (String) tok.nextToken();
             }
 
             if (part.length() < 4) {
@@ -141,17 +141,17 @@ public abstract class GDateValue extends CalendarValue {
             if (era < 0 && !allowYearZero) {
                 d.year++;      // if year zero not allowed, -0001 is the year before +0001, represented as 0 internally.
             }
-            if (!tok.hasMoreElements()) {
+            if (!tok.hasMoreTokens()) {
                 return badDate("Too short", s);
             }
-            if (!"-".equals(tok.nextElement())) {
+            if (!"-".equals(tok.nextToken())) {
                 return badDate("Wrong delimiter after year", s);
             }
 
-            if (!tok.hasMoreElements()) {
+            if (!tok.hasMoreTokens()) {
                 return badDate("Too short", s);
             }
-            part = (String) tok.nextElement();
+            part = (String) tok.nextToken();
             if (part.length() != 2) {
                 return badDate("Month must be two digits", s);
             }
@@ -163,17 +163,17 @@ public abstract class GDateValue extends CalendarValue {
             if (d.month < 1 || d.month > 12) {
                 return badDate("Month is out of range", s);
             }
-            if (!tok.hasMoreElements()) {
+            if (!tok.hasMoreTokens()) {
                 return badDate("Too short", s);
             }
-            if (!"-".equals(tok.nextElement())) {
+            if (!"-".equals(tok.nextToken())) {
                 return badDate("Wrong delimiter after month", s);
             }
 
-            if (!tok.hasMoreElements()) {
+            if (!tok.hasMoreTokens()) {
                 return badDate("Too short", s);
             }
-            part = (String) tok.nextElement();
+            part = (String) tok.nextToken();
             if (part.length() != 2) {
                 return badDate("Day must be two digits", s);
             }
@@ -187,24 +187,24 @@ public abstract class GDateValue extends CalendarValue {
             }
 
             int tzOffset;
-            if (tok.hasMoreElements()) {
+            if (tok.hasMoreTokens()) {
 
-                String delim = (String) tok.nextElement();
+                String delim = (String) tok.nextToken();
 
                 if ("T".equals(delim)) {
                     return badDate("Value includes time", s);
                 } else if ("Z".equals(delim)) {
                     tzOffset = 0;
-                    if (tok.hasMoreElements()) {
+                    if (tok.hasMoreTokens()) {
                         return badDate("Continues after 'Z'", s);
                     }
                     d.setTimezoneInMinutes(tzOffset);
 
                 } else if (!(!"+".equals(delim) && !"-".equals(delim))) {
-                    if (!tok.hasMoreElements()) {
+                    if (!tok.hasMoreTokens()) {
                         return badDate("Missing timezone", s);
                     }
-                    part = (String) tok.nextElement();
+                    part = (String) tok.nextToken();
                     value = DurationValue.simpleInteger(part);
                     if (value < 0) {
                         return badDate("Non-numeric timezone hour component", s);
@@ -216,17 +216,17 @@ public abstract class GDateValue extends CalendarValue {
                     if (tzhour > 14) {
                         return badDate("Timezone hour is out of range", s);
                     }
-                    if (!tok.hasMoreElements()) {
+                    if (!tok.hasMoreTokens()) {
                         return badDate("No minutes in timezone", s);
                     }
-                    if (!":".equals(tok.nextElement())) {
+                    if (!":".equals(tok.nextToken())) {
                         return badDate("Wrong delimiter after timezone hour", s);
                     }
 
-                    if (!tok.hasMoreElements()) {
+                    if (!tok.hasMoreTokens()) {
                         return badDate("No minutes in timezone", s);
                     }
-                    part = (String) tok.nextElement();
+                    part = (String) tok.nextToken();
                     value = DurationValue.simpleInteger(part);
                     if (value < 0) {
                         return badDate("Non-numeric timezone minute component", s);
@@ -238,7 +238,7 @@ public abstract class GDateValue extends CalendarValue {
                     if (tzminute > 59) {
                         return badDate("Timezone minute is out of range", s);
                     }
-                    if (tok.hasMoreElements()) {
+                    if (tok.hasMoreTokens()) {
                         return badDate("Continues after timezone", s);
                     }
 

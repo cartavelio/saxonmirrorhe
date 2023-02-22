@@ -37,7 +37,7 @@ public abstract class XSLChooseOrSwitch extends StyleElement {
 
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
             checkUnknownAttribute(attName);
@@ -82,7 +82,7 @@ public abstract class XSLChooseOrSwitch extends StyleElement {
      */
 
     @Override
-    public boolean markTailCalls() {
+    protected boolean markTailCalls() {
         boolean found = false;
         for (NodeInfo curr : children(StyleElement.class::isInstance)) {
             found |= ((StyleElement) curr).markTailCalls();

@@ -118,7 +118,7 @@ public class SuppliedParameterReference extends Expression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         if (type != null) {
             return type.getCardinality();
         } else {

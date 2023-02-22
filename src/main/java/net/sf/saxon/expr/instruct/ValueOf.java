@@ -170,7 +170,7 @@ public final class ValueOf extends SimpleNodeConstructor {
     }
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         if (noNodeIfEmpty) {
             return StaticProperty.ALLOWS_ZERO_OR_ONE;
         } else {
@@ -330,9 +330,6 @@ public final class ValueOf extends SimpleNodeConstructor {
                     return getNextOutputter().getStringReceiver(true);
                 }
 
-//                @Override
-//                public CharSequenceConsumer getStringReceiver() {return getNextOutputter().getStringReceiver();
-//                }
             };
             getSelect().process(toText, context);
             // Send a zero-length text node to set previousAtomic=false

@@ -43,7 +43,7 @@ public final class XSLCopyOf extends StyleElement {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String selectAtt = null;
         String copyNamespacesAtt = null;

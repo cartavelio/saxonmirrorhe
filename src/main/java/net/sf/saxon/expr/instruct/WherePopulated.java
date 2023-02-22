@@ -74,7 +74,7 @@ public class WherePopulated extends UnaryExpression implements ItemMappingFuncti
     }
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return super.computeCardinality() | StaticProperty.ALLOWS_ZERO;
     }
 

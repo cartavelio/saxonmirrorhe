@@ -52,7 +52,7 @@ public class SaplingComment extends SaplingNode {
     }
 
     @Override
-    protected void sendTo(Receiver receiver) throws XPathException {
+    public void sendTo(Receiver receiver) throws XPathException {
         receiver.comment(StringView.of(value), Loc.NONE, ReceiverOption.NONE);
     }
 }

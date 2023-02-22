@@ -12,8 +12,8 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.EmptySequence;
 
 /**
  * Implement the XPath 2.0 root() function with one argument
@@ -51,12 +51,12 @@ public class Root_1 extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo node = (NodeInfo) arguments[0].head();
         if (node == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         } else {
-            return new ZeroOrOne(node.getRoot());
+            return node.getRoot();
         }
     }
 

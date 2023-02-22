@@ -60,7 +60,7 @@ public class TailIterator
      *          if a dynamic error occurs
      */
 
-    public static <T extends Item> SequenceIterator make(SequenceIterator base, int start) throws XPathException {
+    public static SequenceIterator make(SequenceIterator base, int start) throws XPathException {
         if (start <= 1) {
             return base;
         } else if (base instanceof ArrayIterator) {

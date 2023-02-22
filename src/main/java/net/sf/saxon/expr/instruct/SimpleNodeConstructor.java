@@ -100,7 +100,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return getSelect().getCardinality(); // may allow empty sequence
     }
 
@@ -113,7 +113,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return super.computeSpecialProperties() |
                 StaticProperty.SINGLE_DOCUMENT_NODESET;
     }

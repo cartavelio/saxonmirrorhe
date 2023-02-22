@@ -249,7 +249,7 @@ public class LookupExpression extends BinaryExpression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         if (isSingleContainer && isSingleEntry) {
             if (isArrayLookup) {
                 ItemType arrayType = getLhsExpression().getItemType();
@@ -292,7 +292,7 @@ public class LookupExpression extends BinaryExpression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return "LookupExpression".hashCode() ^ getLhsExpression().hashCode() ^ getRhsExpression().hashCode();
     }
 

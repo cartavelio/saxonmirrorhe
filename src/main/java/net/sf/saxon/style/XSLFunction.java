@@ -77,7 +77,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         if (doneAttributes) {
             return;
@@ -287,7 +287,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 

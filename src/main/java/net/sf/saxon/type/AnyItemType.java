@@ -17,7 +17,7 @@ import net.sf.saxon.value.SequenceType;
  * An implementation of ItemType that matches any item (node or atomic value)
  */
 
-public class AnyItemType implements ItemType.WithSequenceTypeCache {
+public class AnyItemType implements ItemTypeWithSequenceTypeCache {
 
     private SequenceType _one;
     private SequenceType _oneOrMore;

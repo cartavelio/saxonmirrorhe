@@ -489,7 +489,7 @@ public class ForEachGroup extends Instruction
      * @return a set of flags indicating static properties of this expression
      */
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         p |= getActionExpression().getSpecialProperties() & StaticProperty.ALL_NODES_UNTYPED;
         return p;

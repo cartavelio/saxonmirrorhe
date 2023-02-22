@@ -459,7 +459,7 @@ public class ForExpression extends Assignation {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         int c1 = getSequence().getCardinality();
         int c2 = getAction().getCardinality();
         return Cardinality.multiply(c1, c2);

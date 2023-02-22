@@ -145,7 +145,7 @@ public abstract class SimpleExpression extends Expression implements Callable {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         if ((getImplementationMethod() & Expression.EVALUATE_METHOD) == 0) {
             return StaticProperty.ALLOWS_ONE_OR_MORE;
         } else {

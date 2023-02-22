@@ -525,7 +525,7 @@ public abstract class FunctionCall extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         if (getFunctionName() == null) {
             return super.computeHashCode();
         }

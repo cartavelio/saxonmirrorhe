@@ -76,7 +76,7 @@ public abstract class SaplingNode {
      * @throws XPathException if the receiver throws an exception
      */
 
-    protected abstract void sendTo(Receiver receiver) throws XPathException;
+    public abstract void sendTo(Receiver receiver) throws XPathException;
 
 }
 

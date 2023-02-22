@@ -57,7 +57,7 @@ public class XSLNumber extends StyleElement {
 
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String selectAtt = null;
         String valueAtt = null;

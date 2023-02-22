@@ -94,29 +94,6 @@ public class StringItem extends AtomicValue {
         this.typeLabel = typeLabel;
     }
 
-
-    public StringItem(CharSequence value) {
-        // TODO: this is scaffolding
-        this(value.toString(), BuiltInAtomicType.STRING);
-    }
-
-
-    public StringItem(CharSequence value, AtomicType type) {
-        // TODO: this is scaffolding
-        this(value.toString(), type);
-    }
-
-//    /**
-//     * Constructor from UnicodeString. Creates an instance of xs:string.
-//     *
-//     * @param value the UnicodeString value.
-//     */
-//
-//    public StringValue(UnicodeString value) {
-//        this(value, BuiltInAtomicType.STRING);
-//    }
-
-
     /**
      * Create a copy of this atomic value, with a different type label
      *
@@ -172,12 +149,12 @@ public class StringItem extends AtomicValue {
         if (value == null || value.length() == 0) {
             return StringItem.EMPTY_STRING;
         } else {
-            return new StringItem(value);
+            return new StringItem(value.toString());
         }
     }
 
     @Override
-    protected UnicodeString getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
         return content;
     }
 

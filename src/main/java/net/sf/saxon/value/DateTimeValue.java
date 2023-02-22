@@ -316,19 +316,19 @@ public final class DateTimeValue extends CalendarValue
         dt.hasNoYearZero = !rules.isAllowYearZero();
         StringTokenizer tok = new StringTokenizer(Whitespace.trim(s).toString(), "-:.+TZ", true);
 
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badDate("too short", s);
         }
-        String part = (String) tok.nextElement();
+        String part = tok.nextToken();
         int era = +1;
         if ("+".equals(part)) {
             return badDate("Date must not start with '+' sign", s);
         } else if ("-".equals(part)) {
             era = -1;
-            if (!tok.hasMoreElements()) {
+            if (!tok.hasMoreTokens()) {
                 return badDate("No year after '-'", s);
             }
-            part = (String) tok.nextElement();
+            part = tok.nextToken();
         }
         int value = DurationValue.simpleInteger(part);
         if (value < 0) {
@@ -351,17 +351,17 @@ public final class DateTimeValue extends CalendarValue
         if (era < 0 && !rules.isAllowYearZero()) {
             dt.year++;     // if year zero not allowed, -0001 is the year before +0001, represented as 0 internally.
         }
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badDate("Too short", s);
         }
-        if (!"-".equals(tok.nextElement())) {
+        if (!"-".equals(tok.nextToken())) {
             return badDate("Wrong delimiter after year", s);
         }
 
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badDate("Too short", s);
         }
-        part = (String) tok.nextElement();
+        part = tok.nextToken();
         if (part.length() != 2) {
             return badDate("Month must be two digits", s);
         }
@@ -374,16 +374,16 @@ public final class DateTimeValue extends CalendarValue
             return badDate("Month is out of range", s);
         }
 
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badDate("Too short", s);
         }
-        if (!"-".equals(tok.nextElement())) {
+        if (!"-".equals(tok.nextToken())) {
             return badDate("Wrong delimiter after month", s);
         }
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badDate("Too short", s);
         }
-        part = (String) tok.nextElement();
+        part = (String) tok.nextToken();
         if (part.length() != 2) {
             return badDate("Day must be two digits", s);
         }
@@ -396,17 +396,17 @@ public final class DateTimeValue extends CalendarValue
             return badDate("Day is out of range", s);
         }
 
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badDate("Too short", s);
         }
-        if (!"T".equals(tok.nextElement())) {
+        if (!"T".equals(tok.nextToken())) {
             return badDate("Wrong delimiter after day", s);
         }
 
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badDate("Too short", s);
         }
-        part = (String) tok.nextElement();
+        part = tok.nextToken();
         if (part.length() != 2) {
             return badDate("Hour must be two digits", s);
         }
@@ -419,17 +419,17 @@ public final class DateTimeValue extends CalendarValue
             return badDate("Hour is out of range", s);
         }
 
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badDate("Too short", s);
         }
-        if (!":".equals(tok.nextElement())) {
+        if (!":".equals(tok.nextToken())) {
             return badDate("Wrong delimiter after hour", s);
         }
 
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badDate("Too short", s);
         }
-        part = (String) tok.nextElement();
+        part = tok.nextToken();
         if (part.length() != 2) {
             return badDate("Minute must be two digits", s);
         }
@@ -444,17 +444,17 @@ public final class DateTimeValue extends CalendarValue
         if (dt.hour == 24 && dt.minute != 0) {
             return badDate("If hour is 24, minute must be 00", s);
         }
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badDate("Too short", s);
         }
-        if (!":".equals(tok.nextElement())) {
+        if (!":".equals(tok.nextToken())) {
             return badDate("Wrong delimiter after minute", s);
         }
 
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badDate("Too short", s);
         }
-        part = (String) tok.nextElement();
+        part = tok.nextToken();
         if (part.length() != 2) {
             return badDate("Second must be two digits", s);
         }
@@ -474,19 +474,19 @@ public final class DateTimeValue extends CalendarValue
         int tz = 0;
         boolean negativeTz = false;
         int state = 0;
-        while (tok.hasMoreElements()) {
+        while (tok.hasMoreTokens()) {
             if (state == 9) {
                 return badDate("Characters after the end", s);
             }
-            String delim = (String) tok.nextElement();
+            String delim = (String) tok.nextToken();
             if (".".equals(delim)) {
                 if (state != 0) {
                     return badDate("Decimal separator occurs twice", s);
                 }
-                if (!tok.hasMoreElements()) {
+                if (!tok.hasMoreTokens()) {
                     return badDate("Decimal point must be followed by digits", s);
                 }
-                part = (String) tok.nextElement();
+                part = (String) tok.nextToken();
                 if (part.length() > 9 && part.matches("^[0-9]+$")) {
                     part = part.substring(0, 9);
                 }
@@ -517,10 +517,10 @@ public final class DateTimeValue extends CalendarValue
                     return badDate(delim + " cannot occur here", s);
                 }
                 state = 2;
-                if (!tok.hasMoreElements()) {
+                if (!tok.hasMoreTokens()) {
                     return badDate("Missing timezone", s);
                 }
-                part = (String) tok.nextElement();
+                part = (String) tok.nextToken();
                 if (part.length() != 2) {
                     return badDate("Timezone hour must be two digits", s);
                 }
@@ -543,7 +543,7 @@ public final class DateTimeValue extends CalendarValue
                     return badDate("Misplaced ':'", s);
                 }
                 state = 9;
-                part = (String) tok.nextElement();
+                part = (String) tok.nextToken();
                 value = DurationValue.simpleInteger(part);
                 if (value < 0) {
                     return badDate("Non-numeric timezone minute component", s);

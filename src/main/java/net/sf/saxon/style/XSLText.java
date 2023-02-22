@@ -32,7 +32,7 @@ public class XSLText extends XSLLeafNodeConstructor {
 
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String disableAtt = null;
 

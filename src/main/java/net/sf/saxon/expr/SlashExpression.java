@@ -652,7 +652,7 @@ public class SlashExpression extends BinaryExpression
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
 
         int startProperties = getStart().getSpecialProperties();
         int stepProperties = getStep().getSpecialProperties();
@@ -804,7 +804,7 @@ public class SlashExpression extends BinaryExpression
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         int c1 = getStart().getCardinality();
         int c2 = getStep().getCardinality();
         return Cardinality.multiply(c1, c2);
@@ -909,7 +909,7 @@ public class SlashExpression extends BinaryExpression
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return "SlashExpression".hashCode() + getStart().hashCode() + getStep().hashCode();
     }
 

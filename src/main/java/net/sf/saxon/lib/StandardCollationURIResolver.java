@@ -67,7 +67,7 @@ public class StandardCollationURIResolver implements CollationURIResolver {
             Properties props = new Properties();
             String query = uuri.getRawQuery();
             StringTokenizer queryTokenizer = new StringTokenizer(query, ";&");
-            while (queryTokenizer.hasMoreElements()) {
+            while (queryTokenizer.hasMoreTokens()) {
                 String param = queryTokenizer.nextToken();
                 int eq = param.indexOf('=');
                 if (eq > 0 && eq < param.length() - 1) {

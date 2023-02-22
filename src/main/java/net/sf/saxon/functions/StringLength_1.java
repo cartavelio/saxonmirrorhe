@@ -10,8 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.One;
-import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
@@ -45,8 +44,8 @@ public class StringLength_1 extends ScalarSystemFunction {
     }
 
     @Override
-    public ZeroOrOne resultWhenEmpty() {
-        return One.integer(0);
+    public Sequence resultWhenEmpty() {
+        return Int64Value.ZERO;
     }
 
     @Override

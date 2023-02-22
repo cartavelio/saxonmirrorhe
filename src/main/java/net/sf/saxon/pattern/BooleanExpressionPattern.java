@@ -201,7 +201,7 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return 0x7aeffea9 ^ getPredicate().hashCode();
     }
 

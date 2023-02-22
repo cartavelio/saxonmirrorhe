@@ -29,7 +29,7 @@ public class XSLItemType extends StyleElement {      // renamed to solve a trans
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         // Avoid reporting errors twice
         if (itemTypeName != null) {

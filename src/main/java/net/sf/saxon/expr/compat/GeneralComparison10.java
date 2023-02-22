@@ -66,7 +66,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 

@@ -67,7 +67,7 @@ public final class AttributeGetter extends Expression {
     }
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_ONE;
     }
 
@@ -149,7 +149,7 @@ public final class AttributeGetter extends Expression {
     }
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return 83571 ^ attributeName.hashCode();
     }
 

@@ -189,13 +189,13 @@ public class ExpressionTool {
 
     public static Evaluator lazyEvaluator(Expression exp, boolean repeatable) {
         if (exp instanceof Literal) {
-            return Evaluator.LITERAL;
+            return Evaluator.LITERAL.INSTANCE;
 
         } else if (exp instanceof VariableReference) {
-            return Evaluator.VARIABLE;
+            return Evaluator.VARIABLE.INSTANCE;
 
         } else if (exp instanceof SuppliedParameterReference) {
-            return Evaluator.SUPPLIED_PARAMETER;
+            return Evaluator.SUPPLIED_PARAMETER.INSTANCE;
 
         } else if ((exp.getDependencies() &
                             (StaticProperty.DEPENDS_ON_POSITION |
@@ -208,7 +208,7 @@ public class ExpressionTool {
             return eagerEvaluator(exp);
 
         } else if (exp instanceof ErrorExpression) {
-            return Evaluator.SINGLE_ITEM;
+            return Evaluator.SINGLE_ITEM.INSTANCE;
             // evaluateItem() on an error expression throws the latent exception
 
         } else if (!Cardinality.allowsMany(exp.getCardinality())) {
@@ -221,11 +221,11 @@ public class ExpressionTool {
             TailExpression tail = (TailExpression) exp;
             Expression base = tail.getBaseExpression();
             if (base instanceof VariableReference) {
-                return Evaluator.LAZY_TAIL;
+                return Evaluator.LAZY_TAIL.INSTANCE;
             } else if (repeatable) {
-                return Evaluator.MEMO_CLOSURE;
+                return Evaluator.MEMO_CLOSURE.INSTANCE;
             } else {
-                return Evaluator.LAZY_SEQUENCE;
+                return Evaluator.LAZY_SEQUENCE.INSTANCE;
             }
 
         } else if (exp instanceof Block && ((Block) exp).isCandidateForSharedAppend()) {
@@ -236,13 +236,13 @@ public class ExpressionTool {
             // reference as one of its subexpressions. The most common case is that the first argument is a reference
             // to an argument of recursive function, where the recursive function returns the result of
             // appending to the sequence.
-            return Evaluator.SHARED_APPEND;
+            return Evaluator.SHARED_APPEND.INSTANCE;
 
         } else if (repeatable) {
             // create a Closure, a wrapper for the expression and its context
-            return Evaluator.MEMO_CLOSURE;
+            return Evaluator.MEMO_CLOSURE.INSTANCE;
         } else {
-            return Evaluator.LAZY_SEQUENCE;
+            return Evaluator.LAZY_SEQUENCE.INSTANCE;
         }
     }
 
@@ -258,23 +258,23 @@ public class ExpressionTool {
 
     public static Evaluator eagerEvaluator(Expression exp) {
         if (exp instanceof Literal && !(((Literal) exp).getGroundedValue() instanceof Closure)) {
-            return Evaluator.LITERAL;
+            return Evaluator.LITERAL.INSTANCE;
         }
         if (exp instanceof VariableReference) {
-            return Evaluator.VARIABLE;
+            return Evaluator.VARIABLE.INSTANCE;
         }
         int m = exp.getImplementationMethod();
         if ((m & Expression.EVALUATE_METHOD) != 0 && !Cardinality.allowsMany(exp.getCardinality())) {
             if (Cardinality.allowsZero(exp.getCardinality())) {
-                return Evaluator.OPTIONAL_ITEM;
+                return Evaluator.OPTIONAL_ITEM.INSTANCE;
             } else {
-                return Evaluator.SINGLE_ITEM;
+                return Evaluator.SINGLE_ITEM.INSTANCE;
             }
 
         } else if ((m & Expression.ITERATE_METHOD) != 0) {
-            return Evaluator.EAGER_SEQUENCE;
+            return Evaluator.EAGER_SEQUENCE.INSTANCE;
         } else {
-            return Evaluator.PROCESS;
+            return Evaluator.PROCESS.INSTANCE;
         }
     }
 

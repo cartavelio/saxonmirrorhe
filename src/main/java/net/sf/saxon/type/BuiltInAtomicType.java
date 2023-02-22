@@ -31,7 +31,7 @@ import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
  * (such as xs:decimal or xs:anyURI) or a derived type (such as xs:ID or xs:dayTimeDuration).
  */
 
-public class BuiltInAtomicType implements AtomicType, ItemType.WithSequenceTypeCache {
+public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCache {
 
     private final int fingerprint;
     private int baseFingerprint;

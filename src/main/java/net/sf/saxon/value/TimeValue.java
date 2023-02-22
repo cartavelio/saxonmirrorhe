@@ -134,10 +134,10 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
         // input must have format hh:mm:ss[.fff*][([+|-]hh:mm | Z)]
         TimeValue tv = new TimeValue();
         StringTokenizer tok = new StringTokenizer(Whitespace.trim(s).toString(), "-:.+Z", true);
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badTime("too short", s);
         }
-        String part = (String) tok.nextElement();
+        String part = (String) tok.nextToken();
 
         if (part.length() != 2) {
             return badTime("hour must be two digits", s);
@@ -150,17 +150,17 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
         if (tv.hour > 24) {
             return badTime("hour is out of range", s);
         }
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badTime("too short", s);
         }
-        if (!":".equals(tok.nextElement())) {
+        if (!":".equals(tok.nextToken())) {
             return badTime("wrong delimiter after hour", s);
         }
 
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badTime("too short", s);
         }
-        part = (String) tok.nextElement();
+        part = (String) tok.nextToken();
         if (part.length() != 2) {
             return badTime("minute must be two digits", s);
         }
@@ -175,17 +175,17 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
         if (tv.hour == 24 && tv.minute != 0) {
             return badTime("If hour is 24, minute must be 00", s);
         }
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badTime("too short", s);
         }
-        if (!":".equals(tok.nextElement())) {
+        if (!":".equals(tok.nextToken())) {
             return badTime("wrong delimiter after minute", s);
         }
 
-        if (!tok.hasMoreElements()) {
+        if (!tok.hasMoreTokens()) {
             return badTime("too short", s);
         }
-        part = (String) tok.nextElement();
+        part = (String) tok.nextToken();
         if (part.length() != 2) {
             return badTime("second must be two digits", s);
         }
@@ -204,19 +204,19 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
         int tz = 0;
         boolean negativeTz = false;
         int state = 0;
-        while (tok.hasMoreElements()) {
+        while (tok.hasMoreTokens()) {
             if (state == 9) {
                 return badTime("characters after the end", s);
             }
-            String delim = (String) tok.nextElement();
+            String delim = (String) tok.nextToken();
             if (".".equals(delim)) {
                 if (state != 0) {
                     return badTime("decimal separator occurs twice", s);
                 }
-                if (!tok.hasMoreElements()) {
+                if (!tok.hasMoreTokens()) {
                     return badTime("decimal point must be followed by digits", s);
                 }
-                part = (String) tok.nextElement();
+                part = (String) tok.nextToken();
                 if (part.length() > 9 && part.matches("^[0-9]+$")) {
                     part = part.substring(0, 9);
                 }
@@ -242,10 +242,10 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
                     return badTime(delim + " cannot occur here", s);
                 }
                 state = 2;
-                if (!tok.hasMoreElements()) {
+                if (!tok.hasMoreTokens()) {
                     return badTime("missing timezone", s);
                 }
-                part = (String) tok.nextElement();
+                part = (String) tok.nextToken();
                 if (part.length() != 2) {
                     return badTime("timezone hour must be two digits", s);
                 }
@@ -265,7 +265,7 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
                     return badTime("colon cannot occur here", s);
                 }
                 state = 9;
-                part = (String) tok.nextElement();
+                part = (String) tok.nextToken();
                 value = DurationValue.simpleInteger(part);
                 if (value < 0) {
                     return badTime("Non-numeric timezone minute component", s);

@@ -173,7 +173,7 @@ public class DocumentInstr extends ParentNodeConstructor {
      * @return a set of flags indicating static properties of this expression
      */
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         p |= StaticProperty.SINGLE_DOCUMENT_NODESET;
         if (getValidationAction() == Validation.SKIP) {

@@ -191,7 +191,7 @@ public class SourceDocument extends Instruction {
      * @return a set of flags indicating static properties of this expression
      */
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         // Not sure of the general rules here but we'll pick up some special cases which are useful for XQuery streaming
         // use cases written using saxon:stream() - where the body is always a call on snapshot()
         Expression body = getBody();

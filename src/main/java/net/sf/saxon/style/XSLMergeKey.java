@@ -22,7 +22,7 @@ public class XSLMergeKey extends XSLSortOrMergeKey {
 //    }
 
 
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         super.prepareAttributes();
 

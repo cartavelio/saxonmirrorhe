@@ -83,7 +83,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 
@@ -97,7 +97,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String nameAtt = null;
         String matchAtt = null;
@@ -223,17 +223,11 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
 
     }
 
-    private static class ContainsGlobalVariable implements Predicate<Expression> {
-        @Override
-        public boolean test(Expression e) {
-            return e instanceof GlobalVariableReference ||
-                    e instanceof UserFunctionCall ||
-                    e instanceof CallTemplate ||
-                    e instanceof ApplyTemplates;
-        }
-    }
-
-    private static final ContainsGlobalVariable containsGlobalVariable = new ContainsGlobalVariable();
+    private static final Predicate<Expression> containsGlobalVariable = e -> (
+        e instanceof GlobalVariableReference ||
+        e instanceof UserFunctionCall ||
+        e instanceof CallTemplate ||
+        e instanceof ApplyTemplates);
 
     @Override
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) {
