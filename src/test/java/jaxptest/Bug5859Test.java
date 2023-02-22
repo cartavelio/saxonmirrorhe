@@ -1,6 +1,7 @@
 package jaxptest;
 
 
+import net.sf.saxon.jaxp.SaxonTransformerFactory;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,7 +36,7 @@ public class Bug5859Test {
                   dir + "src/main/resources/xslt/final.xslt", domResult);
 
         StringWriter writer = new StringWriter();
-        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        Transformer transformer = new SaxonTransformerFactory().newTransformer();
         transformer.transform(new DOMSource(domResult.getNode()), new StreamResult(writer));
         String result = writer.toString();
 
@@ -59,6 +60,8 @@ public class Bug5859Test {
 
         String stringResult = writer.toString();
         // check if both namespaces are declared somewhere in the result
+
+        System.err.println(stringResult);
         assertTrue(stringResult
                            .contains("http://kszbcss.fgov.be/intf/Abc/invented/v1"));
         assertTrue(stringResult
@@ -69,7 +72,7 @@ public class Bug5859Test {
     private DOMResult transform(Source input, String xsltName)
             throws TransformerFactoryConfigurationError, TransformerException {
         Source xsltSource = new StreamSource(new File(xsltName));
-        Templates transformerTemplate = TransformerFactory.newInstance().newTemplates(xsltSource);
+        Templates transformerTemplate = new SaxonTransformerFactory().newTemplates(xsltSource);
 
         Transformer transformer = transformerTemplate.newTransformer();
 
@@ -82,7 +85,7 @@ public class Bug5859Test {
     private void transform(Source input, String paramName, Node param, String xsltName,
                            Result result) throws TransformerFactoryConfigurationError, TransformerException {
         Source xsltSource = new StreamSource(new File(xsltName));
-        Templates transformerTemplate = TransformerFactory.newInstance().newTemplates(xsltSource);
+        Templates transformerTemplate = new SaxonTransformerFactory().newTemplates(xsltSource);
 
         Transformer transformer = transformerTemplate.newTransformer();
         transformer.setParameter(paramName, param);
