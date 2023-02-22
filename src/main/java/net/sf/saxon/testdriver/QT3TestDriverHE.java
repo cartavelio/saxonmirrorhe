@@ -35,6 +35,7 @@ import java.util.function.Predicate;
 
 import static net.sf.saxon.s9api.streams.Predicates.*;
 import static net.sf.saxon.s9api.streams.Steps.*;
+import static net.sf.saxon.testdriver.Xslt30TestSuiteDriverHE.isTrue;
 
 /**
  * Test Driver for the QT3 test suite
@@ -230,6 +231,12 @@ public class QT3TestDriverHE extends TestDriver {
             //return ("en".equals(value) || "de".equals(value) || "fr".equals(value) || "it".equals(value) || "xib".equals(value)) != inverse;
         } else if ("calendar".equals(type)) {
             return ("AD".equals(value) || "ISO".equals(value)) != inverse;
+        } else if ("put".equals(type)) {
+            return ("comment".equals(value) || "text".equals(value)
+                            || "processing-instruction".equals(value)
+                            || "attribute".equals(value)) == inverse;
+        } else if ("revalidation".equals(type)) {
+            return !inverse;
         } else if ("format-integer-sequence".equals(type)) {
             return !inverse;
         } else if ("unicode-normalization-form".equals(type)) {
@@ -320,7 +327,6 @@ public class QT3TestDriverHE extends TestDriver {
         boolean run = true;
         String hostLang;
         String langVersion;
-        boolean updating = true;
         Spec specOpt = null;
         XPathCompiler xpath = driverProc.newXPathCompiler();
         String testCaseName = testCase.attribute("name");
@@ -409,11 +415,11 @@ public class QT3TestDriverHE extends TestDriver {
                         }
                     }
                 };
-                env.processor.setConfigurationProperty(FeatureKeys.ENVIRONMENT_VARIABLE_RESOLVER, resolver);
+                env.processor.setConfigurationProperty(Feature.ENVIRONMENT_VARIABLE_RESOLVER, resolver);
             }
-            if (type.equals("feature") && value.equals("XQUpdate")) {
-                updating = true;
-            }
+//            if (type.equals("feature") && value.equals("XQUpdate")) {
+//                updating = true;
+//            }
             /*if (type.equals("feature") && value.equals("xpath-1.0-compatibility")) {
                 hostLang = "XP";
                 langVersion = "3.0";
@@ -472,219 +478,252 @@ public class QT3TestDriverHE extends TestDriver {
         }
 
         if (run && (specOpt == null || specOpt == spec)) {
-
+            XdmValue previousResult = null;
             TestOutcome outcome = new TestOutcome(this);
-            String exp = null;
-            try {
-                //XdmNode testNode = (XdmNode)testCase.children("test").iterator().next();
-                exp = xpc.evaluate("if (test/@file) then unparsed-text(resolve-uri(test/@file, base-uri(.))) else string(test)", testCase).toString();
-            } catch (SaxonApiException err) {
-                println("*** Failed to read query: " + err.getMessage());
-                if (err.getErrorCode().getLocalName().equals("FOUT1190")) {
-                    outcome.setException(new QName("XPST0003"));
-                } else {
-                    outcome.setException(err.getErrorCode());
-                }
-            }
-
-            if (exp != null && env.processor.getSaxonEdition().equals("HE") && testSetName.equals("app-spec-examples")) {
-                // Some tests in app-spec-examples do not have their dependencies tagged
-
-                if (exp.contains("http://www.w3.org/2013/collation/UCA?lang=en;alternate=blanked;strength=primary")) {
-                    writeTestcaseElement(testCaseName, "notRun", "requires ICU");
-                    notrun++;
-                    return;
-                }
-
-                if (exp.contains("validate lax")) {
-                    writeTestcaseElement(testCaseName, "notRun", "requires schema-awareness");
-                    notrun++;
-                    return;
-                }
-
-                if (exp.contains("'fallback':function($s)")) {
-                    writeTestcaseElement(testCaseName, "notRun", "requires HOF");
-                    notrun++;
-                    return;
-                }
-            }
-
-            //noinspection ThrowableResultOfMethodCallIgnored
-            if (outcome.getException() == null) {
-                switch (hostLang) {
-                    case "XP":
-                    case "XT": {
-                        XPathCompiler testXpc = env.xpathCompiler;
-                        testXpc.setLanguageVersion(langVersion);
-                        testXpc.declareNamespace("fn", NamespaceConstant.FN);
-                        testXpc.declareNamespace("xs", NamespaceConstant.SCHEMA);
-                        //testXpc.declareNamespace("math", NamespaceConstant.MATH);
-                        testXpc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
-                        testXpc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
-
-                        copySchemaNamespaces(env, testXpc);  // ensure environment has schema namespaces
-
-
-                        ModuleResolver mr = new ModuleResolver(xpc); //
-
-                        mr.setTestCase(testCase);
-                        testXpc.getProcessor().getUnderlyingConfiguration().setModuleURIResolver(mr);
-
-                        try {
-                            XPathSelector selector = testXpc.compile(exp).load();
-                            for (QName varName : env.params.keySet()) {
-                                selector.setVariable(varName, env.params.get(varName));
-                            }
-                            if (env.contextItem != null) {
-                                selector.setContextItem(env.contextItem);
-                            }
-                            selector.setURIResolver(new TestURIResolver(env));
-                            //selector.setURIResolver(new TestURIResolver(env));
-                            if (env.unparsedTextResolver != null) {
-                                selector.getUnderlyingXPathContext().setUnparsedTextURIResolver(env.unparsedTextResolver);
-                            }
-                            XdmValue result = selector.evaluate();
-                            outcome.setPrincipalResult(result);
-                        } catch (SaxonApiException err) {
-                            println(err.getMessage());
-                            outcome.setException(err.getErrorCode());
-                        } catch (Exception err) {
-                            println(err.getMessage());
-                            err.printStackTrace();
-                            writeTestcaseElement(testCaseName, "fail", "*** crashed: " + err.getMessage());
-                            //notrun++;
-                            //return;
-                        }
-                        break;
+            for (XdmItem testQuery : testCase.children("test")) {
+                String exp = null;
+                try {
+                    //XdmNode testNode = (XdmNode)testCase.children("test").iterator().next();
+                    exp = xpc.evaluate("if (@file) then unparsed-text(resolve-uri(@file, base-uri(.))) else string(.)", testQuery).toString();
+                } catch (SaxonApiException err) {
+                    println("*** Failed to read query: " + err.getMessage());
+                    if (err.getErrorCode().getLocalName().equals("FOUT1190")) {
+                        outcome.setException(new QName("XPST0003"));
+                    } else {
+                        outcome.setException(err.getErrorCode());
                     }
-                    case "XQ": {
-                        XQueryCompiler testXqc = env.xqueryCompiler;
-                        //testXqc.setLanguageVersion(langVersion);
-                        testXqc.declareNamespace("fn", NamespaceConstant.FN);
-                        testXqc.declareNamespace("xs", NamespaceConstant.SCHEMA);
-                        //testXqc.declareNamespace("math", NamespaceConstant.MATH);
-                        testXqc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
-                        testXqc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
-                        ErrorCollector errorCollector = new ErrorCollector();
-                        testXqc.setErrorReporter(errorCollector);
-                        String decVars = env.paramDecimalDeclarations.toString();
-                        if (!decVars.isEmpty()) {
-                            int x = exp.indexOf("(:%DECL%:)");
-                            if (x < 0) {
-                                exp = decVars + exp;
-                            } else {
-                                exp = exp.substring(0, x) + decVars + exp.substring(x + 13);
-                            }
-                        }
-                        String vars = env.paramDeclarations.toString();
-                        if (!vars.isEmpty()) {
-                            int x = exp.indexOf("(:%VARDECL%:)");
-                            if (x < 0) {
-                                exp = vars + exp;
-                            } else {
-                                exp = exp.substring(0, x) + vars + exp.substring(x + 13);
-                            }
-                        }
-                        ModuleResolver mr = new ModuleResolver(xpc);
-                        mr.setTestCase(testCase);
-                        testXqc.getProcessor().getUnderlyingConfiguration().setModuleURIResolver(mr);
-                        testXqc.setModuleURIResolver(mr);
+                    break;
+                }
 
-                        try {
-                            testXqc.getUnderlyingStaticContext().setModuleLocation(
-                                    new Loc(testXqc.getBaseURI().toString(), testCase.getLineNumber(), -1));
-                            XQueryExecutable q = null;
-                            try {
-                                q = testXqc.compile(exp);
-                            } catch (SaxonApiException e) {
-                                println("Static error in query");
-                                throw e;
-                            }
-                            if (optimization != null) {
-                                // Test whether required optimizations have been performed
-                                XdmDestination expDest = new XdmDestination();
-                                Configuration config = driverProc.getUnderlyingConfiguration();
-                                try {
-                                    Receiver receiver = expDest.getReceiver(config.makePipelineConfiguration(), config.obtainDefaultSerializationProperties());
-                                    ExpressionPresenter presenter = new ExpressionPresenter(config, receiver);
-                                    q.getUnderlyingCompiledQuery().explain(presenter);
-                                    presenter.close();
-                                } catch (XPathException e) {
-                                    e.printStackTrace();
-                                }
-                                XdmNode explanation = expDest.getXdmNode();
-                                XPathCompiler assertXpc = xpc.getProcessor().newXPathCompiler();
-                                XdmItem optResult = assertXpc.evaluateSingle(optimization.attribute("assert"), explanation);
-                                if (((XdmAtomicValue) optResult).getBooleanValue()) {
-                                    println("Optimization result OK");
-                                } else {
-                                    println("Failed optimization test {" + optimization.attribute("assert") + "}");
-                                    driverProc.writeXdmValue(explanation, driverProc.newSerializer(System.err));
-                                    writeTestcaseElement(testCaseName, "fail", "Failed optimization assertions");
-                                    noteFailure(testSetName, testCaseName);
-                                    return;
-                                }
+                if (exp != null && env.processor.getSaxonEdition().equals("HE") && testSetName.equals("app-spec-examples")) {
+                    // Some tests in app-spec-examples do not have their dependencies tagged
 
-                            }
-                            XQueryEvaluator selector = q.load();
-                            for (QName varName : env.params.keySet()) {
-                                selector.setExternalVariable(varName, env.params.get(varName));
-                            }
-                            if (env.contextItem != null) {
-                                selector.setContextItem(env.contextItem);
-                            }
-                            selector.setURIResolver(new TestURIResolver(env));
-                            if (env.unparsedTextResolver != null) {
-                                selector.getUnderlyingQueryContext().setUnparsedTextURIResolver(env.unparsedTextResolver);
-                            }
-                            if (updating && q.isUpdateQuery()) {
-                                selector.run();
-                                XdmNode resultDoc = null;
-                                Iterator<XdmNode> iter = selector.getUpdatedDocuments();
-                                while (iter.hasNext()) {
-                                    if (resultDoc != null) {
-                                        outcome.setException(new QName("MULTIPLE_UPDATED_DOCUMENTS"));
-                                    }
-                                    resultDoc = iter.next();
-                                }
-                                if (resultDoc == null) {
-                                    outcome.setException(new QName("NO_UPDATED_DOCUMENTS"));
-                                }
-                                outcome.setPrincipalResult(resultDoc);
-                            } else {
-                                if (needSerializedResult) {
-                                    StringWriter sw = new StringWriter();
-                                    Serializer serializer = env.processor.newSerializer(sw);
-                                    selector.setDestination(serializer);
-                                    selector.run();
-                                    outcome.setPrincipalSerializedResult(sw.toString());
-                                }
-
-                                if (needResultValue) {
-                                    XdmValue result = selector.evaluate();
-                                    outcome.setPrincipalResult(result);
-                                }
-                            }
-                        } catch (SaxonApiException err) {
-                            println("in TestSet " + testSetName);
-                            println(err.getMessage());
-                            outcome.setException(err.getErrorCode());
-                            outcome.setErrorsReported(errorCollector.getErrorCodes());
-                        } catch (LicenseException err) {
-                            // treat this as "facility not available", XQST0075
-                            println("in TestSet " + testSetName);
-                            println(err.getMessage());
-                            outcome.setException(new QName("XPST0075"));
-                            errorCollector.error(new XmlProcessingIncident(err.getMessage(), "XPST0075"));
-                            outcome.setErrorsReported(errorCollector.getErrorCodes());
-                        }
-                        break;
-                    }
-                    default:
-                        writeTestcaseElement(testCaseName, "notRun", "No processor found");
+                    if (exp.contains("http://www.w3.org/2013/collation/UCA?lang=en;alternate=blanked;strength=primary")) {
+                        writeTestcaseElement(testCaseName, "notRun", "requires ICU");
                         notrun++;
                         return;
+                    }
+
+                    if (exp.contains("validate lax")) {
+                        writeTestcaseElement(testCaseName, "notRun", "requires schema-awareness");
+                        notrun++;
+                        return;
+                    }
+
+                    if (exp.contains("'fallback':function($s)")) {
+                        writeTestcaseElement(testCaseName, "notRun", "requires HOF");
+                        notrun++;
+                        return;
+                    }
                 }
+
+
+                //noinspection ThrowableResultOfMethodCallIgnored
+                if (outcome.getException() == null) {
+                    switch (hostLang) {
+                        case "XP":
+                        case "XT": {
+                            XPathCompiler testXpc = env.xpathCompiler;
+                            testXpc.setLanguageVersion(langVersion);
+                            testXpc.declareNamespace("fn", NamespaceConstant.FN);
+                            testXpc.declareNamespace("xs", NamespaceConstant.SCHEMA);
+                            //testXpc.declareNamespace("math", NamespaceConstant.MATH);
+                            testXpc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
+                            testXpc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
+
+                            copySchemaNamespaces(env, testXpc);  // ensure environment has schema namespaces
+
+
+                            ModuleResolver mr = new ModuleResolver(xpc); //
+
+                            mr.setTestCase(testCase);
+                            testXpc.getProcessor().getUnderlyingConfiguration().setModuleURIResolver(mr);
+
+                            try {
+                                XPathSelector selector = testXpc.compile(exp).load();
+                                for (QName varName : env.params.keySet()) {
+                                    selector.setVariable(varName, env.params.get(varName));
+                                }
+                                if (env.contextItem != null) {
+                                    selector.setContextItem(env.contextItem);
+                                }
+                                selector.setURIResolver(new TestURIResolver(env));
+                                //selector.setURIResolver(new TestURIResolver(env));
+                                if (env.unparsedTextResolver != null) {
+                                    selector.getUnderlyingXPathContext().setUnparsedTextURIResolver(env.unparsedTextResolver);
+                                }
+                                XdmValue result = selector.evaluate();
+                                previousResult = result;
+                                outcome.setPrincipalResult(result);
+                            } catch (SaxonApiException err) {
+                                println(err.getMessage());
+                                outcome.setException(err.getErrorCode());
+                            } catch (Exception err) {
+                                println(err.getMessage());
+                                err.printStackTrace();
+                                writeTestcaseElement(testCaseName, "fail", "*** crashed: " + err.getMessage());
+                            }
+                            break;
+                        }
+                        case "XQ": {
+                            XQueryCompiler testXqc = env.xqueryCompiler;
+                            //testXqc.setLanguageVersion(langVersion);
+                            testXqc.declareNamespace("fn", NamespaceConstant.FN);
+                            testXqc.declareNamespace("xs", NamespaceConstant.SCHEMA);
+                            //testXqc.declareNamespace("math", NamespaceConstant.MATH);
+                            testXqc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
+                            testXqc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
+                            ErrorCollector errorCollector = new ErrorCollector();
+                            testXqc.setErrorReporter(errorCollector);
+                            String decVars = env.paramDecimalDeclarations.toString();
+                            if (!decVars.isEmpty()) {
+                                int x = exp.indexOf("(:%DECL%:)");
+                                if (x < 0) {
+                                    exp = decVars + exp;
+                                } else {
+                                    exp = exp.substring(0, x) + decVars + exp.substring(x + 13);
+                                }
+                            }
+                            String vars = env.paramDeclarations.toString();
+                            if (!vars.isEmpty()) {
+                                int x = exp.indexOf("(:%VARDECL%:)");
+                                if (x < 0) {
+                                    exp = vars + exp;
+                                } else {
+                                    exp = exp.substring(0, x) + vars + exp.substring(x + 13);
+                                }
+                            }
+                            ModuleResolver mr = new ModuleResolver(xpc);
+                            mr.setTestCase(testCase);
+                            testXqc.getProcessor().getUnderlyingConfiguration().setModuleURIResolver(mr);
+                            testXqc.setModuleURIResolver(mr);
+
+                            try {
+                                testXqc.getUnderlyingStaticContext().setModuleLocation(
+                                        new Loc(testXqc.getBaseURI().toString(), testCase.getLineNumber(), -1));
+                                XQueryExecutable q = null;
+                                try {
+                                    q = testXqc.compile(exp);
+                                } catch (SaxonApiException e) {
+                                    println("Static error in query");
+                                    throw e;
+                                }
+                                if (optimization != null) {
+                                    // Test whether required optimizations have been performed
+                                    XdmDestination expDest = new XdmDestination();
+                                    Configuration config = driverProc.getUnderlyingConfiguration();
+                                    try {
+                                        Receiver receiver = expDest.getReceiver(config.makePipelineConfiguration(), config.obtainDefaultSerializationProperties());
+                                        ExpressionPresenter presenter = new ExpressionPresenter(config, receiver);
+                                        q.getUnderlyingCompiledQuery().explain(presenter);
+                                        presenter.close();
+                                    } catch (XPathException e) {
+                                        e.printStackTrace();
+                                    }
+                                    XdmNode explanation = expDest.getXdmNode();
+                                    XPathCompiler assertXpc = xpc.getProcessor().newXPathCompiler();
+                                    XdmItem optResult = assertXpc.evaluateSingle(optimization.attribute("assert"), explanation);
+                                    if (((XdmAtomicValue) optResult).getBooleanValue()) {
+                                        println("Optimization result OK");
+                                    } else {
+                                        println("Failed optimization test {" + optimization.attribute("assert") + "}");
+                                        driverProc.writeXdmValue(explanation, driverProc.newSerializer(System.err));
+                                        writeTestcaseElement(testCaseName, "fail", "Failed optimization assertions");
+                                        noteFailure(testSetName, testCaseName);
+                                        return;
+                                    }
+
+                                }
+                                XQueryEvaluator selector = q.load();
+                                for (QName varName : env.params.keySet()) {
+                                    selector.setExternalVariable(varName, env.params.get(varName));
+                                }
+                                if (previousResult != null) {
+                                    if (previousResult instanceof XdmItem) {
+                                        selector.setContextItem((XdmItem) previousResult);
+                                    } else {
+                                        selector.setContextItem(null);
+                                    }
+                                } else  if (env.contextItem != null) {
+                                    selector.setContextItem(env.contextItem);
+                                }
+                                selector.setURIResolver(new TestURIResolver(env));
+                                if (env.unparsedTextResolver != null) {
+                                    selector.getUnderlyingQueryContext().setUnparsedTextURIResolver(env.unparsedTextResolver);
+                                }
+                                if (isTrue("update").test(testQuery) && q.isUpdateQuery()) {
+                                    selector.run();
+                                    XdmNode resultDoc = null;
+                                    int numberOfUpdatedDocs = 0;
+                                    Iterator<XdmNode> iter = selector.getUpdatedDocuments();
+                                    while (iter.hasNext()) {
+                                        numberOfUpdatedDocs++;
+                                        resultDoc = iter.next();
+                                    }
+                                    if (resultDoc == null) {
+                                        // Some test queries don't actually update anything, in which case
+                                        // getUpdatedDocuments() returns nothing. The tests are written on
+                                        // the assumption that we process the "main input" of the previous
+                                        // step, which is either the context item or the value of the
+                                        // variable $input-context. Very pragmatic code here...
+                                        if (previousResult == null) {
+                                            resultDoc = (XdmNode)env.params.get(new QName("input-context"));
+                                        } else {
+                                            resultDoc = (XdmNode) previousResult;
+                                        }
+                                        if (resultDoc == null) {
+                                            outcome.setPrincipalResult(XdmEmptySequence.getInstance());
+                                        } else {
+                                            outcome.setPrincipalResult(resultDoc);
+                                        }
+                                    }
+                                    if (numberOfUpdatedDocs == 1) {
+                                        previousResult = resultDoc;
+                                        outcome.setPrincipalResult(resultDoc);
+                                    }
+                                } else {
+                                    if (needSerializedResult) {
+                                        StringWriter sw = new StringWriter();
+                                        Serializer serializer = env.processor.newSerializer(sw);
+                                        selector.setDestination(serializer);
+                                        selector.run();
+                                        outcome.setPrincipalSerializedResult(sw.toString());
+                                    }
+
+                                    if (needResultValue) {
+                                        XdmValue result = selector.evaluate();
+                                        previousResult = result;
+                                        outcome.setPrincipalResult(result);
+                                    }
+                                }
+                            } catch (SaxonApiException err) {
+                                println("in TestSet " + testSetName);
+                                println(err.getMessage());
+                                outcome.setException(err.getErrorCode());
+                                outcome.setErrorsReported(errorCollector.getErrorCodes());
+                            } catch (LicenseException err) {
+                                // treat this as "facility not available", XQST0075
+                                println("in TestSet " + testSetName);
+                                println(err.getMessage());
+                                outcome.setException(new QName("XPST0075"));
+                                errorCollector.error(new XmlProcessingIncident(err.getMessage(), "XPST0075"));
+                                outcome.setErrorsReported(errorCollector.getErrorCodes());
+                            }
+                            break;
+                        }
+                        default:
+                            writeTestcaseElement(testCaseName, "notRun", "No processor found");
+                            notrun++;
+                            return;
+                    }
+                }
+                if (outcome.isException()) {
+                    break;
+                }
+            }
+
+            if (!outcome.isException() && previousResult != null) {
+                outcome.setPrincipalResult(previousResult);
             }
 
             for (Environment.ResetAction action : env.resetActions) {

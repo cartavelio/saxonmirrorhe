@@ -387,6 +387,7 @@ public class Processor implements Configuration.ApiProvider {
      * @deprecated since 9.9 - use {@link #setConfigurationProperty(Feature, Object)}
      */
 
+    @Deprecated
     public void setConfigurationProperty(/*@NotNull*/ String name, /*@NotNull*/ Object value) {
         if (name.equals(FeatureKeys.CONFIGURATION)) {
             config = (Configuration) value;
@@ -408,6 +409,7 @@ public class Processor implements Configuration.ApiProvider {
 
 
     /*@Nullable*/
+    @Deprecated
     public Object getConfigurationProperty(/*@NotNull*/ String name) {
         return config.getConfigurationProperty(name);
     }

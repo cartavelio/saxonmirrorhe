@@ -354,7 +354,7 @@ public class XsltController extends Controller {
      *                               xsl:message output.
      * @deprecated since Saxon 11. The method has no effect. Use {@link #setMessageHandler}
      */
-
+    @Deprecated
     public void setMessageFactory(Supplier<Receiver> messageReceiverFactory) {
 
     }
@@ -369,7 +369,7 @@ public class XsltController extends Controller {
      *             constructor.
      * @deprecated since Saxon 11. The method has no effect. Use {@link #setMessageHandler}
      */
-
+    @Deprecated
     public void setMessageReceiverClassName(String name) {
         // No actioin
     }
@@ -384,6 +384,7 @@ public class XsltController extends Controller {
      */
 
     /*@NotNull*/
+    @Deprecated
     public Receiver makeMessageReceiver() {
         return null;
     }
@@ -426,7 +427,7 @@ public class XsltController extends Controller {
      * in 9.9.0.2 so it is no longer supported in a configuration that allows multi-threading.
      * @deprecated since Saxon 11. The method has no effect. Use {@link #setMessageHandler}
      */
-
+    @Deprecated
     public void setMessageEmitter(Receiver receiver) {
         // No action
     }
@@ -442,6 +443,7 @@ public class XsltController extends Controller {
      */
 
     /*@Nullable*/
+    @Deprecated
     public Receiver getMessageEmitter() {
         return null;
     }

@@ -332,7 +332,7 @@ public class StaticQueryContext {
      * and the language version is always set to "3.1".  From 11.0 the value 40 is accepted.
      * @deprecated since 10.0
      */
-
+    @Deprecated
     public void setLanguageVersion(int version) {
         if (version==10 || version==30 || version==31) {
             // value is ignored
@@ -1104,7 +1104,7 @@ public class StaticQueryContext {
      * @param listener the ErrorListener to be used
      * @deprecated since 10.0: use {@link #setErrorReporter(ErrorReporter)}
      */
-
+    @Deprecated
     public void setErrorListener(ErrorListener listener) {
         setErrorReporter(new ErrorReporterToListener(listener));
     }
@@ -1115,7 +1115,7 @@ public class StaticQueryContext {
      * @return the registered ErrorListener
      * @deprecated since 10.0: use {@link #getErrorReporter()}
      */
-
+    @Deprecated
     public ErrorListener getErrorListener() {
         if (errorReporter instanceof ErrorReporterToListener) {
             return ((ErrorReporterToListener) errorReporter).getErrorListener();

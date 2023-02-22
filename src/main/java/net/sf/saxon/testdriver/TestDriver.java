@@ -28,7 +28,9 @@ import java.util.regex.Pattern;
 
 import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
 import static net.sf.saxon.s9api.streams.Predicates.hasAttribute;
-import static net.sf.saxon.s9api.streams.Steps.*;
+import static net.sf.saxon.s9api.streams.Steps.child;
+import static net.sf.saxon.s9api.streams.Steps.descendant;
+import static net.sf.saxon.s9api.streams.Steps.path;
 import static net.sf.saxon.s9api.streams.XdmCollectors.asString;
 
 public abstract class TestDriver {
@@ -234,6 +236,9 @@ public abstract class TestDriver {
                 xxCompilerLocation = argValue;
             }
         }
+//        System.err.println("SAXON_LICENSE_DIR=" + System.getenv("SAXON_LICENSE_DIR"));
+//        System.out.println(System.getProperty("java.class.path").replace(':','\n'));
+
         if (resultsDoc == null) {
             printError("No result document: missing -lang option", "");
             if (shell == null) {
