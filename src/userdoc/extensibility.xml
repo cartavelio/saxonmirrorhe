@@ -1919,7 +1919,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       <ul/>
     </nav>
     
-    <h2>Conversion from Saxon-specific classes</h2>
+    <h2 class="subtitle">Conversion from Saxon-specific classes</h2>
     
     <p>If the Java object is an instance of a Saxon-defined class, and the Saxon-defined class is an implementation
       of an XDM value, then the value will be accepted with no conversion.</p>
@@ -1978,7 +1978,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       </li>
     </ul>
     
-    <h2>Converting Atomic Values</h2>
+    <h2 class="subtitle">Converting Atomic Values</h2>
     
     <p>This section describes Java classes that are recognized as equivalents to XDM atomic types.</p>
     
@@ -2049,7 +2049,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       
     </ul>
     
-    <h2>Converting Nodes</h2>
+    <h2 class="subtitle">Converting Nodes</h2>
     
     <p>This section describes Java classes that are recognized as representing XDM Nodes.</p>
     
@@ -2089,7 +2089,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       </li>
     </ul>
     
-    <h2>Converting Sequences</h2>
+    <h2 class="subtitle">Converting Sequences</h2>
     
     <p>Java collections are converted to XDM sequences:</p>
     
@@ -2119,7 +2119,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       If you want to pass an XDM array, it's best to construct it explicitly using the static factory
       method <code>XdmArray.makeArray()</code>.</p></aside>
     
-    <h2>Wrapped Java Objects</h2>
+    <h2 class="subtitle">Wrapped Java Objects</h2>
     
     
     <p>If the supplied value is any other Java object, it is returned as a "wrapped

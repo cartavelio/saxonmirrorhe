@@ -1051,7 +1051,7 @@
       in XML 1.1.</aside>
     
     
-    <h2>XML 1.1 Input Documents</h2>
+    <h2 class="subtitle">XML 1.1 Input Documents</h2>
 
     <p>Saxon is capable of working with XML 1.1 input documents, provided that the XML
       parser supports XML 1.1.</p>
@@ -1064,7 +1064,7 @@
       which does not support XML 1.1</p></li>
     </ul>
     
-    <h2>Configuration</h2>
+    <h2 class="subtitle">Configuration</h2>
     
     <p>If you want to use Saxon with XML
       1.1, you should set the option <code>-xmlversion:1.1</code> on the Saxon command line, or 
@@ -1123,7 +1123,7 @@
       "1.1", and an XML parser that does not support XML 1.1 when the configuration is set to "1.0".
       However, Saxon does not enforce this.</p>
     
-    <h2>Data Model</h2>
+    <h2 class="subtitle">Data Model</h2>
     
     <p>In the XDM data model for representation of XML documents, it is possible to have namespaces that are
     in scope for a parent element, but not in scope for its children. This is supported by the native Saxon tree
@@ -1136,7 +1136,7 @@
     Many (but not all) mechanisms for constructing strings check that if the configuration is set to XML 1.0,
     only permitted XML 1.0 characters may appear. </p>
     
-    <h2>Serialization</h2>
+    <h2 class="subtitle">Serialization</h2>
     
     <p>The serialization property <code>version="1.0 | 1.1"</code> may be set on the <code>xsl:output</code>
     and <code>xsl:result-document</code> elements, and on various APIs. The default depends on the setting
