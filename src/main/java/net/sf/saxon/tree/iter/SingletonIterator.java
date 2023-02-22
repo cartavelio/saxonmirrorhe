@@ -102,7 +102,7 @@ public class SingletonIterator implements SequenceIterator,
 
     @Override
     public int getLength() {
-        return 1;
+        return item==null ? 0 : 1;
     }
 
     public boolean isActuallyGrounded() {

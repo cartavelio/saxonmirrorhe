@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -38,8 +37,7 @@ public class LetClausePull extends TuplePull {
         if (!base.nextTuple(context)) {
             return false;
         }
-        Sequence val = letClause.getEvaluator().evaluate(letClause.getSequence(), context);
-        context.setLocalVariable(letClause.getRangeVariable().getLocalSlotNumber(), val);
+        letClause.evaluateRangeVariable(context);
         return true;
     }
 
