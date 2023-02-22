@@ -7,11 +7,12 @@
 
 package net.sf.saxon.expr.sort;
 
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
@@ -323,12 +324,16 @@ public class DocumentSorter extends UnaryExpression {
     public static class DocumentSorterElaborator extends PullElaborator {
 
         public PullEvaluator elaborateForPull() {
-
             final DocumentSorter expr = (DocumentSorter) getExpression();
             final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
             final Comparator<? super NodeInfo> comparer = expr.getComparer();
 
             return context -> new DocumentOrderIterator(baseEval.iterate(context), comparer);
+        }
+
+        public BooleanEvaluator elaborateForBoolean() {
+            final DocumentSorter expr = (DocumentSorter) getExpression();
+            return expr.getBaseExpression().makeElaborator().elaborateForBoolean();
         }
 
     }

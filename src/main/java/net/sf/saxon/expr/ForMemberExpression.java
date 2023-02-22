@@ -193,12 +193,7 @@ public class ForMemberExpression extends Assignation {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        int slot = getLocalSlotNumber();
-        ArrayItem theArray = ((ArrayItem) getSequence().evaluateItem(context));
-        for (GroundedValue member : theArray.members()) {
-            context.setLocalVariable(slot, member);
-            getAction().evaluatePendingUpdates(context, pul);
-        }
+        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
     }
 
     /**
@@ -325,6 +320,21 @@ public class ForMemberExpression extends Assignation {
                     Expression.dispatchTailCall(tail);
                 }
                 return null;
+            };
+        }
+
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            final ForExpression expr = (ForExpression) getExpression();
+            final ItemEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForItem();
+            final UpdateEvaluator actionEval = expr.getAction().makeElaborator().elaborateForUpdate();
+            int slot = expr.getLocalSlotNumber();
+            return (context, pul) -> {
+                ArrayItem theArray = ((ArrayItem) selectEval.eval(context));
+                for (GroundedValue member : theArray.members()) {
+                    context.setLocalVariable(slot, member);
+                    actionEval.registerUpdates(context, pul);
+                }
             };
         }
     }

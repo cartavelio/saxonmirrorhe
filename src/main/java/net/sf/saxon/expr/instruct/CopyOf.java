@@ -12,10 +12,7 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.AccumulatorManager;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushElaborator;
-import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
@@ -1046,6 +1043,19 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 };
 
             }
+        }
+
+        /**
+         * Get a function that evaluates the underlying expression lazily
+         *
+         * @param repeatable true if the resulting {@link Sequence} must be usable repeatedly; false
+         *                   if it only needs to be used once
+         * @return an evaluator for the expression that returns a {@link Sequence} (which may be a lazy sequence)
+         */
+        @Override
+        public SequenceEvaluator lazily(boolean repeatable) {
+            PullEvaluator pullEvaluator = elaborateForPull();
+            return context -> new LazySequence(pullEvaluator.iterate(context));
         }
     }
 

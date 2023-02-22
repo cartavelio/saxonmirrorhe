@@ -143,60 +143,42 @@ public class XPathExpressionImpl implements XPathExpression {
     @Override
     public Object evaluate(/*@Nullable*/ Object node, /*@NotNull*/ QName qName) throws XPathExpressionException {
         Item contextItem;
-//        if (node instanceof ZeroOrOne) {
-//            node = ((ZeroOrOne) node).head();
-//        }
-//        if (node instanceof TreeInfo) {
-//            node = ((TreeInfo)node).getRootNode();
-//        }
-//        if (node instanceof NodeInfo) {
-//            if (!((NodeInfo) node).getConfiguration().isCompatible(config)) {
-//                throw new XPathExpressionException(
-//                        "Supplied node must be built using the same or a compatible Configuration");
-//            }
-//            if (node instanceof TreeInfo && ((TreeInfo) node).isTyped() && !executable.isSchemaAware()) {
-//                throw new XPathExpressionException(
-//                        "The expression was compiled to handled untyped data, but the input is typed");
-//            }
-//            contextItem = (NodeInfo) node;
-//        } else if (node instanceof Item) {
-//            contextItem = (Item) node;
-//        } else {
-            JPConverter converter = JPConverter.allocate(node.getClass(), null, config);
-            GroundedValue val;
-            try {
-                val = converter.convert(node, new EarlyEvaluationContext(config));
-            } catch (XPathException e) {
-                throw new XPathExpressionException(
-                        "Failure converting a node of class " + node.getClass().getName() +
-                                ": " + e.getMessage());
-            }
-            if (val.getLength() == 0) {
-                contextItem = null;
-            } else if (val.getLength() > 1) {
-                throw new XPathExpressionException(
-                        "Supplied context item is a sequence of " + val.getLength() + " items");
-            } else {
-                val = val.head();
-                if (val instanceof NodeInfo) {
-                    if (!((NodeInfo) val).getConfiguration().isCompatible(config)) {
-                        throw new XPathExpressionException(
-                                "Supplied node must be built using the same or a compatible Configuration");
-                    }
-                    if (((NodeInfo) val).getTreeInfo().isTyped() && !executable.isSchemaAware()) {
-                        throw new XPathExpressionException(
-                                "The expression was compiled to handled untyped data, but the input is typed");
-                    }
+
+        JPConverter converter = JPConverter.allocate(node.getClass(), null, config);
+        GroundedValue val;
+        try {
+            val = converter.convert(node, new EarlyEvaluationContext(config));
+        } catch (XPathException e) {
+            throw new XPathExpressionException(
+                    "Failure converting a node of class " + node.getClass().getName() +
+                            ": " + e.getMessage());
+        }
+        if (val.getLength() == 0) {
+            contextItem = null;
+        } else if (val.getLength() > 1) {
+            throw new XPathExpressionException(
+                    "Supplied context item is a sequence of " + val.getLength() + " items");
+        } else {
+            val = val.head();
+            if (val instanceof NodeInfo) {
+                if (!((NodeInfo) val).getConfiguration().isCompatible(config)) {
+                    throw new XPathExpressionException(
+                            "Supplied node must be built using the same or a compatible Configuration");
                 }
-                contextItem = (Item)val;
+                if (((NodeInfo) val).getTreeInfo().isTyped() && !executable.isSchemaAware()) {
+                    throw new XPathExpressionException(
+                            "The expression was compiled to handled untyped data, but the input is typed");
+                }
             }
-//        }
+            contextItem = (Item)val;
+        }
+
 
         XPathContextMajor context = new XPathContextMajor(contextItem, executable);
         context.openStackFrame(stackFrameMap);
         try {
             if (qName.equals(XPathConstants.BOOLEAN)) {
-                return expression.effectiveBooleanValue(context);
+                return expression.makeElaborator().elaborateForBoolean().eval(context);
             } else if (qName.equals(XPathConstants.STRING)) {
                 SequenceIterator iter = expression.iterate(context);
 

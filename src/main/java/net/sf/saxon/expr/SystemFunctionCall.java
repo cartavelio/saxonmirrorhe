@@ -9,10 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.AnalyzeString;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.*;
@@ -486,6 +483,16 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
     }
 
     /**
+     * Determine whether this is an updating expression as defined in the XQuery update specification
+     *
+     * @return true if this is an updating expression
+     */
+    @Override
+    public boolean isUpdatingExpression() {
+        return getTargetFunction() instanceof Put;
+    }
+
+    /**
      * Diagnostic print of expression structure. The abstract expression tree
      * is written to the supplied output destination.
      *
@@ -674,6 +681,20 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                 };
             } else {
                 return super.elaborateForPush();
+            }
+        }
+
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            final SystemFunctionCall expr = (SystemFunctionCall) getExpression();
+            if (expr.isVacuousExpression()) {
+                // typically, a call on fn:error
+                PullEvaluator eval = elaborateForPull();
+                return (context, pul) -> {
+                    eval.iterate(context).next();
+                }; 
+            } else {
+                throw new UnsupportedOperationException("Expression " + expr.toShortString() + " is not an updating expression");
             }
         }
     }

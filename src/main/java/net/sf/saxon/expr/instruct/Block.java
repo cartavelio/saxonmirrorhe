@@ -792,10 +792,7 @@ public class Block extends Instruction {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        for (Operand o : operands()) {
-            Expression child = o.getChildExpression();
-            child.evaluatePendingUpdates(context, pul);
-        }
+        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
     }
 
     @Override
@@ -946,6 +943,22 @@ public class Block extends Instruction {
                         return tail;
                     };
             }
+        }
+
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            final Block expr = (Block) getExpression();
+            final Operand[] operanda = expr.getOperanda();
+            final int size = operanda.length;
+            final UpdateEvaluator[] actions = new UpdateEvaluator[size];
+            for (int i=0; i<size; i++) {
+                actions[i] = expr.child(i).makeElaborator().elaborateForUpdate();
+            }
+            return (context, pul) -> {
+                for (UpdateEvaluator action : actions) {
+                     action.registerUpdates(context, pul);
+                }
+            };
         }
     }
 }

@@ -506,10 +506,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        Sequence[] actualArgs = evaluateArguments(context);
-        XPathContextMajor c2 = context.newCleanContext();
-        c2.setOrigin(this);
-        function.callUpdating(actualArgs, c2, pul);
+        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
     }
 
     private static int depth = 0;
@@ -831,7 +828,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                                                          ") with no implementation", "XTDE3052");
                     }
                     depth++;
-                    System.err.println("depth(pull)=" + depth);
+                    //System.err.println("depth(pull)=" + depth);
                     SequenceIterator result = callTargetFunction(expr, target, context).iterate();
                     depth--;
                     return result;
@@ -913,6 +910,18 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 return context -> callTargetFunction(expr, targetFunction, context).head();
             }
 
+        }
+
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            final UserFunctionCall expr = (UserFunctionCall) getExpression();
+            UserFunction targetFunction = expr.getFunction(); // This is XQuery: target function is known
+            return (context, pul) -> {
+                Sequence[] actualArgs = evaluateArguments(context);
+                XPathContextMajor c2 = context.newCleanContext();
+                c2.setOrigin(expr);
+                targetFunction.callUpdating(actualArgs, c2, pul);
+            };
         }
     }
 }
