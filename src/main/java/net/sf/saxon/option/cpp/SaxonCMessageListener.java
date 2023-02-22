@@ -80,15 +80,13 @@ public class SaxonCMessageListener implements MessageListener2 {
     public static CLongPointer getXslMessages(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle messageListnerRef) {
         SaxonCMessageListener messageListener = SaxonCAPI.objectHandles.get(messageListnerRef);
         List<XdmNode> xslMessages = messageListener.xslMessages;
-        if(xslMessages == null) {
-            return null;
-        } else {
+
             long[] refs= xslMessages.stream().mapToLong( i ->{
                         ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(i);
                         return objectHandle.rawValue();
                     }).toArray();
             CLongPointer addr = SaxonCAPI.longArrayToNative(alloc,refs);
             return addr;
-        }
+        
     }
 }
