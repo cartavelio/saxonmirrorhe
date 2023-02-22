@@ -205,9 +205,9 @@ public class Gizmo {
             try {
                 String dummy = "<dummy/>";
                 StreamSource ss = new StreamSource(new StringReader(dummy));
-                ParseOptions options = new ParseOptions();
-                options.setModel(TreeModel.LINKED_TREE);
-                options.setLineNumbering(true);
+                ParseOptions options = new ParseOptions()
+                        .withModel(TreeModel.LINKED_TREE)
+                        .withLineNumbering(true);
                 currentDoc = (DocumentImpl) config.buildDocumentTree(ss, options).getRootNode();
                 typed = false;
             } catch (XPathException e) {
@@ -563,9 +563,9 @@ public class Gizmo {
         String fileName = source.toString();
         fileName = fileName.replaceFirst("^~", System.getProperty("user.home"));
         StreamSource ss = new StreamSource(new File(fileName));
-        ParseOptions options = new ParseOptions();
-        options.setModel(TreeModel.LINKED_TREE);
-        options.setLineNumbering(true);
+        ParseOptions options = new ParseOptions()
+                .withModel(TreeModel.LINKED_TREE)
+                .withLineNumbering(true);
         currentDoc = (DocumentImpl) config.buildDocumentTree(ss, options).getRootNode();
         typed = false;
         Set<String> names = new HashSet<>();
@@ -897,8 +897,7 @@ public class Gizmo {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         Builder builder = new LinkedTreeBuilder(pipe, Durability.MUTABLE);
         builder.open();
-        ParseOptions options = new ParseOptions();
-        options.setSchemaValidationMode(Validation.STRICT);
+        ParseOptions options = new ParseOptions().withSchemaValidationMode(Validation.STRICT);
         Receiver val = config.getDocumentValidator(builder, currentDoc.getSystemId(), options, Loc.NONE);
         currentDoc.copy(val, CopyOptions.ALL_NAMESPACES, Loc.NONE);
         builder.close();

@@ -117,28 +117,28 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
 
     @SuppressWarnings("OptionalIsPresent")
     protected ParseOptions optionsFromQueryParameters(URIQueryParameters params, XPathContext context) {
-        ParseOptions options = new ParseOptions(context.getConfiguration().getParseOptions());
+        ParseOptions options = context.getConfiguration().getParseOptions();
 
         if (params != null) {
             Optional<Integer> v = params.getValidationMode();
             if (v.isPresent()) {
-                options.setSchemaValidationMode(v.get());
+                options = options.withSchemaValidationMode(v.get());
             }
 
             Optional<Boolean> xInclude = params.getXInclude();
             if (xInclude.isPresent()) {
-                options.setXIncludeAware(xInclude.get());
+                options = options.withXIncludeAware(xInclude.get());
             }
 
             Optional<SpaceStrippingRule> stripSpace = params.getSpaceStrippingRule();
             if (stripSpace.isPresent()) {
-                options.setSpaceStrippingRule(stripSpace.get());
+                options = options.withSpaceStrippingRule(stripSpace.get());
             }
 
             //#if CSHARP==false
             Optional<Maker<XMLReader>> p = params.getXMLReaderMaker();
             if (p.isPresent()) {
-                options.setXMLReaderMaker(p.get());
+                options = options.withXMLReaderMaker(p.get());
             }
             //#endif
 
@@ -154,17 +154,18 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
             final ErrorReporter oldErrorReporter =
                     controller == null ? context.getConfiguration().makeErrorReporter() : controller.getErrorReporter();
 
-            setupErrorHandlingForCollection(options, onError, oldErrorReporter);
+            options = setupErrorHandlingForCollection(options, onError, oldErrorReporter);
         }
         return options;
     }
 
-    public static void setupErrorHandlingForCollection(ParseOptions options, int onError, ErrorReporter oldErrorReporter) {
+    public static ParseOptions setupErrorHandlingForCollection(ParseOptions options, int onError, ErrorReporter oldErrorReporter) {
         if (onError == URIQueryParameters.ON_ERROR_IGNORE) {
-            options.setErrorReporter(new ErrorSuppressor());
+            options = options.withErrorReporter(new ErrorSuppressor());
         } else if (onError == URIQueryParameters.ON_ERROR_WARNING) {
-            options.setErrorReporter(new ErrorAsWarningReporter(oldErrorReporter));
+            options = options.withErrorReporter(new ErrorAsWarningReporter(oldErrorReporter));
         }
+        return options;
     }
 
     private static class ErrorSuppressor implements ErrorReporter {

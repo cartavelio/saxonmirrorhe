@@ -138,8 +138,9 @@ public class ResultDocument extends Instruction
         if (validationOptions == null) {
             validationOptions = new ParseOptions();
         }
-        validationOptions.setSchemaValidationMode(Validation.BY_TYPE);
-        validationOptions.setTopLevelType(type);
+        validationOptions = validationOptions
+                .withSchemaValidationMode(Validation.BY_TYPE)
+                .withTopLevelType(type);
     }
 
     /**
@@ -183,9 +184,9 @@ public class ResultDocument extends Instruction
         boolean preservingTypes = mode == Validation.PRESERVE && schemaType == null;
         if (!preservingTypes) {
             if (validationOptions == null) {
-                validationOptions = new ParseOptions();
-                validationOptions.setSchemaValidationMode(mode);
-                validationOptions.setTopLevelType(schemaType);
+                validationOptions = new ParseOptions()
+                        .withSchemaValidationMode(mode)
+                        .withTopLevelType(schemaType);
             }
         }
     }

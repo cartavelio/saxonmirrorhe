@@ -104,9 +104,9 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                     ((TinyBuilder) b).setStatistics(controller.getConfiguration().getTreeStatistics().FN_PARSE_STATISTICS);
                 }
                 Receiver s = b;
-                ParseOptions options = new ParseOptions();
-                options.setSchemaValidationMode(Validation.SKIP);
-                options.setDTDValidationMode(Validation.SKIP);
+                ParseOptions options = new ParseOptions()
+                        .withSchemaValidationMode(Validation.SKIP)
+                        .withDTDValidationMode(Validation.SKIP);
                 List<Boolean> safetyCheck = new ArrayList<>();
                 reader.setEntityResolver((publicId, systemId) -> {
                     if ("http://www.saxonica.com/parse-xml-fragment/actual.xml".equals(systemId)) {
@@ -120,18 +120,18 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                 });
                 PackageData pd = getRetainedStaticContext().getPackageData();
                 if (pd instanceof StylesheetPackage) {
-                    options.setSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
+                    options = options.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
                     if (((StylesheetPackage) pd).isStripsTypeAnnotations()) {
                         s = configuration.getAnnotationStripper(s);
                     }
                 } else {
-                    options.setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                    options = options.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
                 }
-                options.setErrorHandler(errorHandler);
+                options = options.withErrorHandler(errorHandler);
 
                 s.setPipelineConfiguration(b.getPipelineConfiguration());
 
-                options.addFilter(CSharp.methodRef(OuterElementStripper::new));
+                options = options.withAdditionalFilter(CSharp.methodRef(OuterElementStripper::new));
 
                 try {
                     Sender.send(source, s, options);

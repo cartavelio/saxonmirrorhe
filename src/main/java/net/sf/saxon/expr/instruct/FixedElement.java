@@ -223,7 +223,7 @@ public class FixedElement extends ElementCreator {
                     Token.INTERSECT,
                     new ContentTypeTest(Type.ELEMENT, schemaType, config, false));
                 if (xsiType != null || !decl.hasTypeAlternatives()) {
-                    instr.getValidationOptions().setTopLevelType(schemaType);
+                    instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
                     try {
                         schemaType.analyzeContentExpression(content, Type.ELEMENT);
                     } catch (XPathException e) {
@@ -252,7 +252,7 @@ public class FixedElement extends ElementCreator {
                     itemType = new NameTest(Type.ELEMENT, fp, config.getNamePool());
                 } else {
                     schemaType = decl.getType();
-                    instr.getValidationOptions().setTopLevelType(schemaType);
+                    instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
                     itemType = new CombinedNodeTest(
                             new NameTest(Type.ELEMENT, fp, config.getNamePool()),
                             Token.INTERSECT,
@@ -626,8 +626,8 @@ public class FixedElement extends ElementCreator {
 
                     Receiver elemOut = out;
                     if (!expr.preservingTypes) {
-                        ParseOptions options = new ParseOptions(expr.getValidationOptions());
-                        options.setTopLevelElement(elemName.getStructuredQName());
+                        ParseOptions options = expr.getValidationOptions()
+                                .withTopLevelElement(elemName.getStructuredQName());
                         context.getConfiguration().prepareValidationReporting(context, options);
                         Receiver validator = context.getConfiguration().getElementValidator(
                                 elemOut, options, expr.getLocation());

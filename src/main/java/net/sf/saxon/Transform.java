@@ -1413,9 +1413,9 @@ public class Transform {
                     }
                     StylesheetPackage top = pss.getTopLevelPackage();
                     if (top.isStripsTypeAnnotations()) {
-                        source = AugmentedSource.makeAugmentedSource(source);
-                        ((AugmentedSource)source).getParseOptions().addFilter(
+                        ParseOptions opt = ((AugmentedSource)source).getParseOptions().withAdditionalFilter(
                                 receiver -> getConfiguration().getAnnotationStripper(receiver));
+                        source = new AugmentedSource(source, opt);
                     }
                     XdmNode node = builder.build(source);
                     transformer.setGlobalContextItem(node, true);

@@ -593,10 +593,10 @@ public class MergeInstr extends Instruction {
                 }
 //#endif
             } else if (ms.getForEachSource() != null) {
-                final ParseOptions options = new ParseOptions(context.getConfiguration().getParseOptions());
-                options.setSchemaValidationMode(ms.validation);
-                options.setTopLevelType(ms.schemaType);
-                options.setApplicableAccumulators(ms.accumulators);
+                final ParseOptions options = context.getConfiguration().getParseOptions()
+                        .withSchemaValidationMode(ms.validation)
+                        .withTopLevelType(ms.schemaType)
+                        .withApplicableAccumulators(ms.accumulators);
                 SequenceIterator uriIter = ms.getForEachSource().iterate(context);
                 XsltController controller = (XsltController)context.getController();
                 final AccumulatorManager accumulatorManager = controller.getAccumulatorManager();

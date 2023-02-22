@@ -25,7 +25,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.trace.ExitCounter;
 import net.sf.saxon.trace.TraceEventMulticaster;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
@@ -402,72 +401,17 @@ public class Controller implements ContextOriginator {
     /*@NotNull*/
     public PipelineConfiguration makePipelineConfiguration(boolean reuseParseOptions) {
 
-        ParseOptions parseOptions;
-
-        if (reuseParseOptions)
-        {
-            if (cachedParseOptions == null)
-            {
-                cachedParseOptions = new ParseOptions(getConfiguration().getParseOptions());
-                cachedParseOptions.setSchemaValidationMode(validationMode);
-                cachedParseOptions.setErrorReporter(errorReporter);
-                cachedParseOptions.freeze();
-            }
-
-            parseOptions = cachedParseOptions;
-
-        }
-        else
-        {
-            parseOptions = new ParseOptions(getConfiguration().getParseOptions());
-            parseOptions.setSchemaValidationMode(validationMode);
-            parseOptions.setErrorReporter(errorReporter);
-        }
+        ParseOptions parseOptions = getConfiguration().getParseOptions()
+                .withSchemaValidationMode(validationMode)
+                .withErrorReporter(errorReporter);
 
         PipelineConfiguration pipe = new PipelineConfiguration(getConfiguration(), parseOptions);
 
         pipe.setController(this);
 
         return pipe;
-        //pipe.setURIResolver(userURIResolver == null ? standardURIResolver : userURIResolver);
-//        pipe.getParseOptions().setSchemaValidationMode(validationMode); // added in 9.7
-//        pipe.getParseOptions().setErrorReporter(errorReporter); // added in 9.7.0.4
-//        pipe.setController(this);
-//        final Executable executable = getExecutable();
-//        if (executable != null) {
-//            // can be null for an IdentityTransformer
-//            pipe.setHostLanguage(executable.getHostLanguage());
-//        }
-//        return pipe;
     }
-
-//    /**
-//     * Set the error listener.
-//     *
-//     * @param listener the ErrorListener to be used
-//     */
-//
-//    public void setErrorReporter(ErrorListener listener) {
-//        if (listener instanceof UnfailingErrorListener) {
-//            errorListener = (UnfailingErrorListener) listener;
-//        } else {
-//            errorListener = new DelegatingErrorListener(listener);
-//        }
-//    }
-//
-//    /**
-//     * Get the error listener.
-//     *
-//     * @return the ErrorListener in use. Note that this is not necessarily the ErrorListener that was supplied
-//     * to the {@link #setErrorReporter(ErrorListener)} method; if that was not an {@link UnfailingErrorListener},
-//     * it will have been wrapped in a {@link DelegatingErrorListener}, and it is the DelegatingErrorListener
-//     * that this method returns.
-//     */
-//
-//    public UnfailingErrorListener getErrorReporter() {
-//        return errorListener;
-//    }
-
+    
     /**
      * Set a callback that will be used when reporting a dynamic error or warning
      * @param reporter the error reporter to be notified
@@ -1362,7 +1306,7 @@ public class Controller implements ContextOriginator {
             r = config.getAnnotationStripper(r);
         }
         PipelineConfiguration pipe = sourceBuilder.getPipelineConfiguration();
-        pipe.getParseOptions().setSchemaValidationMode(validationMode);
+        pipe.setParseOptions(pipe.getParseOptions().withSchemaValidationMode(validationMode));
         r.setPipelineConfiguration(pipe);
         Sender.send(source, r, null);
         if (source instanceof AugmentedSource && ((AugmentedSource)source).isPleaseCloseAfterUse()) {

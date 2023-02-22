@@ -734,7 +734,7 @@ public abstract class JPConverter {
             ParseOptions options = new ParseOptions();
             Controller controller = context.getController();
             if (controller != null) {
-                options.setSchemaValidationMode(controller.getSchemaValidationMode());
+                options = options.withSchemaValidationMode(controller.getSchemaValidationMode());
             }
             if (object instanceof TreeInfo) {
                 return ((TreeInfo)object).getRootNode();

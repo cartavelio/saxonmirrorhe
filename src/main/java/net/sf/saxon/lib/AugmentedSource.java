@@ -17,7 +17,6 @@ import org.xml.sax.XMLReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * This class is an extension of the JAXP Source interface. The class can be used
@@ -127,7 +126,7 @@ public class AugmentedSource implements Source {
      */
 
     public void addFilter(FilterFactory filter) {
-        options.addFilter(filter);
+        options = options.withAdditionalFilter(filter);
     }
 
     /**
@@ -163,6 +162,10 @@ public class AugmentedSource implements Source {
         return options;
     }
 
+    public void setParseOptions(ParseOptions options) {
+        this.options = options;
+    }
+
     /**
      * Set the tree model to use. Default is the tiny tree
      *
@@ -173,7 +176,7 @@ public class AugmentedSource implements Source {
      */
 
     public void setModel(TreeModel model) {
-        options.setModel(model);
+        options = options.withModel(model);
     }
 
     /**
@@ -200,7 +203,7 @@ public class AugmentedSource implements Source {
      */
 
     public void setSchemaValidationMode(int option) {
-        options.setSchemaValidationMode(option);
+        options = options.withSchemaValidationMode(option);
     }
 
     /**
@@ -225,7 +228,7 @@ public class AugmentedSource implements Source {
      */
 
     public void setTopLevelElement(StructuredQName elementName) {
-        options.setTopLevelElement(elementName);
+        options = options.withTopLevelElement(elementName);
     }
 
     /**
@@ -250,7 +253,7 @@ public class AugmentedSource implements Source {
      */
 
     public void setTopLevelType(SchemaType type) {
-        options.setTopLevelType(type);
+        options = options.withTopLevelType(type);
     }
 
     /**
@@ -275,7 +278,7 @@ public class AugmentedSource implements Source {
      */
 
     public void setDTDValidationMode(int option) {
-        options.setDTDValidationMode(option);
+        options = options.withDTDValidationMode(option);
     }
 
     /**
@@ -299,7 +302,7 @@ public class AugmentedSource implements Source {
      */
 
     public void setLineNumbering(boolean lineNumbering) {
-        options.setLineNumbering(lineNumbering);
+        options = options.withLineNumbering(lineNumbering);
     }
 
     /**
@@ -333,7 +336,7 @@ public class AugmentedSource implements Source {
      */
 
     public void setXMLReader(XMLReader parser) {
-        options.setXMLReader(parser);
+        options = options.withXMLReader(parser);
         if (source instanceof SAXSource) {
             ((SAXSource) source).setXMLReader(parser);
         }
@@ -358,40 +361,6 @@ public class AugmentedSource implements Source {
         }
     }
     //#endif
-    /**
-     * Assuming that the contained Source is a node in a tree, indicate whether a tree should be created
-     * as a view of this supplied tree, or as a copy.
-     * <p>This option is used only when the Source is supplied to an interface such as the JAXP
-     * Transformer.transform() method where there is no other way of indicating whether a supplied
-     * external document should be wrapped or copied. It is not used when the Source is supplied to
-     * a Saxon-defined interface.</p>
-     *
-     * @param wrap if true, the node in the supplied Source is wrapped, to create a view. If false, the node
-     *             and its contained subtree is copied. If absent, the system default is chosen.
-     * @since 8.8
-     */
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    public void setWrapDocument(Optional<Boolean> wrap) {
-        options.setWrapDocument(wrap);
-    }
-
-    /**
-     * Assuming that the contained Source is a node in a tree, determine whether a tree will be created
-     * as a view of this supplied tree, or as a copy.
-     * <p>This option is used only when the Source is supplied to an interface such as the JAXP
-     * Transformer.transform() method where there is no other way of indicating whether a supplied
-     * external document should be wrapped or copied. It is not used when the Source is supplied to
-     * a Saxon-defined interface.</p>
-     *
-     * @return if true, the node in the supplied Source is wrapped, to create a view. If false, the node
-     *         and its contained subtree is copied. If absent, the system default is chosen.
-     * @since 8.8
-     */
-
-    public Optional<Boolean> getWrapDocument() {
-        return options.getWrapDocument();
-    }
 
     /**
      * Set the System ID. This sets the System Id to be returned by getSystemId.
@@ -431,7 +400,7 @@ public class AugmentedSource implements Source {
      * @since 8.9
      */
     public void setXIncludeAware(boolean state) {
-        options.setXIncludeAware(state);
+        options = options.withXIncludeAware(state);
     }
 
     /**
@@ -467,7 +436,7 @@ public class AugmentedSource implements Source {
      */
 
     public void setEntityResolver(EntityResolver resolver) {
-        options.setEntityResolver(resolver);
+        options = options.withEntityResolver(resolver);
     }
 
     /**
@@ -492,7 +461,7 @@ public class AugmentedSource implements Source {
      */
 
     public void setErrorReporter(ErrorReporter listener) {
-        options.setErrorReporter(listener);
+        options = options.withErrorReporter(listener);
     }
 
     /**
@@ -522,7 +491,7 @@ public class AugmentedSource implements Source {
      */
 
     public void setPleaseCloseAfterUse(boolean close) {
-        options.setPleaseCloseAfterUse(close);
+        options = options.withPleaseCloseAfterUse(close);
     }
 
     /**

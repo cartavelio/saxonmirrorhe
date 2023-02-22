@@ -2151,9 +2151,6 @@ public class XQueryParser extends XPathParser {
 
                 Source source = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
 
-                ParseOptions options = new ParseOptions();
-                options.setSchemaValidationMode(Validation.LAX);
-                options.setDTDValidationMode(Validation.SKIP);
                 TreeInfo doc = config.buildDocumentTree(source);
                 SerializationParamsHandler ph = new SerializationParamsHandler(parameterDocProperties);
                 ph.setSerializationParams(doc.getRootNode());

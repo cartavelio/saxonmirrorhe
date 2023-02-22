@@ -275,18 +275,18 @@ public class DocumentFn extends SystemFunction implements Callable {
 
                 Receiver s = b;
                 if (options == null) {
-                    options = new ParseOptions(b.getPipelineConfiguration().getParseOptions());
+                    options = b.getPipelineConfiguration().getParseOptions();
                     if (packageData instanceof StylesheetPackage) {
                         SpaceStrippingRule rule = ((StylesheetPackage)packageData).getSpaceStrippingRule();
                         if (rule != NoElementsSpaceStrippingRule.getInstance()) {
-                            options.setSpaceStrippingRule(rule);
+                            options = options.withSpaceStrippingRule(rule);
                         }
                     }
-                    options.setSchemaValidationMode(controller.getSchemaValidationMode());
+                    options = options.withSchemaValidationMode(controller.getSchemaValidationMode());
                 }
 
                 if (params != null) {
-                    options.merge(params.makeParseOptions(config));
+                    options = options.merge(params.makeParseOptions(config));
                 }
                 b.getPipelineConfiguration().setParseOptions(options);
 
@@ -297,7 +297,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                 if (silent) {
                     StandardErrorHandler eh = new StandardErrorHandler(controller.getErrorReporter());
                     eh.setSilent(true);
-                    options.setErrorHandler(eh);
+                    options = options.withErrorHandler(eh);
                 }
                 //#endif
                 if (packageData instanceof StylesheetPackage && ((StylesheetPackage)packageData).isStripsTypeAnnotations()) {
@@ -308,7 +308,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                 if (map != null) {
                     PathMap.PathMapRoot pathRoot = map.getRootForDocument(documentKey.toString());
                     if (pathRoot != null && !pathRoot.isReturnable() && !pathRoot.hasUnknownDependencies()) {
-                        options.addFilter(config.makeDocumentProjector(pathRoot));
+                        options = options.withAdditionalFilter(config.makeDocumentProjector(pathRoot));
                     }
                 }
                 s.setPipelineConfiguration(b.getPipelineConfiguration());
@@ -548,7 +548,7 @@ public class DocumentFn extends SystemFunction implements Callable {
 
         ParseOptions options = config.getParseOptions();
         if (params != null) {
-            options.merge(params.makeParseOptions(config));
+            options = options.merge(params.makeParseOptions(config));
         }
 
         TreeInfo newdoc = config.buildDocumentTree(source, options);

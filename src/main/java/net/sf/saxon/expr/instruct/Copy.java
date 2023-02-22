@@ -558,8 +558,8 @@ public class Copy extends ElementCreator {
 
                             Receiver elemOut = output;
                             if (!expr.preservingTypes) {
-                                ParseOptions options = new ParseOptions(expr.getValidationOptions());
-                                options.setTopLevelElement(elemName.getStructuredQName());
+                                ParseOptions options = expr.getValidationOptions()
+                                        .withTopLevelElement(elemName.getStructuredQName());
                                 context.getConfiguration().prepareValidationReporting(context, options);
                                 Receiver validator = context.getConfiguration().getElementValidator(
                                         elemOut, options, expr.getLocation());
@@ -636,8 +636,8 @@ public class Copy extends ElementCreator {
 
                     case Type.DOCUMENT:
                         if (!expr.preservingTypes) {
-                            ParseOptions options = new ParseOptions(expr.getValidationOptions());
-                            options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+                            ParseOptions options = expr.getValidationOptions()
+                                    .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
                             controller.getConfiguration().prepareValidationReporting(context, options);
                             Receiver val = controller.getConfiguration().
                                     getDocumentValidator(output, source.getBaseURI(), options, expr.getLocation());

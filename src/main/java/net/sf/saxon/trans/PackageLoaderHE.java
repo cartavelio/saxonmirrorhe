@@ -161,10 +161,10 @@ public class PackageLoaderHE implements IPackageLoader {
     @Override
     public StylesheetPackage loadPackage(Source source) throws XPathException {
 
-        ParseOptions options = new ParseOptions();
-        options.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
-        options.setSchemaValidationMode(Validation.SKIP);
-        options.setDTDValidationMode(Validation.SKIP);
+        ParseOptions options = new ParseOptions()
+                .withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance())
+                .withSchemaValidationMode(Validation.SKIP)
+                .withDTDValidationMode(Validation.SKIP);
 
         final List<ProxyReceiver> filters = new ArrayList<>(1);
         FilterFactory checksumFactory = next -> {
@@ -175,7 +175,7 @@ public class PackageLoaderHE implements IPackageLoader {
         };
 
 
-        options.addFilter(checksumFactory);
+        options = options.withAdditionalFilter(checksumFactory);
 
         NodeInfo doc = config.buildDocumentTree(source, options).getRootNode();
 
@@ -3150,26 +3150,26 @@ public class PackageLoaderHE implements IPackageLoader {
                 schemaType = loader.getConfiguration().getSchemaType(typeAtt);
                 validation = Validation.BY_TYPE;
             }
-            final ParseOptions options = new ParseOptions(loader.getConfiguration().getParseOptions());
-            options.setSchemaValidationMode(validation);
-            options.setTopLevelType(schemaType);
+            ParseOptions options = loader.getConfiguration().getParseOptions()
+                    .withSchemaValidationMode(validation)
+                    .withTopLevelType(schemaType);
             String flags = element.getAttributeValue(NamespaceUri.NULL,"flags");
             if (flags != null) {
-                if (flags.contains("s")) {
-                    loader.addCompletionAction(() -> options.setSpaceStrippingRule(loader.getTopLevelPackage().getSpaceStrippingRule()));
-                }
+//                if (flags.contains("s")) {
+//                    loader.addCompletionAction(() -> options.setSpaceStrippingRule(loader.getTopLevelPackage().getSpaceStrippingRule()));
+//                }
                 if (flags.contains("S")) {
-                    options.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+                    options = options.withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
                 }
                 if (flags.contains("l")) {
-                    options.setLineNumbering(true);
+                    options = options.withLineNumbering(true);
                 }
-                options.setExpandAttributeDefaults(flags.contains("a"));
+                options = options.withExpandAttributeDefaults(flags.contains("a"));
                 if (flags.contains("d")) {
-                    options.setDTDValidationMode(Validation.STRICT);
+                    options = options.withDTDValidationMode(Validation.STRICT);
                 }
                 if (flags.contains("i")) {
-                    options.setXIncludeAware(true);
+                    options = options.withXIncludeAware(true);
                 }
             }
             Expression body = loader.getExpressionWithRole(element, "body");

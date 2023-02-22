@@ -88,10 +88,10 @@ public class PackageInspector extends ProxyReceiver {
 
     public PackageDetails getPackageDetails(File top, Configuration config) throws XPathException {
         try {
-            ParseOptions options = new ParseOptions();
-            options.setDTDValidationMode(Validation.SKIP);
-            options.setSchemaValidationMode(Validation.SKIP);
-            Sender.send(new StreamSource(top), this, new ParseOptions());
+            ParseOptions options = new ParseOptions()
+                    .withDTDValidationMode(Validation.SKIP)
+                    .withSchemaValidationMode(Validation.SKIP);
+            Sender.send(new StreamSource(top), this, options);
         } catch (XPathException e) {
             // early exit is expected
             if (!e.getMessage().equals("#start#")) {

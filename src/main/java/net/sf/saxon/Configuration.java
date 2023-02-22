@@ -69,6 +69,7 @@ import javax.xml.transform.*;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -135,7 +136,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private CollectionFinder collectionFinder;
     private EnvironmentVariableResolver environmentVariableResolver = new StandardEnvironmentVariableResolver();
     private String defaultCollection = null;
-    private final ParseOptions defaultParseOptions = new ParseOptions();
+    private ParseOptions defaultParseOptions = new ParseOptions();
 
     protected transient StaticQueryContext defaultStaticQueryContext;
     private StaticQueryContextFactory staticQueryContextFactory = new StaticQueryContextFactory();
@@ -940,11 +941,20 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return the parsing and document building options. Note that any changes to this
      * ParseOptions object will be reflected back in the Configuration; if changes are to be made
      * locally, the caller should create a copy.
-     * @since 9.2
+     * @since 9.2. From 12.x the ParseOptions object is immutable, which means any changes must be
+     * written back using {@link #setParseOptions}
      */
 
     public ParseOptions getParseOptions() {
         return defaultParseOptions;
+    }
+
+    /**
+     * Set the parsing and document building options to be used in this configuration.
+     */
+
+    public void setParseOptions(ParseOptions options) {
+        defaultParseOptions = options;
     }
 
     /**
@@ -1090,7 +1100,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void setTreeModel(int treeModel) {
-        defaultParseOptions.setModel(TreeModel.getTreeModel(treeModel));
+        defaultParseOptions = defaultParseOptions.withModel(TreeModel.getTreeModel(treeModel));
     }
 
     /**
@@ -1116,7 +1126,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void setLineNumbering(boolean lineNumbering) {
-        defaultParseOptions.setLineNumbering(lineNumbering);
+        defaultParseOptions = defaultParseOptions.withLineNumbering(lineNumbering);
     }
 
     /**
@@ -1128,7 +1138,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void setXIncludeAware(boolean state) {
-        defaultParseOptions.setXIncludeAware(state);
+        defaultParseOptions = defaultParseOptions.withXIncludeAware(state);
     }
 
     /**
@@ -2383,7 +2393,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void setValidation(boolean validation) {
-        defaultParseOptions.setDTDValidationMode(validation ? Validation.STRICT : Validation.STRIP);
+        defaultParseOptions = defaultParseOptions.withDTDValidationMode(validation ? Validation.STRICT : Validation.STRIP);
     }
 
     /**
@@ -2458,7 +2468,7 @@ public class Configuration implements SourceResolver, NotationSet {
 //            default:
 //                throw new IllegalArgumentException("Unsupported validation mode " + validationMode);
 //        }
-        defaultParseOptions.setSchemaValidationMode(validationMode);
+        defaultParseOptions = defaultParseOptions.withSchemaValidationMode(validationMode);
     }
 
     /**
@@ -2475,7 +2485,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void setValidationWarnings(boolean warn) {
-        defaultParseOptions.setContinueAfterValidationErrors(warn);
+        defaultParseOptions = defaultParseOptions.withContinueAfterValidationErrors(warn);
     }
 
     /**
@@ -2511,7 +2521,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void setExpandAttributeDefaults(boolean expand) {
-        defaultParseOptions.setExpandAttributeDefaults(expand);
+        defaultParseOptions = defaultParseOptions.withExpandAttributeDefaults(expand);
     }
 
     /**
@@ -3784,7 +3794,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws UnsupportedOperationException except in subclasses
      */
 
-    public Map<String, Function> makeMethodMap(Class javaClass, String required) {
+    public Map<String, Function> makeMethodMap(Class<?> javaClass, String required) {
         throw new UnsupportedOperationException();
     }
 
@@ -3929,7 +3939,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public PipelineConfiguration makePipelineConfiguration() {
-        PipelineConfiguration pipe = new PipelineConfiguration(this, new ParseOptions(defaultParseOptions));
+        PipelineConfiguration pipe = new PipelineConfiguration(this, defaultParseOptions);
         pipe.setErrorReporter(makeErrorReporter());
         return pipe;
     }
@@ -4009,7 +4019,7 @@ public class Configuration implements SourceResolver, NotationSet {
             return new ActiveSource() {
                 @Override
                 public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
-                    options.merge(((AugmentedSource) source).getParseOptions());
+                    options = options.merge(((AugmentedSource) source).getParseOptions());
                     resolveSource(((AugmentedSource) source).getContainedSource(), config)
                             .deliver(receiver, options);
                 }
@@ -4079,9 +4089,7 @@ public class Configuration implements SourceResolver, NotationSet {
                     ((AugmentedSource) source).getContainedSource(),
                     ((AugmentedSource) source).getParseOptions());
         } else {
-            return buildDocumentTree(
-                    source,
-                    new ParseOptions(defaultParseOptions));    // see bug 3678
+            return buildDocumentTree(source, defaultParseOptions);
         }
     }
 
@@ -4112,7 +4120,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
         boolean finallyClose = false;
         try {
-            ParseOptions options = new ParseOptions(parseOptions);
+            ParseOptions options = parseOptions;
 
             // Resolve user-defined implementations of Source
             Source src2 = resolveSource(source, this);
@@ -4122,7 +4130,7 @@ public class Configuration implements SourceResolver, NotationSet {
             source = src2;
 
             if (source instanceof AugmentedSource) {
-                options.merge(((AugmentedSource) source).getParseOptions());
+                options = options.merge(((AugmentedSource) source).getParseOptions());
             }
 
             options.applyDefaults(this);
@@ -4247,15 +4255,11 @@ public class Configuration implements SourceResolver, NotationSet {
                 } catch (UnsupportedEncodingException e) {
                     throw new IllegalArgumentException(e);
                 }
-                defaultParseOptions.addParserFeature(uri, requireBoolean(name, value));
+                defaultParseOptions = defaultParseOptions.withAdditionalParserFeature(uri, requireBoolean(name, value));
             } else if (name.startsWith(FeatureKeys.XML_PARSER_PROPERTY)) {
                 String uri = name.substring(FeatureKeys.XML_PARSER_PROPERTY.length());
-                try {
-                    uri = URLDecoder.decode(uri, "utf-8");
-                } catch (UnsupportedEncodingException e) {
-                    throw new IllegalArgumentException(e);
-                }
-                defaultParseOptions.addParserProperties(uri, value);
+                uri = URLDecoder.decode(uri, StandardCharsets.UTF_8);
+                defaultParseOptions = defaultParseOptions.withAdditionalParserProperties(uri, value);
 
             } else {
                 throw new IllegalArgumentException("Unrecognized configuration feature: " + name);
@@ -4367,9 +4371,9 @@ public class Configuration implements SourceResolver, NotationSet {
                 case FeatureCode.DTD_VALIDATION_RECOVERABLE: {
                     boolean b = requireBoolean(name, value);
                     if (b) {
-                        defaultParseOptions.setDTDValidationMode(Validation.LAX);
+                        defaultParseOptions = defaultParseOptions.withDTDValidationMode(Validation.LAX);
                     } else {
-                        defaultParseOptions.setDTDValidationMode(isValidation() ? Validation.STRICT : Validation.SKIP);
+                        defaultParseOptions = defaultParseOptions.withDTDValidationMode(isValidation() ? Validation.STRICT : Validation.SKIP);
                     }
                     internalSetBooleanProperty(code, name, b);
                     break;
@@ -4377,9 +4381,9 @@ public class Configuration implements SourceResolver, NotationSet {
                 //#if CSHARP==false
                 case FeatureCode.ENTITY_RESOLVER_CLASS:
                     if ("".equals(value)) {
-                        defaultParseOptions.setEntityResolver(null);
+                        defaultParseOptions = defaultParseOptions.withEntityResolver(null);
                     } else {
-                        defaultParseOptions.setEntityResolver(
+                        defaultParseOptions = defaultParseOptions.withEntityResolver(
                                 (EntityResolver) instantiateClassName(name, value, EntityResolver.class));
                     }
                     break;
@@ -4528,21 +4532,23 @@ public class Configuration implements SourceResolver, NotationSet {
 
                 case FeatureCode.STRIP_WHITESPACE: {
                     String s = requireString(name, value);
+                    SpaceStrippingRule rule;
                     switch (s) {
                         case "all":
-                            defaultParseOptions.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+                            rule = AllElementsSpaceStrippingRule.getInstance();
                             break;
                         case "none":
-                            defaultParseOptions.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+                            rule = NoElementsSpaceStrippingRule.getInstance();
                             break;
                         case "ignorable":
-                            defaultParseOptions.setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                            rule = IgnorableSpaceStrippingRule.getInstance();
                             break;
                         default:
                             throw new IllegalArgumentException(
                                     "Unrecognized value STRIP_WHITESPACE = '" + value +
                                             "': must be 'all', 'none', or 'ignorable'");
                     }
+                    defaultParseOptions = defaultParseOptions.withSpaceStrippingRule(rule);
                     break;
                 }
                 case FeatureCode.STYLE_PARSER_CLASS:
@@ -4614,11 +4620,11 @@ public class Configuration implements SourceResolver, NotationSet {
                 //#endif
 
                 case FeatureCode.USE_XSI_SCHEMA_LOCATION:
-                    defaultParseOptions.setUseXsiSchemaLocation(requireBoolean(name, value));
+                    defaultParseOptions = defaultParseOptions.withUseXsiSchemaLocation(requireBoolean(name, value));
                     break;
 
                 case FeatureCode.VALIDATION_COMMENTS:
-                    defaultParseOptions.setAddCommentsAfterValidationErrors(requireBoolean(name, value));
+                    defaultParseOptions = defaultParseOptions.withAddCommentsAfterValidationErrors(requireBoolean(name, value));
                     break;
 
                 case FeatureCode.VALIDATION_WARNINGS:

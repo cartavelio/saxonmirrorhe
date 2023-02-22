@@ -95,17 +95,17 @@ public class ParseXml extends SystemFunction implements Callable {
 
             Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
             Receiver s = b;
-            ParseOptions options = new ParseOptions(config.getParseOptions());
+            ParseOptions options = config.getParseOptions();
             PackageData pd = getRetainedStaticContext().getPackageData();
             if (pd instanceof StylesheetPackage) {
-                options.setSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
+                options = options.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
                 if (((StylesheetPackage)pd).isStripsTypeAnnotations()) {
                     s = config.getAnnotationStripper(s);
                 }
             } else {
-                options.setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                options = options.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
             }
-            options.setErrorHandler(errorHandler);
+            options = options.withErrorHandler(errorHandler);
 
             s.setPipelineConfiguration(b.getPipelineConfiguration());
 
@@ -181,15 +181,15 @@ public class ParseXml extends SystemFunction implements Callable {
 
             Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
             Receiver s = b;
-            ParseOptions options = new ParseOptions(config.getParseOptions());
+            ParseOptions options = config.getParseOptions();
             PackageData pd = getRetainedStaticContext().getPackageData();
             if (pd instanceof StylesheetPackage) {
-                options.setSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
+                options = options.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
                 if (((StylesheetPackage) pd).isStripsTypeAnnotations()) {
                     s = config.getAnnotationStripper(s);
                 }
             } else {
-                options.setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                options = options.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
             }
 
             s.setPipelineConfiguration(b.getPipelineConfiguration());

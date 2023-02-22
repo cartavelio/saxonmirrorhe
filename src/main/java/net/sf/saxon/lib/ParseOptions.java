@@ -11,10 +11,11 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.expr.accum.Accumulator;
+import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
+import net.sf.saxon.ma.trie.ImmutableMap;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeModel;
-import net.sf.saxon.trace.ExitCounter;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -28,147 +29,143 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
  * This class defines options for parsing and/or validating a source document. Some of the options
  * are relevant only when parsing, some only when validating, but they are combined into a single
  * class because the two operations are often performed together.
+ *
+ * <p>Rewritten in 12.x as an immutable class, because the product was previously creating a large number
+ * of instances as copies of other instances, without ever making any changes, just in case a change
+ * was required.</p>
  */
 
 @SuppressWarnings("WeakerAccess")
-//@CSharpInjectMembers(code = {
-//        "    public void setErrorReporter(Saxon.Api.ErrorReporter reporter) {"
-//                + "        setErrorReporter(new Saxon.Api.Support.ErrorReporterWrapper(reporter));"
-//                + "    }"
-//})
 public class ParseOptions {
 
-    private int schemaValidation;
-    private int dtdValidation;
-    private StructuredQName topLevelElement;
-    private SchemaType topLevelType;
-
-    private Optional<Boolean> wrapDocument;
-    /*@Nullable*/ private TreeModel treeModel;
-    //private int stripSpace = Whitespace.UNSPECIFIED;
-    private SpaceStrippingRule spaceStrippingRule;
-    private Optional<Boolean> lineNumbering;
-    private boolean pleaseClose;
-    /*@Nullable*/ private transient ErrorReporter errorReporter;
-    /*@Nullable*/ private List<FilterFactory> filters;
-    private boolean continueAfterValidationErrors;
-    private boolean addCommentsAfterValidationErrors;
-    private boolean expandAttributeDefaults;
-    private boolean useXsiSchemaLocation;
-    private boolean checkEntityReferences;
-    private boolean stable;
-    private int validationErrorLimit;
-    /*@Nullable*/ private ValidationParams validationParams;
-    /*@Nullable*/ private ValidationStatisticsRecipient validationStatisticsRecipient;
-    private Map<String, Boolean> parserFeatures;
-    private Map<String, Object> parserProperties;
-    private InvalidityHandler invalidityHandler;
-    private Set<? extends Accumulator> applicableAccumulators;
-
-    //#if CSHARP==false
-    private transient XMLReader parser;
-    private Maker<XMLReader> parserMaker;
-    private transient EntityResolver entityResolver;
-    private transient ErrorHandler errorHandler;
-    //#endif
-
-    private boolean frozen = false;
-
-    public void freeze()
-    {
-        frozen = true;
+    private enum Key {
+        ADD_COMMENTS_AFTER_VALIDATION_ERRORS,
+        APPLICABLE_ACCUMULATORS,
+        CHECK_ENTITY_REFERENCES,
+        CONTINUE_AFTER_VALIDATION_ERRORS,
+        DTD_VALIDATION,
+        ENTITY_RESOLVER,
+        ERROR_HANDLER,
+        ERROR_REPORTER,
+        EXPAND_ATTRIBUTE_DEFAULTS,
+        FILTERS,
+        INVALIDITY_HANDLER,
+        LINE_NUMBERING,
+        MODEL,
+        PARSER_FEATURE,
+        PARSER_PROPERTY,
+        PLEASE_CLOSE,
+        SCHEMA_VALIDATION,
+        SPACE_STRIPPING_RULE,
+        STABLE,
+        TOP_LEVEL_ELEMENT,
+        TOP_LEVEL_TYPE,
+        TREE_MODEL,
+        USE_XSI_SCHEMA_LOCATION,
+        VALIDATION_ERROR_LIMIT,
+        VALIDATION_PARAMS,
+        VALIDATION_STATISTICS_RECIPIENT,
+        WRAP_DOCUMENT,
+        XINCLUDE_AWARE,
+        XML_READER,
+        XML_READER_MAKER
     }
 
-    private void initDefaults()
-    {
-        schemaValidation = Validation.DEFAULT;
-        dtdValidation = Validation.DEFAULT;
-        wrapDocument = Optional.empty();
-        treeModel = null;
-        //stripSpace = Whitespace.UNSPECIFIED;
-        spaceStrippingRule = null;
-        lineNumbering = Optional.empty();
-        pleaseClose = false;
-        errorReporter = null;
-        filters = null;
-        continueAfterValidationErrors = false;
-        addCommentsAfterValidationErrors = false;
-        expandAttributeDefaults = true;
-        useXsiSchemaLocation = true;
-        checkEntityReferences = false;
-        stable = true;
-        validationErrorLimit = Integer.MAX_VALUE;
-        validationParams = null;
-        validationStatisticsRecipient = null;
-         parserFeatures = null;
-        parserProperties = null;
-        invalidityHandler = null;
-        applicableAccumulators = null; // null means "all"
-    }
+    private final ImmutableMap<Key, Object> properties;
 
     /**
      * Create a ParseOptions object with default options set
      */
 
     public ParseOptions() {
-        //entityResolver = new StandardEntityResolver();
-        initDefaults();
+        properties = ImmutableHashTrieMap.empty();
     }
 
     /**
-     * Create a ParseOptions object as a copy of another ParseOptions
+     * Private constructor for internal use: create a ParseOptions object with supplied content
+     * @param properties the initial property values to be set
+     */
+    private ParseOptions(ImmutableMap<Key, Object> properties) {
+        this.properties = properties;
+    }
+
+    /**
+     * Return a copy of the ParseOptions object with one property set to a different value
+     * @param key the property to be set
+     * @param value the new value for the property, or null to remove the property
+     * @return a new ParseOptions object (or the original if there is no change)
+     */
+    private ParseOptions withProperty(Key key, Object value) {
+        if (value == properties.get(key)) {
+            return this;
+        }
+        if (value == null) {
+            return new ParseOptions(properties.remove(key));
+        } else {
+            return new ParseOptions(properties.put(key, value));
+        }
+    }
+
+    /**
+     * Get the value of a property with a given key
+     * @param key the key identifying the required property
+     * @return the value of the property (null if it has not been set)
+     */
+    private Object getProperty(Key key) {
+        return properties.get(key);
+    }
+
+    /**
+     * Ask whether a value has been set for a particular property
+     * @param key the key identifying the required property
+     * @return true if the property has a value
+     */
+    private boolean hasProperty(Key key) {
+        return properties.get(key) != null;
+    }
+
+    /**
+     * Get the value of an integer-valued property, returning a default value if the property
+     * has not been set.
+     * @param key the key identifying the required property
+     * @param defaultValue the value to return if no value has been supplied for the property
+     * @return the value of the property, or its default
+     */
+    private int getIntegerProperty(Key key, int defaultValue) {
+        Object value = properties.get(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return (int)value;
+        }
+    }
+
+    /**
+     * Get the value of a boolean-valued property, returning a default value if the property
+     * has not been set.
      *
-     * @param p the ParseOptions to be copied
+     * @param key          the key identifying the required property
+     * @param defaultValue the value to return if no value has been supplied for the property
+     * @return the value of the property, or its default
      */
 
-    public ParseOptions(/*@NotNull*/ ParseOptions p) {
-        super();
-
-        schemaValidation = p.schemaValidation;
-        validationParams = p.validationParams;
-        setDTDValidationMode(p.dtdValidation);
-        topLevelElement = p.topLevelElement;
-        topLevelType = p.topLevelType;
-
-        wrapDocument = p.wrapDocument;
-        treeModel = p.treeModel;
-        spaceStrippingRule = p.spaceStrippingRule;
-        lineNumbering = p.lineNumbering;
-        pleaseClose = p.pleaseClose;
-        errorReporter = p.errorReporter;
-        invalidityHandler = p.invalidityHandler;
-        stable = p.stable;
-        if (p.filters != null) {
-            filters = new ArrayList<>(p.filters);
+    private boolean getBooleanProperty(Key key, boolean defaultValue) {
+        Object value = properties.get(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return (boolean) value;
         }
-        setExpandAttributeDefaults(p.expandAttributeDefaults);
-        useXsiSchemaLocation = p.useXsiSchemaLocation;
-        validationErrorLimit = p.validationErrorLimit;
-        continueAfterValidationErrors = p.continueAfterValidationErrors;
-        addCommentsAfterValidationErrors = p.addCommentsAfterValidationErrors;
-        if (p.parserFeatures != null) {
-            parserFeatures = new HashMap<>(p.parserFeatures);
-        }
-        if (p.parserProperties != null) {
-            parserProperties = new HashMap<>(p.parserProperties);
-        }
-        applicableAccumulators = p.applicableAccumulators;
-        checkEntityReferences = p.checkEntityReferences;
-        validationStatisticsRecipient = p.validationStatisticsRecipient;
-
-        //#if (CSHARP==false)
-        parserMaker = p.getXMLReaderMaker();
-        parser = p.parser;
-        errorHandler = p.errorHandler;
-        entityResolver = p.entityResolver;
-        //#endif
     }
 
     /**
@@ -183,88 +180,83 @@ public class ParseOptions {
      *     value is taken from the one that "takes precedence".</li>
      * </ul>
      *
-     * @param options the set of {@code ParseOptions} properties to be merged in.
+     * @param other the set of {@code ParseOptions} properties to be merged in.
+     * @return the merged ParseOptions
      */
 
-    public void merge(/*@NotNull*/ ParseOptions options) {
-        if (options.dtdValidation != Validation.DEFAULT) {
-            setDTDValidationMode(options.dtdValidation);
+    public ParseOptions merge(ParseOptions other) {
+        ParseOptions result = this;
+        if (other.getDTDValidationMode() != Validation.DEFAULT) {
+            result = result.withDTDValidationMode(other.getDTDValidationMode());
         }
-        if (options.schemaValidation != Validation.DEFAULT) {
-            schemaValidation = options.schemaValidation;
+        if (other.getSchemaValidationMode() != Validation.DEFAULT) {
+            result = result.withSchemaValidationMode(other.getSchemaValidationMode());
         }
-        if (options.invalidityHandler != null) {
-            invalidityHandler = options.invalidityHandler;
+        result = result.withPropertyIfNotNull(Key.INVALIDITY_HANDLER, other.getInvalidityHandler());
+        result = result.withPropertyIfNotNull(Key.TOP_LEVEL_ELEMENT, other.getTopLevelElement());
+        result = result.withPropertyIfNotNull(Key.TOP_LEVEL_TYPE, other.getTopLevelType());
+        result = result.withPropertyIfNotNull(Key.SPACE_STRIPPING_RULE, other.getSpaceStrippingRule());
+        result = result.withPropertyIfNotNull(Key.TREE_MODEL, other.getTreeModel());
+
+
+        if (other.hasProperty(Key.LINE_NUMBERING)) {
+            result = result.withLineNumbering(other.isLineNumbering());
         }
-        if (options.topLevelElement != null) {
-            topLevelElement = options.topLevelElement;
-        }
-        if (options.topLevelType != null) {
-            topLevelType = options.topLevelType;
-        }
-        if (options.wrapDocument.isPresent()) {
-            wrapDocument = options.wrapDocument;
-        }
-        if (options.treeModel != null) {
-            treeModel = options.treeModel;
-        }
-        if (options.spaceStrippingRule != null) {
-            spaceStrippingRule = options.spaceStrippingRule;
-        }
-        if (options.lineNumbering.isPresent()) {
-            lineNumbering = options.lineNumbering;
-        }
-        if (options.pleaseClose) {
-            pleaseClose = true;
+        if (other.isPleaseCloseAfterUse()) {
+            result = result.withPleaseCloseAfterUse(true);
         }
 
-        if (options.filters != null) {
-            if (filters == null) {
-                filters = new ArrayList<>();
-            }
-            filters.addAll(options.filters);
-        }
-        if (options.parserFeatures != null) {
-            if (parserFeatures == null) {
-                parserFeatures = new HashMap<>();
-            }
-            // Bug 5167
-            for (Map.Entry<String, Boolean> feature : options.parserFeatures.entrySet()) {
-                if (feature.getValue()) {
-                    parserFeatures.put(feature.getKey(), true);
-                }
-            }
-        }
-        if (options.parserProperties != null) {
-            if (parserProperties == null) {
-                parserProperties = new HashMap<>();
-            }
-            parserProperties.putAll(options.parserProperties);
-        }
-        if (!options.expandAttributeDefaults) {
+//        if (other.filters != null) {
+//            if (filters == null) {
+//                filters = new ArrayList<>();
+//            }
+//            filters.addAll(other.filters);
+//        }
+//        if (other.parserFeatures != null) {
+//            if (parserFeatures == null) {
+//                parserFeatures = new HashMap<>();
+//            }
+//            // Bug 5167
+//            for (Map.Entry<String, Boolean> feature : other.parserFeatures.entrySet()) {
+//                if (feature.getValue()) {
+//                    parserFeatures.put(feature.getKey(), true);
+//                }
+//            }
+//        }
+//        if (other.parserProperties != null) {
+//            if (parserProperties == null) {
+//                parserProperties = new HashMap<>();
+//            }
+//            parserProperties.putAll(other.parserProperties);
+//        }
+
+        if (!other.isExpandAttributeDefaults()) {
             // expand defaults unless the other options says don't
-            setExpandAttributeDefaults(false);
+            result = result.withExpandAttributeDefaults(false);
         }
-        if (!options.useXsiSchemaLocation) {
-            // expand defaults unless the other options says don't
-            useXsiSchemaLocation = false;
+        if (!other.isUseXsiSchemaLocation()) {
+            result = result.withUseXsiSchemaLocation(false);
         }
-        if (options.addCommentsAfterValidationErrors) {
+        if (other.isAddCommentsAfterValidationErrors()) {
             // add comments if either set of options requests it
-            addCommentsAfterValidationErrors = true;
+            result = result.withUseXsiSchemaLocation(true);
         }
-        validationErrorLimit = java.lang.Math.min(validationErrorLimit, options.validationErrorLimit);
+        result = result.withValidationErrorLimit(
+                java.lang.Math.min(this.getValidationErrorLimit(), other.getValidationErrorLimit()));
+
         //#if (CSHARP==false)
-        if (options.parser != null) {
-            parser = options.parser;
-        }
-        if (options.errorReporter != null) {
-            errorReporter = options.errorReporter;
-        }
-        if (options.entityResolver != null) {
-            entityResolver = options.entityResolver;
-        }
+        result = result.withPropertyIfNotNull(Key.XML_READER, other.getXMLReader());
+        result = result.withPropertyIfNotNull(Key.ERROR_REPORTER, other.getErrorReporter());
         //#endif
+
+        return result;
+    }
+
+    private ParseOptions withPropertyIfNotNull(Key key, Object value) {
+        if (value != null) {
+            return withProperty(key, value);
+        }
+        return this;
     }
 
     /**
@@ -274,28 +266,31 @@ public class ParseOptions {
      *               used only where no setting is present in this ParseOptions object
      */
 
-    public void applyDefaults(/*@NotNull*/ Configuration config) {
-        if (dtdValidation == Validation.DEFAULT) {
-            setDTDValidationMode(config.isValidation() ? Validation.STRICT : Validation.SKIP);
+    public ParseOptions applyDefaults(Configuration config) {
+        ParseOptions result = this;
+        if (getDTDValidationMode() == Validation.DEFAULT) {
+            result = result.withDTDValidationMode(config.isValidation() ? Validation.STRICT : Validation.SKIP);
         }
-        if (schemaValidation == Validation.DEFAULT) {
-            schemaValidation = config.getSchemaValidationMode();
+        if (getSchemaValidationMode() == Validation.DEFAULT) {
+            result = result.withSchemaValidationMode(config.getSchemaValidationMode());
         }
-        if (treeModel == null) {
-            treeModel = TreeModel.getTreeModel(config.getTreeModel());
+        if (getModel() == null) {
+            result = result.withModel(TreeModel.getTreeModel(config.getTreeModel()));
         }
-        if (spaceStrippingRule == null) {
-            spaceStrippingRule = config.getParseOptions().getSpaceStrippingRule();
+        if (getSpaceStrippingRule() == null) {
+            result = result.withSpaceStrippingRule(config.getParseOptions().getSpaceStrippingRule());
         }
-        if (!lineNumbering.isPresent()) {
-            lineNumbering = Optional.of(config.isLineNumbering());
+        if (getProperty(Key.LINE_NUMBERING) == null) {
+            result = result.withProperty(Key.LINE_NUMBERING, config.isLineNumbering());
         }
 
         //#if (CSHARP==false)
-        if (errorReporter == null) {
-            setErrorReporter(config.makeErrorReporter());
+        if (getProperty(Key.ERROR_REPORTER) == null) {
+            result = result.withErrorReporter(config.makeErrorReporter());
         }
         //#endif
+
+        return result;
     }
 
     /**
@@ -311,11 +306,15 @@ public class ParseOptions {
      * @param filterFactory the filterFactory to be added
      */
 
-    public void addFilter(FilterFactory filterFactory) {
-        if (filters == null) {
-            filters = new ArrayList<>(5);
+    public ParseOptions withAdditionalFilter(FilterFactory filterFactory) {
+        List<FilterFactory> list = getFilters();
+        if (list == null) {
+            list = new ArrayList<>(2);
+        } else {
+            list = new ArrayList<>(list); // to keep it immutable; it's not going to be a long list
         }
-        filters.add(filterFactory);
+        list.add(filterFactory);
+        return withProperty(Key.FILTERS, list);
     }
 
     /**
@@ -326,7 +325,7 @@ public class ParseOptions {
 
     /*@Nullable*/
     public List<FilterFactory> getFilters() {
-        return filters;
+        return (List<FilterFactory>)getProperty(Key.FILTERS);
     }
 
     /**
@@ -336,7 +335,7 @@ public class ParseOptions {
      */
 
     public SpaceStrippingRule getSpaceStrippingRule() {
-        return spaceStrippingRule;
+        return (SpaceStrippingRule)getProperty(Key.SPACE_STRIPPING_RULE);
     }
 
     /**
@@ -345,9 +344,8 @@ public class ParseOptions {
      * @param rule space stripping rule to be used
      */
 
-    public void setSpaceStrippingRule(SpaceStrippingRule rule) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        spaceStrippingRule = rule;
+    public ParseOptions withSpaceStrippingRule(SpaceStrippingRule rule) {
+        return withProperty(Key.SPACE_STRIPPING_RULE, rule);
     }
 
     /**
@@ -357,9 +355,9 @@ public class ParseOptions {
      *              {@link net.sf.saxon.event.Builder#LINKED_TREE} or {@link net.sf.saxon.event.Builder#TINY_TREE_CONDENSED}
      */
 
-    public void setTreeModel(int model) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        treeModel = TreeModel.getTreeModel(model);
+
+    public ParseOptions withTreeModel(int model) {
+        return withProperty(Key.TREE_MODEL, model);
     }
 
     /**
@@ -368,11 +366,12 @@ public class ParseOptions {
      * @param uri   The features as a URIs
      * @param value The value given to the feature as boolean
      */
-    public void addParserFeature(String uri, boolean value) {
-        if (parserFeatures == null) {
-            parserFeatures = new HashMap<>();
-        }
-        parserFeatures.put(uri, value);
+    public ParseOptions withAdditionalParserFeature(String uri, boolean value) {
+//        if (parserFeatures == null) {
+//            parserFeatures = new HashMap<>();
+//        }
+//        parserFeatures.put(uri, value);
+        return this;            // TODO
     }
 
     /**
@@ -381,11 +380,12 @@ public class ParseOptions {
      * @param uri   The properties as a URIs
      * @param value The value given to the properties as a string
      */
-    public void addParserProperties(String uri, Object value) {
-        if (parserProperties == null) {
-            parserProperties = new HashMap<>();
-        }
-        parserProperties.put(uri, value);
+    public ParseOptions withAdditionalParserProperties(String uri, Object value) {
+//        if (parserProperties == null) {
+//            parserProperties = new HashMap<>();
+//        }
+//        parserProperties.put(uri, value);
+        return this;   //TODO
     }
 
     /**
@@ -395,7 +395,8 @@ public class ParseOptions {
      * @return The feature value as boolean
      */
     public boolean getParserFeature(String uri) {
-        return parserFeatures.get(uri);
+        Set<String> parserFeatures = (Set<String>)getProperty(Key.PARSER_FEATURE);
+        return parserFeatures != null && parserFeatures.contains(uri);
     }
 
     /**
@@ -405,7 +406,9 @@ public class ParseOptions {
      * @return The property value (which may be any object)
      */
     public Object getParserProperty(String name) {
-        return parserProperties.get(name);
+        //return parserProperties.get(name);
+
+        return null; // TODO
     }
 
     /**
@@ -414,7 +417,8 @@ public class ParseOptions {
      * @return A map of (feature, value) pairs
      */
     public Map<String, Boolean> getParserFeatures() {
-        return parserFeatures;
+        //return parserFeatures;
+        return null; // TODO
     }
 
     /**
@@ -423,7 +427,7 @@ public class ParseOptions {
      * @return A map of (feature, string) pairs
      */
     public Map<String, Object> getParserProperties() {
-        return parserProperties;
+        return null; // TODO
     }
 
     /**
@@ -435,10 +439,11 @@ public class ParseOptions {
      */
 
     public int getTreeModel() {
-        if (treeModel == null) {
+        TreeModel model = getModel();
+        if (model == null) {
             return Builder.UNSPECIFIED_TREE_MODEL;
         }
-        return treeModel.getSymbolicValue();
+        return model.getSymbolicValue();
     }
 
     /**
@@ -450,9 +455,8 @@ public class ParseOptions {
      * @since 9.2
      */
 
-    public void setModel(TreeModel model) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        treeModel = model;
+    public ParseOptions withModel(TreeModel model) {
+        return withProperty(Key.MODEL, model);
     }
 
     /**
@@ -464,6 +468,7 @@ public class ParseOptions {
      */
 
     public TreeModel getModel() {
+        TreeModel treeModel = (TreeModel)getProperty(Key.MODEL);
         return treeModel == null ? TreeModel.TINY_TREE : treeModel;
     }
 
@@ -476,9 +481,8 @@ public class ParseOptions {
      *               {@link Validation#PRESERVE}, {@link Validation#DEFAULT}
      */
 
-    public void setSchemaValidationMode(int option) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        schemaValidation = option;
+    public ParseOptions withSchemaValidationMode(int option) {
+        return withProperty(Key.SCHEMA_VALIDATION, option);
     }
 
     /**
@@ -489,7 +493,7 @@ public class ParseOptions {
      */
 
     public int getSchemaValidationMode() {
-        return schemaValidation;
+        return getIntegerProperty(Key.SCHEMA_VALIDATION, Validation.DEFAULT);
     }
 
     /**
@@ -500,9 +504,9 @@ public class ParseOptions {
      *               supplied in a DTD or schema, false if they are to be left as absent
      */
 
-    public void setExpandAttributeDefaults(boolean expand) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        this.expandAttributeDefaults = expand;
+
+    public ParseOptions withExpandAttributeDefaults(boolean expand) {
+        return withProperty(Key.EXPAND_ATTRIBUTE_DEFAULTS, expand);
     }
 
     /**
@@ -514,7 +518,7 @@ public class ParseOptions {
      */
 
     public boolean isExpandAttributeDefaults() {
-        return expandAttributeDefaults;
+        return getBooleanProperty(Key.EXPAND_ATTRIBUTE_DEFAULTS, true);
     }
 
     /**
@@ -525,9 +529,8 @@ public class ParseOptions {
      * @param elementName the QName of the required top-level element, or null to unset the value
      */
 
-    public void setTopLevelElement(StructuredQName elementName) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        topLevelElement = elementName;
+    public ParseOptions withTopLevelElement(StructuredQName elementName) {
+        return withProperty(Key.TOP_LEVEL_ELEMENT, elementName);
     }
 
     /**
@@ -540,7 +543,7 @@ public class ParseOptions {
      */
 
     public StructuredQName getTopLevelElement() {
-        return topLevelElement;
+        return (StructuredQName)getProperty(Key.TOP_LEVEL_ELEMENT);
     }
 
     /**
@@ -550,9 +553,8 @@ public class ParseOptions {
      * @param type the schema type required for the document element, or null to unset the value
      */
 
-    public void setTopLevelType(SchemaType type) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        topLevelType = type;
+    public ParseOptions withTopLevelType(SchemaType type) {
+        return withProperty(Key.TOP_LEVEL_TYPE, type);
     }
 
     /**
@@ -564,7 +566,7 @@ public class ParseOptions {
      */
 
     public SchemaType getTopLevelType() {
-        return topLevelType;
+        return (SchemaType)getProperty(Key.TOP_LEVEL_TYPE);
     }
 
     /**
@@ -575,9 +577,8 @@ public class ParseOptions {
      * @param use true if these attributes are to be used, false if they are to be ignored
      */
 
-    public void setUseXsiSchemaLocation(boolean use) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        useXsiSchemaLocation = use;
+    public ParseOptions withUseXsiSchemaLocation(boolean use) {
+        return withProperty(Key.USE_XSI_SCHEMA_LOCATION, use);
     }
 
     /**
@@ -589,7 +590,7 @@ public class ParseOptions {
      */
 
     public boolean isUseXsiSchemaLocation() {
-        return useXsiSchemaLocation;
+        return getBooleanProperty(Key.USE_XSI_SCHEMA_LOCATION, true);
     }
 
     /**
@@ -600,7 +601,7 @@ public class ParseOptions {
      */
 
     public int getValidationErrorLimit() {
-        return validationErrorLimit;
+        return getIntegerProperty(Key.VALIDATION_ERROR_LIMIT, Integer.MAX_VALUE);
     }
 
     /**
@@ -611,9 +612,8 @@ public class ParseOptions {
      * @param validationErrorLimit the limit on the number of errors
      */
 
-    public void setValidationErrorLimit(int validationErrorLimit) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        this.validationErrorLimit = validationErrorLimit;
+    public ParseOptions withValidationErrorLimit(int validationErrorLimit) {
+        return withProperty(Key.VALIDATION_ERROR_LIMIT, validationErrorLimit);
     }
 
     /**
@@ -625,11 +625,11 @@ public class ParseOptions {
      *               requested, but validation failures are treated as warnings only.</p>
      */
 
-    public void setDTDValidationMode(int option) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        dtdValidation = option;
-        addParserFeature("http://xml.org/sax/features/validation",
-                         option == Validation.STRICT || option == Validation.LAX);
+    public ParseOptions withDTDValidationMode(int option) {
+        // TODO: reinstate
+//        addParserFeature("http://xml.org/sax/features/validation",
+//                         option == Validation.STRICT || option == Validation.LAX);
+        return withProperty(Key.DTD_VALIDATION, option);
     }
 
     /**
@@ -642,7 +642,7 @@ public class ParseOptions {
      */
 
     public int getDTDValidationMode() {
-        return dtdValidation;
+        return getIntegerProperty(Key.DTD_VALIDATION, Validation.SKIP);
     }
 
     /**
@@ -653,9 +653,8 @@ public class ParseOptions {
      *                  validation episode, May be set to null if no agent is to be notified.
      */
 
-    public void setValidationStatisticsRecipient(/*@Nullable*/ ValidationStatisticsRecipient recipient) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        validationStatisticsRecipient = recipient;
+    public ParseOptions withValidationStatisticsRecipient(ValidationStatisticsRecipient recipient) {
+        return withProperty(Key.VALIDATION_STATISTICS_RECIPIENT, recipient);
     }
 
     /**
@@ -668,7 +667,7 @@ public class ParseOptions {
 
     /*@Nullable*/
     public ValidationStatisticsRecipient getValidationStatisticsRecipient() {
-        return validationStatisticsRecipient;
+        return (ValidationStatisticsRecipient)getProperty(Key.VALIDATION_STATISTICS_RECIPIENT);
     }
 
     /**
@@ -677,9 +676,8 @@ public class ParseOptions {
      * @param lineNumbering true if line numbers are to be maintained
      */
 
-    public void setLineNumbering(boolean lineNumbering) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        this.lineNumbering = Optional.of(lineNumbering);
+    public ParseOptions withLineNumbering(boolean lineNumbering) {
+        return withProperty(Key.LINE_NUMBERING, lineNumbering);
     }
 
     /**
@@ -689,7 +687,7 @@ public class ParseOptions {
      */
 
     public boolean isLineNumbering() {
-        return lineNumbering.isPresent() && lineNumbering.get();
+        return getBooleanProperty(Key.LINE_NUMBERING, false);
     }
 
     /**
@@ -699,7 +697,7 @@ public class ParseOptions {
      */
 
     public boolean isLineNumberingSet() {
-        return lineNumbering.isPresent();
+        return hasProperty(Key.LINE_NUMBERING);
     }
 
     //#if CSHARP==false
@@ -712,9 +710,8 @@ public class ParseOptions {
      * @param parser the SAX parser
      */
 
-    public void setXMLReader(XMLReader parser) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        this.parser = parser;
+    public ParseOptions withXMLReader(XMLReader parser) {
+        return withProperty(Key.XML_READER, parser);
     }
 
     /**
@@ -724,7 +721,7 @@ public class ParseOptions {
 
     /*@Nullable*/
     public XMLReader getXMLReader() {
-        return parser;
+        return (XMLReader)getProperty(Key.XML_READER);
     }
 
     /**
@@ -733,9 +730,8 @@ public class ParseOptions {
      * @param parserMaker a factory object that delivers an XMLReader on demand
      */
 
-    public void setXMLReaderMaker(Maker<XMLReader> parserMaker) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        this.parserMaker = parserMaker;
+    public ParseOptions withXMLReaderMaker(Maker<XMLReader> parserMaker) {
+        return withProperty(Key.XML_READER_MAKER, parserMaker);
     }
 
     /**
@@ -746,7 +742,7 @@ public class ParseOptions {
 
     /*@Nullable*/
     public Maker<XMLReader> getXMLReaderMaker() {
-        return parserMaker;
+        return (Maker<XMLReader>)getProperty(Key.XML_READER_MAKER);
     }
 
     /**
@@ -755,12 +751,11 @@ public class ParseOptions {
      */
 
     public XMLReader obtainXMLReader() throws XPathException {
-        if (parserMaker != null) {
-            return parserMaker.make();
-        } else if (parser != null) {
-            return parser;
+        Maker<XMLReader> factory = getXMLReaderMaker();
+        if (factory != null) {
+            return factory.make();
         } else {
-            return null;
+            return getXMLReader();
         }
     }
 
@@ -774,21 +769,20 @@ public class ParseOptions {
      *                 EntityResolver is removed from the options
      */
 
-    public void setEntityResolver(/*@Nullable*/ EntityResolver resolver) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        entityResolver = resolver;
+    public ParseOptions withEntityResolver(/*@Nullable*/ EntityResolver resolver) {
+        return withProperty(Key.ENTITY_RESOLVER, resolver);
     }
 
     /**
      * Get the EntityResolver that will be used when parsing
      *
-     * @return the EntityResolver, if one has been set using {@link #setEntityResolver},
+     * @return the EntityResolver, if one has been set using {@link #withEntityResolver},
      * otherwise null.
      */
 
     /*@Nullable*/
     public EntityResolver getEntityResolver() {
-        return entityResolver;
+        return (EntityResolver)getProperty(Key.ENTITY_RESOLVER);
     }
 
     /**
@@ -799,52 +793,24 @@ public class ParseOptions {
      * @param handler the ErrorHandler to be used, or null to indicate that no ErrorHandler is to be used.
      */
 
-    public void setErrorHandler(/*@Nullable*/ ErrorHandler handler) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        errorHandler = handler;
+    public ParseOptions withErrorHandler(ErrorHandler handler) {
+        return withProperty(Key.ERROR_HANDLER, handler);
     }
 
     /**
      * Get the ErrorHandler that will be used when parsing
      *
-     * @return the ErrorHandler, if one has been set using {@link #setErrorHandler},
+     * @return the ErrorHandler, if one has been set using {@link #withErrorHandler},
      * otherwise null.
      */
 
     /*@Nullable*/
     public ErrorHandler getErrorHandler() {
-        return errorHandler;
+        return (ErrorHandler)getProperty(Key.ERROR_HANDLER);
     }
 
     //#endif
 
-    /**
-     * Assuming that the contained Source is a node in a tree, indicate whether a tree should be created
-     * as a view of this supplied tree, or as a copy.
-     *
-     * @param wrap if true, the node in the supplied Source is wrapped, to create a view. If false, the node
-     *             and its contained subtree is copied. If null, the system default is chosen.
-     */
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    public void setWrapDocument(Optional<Boolean> wrap) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        wrapDocument = wrap;
-    }
-
-    /**
-     * Assuming that the contained Source is a node in a tree, determine whether a tree will be created
-     * as a view of this supplied tree, or as a copy.
-     *
-     * @return if true, the node in the supplied Source is wrapped, to create a view. If false, the node
-     * and its contained subtree is copied. If null, the system default is chosen.
-     * @since 8.8
-     */
-
-    /*@Nullable*/
-    public Optional<Boolean> getWrapDocument() {
-        return wrapDocument;
-    }
 
     /**
      * <p>Set state of XInclude processing.</p>
@@ -857,9 +823,10 @@ public class ParseOptions {
      *              <code>false</code>
      * @since 8.9
      */
-    public void setXIncludeAware(boolean state) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        addParserFeature("http://apache.org/xml/features/xinclude", state);
+    public ParseOptions withXIncludeAware(boolean state) {
+        // TODO
+        //return addParserFeature("http://apache.org/xml/features/xinclude", state);
+        return null;
     }
 
     /**
@@ -869,7 +836,8 @@ public class ParseOptions {
      */
 
     public boolean isXIncludeAwareSet() {
-        return parserFeatures != null && parserFeatures.containsKey("http://apache.org/xml/features/xinclude");
+        return false; // TODO
+        //return parserFeatures != null && parserFeatures.containsKey("http://apache.org/xml/features/xinclude");
     }
 
     /**
@@ -879,8 +847,9 @@ public class ParseOptions {
      */
 
     public boolean isXIncludeAware() {
-            return parserFeatures != null
-                    && parserFeatures.getOrDefault("http://apache.org/xml/features/xinclude", false);
+        return false; // TODO
+//            return parserFeatures != null
+//                    && parserFeatures.getOrDefault("http://apache.org/xml/features/xinclude", false);
     }
 
     /**
@@ -890,24 +859,23 @@ public class ParseOptions {
      *                 standard ErrorReporter is to be used.
      */
 
-    public void setErrorReporter(/*@Nullable*/ ErrorReporter reporter) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
+    public ParseOptions withErrorReporter(/*@Nullable*/ ErrorReporter reporter) {
         if (reporter == null) {
             reporter = new StandardErrorReporter();
         }
-        errorReporter = reporter;
+        return withProperty(Key.ERROR_REPORTER, reporter);
     }
 
     /**
      * Get the ErrorReporter that will be used when parsing
      *
-     * @return the ErrorReporter, if one has been set using {@link #setErrorReporter},
+     * @return the ErrorReporter, if one has been set using {@link #withErrorReporter},
      * otherwise null.
      */
 
     /*@Nullable*/
     public ErrorReporter getErrorReporter() {
-        return errorReporter;
+        return (ErrorReporter)getProperty(Key.ERROR_REPORTER);
     }
 
     /**
@@ -920,9 +888,8 @@ public class ParseOptions {
      * @param keepGoing true if processing should continue
      */
 
-    public void setContinueAfterValidationErrors(boolean keepGoing) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        continueAfterValidationErrors = keepGoing;
+    public ParseOptions withContinueAfterValidationErrors(boolean keepGoing) {
+        return withProperty(Key.CONTINUE_AFTER_VALIDATION_ERRORS, keepGoing);
     }
 
     /**
@@ -936,7 +903,7 @@ public class ParseOptions {
      */
 
     public boolean isContinueAfterValidationErrors() {
-        return continueAfterValidationErrors;
+        return getBooleanProperty(Key.CONTINUE_AFTER_VALIDATION_ERRORS, false);
     }
 
     /**
@@ -944,13 +911,12 @@ public class ParseOptions {
      * be written as comments in the validated source document. This option is only relevant when
      * processing continues after a validation error
      *
-     * @param keepGoing true if comments should be added
+     * @param addComments true if comments should be added
      * @since 9.3. Default is now false; in previous releases this option was always on.
      */
 
-    public void setAddCommentsAfterValidationErrors(boolean keepGoing) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        addCommentsAfterValidationErrors = keepGoing;
+    public ParseOptions withAddCommentsAfterValidationErrors(boolean addComments) {
+        return withProperty(Key.ADD_COMMENTS_AFTER_VALIDATION_ERRORS, addComments);
     }
 
     /**
@@ -963,7 +929,7 @@ public class ParseOptions {
      */
 
     public boolean isAddCommentsAfterValidationErrors() {
-        return addCommentsAfterValidationErrors;
+        return getBooleanProperty(Key.ADD_COMMENTS_AFTER_VALIDATION_ERRORS, false);
     }
 
     /**
@@ -974,9 +940,8 @@ public class ParseOptions {
      * @param params the validation parameters
      */
 
-    public void setValidationParams(ValidationParams params) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        validationParams = params;
+    public ParseOptions withValidationParams(ValidationParams params) {
+        return withProperty(Key.VALIDATION_PARAMS, params);
     }
 
     /**
@@ -988,7 +953,7 @@ public class ParseOptions {
      */
 
     public ValidationParams getValidationParams() {
-        return validationParams;
+        return (ValidationParams)getProperty(Key.VALIDATION_PARAMS);
     }
 
 
@@ -1001,9 +966,8 @@ public class ParseOptions {
      * @param check true if entities are to be checked, false otherwise
      */
 
-    public void setCheckEntityReferences(boolean check) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        this.checkEntityReferences = check;
+    public ParseOptions withCheckEntityReferences(boolean check) {
+        return withProperty(Key.CHECK_ENTITY_REFERENCES, check);
     }
 
     /**
@@ -1016,7 +980,7 @@ public class ParseOptions {
      */
 
     public boolean isCheckEntityReferences() {
-        return this.checkEntityReferences;
+        return getBooleanProperty(Key.CHECK_ENTITY_REFERENCES, false);
     }
 
     /**
@@ -1027,7 +991,7 @@ public class ParseOptions {
      */
 
     public boolean isStable() {
-        return stable;
+        return getBooleanProperty(Key.STABLE, true);
     }
 
     /**
@@ -1037,9 +1001,8 @@ public class ParseOptions {
      * @param stable true if the document or collection is stable
      */
 
-    public void setStable(boolean stable) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        this.stable = stable;
+    public ParseOptions withStable(boolean stable) {
+        return withProperty(Key.STABLE, stable);
     }
 
     /**
@@ -1049,7 +1012,7 @@ public class ParseOptions {
      */
 
     public InvalidityHandler getInvalidityHandler() {
-        return invalidityHandler;
+        return (InvalidityHandler)getProperty(Key.INVALIDITY_HANDLER);
     }
 
     /**
@@ -1058,9 +1021,8 @@ public class ParseOptions {
      * @param invalidityHandler the InvalidityHandler to be used for reporting validation failures
      */
 
-    public void setInvalidityHandler(InvalidityHandler invalidityHandler) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        this.invalidityHandler = invalidityHandler;
+    public ParseOptions withInvalidityHandler(InvalidityHandler invalidityHandler) {
+        return withProperty(Key.INVALIDITY_HANDLER, invalidityHandler);
     }
 
     /**
@@ -1072,9 +1034,8 @@ public class ParseOptions {
      *                     declared in a given package).
      */
 
-    public void setApplicableAccumulators(Set<? extends Accumulator> accumulators) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        this.applicableAccumulators = accumulators;
+    public ParseOptions withApplicableAccumulators(Set<? extends Accumulator> accumulators) {
+        return withProperty(Key.APPLICABLE_ACCUMULATORS, accumulators);
     }
 
     /**
@@ -1087,7 +1048,7 @@ public class ParseOptions {
      */
 
     public Set<? extends Accumulator> getApplicableAccumulators() {
-        return applicableAccumulators;
+        return (Set<? extends Accumulator>)getProperty(Key.APPLICABLE_ACCUMULATORS);
     }
 
 
@@ -1103,9 +1064,8 @@ public class ParseOptions {
      * @param close true if the source should be closed as soon as it has been consumed
      */
 
-    public void setPleaseCloseAfterUse(boolean close) {
-        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
-        pleaseClose = close;
+    public ParseOptions withPleaseCloseAfterUse(boolean close) {
+        return withProperty(Key.PLEASE_CLOSE, close);
     }
 
     /**
@@ -1116,7 +1076,7 @@ public class ParseOptions {
      */
 
     public boolean isPleaseCloseAfterUse() {
-        return pleaseClose;
+        return getBooleanProperty(Key.PLEASE_CLOSE, false);
     }
 
     /**

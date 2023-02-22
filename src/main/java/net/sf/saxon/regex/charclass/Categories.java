@@ -116,11 +116,11 @@ public class Categories {
         }
 
         Configuration config = new Configuration();
-        ParseOptions options = new ParseOptions();
-        options.setSchemaValidationMode(Validation.SKIP);
-        options.setDTDValidationMode(Validation.SKIP);
-        options.setTreeModel(Builder.TINY_TREE);
-        options.setPleaseCloseAfterUse(true);
+        ParseOptions options = new ParseOptions()
+                .withSchemaValidationMode(Validation.SKIP)
+                .withDTDValidationMode(Validation.SKIP)
+                .withTreeModel(Builder.TINY_TREE)
+                .withPleaseCloseAfterUse(true);
         NodeInfo doc;
         try {
             doc = config.buildDocumentTree(new StreamSource(in, "categories.xml"), options).getRootNode();

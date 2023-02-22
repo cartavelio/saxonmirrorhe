@@ -637,8 +637,8 @@ public class ComputedElement extends ElementCreator {
 
                     Receiver elemOut = out;
                     if (!expr.preservingTypes) {
-                        ParseOptions options = new ParseOptions(expr.getValidationOptions());
-                        options.setTopLevelElement(elemName.getStructuredQName());
+                        ParseOptions options = expr.getValidationOptions()
+                                .withTopLevelElement(elemName.getStructuredQName());
                         context.getConfiguration().prepareValidationReporting(context, options);
                         Receiver validator = context.getConfiguration().getElementValidator(
                                 elemOut, options, expr.getLocation());

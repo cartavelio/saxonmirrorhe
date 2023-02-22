@@ -349,37 +349,37 @@ public class DocumentBuilder {
                 throw new SaxonApiException("When schema validation is used, the whitespace stripping policy must be IGNORABLE");
             }
         }
-        ParseOptions options = new ParseOptions(config.getParseOptions());
-        options.setDTDValidationMode(dtdValidation ? Validation.STRICT : Validation.STRIP);
+        ParseOptions options = config.getParseOptions()
+                .withDTDValidationMode(dtdValidation ? Validation.STRICT : Validation.STRIP);
 
         if (schemaValidator != null) {
-            options.setSchemaValidationMode(schemaValidator.isLax() ? Validation.LAX : Validation.STRICT);
+            options = options.withSchemaValidationMode(schemaValidator.isLax() ? Validation.LAX : Validation.STRICT);
             if (schemaValidator.getDocumentElementName() != null) {
                 QName qn = schemaValidator.getDocumentElementName();
-                options.setTopLevelElement(qn.getStructuredQName());
+                options = options.withTopLevelElement(qn.getStructuredQName());
             }
             if (schemaValidator.getDocumentElementType() != null) {
-                options.setTopLevelType(schemaValidator.getDocumentElementType());
+                options = options.withTopLevelType(schemaValidator.getDocumentElementType());
             }
-            options.setExpandAttributeDefaults(schemaValidator.isExpandAttributeDefaults());
-            options.setUseXsiSchemaLocation(schemaValidator.isUseXsiSchemaLocation());
-            options.setValidationParams(schemaValidator.getValidationParameters());
-            options.setInvalidityHandler(schemaValidator.getInvalidityHandler());
+            options = options.withExpandAttributeDefaults(schemaValidator.isExpandAttributeDefaults());
+            options = options.withUseXsiSchemaLocation(schemaValidator.isUseXsiSchemaLocation());
+            options = options.withValidationParams(schemaValidator.getValidationParameters());
+            options = options.withInvalidityHandler(schemaValidator.getInvalidityHandler());
         }
 
         if (treeModel != null) {
-            options.setModel(treeModel);
+            options = options.withModel(treeModel);
         }
         if (whitespacePolicy != null && whitespacePolicy != WhitespaceStrippingPolicy.UNSPECIFIED) {
             int option = whitespacePolicy.ordinal();
             if (option == Whitespace.XSLT) {
-                options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-                options.addFilter(whitespacePolicy.makeStripper());
+                options = options.withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+                options = options.withAdditionalFilter(whitespacePolicy.makeStripper());
             } else {
-                options.setSpaceStrippingRule(whitespacePolicy.getSpaceStrippingRule());
+                options = options.withSpaceStrippingRule(whitespacePolicy.getSpaceStrippingRule());
             }
         }
-        options.setLineNumbering(lineNumbering);
+        options = options.withLineNumbering(lineNumbering);
         if (source.getSystemId() == null && baseURI != null) {
             source.setSystemId(baseURI.toString());
         }
@@ -387,11 +387,11 @@ public class DocumentBuilder {
             XQueryExpression exp = projectionQuery.getUnderlyingCompiledQuery();
             FilterFactory ff = config.makeDocumentProjector(exp);
             if (ff != null) {
-                options.addFilter(ff);
+                options = options.withAdditionalFilter(ff);
             }
         }
         if (source instanceof AugmentedSource) {
-            options.merge(((AugmentedSource)source).getParseOptions());
+            options = options.merge(((AugmentedSource)source).getParseOptions());
         }
         return options;
     }
