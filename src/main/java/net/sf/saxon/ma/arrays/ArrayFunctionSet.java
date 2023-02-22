@@ -8,6 +8,7 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.freq.Ping;
 import net.sf.saxon.functions.Fold;
 import net.sf.saxon.functions.FoldingFunction;
 import net.sf.saxon.functions.SystemFunction;
@@ -27,6 +28,7 @@ import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in XPath 2.0
@@ -198,6 +200,58 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         return index;
     }
 
+    /**
+     * Abstract superclass for functions that produce an array, and that decide what kind of array implementation
+     * to use based on past experience. Specifically, if the generated array is frequently converted to
+     * an ImmutableArrayItem, then the function ends up deciding to generate an ImmutableArrayItem in the
+     * first place.
+     */
+
+    public static abstract class ArrayGeneratingFunction extends SystemFunction implements Consumer<Ping> {
+
+        private double numberOfCalls = 0;
+        private double numberOfConversions = 0;
+        private double totalSize = 0;
+
+        /**
+         * Callback function, invoked when a SimpleArrayItem created by this function needs to be converted
+         * to an {@code ImmutableArrayItem}
+         * @param ping not used
+         */
+
+        @Override
+        public void accept(Ping ping) {
+            numberOfConversions++;
+        }
+
+        /**
+         * Get the estimated number of members in the array, based on past experience
+         * @return the average size of arrays previously created, plus a little margin for expansion
+         */
+
+        protected int expectedSize() {
+            return numberOfCalls < 10 ? 10 : (int)(totalSize / numberOfCalls * 1.05); // allow a little leeway
+        }
+
+        /**
+         * Construct an array, given a list of members
+         * @param members the members of the array
+         * @return the constructed array
+         */
+        protected ArrayItem makeArray(List<GroundedValue> members) {
+            if (numberOfConversions > Math.max(10, numberOfCalls * 0.5)) {
+                // More than half the calls result in the array being converted...
+                return new ImmutableArrayItem(members);
+            } else {
+                numberOfCalls++;
+                totalSize += members.size();
+                SimpleArrayItem result = new SimpleArrayItem(members);
+                result.requestNotification(this);
+                return result;
+            }
+        }
+    }
+
 
     /**
      * Implementation of the function array:append(array, item()*) =&gt; array
@@ -208,14 +262,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             ArrayItem array = (ArrayItem) arguments[0].head();
             assert array != null;
-            return append(array, arguments[1]);
-        }
-
-        public static ArrayItem append(ArrayItem array, Sequence member) throws XPathException {
-            List<GroundedValue> list = new ArrayList<>(1);
-            list.add(member.materialize());
-            SimpleArrayItem otherArray = new SimpleArrayItem(list);
-            return array.concat(otherArray);
+            return array.append(arguments[1].materialize());
         }
 
     }
@@ -223,20 +270,21 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     /**
      * Implementation of the function array:filter(array, function) =&gt; array
      */
-    public static class ArrayFilter extends SystemFunction {
+    public static class ArrayFilter extends ArrayGeneratingFunction {
 
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+
             ArrayItem array = (ArrayItem) arguments[0].head();
             assert array != null;
             Function fn = (Function) arguments[1].head();
-            List<GroundedValue> list = new ArrayList<>(1);
+            List<GroundedValue> list = new ArrayList<>(expectedSize());
             for (GroundedValue gv : array.members()) {
                 if (((BooleanValue) dynamicCall(fn, context, new Sequence[]{gv}).head()).getBooleanValue()) {
                     list.add(gv);
                 }
             }
-            return new SimpleArrayItem(list);
+            return makeArray(list);
         }
     }
 
@@ -307,18 +355,18 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     /**
      * Implementation of the function array:for-each(array, function) =&gt; array
      */
-    public static class ArrayForEach extends SystemFunction {
+    public static class ArrayForEach extends ArrayGeneratingFunction {
 
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             ArrayItem array = (ArrayItem) arguments[0].head();
             assert array != null;
             Function fn = (Function) arguments[1].head();
-            List<GroundedValue> list = new ArrayList<>(1);
+            List<GroundedValue> list = new ArrayList<>(expectedSize());
             for (GroundedValue gv : array.members()) {
                 list.add(dynamicCall(fn, context, new GroundedValue[]{gv}).materialize());
             }
-            return new SimpleArrayItem(list);
+            return makeArray(list);
         }
 
     }
@@ -326,7 +374,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     /**
      * Implementation of the function array:for-each-pair(array, array, function) =&gt; array
      */
-    public static class ArrayForEachPair extends SystemFunction {
+    public static class ArrayForEachPair extends ArrayGeneratingFunction {
 
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
@@ -335,12 +383,12 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             ArrayItem array2 = (ArrayItem) arguments[1].head();
             assert array2 != null;
             Function fn = (Function) arguments[2].head();
-            List<GroundedValue> list = new ArrayList<>(1);
+            List<GroundedValue> list = new ArrayList<>(expectedSize());
             int i;
             for (i=0; i < array1.arrayLength() && i < array2.arrayLength(); i++) {
                 list.add(dynamicCall(fn, context, new Sequence[]{array1.get(i), array2.get(i)}).materialize());
             }
-            return new SimpleArrayItem(list);
+            return makeArray(list);
         }
     }
 
@@ -433,16 +481,16 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     /**
      * Implementation of the proposed XP40 function array:of(parcel*) =&gt; array
      */
-    public static class ArrayOf extends SystemFunction {
+    public static class ArrayOf extends ArrayGeneratingFunction {
 
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-            List<GroundedValue> members = new ArrayList<>();
+            List<GroundedValue> members = new ArrayList<>(expectedSize());
             SequenceIterator parcels = arguments[0].iterate();
             for (Item parcel; (parcel = parcels.next()) != null;) {
                 members.add(UnparcelFn.unparcel(parcel, context));
             }
-            return new SimpleArrayItem(members);
+            return makeArray(members);
         }
 
     }
@@ -490,18 +538,18 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     /**
      * Implementation of the function array:reverse(array, xs:integer, xs:integer) =&gt; array
      */
-    public static class ArrayReverse extends SystemFunction {
+    public static class ArrayReverse extends ArrayGeneratingFunction {
 
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             ArrayItem array = (ArrayItem) arguments[0].head();
             assert array != null;
-            List<GroundedValue> list = new ArrayList<>(1);
+            List<GroundedValue> list = new ArrayList<>(array.arrayLength());
             int i;
             for (i=0; i < array.arrayLength(); i++) {
                 list.add(array.get(array.arrayLength()-i-1));
             }
-            return new SimpleArrayItem(list);
+            return makeArray(list);
         }
 
     }
@@ -599,10 +647,33 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
      * is used internally for the implementation of array{} and of the saxon:array extension
      */
 
-    public static class ArrayFromSequence extends FoldingFunction {
+    public static class ArrayFromSequence extends FoldingFunction implements Consumer<Ping> {
+
+        private double numberOfCalls = 0;
+        private double numberOfConversions = 0;
+
+        /**
+         * Callback function, invoked when a SimpleArrayItem created by this function needs to be converted
+         * to an {@code ImmutableArrayItem}
+         *
+         * @param ping not used
+         */
+
+        @Override
+        public void accept(Ping ping) {
+            numberOfConversions++;
+        }
+
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-            return SimpleArrayItem.makeSimpleArrayItem(arguments[0].iterate());
+            if (numberOfConversions > Math.max(10, numberOfCalls * 0.5)) {
+                return ImmutableArrayItem.from(arguments[0].iterate());
+            } else {
+                SimpleArrayItem result = SimpleArrayItem.makeSimpleArrayItem(arguments[0].iterate());
+                result.requestNotification(this);
+                numberOfCalls++;
+                return result;
+            }
         }
 
         /**
