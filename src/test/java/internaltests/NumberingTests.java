@@ -33,9 +33,9 @@ public class NumberingTests {
         Locale locale = new Locale(lang);
         Configuration icuConfig = new ProfessionalConfiguration();
         ICUNumbererPE icu = ICUNumbererPE.getNumberer(locale, "xxx", icuConfig);
-        Configuration heConfig = new Configuration();
-        heConfig.setLocalizerFactory(new JavaLocalizerFactory(heConfig));
-        Numberer he = heConfig.makeNumberer(lang, null);
+        ProfessionalConfiguration peConfig = new ProfessionalConfiguration();
+        peConfig.setLocalizerFactory(new JavaLocalizerFactory(peConfig));
+        Numberer he = peConfig.makeNumberer(lang, null);
         for (long i=0; i<=100; i++) {
              compareCardinal(i, icu, he);
         }
@@ -86,9 +86,15 @@ public class NumberingTests {
 
 
     @Test
-    public void testEnglish() {
+    public void testBritishEnglish() {
         testCardinal("en-GB");
         testOrdinal("en-GB", "%spellout-ordinal");
+    }
+
+    @Test
+    public void testAmericanEnglish() {
+        testCardinal("en-US");
+        testOrdinal("en-US", "%spellout-ordinal");
     }
 
     @Test
