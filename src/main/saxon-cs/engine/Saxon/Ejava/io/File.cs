@@ -291,5 +291,15 @@ namespace Saxon.Ejava.io {
         public override string ToString() {
             return fileName;
         }
+
+        public static SysUri CurrentDirectoryUri() {
+            string dir = Environment.CurrentDirectory;
+            dir = dir.Replace('\\', '/');
+            if (!dir.EndsWith('/')) {
+                dir = dir + "/";
+            }
+
+            return new SysUri(dir);
+        }
     }
 }
