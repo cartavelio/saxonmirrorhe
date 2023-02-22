@@ -21,6 +21,7 @@ import net.sf.saxon.lib.*;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.BuiltInType;
@@ -379,13 +380,23 @@ public class SaxonCAPI {
         return holder.get();
     }
 
-    @CEntryPoint(name = "setCatalogFile")
-    public static void setCatalog(IsolateThread thread, ObjectHandle processorRef, CCharPointer catalogFile) {
+
+    @CEntryPoint(name = "j_setCatalogFile", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_setCatalog(IsolateThread thread, ObjectHandle processorRef, CCharPointer catalogFile) {
         Processor processor = objectHandles.get(processorRef);
-        if (catalogFile == WordFactory.nullPointer()) {
-            return;
+        if (processor == null || catalogFile == WordFactory.nullPointer()) {
+            return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
         }
-        processor.setCatalogFiles(CTypeConversion.toJavaString(catalogFile));
+        //processor.setCatalogFiles(CTypeConversion.toJavaString(catalogFile));
+        ArrayList list = new ArrayList();
+        list.add(CTypeConversion.toJavaString(catalogFile));
+        Configuration config = processor.getUnderlyingConfiguration();
+        if (config.getResourceResolver() instanceof ConfigurableResourceResolver) {
+            CommandLineOptions.setCatalogFiles(((ConfigurableResourceResolver) config.getResourceResolver() ), list);
+        }  else {
+            return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
+        }
+        return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_OK;
     }
 
 

@@ -2189,7 +2189,7 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
     cout << endl << "Test: testCatalog" << endl;
     bool trace = false;
     proc->setcwd(cwd);
-    proc->setCatalog("../datax/catalog.xml");
+    proc->setCatalog("../data/catalog.xml");
     if (proc->exceptionOccurred()) {
         const char *message = proc->getErrorMessage();
         if(message != nullptr) {
@@ -2204,7 +2204,7 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
     XsltExecutable  * executable = trans->compileFromFile("../data/example.xsl");
 
     if(executable == nullptr) {
-
+       
         if (trans->exceptionOccurred()) {
 
             if(trans->getErrorMessage() != nullptr) {
@@ -2239,9 +2239,8 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
         sresult->failure++;
         sresult->failureList.push_back("testCatalog");
         if (executable->exceptionOccurred()) {
-
-                    if(executable->getErrorMessage() != nullptr) {
-                        const char *message = executable->getErrorMessage();
+                    const char * message = executable->getErrorMessage();
+                    if(message != nullptr) {
                         cerr << "exception message=" << message << endl;
                     }
         }
@@ -2460,7 +2459,7 @@ int main(int argc, char* argv[]) {
     int check =0;
     //cin>>check;
     SaxonProcessor *processor = new SaxonProcessor(true);
-    setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
+    //setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
 #if defined (__linux__)
     processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/lib/saxon-license.lic");
 #elif  defined (__APPLE__) && defined(__MACH__)
