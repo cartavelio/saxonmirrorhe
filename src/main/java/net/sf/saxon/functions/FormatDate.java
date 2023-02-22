@@ -815,6 +815,9 @@ public class FormatDate extends SystemFunction implements Callable {
         if (format.codePointAt(0) == 'N' || format.codePointAt(0) == 'n') {
             if (min <= 5) {
                 String tzname = NamedTimeZone.getTimeZoneNameForDate(value, country);
+                if (tzname == null) {
+                    return formatTimeZone(value, 'Z', BMPString.of("Z00:00t"), country).toString();
+                }
                 if (format.codePointAt(0) == 'n') {
                     tzname = tzname.toLowerCase();
                 }
