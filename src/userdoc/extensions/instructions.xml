@@ -138,6 +138,7 @@
           assignable by including the extra attribute <a class="bodylink code"
             href="/extensions/attributes/assignable">saxon:assignable</a> with value
             <code>yes</code>.</p>
+        
       </description>
       <details>
 
@@ -159,8 +160,9 @@
         of instructions in the stylesheet is then unpredictable.</p>
 
 
-        <p>If the <code>xsl:variable</code> element has an <code>as</code> attribute, then the value
-          is converted to the required type of the variable in the usual way.</p>
+        <p>The new value is converted to the declared type of the variable using
+          the function conversion rules. This may result in a type error if conversion
+          is not possible.</p>
 
         <p>The <code>saxon:assign</code> element itself does not allow an <code>as</code> attribute.
           Instead, it calculates the value of the variable as if <code>as="item()*"</code> were
