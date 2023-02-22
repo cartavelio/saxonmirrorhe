@@ -2,6 +2,9 @@ from setuptools import setup, Extension
 from Cython.Build import cythonize
 import shutil
 
+# This file is copied to build/pypi before running; internal
+# paths are relative to that location
+
 # read the long_description from a file.
 from pathlib import Path
 this_directory = Path(__file__).parent
@@ -14,58 +17,9 @@ from distutils.dir_util import copy_tree
 extra_link_args = []
 
 if system() == 'Darwin':
-    saxon_home = 'libs/darwin'
-    #extra_link_args.append('-Wl,-rpath,' + saxon_home)
+    extra_link_args.append('-Llibs/darwin')
 else:
-    saxon_home = 'libs/nix'
-    #extra_link_args.append('-Wl,-rpath,' + saxon_home)
-
-
-
-
-copy_tree(saxon_home, 'src/saxonc_home')
-copy_tree("../../graalvm", 'Saxon.C.API/graalvm')
-shutil.copyfile("../saxonc.pyx","python_saxon/saxonc.pyx")
-shutil.copyfile("../saxoncClasses.pxd","python_saxon/saxoncClasses.pxd")
-shutil.copyfile("../nodekind.py","python_saxon/nodekind.py")
-shutil.copyfile("../readme.txt","python_saxon/readme.txt")
-shutil.copyfile("../../SaxonProcessor.cpp", "Saxon.C.API/SaxonProcessor.cpp")
-shutil.copyfile("../../SaxonCGlue.c","Saxon.C.API/SaxonCGlue.c")
-shutil.copyfile("../../SaxonCProcessor.c","Saxon.C.API/SaxonCProcessor.c")
-shutil.copyfile("../../SaxonCXPath.c","Saxon.C.API/SaxonCXPath.c")
-shutil.copyfile("../../XdmValue.cpp","Saxon.C.API/XdmValue.cpp")
-shutil.copyfile("../../XdmItem.cpp","Saxon.C.API/XdmItem.cpp")
-shutil.copyfile("../../XdmNode.cpp","Saxon.C.API/XdmNode.cpp")
-shutil.copyfile("../../XdmAtomicValue.cpp","Saxon.C.API/XdmAtomicValue.cpp")
-shutil.copyfile("../../XdmFunctionItem.cpp","Saxon.C.API/XdmFunctionItem.cpp")
-shutil.copyfile("../../XdmMap.cpp","Saxon.C.API/XdmMap.cpp")
-shutil.copyfile("../../XdmArray.cpp","Saxon.C.API/XdmArray.cpp")
-shutil.copyfile("../../DocumentBuilder.cpp","Saxon.C.API/DocumentBuilder.cpp")
-shutil.copyfile("../../Xslt30Processor.cpp","Saxon.C.API/Xslt30Processor.cpp")
-shutil.copyfile("../../XsltExecutable.cpp","Saxon.C.API/XsltExecutable.cpp")
-shutil.copyfile("../../XQueryProcessor.cpp","Saxon.C.API/XQueryProcessor.cpp")
-shutil.copyfile("../../XPathProcessor.cpp","Saxon.C.API/XPathProcessor.cpp")
-shutil.copyfile("../../SchemaValidator.cpp","Saxon.C.API/SchemaValidator.cpp")
-shutil.copyfile("../../SaxonApiException.cpp","Saxon.C.API/SaxonApiException.cpp")
-
-shutil.copyfile("../../SaxonProcessor.h", "Saxon.C.API/SaxonProcessor.h")
-shutil.copyfile("../../SaxonCGlue.h","Saxon.C.API/SaxonCGlue.h")
-shutil.copyfile("../../SaxonCProcessor.h","Saxon.C.API/SaxonCProcessor.h")
-shutil.copyfile("../../SaxonCXPath.h","Saxon.C.API/SaxonCXPath.h")
-shutil.copyfile("../../XdmValue.h","Saxon.C.API/XdmValue.h")
-shutil.copyfile("../../XdmItem.h","Saxon.C.API/XdmItem.h")
-shutil.copyfile("../../XdmNode.h","Saxon.C.API/XdmNode.h")
-shutil.copyfile("../../XdmAtomicValue.h","Saxon.C.API/XdmAtomicValue.h")
-shutil.copyfile("../../XdmFunctionItem.h","Saxon.C.API/XdmFunctionItem.h")
-shutil.copyfile("../../XdmMap.h","Saxon.C.API/XdmMap.h")
-shutil.copyfile("../../XdmArray.h","Saxon.C.API/XdmArray.h")
-shutil.copyfile("../../DocumentBuilder.h","Saxon.C.API/DocumentBuilder.h")
-shutil.copyfile("../../Xslt30Processor.h","Saxon.C.API/Xslt30Processor.h")
-shutil.copyfile("../../XsltExecutable.h","Saxon.C.API/XsltExecutable.h")
-shutil.copyfile("../../XQueryProcessor.h","Saxon.C.API/XQueryProcessor.h")
-shutil.copyfile("../../XPathProcessor.h","Saxon.C.API/XPathProcessor.h")
-shutil.copyfile("../../SchemaValidator.h","Saxon.C.API/SchemaValidator.h")
-shutil.copyfile("../../SaxonApiException.h","Saxon.C.API/SaxonApiException.h")
+    extra_link_args.append('-Llibs/nix')
 
 # extented modules
 ext_modules = [Extension(
