@@ -1300,6 +1300,8 @@ public class Controller implements ContextOriginator {
     public NodeInfo makeSourceTree(Source source, int validationMode) throws XPathException {
         if (source instanceof NodeSource) {
             return ((NodeSource) source).getNode();
+        } else if (source instanceof TreeInfo) {
+            return ((TreeInfo)source).getRootNode();
         //#if CSHARP==false
         } else if (source instanceof NodeInfo) {
             return ((NodeInfo)source);
