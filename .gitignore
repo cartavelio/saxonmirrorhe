@@ -23,3 +23,6 @@ java_*.hprof
 /src/main/java/net/sf/saxon/lib/FeatureKeys.java
 /src/main/csharp/api/Saxon.Api/Feature.cs
 /src/main/csharp/api/Saxon.Api/FeatureKeys.cs
+
+# Binaries built by Rider and friends
+/src/samples/cs/bin/
