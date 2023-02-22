@@ -33,7 +33,7 @@ public:
     //! A constructor with a SaxonProcessor.
     /*!
      * The supplied processor should have license flag set to true for the Schema Validator to operate.
-     * @param SaxonProcessor
+     * @param proc - the SaxonProcessor
      * @param cwd - set the current working directory
     */
     SchemaValidator(SaxonProcessor* proc, std::string cwd="");
@@ -94,7 +94,7 @@ public:
 
      //!Set the source node for validation
     /**
-     * @param The source document supplied as an XdmNode, which will be used to validate against the schema using the validate methods.
+     * @param source - The source document supplied as an XdmNode, which will be used to validate against the schema using the validate methods.
     */
     void setSourceNode(XdmNode * source);
 
@@ -135,10 +135,10 @@ public:
     void setProperty(const char * name, const char * value);
 //! Clear parameter values set
     /**
+     * Default behaviour (false) is to leave XdmValues in memory.
+     * Individual pointers to XdmValue objects have to be deleted in the calling program.
      *
-     *  @param deleteValues.  Individual pointers to XdmValue objects have to be deleted in the calling program
-     * Default behaviour (false) is to leave XdmValues in memory
-     *  true then XdmValues are deleted
+     *  @param deleteValues - if true then XdmValues are deleted
      */
     void clearParameters(bool deleteValues=false);
 

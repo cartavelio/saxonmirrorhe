@@ -231,12 +231,12 @@ public:
      */
      std::map<std::string,std::string>& getProperties();
 
-    //!Clear parameter values set
-    /**
-     * Default behaviour (false) is to leave XdmValues in memory
-     *  true then XdmValues are deleted
-     *  @param deleteValues.  Individual pointers to XdmValue objects have to be deleted in the calling program
-     */
+    //!Clear parameter values set.
+        /**
+         * Default behaviour (false) is to leave XdmValues in memory.
+         * Individual pointers to XdmValue objects have to be deleted in the calling program.
+         * @param deleteValues - if true then XdmValues are deleted
+         */
     void clearParameters(bool deleteValues=false);
 
      //! Clear property values set
@@ -373,7 +373,6 @@ public:
     * called, then the parameters supplied are made available to the called template (no error
     * occurs if parameters are supplied that are not used).
     * @param templateName - the name of the initial template. This must match the name of a public named template in the stylesheet. If the value is nullptr, the clark name for xsl:initial-template is used.
-    * @param outputfile - The file name where results will be stored,
     */
     const char* callTemplateReturningString(const char* templateName=nullptr);
 

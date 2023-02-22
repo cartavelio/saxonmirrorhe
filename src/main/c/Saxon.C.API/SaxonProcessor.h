@@ -238,7 +238,7 @@ public:
      *
      * of a zero-length string (and potentially other strings, in future)
      *
-     * @param value the String value. NULL is taken as equivalent to "".
+     * @param str the String value. NULL is taken as equivalent to "".
      * @return the corresponding StringValue
      */
     XdmAtomicValue *makeStringValue(std::string str);
@@ -248,7 +248,7 @@ public:
      *
      * of a zero-length string (and potentially other strings, in future)
      *
-     * @param value the char pointer array. nullptr is taken as equivalent to "".
+     * @param str the char pointer array. nullptr is taken as equivalent to "".
      * @return the corresponding StringValue
      */
     XdmAtomicValue *makeStringValue(const char *str);
@@ -258,7 +258,7 @@ public:
      *
      * of a zero-length string (and potentially other strings, in future)
      *
-     * @param value the std:string
+     * @param str the std:string
      * @return the corresponding StringValue
      */
     static XdmAtomicValue *makeStringValue2(std::string str);
@@ -284,10 +284,10 @@ public:
     /*!
      *
      *
-     * @param f the value of the foat
+     * @param f the value of the float
      * @return a new XdmAtomicValue
      */
-    XdmAtomicValue *makeFloatValue(float);
+    XdmAtomicValue *makeFloatValue(float f);
 
     //! Factory method: makes either an Int64Value or a BigIntegerValue depending on the value supplied
     /*!
@@ -376,7 +376,7 @@ public:
     //! Make an XdmArray whose members are of type XdmValue
     /**
         *
-        * @param input the input array of XdmValue pointers
+        * @param values the input array of XdmValue pointers
         * @param length - the number of items in the array
         * @return an XdmArray whose members are XdmValue values corresponding one-to-one with the input
    */
@@ -428,16 +428,18 @@ public:
     //! Parse a source document file and return it as an XdmNode.
     /**
      *
-     @param validator.
-     @return an XdmNode
+     * @param source the filename of the source document
+     * @param validator
+     * @return an XdmNode
     */
     XdmNode *parseXmlFromFile(const char *source, SchemaValidator * validator = nullptr);
 
     //! Parse a source document available by URI and return it as an XdmNode.
     /**
      *
-     @param validator.
-     @return an XdmNode
+     * @param source
+     * @param validator
+     * @return an XdmNode
     */
     XdmNode *parseXmlFromUri(const char *source, SchemaValidator * validator = nullptr);
 
@@ -526,10 +528,11 @@ public:
 
 
     //! Set a configuration property specific to the processor in use.
-    /**
+    /*!
      *
      * Properties specified here are common across all the processors.
      * Example 'l':enable line number has the value 'on' or 'off'
+     *
      * @param name of the property
      * @param value of the property
      */

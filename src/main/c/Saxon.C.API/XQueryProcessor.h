@@ -31,7 +31,7 @@ public:
 
     //! Constructor with the SaxonProcessor supplied.
     /*!
-     * @param SaxonProcessor - Supplied pointer to the SaxonProcessor object
+     * @param p - Supplied pointer to the SaxonProcessor object
      * @param cwd - set the current working directory. Default is the empty string
     */
     XQueryProcessor(SaxonProcessor *p, std::string cwd="");
@@ -67,7 +67,7 @@ public:
 
     /**
      * Set a parameter value used in the query
-     *s
+     *
      * @param name  of the parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name"
      * @param value of the query parameter, or nullptr to clear a previously set value
      */
@@ -77,7 +77,7 @@ public:
     //! Remove a parameter (name, value) pair
     /**
      *
-     * @param name  of the parameter
+     * @param name - of the parameter
      * @return bool - outcome of the removal
      */
     bool removeParameter(const char * name);
@@ -93,13 +93,12 @@ public:
      */
     void setProperty(const char * name, const char * value);
 
-    //! Clear parameter values set
-    /**
-     *
-     *  @param deleteValues.  Individual pointers to XdmValue objects have to be deleted in the calling program
-     * Default behaviour (false) is to leave XdmValues in memory
-     *  true then XdmValues are deleted
-     */
+    //! Clear parameter values set.
+        /**
+         * Default behaviour (false) is to leave XdmValues in memory.
+         * Individual pointers to XdmValue objects have to be deleted in the calling program.
+         * @param deleteValues - if true then XdmValues are deleted
+         */
     void clearParameters(bool deleteValues=false);
 
     //! Clear property values set
@@ -130,7 +129,6 @@ public:
      //!Perform the Query to a XdmValue representation.
     /**
      * @param infilename - The file name of the source document
-     * @param ofilename - The file name of where result will be stored
      * @param query - The query as string representation
      * @return XdmValue - result of the the query as a XdmValue 
      */

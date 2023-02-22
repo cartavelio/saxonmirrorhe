@@ -73,6 +73,8 @@ public:
    */
    XdmItem * evaluateSingle(const char * xpathStr);
 
+    /** Set the context item
+    */
    void setContextItem(XdmItem * item);
 
     /**
@@ -195,11 +197,11 @@ public:
      std::map<std::string,std::string>& getProperties();
 
     /**
-     * Clear parameter values set
-     *  @param deleteValues.  Individual pointers to XdmValue objects have to be deleted in the calling program
-     * Default behaviour (false) is to leave XdmValues in memory
-     *  true then XdmValues are deleted
-     */
+          * Clear parameter values set.
+          * Default behaviour (false) is to leave XdmValues in memory.
+          * Individual pointers to XdmValue objects have to be deleted in the calling program.
+          * @param deleteValues - if true then XdmValues are deleted
+          */
     void clearParameters(bool deleteValues=false);
 
     /**
