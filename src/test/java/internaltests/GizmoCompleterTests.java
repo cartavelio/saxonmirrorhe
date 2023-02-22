@@ -11,6 +11,7 @@ import jaxptest.ConfigTest;
 import net.sf.saxon.gizmo.JLine2Talker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -161,6 +162,7 @@ public class GizmoCompleterTests {
         assertEquals(pos, "load ".length(), "e");
     }
 
+    @Tag("mikeonly")
     @Test
     public void testFileCompletion004() {
         String home = System.getProperty("user.home");

@@ -53,7 +53,7 @@ public class TestModuleURIResolver {
         @Override
         protected StreamSource resolveLocationHint(String baseURI, String locationHint) throws XPathException {
             if (locationHint.startsWith("http://ldueck.librarytest/")) {
-                String replace = locationHint.replace("http://ldueck.librarytest/", ConfigTest.DATA_DIR + "xq_modules_problem/");
+                String replace = locationHint.replace("http://ldueck.librarytest/", "file:///" + ConfigTest.DATA_DIR + "xq_modules_problem/");
                 System.out.println("Load from " + replace);
                 return super.resolveLocationHint(baseURI, replace);
             }
