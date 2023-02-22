@@ -100,7 +100,6 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
             return choose;
         }
         // In a Block expression, check whether adjacent text nodes can occur (used in test strmode089)
-        // Code deleted:
         if (getBaseExpression() instanceof Block) {
             Block block = (Block) getBaseExpression();
             Operand[] actions = block.getOperanda();
@@ -120,7 +119,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
                         maybeEmpty = true;
                     }
                 } else {
-                    maybetext = th.relationship(action.getItemType(), NodeKindTest.TEXT) != Affinity.DISJOINT;
+                    maybetext = action.getStaticUType(contextInfo.getContextItemUType()).overlaps(UType.TEXT);
                     maybeEmpty |= maybetext;
                 }
                 if (prevtext && maybetext) {
