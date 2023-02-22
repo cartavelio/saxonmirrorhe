@@ -455,7 +455,6 @@ public class PackageLoaderHE implements IPackageLoader {
                         break;
                     case "globalVariable":
                         cc = readGlobalVariable(grandchild);
-                        codeGen = true;
                         break;
                     case "globalParam":
                         cc = readGlobalParam(grandchild);
