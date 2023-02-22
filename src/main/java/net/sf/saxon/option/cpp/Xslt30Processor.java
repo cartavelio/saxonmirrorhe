@@ -148,6 +148,7 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException("Output filename is NULL");
         }
         Source source = resolveFileToSource(processor, cwd, CTypeConversion.toJavaString(xsl), ResourceRequest.XSLT_NATURE);
+        compiler.setErrorList(SaxonCException.errorList);
         XsltPackage pack = compiler.compilePackage(source);
         File file = resolveFile(processor, cwd, CTypeConversion.toJavaString(outFilename), ResourceRequest.XSLT_NATURE);
         pack.save(file);
@@ -191,7 +192,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param str      - File name of the stylsheet
      * @param filename - the file to which the compiled package should be saved
      */
-    @CEntryPoint(name = "j_compileFromStringAndSave", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    @CEntryPoint(name = "j_compileFromStringAndSave", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long compileFromStringAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cstr, CCharPointer cfilename) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
@@ -203,12 +204,11 @@ public class Xslt30Processor extends SaxonCAPI {
             cwd =   CTypeConversion.toJavaString(ccwd);
         }
         if (processor == null || str == null || filename == null) {
-            if (SaxonCAPI.debug) {
-                System.err.println("DEBUG: compileFromStringAndSave str is null");
-            }
-            return SaxonCAPI.STATUS_FAIL;
+            throw new SaxonApiException("Stylesheet string or output filename is null");
+
         }
         XsltCompiler compiler = processor.newXsltCompiler();
+        compiler.setErrorList(SaxonCException.errorList);
         XsltPackage pack = null;
         try {
             //StreamSource stream = new StreamSource(sr);
@@ -246,7 +246,7 @@ public class Xslt30Processor extends SaxonCAPI {
             SaxonApiException ex = new SaxonApiException("Failed to create Stylesheet from XdoNode");
             throw ex;
         }
-
+        compiler.setErrorList(SaxonCException.errorList);
         XsltPackage pack = compiler.compilePackage(node.asSource());
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
@@ -291,6 +291,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
             //compiler.setErrorListener(errorListener);
             compiler.setSchemaAware(xslt30Processor.schemaAware);
+            compiler.setErrorList(SaxonCException.errorList);
             executable = compiler.compile(compiler.getAssociatedStylesheet(source, null, null, null));
             ObjectHandle handle = SaxonCAPI.objectHandles.create(executable);
 
@@ -334,6 +335,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         //compiler.setErrorListener(errorListener);
         compiler.setSchemaAware(xslt30Processor.schemaAware);
+        compiler.setErrorList(SaxonCException.errorList);
         executable = compiler.compile(source);
         ObjectHandle handle = SaxonCAPI.objectHandles.create(executable);
 
@@ -383,7 +385,7 @@ public class Xslt30Processor extends SaxonCAPI {
             source.setSystemId(cwd);
 
         }
-
+        compiler.setErrorList(SaxonCException.errorList);
         XsltExecutable executable = compiler.compile(source);
         ObjectHandle handle = SaxonCAPI.objectHandles.create(executable);
 
@@ -420,6 +422,7 @@ public class Xslt30Processor extends SaxonCAPI {
         /* if (packagesToLoad.size() > 0) {
             compilePackages(compiler);
         }  */
+        compiler.setErrorList(SaxonCException.errorList);
         XsltExecutable executable = compiler.compile(node.asSource());
         ObjectHandle handle = SaxonCAPI.objectHandles.create(executable);
 
@@ -545,7 +548,16 @@ public class Xslt30Processor extends SaxonCAPI {
         } else {
             xdmResult = new XdmDestination();
         }
-        Object sourceObj = objectHandles.get(sourceObjRef);
+        if(sourceObjRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Source Object is NULL");
+        }
+        Object sourceObji = objectHandles.get(sourceObjRef);
+        Object sourceObj = null;
+        if(sourceObji instanceof ProcessorDataAccumulator) {
+             sourceObj = ((ProcessorDataAccumulator)sourceObji).getValues();
+        }  else {
+            sourceObj = sourceObji;
+        }
         if (sourceObj instanceof String) {
             Source source = resolveFileToSource(processor, cwd, (String) sourceObj, ResourceRequest.XML_NATURE);
             if (paramsMap.containsKey("dtd")) {
@@ -562,19 +574,17 @@ public class Xslt30Processor extends SaxonCAPI {
             XdmValue selection = (XdmValue) sourceObj;
 
             transformer.applyTemplates(selection, xdmResult);
-        } else if (sourceObj instanceof XdmItem[]) {
-            XdmItem[] itemArr = (XdmItem[]) sourceObj;
-            XdmValue valueSeq;
-            if (itemArr.length == 0) {
-                throw new SaxonApiException("Source object is an empty array of XdmItems");
-
-            } else if (itemArr.length == 1) {
-                valueSeq = itemArr[0];
-            } else {
-                List<XdmItem> itemList = Arrays.asList((XdmItem[]) sourceObj);
-                valueSeq = new XdmValue(itemList);
+        } else if (sourceObj instanceof Object[]) {
+            Object [] valueObj = (Object[]) sourceObj;
+            if (valueObj.length == 0) {
+                throw new SaxonApiException("Source object found is an empty array");
             }
-
+            List<XdmItem> itemList = new ArrayList<>(valueObj.length);
+            for(int i=0; i < valueObj.length; i++) {
+                 itemList.add((XdmItem) valueObj[i]);
+            }
+            XdmValue valueSeq;
+            valueSeq = new XdmValue(itemList);
             transformer.applyTemplates(valueSeq, xdmResult);
         } else {
             throw new SaxonApiException("Source object is neither a String value or an XdmValue object");
@@ -654,11 +664,16 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException(ex);
 
         }
-        Object sourceObj = null;
         if(sourceObjRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("Source object is null");
         }
-        sourceObj = objectHandles.get(sourceObjRef);
+        Object sourceObji = objectHandles.get(sourceObjRef);
+        Object sourceObj = null;
+        if(sourceObji instanceof ProcessorDataAccumulator) {
+             sourceObj = ((ProcessorDataAccumulator)sourceObji).getValues();
+        }  else {
+            sourceObj = sourceObji;
+        }
         if (sourceObj instanceof String) {
 
             Source source = resolveFileToSource(processor, cwd, (String) sourceObj, ResourceRequest.XML_NATURE);
@@ -674,19 +689,17 @@ public class Xslt30Processor extends SaxonCAPI {
         } else if (sourceObj instanceof XdmValue) {
             XdmValue selection = (XdmValue) sourceObj;
             transformer.applyTemplates(selection, serializer);
-        } else if (sourceObj instanceof XdmItem[]) {
-            XdmItem[] itemArr = (XdmItem[]) sourceObj;
-            XdmValue valueSeq;
-            if (itemArr.length == 0) {
-                throw new SaxonApiException("Source object is an empty array of XdmItem objects");
-
-            } else if (itemArr.length == 1) {
-                valueSeq = itemArr[0];
-            } else {
-                List<XdmItem> itemList = Arrays.asList((XdmItem[]) sourceObj);
-                valueSeq = new XdmValue(itemList);
+        } else if (sourceObj instanceof Object[]) {
+            Object [] valueObj = (Object[]) sourceObj;
+            if (valueObj.length == 0) {
+                throw new SaxonApiException("Source object found is an empty array");
             }
-
+            List<XdmItem> itemList = new ArrayList<>(valueObj.length);
+            for(int i=0; i < valueObj.length; i++) {
+                 itemList.add((XdmItem) valueObj[i]);
+            }
+            XdmValue valueSeq;
+            valueSeq = new XdmValue(itemList);
             transformer.applyTemplates(valueSeq, serializer);
         } else {
             throw new SaxonApiException("Source object is not of type (String, XdmValue or XdmValue[])");
@@ -702,9 +715,12 @@ public class Xslt30Processor extends SaxonCAPI {
             cwd = CTypeConversion.toJavaString(ccwd);
         }
         XsltExecutable executable = objectHandles.get(executableRef);
+        Object sourceObji = objectHandles.get(sourceObjRef);
         Object sourceObj = null;
-        if(sourceObjRef != WordFactory.nullPointer()) {
-            sourceObj = objectHandles.get(sourceObjRef);
+        if(sourceObji instanceof ProcessorDataAccumulator) {
+             sourceObj = ((ProcessorDataAccumulator)sourceObji).getValues();
+        }  else {
+            sourceObj = sourceObji;
         }
 
         Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
@@ -742,19 +758,17 @@ public class Xslt30Processor extends SaxonCAPI {
         } else if (sourceObj instanceof XdmValue) {
             XdmValue selection = (XdmValue) sourceObj;
             transformer.applyTemplates(selection, serializer);
-        } else if (sourceObj instanceof XdmItem[]) {
-            XdmItem[] itemArr = (XdmItem[]) sourceObj;
-            XdmValue valueSeq;
-            if (itemArr.length == 0) {
-                throw new SaxonApiException("Source object is an empty array of XdmItem objects");
-
-            } else if (itemArr.length == 1) {
-                valueSeq = itemArr[0];
-            } else {
-                List<XdmItem> itemList = Arrays.asList((XdmItem[]) sourceObj);
-                valueSeq = new XdmValue(itemList);
+        } else if (sourceObj instanceof Object[]) {
+            Object [] valueObj = (Object[]) sourceObj;
+            if (valueObj.length == 0) {
+                throw new SaxonApiException("Source object found is an empty array");
             }
-
+            List<XdmItem> itemList = new ArrayList<>(valueObj.length);
+            for(int i=0; i < valueObj.length; i++) {
+                 itemList.add((XdmItem) valueObj[i]);
+            }
+            XdmValue valueSeq;
+            valueSeq = new XdmValue(itemList);
             transformer.applyTemplates(valueSeq, serializer);
         } else {
             throw new SaxonApiException("Source object is not of type (String, XdmValue or XdmValue[])");

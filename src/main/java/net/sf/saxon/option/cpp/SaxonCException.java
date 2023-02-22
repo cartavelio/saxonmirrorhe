@@ -8,6 +8,7 @@
 package net.sf.saxon.option.cpp;
 
 import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.XmlProcessingError;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.ObjectHandles;
@@ -17,12 +18,16 @@ import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.WordFactory;
 import com.oracle.svm.core.annotate.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * * This class is to use with Saxon on C++
  */
 public class SaxonCException  {
 
     public static Throwable throwable = null;
+    public static List<? super XmlProcessingError> errorList = new ArrayList<>();
     
     @Uninterruptible(reason = "exception handler")
     public SaxonCException(Throwable e) {
@@ -50,6 +55,32 @@ public class SaxonCException  {
         CCharPointer a = SaxonCAPI.stringToNative2(alloc, exception.getMessage());
         return a;
     }
+
+
+
+    @CEntryPoint(name = "j_getCombinedStaticErrorMessages")
+    public static CCharPointer j_getCombinedStaticErrorMessages(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
+
+        if(errorList.isEmpty()) {
+            return WordFactory.nullPointer();
+        }
+
+        String message = new String();
+
+
+
+        for(Object item : errorList) {
+            System.err.println("Java DEBUG j_getCombinedStaticErrorMessages message: "+((XmlProcessingError)item).getMessage());
+            message+=(((XmlProcessingError)item).getMessage() + "\n");
+            System.err.println("Java DEBUG j_getCombinedStaticErrorMessages message-1: "+message);
+        }
+
+
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, message);
+        return a;
+    }
+
+
 
     @CEntryPoint(name = "j_getLineNumber")
     public static int getLinenumber(IsolateThread thread){
@@ -105,6 +136,7 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_clearException")
     public static void clearException(IsolateThread thread) {
+        errorList.clear();
         throwable = null;
     }
 
@@ -113,6 +145,13 @@ public class SaxonCException  {
     @CEntryPoint(name = "j_checkForException")
     public static byte checkForException(IsolateThread thread) {
         return CTypeConversion.toCBoolean(throwable != null);
+    }
+
+
+
+    @CEntryPoint(name = "j_staticErrorCount")
+    public static int staticErrorCount(IsolateThread thread) {
+        return errorList.size();
     }
 
 

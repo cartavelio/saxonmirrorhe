@@ -60,6 +60,8 @@ typedef char* (*j_getStringValue_fn_t)(graal_isolatethread_t*, void *);
 
 typedef char* (*j_getErrorMessage_fn_t)(graal_isolatethread_t*, void *);
 
+typedef char* (*j_getCombinedStaticErrorMessages_fn_t)(graal_isolatethread_t*, void *);
+
 typedef int (*j_getLineNumber_fn_t)(graal_isolatethread_t*);
 
 typedef char* (*j_getErrorCode_fn_t)(graal_isolatethread_t*, void *);
@@ -69,6 +71,8 @@ typedef char* (*j_getSystemId_fn_t)(graal_isolatethread_t*, void *);
 typedef void (*j_clearException_fn_t)(graal_isolatethread_t*);
 
 typedef char (*j_checkForException_fn_t)(graal_isolatethread_t*);
+
+typedef int (*j_staticErrorCount_fn_t)(graal_isolatethread_t*);
 
 typedef long long int (*createSaxonCMessageListener_fn_t)(graal_isolatethread_t*, void *, char*, char*);
 
@@ -153,6 +157,8 @@ typedef char* (*j_getLocalName_fn_t)(graal_isolatethread_t*, void *);
 typedef char* (*j_getNodeName_fn_t)(graal_isolatethread_t*, void *);
 
 typedef char* (*xdmValueArrayToString_fn_t)(graal_isolatethread_t*, void *, void *);
+
+typedef char* (*j_xdmItemToString_fn_t)(graal_isolatethread_t*, void *, void *);
 
 typedef char* (*j_getAttributeValue_fn_t)(graal_isolatethread_t*, void *, char*);
 

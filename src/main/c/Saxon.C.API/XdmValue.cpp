@@ -20,7 +20,6 @@ XdmValue::XdmValue(const XdmValue &other) {
 	jValues = other.jValues;
 	toStringValue = other.toStringValue;
 	values.resize(0);//TODO memory issue might occur here
-	toStringValue = other.toStringValue;
 	for (int i = 0; i < xdmSize; i++) {
 		addXdmItem(other.values[i]);
 	}
@@ -28,21 +27,25 @@ XdmValue::XdmValue(const XdmValue &other) {
 }
 
 const char * XdmValue::toString() {
-
-    if(size() == 0) {
+    int count = size();
+    if(count == 0) {
         return nullptr;
     }
-    if (toStringValue.empty()) {
-        if (jValues == -1) {
-            jValues = getUnderlyingValue();
-
-        }
+    if (toStringValue == nullptr) {
         allocFn fn = operator new;
-       char * resulti = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread, (void *)fn,(void *)jValues);
-        toStringValue = resulti;
+        if(count == 1) {
+            toStringValue = xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *) fn, (void *) (values[0]->getUnderlyingValue()));
+        } else {
+            if (jValues == -1) {
+                jValues = getUnderlyingValue();
+
+            }
+
+            toStringValue = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread, (void *) fn, (void *) jValues);
+        }
 
     }
-    return toStringValue.c_str();
+    return toStringValue;
 
 
 
@@ -143,8 +146,8 @@ XdmValue::~XdmValue() {
 	jValues = -1;
 	xdmSize = 0;
 
-    if(!toStringValue.empty()) {
-        toStringValue.clear();
+    if(toStringValue != nullptr) {
+        toStringValue = nullptr;
     }
 
 }
@@ -156,6 +159,10 @@ void XdmValue::addXdmItem(XdmItem* val) {
 		xdmSize++;
         if (jValues) {
             jValues = -1;
+        }
+        if(toStringValue != nullptr) {
+            delete toStringValue;
+            toStringValue = nullptr;
         }
 
 	}

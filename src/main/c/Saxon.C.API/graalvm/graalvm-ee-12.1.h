@@ -60,6 +60,8 @@ char* j_getStringValue(graal_isolatethread_t*, void *);
 
 char* j_getErrorMessage(graal_isolatethread_t*, void *);
 
+char* j_getCombinedStaticErrorMessages(graal_isolatethread_t*, void *);
+
 int j_getLineNumber(graal_isolatethread_t*);
 
 char* j_getErrorCode(graal_isolatethread_t*, void *);
@@ -69,6 +71,8 @@ char* j_getSystemId(graal_isolatethread_t*, void *);
 void j_clearException(graal_isolatethread_t*);
 
 char j_checkForException(graal_isolatethread_t*);
+
+int j_staticErrorCount(graal_isolatethread_t*);
 
 long long int createSaxonCMessageListener(graal_isolatethread_t*, void *, char*, char*);
 
@@ -153,6 +157,8 @@ char* j_getLocalName(graal_isolatethread_t*, void *);
 char* j_getNodeName(graal_isolatethread_t*, void *);
 
 char* xdmValueArrayToString(graal_isolatethread_t*, void *, void *);
+
+char* j_xdmItemToString(graal_isolatethread_t*, void *, void *);
 
 char* j_getAttributeValue(graal_isolatethread_t*, void *, char*);
 
