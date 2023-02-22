@@ -1,0 +1,130 @@
+package jaxptest;
+
+import junit.framework.TestCase;
+import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.StandardURIResolver;
+import net.sf.saxon.trans.XPathException;
+
+import javax.xml.transform.*;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+
+/**
+ * JUnit tests for the JAXP Transformation API (trax).
+ * Adapted by converting the TraxExamples file
+ * originally created by Scott Boag, but much evolved since.
+ */
+public class URIResolverTest extends TestCase {
+
+    private static final String d = ConfigTest.DATA_DIR + "trax/";
+
+    private static final String foo_xml = d + "xml/foo.xml";
+    private static final String foo_xsl = d + "xsl/foo.xsl";
+
+    public void testGetURIResolver() {
+
+        try {
+
+            // Create a transform factory instance.
+            TransformerFactory tfactory = TransformerFactory.newInstance();
+            tfactory.setAttribute(FeatureKeys.OPTIMIZATION_LEVEL, "-j"); // Disable JIT compilation
+            Resolver1 phoo = new Resolver1("phoo");
+            tfactory.setURIResolver(phoo);
+            assertTrue(tfactory.getURIResolver() == phoo);
+
+            Templates foo1Templates = tfactory.newTemplates(new StreamSource(foo_xsl));
+            assertTrue(phoo.history.contains("inc1/inc1.xsl"));
+            assertTrue(phoo.history.contains("inc2/inc2.xsl"));
+
+            Transformer foo1Transformer = foo1Templates.newTransformer();
+            assertTrue(foo1Transformer.getURIResolver() == phoo);
+
+            Resolver1 phut = new Resolver1("phut");
+            phut.map("inc1/inc1.xsl", "identity.xsl");
+            tfactory.setURIResolver(phut);
+            assertTrue(tfactory.getURIResolver() == phut);
+
+            Resolver1 phum = new Resolver1("phum");
+            foo1Transformer.setURIResolver(phum);
+            assertTrue(foo1Transformer.getURIResolver() == phum);
+            assertTrue(tfactory.getURIResolver() == phut);
+
+            foo1Transformer.setURIResolver(null);
+            assertTrue(foo1Transformer.getURIResolver() == null);
+            assertTrue(tfactory.getURIResolver() == phut);
+
+            Templates foo2Templates;
+            try {
+                foo2Templates = tfactory.newTemplates(new StreamSource(foo_xsl));
+                fail("Should have failed");
+            } catch (TransformerException err) {
+                // expected failure
+            }
+            assertTrue(phut.history.contains("inc1/inc1.xsl"));
+            assertFalse(phut.history.contains("inc2/inc2.xsl"));
+
+            String whimsy = "<xsl:transform version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                    "<xsl:template match='/'><xsl:copy-of select=\"doc('mimsy.xml')\"/></xsl:template>" +
+                    "</xsl:transform>";
+            Templates foo3Templates = tfactory.newTemplates(
+                    new StreamSource(new StringReader(whimsy), new StreamSource(foo_xsl).getSystemId()));
+            Resolver1 whimsical = new Resolver1("whim");
+            whimsical.map("mimsy.xml", "../xml/baz.xml");
+            tfactory.setURIResolver(whimsical);
+            Transformer transformer3 = foo3Templates.newTransformer();
+            StringWriter sw3 = new StringWriter();
+            transformer3.transform(new StreamSource(foo_xml), new StreamResult(sw3));
+            assertTrue(sw3.toString().contains("<foo:document"));
+
+            tfactory.setURIResolver(new StandardURIResolver());
+            Templates foo4Templates = tfactory.newTemplates(
+                    new StreamSource(new StringReader(whimsy), new StreamSource(foo_xsl).getSystemId()));
+            whimsical.map("mimsy.xml", "../xml/cities.xml");
+            Transformer transformer4 = foo4Templates.newTransformer();
+            transformer4.setURIResolver(whimsical);
+            StringWriter sw4 = new StringWriter();
+            transformer4.transform(new StreamSource(foo_xml), new StreamResult(sw4));
+            assertTrue(sw4.toString().contains("<cities"));
+            assertTrue(whimsical.history.contains("mimsy.xml"));
+
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
+    }
+
+
+    private static class Resolver1 extends StandardURIResolver {
+
+        public String name;
+        public Set<String> history = new HashSet<String>();
+        public Map<String, String> mappings = new HashMap<String, String>();
+
+        public Resolver1(String nameOfFoo) {
+            this.name = nameOfFoo;
+        }
+
+        public void map(String from, String to) {
+            mappings.put(from, to);
+        }
+
+        @Override
+        public Source resolve(String href, String base) throws XPathException {
+            history.add(href);
+            for (Map.Entry<String, String> entry : mappings.entrySet()) {
+                href = href.replace(entry.getKey(), entry.getValue());
+            }
+            return super.resolve(href, base);
+        }
+    }
+
+
+}

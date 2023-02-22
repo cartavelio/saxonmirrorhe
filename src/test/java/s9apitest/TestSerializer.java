@@ -1,0 +1,414 @@
+package s9apitest;
+
+import com.saxonica.config.ProfessionalTransformerFactory;
+import jaxptest.ConfigTest;
+import junit.framework.TestCase;
+import net.sf.saxon.TransformerFactoryImpl;
+import net.sf.saxon.jaxp.TransformerImpl;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.OutputURIResolver;
+import net.sf.saxon.s9api.*;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
+
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.*;
+
+import static net.sf.saxon.s9api.streams.Steps.child;
+
+/**
+ * JUnit tests for the s9api XQueryCompiler
+ */
+public class TestSerializer extends TestCase {
+
+    public void testXQuerySerialization() {
+        try {
+            Processor proc = new Processor(false);
+            StringReader sr = new StringReader("<doc><e>text</e></doc>");
+            SAXSource source = new SAXSource(new InputSource(sr));
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode node = builder.build(source);
+            XQueryCompiler xqcomp = proc.newXQueryCompiler();
+            XQueryExecutable xqexec = xqcomp.compile("declare option saxon:output 'cdata-section-elements=e';.");
+            XQueryEvaluator xqeval = xqexec.load();
+            xqeval.setContextItem(node);
+
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            Serializer serializer = proc.newSerializer(os);
+
+            serializer.setOutputProperty(Serializer.Property.BYTE_ORDER_MARK, "no");
+            serializer.setOutputProperty(Serializer.Property.ENCODING, "utf-8");
+            serializer.setOutputProperty(Serializer.Property.INDENT, "no");
+            serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+
+            xqeval.setDestination(serializer);
+            xqeval.run();
+
+            String result = os.toString();
+            assertFalse("XML declaration exists", result.contains("<?xml"));
+            assertTrue("Indented", result.contains("doc><e"));
+            assertTrue("Cdata section", result.contains("<e><![CDATA"));
+
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testXsltSerialization() {
+        try {
+            Processor proc = new Processor(false);
+            StringReader sr = new StringReader("<doc><e>text</e></doc>");
+            SAXSource source = new SAXSource(new InputSource(sr));
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode node = builder.build(source);
+            XsltCompiler xqcomp = proc.newXsltCompiler();
+            sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                                          "<xsl:output indent='yes' cdata-section-elements='e'/>" +
+                                          "<xsl:template match='/'><xsl:copy-of select='.'/></xsl:template>" +
+                                          "</xsl:stylesheet>");
+            SAXSource style = new SAXSource(new InputSource(sr));
+            XsltTransformer trans = xqcomp.compile(style).load();
+
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            Serializer serializer = proc.newSerializer(os);
+
+            serializer.setOutputProperty(Serializer.Property.BYTE_ORDER_MARK, "no");
+            serializer.setOutputProperty(Serializer.Property.ENCODING, "utf-8");
+            serializer.setOutputProperty(Serializer.Property.INDENT, "no");
+            serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+
+            trans.setSource(node.asSource());
+            trans.setDestination(serializer);
+            trans.transform();
+
+            String result = os.toString();
+            assertFalse("XML declaration exists", result.contains("<?xml"));
+            assertTrue("Indented", result.contains("doc><e"));
+            assertTrue("Cdata section", result.contains("<e><![CDATA"));
+
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testXsltCharacterMaps() {
+        try {
+            Processor proc = new Processor(false);
+            StringReader sr = new StringReader("<doc><e>text</e></doc>");
+            SAXSource source = new SAXSource(new InputSource(sr));
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode node = builder.build(source);
+            XsltCompiler xqcomp = proc.newXsltCompiler();
+            sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                                          "<xsl:output method='xml' use-character-maps='m'/>" +
+                                          "<xsl:character-map name='m'><xsl:output-character character='e' string='f'/></xsl:character-map>" +
+                                          "<xsl:template match='/'><xsl:copy-of select='.'/></xsl:template>" +
+                                          "</xsl:stylesheet>");
+            SAXSource style = new SAXSource(new InputSource(sr));
+            XsltTransformer trans = xqcomp.compile(style).load();
+
+            Serializer serializer = proc.newSerializer();
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            serializer.setOutputStream(os);
+
+            trans.setSource(node.asSource());
+            trans.setDestination(serializer);
+            trans.transform();
+
+            String result = os.toString();
+            assertTrue("Charmapped", result.contains("tfxt"));
+
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testSecondaryOutputDestination() {
+        try {
+            new File(ConfigTest.DATA_DIR + "temp/first.xml").delete();
+            new File(ConfigTest.DATA_DIR + "temp/second.xml").delete();
+            Processor proc = new Processor(false);
+            proc.setConfigurationProperty(Feature.TIMING, true);
+            StringReader sr = new StringReader("<doc><e>text</e></doc>");
+            SAXSource source = new SAXSource(new InputSource(sr));
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode node = builder.build(source);
+            XsltCompiler xqcomp = proc.newXsltCompiler();
+            sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                                          "<xsl:output method='xml'/>" +
+                                          "<xsl:template match='/'>" +
+                                          "  <xsl:copy-of select='.'/>" +
+                                          "  <xsl:result-document href='second.xml'><xsl:copy-of select='.'/></xsl:result-document>" +
+                                          "</xsl:template>" +
+                                          "</xsl:stylesheet>");
+            SAXSource style = new SAXSource(new InputSource(sr));
+            XsltTransformer trans = xqcomp.compile(style).load();
+
+            Serializer serializer = proc.newSerializer();
+            serializer.setOutputFile(new File(ConfigTest.DATA_DIR + "temp/first.xml"));
+            trans.setSource(node.asSource());
+            trans.setDestination(serializer);
+            trans.transform();
+
+            assertTrue("first exists", new File(ConfigTest.DATA_DIR + "temp/first.xml").exists());
+            assertTrue("second exists", new File(ConfigTest.DATA_DIR + "temp/second.xml").exists());
+
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public static void testWriteXdmValue() {
+        try {
+            Processor proc = new Processor(false);
+            StringReader sr = new StringReader("<doc><e>text</e></doc>");
+            SAXSource source = new SAXSource(new InputSource(sr));
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode node = builder.build(source);
+            proc.writeXdmValue(node, new XdmDestination());
+        } catch (SaxonApiException err) {
+            fail(err.getMessage());
+        }
+    }
+
+    public void testS9apiImport() throws Exception {
+        // tests use of dynamic serialization properties chosen by xsl:result-document
+        try {
+            final Processor processor = new Processor(true);
+
+            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+
+            StreamSource xsltSource = new StreamSource(ConfigTest.DATA_DIR + "welch-ser/A.xsl");
+
+            XsltExecutable xsltExecutable = xsltCompiler.compile(xsltSource);
+            XsltTransformer xsltTransformer = xsltExecutable.load();
+            xsltTransformer.setInitialTemplate(new QName("main"));
+
+            StringWriter sw = new StringWriter();
+            Serializer serializer = processor.newSerializer();
+            serializer.setOutputWriter(sw);
+            xsltTransformer.setDestination(serializer);
+            xsltTransformer.setResultDocumentHandler(uri -> serializer);
+
+            xsltTransformer.transform();
+            assertTrue(sw.toString().contains("<foo>bar</foo>")); // proving that method="xml" was used
+        } catch (SaxonApiException e) {
+            fail();
+            e.printStackTrace();
+        }
+    }
+
+//    public void testCaptureOfSerializationProperties() throws Exception {
+//        // attempt to capture the serialization properties defined in the stylesheet
+//        // by subclassing Serializer
+//        try {
+//            final Processor processor = new Processor(true);
+//
+//            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+//
+//            StreamSource xsltSource = new StreamSource(ConfigTest.DATA_DIR + "welch-ser/A.xsl");
+//
+//            XsltExecutable xsltExecutable = xsltCompiler.compile(xsltSource);
+//            XsltTransformer xsltTransformer = xsltExecutable.load();
+//            xsltTransformer.setInitialTemplate(new QName("main"));
+//
+//            Serializer seriar
+//
+//            StringWriter sw = new StringWriter();
+//            Serializer serializer = processor.newSerializer();
+//            serializer.setOutputWriter(sw);
+//            xsltTransformer.setDestination(serializer);
+//            xsltTransformer.setResultDocumentHandler(uri -> serializer);
+//
+//            xsltTransformer.transform();
+//            assertTrue(sw.toString().contains("<foo>bar</foo>")); // proving that method="xml" was used
+//        } catch (SaxonApiException e) {
+//            fail();
+//            e.printStackTrace();
+//        }
+//    }
+
+
+    public void testJaxpImport() throws Exception {
+        try {
+            // same test as above but with JAXP interface
+            TransformerFactory factory = new net.sf.saxon.TransformerFactoryImpl();
+            StringWriter sw = new StringWriter();
+            factory.setAttribute(FeatureKeys.OUTPUT_URI_RESOLVER, new OutputURIResolver() {
+                @Override
+                public OutputURIResolver newInstance() {
+                    return this;
+                }
+
+                @Override
+                public Result resolve(String href, String base) throws TransformerException {
+                    return new StreamResult(sw);
+                }
+
+                @Override
+                public void close(Result result) throws TransformerException {
+                    // no action
+                }
+            } );
+            Transformer transformer = factory.newTransformer(new StreamSource(ConfigTest.DATA_DIR + "welch-ser/A.xsl"));
+
+            ((TransformerImpl) transformer).setInitialTemplate("main");
+
+            transformer.transform(null, new StreamResult(sw));
+            assertTrue(sw.toString().contains("<foo>bar</foo>")); // proving that method="xml" was used
+        } catch (TransformerException e) {
+            fail();
+            e.printStackTrace();
+        }
+    }
+
+    public void testAsSaxContentHandler() throws Exception {
+        try {
+
+            Processor proc = new Processor(false);
+            StringReader sr = new StringReader("<doc><e>text</e></doc>");
+
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            factory.setValidating(false);
+            XMLReader reader = factory.newSAXParser().getXMLReader();
+
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            Serializer serializer = proc.newSerializer(os);
+            serializer.setOutputProperty(Serializer.Property.BYTE_ORDER_MARK, "no");
+            serializer.setOutputProperty(Serializer.Property.ENCODING, "utf-8");
+            serializer.setOutputProperty(Serializer.Property.INDENT, "no");
+            serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+            serializer.setOutputProperty(Serializer.Property.CDATA_SECTION_ELEMENTS, "e");
+
+            ContentHandler ch = serializer.getContentHandler();
+            reader.setContentHandler(ch);
+            reader.parse(new InputSource(sr));
+
+            String result = os.toString();
+            assertFalse("XML declaration exists", result.contains("<?xml"));
+            assertTrue("Indented", result.contains("doc><e"));
+            assertTrue("Cdata section", result.contains("<e><![CDATA"));
+
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void test3631() {
+        try {
+            String dir = ConfigTest.DATA_DIR + "nadolu3631/";
+            String sourceID = dir + "test.xml";
+            String xslID = dir + "main.xsl";
+
+            // Create a transform factory instance.
+            TransformerFactoryImpl tfactory = new ProfessionalTransformerFactory();
+
+            // Create a transformer for the stylesheet.
+            Transformer transformer = tfactory.newTransformer(new StreamSource(xslID));
+
+            // Obtain the encoding
+            String transformerEncoding = transformer.getOutputProperty("encoding");
+
+            // Transform the source XML.
+            StringWriter writer = new StringWriter();
+            transformer.transform(new StreamSource(sourceID), new StreamResult(writer));
+            String out = writer.toString();
+            assertTrue(out.contains("<second_processing>"));
+        } catch (TransformerException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    public void testIndentation() {
+        try {
+            String in = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                    + "<root>\n"
+                    + "    <parent>\n"
+                    + "        <foo>\n"
+                    + "            <bar>foo</bar>\n"
+                    + "        </foo>        \n"
+                    + "    </parent>\n"
+                    + "</root>";
+            Processor proc = new Processor(false);
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            //builder.setWhitespaceStrippingPolicy(WhitespaceStrippingPolicy.ALL);
+            XdmNode doc = builder.build(new StreamSource(new StringReader(in)));
+            StringWriter sw = new StringWriter();
+            Serializer serializer = proc.newSerializer(sw);
+            serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+            serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+            XdmNode foo = doc.axisIterator(Axis.DESCENDANT, new QName("foo")).next();
+            serializer.serializeNode(foo);
+            System.err.println(sw);
+        } catch (SaxonApiException err) {
+            fail();
+        }
+    }
+
+    public void testElementToString() {
+        try {
+            String in = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                    + "<root><parent><foo>\n"
+                    + "            <bar>foo</bar>\n"
+                    + "</foo></parent></root>";
+            Processor proc = new Processor(false);
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            builder.setWhitespaceStrippingPolicy(WhitespaceStrippingPolicy.ALL);
+            XdmNode doc = builder.build(new StreamSource(new StringReader(in)));
+            XdmNode root = doc.select(child("root")).asNode();
+            String out = root.toString();
+            System.err.println(out);
+            assertTrue("noFinalNewline", out.endsWith("</root>"));
+        } catch (SaxonApiException err) {
+            fail();
+        }
+    }
+
+//    public void testBulkIndent() {
+          // Test to check that indentation produces reasonable results. Commented out because
+          // there is no automated checking of the results, it relies on visual inspection.
+//
+//        File dir = new File(ConfigTest.DATA_DIR);
+//        File[] files = dir.listFiles(
+//                new FilenameFilter() {
+//                    public boolean accept(File dir, String name) {
+//                        return name.endsWith(".xml") || name.endsWith(".xsl") || name.endsWith(".xsd");
+//                    }
+//                }
+//        );
+//
+//        Processor proc = new Processor(false);
+//        DocumentBuilder builder = proc.newDocumentBuilder();
+//        //builder.setWhitespaceStrippingPolicy(WhitespaceStrippingPolicy.ALL);
+//        Serializer serializer = proc.newSerializer(System.err);
+//        serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+//        serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+//
+//        for (File file : files) {
+//            System.err.println(file.getPath());
+//            try {
+//                XdmNode doc = builder.build(new StreamSource(file));
+//                serializer.serializeNode(doc);
+//
+//            } catch (SaxonApiException e) {
+//                System.err.println("**** Failed to process document: " + e.getMessage());
+//            }
+//        }
+//    }
+
+
+}
