@@ -7,15 +7,7 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.expr.sort.AtomicMatchKey;
-import net.sf.saxon.expr.sort.XPathComparable;
-import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.str.UnicodeBuilder;
-import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.type.BuiltInAtomicType;
 
 import java.util.Arrays;
 import java.util.StringTokenizer;
@@ -23,14 +15,11 @@ import java.util.StringTokenizer;
 /**
  * This class represents a dot-separated sequence of numbers such as 1.12.5, typically
  * used as a software version number.
- * <p>Although the class is implemented as an atomic type derived from xs:string, it
- * has not been integrated into the schema type hierarchy and cannot be used directly
- * in schema validation.</p>
  * <p>The class provides "smart" ordering, for example 1 &lt; 1.2 &lt; 1.12 &lt; 1.12.6</p>
  */
 
 
-public class NestedIntegerValue extends AtomicValue implements XPathComparable, AtomicMatchKey {
+public class NestedIntegerValue implements Comparable<NestedIntegerValue> {
 
     public static NestedIntegerValue ONE = new NestedIntegerValue(new int[]{1});
     public static NestedIntegerValue TWO = new NestedIntegerValue(new int[]{2});
@@ -38,12 +27,10 @@ public class NestedIntegerValue extends AtomicValue implements XPathComparable, 
     int[] value;
 
     public NestedIntegerValue(String v) throws XPathException {
-        typeLabel = BuiltInAtomicType.STRING;
         parse(v);
     }
 
     public NestedIntegerValue(int[] val) {
-        typeLabel = BuiltInAtomicType.STRING;
         value = val;
     }
 
@@ -90,16 +77,6 @@ public class NestedIntegerValue extends AtomicValue implements XPathComparable, 
     }
 
     @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
-        return this;
-    }
-
-    @Override
-    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
-        return this;
-    }
-
-    @Override
     public boolean equals(Object o) {
         return (o instanceof NestedIntegerValue) && Arrays.equals(value, ((NestedIntegerValue) o).value);
     }
@@ -113,45 +90,18 @@ public class NestedIntegerValue extends AtomicValue implements XPathComparable, 
     }
 
     @Override
-    public BuiltInAtomicType getPrimitiveType() {
-        return BuiltInAtomicType.STRING;
-    }
-
-    @Override
-    public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        NestedIntegerValue v = new NestedIntegerValue(value);
-        v.typeLabel = typeLabel;
-        return v;
-    }
-
-    @Override
-    public UnicodeString getPrimitiveStringValue() {
-        UnicodeBuilder buffer = new UnicodeBuilder();
-        for (int i = 0; i < value.length - 1; i++) {
-            buffer.append(value[i] + ".");
-        }
-        buffer.append(value[value.length - 1] + "");
-        return buffer.toUnicodeString();
-    }
-
-
-    @Override
-    public int compareTo(XPathComparable other) {
-        if (other instanceof NestedIntegerValue) {
-            NestedIntegerValue v2 = (NestedIntegerValue)other;
-            for (int i = 0; i < value.length && i < v2.value.length; i++) {
-                if (value[i] != v2.value[i]) {
-                    if (value[i] < v2.value[i]) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
+    public int compareTo(NestedIntegerValue other) {
+        NestedIntegerValue v2 = (NestedIntegerValue)other;
+        for (int i = 0; i < value.length && i < v2.value.length; i++) {
+            if (value[i] != v2.value[i]) {
+                if (value[i] < v2.value[i]) {
+                    return -1;
+                } else {
+                    return 1;
                 }
             }
-            return Integer.signum(value.length - v2.value.length);
-        } else {
-            throw new ClassCastException("Cannot compare nested integer value to " + other);
         }
+        return Integer.signum(value.length - v2.value.length);
     }
 
 }
