@@ -224,6 +224,13 @@
       <xsl:text>)</xsl:text>
    </xsl:template>
    
+   <xsl:template match="*[starts-with(type/@RESOLVED_TYPE, 'java.net.URI')]
+      [count(arguments/argument) eq 1]" priority="30">
+      <xsl:text>new System.Uri(</xsl:text>
+      <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+      <xsl:text>, System.UriKind.RelativeOrAbsolute)</xsl:text>
+   </xsl:template>
+   
    
    <!-- DotNetPlatform -->
    <xsl:template match="*[type/@RESOLVED_TYPE='net.sf.saxon.dotnet.DotNetPlatform']">

@@ -133,10 +133,12 @@
       'net.sf.saxon.ma.arrays.ImmutableArrayItem': 'Saxon.Impl.DataModel.ImmArray',
       'net.sf.saxon.ma.map.HashTrieMap': 'Saxon.Impl.DataModel.ImmMap',
       'net.sf.saxon.ma.trie.ImmutableHashTrieMap': 'System.Collections.Immutable.ImmutableDictionary',
-      'net.sf.saxon.s9api.ExtensionFunction': 'Saxon.Api.ExtensionFunction',     
+      'net.sf.saxon.s9api.ExtensionFunction': 'Saxon.Api.ExtensionFunction',
+      'net.sf.saxon.s9api.HostLanguage': 'Saxon.Api.HostLanguage',
       'net.sf.saxon.s9api.ItemType': 'Saxon.Api.XdmItemType',
       (: 'net.sf.saxon.s9api.Location': 'Saxon.Api.IXmlLocation', :)
-      'net.sf.saxon.s9api.MessageListener2': 'Saxon.Api.IMessageListener2',
+      (:'net.sf.saxon.s9api.MessageListener2': 'Saxon.Api.IMessageListener2', :)
+      'net.sf.saxon.s9api.Message': 'Saxon.Api.Message',
       'net.sf.saxon.s9api.QName': 'Saxon.Api.QName',
       'net.sf.saxon.s9api.SequenceType': 'Saxon.Api.XdmSequenceType',
       'net.sf.saxon.s9api.WhitespaceStrippingPolicy': 'Saxon.Api.WhitespacePolicy',
@@ -148,6 +150,7 @@
       'net.sf.saxon.s9api.XdmMap': 'Saxon.Api.XdmMap',
       'net.sf.saxon.s9api.XdmNode': 'Saxon.Api.XdmNode',
       'net.sf.saxon.s9api.XdmValue': 'Saxon.Api.XdmValue'
+      (:'net.sf.saxon.s9api.XmlProcessingError': 'Saxon.Api.XmlProcessingError':)
       }"/>
    
    <xsl:variable name="jdkExceptionTypes" as="xs:string*" select="
