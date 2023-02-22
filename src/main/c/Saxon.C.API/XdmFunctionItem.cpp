@@ -45,7 +45,6 @@
 
                           }  else if (typeRef == 4) {
                               value = new XdmValue();
-                              value = new XdmValue();
                               xdmItem =  new XdmMap(results);
                               value->addXdmItem(xdmItem);
 
@@ -137,6 +136,12 @@
            if(argumentJArrayRef != -1) {
                j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)argumentJArrayRef);
                argumentJArrayRef = -1;
+           }
+           if(results == -2) {
+               SaxonApiException * exception = new SaxonApiException();
+               std::cerr<<"Exception found in XdmFunctionItem.call Message= "<<exception->getMessage()<<std::endl;
+               delete exception;
+               return nullptr;
            }
         return getXdmValueSubClass(results);
 
