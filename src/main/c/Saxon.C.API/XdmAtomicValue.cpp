@@ -14,10 +14,10 @@
     return this;}
 	
 
-    XdmAtomicValue::XdmAtomicValue(jobject obj):XdmItem(obj){
+    XdmAtomicValue::XdmAtomicValue(int64_t obj):XdmItem(obj){
     }
 
-    XdmAtomicValue::XdmAtomicValue(jobject obj, const char* ty):XdmItem(obj){
+    XdmAtomicValue::XdmAtomicValue(int64_t obj, const char* ty):XdmItem(obj){
 	    valType = std::string(ty);
     }
 
@@ -34,87 +34,37 @@
     }
 
     const char* XdmAtomicValue::getPrimitiveTypeName(){
-	if(!valType.empty()) {
-		return valType.c_str();	
-	}
+	    if(!valType.empty()) {
+		    return valType.c_str();
+	    }
 
-		jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
-		jmethodID xmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getPrimitiveTypeName",
-					"(Lnet/sf/saxon/s9api/XdmAtomicValue;)Ljava/lang/String;");
-		if (!xmID) {
-			std::cerr << "Error: SaxonDll." << "getPrimitiveTypeName"
-				<< " not found\n" << std::endl;
-			return "";
-		}
-		jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID,value));
-		if(result) {
-			const char * stri = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result,
-					nullptr);
-		
-		//SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-			valType = std::string(stri);
-			return stri;
-		}
+	    char * result = j_getPrimitiveTypeName(SaxonProcessor::sxn_environ->thread, value);
+
+	    f(result != nullptr) {
+	        valType = std::string(result);
+            return stri;
+	    }
+
+
 
 	    return "Q{http://www.w3.org/2001/XMLSchema}anyAtomicType";
     }
 
     bool XdmAtomicValue::getBooleanValue(){
-		jclass xdmNodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
-		jmethodID bmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmNodeClass,
-					"getBooleanValue",
-					"()Z");
-		if (!bmID) {
-			std::cerr << "Error: MyClassInDll." << "getBooleanValue"
-				<< " not found\n" << std::endl;
-			return false;
-		} else {
-			jboolean result = (jboolean)(SaxonProcessor::sxn_environ->env->CallBooleanMethod(value, bmID));
-			if(result) {
-				return (bool)result;
-			}
-		}
-	return false;
+        byte result = j_getBooleanValue(SaxonProcessor::sxn_environ->thread, value);
+        return result!=0;
     }
 
 
     int XdmAtomicValue::getHashCode(){
-		jclass xdmAtomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
-		jmethodID bhcID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmAtomicValueClass,
-					"hashCode", "()I");
-		if (!bhcID) {
-			std::cerr << "Error: SaxonC." << "getHashCode"
-				<< " not found\n" << std::endl;
-			return 0;
-		} else {
-			jint result = (jint)(SaxonProcessor::sxn_environ->env->CallIntMethod(value, bhcID));
-			if(result) {
-				return (int)result;
-			}
-		}
-
-	return 0;
+        int result = j_getHashCode(SaxonProcessor::sxn_environ->thread, value);
+        return result;
 
     }
 
     double XdmAtomicValue::getDoubleValue(){
-		jclass xdmNodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
-		jmethodID bmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmNodeClass,
-					"getDoubleValue",
-					"()D");
-		if (!bmID) {
-			std::cerr << "Error: MyClassInDll." << "getDecimalValue"
-				<< " not found\n" << std::endl;
-			return 0;
-		} else {
-			jdouble result = (jdouble)(SaxonProcessor::sxn_environ->env->CallDoubleMethod(value, bmID));
-			if(result) {
-				return (double)result;
-			}
-//checkForException(*(SaxonProcessor::sxn_environ), nullptr);
-		}
-
-	return 0;
+        double result = j_getDoubleValue(SaxonProcessor::sxn_environ->thread, value);
+        return result;
     }
 
 
@@ -124,20 +74,6 @@
     }
 
     long XdmAtomicValue::getLongValue(){
-		jclass xdmNodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
-		jmethodID bmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmNodeClass,
-					"getLongValue",
-					"()J");
-		if (!bmID) {
-			std::cerr << "Error: MyClassInDll." << "getLongValue"
-				<< " not found\n" << std::endl;
-			return 0;
-		} else {
-			jlong result = (jlong)(SaxonProcessor::sxn_environ->env->CallObjectMethod(value, bmID));
-			if(result) {
-				return (long)result;
-			}
-		}
-
-	return 0;
+        long result = j_getLongValue(SaxonProcessor::sxn_environ->thread, value);
+        return result;
      }

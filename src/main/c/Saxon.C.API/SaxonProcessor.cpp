@@ -401,7 +401,9 @@ void SaxonProcessor::applyConfigurationProperties() {
     SaxonProcessor::attachCurrentThread();
     if (configProperties.size() > 0) {
         int size = configProperties.size();
-        jclass stringClass = lookForClass(SaxonProcessor::sxn_environ->env, "java/lang/String");
+        char ** cnames = new char[size];
+        char ** cvalues = new char[size];
+        /*jclass stringClass = lookForClass(SaxonProcessor::sxn_environ->env, "java/lang/String");
         jobjectArray stringArray1 = SaxonProcessor::sxn_environ->env->NewObjectArray((jint) size, stringClass, 0);
         jobjectArray stringArray2 = SaxonProcessor::sxn_environ->env->NewObjectArray((jint) size, stringClass, 0);
         static jmethodID mIDappConfig = nullptr;
@@ -414,24 +416,21 @@ void SaxonProcessor::applyConfigurationProperties() {
                           << " not found\n" << std::endl;
                 return;
             }
-        }
+        }*/
         int i = 0;
         std::map<std::string, std::string>::iterator iter = configProperties.begin();
         for (iter = configProperties.begin(); iter != configProperties.end(); ++iter, i++) {
-            SaxonProcessor::sxn_environ->env->SetObjectArrayElement(stringArray1, i,
-                                                                    SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                            (iter->first).c_str()));
-            SaxonProcessor::sxn_environ->env->SetObjectArrayElement(stringArray2, i,
-                                                                    SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                            (iter->second).c_str()));
+            cnames[i] = (iter->first).c_str();
+            cvalues[i] = (iter->second).c_str();
+
         }
-        SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mIDappConfig, proc, stringArray1,
-                                                                 stringArray2);
-        if (exceptionOccurred()) {
+
+        /* if (exceptionOccurred()) {
             createException();
-        }
-        SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray1);
-        SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray2);
+        } */
+        j_applyToConfiguration(SaxonProcessor::sxn_environ->thread, procRef, cnames, cvalues,size);
+        delete cnames;
+        delete cvalues;
 
     }
 }
@@ -481,10 +480,6 @@ int64_t SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue *> 
     JParameters comboArrays;
     comboArrays.stringArray = nullptr;
     comboArrays.objectArray = nullptr;
-    jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                      "java/lang/Object");
-    jclass stringClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                      "java/lang/String");
 
 
 #ifdef DEBUG
@@ -540,7 +535,7 @@ int64_t SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue *> 
     }
 }
 
-JParameters SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValue *> parameters) {
+int64_t SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValue *> parameters) {
 
     int size = parameters.size();
     int64_t processorDataRef = createProcessorData(SaxonProcessor::sxn_environ->thread, size);
@@ -814,134 +809,79 @@ void SaxonProcessor::release() {
 
 XdmAtomicValue *SaxonProcessor::makeStringValue(const char *str) {
     SaxonProcessor::attachCurrentThread();
-
-    jobject obj2 = (jobject) createSaxonProcessor2(SaxonProcessor::sxn_environ->env, xdmAtomicClass, "(Ljava/lang/String;)V", SaxonProcessor::sxn_environ->env->NewStringUTF(str));
-
-    XdmAtomicValue *value = new XdmAtomicValue(obj2, "xs:string");
-    //SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
-    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj2);
+    int64_t stringValueRef = j_makeStringValue(sxn_environ->isolate, (char *) str);
+    XdmAtomicValue value = new XdmAtomicValue(stringValueRef, "xs:string");
     return value;
 }
 
-
-XdmAtomicValue *SaxonProcessor::makeStringValue2(std::string str) {
-    SaxonProcessor::attachCurrentThread();
-    jclass xdmAtomicClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
-
-    jobject obj = getJavaStringValue(SaxonProcessor::sxn_environ, str.c_str());
-    static jmethodID msID_atomic = nullptr;
-    if (msID_atomic == nullptr) {
-        msID_atomic = (jmethodID) (SaxonProcessor::sxn_environ->env->GetMethodID(xdmAtomicClass, "<init>",
-                                                                                 "(Ljava/lang/String;)V"));
-    }
-    if (!msID_atomic) {
-        std::cerr << "XdmAtomic constructor (String)" << std::endl;
-        return nullptr;
-    }
-    jobject obj3 = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, msID_atomic, obj));
-    XdmAtomicValue *value = new XdmAtomicValue(obj3, "xs:string");
-    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
-    return value;
-}
 
 XdmAtomicValue *SaxonProcessor::makeStringValue(std::string str) {
-    SaxonProcessor::attachCurrentThread();
-    jobject obj = getJavaStringValue(SaxonProcessor::sxn_environ, str.c_str());
-    static jmethodID msID_atomic = nullptr;
-    if (msID_atomic == nullptr) {
-        msID_atomic = (jmethodID) (SaxonProcessor::sxn_environ->env->GetMethodID(xdmAtomicClass, "<init>",
-                                                                                 "(Ljava/lang/String;)V"));
-    }
-    if (!msID_atomic) {
-        std::cerr << "XdmAtomic constructor (String)" << std::endl;
-        return nullptr;
-    }
-    jobject obj2 = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, msID_atomic, obj));
-    XdmAtomicValue *value = new XdmAtomicValue(obj2, "xs:string");
-    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+    //SaxonProcessor::attachCurrentThread();
+
+    int64_t stringValueRef = j_makeStringValue(sxn_environ->isolate, str.c_str());
+    XdmAtomicValue value = new XdmAtomicValue(stringValueRef, "xs:string");
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeIntegerValue(int i) {
-    SaxonProcessor::attachCurrentThread();
+    //SaxonProcessor::attachCurrentThread();
     //jobject obj = integerValue(*SaxonProcessor::sxn_environ, i);
-    static jmethodID miiID_atomic = nullptr;
-    if (miiID_atomic == nullptr) {
-        miiID_atomic = (jmethodID) (SaxonProcessor::sxn_environ->env->GetMethodID(xdmAtomicClass, "<init>", "(J)V"));
-    }
-    if (!miiID_atomic) {
-        std::cerr << "XdmAtomic constructor (J)" << std::endl;
-        return nullptr;
-    }
-    jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, miiID_atomic, (jlong) i));
-    XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}integer");
-    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+
+    int64_t intValueRef = j_makeDoubleValue(sxn_environ->isolate, i);
+    XdmAtomicValue value = new XdmAtomicValue(intValueRef, "Q{http://www.w3.org/2001/XMLSchema}integer");
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeDoubleValue(double d) {
-    SaxonProcessor::attachCurrentThread();
-    //jobject obj = doubleValue(*SaxonProcessor::sxn_environ, d);
-    static jmethodID mdID_atomic = nullptr;
-    if (mdID_atomic == nullptr) {
-        mdID_atomic = (jmethodID) (SaxonProcessor::sxn_environ->env->GetMethodID(xdmAtomicClass, "<init>", "(D)V"));
-    }
-    jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mdID_atomic, (jdouble) d));
-    XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}double");
-    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+    //SaxonProcessor::attachCurrentThread();
+
+    int64_t doubleValueRef = j_makeDoubleValue(sxn_environ->isolate, d);
+    XdmAtomicValue value = new XdmAtomicValue(doubleValueRef, "Q{http://www.w3.org/2001/XMLSchema}double");
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeFloatValue(float d) {
     int64_t floatValueRef = j_makeFloatValue(sxn_environ->isolate, d);
-    XdmAtomicValue value = new XdmAtomicValue(floatValueRef);
+    XdmAtomicValue value = new XdmAtomicValue(floatValueRef, "Q{http://www.w3.org/2001/XMLSchema}float");
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeLongValue(long l) {
-    SaxonProcessor::attachCurrentThread();
+    //SaxonProcessor::attachCurrentThread();
     //jobject obj = longValue(*SaxonProcessor::sxn_environ, l);
-    static jmethodID mlID_atomic = nullptr;
-    if (mlID_atomic == nullptr) {
-        mlID_atomic = (jmethodID) (SaxonProcessor::sxn_environ->env->GetMethodID(xdmAtomicClass, "<init>", "(J)V"));
-    }
-    jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mlID_atomic, (jlong) l));
-    XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}long");
-    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+
+    int64_t longValueRef = j_makeBooleanValue(sxn_environ->isolate, l);
+    XdmAtomicValue value = new XdmAtomicValue(longValueRef, "Q{http://www.w3.org/2001/XMLSchema}long");
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeBooleanValue(bool b) {
-    SaxonProcessor::attachCurrentThread();
-    //jobject obj = booleanValue(*SaxonProcessor::sxn_environ, b);
-    static jmethodID mID_atomic = nullptr;
-    if (mID_atomic == nullptr) {
-        mID_atomic = (jmethodID) (SaxonProcessor::sxn_environ->env->GetMethodID(xdmAtomicClass, "<init>", "(Z)V"));
-    }
-    jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mID_atomic, (jboolean) b));
-    XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}boolean");
-    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+    //SaxonProcessor::attachCurrentThread();
+    int64_t boolValueRef = j_makeBooleanValue(sxn_environ->isolate, (int)b);
+    XdmAtomicValue value = new XdmAtomicValue(boolValueRef, "Q{http://www.w3.org/2001/XMLSchema}boolean");
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeQNameValue(const char *str) {
     SaxonProcessor::attachCurrentThread();
-    jobject val = xdmValueAsObj(SaxonProcessor::sxn_environ, "QName", str);
-    XdmAtomicValue *value = new XdmAtomicValue(val, "QName");
-    SaxonProcessor::sxn_environ->env->DeleteLocalRef(val);
+    int64_t qnameValueRef = j_makeQNameValue(sxn_environ->isolate, str);
+    XdmAtomicValue value = new XdmAtomicValue(qnameValueRef, "QName");
     return value;
+
 }
 
 XdmAtomicValue *SaxonProcessor::makeAtomicValue(const char *typei, const char *strValue) {
-    SaxonProcessor::attachCurrentThread();
+    return nullptr;
+    //TODO fix this method
+    /*SaxonProcessor::attachCurrentThread();
     jobject obj = xdmValueAsObj(SaxonProcessor::sxn_environ, typei, strValue);
     XdmAtomicValue *value = new XdmAtomicValue(obj, typei);
     SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
-    return value;
+    return value;*/
 }
 
 const char *SaxonProcessor::getStringValue(XdmItem *item) {
-    const char *result = stringValue(SaxonProcessor::sxn_environ, item->getUnderlyingValue());
+    const char *result = getStringValue(SaxonProcessor::sxn_environ->thread, item->getUnderlyingValue());
 #ifdef DEBUG
     if(result == nullptr) {
         std::cerr<<"getStringValue of XdmItem is nullptr"<<std::endl;
@@ -1003,12 +943,14 @@ XdmArray *SaxonProcessor::makeArray(short *input, int length) {
 
 XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
 
-    if (input == nullptr || length <= 0) {
-        std::cerr << "Warning: Empty XdmArray";
-        //Handle empty array
-    } else {
+        int64_t  processorDataRef = -1;
 
-        int64_t  processorDataRef = createProcessorDataWithCapacity(sxn_environ->thread, length);
+        if(length == 0) {
+            processorDataRef = createProcessorData(sxn_environ->thread);
+        } else {
+            processorDataRef = createProcessorDataWithCapacity(sxn_environ->thread, length);
+
+        }
 
         for (int i = 0; i < length; i++) {
             if (input[i] == nullptr || !input[i]->getUnderlyingValue() != -1) {
@@ -1019,107 +961,39 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
 
         }
 
-        XdmArray newArray = new XdmArray();
+        int64_t  xdmArrayRef = j_makeXdmArray(sxn_environ->thread, processorDataRef);
 
-
-    }
-
-    if (exceptionOccurred()) {
-        checkAndCreateException(saxonCAPIClass);
-    } else {
-        XdmArray *value = new XdmArray(xdmArrayi, length);
-        return value;
-    }
-    std::cerr << "Error found when converting string to XdmArray - cp1" << std::endl;
-    return nullptr;
+        XdmArray newArray = new XdmArray(xdmArrayRef, length);
+        return newArray;
 
 
 }
 
 
 XdmArray *SaxonProcessor::makeArray(int *input, int length) {
-    SaxonProcessor::attachCurrentThread();
+    //SaxonProcessor::attachCurrentThread();
     if (input == nullptr) {
         std::cerr << "Error found when converting string to XdmArray";
         return nullptr;
     }
-    jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
-    static jmethodID mmiiID = nullptr;
-    if (mmiiID == nullptr) {
-        mmiiID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmArrayClass, "makeArray",
-                                                                                 "([I)Lnet/sf/saxon/s9api/XdmArray;");
-    }
-    if (!mmiiID) {
-        std::cerr << "\nError: Saxonc.Dll " << "makeArray([I)" << " not found" << std::endl;
-        return nullptr;
-    }
+    int64_t  xdmArrayRef = j_makeXdmArrayFromInt(sxn_environ->thread, input, length);
 
+    XdmArray newArray = new XdmArray(xdmArrayRef, length);
+    return newArray;
 
-    jintArray iArray = nullptr;
-
-    iArray = SaxonProcessor::sxn_environ->env->NewIntArray((jint) length);
-    jint * fill = new jint[length];
-    for (int i = 0; i < length; i++) {
-        fill[i] = input[i];
-    }
-    SaxonProcessor::sxn_environ->env->SetIntArrayRegion(iArray, 0, length, fill);
-
-
-    jobject xdmArrayi = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmArrayClass, mmiiID, iArray);
-    if (!xdmArrayi) {
-        std::cerr << "Error found when converting string to XdmArray";
-        return nullptr;
-    }
-    if (exceptionOccurred()) {
-        createException();
-    } else {
-        XdmArray *value = new XdmArray(xdmArrayi);
-        return value;
-    }
-    return nullptr;
 
 }
 
 XdmArray *SaxonProcessor::makeArray(long *input, int length) {
-    SaxonProcessor::attachCurrentThread();
+    //SaxonProcessor::attachCurrentThread();
     if (input == nullptr) {
         std::cerr << "Error found when converting string to XdmArray";
         return nullptr;
     }
-    jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
-    static jmethodID mmiID = nullptr;
-    if (mmiID == nullptr) {
-        mmiID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmArrayClass, "makeArray",
-                                                                                "([J)Lnet/sf/saxon/s9api/XdmArray;");
-    }
-    if (!mmiID) {
-        std::cerr << "\nError: Saxonc.Dll " << "makeArray([J)" << " not found" << std::endl;
-        return nullptr;
-    }
+    int64_t  xdmArrayRef = j_makeXdmArrayFromLong(sxn_environ->thread, input, length);
 
-
-    jlongArray lArray = nullptr;
-
-    lArray = SaxonProcessor::sxn_environ->env->NewLongArray((jint) length);
-    jlong * fill = new jlong[length];
-    for (int i = 0; i < length; i++) {
-        fill[i] = input[i];
-    }
-    SaxonProcessor::sxn_environ->env->SetLongArrayRegion(lArray, 0, length, fill);
-
-
-    jobject xdmArrayi = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmArrayClass, mmiID, lArray);
-    if (!xdmArrayi) {
-        std::cerr << "Error found when converting string to XdmArray";
-        return nullptr;
-    }
-    if (exceptionOccurred()) {
-        createException();
-    } else {
-        XdmArray *value = new XdmArray(xdmArrayi);
-        return value;
-    }
-    return nullptr;
+    XdmArray newArray = new XdmArray(xdmArrayRef, length);
+    return newArray;
 }
 
 
@@ -1129,89 +1003,35 @@ XdmArray *SaxonProcessor::makeArray(bool *input, int length) {
         std::cerr << "Error found when converting string to XdmArray";
         return nullptr;
     }
-    jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
-    static jmethodID mmbID = nullptr;
-    if (mmbID == nullptr) {
-        mmbID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmArrayClass, "makeArray",
-                                                                                "([Z)Lnet/sf/saxon/s9api/XdmArray;");
-    }
-    if (!mmbID) {
-        std::cerr << "\nError: Saxonc.Dll " << "makeArray([Z)" << " not found" << std::endl;
-        return nullptr;
+    int * inputAsInts = new int[length];
+
+    for(int i =0; i<length; i++) {
+        inputAsInts[i] = (int)input[i];
     }
 
 
-    jbooleanArray bArray = nullptr;
-
-    bArray = SaxonProcessor::sxn_environ->env->NewBooleanArray((jint) length);
-    jboolean * fill = new jboolean[length];
-    for (int i = 0; i < length; i++) {
-        fill[i] = input[i];
-    }
-    SaxonProcessor::sxn_environ->env->SetBooleanArrayRegion(bArray, 0, length, fill);
-
-
-    jobject xdmArrayi = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmArrayClass, mmbID, bArray);
-    if (!xdmArrayi) {
-        std::cerr << "Error found when converting string to XdmArray";
-        return nullptr;
-    }
-    if (exceptionOccurred()) {
-        createException();
-    } else {
-        XdmArray *value = new XdmArray(xdmArrayi);
-        return value;
-    }
-    return nullptr;
-
+    int64_t  xdmArrayRef = j_makeXdmArrayFromBool(sxn_environ->thread, inputAsInts, length);
+    XdmArray newArray = new XdmArray(xdmArrayRef, length);
+    return newArray;
 
 }
 
 
 XdmArray *SaxonProcessor::makeArray(const char **input, int length) {
-    SaxonProcessor::attachCurrentThread();
-    if (input == nullptr || length <= 0) {
+    //SaxonProcessor::attachCurrentThread();
+    if (input == nullptr) {
         std::cerr << "Error found when converting string to XdmArray";
         return nullptr;
     }
-    jobject obj = nullptr;
-    jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
-    jmethodID mmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmArrayClass, "makeArray",
-                                                                                     "([Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmArray;");
+    int64_t  xdmArrayRef = j_makeXdmArrayFromStrings(sxn_environ->thread, input, length);
 
-    jmethodID mID_atomic = (jmethodID) (SaxonProcessor::sxn_environ->env->GetMethodID(xdmAtomicClass, "<init>",
-                                                                                      "(Ljava/lang/String;)V"));
-    jobjectArray valueArray = nullptr;
-    jobject obj2 = nullptr;
-    valueArray = SaxonProcessor::sxn_environ->env->NewObjectArray((jint) length, xdmAtomicClass, 0);
-    for (int i = 0; i < length; i++) {
-        if (input[i] == nullptr) {
-            std::cerr << "Error found when converting string to XdmArray";
-            return nullptr;
-        }
-        obj = getJavaStringValue(SaxonProcessor::sxn_environ, input[i]);
-        obj2 = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mID_atomic, obj));
-        SaxonProcessor::sxn_environ->env->SetObjectArrayElement(valueArray, i, obj2);
-    }
-
-    jobject xdmArrayi = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmArrayClass, mmID, valueArray);
-    if (!xdmArrayi) {
-        std::cerr << "Error found when converting string to XdmArray";
-        return nullptr;
-    }
-
-    if (exceptionOccurred()) {
-        checkAndCreateException(saxonCAPIClass);
-    } else {
-        XdmArray *value = new XdmArray(xdmArrayi);
-        return value;
-    }
-    return nullptr;
+    XdmArray newArray = new XdmArray(xdmArrayRef, length);
+    return newArray;
 }
 
 
 XdmMap *SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) {
-    SaxonProcessor::attachCurrentThread();
+   /* SaxonProcessor::attachCurrentThread();
     jobjectArray keyArray = nullptr;
     jobjectArray valueArray = nullptr;
     jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env,
@@ -1256,7 +1076,7 @@ XdmMap *SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) 
         } else {
             return new XdmMap(results);
         }
-    }
+    }*/
 
     return nullptr;
 }
@@ -1265,7 +1085,7 @@ XdmMap *SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) 
 
 
 XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
-    SaxonProcessor::attachCurrentThread();
+    /*SaxonProcessor::attachCurrentThread();
     jobjectArray keyArray = nullptr;
     jobjectArray valueArray = nullptr;
     XdmAtomicValue ** atomicArray = nullptr;
@@ -1317,18 +1137,18 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
             delete atomicArray[j];
         }
         delete [] atomicArray;
-        if (/*exceptionOccurred() || */ !results) {
+        if ( !results) {
             return nullptr;//checkAndCreateException(saxonCAPIClass);
         } else {
             return new XdmMap(results);
         }
-    }
+    }*/
     return nullptr;
 }
 
 
     XdmMap *SaxonProcessor::makeMap3(XdmAtomicValue ** keys, XdmValue ** values, int size) {
-        SaxonProcessor::attachCurrentThread();
+     /*   SaxonProcessor::attachCurrentThread();
     jobjectArray keyArray = nullptr;
     jobjectArray valueArray = nullptr;
 
@@ -1376,7 +1196,7 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
         } else {
             return new XdmMap(results);
         }
-    }
+    }*/
     return nullptr;
 
 

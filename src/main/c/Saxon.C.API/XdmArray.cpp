@@ -12,38 +12,16 @@ XdmArray::XdmArray(const XdmArray &d): XdmFunctionItem(d){
 }
 
 
+//TODO arrayLen should be set upfront
+XdmArray::XdmArray(int64_t obj) : XdmFunctionItem(obj), arrayLen(0){}
 
-XdmArray::XdmArray(jobject obj) : XdmFunctionItem(obj), arrayLen(0){}
 
-
-XdmArray::XdmArray(jobject obj, int aLen) : XdmFunctionItem(obj), arrayLen(aLen){}
+XdmArray::XdmArray(int64_t obj, int aLen) : XdmFunctionItem(obj), arrayLen(aLen){}
 
 int XdmArray::arrayLength()  {
+    //TODO - this information should be set upfront
+    return arrayLen;
 
-    if(arrayLen == 0) {
-    jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
-    static jmethodID arLenmID = nullptr;
-
-    if(arLenmID == nullptr) {
-
-        arLenmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmArrayClass, "arrayLength",
-                                                                          "()I");
-    }
-
-    if (arLenmID == nullptr || !value) {
-        std::cerr << "Error: Saxonc.XdmArray." << "arrayLength"
-                  << " not found\n" << std::endl;
-        arrayLen = 0;
-        return 0;
-    } else {
-
-        jint valuei = (jint)(SaxonProcessor::sxn_environ->env->CallIntMethod(value, arLenmID));
-        arrayLen = (int)valuei;
-        return arrayLen;
-    }
-    } else {
-        return arrayLen;
-    }
 }
 
 XdmValue* XdmArray::get(int n){

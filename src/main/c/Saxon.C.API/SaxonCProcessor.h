@@ -30,12 +30,6 @@ EXTERN_SAXONC
 
 
 
-// Graalvm entrypoint methods
-char * getProductVersion(graal_isolatethread_t*, int64_t processorRef);
-char * xsltApplyStylesheet(graal_isolatethread_t*, int64_t processorRef, char * cwd, char * sourceFile, char * stylesheet);
-
-
-
 /*
  * Get the Saxon version 
  */
