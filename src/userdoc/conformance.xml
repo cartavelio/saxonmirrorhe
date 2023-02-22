@@ -572,10 +572,10 @@
                      attribute recognized for any given language. (See 12.4 Number to String
                      Conversion Attributes)</i>
                </p>
-               <p class="javaonly">&#x25BA; SaxonJ uses the ICU-J library for localization. This offers a large and
+               <p class="javaonly">&#x25BA; SaxonJ uses the ICU4J library for localization. This offers a large and
                extensible set of languages. The numbering sequences recognized are listed
                at <a class="bodylink" href="/xsl-elements/number">xsl:number</a>.</p>
-               <p class="csonly">&#x25BA; SaxonCS uses the ICU-N library for localization. This does not include 
+               <p class="csonly">&#x25BA; SaxonCS uses the ICU4N library for localization. This does not include 
                   support for numbering sequences (such as spelled-out numbering, <i>one</i>, <i>two</i>, <i>three</i>).
                SaxonCS therefore supports such sequences only for English.</p>
             </li>
