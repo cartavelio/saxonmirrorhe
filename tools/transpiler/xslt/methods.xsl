@@ -530,7 +530,7 @@
          'getRawSchemeSpecificPart#0':'%scope%.PathAndQuery',
          'getRawUserInfo#0':          '%scope%.UserInfo',
          'getScheme#0':               '%scope%.Scheme',
-         'getSchemeSpecificPart#0':   '%scope%.PathAndQuery',
+         'getSchemeSpecificPart#0':   '%scope%.GetComponents(System.UriComponents.PathAndQuery, System.UriFormat.Unescaped)',
          'getUserInfo#0':             '%scope%.UserInfo',
          'isAbsolute#0':              '%scope%.IsAbsoluteUri',
          'isOpaque#0':                'Saxon.Impl.Helpers.UriUtils.IsOpaque(%scope%)',
@@ -678,14 +678,14 @@
    <xsl:template match="*[@RESOLVED_TYPE = 'java.math.BigInteger']" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'abs#0':       'System.Numerics.BigInteger.Abs(%scope%)',
-         'add#1':       'System.Numerics.BigInteger.Add(%scope%, %args%)',
-         'subtract#1':  'System.Numerics.BigInteger.Subtract(%scope%, %args%)',
-         'multiply#1':  'System.Numerics.BigInteger.Multiply(%scope%, %args%)',
-         'divide#1':    'System.Numerics.BigInteger.Divide(%scope%, %args%)',
-         'negate#0':    'System.Numerics.BigInteger.Negate(%scope%)',
-         'mod#1':       'Saxon.Impl.Helpers.BigIntegerUtils.Mod(%scope%, %args%)',
-         'remainder#1': 'Saxon.Impl.Helpers.BigIntegerUtils.Remainder(%scope%, %args%)',
+         'abs#0':                'System.Numerics.BigInteger.Abs(%scope%)',
+         'add#1':                'System.Numerics.BigInteger.Add(%scope%, %args%)',
+         'subtract#1':           'System.Numerics.BigInteger.Subtract(%scope%, %args%)',
+         'multiply#1':           'System.Numerics.BigInteger.Multiply(%scope%, %args%)',
+         'divide#1':             'System.Numerics.BigInteger.Divide(%scope%, %args%)',
+         'negate#0':             'System.Numerics.BigInteger.Negate(%scope%)',
+         'mod#1':                'Saxon.Impl.Helpers.BigIntegerUtils.Mod(%scope%, %args%)',
+         'remainder#1':          'Saxon.Impl.Helpers.BigIntegerUtils.Remainder(%scope%, %args%)',
          'divideAndRemainder#1': 'Saxon.Impl.Helpers.BigIntegerUtils.DivideAndRemainder(%scope%, %args%)',
          'signum#0':             'Saxon.Impl.Helpers.BigIntegerUtils.Signum(%scope%)',
          'valueOf#1':            'Saxon.Impl.Helpers.BigIntegerUtils.ValueOf(%args%)',
@@ -967,7 +967,7 @@
    
    <xsl:template match="*[f:targetType(.) = 'java.util.Iterator']" 
       priority="20" mode="methods">
-      <xsl:variable name="suppressWarning" select="ancestor::*[@nodeType='MethodDeclaration'][1]/annotations/annotation[name/@identifier='CSHarpSuppressWarnings']//@value='UnsafeIteratorConversion'"/>
+      <xsl:variable name="suppressWarning" select="ancestor::*[@nodeType='MethodDeclaration'][1]/annotations/annotation[name/@identifier='CSharpSuppressWarnings']//@value='UnsafeIteratorConversion'"/>
       <xsl:choose>
          <xsl:when test="name/@identifier='hasNext' and count(arguments/argument)=0">
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
