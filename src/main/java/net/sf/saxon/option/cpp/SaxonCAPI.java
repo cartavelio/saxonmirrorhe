@@ -282,10 +282,10 @@ public class SaxonCAPI {
     }
 
     @CEntryPoint(name = "setCatalogFile", exceptionHandler = SaxonCExceptionHandler.class)
-    public static void setCatalog(IsolateThread thread, ObjectHandle processorRef, CCharPointer catalogFile) throws SaxonApiException {
+    public static void setCatalog(IsolateThread thread, ObjectHandle processorRef, CCharPointer catalogFile){
         Processor processor = objectHandles.get(processorRef);
         if(catalogFile == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Catalog file name is null");
+            return;
         }
         processor.setCatalogFiles(CTypeConversion.toJavaString(catalogFile));
     }
