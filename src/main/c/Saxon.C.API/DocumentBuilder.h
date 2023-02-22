@@ -18,6 +18,7 @@ class SaxonApiException;
 class XdmNode;
 class SchemaValidator;
 
+
 /**
  * A document builder holds properties controlling how a Saxon document tree should be built, and
  * provides methods to invoke the tree construction.
