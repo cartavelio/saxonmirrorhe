@@ -214,13 +214,13 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
             case Type.ATTRIBUTE:
                 emit(node.getDisplayName());
                 emit("=\"");
-                emit(node.getUnicodeStringValue());
+                emit(escapeAttributeValue(node.getStringValue()));
                 emit("\"");
                 break;
             case Type.NAMESPACE:
                 emit(node.getLocalPart().isEmpty() ? "xmlns" : "xmlns:" + node.getLocalPart());
                 emit("=\"");
-                emit(node.getUnicodeStringValue());
+                emit(escapeAttributeValue(node.getStringValue()));
                 emit("\"");
                 break;
             default:
@@ -242,6 +242,41 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
                 emit(sw.toString().trim());
                 break;
         }
+    }
+
+    private String escapeAttributeValue(String value) {
+        StringBuilder sb = new StringBuilder(value.length()*2);
+        for (int i=0; i<value.length(); i++) {
+            char c = value.charAt(i);
+            switch (c) {
+                case '\r':
+                    sb.append("&#xD;");
+                    break;
+                case '\t':
+                    sb.append("&#x9;");
+                    break;
+                case '\n':
+                    sb.append("&#xA;");
+                    break;
+                case '&':
+                    sb.append("&amp;");
+                    break;
+                case '<':
+                    sb.append("&lt;");
+                    break;
+                case '>':
+                    sb.append("&gt;");
+                    break;
+                case '"':
+                    sb.append("&quot;");
+                    break;
+                default:
+                    sb.append(c);
+                    break;
+            }
+
+        }
+        return sb.toString();
     }
 
     private void serializeArray(ArrayItem array) throws XPathException {
