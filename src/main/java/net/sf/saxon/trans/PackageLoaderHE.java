@@ -3330,9 +3330,9 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
             ValueComparison vc = new ValueComparison(lhs, op, rhs);
-            String compAtt = element.getAttributeValue(NamespaceUri.NULL,"comp");
-            AtomicComparer comp = loader.makeAtomicComparer(compAtt, element);
-            vc.setAtomicComparer(comp);
+//            String compAtt = element.getAttributeValue(NamespaceUri.NULL,"comp");
+//            AtomicComparer comp = loader.makeAtomicComparer(compAtt, element);
+//            vc.setAtomicComparer(comp);
             String onEmptyAtt = element.getAttributeValue(NamespaceUri.NULL,"onEmpty");
             if (onEmptyAtt != null) {
                 vc.setResultWhenEmpty(BooleanValue.get("1".equals(onEmptyAtt)));

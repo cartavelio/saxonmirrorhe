@@ -155,6 +155,16 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
     }
 
     /**
+     * Get the StringCollator used to compare string values.
+     *
+     * @return the collator. May return null if the expression will never be used to compare strings
+     */
+    @Override
+    public StringCollator getStringCollator() {
+        return comparer.getCollator();
+    }
+
+    /**
      * Get the primitive (singleton) operator used: one of Token.FEQ, Token.FNE, Token.FLT, Token.FGT,
      * Token.FLE, Token.FGE
      */
@@ -328,7 +338,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             }
 
             ValueComparison vc = new ValueComparison(e0, singletonOperator, e1);
-            vc.setAtomicComparer(comparer);
+            //vc.setAtomicComparer(comparer);
             vc.setResultWhenEmpty(BooleanValue.FALSE);
             ExpressionTool.copyLocationInfo(this, vc);
             Optimizer.trace(config, "Replaced general comparison by value comparison", vc);
@@ -356,7 +366,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
     private Expression makeCompareUntypedToNumeric(Expression lhs, Expression rhs, int operator) {
         ValueComparison vc = new ValueComparison(lhs, operator, rhs);
-        vc.setAtomicComparer(new UntypedNumericComparer());
+        //vc.setAtomicComparer(new UntypedNumericComparer());
+        vc.setCompareUntypedToNumeric(true);
         ExpressionTool.copyLocationInfo(this, vc);
         Optimizer.trace(getConfiguration(), "Replaced general comparison by untyped-numeric value comparison", vc);
         return vc;
@@ -554,7 +565,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                             singletonOperator,
                             makeMinOrMax(visitor, contextInfo, getRhsExpression(), "max"));
                     vc.setResultWhenEmpty(BooleanValue.FALSE);
-                    vc.setAtomicComparer(comparer);
+                    //vc.setAtomicComparer(comparer);
                     break;
                 case Token.GT:
                 case Token.GE:
@@ -562,7 +573,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                             singletonOperator,
                             makeMinOrMax(visitor, contextInfo, getRhsExpression(), "min"));
                     vc.setResultWhenEmpty(BooleanValue.FALSE);
-                    vc.setAtomicComparer(comparer);
+                    //vc.setAtomicComparer(comparer);
                     break;
                 default:
                     throw new UnsupportedOperationException("Unknown operator " + operator);

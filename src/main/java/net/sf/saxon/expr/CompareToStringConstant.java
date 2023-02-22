@@ -17,6 +17,7 @@ import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollatingComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -194,7 +195,15 @@ public class CompareToStringConstant extends CompareToConstant {
     @Override
     public AtomicComparer getAtomicComparer() {
         return CodepointCollatingComparer.getInstance();
-        // Note: this treats NaN=NaN as true, but it doesn't matter, because the rhs will never be NaN.
+    }
+
+    /**
+     * Get the StringCollator used to compare string values.
+     * @return the collator.
+     */
+    @Override
+    public StringCollator getStringCollator() {
+        return CodepointCollator.getInstance();
     }
 
     /**

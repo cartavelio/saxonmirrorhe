@@ -15,7 +15,9 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.DoubleSortComparer;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -199,6 +201,15 @@ public class CompareToIntegerConstant extends CompareToConstant {
     public AtomicComparer getAtomicComparer() {
         return DoubleSortComparer.getInstance();
         // Note: this treats NaN=NaN as true, but it doesn't matter, because the rhs will never be NaN.
+    }
+
+    /**
+     * Get the StringCollator used to compare string values.
+     * @return the collator.
+     */
+    @Override
+    public StringCollator getStringCollator() {
+        return CodepointCollator.getInstance(); // actually, the question doesn't arise.
     }
 
     /**

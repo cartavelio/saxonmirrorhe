@@ -90,7 +90,7 @@ public class PatternParser extends XPathParser {
                             InstanceOfExpression condition =
                                     new InstanceOfExpression(new LocalVariableReference(let), SequenceType.SINGLE_NUMERIC);
                             LocalVariableReference ref = new LocalVariableReference(let);
-                            ref.setStaticType(SequenceType.SINGLE_NUMERIC, null, 0);
+                            ref.setStaticType(SequenceType.ANY_SEQUENCE, null, 0);
                             ValueComparison comparison =
                                     new ValueComparison(ref, Token.FEQ, Literal.makeLiteral(Int64Value.PLUS_ONE));
                             Choose choice = new Choose(new Expression[]{condition, Literal.makeLiteral(BooleanValue.TRUE)},

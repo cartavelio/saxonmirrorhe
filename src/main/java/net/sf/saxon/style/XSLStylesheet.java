@@ -7,11 +7,9 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
 /**
@@ -23,6 +21,11 @@ import net.sf.saxon.type.Type;
 
 public class XSLStylesheet extends XSLModuleRoot {
 
+    @Override
+    public void initialise(NodeName elemName, SchemaType elementType, AttributeMap atts, NodeInfo parent, int sequenceNumber) {
+        super.initialise(elemName, elementType, atts, parent, sequenceNumber);
+        processDefaultCollationAttribute();
+    }
 
     @Override
     protected boolean mayContainParam() {
