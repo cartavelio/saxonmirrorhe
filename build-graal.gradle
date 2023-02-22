@@ -918,7 +918,6 @@ task all_saxonc_releases() {
         into "${buildDir}/${edition}c_pypi/python_saxon"
         include "saxonc.pyx"
         include "saxoncClasses.pxd"
-        include "nodekind.py"
         include "readme.txt"
         filter { line ->
           line.replace('@@edition@@', edition)
