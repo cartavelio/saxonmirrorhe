@@ -110,10 +110,17 @@ public class ZenoSequence implements GroundedValue {
 
     public void appendSequence(GroundedValue items) {
         if (items instanceof ZenoSequence) {
-            if (this.getLength() == 1) {
-                chain = ((ZenoSequence)items).chain.prepend(head());
-            } else {
-                chain = chain.addAll(((ZenoSequence) items).chain);
+            int len = this.getLength();
+            switch (len) {
+                case 0:
+                    chain = ((ZenoSequence) items).chain;
+                    return;
+                case 1:
+                    chain = ((ZenoSequence) items).chain.prepend(head());
+                    return;
+                default:
+                    chain = chain.addAll(((ZenoSequence) items).chain);
+                    return;
             }
         } else {
             chain = chain.addAll(items.asIterable());
