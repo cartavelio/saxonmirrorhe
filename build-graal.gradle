@@ -328,7 +328,7 @@ task hec_graal_preprocess(
   inputs.files fileTree(dir: "${buildDir}/filtered/hec")
   outputs.files fileTree(dir: "${buildDir}/preprocess/hec")
   classpath = configurations.preprocessor
-  main = "com.igormaznitsa.jcp.JcpPreprocessor"
+  mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
   args "/c",
     "/i:${buildDir}/filtered/hec", "/o:${buildDir}/preprocess/hec",
     "/p:EE=false", "/p:PE=false", "/p:CSHARP=false",
@@ -346,7 +346,7 @@ task pec_graal_preprocess(
   inputs.files fileTree(dir: "${buildDir}/filtered/pec")
   outputs.files fileTree(dir: "${buildDir}/preprocess/pec")
   classpath = configurations.preprocessor
-  main = "com.igormaznitsa.jcp.JcpPreprocessor"
+  mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
   args "/c",
     "/i:${buildDir}/filtered/pec", "/o:${buildDir}/preprocess/pec",
     "/p:EE=false", "/p:PE=true", "/p:CSHARP=false",
@@ -365,7 +365,7 @@ task eec_graal_preprocess(
   inputs.files fileTree(dir: "${buildDir}/filtered/eec")
   outputs.files fileTree(dir: "${buildDir}/preprocess/eec")
   classpath = configurations.preprocessor
-  main = "com.igormaznitsa.jcp.JcpPreprocessor"
+  mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
   args "/c",
     "/i:${buildDir}/filtered/eec", "/o:${buildDir}/preprocess/eec",
     "/p:EE=true", "/p:PE=false", "/p:CSHARP=false",
