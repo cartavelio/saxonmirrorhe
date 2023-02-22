@@ -2189,7 +2189,7 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
     cout << endl << "Test: testCatalog" << endl;
     bool trace = false;
     proc->setcwd(cwd);
-    proc->setCatalog("../php/catalog-test/catalog.xml");
+    proc->setCatalog("../data/catalog.xml");
     if (proc->exceptionOccurred()) {
         const char *message = proc->getErrorMessage();
         if(message != nullptr) {
@@ -2201,7 +2201,7 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
     }
     Xslt30Processor * trans = proc->newXslt30Processor();
 
-    XsltExecutable  * executable = trans->compileFromFile("../php/catalog-test/test1.xsl");
+    XsltExecutable  * executable = trans->compileFromFile("../data/example.xsl");
 
     if(executable == nullptr) {
 
@@ -2227,7 +2227,7 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
         return;
     }
 
-    executable->setInitialMatchSelectionAsFile("../php/catalog-test/example.xml");
+    executable->setInitialMatchSelectionAsFile("../data/example.xml");
 
     const char *result = executable->applyTemplatesReturningString();
 
@@ -2238,7 +2238,17 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
     } else {
         sresult->failure++;
         sresult->failureList.push_back("testCatalog");
-    }
+        if (executable->exceptionOccurred()) {
+
+                    if(executable->getErrorMessage() != nullptr) {
+                        const char *message = executable->getErrorMessage();
+                        cerr << "exception message=" << message << endl;
+                    }
+        }
+
+
+     }
+  
 
 
     delete executable;
@@ -2541,7 +2551,7 @@ int main(int argc, char* argv[]) {
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
-    //testCatalog(cwd, processor,  sresult); //not to run in DEBUG mode - setCatalog throws SEG error
+    testCatalog(cwd, processor,  sresult); 
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
