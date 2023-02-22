@@ -228,9 +228,13 @@ public final class BigDecimalValue extends DecimalValue {
 
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        BigDecimalValue v = new BigDecimalValue(value);
-        v.typeLabel = typeLabel;
-        return v;
+        if (typeLabel.getPrimitiveItemType() == BuiltInAtomicType.INTEGER) {
+            return IntegerValue.makeIntegerValue(value.toBigInteger()).copyAsSubType(typeLabel);
+        } else {
+            BigDecimalValue v = new BigDecimalValue(value);
+            v.typeLabel = typeLabel;
+            return v;
+        }
     }
 
     /**
