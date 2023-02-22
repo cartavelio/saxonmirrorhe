@@ -97,7 +97,7 @@
                     <xsl:apply-templates select="@*" mode="#current"/>
                     <desc>
                         <xsl:sequence select="$atts(@name)"/>
-                        <xsl:if test="empty($atts(@name))">
+                        <xsl:if test="empty($atts(@name)) and not($el-name eq 'transform')">
                             <xsl:message>**** <xsl:value-of select="concat('xsl:',$el-name,'/@',@name)"/> requires description</xsl:message>
                         </xsl:if>
                     </desc>
