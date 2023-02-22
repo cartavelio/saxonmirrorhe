@@ -152,7 +152,7 @@
    <section id="saxon_c_cpp_api" title="SaxonC C++ API">
       <h1>SaxonC C++ API</h1>
 
-      <p>SaxonC 12 is built from the SaxonJ 12 Java product by cross compiling using GraalVM Native Image.
+      <p>SaxonC 12 is built from the SaxonJ 12 Java product by compiling using GraalVM Native Image.
          This generates platform specific machine code, which is
          interfaced with C/C++ using the Native Image C API.</p>
       

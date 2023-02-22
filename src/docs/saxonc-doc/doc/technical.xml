@@ -1,7 +1,7 @@
 <article id="technical" title="Technical information">
    <h1>Technical information</h1>
 
-   <p>SaxonC is built by cross compiling the Java code of Saxon 12 using GraalVM Native Image (version 22.3.0).
+   <p>SaxonC is built by compiling the Java code of Saxon 12 using GraalVM Native Image (version 22.3.0).
       This generates platform specific machine code, which we
       interface with C/C++ using the Native Image C API.</p>
 
@@ -15,7 +15,7 @@
    <p>The Python interface is in the form of a Cython module interfaced with the C/C++ SaxonC API.
       Currently supports Python3.</p>
 
-   <p>We currently use the Xerces XML parser which is also cross compiled. There are currently no links to libxml.</p>
+   <p>We currently use the Xerces XML parser which is also compiled using GraalVM. There are currently no links to libxml.</p>
 
 
 
@@ -23,9 +23,9 @@
 
    <p>The following limitations apply to the 12 release:</p>
    <ul>
-      <li>ICU localization is currently not support in SaxonC-PE or SaxonC-EE.</li>
+      <li>ICU localization is currently not supported.</li>
       <li>The XQuery Update feature is not supported.</li>
-      <li>Host language extension functions are currently not supported in SaxonC 12.</li>
+      <li>Host language extension functions are currently not supported.</li>
    </ul>
 
    <h2>Feedback/comments:</h2>
