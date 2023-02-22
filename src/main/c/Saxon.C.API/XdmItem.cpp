@@ -14,8 +14,8 @@ XdmItem::XdmItem(): XdmValue(){
     }
 
 
-XdmItem::XdmItem(jobject obj){
-	value = SaxonProcessor::sxn_environ->env->NewGlobalRef(obj);
+XdmItem::XdmItem(int64_t objRef){
+	value = objRef;
 	xdmSize =1;
 	refCount =0;
 }
@@ -48,7 +48,6 @@ bool XdmItem::isArray(){
 
 
 XdmItem * XdmItem::getHead(){
-     std::cerr<<std::endl<<"XdmItem-getHead:"<<std::endl;
 return this;}
 
   XdmItem * XdmItem::itemAt(int n){
@@ -64,7 +63,7 @@ return this;}
 	return 1;	
    }
 
-jobject XdmItem::getUnderlyingValue(){
+int64_t XdmItem::getUnderlyingValue(){
 #ifdef DEBUG
 	std::cerr<<std::endl<<"XdmItem-getUnderlyingValue:"<<std::endl; 
 #endif
@@ -79,28 +78,15 @@ jobject XdmItem::getUnderlyingValue(){
 
     const char * XdmItem:: getStringValue(){
         if(stringValue.empty()) {
-    		jclass xdmItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmItem");
-    		jmethodID sbmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmItemClass,
-    					"getStringValue",
-    					"()Ljava/lang/String;");
-    		if (!sbmID) {
-    			std::cerr << "Error: Saxonc." << "getStringValue"
-    				<< " not found\n" << std::endl;
-    			return nullptr;
-    		} else {
-    			jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallObjectMethod(value, sbmID));
-    			if(result) {
-    					const char * str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
 
-    					stringValue = std::string(str);
+            const char * str = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread, value);
+            if(str == nullptr) {
+                return nullptr;
+            }
+    		stringValue = std::string(str);
 
-    					if(stringValue.length() == 0  || stringValue.empty()) {
-                            return nullptr;
-    					}
-                        return stringValue.c_str();
-    			}
-    			return nullptr;
-    		}
+    		return stringValue.c_str();
+
     	} else {
     		return stringValue.c_str();
     	}
@@ -108,23 +94,11 @@ jobject XdmItem::getUnderlyingValue(){
 
 
 const char * XdmItem::toString(){
-    jclass xdmClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmItem");
-    jmethodID strbbMID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmClass,
-                                                                                   "toString",
-                                                                                   "()Ljava/lang/String;");
-    if (!strbbMID) {
-        std::cerr << "Error: Saxonc." << "toString"
-                  << " not found\n" << std::endl;
-        return nullptr;
-    } else {
-        jstring result = (jstring) (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, strbbMID));
-        if(result) {
-            const char * str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
-            stringValue = str;
-            return str;
-        }
-        return nullptr;
-    }
+  const char * str = xdmItemToString(SaxonProcessor::sxn_environ->thread, value);
+  if(str == nullptr) {
+    return nullptr;
+  }
+  return str;
 
 }
 
@@ -136,11 +110,8 @@ const char * XdmItem::toString(){
 	}
 
 XdmItem::~XdmItem() {
-   // std::cerr<< " ref="<<getRefCount()<<std::endl;
-
-    if(value !=nullptr /* && getRefCount() <=1*/) {
-        SaxonProcessor::sxn_environ->env->DeleteGlobalRef(value);
-    } /*else {
+   value = -1;
+   /*else {
         decrementRefCount();
     }*/
     if(stringValue.empty()) {

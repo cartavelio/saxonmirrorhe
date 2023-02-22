@@ -1,6 +1,6 @@
 #include "../../Saxon.C.API/SaxonCProcessor.h"
 /*#include "../../Saxon.C.API/SaxonCXPath.h" */
-#include "../../Saxon.C.API/SaxonCGlue2.h"
+//#include "../../Saxon.C.API/SaxonCGlue.h"
 
 int main()
 {

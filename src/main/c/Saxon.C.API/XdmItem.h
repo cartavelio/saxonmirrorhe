@@ -41,7 +41,7 @@ public:
      * XdmItem constructor created from a JNI Java object. This is for internal use only
      * @param obj - The internal Java object for the XdmItem is wrapped here in the C++ XdmItem class
      */
-     explicit XdmItem(jobject);
+     explicit XdmItem(int64_t);
 
 
     //! Copy constructor.
@@ -108,7 +108,7 @@ public:
      * Get Java XdmValue object.
      * @return jobject - The Java object of the XdmValue in its JNI representation
      */
-     virtual  jobject getUnderlyingValue();
+     virtual  int64_t getUnderlyingValue();
 
 
 
@@ -160,7 +160,7 @@ public:
 	virtual XDM_TYPE getType();
 
  protected:  
-	jobject value; /*!< The Java XdmItem object as a JNI jobject  */
+	int64_t value; /*!< The Java XdmItem reference in Graalvm  */
 	std::string stringValue;  /*!< Cached. String representation of the XdmValue, if available */
 };
 
