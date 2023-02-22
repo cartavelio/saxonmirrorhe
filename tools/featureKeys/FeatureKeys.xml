@@ -1158,9 +1158,9 @@
                 preference to the Microsoft .NET parser.</p>
         </configfiledesc>
         <desc>
-            <p>Relevant only on .NET, determines whether the Java Classpath parser is used in
+            <p>Relevant only on the IKVM-based .NET product, determines whether the Java Classpath parser is used in
                 preference to the Microsoft .NET parser.</p>
-            <p>This option has no effect on the Java platform. The default is <b>true</b>. When
+            <p>This option has no effect on the Java platform, nor with Saxon-CS. The default is <b>true</b>. When
                 running on the .NET platform, if the option is true it causes the Apache Xerces
                 parser (cross-compiled using IKVMC) to be used in preference to the .NET XML parser.
                 If false the .NET XML parser (<code>System.Xml.XmlTextReader</code>) is used. One
