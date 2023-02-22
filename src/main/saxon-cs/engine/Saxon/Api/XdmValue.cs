@@ -294,19 +294,13 @@ namespace Saxon.Api {
                 case 1:
                     Item first = value.head();
 
-                    XdmValue wrapExternalObject(object o) {
-                        // See bug 5151, comment #8. Creates an ExternalObject<T> where T is the type of the object o.
-                        Type t = o.GetType();
-                        return (XdmValue)Activator.CreateInstance(typeof(XdmExternalObject<>).MakeGenericType(t), o);
-                    }
-                    
                     return first.getGenre() switch {
                         Genre.NODE => new XdmNode((NodeInfo)first),
                         Genre.ATOMIC => new XdmAtomicValue((AtomicValue)first),
                         Genre.MAP => new XdmMap((MapItem)first),
                         Genre.ARRAY => new XdmArray((ArrayItem)first),
                         Genre.FUNCTION => new XdmFunctionItem((Function)first),
-                        Genre.EXTERNAL => wrapExternalObject(((Saxon.Hej.value.AnyExternalObject)first).getWrappedObject()),
+                        Genre.EXTERNAL => new XdmExternalObject(((Saxon.Hej.value.AnyExternalObject)first).getWrappedObject()),
                         _ => throw new IllegalArgumentException()
                     };
                 default:
