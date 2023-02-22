@@ -1320,7 +1320,7 @@ public class Configuration implements SourceResolver, NotationSet {
         } else if (version == 40) {
             return XSLT40FunctionSet.getInstance();
         } else {
-            throw new IllegalArgumentException("XSLT version must be 30 or 40");
+            throw new IllegalArgumentException("Unsupported XSLT version " + version + " (must be 30 or 40)");
         }
     }
 
