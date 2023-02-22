@@ -52,7 +52,7 @@ public class ProjectionTests {
             FilterFactory ff = next -> new Projector(map.getRootForDocument(fileName), next);
             StreamSource ss = new StreamSource(fileName);
 
-            ParseOptions options = new ParseOptions().withAdditionalFilter(ff);
+            ParseOptions options = new ParseOptions().withFilter(ff);
             NodeInfo doc = config.buildDocumentTree(ss, options).getRootNode();
 
             // Test that the projected doc contains the CATEGORY elements

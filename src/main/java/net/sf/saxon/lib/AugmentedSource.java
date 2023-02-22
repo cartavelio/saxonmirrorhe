@@ -126,7 +126,7 @@ public class AugmentedSource implements Source {
      */
 
     public void addFilter(FilterFactory filter) {
-        options = options.withAdditionalFilter(filter);
+        options = options.withFilter(filter);
     }
 
     /**

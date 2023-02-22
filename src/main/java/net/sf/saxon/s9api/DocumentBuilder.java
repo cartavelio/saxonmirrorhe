@@ -374,7 +374,7 @@ public class DocumentBuilder {
             int option = whitespacePolicy.ordinal();
             if (option == Whitespace.XSLT) {
                 options = options.withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-                options = options.withAdditionalFilter(whitespacePolicy.makeStripper());
+                options = options.withFilter(whitespacePolicy.makeStripper());
             } else {
                 options = options.withSpaceStrippingRule(whitespacePolicy.getSpaceStrippingRule());
             }
@@ -387,7 +387,7 @@ public class DocumentBuilder {
             XQueryExpression exp = projectionQuery.getUnderlyingCompiledQuery();
             FilterFactory ff = config.makeDocumentProjector(exp);
             if (ff != null) {
-                options = options.withAdditionalFilter(ff);
+                options = options.withFilter(ff);
             }
         }
         if (source instanceof AugmentedSource) {

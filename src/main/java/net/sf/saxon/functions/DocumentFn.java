@@ -308,7 +308,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                 if (map != null) {
                     PathMap.PathMapRoot pathRoot = map.getRootForDocument(documentKey.toString());
                     if (pathRoot != null && !pathRoot.isReturnable() && !pathRoot.hasUnknownDependencies()) {
-                        options = options.withAdditionalFilter(config.makeDocumentProjector(pathRoot));
+                        options = options.withFilter(config.makeDocumentProjector(pathRoot));
                     }
                 }
                 s.setPipelineConfiguration(b.getPipelineConfiguration());

@@ -131,7 +131,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
 
                 s.setPipelineConfiguration(b.getPipelineConfiguration());
 
-                options = options.withAdditionalFilter(CSharp.methodRef(OuterElementStripper::new));
+                options = options.withFilter(CSharp.methodRef(OuterElementStripper::new));
 
                 try {
                     Sender.send(source, s, options);

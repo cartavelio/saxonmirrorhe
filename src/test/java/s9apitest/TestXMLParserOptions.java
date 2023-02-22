@@ -25,7 +25,7 @@ public class TestXMLParserOptions {
     private final ConfigTest configTest = new ConfigTest();
     
     @Test
-    public void testEnableOnExternalEntityExpansion() {
+    public void testEnableExternalEntityExpansion() {
         try {
             Processor processor = new Processor(false);
             ParseOptions parserOptions = processor.getUnderlyingConfiguration().getParseOptions();
@@ -66,7 +66,7 @@ public class TestXMLParserOptions {
     }
 
     @Test
-    public void testDisableOnExternalEntityExpansion() {
+    public void testDisableExternalEntityExpansion() {
         try {
             Processor processor = new Processor(false);
             ParseOptions parserOptions = processor.getUnderlyingConfiguration().getParseOptions()
@@ -94,7 +94,7 @@ public class TestXMLParserOptions {
 
 
     @Test
-    public void testDisableOnExternalEntityExpansion2() {
+    public void testDisableExternalEntityExpansion2() {
         try {
             Processor processor = new Processor(false);
             processor.setConfigurationProperty(Feature.XML_PARSER_FEATURE.name + "http://xml.org/sax/features/external-general-entities", false);
@@ -120,7 +120,7 @@ public class TestXMLParserOptions {
 
 
     @Test
-    public void testEnableOnExternalEntityExpansion2() {
+    public void testEnableExternalEntityExpansion2() {
         try {
             Processor processor = new Processor(false);
             processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://xml.org/sax/features/external-general-entities", true);
@@ -294,7 +294,7 @@ public class TestXMLParserOptions {
             XQueryEvaluator eval = c.compile("empty(/saxonica/*:include) and exists(/saxonica/html)").load();
             eval.setContextItem(doc);
             XdmValue val = eval.evaluate();
-            assertEquals(true, ((XdmAtomicValue) val).getBooleanValue());
+            assertTrue(((XdmAtomicValue) val).getBooleanValue());
         } catch (SaxonApiException e) {
             fail();
         }
