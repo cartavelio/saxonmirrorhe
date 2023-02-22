@@ -88,29 +88,16 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
 
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
-        return new ManualSortedGroupIterator(values, position);
+        GroupToBeSorted[] groupArray = (GroupToBeSorted[]) values;
+        GroupToBeSorted thisGroup = groupArray[position - 1];
+        ManualGroupIterator iter = new ManualGroupIterator(thisGroup.value, position);
+        iter.setCurrentGroup(thisGroup.currentGroup);
+        iter.setCurrentGroupingKey(thisGroup.currentGroupingKey);
+        iter.setLengthFinder(() -> values.length);
+        return iter;
     }
 
-    private static class ManualSortedGroupIterator extends ManualGroupIterator {
 
-        private final ObjectToBeSorted[] values;
-
-        public ManualSortedGroupIterator(ObjectToBeSorted[] values, int position) {
-            super(values[position - 1].value, position);
-            this.values = values;
-            setLengthFinder(() -> values.length);
-        }
-
-        @Override
-        public AtomicSequence getCurrentGroupingKey() {
-            return ((GroupToBeSorted) values[position() - 1]).currentGroupingKey;
-        }
-
-        @Override
-        public GroundedValue currentGroup() throws XPathException {
-            return ((GroupToBeSorted) values[position() - 1]).currentGroup;
-        }
-    }
 //#endif
 
 }

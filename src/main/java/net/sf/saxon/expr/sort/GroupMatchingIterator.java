@@ -92,28 +92,12 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
 
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
-        return new ManualGroupMatchingIterator(current, position, currentMembers, runningContext.newMinorContext());
+        ManualGroupIterator iter = new ManualGroupIterator(current, position);
+        iter.setCurrentGroup(SequenceExtent.makeSequenceExtent(currentMembers));
+        iter.setLengthFinder(CSharp.methodRef(runningContext::getLast));
+        return iter;
     }
 
-    private static class ManualGroupMatchingIterator extends ManualGroupIterator {
-        private final List<Item> cMembers;
-
-        public ManualGroupMatchingIterator(Item current, int position, List<Item> currentMembers, XPathContext savedContext) {
-            super(current, position);
-            this.cMembers = currentMembers;
-            setLengthFinder(CSharp.methodRef(savedContext::getLast));
-        }
-
-        @Override
-        public AtomicSequence getCurrentGroupingKey() {
-            return null;
-        }
-
-        @Override
-        public GroundedValue currentGroup() throws XPathException {
-            return SequenceExtent.makeSequenceExtent(cMembers);
-        }
-    }
 
 //#endif
 

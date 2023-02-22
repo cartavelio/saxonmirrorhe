@@ -17,6 +17,7 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceExtent;
@@ -199,29 +200,14 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
 
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
-        return new ManualGroupAdjacentIterator(current, position,
-                                               currentMembers, currentKey,
-                                               runningContext.newMinorContext());
+        ManualGroupIterator iter = new ManualGroupIterator(current, position);
+        iter.setCurrentGroup(SequenceExtent.makeSequenceExtent(currentMembers));
+        iter.setCurrentGroupingKey(currentKey);
+        iter.setLengthFinder(CSharp.methodRef(context::getLast));
+        return iter;
     }
 
-    private static class ManualGroupAdjacentIterator extends ManualGroupIterator {
 
-        private final List<Item> currentMembers;
-        private final XPathContext savedcontext;
-
-        ManualGroupAdjacentIterator(Item current,
-                                    int position,
-                                    List<Item> currentMembers,
-                                    AtomicSequence currentKey,
-                                    XPathContext savedContext) {
-            super(current, position);
-            this.currentMembers = currentMembers;
-            this.savedcontext = savedContext;
-            setCurrentGroupingKey(currentKey);
-            setLengthFinder(() -> savedcontext.getLast());
-        }
-
-    }
 //#endif
 
 }

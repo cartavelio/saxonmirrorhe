@@ -273,37 +273,13 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
 
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
-        return new ManualGroupByIterator(groups, groupKeys, position);
+        ManualGroupIterator iter = new ManualGroupIterator(groups.get(position - 1).get(0), position);
+        iter.setCurrentGroup(SequenceExtent.makeSequenceExtent(groups.get(position - 1)));
+        iter.setCurrentGroupingKey(groupKeys.get(position - 1));
+        iter.setLengthFinder(() -> groups.size());
+        return iter;
     }
 
-    public static class ManualGroupByIterator extends ManualGroupIterator {
-
-        private final List<List<Item>> groups;
-        private final List<Item> currentGroup;
-        private final AtomicSequence currentGroupingKey;
-
-        public ManualGroupByIterator(List<List<Item>> groups, List<AtomicSequence> groupKeys, int position) {
-            super(groups.get(position - 1).get(0), position);
-            this.groups = groups;
-            currentGroup = groups.get(position - 1);
-            currentGroupingKey = groupKeys.get(position - 1);
-
-            setLengthFinder(() -> groups.size());
-        }
-
-        @Override
-        public AtomicSequence getCurrentGroupingKey() {
-            return currentGroupingKey;
-        }
-
-
-        @Override
-        public int getLength() {
-            return groups.size();
-        }
-
-
-    }
 //#endif
 
 

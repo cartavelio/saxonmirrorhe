@@ -55,10 +55,14 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
 
     //#if EE==true
     @Override
-    public ManualMergeGroupingIterator getSnapShot(XPathContext context) {
-        return new ManualMergeGroupingIterator(currentMembers, getCurrentGroupingKey(), position, currenti);
+    public ManualGroupIterator getSnapShot(XPathContext context) {
+        ManualGroupIterator iter = new ManualGroupIterator(currenti.getObject().baseItem, position);
+        iter.setCurrentGroup(SequenceExtent.makeSequenceExtent(currentMembers));
+        iter.setCurrentGroupingKey(getCurrentGroupingKey());
+        iter.setLengthFinder(() -> currentMembers.size());
+        return iter;
     }
-//#endif
+    //#endif
 
     /**
      * The advance() method reads ahead a group of items having common merge key values. These items are
@@ -182,38 +186,8 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
         }
     }
 
-    //#if EE==true
-    public static class ManualMergeGroupingIterator extends ManualGroupIterator {
-
-        List<Item> currentGroup;
-        AtomicSequence currentGroupingKey;
-        ObjectValue<ItemWithMergeKeys> currenti;
-
-        public ManualMergeGroupingIterator(List<Item> currentGroup,
-                                           AtomicSequence currentGroupingKey,
-                                           int position,
-                                           ObjectValue<ItemWithMergeKeys> currenti) {
-            super(currenti.getObject().baseItem, position);
-            this.currentGroup = currentGroup;
-            this.currentGroupingKey = currentGroupingKey;
-            this.currenti = currenti;
-            setLengthFinder(() -> currentGroup.size());
-        }
-
-        @Override
-        public AtomicSequence getCurrentGroupingKey() {
-            return currentGroupingKey;
-        }
 
 
-        @Override
-        public int getLength() {
-            return currentGroup.size();
-        }
-
-
-    }
-//#endif
 
 }
 
