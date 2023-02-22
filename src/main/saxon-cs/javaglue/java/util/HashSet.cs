@@ -37,6 +37,10 @@ namespace java.util {
             }
         }
 
+        public void remove(E entry) {
+            _set.Remove(entry);
+        }
+
         public void clear() {
             _set.Clear();
         }
