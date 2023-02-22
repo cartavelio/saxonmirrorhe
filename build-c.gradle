@@ -215,10 +215,8 @@ task rejar_Xerces(
 
         from("${projectDir}/src/docs") {
           include "notices/JAMESCLARK.txt"
-          include "notices/UNICODE.txt"
           include "notices/CERN.txt"
           include "notices/LICENSE.txt"
-          include "notices/THAI.txt"
         }
 
         from("${projectDir}/src/main/c") {
