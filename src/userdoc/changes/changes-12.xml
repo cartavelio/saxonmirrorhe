@@ -209,6 +209,14 @@
             for performance reasons; we found that the code was spending a great deal of time creating and copying new <code>ParseOptions</code>
             objects.</p>
         
+        <p>A potential problem that has existed for many years, but which rarely surfaces, arises when a <code>SequenceIterator</code>
+        holds external resources (for example an <code>UnparsedTextLines</code> iterator, which keeps a text file open), and the iterator
+        is neither read to completion, nor explicitly closed. This typically occurs as a consequence of lazy evaluation. When such an iterator
+        is created, Saxon now uses a Java <code>Cleaner</code> thread (owned by the <code>Configuration</code>) to close the relevant
+        resources as soon as the iterator is garbage-collected. This extra thread may be visible in Java monitoring output. The thread
+        shuts down when the <code>Cleaner</code> is garbage-collected, which typically happens when the <code>Configuration</code>
+        is garbage collected; it can also be forced by calling <code>Configuration.close()</code>.</p>
+        
    
     </category>
 
