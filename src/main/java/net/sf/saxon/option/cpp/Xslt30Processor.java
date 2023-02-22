@@ -197,7 +197,7 @@ public class Xslt30Processor extends SaxonCAPI {
             if (SaxonCAPI.debug) {
                 System.err.println("DEBUG: compileFromStringAndSave str is null");
             }
-            return;
+            return SaxonCAPI.STATUS_FAIL;
         }
         XsltCompiler compiler = processor.newXsltCompiler();
         XsltPackage pack = null;
