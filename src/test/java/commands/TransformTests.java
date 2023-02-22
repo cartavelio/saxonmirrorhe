@@ -188,6 +188,27 @@ public class TransformTests {
         }
     }
 
+    @Test
+    public void testUOption() {
+        String[] args = {
+                "-u",
+                "-quit:off",
+                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-xsl:" + ConfigTest.DATA_DIR + "books.xsl"
+        };
+        try {
+            VerifyingTransform vt = new VerifyingTransform();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(baos));   // redirect System.out
+            String strResult = vt.transform(args);
+            assertTrue(strResult.toLowerCase().startsWith("<!doctype html><html>"), "html");
+            assertTrue(strResult.contains("<head><meta"), "head-meta");
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+
     /**
      * Test saxon:line-number on different documents
      */

@@ -184,5 +184,15 @@ public class GizmoCompleterTests {
         assertEquals(pos, "load ./".length(), "e");
     }
 
+    @Test
+    public void testFileCompletion006() {
+        List<String> options = new ArrayList<>();
+        int pos = go("load trax/xs", options);
+        assertEquals(1, options.size(), "xsl/");
+        assertTrue(options.contains("xsl/"), "b");
+        assertEquals(pos, "load trax/".length(), "e");
+    }
+
+
 }
 
