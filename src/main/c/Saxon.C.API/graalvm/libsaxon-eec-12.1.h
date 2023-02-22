@@ -136,7 +136,7 @@ long long int j_evaluate(graal_isolatethread_t*, void *, void *, char*, char*, v
 
 long long int j_evaluateSingle(graal_isolatethread_t*, void *, char*, char*, void *);
 
-char j_effectiveBooleanValue(graal_isolatethread_t*, void *, char*, char*, void *);
+int j_effectiveBooleanValue(graal_isolatethread_t*, void *, char*, char*, void *);
 
 long long int j_createXQueryEngine(graal_isolatethread_t*);
 

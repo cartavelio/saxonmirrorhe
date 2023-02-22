@@ -68,6 +68,23 @@ SchemaValidator::SchemaValidator(const SchemaValidator &other){
 
 }
 
+
+SchemaValidator::~SchemaValidator() {
+    clearProperties();
+    clearParameters();
+    if(sourceNode != nullptr) {
+        sourceNode->decrementRefCount();
+    }
+    if(cppV > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppV);
+    }
+
+    /*if(exception != nullptr) {
+        delete exception;
+    }*/
+
+}
+
    void SchemaValidator::setcwd(const char* dir){
 	if(dir==nullptr) {
     		cwdV = std::string(dir);
@@ -107,6 +124,10 @@ void SchemaValidator::setLax(bool l){
       int64_t  status = j_registerSchema(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,(char *)cwdV.c_str(), (char *)sourceFile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
       if(status == -2) {
           exception = new SaxonApiException();
+      }
+      if(processorDataRef > 0) {
+          j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+          processorDataRef = -1;
       }
 	
  }
@@ -153,6 +174,10 @@ void SchemaValidator::setLax(bool l){
       if(status == -2) {
           exception = new SaxonApiException();
       }
+      if(processorDataRef > 0) {
+          j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+          processorDataRef = -1;
+      }
 }
    
 XdmNode * SchemaValidator::validateToNode(const char * sourceFile){
@@ -164,6 +189,10 @@ XdmNode * SchemaValidator::validateToNode(const char * sourceFile){
 
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int64_t  result = j_validateToNode(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (void *)cppV, (char *)cwdV.c_str(), (char *)sourceFile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     if (result > 0) {
         XdmNode * node = new XdmNode(result);
         return node;

@@ -92,7 +92,9 @@ XPathProcessor::XPathProcessor(const XPathProcessor &other) {
 XPathProcessor::~XPathProcessor(){
     clearProperties();
     clearParameters();
-
+    if(cppXP > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppXP);
+    }
     cppXP = -1;
     //exceptionClear();
 
@@ -109,13 +111,15 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
     allocFn fn = operator new;
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties,0);
     int64_t results = j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
-     std::cerr<<"XXXXXXX evaluate result = "<<results<<std::endl;
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
 	if(results >0) {
 	    XdmValue * value = nullptr;
 
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results);
 
-         std::cerr<<"XXXXXXX evaluate j_getXdmObjectType = "<<typeRef<<std::endl;
         XdmItem * xdmItem = nullptr;
         if(typeRef == -2) {
             exception = new SaxonApiException();
@@ -133,6 +137,7 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
 
         }  else if (typeRef == 4) {
             value = new XdmValue();
+            value = new XdmValue();
             xdmItem =  new XdmMap(results);
             value->addXdmItem(xdmItem);
 
@@ -148,6 +153,8 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
         } else if (typeRef == 6) {
            //Empty Sequence detected.
            //TODO Maybe we should create an EmptySequence object
+            j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)results);
+            results = -1;
            return nullptr;
 
         }else {
@@ -178,7 +185,10 @@ XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
     setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int64_t result = j_evaluateSingle(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
-
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     if (result > 0) {
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
         XdmItem * xdmItem = nullptr;
@@ -307,6 +317,10 @@ bool XPathProcessor::effectiveBooleanValue(const char * xpathStr) {
     setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int resultsi = j_effectiveBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     if(resultsi == -2) {
         exception = new SaxonApiException();
         return false;

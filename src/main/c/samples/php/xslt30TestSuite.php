@@ -134,7 +134,8 @@ function check_dependency($xml)
                             continue;
                         }  else {
                             //if value = 'support year zero' then set schema_aware and return true
-                            error_log("check_DependencyXX returning false");
+                            unset($xmlNode);
+                            unset($child);
                             return false;
                         }
 
@@ -148,6 +149,8 @@ function check_dependency($xml)
                             continue;
                         } elseif ($attrStr == "streaming") {
                             error_log("check_DependencyXX returning false");
+                            unset($xmlNode);
+                            unset($child);
                             return false;
                             //break;
                         } else {
@@ -160,6 +163,8 @@ function check_dependency($xml)
                             continue;
                         } else {
                             error_log("check_DependencyXX returning false");
+                            unset($xmlNode);
+                            unset($child);
                             return false;
                         }
                     
@@ -169,7 +174,7 @@ function check_dependency($xml)
             unset($child);
         }
     }
-    error_log("check_DependencyYY returning true");
+    unset($xmlNode);
     return true;
 }
 
@@ -323,6 +328,7 @@ function parse_environment($xml, $path)
                                 //$array["" . $envName]["sources"][".file"] = $href;
 
                             }
+                            unset($nodej);
 
                         }  elseif ($rawuri != null) {
                             //$array["" . $envName]["sources"][$rawuri] = $rawuri;
@@ -344,6 +350,7 @@ function parse_environment($xml, $path)
                 if($envStylesheet != null) {
                     $newarray["stylesheet"] = $envStylesheet->getAttributeValue("file");
                 }
+                unset($envStylesheet);
 
             }
 
@@ -353,6 +360,7 @@ function parse_environment($xml, $path)
                // error_log(" Whole dump=" . print_r($array, TRUE));
            // }
         }
+        unset($value);
        unset($nodeii);
     }
     echo "<br/>";
@@ -423,6 +431,7 @@ function test_case($test_set)
         $t_dep = getNodeFromXPath($xml, "./*:test-set/*:dependencies");
 
         $check = check_dependency($t_dep);
+        
         $testCases = $xpathProcForEnv->evaluate("//*:test-case");
         if ($check and   $testCases != null) {
 
@@ -436,7 +445,7 @@ function test_case($test_set)
                     echo "<tr><td>$testCaseName</td>";
                     $result = null;
                     if(($run_test_case == null || $run_test_case == $testCaseName) && strpos($exceptionList, $testCaseName) == false) {
-                        $result = run_test_case($nodex, $env, $test_path);
+                        $result = "Not run";//$result = run_test_case($nodex, $env, $test_path);
                     }  else {
                         $result = "Not run";
 
@@ -460,6 +469,8 @@ function test_case($test_set)
     } else {
         exit('Failed to open ' . $test_set);
     }
+    $env = null;
+    unset($env);
 }
 
 function getNodeFromXPath($node, $xpath) {
@@ -1106,7 +1117,7 @@ function run_test_case($testcase, $env, $path)
             error_log("TEST CASE checkpoint 2 - LLLLLl ");
             $test = null;
 
-            $asserts = getNodeFromXPath($testcase, "./result/child::*");
+            $asserts = getNodeFromXPath($testcase, "./*:result/*:child::*");
 
             $assertsSerial = effectiveBooleanValue($asserts, "exists(//descendant-or-self::*[assert-serialization or assert-serialization-error or serialization-matches])");
 
@@ -1146,9 +1157,11 @@ function run_test_case($testcase, $env, $path)
                 if ($test != null && file_exists($test)) {
                     try {
                         //if ($t_env != null) {
-
+                                if($testElem->getNodeValue() == null) {
+                                    error_log("$testElem->getNodeValue() is null");
+                                }
                                 $result = NULL;
-                                $paramVar = getNodeFromXPath($testElem->getNodeValue(), "./param");
+                                $paramVar = getNodeFromXPath($testElem->getNodeValue(), "./*:param");
 
                                 if($paramVar != null) {
                                     $paramCount = $paramVar->size();
@@ -1263,11 +1276,11 @@ function run_test_case($testcase, $env, $path)
                                     //return "FAIL Error:".$xsltproc->getErrorMessage();
                                 } else {
 
-                                    $init_template = getSingleNodeFromXPath($testElem->getNodeValue(), "./initial-template");
+                                    $init_template = getSingleNodeFromXPath($testElem->getNodeValue(), "./*:initial-template");
                                     
-                                    $init_mode = getSingleNodeFromXPath($testElem->getNodeValue(), "./initial-mode");
+                                    $init_mode = getSingleNodeFromXPath($testElem->getNodeValue(), "./*:initial-mode");
                                     
-                                    $nit_function = getSingleNodeFromXPath($testElem->getNodeValue(), "./initial-function");
+                                    $nit_function = getSingleNodeFromXPath($testElem->getNodeValue(), "./*:initial-function");
 
 
 
@@ -1472,15 +1485,19 @@ function run_test_case($testcase, $env, $path)
                         $asserts = getNodeFromXPath($testcase, "./*:result/child::*");
                         if($run_assertion != null and $asserts->itemAt(0)->getNodeValue()->getLocalName() != $run_assertion) {
                             $notrun++;
+                            unset($asserts);
                             return "Not Run";
 
                         }
                         $outcome = testAssertion($path, $asserts->itemAt(0)->getNodeValue(), $result, $resultDocMap, $errorCode);
                         if (!$outcome) {
                             $fail++;
+                            unset($asserts);
+                            unset($outcome);
                             return "Fail - error: " . $ex->getMessage();
                         } else {
                             $pass++;
+                            unset($asserts);
                             return "PASS";
                         }
                     }

@@ -121,15 +121,17 @@ XdmValue::~XdmValue() {
 
 	if(values.size() > 0) {
         for (size_t i = 0; i < values.size(); i++) {
-            if (values[i] != nullptr && values[i]->getRefCount()<1) {
+            if (values[i] != nullptr && values[i]->getRefCount()<=1) {
                 delete values[i];
+            } else {
+                std::cerr<<"XdmValue destructor called values not deleted thought !!!!!!!!! ref="<<values[i]->getRefCount()<<std::endl;
             }
         }
         values.clear();
     }
 	if (valueType != nullptr) { delete valueType; }
 	if(jValues >0) {
-        j_handles_destroy(SaxonProcessor::sxn_environ->thread, jValues);
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)jValues);
 	}
 	jValues = -1;
 	xdmSize = 0;

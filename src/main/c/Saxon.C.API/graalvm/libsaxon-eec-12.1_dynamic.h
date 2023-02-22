@@ -136,7 +136,7 @@ typedef long long int (*j_evaluate_fn_t)(graal_isolatethread_t*, void *, void *,
 
 typedef long long int (*j_evaluateSingle_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
 
-typedef char (*j_effectiveBooleanValue_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
+typedef int (*j_effectiveBooleanValue_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
 
 typedef long long int (*j_createXQueryEngine_fn_t)(graal_isolatethread_t*);
 
