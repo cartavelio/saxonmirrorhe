@@ -29,10 +29,7 @@ namespace TestRunner {
 
         private SysCollGen.Dictionary<string, Dependency> dependencyDictionary =
             new SysCollGen.Dictionary<string, Dependency>();
-
-
-        private Spec spec;
-        //private FotsResultsDocument resultsDoc;
+        
 
         public override string catalogNamespace() {
             return CNS;
@@ -41,26 +38,35 @@ namespace TestRunner {
 
         protected override void processSpec(string specStr) {
             if (specStr.Equals("XP20")) {
-                spec = Spec.XP20;
+                requestedSpec = Spec.XP20;
             }
             else if (specStr.Equals("XP30")) {
-                spec = Spec.XP30;
+                requestedSpec = Spec.XP30;
+            }
+            else if (specStr.Equals("XP31")) {
+                requestedSpec = Spec.XP31;
+            }
+            else if (specStr.Equals("XP40")) {
+                requestedSpec = Spec.XP40;
             }
             else if (specStr.Equals("XQ10")) {
-                spec = Spec.XQ10;
+                requestedSpec = Spec.XQ10;
             }
             else if (specStr.Equals("XQ30")) {
-                spec = Spec.XQ30;
+                requestedSpec = Spec.XQ30;
             }
             else if (specStr.Equals("XQ31")) {
-                spec = Spec.XQ31;
+                requestedSpec = Spec.XQ31;
+            }
+            else if (specStr.Equals("XQ40")) {
+                requestedSpec = Spec.XQ40;
             }
             else {
                 System.Console.WriteLine(
                     "The specific language must be one of the following: XP20, XP30, XQ10, XQ30 or XQ31");
             }
 
-            resultsDoc = new FotsResultsDocument(this.getResultsDir(), spec);
+            resultsDoc = new FotsResultsDocument(this.getResultsDir(), requestedSpec);
         }
 
 
@@ -108,160 +114,207 @@ namespace TestRunner {
             string type = dependency.GetAttributeValue(new QName("type"));
             string value = dependency.GetAttributeValue(new QName("value"));
             bool inverse = "false".Equals(dependency.GetAttributeValue(new QName("satisfied")));
-            if ("xml-version".Equals(type)) {
-                if (value.Equals("1.0:4-") && !inverse) {
-                    // we don't support XML 1.0 4th edition or earlier
-                    return false;
-                }
-
-                if (value.Contains("1.1") && !inverse) {
-                    return false;
-                    // if (env != null) {
-                    //     env.processor.SetProperty(JFeatureKeys.XML_VERSION, "1.1");
-                    // }
-                    // else {
-                    //     return false;
-                    // }
-                }
-                else if (value.Contains("1.0") && !inverse) {
-                    if (env != null) {
-                        env.processor.SetProperty(JFeatureKeys.XML_VERSION, "1.0");
-                    }
-                    else {
+            switch (type) {
+                case "xml-version": {
+                    if (value.Equals("1.0:4-") && !inverse) {
+                        // we don't support XML 1.0 4th edition or earlier
                         return false;
                     }
-                }
 
-                return true;
-            }
-            else if ("xsd-version".Equals(type)) {
-                if ("1.1".Equals(value)) {
-                    if (env != null) {
-                        env.processor.SetProperty(JFeatureKeys.XSD_VERSION, (inverse ? "1.0" : "1.1"));
-                    }
-                    else {
+                    if (value.Contains("1.1") && !inverse) {
                         return false;
+                        // if (env != null) {
+                        //     env.processor.SetProperty(JFeatureKeys.XML_VERSION, "1.1");
+                        // }
+                        // else {
+                        //     return false;
+                        // }
                     }
-                }
-                else if ("1.0".Equals(value)) {
-                    if (env != null) {
-                        env.processor.SetProperty(JFeatureKeys.XSD_VERSION, (inverse ? "1.1" : "1.0"));
+                    else if (value.Contains("1.0") && !inverse) {
+                        if (env != null) {
+                            env.processor.SetProperty(JFeatureKeys.XML_VERSION, "1.0");
+                        }
+                        else {
+                            return false;
+                        }
                     }
-                    else {
-                        return false;
-                    }
-                }
 
-                return true;
-            }
-            else if ("limits".Equals(type)) {
-                return "year_lt_0".Equals(value) && !inverse;
-            }
-            else if ("spec".Equals(type)) {
-                return !(value.Contains("40"));
-            }
-            else if ("collection-stability".Equals(type)) {
-                // SAXON has a problem here - we don't support stable collections
-                return ("false".Equals(value) != inverse);
-            }
-            else if ("default-language".Equals(type)) {
-                return ("en".Equals(value) != inverse);
-            }
-            else if ("directory-as-collection-uri".Equals(type)) {
-                return ("true".Equals(value) != inverse);
-            }
-            else if ("language".Equals(type)) {
-                return "en".Equals(value) != inverse;
-            }
-            else if ("calendar".Equals(type)) {
-                return (("AD".Equals(value) || "ISO".Equals(value)) != inverse);
-            }
-            else if ("format-integer-sequence".Equals(type)) {
-                return !inverse;
-            }
-            else if ("unicode-normalization-form".Equals(type)) {
-                return value.Equals("FULLY-NORMALIZED", StringComparison.OrdinalIgnoreCase) ? inverse : !inverse;
-            }
-            else if ("feature".Equals(type)) {
-                if ("namespace-axis".Equals(value)) {
-                    return !inverse;
-                }
-                else if ("higherOrderFunctions".Equals(value)) {
-                    return !inverse;
-                }
-                else if ("schemaImport".Equals(value) || "schemaValidation".Equals(value) ||
-                         "schemaAware".Equals(value) || "schema-location-hint".Equals(value)) {
-                    return makeSchemaAware(env, inverse);
- 
-                }
-                // else if ("xpath-1.0-compatibility".Equals(value))
-                // {
-                //     if (env != null)
-                //     {
-                //         env.xpathCompiler.BackwardsCompatible = !inverse;
-                //         return true;
-                //     }
-                //     else
-                //     {
-                //         return false;
-                //     }
-                // }
-                else if ("staticTyping".Equals(value)) {
-                    return inverse;
-                }
-                else if ("moduleImport".Equals(value)) {
-                    return !inverse;
-                }
-                else if ("schema-location-hint".Equals(value)) {
-                    return !inverse;
-                }
-                else if ("info-dtd".Equals(value)) {
-                    if (treeModel == TreeModel.TinyTree || treeModel == TreeModel.LinkedTree ||
-                        treeModel == TreeModel.TinyTreeCondensed) {
-                        return !inverse;
-                    }
-                    else {
-                        return inverse;
-                    }
-                }
-                else if ("serialization".Equals(value)) {
                     return true;
                 }
-                else if ("non_codepoint_collation".Equals(value)) {
+                case "xsd-version": {
+                    if ("1.1".Equals(value)) {
+                        if (env != null) {
+                            env.processor.SetProperty(JFeatureKeys.XSD_VERSION, (inverse ? "1.0" : "1.1"));
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                    else if ("1.0".Equals(value)) {
+                        if (env != null) {
+                            env.processor.SetProperty(JFeatureKeys.XSD_VERSION, (inverse ? "1.1" : "1.0"));
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+                case "limits": {
+                    return "year_lt_0".Equals(value) && !inverse;
+                }
+                case "spec": {
+                    return isApplicableToSpecVersion(value, requestedSpec);
+                    string xpcVersion = env.xpathCompiler.XPathLanguageVersion;
+                    // string xqcVersion = env.xqueryCompiler.XQueryLanguageVersion;
+                    // string xtVersion = env.xsltCompiler != null ? env.xsltCompiler.XsltLanguageVersion : "3.0";
+                    // Spec test
+                    // env.xpathCompiler.XPathLanguageVersion = ((SpecAttr) (requestedSpec.GetAttr())).version;
+                    // env.xqueryCompiler.XQueryLanguageVersion = ((SpecAttr) (requestedSpec.GetAttr())).version;
+                    // if (env.xsltCompiler != null) {
+                    //     env.xsltCompiler.XsltLanguageVersion = ((SpecAttr) (requestedSpec.GetAttr())).version;
+                    // }
+                    // env.resetActions.Add((envt) =>  {
+                    //     envt.xpathCompiler.XPathLanguageVersion=xpcVersion;
+                    //     envt.xqueryCompiler.XQueryLanguageVersion=xqcVersion;
+                    //     if (envt.xsltCompiler != null) {
+                    //         envt.xsltCompiler.XsltLanguageVersion=xtVersion;
+                    //     }
+                    // });
+                    // return true;
+                }
+                case "collection-stability": {
+                    // SAXON has a problem here - we don't support stable collections
+                    return ("false".Equals(value) != inverse);
+                }
+                case "default-language": {
+                    return ("en".Equals(value) != inverse);
+                }
+                case "directory-as-collection-uri": {
+                    return ("true".Equals(value) != inverse);
+                }
+                case "language": {
+                    return "en".Equals(value) != inverse;
+                }
+                case "calendar": {
+                    return (("AD".Equals(value) || "ISO".Equals(value)) != inverse);
+                }
+                case "format-integer-sequence": {
                     return !inverse;
                 }
-                else if ("non_empty_sequence_collection".Equals(value)) {
-                    return !inverse;
+                case "unicode-normalization-form": {
+                    return value.Equals("FULLY-NORMALIZED", StringComparison.OrdinalIgnoreCase) ? inverse : !inverse;
                 }
-                else if ("fn-transform-XSLT".Equals(value)) {
-                    return !inverse;
+                case "saxon:config": {
+                    string name = dependency.GetAttributeValue("name");
+                    if (name != null) {
+                        string oldValue = env.processor.GetProperty(name);
+                        env.processor.SetProperty(name, value);
+                        env.resetActions.Add((env) => { env.processor.SetProperty(name, oldValue); });
+                    }
+                    return true;
                 }
-                else if ("fn-transform-XSLT30".Equals(value)) {
-                    String edition = env.processor.Edition;
-                    return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
+                case "saxon:platform": {
+                    return value.Split(' ').Contains("CS");
                 }
-                else if ("fn-format-integer-CLDR".Equals(value)) {
-                    String edition = env.processor.Edition;
-                    return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
+                case "feature": {
+                    if ("namespace-axis".Equals(value)) {
+                        return !inverse;
+                    }
+                    else if ("higherOrderFunctions".Equals(value)) {
+                        return !inverse;
+                    }
+                    else if ("schemaImport".Equals(value) || "schemaValidation".Equals(value) ||
+                             "schemaAware".Equals(value) || "schema-location-hint".Equals(value)) {
+                        return makeSchemaAware(env, inverse);
+
+                    }
+                    // else if ("xpath-1.0-compatibility".Equals(value))
+                    // {
+                    //     if (env != null)
+                    //     {
+                    //         env.xpathCompiler.BackwardsCompatible = !inverse;
+                    //         return true;
+                    //     }
+                    //     else
+                    //     {
+                    //         return false;
+                    //     }
+                    // }
+                    else if ("staticTyping".Equals(value)) {
+                        return inverse;
+                    }
+                    else if ("moduleImport".Equals(value)) {
+                        return !inverse;
+                    }
+                    else if ("schema-location-hint".Equals(value)) {
+                        return !inverse;
+                    }
+                    else if ("info-dtd".Equals(value)) {
+                        if (treeModel == TreeModel.TinyTree || treeModel == TreeModel.LinkedTree ||
+                            treeModel == TreeModel.TinyTreeCondensed) {
+                            return !inverse;
+                        }
+                        else {
+                            return inverse;
+                        }
+                    }
+                    else if ("serialization".Equals(value)) {
+                        return true;
+                    }
+                    else if ("non_codepoint_collation".Equals(value)) {
+                        return !inverse;
+                    }
+                    else if ("non_empty_sequence_collection".Equals(value)) {
+                        return !inverse;
+                    }
+                    else if ("fn-transform-XSLT".Equals(value)) {
+                        return !inverse;
+                    }
+                    else if ("fn-transform-XSLT30".Equals(value)) {
+                        String edition = env.processor.Edition;
+                        return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
+                    }
+                    else if ("fn-format-integer-CLDR".Equals(value)) {
+                        String edition = env.processor.Edition;
+                        return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
+                    }
+                    else if ("simple-uca-fallback".Equals(value)) {
+                        return !inverse;
+                    }
+                    else if ("advanced-uca-fallback".Equals(value)) {
+                        String edition = env.processor.Edition;
+                        return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
+                    }
+                    else {
+                        println("**** feature = " + value + "  ????");
+                        return false;
+                    }
                 }
-                else if ("simple-uca-fallback".Equals(value)) {
-                    return !inverse;
-                }
-                else if ("advanced-uca-fallback".Equals(value)) {
-                    String edition = env.processor.Edition;
-                    return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
-                }
-                else {
-                    println("**** feature = " + value + "  ????");
+                default: {
+                    println("**** dependency not recognized: " + type);
                     return false;
                 }
-            }
-            else {
-                println("**** dependency not recognized: " + type);
-                return false;
             }
         }
         
+        private static bool isApplicableToSpecVersion(String value, Spec spec) {
+            bool applicable = false;
+            string tag = SpecAttr.ShortNameAndVersionOf(spec);
+            if (!value.Contains(SpecAttr.ShortNameOf(spec))) {
+                applicable = false;
+            } else if (value.Contains(tag)) {
+                applicable = true;
+            } else if ((tag is "XQ30" or "XQ31" or "XQ40") &&
+                       (value.Contains("XQ10+") || value.Contains("XQ30+") || value.Contains("XQ31+"))) {
+                applicable = true;
+            } else if ((tag is "XP30" or "XP31" or "XP40") &&
+                       (value.Contains("XP20+") || value.Contains("XP30+") || value.Contains("XP31+"))) {
+                applicable = true;
+            }
+            return applicable;
+        }
 
         protected bool makeSchemaAware(Environment env, bool inverse) {
             // if (!env.processor.SchemaAware) {
@@ -356,8 +409,8 @@ namespace TestRunner {
             XdmNode optimization = null;
 
 
-            hostLang = ((SpecAttr) spec.GetAttr()).sname;
-            langVersion = ((SpecAttr) spec.GetAttr()).version;
+            hostLang = ((SpecAttr) requestedSpec.GetAttr()).sname;
+            langVersion = ((SpecAttr) requestedSpec.GetAttr()).version;
 
 
             Environment env = getEnvironment(testCase, xpc);
@@ -392,25 +445,25 @@ namespace TestRunner {
 
                 if (type.Equals("spec")) {
                     bool applicable = false;
-                    if (!value.Contains(((SpecAttr) spec.GetAttr()).sname)) {
+                    if (!value.Contains(((SpecAttr) requestedSpec.GetAttr()).sname)) {
                         applicable = false;
                     }
-                    else if (value.Contains(((SpecAttr) spec.GetAttr()).svname)) {
+                    else if (value.Contains(((SpecAttr) requestedSpec.GetAttr()).svname)) {
                         applicable = true;
                     }
-                    else if ((((SpecAttr) spec.GetAttr()).svname.Equals("XQ30") ||
-                              ((SpecAttr) spec.GetAttr()).svname.Equals("XQ31")) &&
+                    else if ((((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XQ30") ||
+                              ((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XQ31")) &&
                              (value.Contains("XQ10+") || value.Contains("XQ30+"))) {
                         applicable = true;
                     }
-                    else if ((((SpecAttr) spec.GetAttr()).svname.Equals("XP30") ||
-                              ((SpecAttr) spec.GetAttr()).svname.Equals("XP31")) &&
+                    else if ((((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XP30") ||
+                              ((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XP31")) &&
                              (value.Contains("XP20+") || value.Contains("XP30+"))) {
                         applicable = true;
                     }
 
                     if (!applicable) {
-                        writeTestcaseElement(testCaseName, "n/a", "not" + ((SpecAttr) spec.GetAttr()).svname, spec);
+                        writeTestcaseElement(testCaseName, "n/a", "not" + ((SpecAttr) requestedSpec.GetAttr()).svname, requestedSpec);
                         notrun++;
                         return;
                     }
@@ -438,7 +491,7 @@ namespace TestRunner {
                 if (!EnsureDependencySatisfied((XdmNode) dependency, env)) {
                     println("*** Dependency not satisfied: " +
                             ((XdmNode) dependency).GetAttributeValue(new QName("type")));
-                    writeTestcaseElement(testCaseName, "n/a", "Dependency not satisfied", spec);
+                    writeTestcaseElement(testCaseName, "n/a", "Dependency not satisfied", requestedSpec);
                     run = false;
                     notrun++;
                     return;
@@ -446,7 +499,7 @@ namespace TestRunner {
             }
 
             if (isSlow(testCaseName)) {
-                writeTestcaseElement(testCaseName, "tooBig", "Test is too slow", spec);
+                writeTestcaseElement(testCaseName, "tooBig", "Test is too slow", requestedSpec);
                 run = false;
                 notrun++;
                 return;
@@ -468,14 +521,14 @@ namespace TestRunner {
                     XdmItem paramValue =
                         xpath.EvaluateSingle("param[@name='not-unfolded' and @value='yes']/@name", config);
                     if (unfolded && paramValue != null) {
-                        writeTestcaseElement(testCaseName, "notRun", reasonMsg, spec);
+                        writeTestcaseElement(testCaseName, "notRun", reasonMsg, requestedSpec);
                         notrun++;
                         return;
                     }
                 }
 
                 if ("false".Equals(runAtt)) {
-                    writeTestcaseElement(testCaseName, reportAtt, reasonMsg, spec);
+                    writeTestcaseElement(testCaseName, reportAtt, reasonMsg, requestedSpec);
                     notrun++;
                     return;
                 }
@@ -484,7 +537,7 @@ namespace TestRunner {
                 optimization = (XdmNode) xpc.EvaluateSingle("optimization", exceptionElement);
             }
 
-            if (run && (specOpt == Spec.NULL || specOpt == spec)) {
+            if (run && (specOpt == Spec.NULL || specOpt == requestedSpec)) {
                 TestOutcome outcome = new TestOutcome(this);
                 string exp = null;
                 try {
@@ -588,7 +641,7 @@ namespace TestRunner {
                                     Serializer ser = env.processor.NewSerializer();
                                     ser.SetOutputStream((Stream) System.Console.OpenStandardError());
                                     driverProc.WriteXdmValue(explanation, ser);
-                                    writeTestcaseElement(testCaseName, "fail", "Failed optimization assertions", spec);
+                                    writeTestcaseElement(testCaseName, "fail", "Failed optimization assertions", requestedSpec);
                                     recordFailure(testSetName, testCaseName);
                                     return;
                                 }
@@ -644,7 +697,7 @@ namespace TestRunner {
                         }
                     }
                     else {
-                        writeTestcaseElement(testCaseName, "notRun", "No processor found", spec);
+                        writeTestcaseElement(testCaseName, "notRun", "No processor found", requestedSpec);
                         notrun++;
                         return;
                     }
@@ -668,7 +721,7 @@ namespace TestRunner {
 
                 if (assertion == null) {
                     println("*** No assertions found for test case " + testCaseName);
-                    writeTestcaseElement(testCaseName, "disputed", "No assertions in test case", spec);
+                    writeTestcaseElement(testCaseName, "disputed", "No assertions in test case", requestedSpec);
                     feedback.Feedback(successes, failures, total);
                     recordFailure(testSetName, testCaseName);
                     return;
@@ -689,7 +742,7 @@ namespace TestRunner {
                     debug);
                 if (b) {
                     //println("OK");
-                    writeTestcaseElement(testCaseName, "pass", null, spec);
+                    writeTestcaseElement(testCaseName, "pass", null, requestedSpec);
                     feedback.Feedback(successes++, failures, total);
                 }
                 else {
@@ -701,7 +754,7 @@ namespace TestRunner {
                             //                            outcome.getException().printStackTrace(System.out);
                             //                        }
 
-                            writeTestcaseElement(testCaseName, "fail", "Expected success, got ", spec);
+                            writeTestcaseElement(testCaseName, "fail", "Expected success, got ", requestedSpec);
                             println("*** fail, result " + outcome.GetException() +
                                     " Expected success.");
                             feedback.Feedback(successes, failures, total);
@@ -714,7 +767,7 @@ namespace TestRunner {
                                 ? "unknown - " + exceptionMessage
                                 : outcome.GetErrorCode().LocalName);
                             writeTestcaseElement(testCaseName, "wrongError",
-                                "Expected error:" + expectedError.ToString() + ", got " + errorCode, spec);
+                                "Expected error:" + expectedError.ToString() + ", got " + errorCode, requestedSpec);
                             println("*** fail, result " + errorCode +
                                     " Expected error:" + expectedError.ToString());
                             wrongErrorResults++;
@@ -724,7 +777,7 @@ namespace TestRunner {
                     else {
                         writeTestcaseElement(testCaseName, "fail", "Wrong results, got " +
                                                                    truncate(outcome.Serialize(assertXpc.Processor,
-                                                                       outcome.GetPrincipalResultDoc())), spec);
+                                                                       outcome.GetPrincipalResultDoc())), requestedSpec);
                         feedback.Feedback(successes, failures, total);
                         recordFailure(testSetName, testCaseName);
                         if (debug) {

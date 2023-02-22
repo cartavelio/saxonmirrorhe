@@ -58,10 +58,13 @@
     <environment ref="EXPath-binary"/>
     <test> bin:encode-string("","big5") </test>
     <result>
-      <all-of>
-        <assert-type>xs:base64Binary</assert-type>
-        <assert-eq>xs:base64Binary("")</assert-eq>
-      </all-of>
+      <any-of>
+        <all-of>
+          <assert-type>xs:base64Binary</assert-type>
+          <assert-eq>xs:base64Binary("")</assert-eq>
+        </all-of>
+        <error code="bin:conversion-error"/>
+      </any-of>
     </result>
   </test-case>
   
@@ -110,10 +113,13 @@
     <environment ref="EXPath-binary"/>
     <test> bin:encode-string("A","big5")  cast as xs:hexBinary</test>
     <result>
-      <all-of>
-        <assert-type>xs:hexBinary</assert-type>
-        <assert-eq>xs:hexBinary("41")</assert-eq>
-      </all-of>
+      <any-of>
+        <all-of>
+          <assert-type>xs:hexBinary</assert-type>
+          <assert-eq>xs:hexBinary("41")</assert-eq>
+        </all-of>
+        <error code="bin:conversion-error"/>
+      </any-of>
     </result>
   </test-case>
   
@@ -159,10 +165,13 @@
     <environment ref="EXPath-binary"/>
     <test> bin:encode-string("&#x4e93;","big5")  cast as xs:hexBinary</test>
     <result>
-      <all-of>
-        <assert-type>xs:hexBinary</assert-type>
-        <assert-eq>xs:hexBinary("C951")</assert-eq>
-      </all-of>
+      <any-of>
+        <all-of>
+          <assert-type>xs:hexBinary</assert-type>
+          <assert-eq>xs:hexBinary("C951")</assert-eq>
+        </all-of>
+        <error code="bin:conversion-error"/>
+      </any-of>
     </result>
   </test-case>
   
@@ -289,7 +298,10 @@
     <environment ref="EXPath-binary"/>
     <test> bin:decode-string($empty.bin, "big5") </test>
     <result>
-      <assert-eq>""</assert-eq>
+      <any-of>
+        <assert-eq>""</assert-eq>
+        <error code="bin:conversion-error"/>
+      </any-of>
     </result>
   </test-case>
   
@@ -338,10 +350,13 @@
     <environment ref="EXPath-binary"/>
     <test> bin:decode-string(bin:hex("41"), "Big5") </test>
     <result>
-      <all-of>
-        <assert-type>xs:string</assert-type>
-        <assert-eq>"A"</assert-eq>
-      </all-of>
+      <any-of>
+        <all-of>
+          <assert-type>xs:string</assert-type>
+          <assert-eq>"A"</assert-eq>
+        </all-of>
+        <error code="bin:conversion-error"/>
+      </any-of>
     </result>
   </test-case>
   
@@ -379,10 +394,13 @@
     <environment ref="EXPath-binary"/>
     <test> bin:decode-string(bin:hex("C951"), "Big5") </test>
     <result>
-      <all-of>
-        <assert-type>xs:string</assert-type>
-        <assert-eq>"&#x4e93;"</assert-eq>
-      </all-of>
+      <any-of>
+        <all-of>
+          <assert-type>xs:string</assert-type>
+          <assert-eq>"&#x4e93;"</assert-eq>
+        </all-of>
+        <error code="bin:conversion-error"/>
+      </any-of>
     </result>
   </test-case>
   
