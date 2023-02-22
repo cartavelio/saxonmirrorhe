@@ -536,8 +536,12 @@ public class TestXQueryEvaluator {
         try {
             String doc = "<a xmlns='http://a/'><b>1</b><b>2</b><b>3</b><b>4</b></a>";
             String q = "declare namespace p='http://a/';\n" +
-                    "for $i in //p:b where $i mod 2 = 0 order by -$i return $i";
+                    "for $i in //p:b \n" +
+                    "where $i mod 2 = 0 \n" +
+                    "order by -$i \n" +
+                    "return $i";
             Processor p = new Processor(false);
+            p.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, "");
             XQueryCompiler comp = p.newXQueryCompiler();
             comp.setCompileWithTracing(true);
             XQueryExecutable exec = comp.compile(q);
@@ -564,23 +568,30 @@ public class TestXQueryEvaluator {
                 @Override
                 public void enter(Traceable instruction, Map<String, Object> properties, XPathContext context) {
                     if (!(instruction instanceof TraceExpression)) {
+                        System.err.println(i + ": @" + instruction.getLocation().getLineNumber() + " " +
+                                                   (instruction instanceof ClauseInfo ? ((ClauseInfo) instruction).getClause().getClauseKey() : instruction.getClass()));
                         switch (i++) {
                             case 0:
                                 assertTrue(instruction instanceof XQueryExpression, "isXQueryExpression");
                                 break;
                             case 1:
+                            case 2:
+                            case 4:
+                            case 5:
                                 assertTrue(instruction instanceof ClauseInfo, "isClauseInfo0");
                                 assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix0");
                                 assertTrue(((ClauseInfo) instruction).getClause() instanceof ForClause, "isForClause0");
                                 assertEquals(2, instruction.getLocation().getLineNumber(), "lineNumber0");
                                 break;
-                            case 2:
+                            case 3:
+                            case 6:
                                 assertTrue(instruction instanceof ClauseInfo, "isClauseInfo1");
                                 assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix1");
                                 assertTrue(((ClauseInfo) instruction).getClause() instanceof WhereClause, "isWhereClause1");
                                 assertEquals(3, instruction.getLocation().getLineNumber(), "lineNumber1");
                                 break;
-                            case 5:
+                            case 7:
+                            case 8:
                                 assertTrue(instruction instanceof ClauseInfo, "isClauseInfo4");
                                 assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix4");
                                 assertTrue(((ClauseInfo) instruction).getClause() instanceof OrderByClause, "isOrderBy4");

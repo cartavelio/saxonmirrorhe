@@ -2,9 +2,6 @@ package xqjtests;
 
 import com.saxonica.xqj.SaxonXQDataSource;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.type.ValidationException;
-import net.sf.saxon.value.DurationValue;
 import net.sf.saxon.value.SaxonDuration;
 import org.junit.jupiter.api.Test;
 
@@ -79,17 +76,11 @@ public class TestSaxonDuration {
 
     @Test
     public void testAddition() {
-        try {
-            Duration dayTimeDuration = getDayTimeDuration();
-            Duration yearMonthDuration = getYearMonthDuration();
-            assertEquals(new SaxonDuration((DurationValue)DurationValue.makeDuration(StringView.wrap("P2DT4H6M9S")).asAtomic()),
-                         dayTimeDuration.add(dayTimeDuration));
-            assertEquals(new SaxonDuration((DurationValue) DurationValue.makeDuration(StringView.wrap("P17Y6M")).asAtomic()),
-                         yearMonthDuration.add(yearMonthDuration));
-        } catch (ValidationException e) {
-            e.printStackTrace();
-            fail();
-        }
+        // changed 2021-03-17 to avoid use of XPathComparable in the assertEquals()
+        Duration dayTimeDuration = getDayTimeDuration();
+        Duration yearMonthDuration = getYearMonthDuration();
+        assertEquals("P0Y0M2DT4H6M9S", dayTimeDuration.add(dayTimeDuration).toString());
+        assertEquals("P17Y6M0DT0H0M0S", yearMonthDuration.add(yearMonthDuration).toString());
     }
 
     @Test
