@@ -71,21 +71,9 @@ void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath, sResult
 
 
 
-    for(int i=0; i< children[0]->getChildCount(); i++) {
-        delete children0[i];
-    }
-    delete [] children0;
-
-    for(int i=0; i<input->getChildCount(); i++) {
-        delete children[i];
-    }
-
-    delete [] children;
-
-    delete input;
 
 
-    /*for(int i=0; i<num;i++) {
+    for(int i=0; i<num;i++) {
         cout<<"checkpoint - 1"<<endl;
         if(children0[i] == nullptr) {
             cout<<"checkpoint - 1-1 null found"<<endl;
@@ -98,9 +86,21 @@ void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath, sResult
         }
         cout<<"checkpoint - 2"<<endl;
     }
-    cout<<"checkpoint - 1"<<endl;
-        //delete []children;
-    //delete [] children0;
+
+
+
+    for(int i=0; i< children[0]->getChildCount(); i++) {
+        delete children0[i];
+    }
+    delete [] children0;
+
+    for(int i=0; i<input->getChildCount(); i++) {
+        delete children[i];
+    }
+
+    delete [] children;
+
+
 
     xpath->setContextItem((XdmItem *)input);
     cerr<<"testXPAthValues end cp0 "<<endl;
@@ -140,7 +140,7 @@ void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath, sResult
     delete input;
     xpath->clearParameters();
     xpath->clearProperties();
-    cerr<<"testXPAthValues end cp2 "<<endl;*/
+    cerr<<"testXPAthValues end cp2 "<<endl;
 
 }
 
