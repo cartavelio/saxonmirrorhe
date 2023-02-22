@@ -264,9 +264,10 @@ public class Optimizer {
      * @param iter the iterator that delivers the sequence of values to be indexed
      * @return the indexed value
      * @throws UnsupportedOperationException this method should not be called in Saxon-HE
+     * @throws XPathException if an error occurs
      */
 
-    public GroundedValue makeIndexedValue(SequenceIterator iter) throws UnsupportedOperationException {
+    public GroundedValue makeIndexedValue(SequenceIterator iter) throws UnsupportedOperationException, XPathException {
         throw new UnsupportedOperationException("Indexing requires Saxon-EE");
     }
 
