@@ -9,6 +9,8 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.Parcel;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
@@ -32,9 +34,16 @@ public class UnparcelFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item arg = arguments[0].head();
-        if (!(arg instanceof Parcel)) {
+        return unparcel(arg, context);
+    }
+
+    public static GroundedValue unparcel(Item arg, XPathContext context) throws XPathException {
+        if (arg instanceof Parcel) {
+            return ((Parcel) arg).getValue();
+        } else if (Parcel.TYPE.matches(arg, context.getConfiguration().getTypeHierarchy())) {
+            return ((MapItem) arg).get(Parcel.parcelKey);
+        } else {
             throw new XPathException("The first argument of fn:unparcel must be a parcel", "XPTY0004");
         }
-        return ((Parcel)arg).getValue();
     }
 }

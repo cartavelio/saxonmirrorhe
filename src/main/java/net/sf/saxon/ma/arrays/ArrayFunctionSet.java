@@ -11,6 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Fold;
 import net.sf.saxon.functions.FoldingFunction;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.UnparcelFn;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.Parcel;
@@ -442,7 +443,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             List<GroundedValue> members = new ArrayList<>();
             SequenceIterator parcels = arguments[0].iterate();
             for (Item parcel; (parcel = parcels.next()) != null;) {
-                members.add(((Parcel)parcel).getValue());
+                members.add(UnparcelFn.unparcel(parcel, context));
             }
             return new SimpleArrayItem(members);
         }
