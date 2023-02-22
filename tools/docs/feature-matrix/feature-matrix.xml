@@ -1,7 +1,10 @@
 <featureMatrix version="11" release="Oct 2021" Jrelease="Jan 2022" Crelease="Jan 2022" JSversion="2" JSrelease="Jun 2020">
   
   <!-- For different descriptions in the Product Descriptions, but not the feature matrix table,
-      use description and alt-description elements --> 
+      use description and alt-description elements.
+      Use description/@generic="true" for generic descriptions used by the feature matrix only, for features
+      with levels.
+  --> 
   
   <packages>
     <package edition="HE" platforms="J C JS"/>
@@ -638,7 +641,7 @@
     </products>
   </feature>
 
-  <feature class="Localization">
+  <!--<feature class="Localization">
     <shortName>Localization</shortName>
     <description>
       <p>At the <i>Basic</i> level, all the interfaces for developers are in English, but there is
@@ -664,6 +667,75 @@
           comparison of strings, building on the capabilities of the <a
             href="http://site.icu-project.org/" class="bodylink">ICU-J library</a>. The
           <i>Advanced</i> level also includes APIs which allow additional languages to be supported.</p></description>
+      </product>
+    </products>
+  </feature>-->
+
+  <feature class="heading">
+    <shortName>Localization</shortName>
+  </feature>
+  
+  <feature class="Localization">
+    <shortName>Localization for sorting</shortName>
+    <details link="extensibility/config-extend/collation/UCA" name="Unicode collation"
+      subpages="has-subpages"/>
+    <products>
+      <product level="Basic" J="HE" C="HE">
+        <description J="HE" C="HE"><p>Run-time localization support for sorting and comparison of strings,
+          building on the capabilities of the Java Virtual Machine.</p></description>
+      </product>
+      <product level="Basic Adv" J="PE" C="PE" CS="PE" JS="HE">
+        <description generic="true"><p>Run-time localization support for sorting and comparison of strings, building on the
+          capabilities of the <a href="http://site.icu-project.org/" class="bodylink">ICU library</a> for the
+          relevant platform for Saxon 11 products (ICU4J for SaxonJ and SaxonC, ICU4N for SaxonCS), and for
+          SaxonJS using the <code>Intl.Collator</code> JavaScript API.</p></description>
+        <alt-description J="PE" C="PE"><p>Run-time localization support for sorting and comparison of strings,
+          building on the capabilities of the <a href="http://site.icu-project.org/" class="bodylink">ICU4J
+            library</a>.</p></alt-description>
+        <alt-description CS="PE"><p>Run-time localization support for sorting and comparison of strings,
+          building on the capabilities of the ICU4N library.</p></alt-description>
+        <alt-description JS="HE"><p>Run-time localization support for sorting and comparison of strings,
+          in the browser using <code>Intl.Collator</code>.</p></alt-description>
+      </product>
+    </products>
+  </feature>
+  
+  <feature class="Localization">
+    <shortName>Localization for formatting numbers</shortName>
+    <details link="extensibility/config-extend/localizing" name="Localizing numbers and dates"
+      subpages="has-subpages"/>
+    <products>
+      <product level="Basic" J="HE" C="HE">
+        <description J="HE" C="HE"><p>By default, English is the only language supported for formatting
+          numbers in words. A further set of installable numberers are available to provide support for some
+          other European languages: Danish (da), German (de), French (fr), Belgium French (fr-BE), Italian
+          (it), Dutch (nl), Belgium Flemish (nl-BE), and Swedish (sv).</p></description>
+      </product>
+      <product level="Basic Adv" J="PE" C="PE">
+        <description><p>Full support for formatting numbers in words in different languages is provided using
+          the <a href="http://site.icu-project.org/" class="bodylink">ICU4J library</a>.</p></description>
+      </product>
+    </products>
+  </feature>
+  
+  <feature class="Localization">
+    <shortName>Localization for formatting dates</shortName>
+    <details link="extensibility/config-extend/localizing" name="Localizing numbers and dates"
+      subpages="has-subpages"/>
+    <products>
+      <product level="Basic" J="HE" C="HE">
+        <description J="HE" C="HE"><p>By default, English is the only language supported for formatting
+          dates in words.</p></description>
+      </product>
+      <product level="Basic Adv" J="PE" C="PE" CS="PE">
+        <description generic="true"><p>Full support for formatting dates in words in different languages is
+          provided using the <a href="http://site.icu-project.org/" class="bodylink">ICU library</a> for the
+          relevant platform (ICU4J for SaxonJ and SaxonC, ICU4N for SaxonCS).</p></description>
+        <alt-description J="PE" C="PE"><p>Full support for formatting dates in words in different languages is
+          provided using the <a href="http://site.icu-project.org/" class="bodylink">ICU4J
+            library</a>.</p></alt-description>
+        <alt-description CS="PE"><p>Full support for formatting dates in words in different languages is
+          provided using the ICU4N library.</p></alt-description>
       </product>
     </products>
   </feature>
