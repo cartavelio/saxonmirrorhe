@@ -16,6 +16,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.z.IntHashMap;
 
 import java.util.ArrayList;
@@ -183,6 +184,10 @@ public class MemoFunction extends UserFunction {
                     }
                     if (!av0.isIdentical(av1)) {
                         return false;
+                    }
+                    if (av0 instanceof NumericValue &&
+                            (((NumericValue)av0).isNegativeZero() != ((NumericValue) av1).isNegativeZero())) {
+                        return false; // The isIdentical() test treats positive and negative zero as identical
                     }
                 } else {
                     if (!it0.equals(it1)) {
