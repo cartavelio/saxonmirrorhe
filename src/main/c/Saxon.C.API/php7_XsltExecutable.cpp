@@ -112,7 +112,7 @@ PHP_METHOD(XsltExecutable, getResultDocuments)
 
     if (xsltExecutable != NULL) {
         xsltExecutable->exceptionClear();
-        std::map<std::string,XdmNode*> cpp_resultDocMap = xsltExecutable->getResultDocuments();
+        std::map<std::string,XdmValue*> cpp_resultDocMap = xsltExecutable->getResultDocuments();
         if(cpp_resultDocMap.size() == 0) {
             RETURN_NULL();
         }
@@ -490,9 +490,9 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
     PHP_METHOD(XsltExecutable, callTemplateReturningValue){
 
   XsltExecutable *xsltExecutable;
-    char* templateName = nullptr;
+    char* templateName = NULL;
 
-    size_t len1, len2;
+    size_t len2 = 0;
 
     if (ZEND_NUM_ARGS()>1) {
         WRONG_PARAM_COUNT;
@@ -510,7 +510,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
 
 
 	//php_printf(" argument_length= %d",argument_length);
-        XdmValue * result = xsltExecutable->callTemplateReturningValue(templateName);
+        XdmValue * result = xsltExecutable->callTemplateReturningValue((len2 == 0 ? NULL :templateName));
 
 	if(result != nullptr) {
 	    result->incrementRefCount();
@@ -557,7 +557,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
 
 
 	//php_printf(" argument_length= %d",argument_length);
-        const char * result = xsltExecutable->callTemplateReturningString(templateName);
+        const char * result = xsltExecutable->callTemplateReturningString((len2 == 0 ? NULL :templateName));
 	if(result != nullptr) {
             _RETURN_STRING(result);
         } else {
@@ -589,7 +589,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
     xsltExecutable = obj->xsltExecutable;
 
     if (xsltExecutable != nullptr) {
-   	xsltExecutable->callTemplateReturningFile(templateName, filename);
+   	xsltExecutable->callTemplateReturningFile((len2 == 0 ? NULL :templateName), filename);
     }
 
   }
