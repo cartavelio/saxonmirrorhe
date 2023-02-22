@@ -309,7 +309,7 @@ def testSuiteMatrix = [
       ]
     ],
     "xslt30": [
-      "_exceptions": "${projectDir}/src/test/exceptions/xslt30.xml",
+      "_exceptions": "${projectDir}/src/test/exceptions/xslt40cs.xml",
       "_depends": ["cloneXslt30TestSuite"],
 
       "XT30": [
