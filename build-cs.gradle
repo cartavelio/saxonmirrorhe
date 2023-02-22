@@ -403,7 +403,7 @@ task eecs_dll(
 task dotnetTestDrivers(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/SaxonCS.dll"
+  inputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/test/cstestrunner")
   outputs.file "${buildDir}/testdrivers/bin/${csconfiguration}/TestDrivers.${csver}.nupkg"
 
@@ -448,7 +448,7 @@ task dotnetTestDrivers(
 task dotnetExamples(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/SaxonCS.dll"
+  inputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/samples/cs/Examples.cs")
   outputs.file "${buildDir}/examples/bin/${csconfiguration}/Examples.${csver}.nupkg"
 
