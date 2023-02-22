@@ -103,10 +103,11 @@
         <h1>Saxon Java API Documentation</h1>
         <xsl:variable name="art" select="."/>
         <xsl:variable name="titles"
-            select="('s9api Interface','Other Interfaces','External Interfaces','Other Packages')"
+            select="('s9api Interfaces','Other Interfaces','External Interfaces','Other Packages')"
             as="xs:string+"/>
 
-        <xsl:variable name="p1" select="'net.sf.saxon.s9api'"/>
+        <xsl:variable name="p1" select="'net.sf.saxon.s9api', 'net.sf.saxon.s9api.push',
+            'net.sf.saxon.s9api.streams'"/>
         <xsl:variable name="p2"
             select="'com.saxonica.config','com.saxonica.jaxp','com.saxonica.schema',
 'net.sf.saxon','net.sf.saxon.lib', 'net.sf.saxon.om',
