@@ -11,16 +11,10 @@
 	xmlns:saxon="http://saxon.sf.net/"
  	extension-element-prefixes="saxon sql">
 
-<!-- insert your database details here, or supply them in parameters -->
-    <!--<xsl:param name="database" select="'jdbc:hsqldb:file:db/test'"/>  
-    <xsl:param name="user" select="'mike'"/>
-<xsl:param name="password" select="'saxonxxx'"/>
-<xsl:param name="driver" select="'org.hsqldb.jdbc.JDBCDriver'"/>
-    -->
-    <xsl:param name="database" select="'jdbc:mysql://localhost/saxontest'"/>  
-    <xsl:param name="user" select="'jwl'"/>
-    <xsl:param name="password" select="'john'"/>
-    <xsl:param name="driver" select="'com.mysql.jdbc.Driver'"/>
+  <xsl:param name="database" select="'jdbc:postgresql://localhost/sample'"/>  
+  <xsl:param name="user" select="'testeditor'"/>
+  <xsl:param name="password" select="'sekrit'"/>
+  <xsl:param name="driver" select="'org.postgresql.Driver'"/>
 
 <!-- This stylesheet writes the book list to a SQL database -->
 

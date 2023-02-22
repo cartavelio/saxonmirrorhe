@@ -12,20 +12,13 @@
     extension-element-prefixes="saxon sql"
     expand-text="true">
 
-    <!-- insert your database details here, or supply them in parameters -->
-    <!--<xsl:param name="database" select="'jdbc:hsqldb:file:db/test'"/>  
-    <xsl:param name="user" select="'mike'"/>
-<xsl:param name="password" select="'saxonxxx'"/>
-<xsl:param name="driver" select="'org.hsqldb.jdbc.JDBCDriver'"/>
-    -->
-
     <!-- Note that there are problems with single character values when used in sql:column,
     hence there are some normalizations of strings, or using sql:execute instead -->
 
-    <xsl:param name="database" static='yes' select="'jdbc:mysql://localhost/saxontest'"/>
-    <xsl:param name="user" static='yes' select="'jwl'"/>
-    <xsl:param name="password" static='yes' select="'john'"/>
-    <xsl:param name="driver" select="'com.mysql.jdbc.Driver'"/>
+    <xsl:param name="database" select="'jdbc:postgresql://localhost/sample'"/>  
+    <xsl:param name="user" select="'testeditor'"/>
+    <xsl:param name="password" select="'sekrit'"/>
+    <xsl:param name="driver" select="'org.postgresql.Driver'"/>
 
     <!-- This stylesheet writes the book list to a SQL database -->
 
