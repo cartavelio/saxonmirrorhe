@@ -65,10 +65,10 @@ public class Twine8 extends UnicodeString {
     /**
      * Create a Twine8 from a string whose characters are known to be single byte chars
      *
-     * @param string the value, all characters in range must be <= 255
+     * @param str the value, all characters in range must be <= 255
      */
-    public Twine8(String string) {
-        bytes = string.getBytes(StandardCharsets.ISO_8859_1);
+    public Twine8(String str) {
+        bytes = str.getBytes(StandardCharsets.ISO_8859_1);
     }
 
     /**

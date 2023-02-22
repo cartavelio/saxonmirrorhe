@@ -234,7 +234,7 @@
    <!-- Identify static field accessors such as java.nio.charset.StandardCharsets.UTF_8 -->
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.nio.charset.StandardCharsets']" priority="20">
       <xsl:choose>
-         <xsl:when test="name/@identifier='ISO_8859_1'">System.Text.Encoding.Latin1</xsl:when>
+         <xsl:when test="name/@identifier='ISO_8859_1'">System.Text.Encoding.GetEncoding(1252)</xsl:when>
          <xsl:when test="name/@identifier='UTF_8'">System.Text.Encoding.UTF8</xsl:when>
          <xsl:when test="name/@identifier='UTF_16'">System.Text.Encoding.Unicode</xsl:when>
          <xsl:when test="name/@identifier='UTF_16BE'">System.Text.Encoding.BigEndianUnicode</xsl:when>
