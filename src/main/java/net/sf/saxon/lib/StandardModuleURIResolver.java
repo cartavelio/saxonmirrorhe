@@ -109,7 +109,7 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
                     Source source = null;
                     if (config != null) {
                         try {
-                            source = config.getSaxonResourceResolver().resolve(href, baseURI);
+                            source = config.getCommonResourceResolver().resolve(href, baseURI);
                         } catch (TransformerException ex) {
                             // Sigh. Nevermind then.
                         }
@@ -139,10 +139,10 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
         try {
             Source source = null;
             if (config != null) {
-                source = config.getSaxonResourceResolver().resolveNamespace(moduleURI, XQUERY_PURPOSE, null);
+                source = config.getCommonResourceResolver().resolveNamespace(moduleURI, XQUERY_PURPOSE, null);
                 if (source == null && baseURI != null) {
                     String resuri = new URI(baseURI).resolve(moduleURI).toString();
-                    source = config.getSaxonResourceResolver().resolveNamespace(resuri, XQUERY_PURPOSE, null);
+                    source = config.getCommonResourceResolver().resolveNamespace(resuri, XQUERY_PURPOSE, null);
                 }
             }
             if (source != null) {

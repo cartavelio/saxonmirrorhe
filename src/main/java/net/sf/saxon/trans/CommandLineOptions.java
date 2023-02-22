@@ -313,7 +313,7 @@ public class CommandLineOptions {
                 }
             }
 
-            config.getSaxonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogs);
+            config.getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogs);
         }
         //#endif
 

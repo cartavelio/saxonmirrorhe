@@ -52,7 +52,7 @@ public class CatalogResolver {
     @Test
     public void xmlResolverParse() {
         Configuration config = new Configuration();
-        CommonResourceResolver resolver = config.getSaxonResourceResolver();
+        CommonResourceResolver resolver = config.getCommonResourceResolver();
         try {
             resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
             Processor processor = new Processor(config);
@@ -68,7 +68,7 @@ public class CatalogResolver {
     @Test
     public void xmlResolverUriResolver() {
         Configuration config = new Configuration();
-        CommonResourceResolver resolver = config.getSaxonResourceResolver();
+        CommonResourceResolver resolver = config.getCommonResourceResolver();
         try {
             resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
             Processor processor = new Processor(config);
@@ -98,7 +98,7 @@ public class CatalogResolver {
     @Test
     public void xmlResolverStylesheetUriResolver() {
         Configuration config = new Configuration();
-        CommonResourceResolver resolver = config.getSaxonResourceResolver();
+        CommonResourceResolver resolver = config.getCommonResourceResolver();
         try {
             resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
             Processor processor = new Processor(config);
@@ -128,7 +128,7 @@ public class CatalogResolver {
     @Test
     public void xmlResolverUnparsedTextUriResolver() {
         Configuration config = new Configuration();
-        CommonResourceResolver resolver = config.getSaxonResourceResolver();
+        CommonResourceResolver resolver = config.getCommonResourceResolver();
         try {
             resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
             Processor processor = new Processor(config);
@@ -158,7 +158,7 @@ public class CatalogResolver {
     @Test
     public void xmlResolverModuleUriResolver() {
         Configuration config = new Configuration();
-        CommonResourceResolver resolver = config.getSaxonResourceResolver();
+        CommonResourceResolver resolver = config.getCommonResourceResolver();
         try {
             resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
             Processor processor = new Processor(config);

@@ -2965,10 +2965,10 @@
         <type>Implementation of <link>net.sf.saxon.lib.CommonResourceResolver</link></type>
         <uri>http://saxon.sf.net/feature/saxon-resource-resolver</uri>
         <editions>HE PE EE</editions>
-        <setter class="net.sf.saxon.Configuration">setSaxonResourceResolver</setter>
-        <getter class="net.sf.saxon.Configuration">getSaxonResourceResolver</getter>
+        <setter class="net.sf.saxon.Configuration">setCommonResourceResolver</setter>
+        <getter class="net.sf.saxon.Configuration">getCommonResourceResolver</getter>
         <desc>
-            <p>The supplied implementation of <code>SaxonResourceResolver</code> is used to
+            <p>The supplied implementation of <code>CommonResourceResolver</code> is used to
             resolve URIs. The default implementation uses XML Catalog files.
             The Saxon resource resolver is used by the entity resolver, URI resolver,
             unparsed text resolver, and other resolvers that resolve URIs to resources.</p>
@@ -2981,9 +2981,9 @@
         <type>Name of a class implementing <link>net.sf.saxon.lib.CommonResourceResolver</link></type>
         <uri>http://saxon.sf.net/feature/saxon-resource-resolver-class</uri>
         <editions>HE PE EE</editions>
-        <setter class="net.sf.saxon.Configuration">setSaxonResourceResolver</setter>
-        <getter class="net.sf.saxon.Configuration">getSaxonResourceResolver</getter>
-        <configfile>global/@SaxonResourceResolver</configfile>
+        <setter class="net.sf.saxon.Configuration">setCommonResourceResolver</setter>
+        <getter class="net.sf.saxon.Configuration">getCommonResourceResolver</getter>
+        <configfile>global/@CommonResourceResolver</configfile>
         <configfiledesc>
             <p>User-supplied class used to perform URI resolution.</p>
         </configfiledesc>

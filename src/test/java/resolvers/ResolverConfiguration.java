@@ -23,16 +23,16 @@ public class ResolverConfiguration {
     @Test
     public void defaultCatalogResourceResolver() {
         Configuration config = new Configuration();
-        assertNotNull(config.getSaxonResourceResolver());
-        assertEquals("net.sf.saxon.lib.CatalogResourceResolver", config.getSaxonResourceResolver().getClass().getName());
+        assertNotNull(config.getCommonResourceResolver());
+        assertEquals("net.sf.saxon.lib.CatalogResourceResolver", config.getCommonResourceResolver().getClass().getName());
     }
 
     @Test
     public void explicitCatalogResourceResolverClass() {
         Configuration config = new Configuration();
         config.setConfigurationProperty(Feature.SAXON_RESOURCE_RESOLVER_CLASS, "net.sf.saxon.lib.CatalogResourceResolver");
-        assertNotNull(config.getSaxonResourceResolver());
-        assertEquals("net.sf.saxon.lib.CatalogResourceResolver", config.getSaxonResourceResolver().getClass().getName());
+        assertNotNull(config.getCommonResourceResolver());
+        assertEquals("net.sf.saxon.lib.CatalogResourceResolver", config.getCommonResourceResolver().getClass().getName());
     }
 
     @Test
@@ -44,8 +44,8 @@ public class ResolverConfiguration {
         MyResolver resolver = new MyResolver(underlyingResolver);
 
         config.setConfigurationProperty(Feature.SAXON_RESOURCE_RESOLVER, resolver);
-        assertNotNull(config.getSaxonResourceResolver());
-        assertEquals("resolvers.ResolverConfiguration$MyResolver", config.getSaxonResourceResolver().getClass().getName());
+        assertNotNull(config.getCommonResourceResolver());
+        assertEquals("resolvers.ResolverConfiguration$MyResolver", config.getCommonResourceResolver().getClass().getName());
     }
 
     @Test

@@ -811,7 +811,7 @@ public class ConfigurationReader implements Receiver {
         }
 
         if (level == 2 && "resources".equals(localName) && catalogFiles.size() != 0) {
-            targetConfig.getSaxonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogFiles);
+            targetConfig.getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogFiles);
         }
 
         level--;

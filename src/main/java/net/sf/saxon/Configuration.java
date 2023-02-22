@@ -191,7 +191,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private final TypeChecker typeChecker = new TypeChecker();
     private final TypeChecker10 typeChecker10 = new TypeChecker10();
 
-    private transient CommonResourceResolver catalogResolver;
+    private transient CommonResourceResolver commonResolver;
     private transient URIResolver uriResolver;
     protected FunctionLibraryList builtInExtensionLibraryList;
     protected int xsdVersion = XSD11;
@@ -386,7 +386,7 @@ public class Configuration implements SourceResolver, NotationSet {
         // There's a temptation to be lazy about instantiating the catalog resolver, but we want
         // to make sure that if someone subsequently overrides, for example, the URIResolver,
         // that their override wins.
-        catalogResolver = new CatalogResourceResolver();
+        commonResolver = new CatalogResourceResolver();
         defaultXsltCompilerInfo = makeCompilerInfo();
         systemURIResolver = new StandardURIResolver(this);
         standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
@@ -750,10 +750,10 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param resolver The resolver to use.
      */
 
-    public void setSaxonResourceResolver(CommonResourceResolver resolver) {
-        catalogResolver = resolver;
-        defaultXsltCompilerInfo.setSaxonResourceResolver(resolver);
-        setURIResolver(catalogResolver);
+    public void setCommonResourceResolver(CommonResourceResolver resolver) {
+        commonResolver = resolver;
+        defaultXsltCompilerInfo.setCommonResourceResolver(resolver);
+        setURIResolver(commonResolver);
     }
 
     /**
@@ -763,11 +763,11 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return The resolver.
      */
 
-    public CommonResourceResolver getSaxonResourceResolver() {
-        if (catalogResolver == null) {
-            setSaxonResourceResolver(new CatalogResourceResolver());
+    public CommonResourceResolver getCommonResourceResolver() {
+        if (commonResolver == null) {
+            setCommonResourceResolver(new CatalogResourceResolver());
         }
-        return catalogResolver;
+        return commonResolver;
     }
 
     /**
@@ -2719,7 +2719,7 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = loadParser();
         }
 
-        CommonResourceResolver resolver = getSaxonResourceResolver().newInstance().chain(parser.getEntityResolver());
+        CommonResourceResolver resolver = getCommonResourceResolver().newInstance().chain(parser.getEntityResolver());
         parser.setEntityResolver(resolver);
 
         return parser;
@@ -2753,7 +2753,7 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = loadParser();
         }
 
-        CommonResourceResolver resolver = getSaxonResourceResolver().newInstance().chain(parser.getEntityResolver());
+        CommonResourceResolver resolver = getCommonResourceResolver().newInstance().chain(parser.getEntityResolver());
         parser.setEntityResolver(resolver);
 
         if (isTiming()) {
@@ -2859,7 +2859,7 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = loadParser();
         }
 
-        CommonResourceResolver resolver = getSaxonResourceResolver().newInstance().chain(parser.getEntityResolver());
+        CommonResourceResolver resolver = getCommonResourceResolver().newInstance().chain(parser.getEntityResolver());
         parser.setEntityResolver(resolver);
 
         try {
@@ -4815,13 +4815,13 @@ public class Configuration implements SourceResolver, NotationSet {
                 case FeatureCode.SAXON_RESOURCE_RESOLVER:
                     if (!(value instanceof CommonResourceResolver)) {
                         throw new IllegalArgumentException(
-                                "SAXON_RESOURCE_RESOLVER value must be an instance of net.sf.saxon.lib.SaxonResourceResolver");
+                                "SAXON_RESOURCE_RESOLVER value must be an instance of net.sf.saxon.lib.CommonResourceResolver");
                     }
-                    setSaxonResourceResolver((CommonResourceResolver) value);
+                    setCommonResourceResolver((CommonResourceResolver) value);
                     break;
                 case FeatureCode.SAXON_RESOURCE_RESOLVER_CLASS:
                     CommonResourceResolver rresolver = (CommonResourceResolver) instantiateClassName(name, value, CommonResourceResolver.class);
-                    setSaxonResourceResolver(rresolver);
+                    setCommonResourceResolver(rresolver);
                     break;
                 //#endif
 
@@ -5328,10 +5328,10 @@ public class Configuration implements SourceResolver, NotationSet {
 
             //#if CSHARP==false
             case FeatureCode.SAXON_RESOURCE_RESOLVER:
-                return getSaxonResourceResolver();
+                return getCommonResourceResolver();
 
             case FeatureCode.SAXON_RESOURCE_RESOLVER_CLASS:
-                return getSaxonResourceResolver().getClass().getName();
+                return getCommonResourceResolver().getClass().getName();
             //#endif
         }
         throw new IllegalArgumentException("Unknown configuration property " );
