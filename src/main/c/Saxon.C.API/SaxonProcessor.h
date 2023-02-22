@@ -669,6 +669,8 @@ private:
 
     static int64_t createJArray(XdmValue **values, int length);
 
+    static XdmValue * makeXdmValueFromRef(int64_t valueRef);
+
     static const char *checkException();
 };
 

@@ -116,53 +116,7 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
         processorDataRef = -1;
     }
 	if(results >0) {
-	    XdmValue * value = nullptr;
-
-        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results);
-
-        XdmItem * xdmItem = nullptr;
-        if(typeRef == -2) {
-            exception = new SaxonApiException();
-            return nullptr;
-        }
-        if(typeRef == 1) {
-            value = new XdmValue();
-            xdmItem = new XdmAtomicValue(results);
-            value->addXdmItem(xdmItem);
-
-        } else if(typeRef == 2) {
-            value = new XdmValue();
-            xdmItem = new XdmNode(results);
-            value->addXdmItem(xdmItem);
-
-        }  else if (typeRef == 4) {
-            value = new XdmValue();
-            xdmItem =  new XdmMap(results);
-            value->addXdmItem(xdmItem);
-
-        } else if (typeRef == 3) {
-            value = new XdmValue();
-            xdmItem =  new XdmArray(results);
-            value->addXdmItem(xdmItem);
-
-        } else if (typeRef == 5) {
-            value = new XdmValue();
-            xdmItem =  new XdmFunctionItem(results);
-            value->addXdmItem(xdmItem);
-        } else if (typeRef == 6) {
-           //Empty Sequence detected.
-           //TODO Maybe we should create an EmptySequence object
-            j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)results);
-            results = -1;
-           return nullptr;
-
-        }else {
-            value = new XdmValue(results, true);
-
-        }
-
-
-		return value;
+        return SaxonProcessor::makeXdmValueFromRef(results);
 	} else if(results == -2){
 	    exception = new SaxonApiException();
 	}

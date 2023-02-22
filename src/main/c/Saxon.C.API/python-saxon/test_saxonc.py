@@ -742,6 +742,8 @@ def testCallTemplateWithResultValidation(files_dir):
     trans = saxonproc2.new_xslt30_processor()
     source = "<?xml version='1.0'?>  <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  xmlns:xs='http://www.w3.org/2001/XMLSchema'  version='3.0' exclude-result-prefixes='#all'>  <xsl:import-schema><xs:schema><xs:element name='x' type='xs:int'/></xs:schema></xsl:import-schema>  <xsl:template name='main'>     <xsl:result-document validation='strict'>       <x>3</x>     </xsl:result-document>  </xsl:template>  </xsl:stylesheet>"
     executable = trans.compile_stylesheet(stylesheet_text=source)
+    print(trans.error_message)
+    assert executable is not None
     executable.set_property("!omit-xml-declaration", "yes")
     sw = executable.call_template_returning_string("main")
     assert sw is not None
@@ -763,9 +765,12 @@ def testCallNamedTemplateWithParamsRaw(saxonproc):
     executable = trans.compile_stylesheet(stylesheet_text=source)
     executable.set_result_as_raw_value(True)
     paramArr = {"a":saxonproc.make_integer_value(12), "b":saxonproc.make_integer_value(5)}
+    print(paramArr)
     executable.set_initial_template_parameters(False, paramArr)
     val = executable.call_template_returning_value("t")
+    assert not executable.exception_occurred
     assert val is not None
+    print(val)
     assert val.size == 2
     assert val.item_at(0).is_atomic
     assert val.item_at(0).get_atomic_value().integer_value == 13
@@ -827,6 +832,7 @@ def testxQuery1(saxonproc, data_dir):
     query_proc.set_property("s", xmlFile)
     query_proc.set_property("qs", "<out>{count(/out/person)}</out>")
     result = query_proc.run_query_to_string()
+    
     assert not query_proc.exception_occurred
     assert result is not None
     print(result)
@@ -1244,8 +1250,11 @@ def testMapAsFunction():
         cVar = saxonproc.make_string_value("c")
         result = map.call(saxonproc, [cVar])
         assert result is not None
-        assert isinstance(result, PyXdmAtomicValue)
-        assert result.integer_value == 3
+        item = result.head
+        assert isinstance(item, PyXdmAtomicValue)
+
+        assert item.integer_value == 3
+        assert item.integer_value == 3
 
 
 def testMapAsQueryParameter():
