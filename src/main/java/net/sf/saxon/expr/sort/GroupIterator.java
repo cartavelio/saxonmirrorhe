@@ -10,7 +10,7 @@ package net.sf.saxon.expr.sort;
 import com.saxonica.ee.stream.ManualGroupIterator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 
@@ -43,7 +43,7 @@ public interface GroupIterator extends SequenceIterator {
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs
      */
 
-    Sequence currentGroup() throws XPathException;
+    GroundedValue currentGroup() throws XPathException;
 
     //#if EE==true
 
