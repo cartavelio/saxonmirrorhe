@@ -180,7 +180,8 @@ public abstract class Elaborator {
      */
 
     public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
-        return context -> elaborateForUnicodeString(zeroLengthWhenAbsent).eval(context).toString();
+        UnicodeStringEvaluator evaluator = elaborateForUnicodeString(zeroLengthWhenAbsent);
+        return context -> evaluator.eval(context).toString();
     }
 
 
