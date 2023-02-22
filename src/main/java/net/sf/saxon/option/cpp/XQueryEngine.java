@@ -220,6 +220,14 @@ public class XQueryEngine extends SaxonCAPI {
                     }
                 }
 
+                if(optionsMap.containsKey("-streaming")) {
+                    if(optionsMap.get("-streaming").equals("1")) {
+                         compiler.setStreaming(true);
+                    } else {
+                        compiler.setStreaming(false);
+                    }
+                }
+
                 if (optionsMap.containsKey("qs")) {
                     query = (String) optionsMap.get("qs");
                     executable = compiler.compile(query);

@@ -499,6 +499,10 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
 
         void setUpdating(bool updating)
 
+        void setStreaming(bool option)
+
+        void isStreaming()
+
         XdmValue * runQueryToValue() except +
         const char * runQueryToString() except +
 

@@ -327,6 +327,8 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XQueryProcessor,  setContextItemFromFile);
     PHP_METHOD(XQueryProcessor,  setParameter);
     PHP_METHOD(XQueryProcessor,  setProperty);
+    PHP_METHOD(XQueryProcessor,  setStreaming);
+    PHP_METHOD(XQueryProcessor,  isStreaming);
     PHP_METHOD(XQueryProcessor,  clearParameters);
     PHP_METHOD(XQueryProcessor,  clearProperties);
    // PHP_METHOD(XQueryProcessor, setOutputFile);
