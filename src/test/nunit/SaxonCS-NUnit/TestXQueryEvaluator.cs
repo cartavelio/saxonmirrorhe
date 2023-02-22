@@ -998,5 +998,31 @@ namespace SaxonCS_NUnit {
         //         Assert.Fail(e.Message);
         //     }
         // }
+        
+       [Test]
+        public void testFnTransform40() {
+            try {
+                Processor proc = new Processor(true);
+                XdmNode source = proc.NewDocumentBuilder().Build(new StringReader("<a/>"));
+                XQueryCompiler comp = proc.NewXQueryCompiler();
+                comp.XQueryLanguageVersion = "4.0";
+                comp.BaseUri = new Uri("file:///c:/aplEjXML/");
+                string qry_base = "transform(map{"
+                                  + "'xslt-version':4.0,"
+                                  + "'stylesheet-text':"
+                                  + "'<a xsl:version=\"4.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" z=\"{node-name() otherwise 42}\"/>',"
+                                  + "'source-node':.})?output";
+
+                XQueryExecutable exp = comp.Compile(qry_base);
+                XQueryEvaluator qe = exp.Load();
+                qe.ContextItem = source;
+                StringWriter sw = new StringWriter();
+                qe.Run(proc.NewSerializer(sw));
+                Assert.That(sw.ToString().Contains("z=\"42\""));
+            } catch (SaxonApiException e) {
+                Console.WriteLine(e.Message);
+                Assert.Fail();
+            }
+        }
     }
 }
