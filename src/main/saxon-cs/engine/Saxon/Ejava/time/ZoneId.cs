@@ -503,6 +503,16 @@ namespace Saxon.Ejava.time {
                 }
             }
         }
+        /*
+        public static ZoneId ofOffset(string shortname, int offset)
+        {
+            if (shortname != "UTC")
+            {
+                throw new ArgumentException("UTC expected");
+            }
+            string tzid = "tz-local-" + offset;
+            return new ZoneId(TimeZoneInfo.CreateCustomTimeZone(tzid, TimeSpan.FromMinutes(offset)), tzid, tzid);
+        }*/
 
         public static System.Collections.Generic.ISet<string> getAvailableZoneIds() {
             var result = new System.Collections.Generic.HashSet<string>();
