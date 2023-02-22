@@ -27,74 +27,6 @@ import net.sf.saxon.value.BooleanValue;
  */
 public class Exists extends Aggregate {
 
-//    @Override
-//    public Expression makeFunctionCall(Expression[] arguments) {
-//        return new SystemFunctionCall(this, arguments) {
-//
-//            @Override
-//            public Expression optimize(/*@NotNull*/ ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-//                Expression e2 = super.optimize(visitor, contextInfo);
-//                if (e2 != this) {
-//                    return e2;
-//                }
-//                // See if we can deduce the answer from the cardinality
-//                int c = getArg(0).getCardinality();
-//                if (!Cardinality.allowsZero(c)) {
-//                    return Literal.makeLiteral(BooleanValue.TRUE, e2);
-//                } else if (c == StaticProperty.ALLOWS_ZERO) {
-//                    return Literal.makeLiteral(BooleanValue.FALSE, e2);
-//                }
-//
-//                // Don't sort the argument
-//                setArg(0, getArg(0).unordered(false, visitor.isOptimizeForStreaming()));
-//
-//                // Rewrite
-//                //    exists(A|B) => exists(A) or exists(B)
-//                if (getArg(0) instanceof VennExpression && !visitor.isOptimizeForStreaming()) {
-//                    VennExpression v = (VennExpression) getArg(0);
-//                    if (v.getOperator() == Token.UNION) {
-//                        Expression e0 = SystemFunction.makeCall("exists", getRetainedStaticContext(), v.getLhsExpression());
-//                        Expression e1 = SystemFunction.makeCall("exists", getRetainedStaticContext(), v.getRhsExpression());
-//                        return new OrExpression(e0, e1).optimize(visitor, contextInfo);
-//                    }
-//                }
-//                return this;
-//            }
-//
-//            @Override
-//            @CSharpModifiers(code = {"public", "override"})
-//            public boolean effectiveBooleanValue(XPathContext c) throws XPathException {
-//                try {
-//                    boolean result;
-//                    SequenceIterator iter = getArg(0).iterate(c);
-//                    if (iter instanceof LookaheadIterator && ((LookaheadIterator) iter).supportsHasNext()) {
-//                        result = ((LookaheadIterator) iter).hasNext();
-//                    } else {
-//                        result = iter.next() != null;
-//                    }
-//                    iter.close();
-//                    return result;
-//                } catch (XPathException e) {
-//                    e.maybeSetLocation(getLocation());
-//                    e.maybeSetContext(c);
-//                    throw e;
-//                }
-//            }
-//
-//            @Override
-//            @CSharpModifiers(code = {"public", "override"})
-//            public BooleanValue evaluateItem(XPathContext context) throws XPathException {
-//                return BooleanValue.get(effectiveBooleanValue(context));
-//            }
-//
-//            @Override
-//            public int getNetCost() {
-//                return 0;
-//            }
-//        };
-//    }
-
-
     @Override
     public Expression makeOptimizedFunctionCall(
             ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, final Expression... arguments) throws XPathException {
@@ -108,7 +40,10 @@ public class Exists extends Aggregate {
         }
 
         // Don't sort the argument
-        arguments[0] = arguments[0].unordered(false, visitor.isOptimizeForStreaming());
+        Expression unorderedArg0 = arguments[0].unordered(false, visitor.isOptimizeForStreaming());
+        if (unorderedArg0 != arguments[0]) {
+            return makeFunctionCall(unorderedArg0);
+        }
 
         // Rewrite
         //    exists(A|B) => exists(A) or exists(B)
