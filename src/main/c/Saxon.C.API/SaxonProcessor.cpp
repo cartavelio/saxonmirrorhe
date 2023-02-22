@@ -635,7 +635,7 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
 
 
 DocumentBuilder * SaxonProcessor::newDocumentBuilder(){
-
+    applyConfigurationProperties();
     int64_t  docBuilderRef = createDocumentBuilder(SaxonProcessor::sxn_environ->thread, (void *)procRef);
 
     DocumentBuilder * builder = new DocumentBuilder(this, docBuilderRef, cwd);
@@ -735,7 +735,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
 XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator * validator) {
     //SaxonProcessor::attachCurrentThread();
 
-
+    applyConfigurationProperties();
     int64_t xdmNodeRef = parseXmlStringWithValidator(sxn_environ->thread, (void*)procRef, (validator != nullptr ? (void *)validator->getUnderlyingValidator() : (void *)nullptr), (char *)source);
     if (xdmNodeRef >= 0) {
         XdmNode *value = new XdmNode(xdmNodeRef);
@@ -758,6 +758,7 @@ int SaxonProcessor::getNodeKind(int64_t nodeRef) {
 
 
 XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename, SchemaValidator * validator) {
+    applyConfigurationProperties();
     int64_t xdmNodeRef = parseXmlFileWithValidator(sxn_environ->thread, (char *)cwd.c_str(), (void *)procRef, (validator != nullptr ? (void *)validator->getUnderlyingValidator() : (void *)nullptr), (char *)filename);
     if (xdmNodeRef >= 1) {
         XdmNode *value = nullptr;
@@ -774,6 +775,7 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename, SchemaValidator 
 }
 
 XdmNode *SaxonProcessor::parseXmlFromUri(const char *uri, SchemaValidator * validator) {
+    applyConfigurationProperties();
     int64_t xdmNodeRef = parseXmlFileWithValidator(sxn_environ->thread, (char *) cwd.c_str(), (void *)procRef, (validator != nullptr ? (void *)validator->getUnderlyingValidator() : (void *)nullptr), (char *)uri);
     if (xdmNodeRef >= 0) {
         XdmNode *value = nullptr;

@@ -4,13 +4,14 @@ from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.map cimport map
 
+cdef extern from "@@location@@Saxon.C.API/CythonExceptionHandler.h":
+  cdef void raise_py_error()
 
 
-
-cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
+cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
     cdef cppclass SaxonProcessor:
-        SaxonProcessor(bool) except +
-        SaxonProcessor(const char * configFile) except +
+        SaxonProcessor(bool) except +raise_py_error
+        SaxonProcessor(const char * configFile) except +raise_py_error
         bool license
         char * version()
         void release()
@@ -55,7 +56,7 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
 
         SchemaValidator * newSchemaValidator()
 
-        DocumentBuilder * newDocumentBuilder()
+        DocumentBuilder * newDocumentBuilder() except +raise_py_error
 
         XdmAtomicValue * makeStringValue(const char* str1)
 
@@ -115,7 +116,7 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
 
 
     cdef cppclass DocumentBuilder:
-        DocumentBuilder() except +
+        DocumentBuilder() except +raise_py_error
 
         void setLineNumbering(bool option)
 
@@ -126,25 +127,25 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
         SchemaValidator * getSchemaValidator()
 
 
-        void setDTDValidation(bool option)  except +
+        void setDTDValidation(bool option)  except +raise_py_error
 
         bool isDTDValidation()
 
-        void setBaseUri(const char* uri)  except +
+        void setBaseUri(const char* uri)  except +raise_py_error
 
         const char * getBaseUri()
 
-        XdmNode* parseXmlFromString(const char * content) except +
+        XdmNode* parseXmlFromString(const char * content) except +raise_py_error
 
-        XdmNode* parseXmlFromFile(const char * filename)  except +
+        XdmNode* parseXmlFromFile(const char * filename)  except +raise_py_error
 
-        XdmNode * parseXmlFromUri(const char* source)  except +
+        XdmNode * parseXmlFromUri(const char* source)  except +raise_py_error
 
 
 
 
     cdef cppclass Xslt30Processor:
-        Xslt30Processor() except +
+        Xslt30Processor() except +raise_py_error
         # set the current working directory
         void setcwd(const char* cwd)
 
@@ -241,7 +242,7 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
 
 
     cdef cppclass XsltExecutable:
-        XsltExecutable() except +
+        XsltExecutable() except +raise_py_error
         # set the current working directory
         void setcwd(const char* cwd)
 
@@ -381,11 +382,11 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
 
 
     cdef cppclass SaxonApiException:
-        SaxonApiException() except +
+        SaxonApiException() except +raise_py_error
 
 
     cdef cppclass SchemaValidator:
-        SchemaValidator() except +
+        SchemaValidator() except +raise_py_error
 
         void setcwd(const char* cwd)
 
@@ -399,9 +400,9 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
 
         void setOutputFile(const char * outputFile)
 
-        void validate(const char * sourceFile) except +
+        void validate(const char * sourceFile) except +raise_py_error
    
-        XdmNode * validateToNode(const char * sourceFile) except +
+        XdmNode * validateToNode(const char * sourceFile) except +raise_py_error
 
         void setSourceNode(XdmNode * source)
 
@@ -433,7 +434,7 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
         void setLax(bool l)
 
     cdef cppclass XPathProcessor:
-        XPathProcessor() except +
+        XPathProcessor() except +raise_py_error
 
         void setBaseURI(const char * uriStr)
 
@@ -480,9 +481,9 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
         const char * getErrorCode()
 
     cdef cppclass XQueryProcessor:
-        XQueryProcessor() except +
+        XQueryProcessor() except +raise_py_error
 
-        void setContextItem(XdmItem * value) except +
+        void setContextItem(XdmItem * value) except +raise_py_error
 
         void setOutputFile(const char* outfile)
 
@@ -506,12 +507,12 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
 
         void isStreaming()
 
-        XdmValue * runQueryToValue() except +
-        const char * runQueryToString() except +
+        XdmValue * runQueryToValue() except +raise_py_error
+        const char * runQueryToString() except +raise_py_error
 
-        void runQueryToFile() except +
+        void runQueryToFile() except +raise_py_error
 
-        void declareNamespace(const char *prefix, const char * uri) except +
+        void declareNamespace(const char *prefix, const char * uri) except +raise_py_error
 
         void setQueryFile(const char* filename)
 
@@ -534,9 +535,9 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
         const char * getErrorCode()
 
 
-cdef extern from "../../Saxon.C.API/XdmValue.h":
+cdef extern from "@@location@@Saxon.C.API/XdmValue.h":
     cdef cppclass XdmValue:
-        XdmValue() except +
+        XdmValue() except +raise_py_error
 
         void addXdmItem(XdmItem *val)
         #void releaseXdmValue()
@@ -557,9 +558,9 @@ cdef extern from "../../Saxon.C.API/XdmValue.h":
 
         int getType()
 
-cdef extern from "../../Saxon.C.API/XdmItem.h":
+cdef extern from "@@location@@Saxon.C.API/XdmItem.h":
     cdef cppclass XdmItem(XdmValue):
-        XdmItem() except +
+        XdmItem() except +raise_py_error
         const char * getStringValue()
         bool isAtomic()
 
@@ -574,7 +575,7 @@ cdef extern from "../../Saxon.C.API/XdmItem.h":
 
 
 
-cdef extern from "../../Saxon.C.API/XdmNode.h":
+cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
     cdef cppclass XdmNode(XdmItem):
         bool isAtomic()
 
@@ -601,9 +602,9 @@ cdef extern from "../../Saxon.C.API/XdmNode.h":
 
 
 
-cdef extern from "../../Saxon.C.API/XdmAtomicValue.h":
+cdef extern from "@@location@@Saxon.C.API/XdmAtomicValue.h":
     cdef cppclass XdmAtomicValue(XdmItem):
-        XdmAtomicValue() except +
+        XdmAtomicValue() except +raise_py_error
 
         const char * getPrimitiveTypeName()
 
@@ -618,7 +619,7 @@ cdef extern from "../../Saxon.C.API/XdmAtomicValue.h":
 
         
 
-cdef extern from "../../Saxon.C.API/XdmFunctionItem.h":
+cdef extern from "@@location@@Saxon.C.API/XdmFunctionItem.h":
     cdef cppclass XdmFunctionItem(XdmItem):
         const char* getName()
 
@@ -626,14 +627,14 @@ cdef extern from "../../Saxon.C.API/XdmFunctionItem.h":
 
         XdmFunctionItem * getSystemFunction(SaxonProcessor * processor, const char * name, int arity)
 
-        XdmValue * call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length) except +
+        XdmValue * call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length) except +raise_py_error
 
         XdmValue ** createXdmValueArray(int len)
 
 
 
 
-cdef extern from "../../Saxon.C.API/XdmMap.h":
+cdef extern from "@@location@@Saxon.C.API/XdmMap.h":
     cdef cppclass XdmMap(XdmFunctionItem):
         int mapSize()
 
@@ -669,7 +670,7 @@ cdef extern from "../../Saxon.C.API/XdmMap.h":
 
 
 
-cdef extern from "../../Saxon.C.API/XdmArray.h":
+cdef extern from "@@location@@Saxon.C.API/XdmArray.h":
     cdef cppclass XdmArray(XdmFunctionItem):
 
         int arrayLength()

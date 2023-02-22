@@ -736,6 +736,22 @@ task all_saxonc_releases() {
         }
       }
     }
+
+
+    doLast {
+      copy {
+        from "${projectDir}/src/main/c/pypi/python_saxon"
+        into "${saxoncReleaseDir}/pypi/python_saxon"
+        filter { line ->
+          line.replaceAll('@@VERSION@@', saxonVersion)
+                  .replace('@@edition@@', edition)
+                  .replace('@@EDITION@@', edition.toUpperCase())
+                  .replace('@@libpath@@', libpath)
+                  .replace('@@location@@', location)
+        }
+      }
+    }
+
     doLast {
       copy {
         from "${projectDir}/src/main/c/samples"
@@ -810,6 +826,8 @@ task all_saxonc_releases() {
         include "php8_XPathProcessor.cpp"
         include "php8_saxon.h"
         include "php8_XQueryProcessor.cpp"
+        include "CythonExceptionHandler.h"
+        include "CythonExceptionHandler.cpp"
         include "config.m4"
         include "config.w32"
         filter { line ->
@@ -956,6 +974,7 @@ task all_saxonc_releases() {
         include "readme.txt"
         filter { line ->
           line.replace('@@edition@@', edition)
+          line.replace('@@location@@', '../')
         }
       }
     }
@@ -1007,6 +1026,7 @@ task all_saxonc_releases() {
         include "XPathProcessor.cpp"
         include "SchemaValidator.cpp"
         include "SaxonApiException.cpp"
+        include "CythonExceptionHandler.cpp"
         include "SaxonProcessor.h"
         include "SaxonCGlue.h"
         include "SaxonCProcessor.h"
@@ -1025,6 +1045,7 @@ task all_saxonc_releases() {
         include "XPathProcessor.h"
         include "SchemaValidator.h"
         include "SaxonApiException.h"
+        include "CythonExceptionHandler.h"
         filter { line ->
           line.replaceAll('@@VERSION@@', saxonVersion)
             .replace('@@edition@@', edition)
