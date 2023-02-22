@@ -129,6 +129,11 @@ if (jarsigner.makeSignedJars) {
 } else {
   println("Build is not configured to sign jar files")
 }
+if (jarsigner.makeSignedExes) {
+  println("Build is configured to sign Windows executable files")
+} else {
+  println("Build is not configured to sign Windows executable files")
+}
 
 dependencies {
   preprocessor (
@@ -292,6 +297,15 @@ def signJar(String jarfile) {
   if (jarsigner.makeSignedJars) {
     exec {
       commandLine jarsigner.signJarCommand(jarfile)
+    }
+  }
+}
+
+def signExe(String exefile) {
+  // It's convenient to leave this in build.gradle because of the exec closure.
+  if (jarsigner.makeSignedExes) {
+    exec {
+      commandLine jarsigner.signExeCommand(exefile)
     }
   }
 }
@@ -1906,6 +1920,7 @@ task compileXqjTck(
 task helloWorld() {
   doLast {
     println("Hello, world.")
+
 /*
     project.properties.keySet().each { key ->
       if (key.startsWith("td")) {
@@ -1917,4 +1932,5 @@ task helloWorld() {
     }
 */
   }
+
 }
