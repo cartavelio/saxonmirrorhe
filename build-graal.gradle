@@ -861,13 +861,6 @@ task graal_eec_jar(
 
     doLast {
       copy {
-        from SAXONC_HOME
-        into "${buildDir}/${edition}c_pypi/src/saxonc${edition}_home"
-      }
-    }
-      
-    doLast {
-      copy {
         from "${buildDir}/c/"
         into "${buildDir}/${edition}c_pypi/Saxon.C.API/graalvm"
         include "graal*.h"
@@ -1007,7 +1000,6 @@ task saxonc_stage_wheels(
   include "${systemOsName}/**"
   exclude "${systemOsName}/*/build/**"
   exclude "${systemOsName}/*/*.egg-info/**"
-  exclude "${systemOsName}/*/src/saxonc*_home"
   compression = Compression.GZIP
 
   doLast {
