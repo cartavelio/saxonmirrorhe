@@ -12,6 +12,7 @@ import net.sf.saxon.expr.elab.BooleanElaborator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 
@@ -163,7 +164,30 @@ public class OrExpression extends BooleanExpression {
             BooleanEvaluator eval0 = expr.getLhsExpression().makeElaborator().elaborateForBoolean();
             BooleanEvaluator eval1 = expr.getRhsExpression().makeElaborator().elaborateForBoolean();
 
-            return context -> eval0.eval(context) || eval1.eval(context);
+            // Don't throw an error if either branch returns true.
+            // See bug 5721. Conforms with the 4.0 rules for guarded expressions, even if the
+            // operands are reordered
+            return context -> {
+                XPathException saved = null;
+                try {
+                    boolean b0 = eval0.eval(context);
+                    if (b0) {
+                        return true;
+                    }
+                } catch (UncheckedXPathException err) {
+                    saved = err.getXPathException();
+                } catch (XPathException err) {
+                    saved = err;
+                }
+                boolean b1 = eval1.eval(context);
+                if (b1) {
+                    return true;
+                }
+                if (saved != null) {
+                    throw saved;
+                }
+                return false;
+            };
         }
 
 
