@@ -107,9 +107,9 @@ void SchemaValidator::setLax(bool l){
 	int64_t result = j_getValidationReport(SaxonProcessor::sxn_environ->thread, (void *)cppV);
 		
 	if (result > 0) {
-			XdmNode * node = new XdmNode(result);
-			return node;
-	} else {
+		XdmNode * node = new XdmNode(result);
+		return node;
+	} else if( result == -2){
         exception = new SaxonApiException();
     }
 	return nullptr;

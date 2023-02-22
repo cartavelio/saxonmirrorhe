@@ -36,7 +36,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
     private SchemaManager schemaManager = null;
     private Source source = null;
-    private XdmDestination xdmDestination;
+    private XdmDestination xdmDestination = null;
 
 
     /*
@@ -128,6 +128,9 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
 
     public XdmNode getValidationReport() throws SaxonApiException {
+        if(xdmDestination == null) {
+            return null;
+        }
        return xdmDestination.getXdmNode();
     }
 
@@ -135,6 +138,9 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     public static long j_getValidationReport(IsolateThread thread, ObjectHandle schemaValidatorForCpp) throws SaxonApiException {
         SchemaValidatorForCpp schemaValidatorForCpp1 = SaxonCAPI.objectHandles.get(schemaValidatorForCpp);
         XdmNode node = schemaValidatorForCpp1.getValidationReport();
+        if(node == null) {
+            return SaxonCAPI.STATUS_FAIL;
+        }
         ObjectHandle handle = SaxonCAPI.createHandle(node);
         return handle.rawValue();
     }

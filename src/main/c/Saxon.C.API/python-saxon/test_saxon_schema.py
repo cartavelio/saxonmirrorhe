@@ -9,6 +9,9 @@ from os.path import isfile
 def saxonproc2():
     return PySaxonProcessor(license=True)
 
+@pytest.fixture
+def data_dir():
+    return "../../samples/data/"
 
 def testValidator2(saxonproc2):
     saxonproc2.set_cwd('.')
@@ -29,14 +32,14 @@ def testValidator2(saxonproc2):
     val.exception_clear()
 
 
-def testValdiator3(saxonproc2):
+def testValdiator3(data_dir, saxonproc2):
     saxonproc2.set_configuration_property("xsdversion", "1.1")
     val = saxonproc2.new_schema_validator()
     
-    val.register_schema(xsd_file="family-ext.xsd")
+    val.register_schema(xsd_file=data_dir + "family-ext.xsd")
 
-    val.register_schema(xsd_file="family.xsd")
-    val.validate(file_name="family.xml")
+    val.register_schema(xsd_file=data_dir + "family.xsd")
+    val.validate(file_name=data_dir + "family.xml")
     nodea = val.validation_report
     if val.exception_occurred:
         print(val.get_error_message(0))
