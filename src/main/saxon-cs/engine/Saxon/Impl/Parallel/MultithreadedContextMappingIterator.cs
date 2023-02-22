@@ -20,7 +20,7 @@ namespace Saxon.Impl.Parallel {
         private SequenceIterator stepIterator;
         private int index = 0;
 
-        public MultithreadedContextMappingIterator(Saxon.Hej.expr.Expression action,
+        public MultithreadedContextMappingIterator(Saxon.Hej.expr.elab.PullEvaluator action,
                 Saxon.Hej.expr.XPathContextMinor context, int threads) {
             SysCollGen.List<Item> inputSequence = new SysCollGen.List<Item>();
             SequenceIterator inputIter = context.currentIterator;
@@ -37,7 +37,7 @@ namespace Saxon.Impl.Parallel {
                     ManualIterator manualIterator = new (inputSequence[i], i+1);
                     manualIterator.setLengthFinder(() => inputSequence.Count);
                     c3.setCurrentIterator(manualIterator);
-                    SequenceIterator oneOutputIter = action.iterate(c3);
+                    SequenceIterator oneOutputIter = action(c3);
                     SysCollGen.List<Item> oneOutput = new SysCollGen.List<Item>();
                     for (Item item; (item = oneOutputIter.next()) != null;) {
                         oneOutput.Add(item);

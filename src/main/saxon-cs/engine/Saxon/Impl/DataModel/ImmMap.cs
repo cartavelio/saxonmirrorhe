@@ -50,14 +50,14 @@ namespace Saxon.Impl.DataModel {
         private int valueCardinality = 0;
 
         // The number of entries in the map; -1 if unknown
-        private int entries = -1;
+        private int nrOfEntries = -1;
 
         /**
          * Create an empty map
          */
         public ImmMap() {
             this.imap = ImmutableDictionary.Create<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair>();
-            this.entries = 0;
+            this.nrOfEntries = 0;
         }
 
 
@@ -77,7 +77,7 @@ namespace Saxon.Impl.DataModel {
          */
         public ImmMap(ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> imap) {
             this.imap = imap;
-            entries = -1;
+            nrOfEntries = -1;
         }
 
         /**
@@ -131,8 +131,8 @@ namespace Saxon.Impl.DataModel {
          * Get the size of the map
          */
         public override int size() {
-            if (entries >= 0) {
-                return entries;
+            if (nrOfEntries >= 0) {
+                return nrOfEntries;
             }
 
             int count = 0;
@@ -141,7 +141,7 @@ namespace Saxon.Impl.DataModel {
                 count++;
             }
 
-            return entries = count;
+            return nrOfEntries = count;
         }
 
         /**
@@ -150,7 +150,7 @@ namespace Saxon.Impl.DataModel {
          * @return true if and only if the size of the map is zero
          */
         public override bool isEmpty() {
-            return entries == 0 || !imap.GetEnumerator().MoveNext();
+            return nrOfEntries == 0 || !imap.GetEnumerator().MoveNext();
         }
 
         /**
@@ -302,8 +302,8 @@ namespace Saxon.Impl.DataModel {
                 valueItemType = valueItemType
             };
             t2.updateTypeInformation(key, value, empty);
-            if (entries >= 0) {
-                t2.entries = isNew ? entries + 1 : entries;
+            if (nrOfEntries >= 0) {
+                t2.nrOfEntries = isNew ? nrOfEntries + 1 : nrOfEntries;
             }
 
             return t2;
@@ -324,7 +324,7 @@ namespace Saxon.Impl.DataModel {
             bool exists = imap.ContainsKey(amk);
             imap = imap.SetItem(amk, new Saxon.Hej.ma.map.KeyValuePair(key, value));
             updateTypeInformation(key, value, empty);
-            entries = -1;
+            nrOfEntries = -1;
             return exists;
         }
 
@@ -352,7 +352,7 @@ namespace Saxon.Impl.DataModel {
                 keyUType = keyUType,
                 valueUType = valueUType,
                 valueCardinality = valueCardinality,
-                entries = entries - 1
+                nrOfEntries = nrOfEntries - 1
             };
             return result;
         }
