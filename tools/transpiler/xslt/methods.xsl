@@ -1140,7 +1140,8 @@
          'getEQName#0':           '%scope%.EQName',
          'getPrefix#0':           '%scope%.Prefix',
          'getLocalName#0':        '%scope%.LocalName',
-         'getNamespaceURI#0':     '%scope%.Uri',
+         'getNamespace#0':        '%scope%.NamespaceUri.ToString()',
+         'getNamespaceUri#0':     '%scope%.NamespaceUri',
          '*':                     '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
