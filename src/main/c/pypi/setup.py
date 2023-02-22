@@ -17,36 +17,36 @@ from distutils.dir_util import copy_tree
 extra_link_args = []
 
 if system() == 'Darwin':
-    extra_link_args.append('-Llibs/darwin')
+    extra_link_args.append('-L../libs/darwin')
 elif system() == 'Windows':
     extra_link_args.append('libs\\win\\libsaxon-@@edition@@c-@@VERSION@@.lib')
 else:
-    extra_link_args.append('-Llibs/nix')
+    extra_link_args.append('-L../libs/nix')
 
 # extented modules
 ext_modules = [Extension(
                          "saxonc@@edition@@", 
                         sources=[
-                            "python_saxon/saxonc.pyx", 
-                            "Saxon.C.API/SaxonProcessor.cpp",
-                            "Saxon.C.API/SaxonCGlue.c",
-                            "Saxon.C.API/SaxonCXPath.c",
-                            "Saxon.C.API/XdmValue.cpp",
-                            "Saxon.C.API/XdmItem.cpp",
-                            "Saxon.C.API/XdmNode.cpp",
-                            "Saxon.C.API/XdmAtomicValue.cpp",
-                            "Saxon.C.API/XdmFunctionItem.cpp",
-                            "Saxon.C.API/XdmMap.cpp",
-                            "Saxon.C.API/XdmArray.cpp",
-                            "Saxon.C.API/DocumentBuilder.cpp",
-                            "Saxon.C.API/Xslt30Processor.cpp",
-                            "Saxon.C.API/XsltExecutable.cpp",
-                            "Saxon.C.API/XQueryProcessor.cpp",
-                            "Saxon.C.API/XPathProcessor.cpp",
-                            "Saxon.C.API/SchemaValidator.cpp",
-                            "Saxon.C.API/SaxonApiException.cpp"],
+                            "python_saxon/saxonc.pyx",
+                            "../Saxon.C.API/SaxonProcessor.cpp",
+                            "../Saxon.C.API/SaxonCGlue.c",
+                            "../Saxon.C.API/SaxonCXPath.c",
+                            "../Saxon.C.API/XdmValue.cpp",
+                            "../Saxon.C.API/XdmItem.cpp",
+                            "../Saxon.C.API/XdmNode.cpp",
+                            "../Saxon.C.API/XdmAtomicValue.cpp",
+                            "../Saxon.C.API/XdmFunctionItem.cpp",
+                            "../Saxon.C.API/XdmMap.cpp",
+                            "../Saxon.C.API/XdmArray.cpp",
+                            "../Saxon.C.API/DocumentBuilder.cpp",
+                            "../Saxon.C.API/Xslt30Processor.cpp",
+                            "../Saxon.C.API/XsltExecutable.cpp",
+                            "../Saxon.C.API/XQueryProcessor.cpp",
+                            "../Saxon.C.API/XPathProcessor.cpp",
+                            "../Saxon.C.API/SchemaValidator.cpp",
+                            "../Saxon.C.API/SaxonApiException.cpp"],
                         language="c++",
-                        include_dirs = ['Saxon.C.API/graalvm',],
+                        include_dirs = ['../Saxon.C.API/graalvm',],
                          extra_link_args = extra_link_args,
                        libraries=['@@libpath@@saxon-@@edition@@c-@@VERSION@@']
                         ),
