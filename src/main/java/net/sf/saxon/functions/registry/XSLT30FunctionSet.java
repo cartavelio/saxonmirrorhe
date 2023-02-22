@@ -32,7 +32,7 @@ public class XSLT30FunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        importFunctionSet(XPath31FunctionSet.getInstance());
+        importFunctionSet(XPath40FunctionSet.getInstance());  // TODO: support different function sets for 3.0/4.0
 
         register("accumulator-after", 1, AccumulatorFn.AccumulatorAfter.class, AnyItemType.getInstance(),
                  STAR, LATE | CITEM)
