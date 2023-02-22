@@ -403,21 +403,6 @@ public class Literal extends Expression {
 
 
     /**
-     * Evaluate an updating expression, adding the results to a Pending Update List.
-     * The default implementation of this method, which is used for non-updating expressions,
-     * throws an UnsupportedOperationException. The implementation for a literal representing
-     * an empty sequence, however, is a no-op.
-     *
-     * @param context the XPath dynamic evaluation context
-     * @param pul     the pending update list to which the results should be written
-     */
-
-    @Override
-    public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
-    }
-
-    /**
      * Determine whether two literals are equal, when considered as expressions.
      *
      * @param obj the other expression

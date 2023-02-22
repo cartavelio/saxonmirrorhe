@@ -788,20 +788,6 @@ public class LetExpression extends Assignation
         }
     }
 
-    /**
-     * Evaluate an updating expression, adding the results to a Pending Update List.
-     * The default implementation of this method, which is used for non-updating expressions,
-     * throws an UnsupportedOperationException
-     *
-     * @param context the XPath dynamic evaluation context
-     * @param pul     the pending update list to which the results should be written
-     */
-
-    @Override
-    public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
-    }
-
 
     /**
      * The toString() method for an expression attempts to give a representation of the expression
