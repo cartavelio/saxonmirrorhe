@@ -9,6 +9,7 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AnyURIValue;
@@ -18,12 +19,12 @@ import net.sf.saxon.value.AtomicValue;
  * This class supports the namespace-uri() function
  */
 
-public class NamespaceUri_1 extends ScalarSystemFunction {
+public class NamespaceUriFn_1 extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item item, XPathContext context) throws XPathException {
-        String uri = ((NodeInfo) item).getURI();
-        return new AnyURIValue(uri);
+        NamespaceUri uri = ((NodeInfo) item).getNamespaceUri();
+        return new AnyURIValue(uri.toUnicodeString());
     }
 
     @Override
