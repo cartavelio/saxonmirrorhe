@@ -252,6 +252,7 @@
                   <li>l: loop lifting</li>
                   <li>m: miscellaneous</li>
                   <li>n: constant folding</li>
+                  <li>p: predicate reordering</li>
                   <li>r: template rule-sets (not relevant to XQuery)</li>
                   <li>s: extract common subexpressions</li>
                   <li>t: tail call optimization</li>
