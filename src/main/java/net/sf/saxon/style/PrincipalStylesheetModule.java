@@ -1545,6 +1545,9 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         Map<SymbolicName, Component> componentIndex = stylesheetPackage.getComponentIndex();
         for (Component component : componentIndex.values()) {
             int fp = component.getComponentKind();
+            if (fp == StandardNames.XSL_MODE && ((Mode)component.getActor()).isUnnamedMode()) {
+                continue;
+            }
             ComponentTest exactNameTest =
                     new ComponentTest(fp,
                                       new NameTest(Type.ELEMENT, new FingerprintedQName(component.getActor().getComponentName(), pool), pool), -1);

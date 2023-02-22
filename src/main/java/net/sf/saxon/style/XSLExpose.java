@@ -146,7 +146,7 @@ public class XSLExpose extends XSLAcceptExpose {
                         break;
                 }
                 if (!found) {
-                    compileError("No " + sName.toString() + " exists in the containing package", "XTSE3020");
+                    compileError("No " + sName + " exists in the containing package", "XTSE3020");
                 }
 
             }
