@@ -4,7 +4,7 @@
 
     <p>Saxonica provides an additional resources download which contains various sample XML
         resources, and several sample applications. The download file is named
-            <code>saxon-resources-11.zip</code>, and is separate from the software download. It is
+            <code>saxon-resources-12.zip</code>, and is separate from the software download. It is
         available from <a href="http://www.saxonica.com/download/download_page.xml" class="bodylink"
             >Saxonica downloads</a>. Unzip the contents of
         this file into the same directory as the Saxon software. The sample applications are found

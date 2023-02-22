@@ -956,7 +956,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             <h1>Other XPath 4.0 proposed extensions</h1>
             
             <p>This section lists other proposed XPath 4.0 language features that are implemented experimentally
-            in Saxon 11.</p>
+            in Saxon 12.</p>
             
             <nav>
                <ul/>
