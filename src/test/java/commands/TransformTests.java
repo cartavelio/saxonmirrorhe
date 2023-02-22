@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests on Transform CommandLine options
  */
 public class TransformTests {
-
+    private final ConfigTest configTest = new ConfigTest();
     private static class RetentiveLogger extends Logger {
 
         private final List<String> output = new ArrayList<>();
@@ -80,14 +80,14 @@ public class TransformTests {
     @Test
     public void testTransformation() {
 
-        String[] args = {"-t", "-xsl:" + ConfigTest.DATA_DIR + "play.xsl", "-s:" + ConfigTest.DATA_DIR + "othello.xml", "dir=" + ConfigTest.DATA_DIR + "samples/output"};
+        String[] args = {"-t", "-xsl:" + configTest.getDataDir() + "play.xsl", "-s:" + configTest.getDataDir() + "othello.xml", "dir=" + configTest.getDataDir() + "samples/output"};
         try {
             Transform.main(args);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
         }
-        assertEquals(16, new File(ConfigTest.DATA_DIR + "samples/output").listFiles().length);
+        assertEquals(16, new File(configTest.getDataDir() + "samples/output").listFiles().length);
     }
 
     @Test
@@ -95,10 +95,10 @@ public class TransformTests {
 
         String[] args = {
                 "-t",
-                "-xsl:" + ConfigTest.DATA_DIR + "play.xsl",
-                "-s:" + ConfigTest.DATA_DIR + "othello.xml",
+                "-xsl:" + configTest.getDataDir() + "play.xsl",
+                "-s:" + configTest.getDataDir() + "othello.xml",
                 "-quit:off",
-                "dir=" + ConfigTest.DATA_DIR + "samples/output"};
+                "dir=" + configTest.getDataDir() + "samples/output"};
         try {
             VerifyingTransform vt = new VerifyingTransform();
             String result = vt.transform(args);
@@ -113,21 +113,21 @@ public class TransformTests {
             e.printStackTrace();
             fail();
         }
-        assertEquals(16, new File(ConfigTest.DATA_DIR + "samples/output").listFiles().length);
+        assertEquals(16, new File(configTest.getDataDir() + "samples/output").listFiles().length);
     }
 
 
     @Test
     public void testThreadTransformation() {
 
-        String[] args = {"-xsl:" + ConfigTest.DATA_DIR + "threads/test.xsl", "-s:" + ConfigTest.DATA_DIR + "threads/input", "-o:" + ConfigTest.DATA_DIR + "threads/output", "-threads:2"};
+        String[] args = {"-xsl:" + configTest.getDataDir() + "threads/test.xsl", "-s:" + configTest.getDataDir() + "threads/input", "-o:" + configTest.getDataDir() + "threads/output", "-threads:2"};
         try {
             Transform.main(args);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
         }
-        assertEquals(5, new File(ConfigTest.DATA_DIR + "threads/output").listFiles().length);
+        assertEquals(5, new File(configTest.getDataDir() + "threads/output").listFiles().length);
 
     }
 
@@ -136,8 +136,8 @@ public class TransformTests {
         String[] args = {
                 "-ext:off",
                 "-quit:off",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "books.xsl"
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-xsl:" + configTest.getDataDir() + "books.xsl"
         };
         try {
             VerifyingTransform vt = new VerifyingTransform();
@@ -156,8 +156,8 @@ public class TransformTests {
         String[] args = {
                 "-ext:off",
                 "-quit:off",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "books.xsl",
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-xsl:" + configTest.getDataDir() + "books.xsl",
                 "!indent=yes"
         };
         try {
@@ -175,8 +175,8 @@ public class TransformTests {
         String[] args = {
                 "-ext:off",
                 "-quit:off",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "books.xsl",
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-xsl:" + configTest.getDataDir() + "books.xsl",
                 "!method=xml"
         };
         try {
@@ -193,8 +193,8 @@ public class TransformTests {
         String[] args = {
                 "-u",
                 "-quit:off",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "books.xsl"
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-xsl:" + configTest.getDataDir() + "books.xsl"
         };
         try {
             VerifyingTransform vt = new VerifyingTransform();
@@ -216,8 +216,8 @@ public class TransformTests {
     @Test
     public void testLineNumberPrincipal() {
         String[] args = {
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "line-numbering.xsl",
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-xsl:" + configTest.getDataDir() + "line-numbering.xsl",
                 "-it:a",
                 "-l",
                 "!method=xml"
@@ -235,10 +235,10 @@ public class TransformTests {
     @Test
     public void testLineNumberParam() {
         String[] args = {
-                "-xsl:" + ConfigTest.DATA_DIR + "line-numbering.xsl",
+                "-xsl:" + configTest.getDataDir() + "line-numbering.xsl",
                 "-it:b",
                 "-l:on",
-                "+doc=" + ConfigTest.DATA_DIR + "books.xml",
+                "+doc=" + configTest.getDataDir() + "books.xml",
                 "!method=xml"
         };
         try {
@@ -254,7 +254,7 @@ public class TransformTests {
     @Test
     public void testLineNumberDoc() {
         String[] args = {
-                "-xsl:" + ConfigTest.DATA_DIR + "line-numbering.xsl",
+                "-xsl:" + configTest.getDataDir() + "line-numbering.xsl",
                 "-it:c",
                 "-l",
                 "!method=xml"
@@ -277,8 +277,8 @@ public class TransformTests {
     public void testStaticParams() {
 
         String[] args = {
-                "-xsl:" + ConfigTest.DATA_DIR + "use-static.xsl",
-                "-s:" + ConfigTest.DATA_DIR + "bills.xml",
+                "-xsl:" + configTest.getDataDir() + "use-static.xsl",
+                "-s:" + configTest.getDataDir() + "bills.xml",
                 "date=2013-01-01",
                 "?now=current-time()"};
         try {
@@ -309,7 +309,7 @@ public class TransformTests {
         String[] args = {
                 "-a:on",
                 "--version-warning:off",
-                "-s:" + ConfigTest.DATA_DIR + "bills.xml",
+                "-s:" + configTest.getDataDir() + "bills.xml",
                 "s=s-actual",
                 "d=d-actual"};
         try {
@@ -338,8 +338,8 @@ public class TransformTests {
         String[] args = {
                 "-ext:off",
                 "-quit:off",
-                "-s:" + ConfigTest.DATA_DIR + "samples/data/books.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "samples/styles/books-pe.xsl"
+                "-s:" + configTest.getDataDir() + "samples/data/books.xml",
+                "-xsl:" + configTest.getDataDir() + "samples/styles/books-pe.xsl"
         };
         try {
             Transform.main(args);
@@ -353,10 +353,10 @@ public class TransformTests {
     public void testTimingProfile() {
         String[] args = {
                 "-ext:off",
-                "-TP:" + ConfigTest.DATA_DIR + "temp/profile.html",
-                "-o:" + ConfigTest.DATA_DIR + "temp/books.html",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "books.xsl"
+                "-TP:" + configTest.getDataDir() + "temp/profile.html",
+                "-o:" + configTest.getDataDir() + "temp/books.html",
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-xsl:" + configTest.getDataDir() + "books.xsl"
         };
         try {
             Transform.main(args);
@@ -369,8 +369,8 @@ public class TransformTests {
     public void testJsonMethod() {
         String[] args = {
                 "-ext:off",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "books-to-json.xsl"
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-xsl:" + configTest.getDataDir() + "books-to-json.xsl"
         };
         try {
             VerifyingTransform vt = new VerifyingTransform();
@@ -391,9 +391,9 @@ public class TransformTests {
         // TODO: what is this test trying to achieve?
         String[] args = {
                 "-t",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-lib:" + ConfigTest.DATA_DIR + "packages/pack-002.xsl",
-                "-xsl:" + ConfigTest.DATA_DIR + "packages/pack-001.xsl"
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-lib:" + configTest.getDataDir() + "packages/pack-002.xsl",
+                "-xsl:" + configTest.getDataDir() + "packages/pack-001.xsl"
         };
         try {
             VerifyingTransform vt = new VerifyingTransform();
@@ -412,9 +412,9 @@ public class TransformTests {
     public void testPackages002() {
         String[] args = {
                 "-t",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-lib:" + ConfigTest.DATA_DIR + "packages/pack-001.xsl",
-                "-xsl:" + ConfigTest.DATA_DIR + "packages/pack-002.xsl"
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-lib:" + configTest.getDataDir() + "packages/pack-001.xsl",
+                "-xsl:" + configTest.getDataDir() + "packages/pack-002.xsl"
         };
         try {
             VerifyingTransform vt = new VerifyingTransform();
@@ -433,8 +433,8 @@ public class TransformTests {
     public void testNextInChain() {
         String[] args = {
                 "-t",
-                "-s:" + ConfigTest.DATA_DIR + "next-in-chain/test.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "next-in-chain/main.xsl"
+                "-s:" + configTest.getDataDir() + "next-in-chain/test.xml",
+                "-xsl:" + configTest.getDataDir() + "next-in-chain/main.xsl"
         };
         try {
             VerifyingTransform vt = new VerifyingTransform();
@@ -449,29 +449,29 @@ public class TransformTests {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void testDirectory() {
-        if (!new File(ConfigTest.DATA_DIR + "sandpit/welch-ser/out").exists()) {
-            new File(ConfigTest.DATA_DIR + "sandpit/welch-ser/out").mkdir();
+        if (!new File(configTest.getDataDir() + "sandpit/welch-ser/out").exists()) {
+            new File(configTest.getDataDir() + "sandpit/welch-ser/out").mkdir();
         }
-        if (new File(ConfigTest.DATA_DIR + "sandpit/welch-ser/out/A.xsl.xml").exists()) {
-            new File(ConfigTest.DATA_DIR + "sandpit/welch-ser/out/A.xsl.xml").delete();
+        if (new File(configTest.getDataDir() + "sandpit/welch-ser/out/A.xsl.xml").exists()) {
+            new File(configTest.getDataDir() + "sandpit/welch-ser/out/A.xsl.xml").delete();
         }
-        if (new File(ConfigTest.DATA_DIR + "sandpit/welch-ser/out/B.xsl.xml").exists()) {
-            new File(ConfigTest.DATA_DIR + "sandpit/welch-ser/out/B.xsl.xml").delete();
+        if (new File(configTest.getDataDir() + "sandpit/welch-ser/out/B.xsl.xml").exists()) {
+            new File(configTest.getDataDir() + "sandpit/welch-ser/out/B.xsl.xml").delete();
         }
         String[] args = {
                 "-t",
-                "-o:" + ConfigTest.DATA_DIR + "sandpit/welch-ser/out",
-                "-s:" + ConfigTest.DATA_DIR + "welch-ser",
-                "-xsl:" + ConfigTest.DATA_DIR + "identity.xsl"
+                "-o:" + configTest.getDataDir() + "sandpit/welch-ser/out",
+                "-s:" + configTest.getDataDir() + "welch-ser",
+                "-xsl:" + configTest.getDataDir() + "identity.xsl"
         };
         try {
             Transform.main(args);
-            assertTrue(new File(ConfigTest.DATA_DIR + "sandpit/welch-ser/out/A.xsl.xml").exists(), "A exists");
-            assertTrue(new File(ConfigTest.DATA_DIR + "sandpit/welch-ser/out/B.xsl.xml").exists(), "B exists");
+            assertTrue(new File(configTest.getDataDir() + "sandpit/welch-ser/out/A.xsl.xml").exists(), "A exists");
+            assertTrue(new File(configTest.getDataDir() + "sandpit/welch-ser/out/B.xsl.xml").exists(), "B exists");
         } catch (Exception e) {
             fail();
         } finally {
-            new File(ConfigTest.DATA_DIR + "welch-ser/out").delete();
+            new File(configTest.getDataDir() + "welch-ser/out").delete();
         }
     }
 
@@ -494,9 +494,9 @@ public class TransformTests {
 
         String[] args = {
                 "-t",
-                "-s:" + ConfigTest.DATA_DIR + "caffo/Input.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "caffo/Transform2Streamable.xslt",
-                "-o:" + ConfigTest.DATA_DIR + "sandpit/caffoOut.xml",
+                "-s:" + configTest.getDataDir() + "caffo/Input.xml",
+                "-xsl:" + configTest.getDataDir() + "caffo/Transform2Streamable.xslt",
+                "-o:" + configTest.getDataDir() + "sandpit/caffoOut.xml",
                 "-init:commands.TransformTests$RequireStreaming"
         };
         try {
@@ -505,7 +505,7 @@ public class TransformTests {
             e.printStackTrace();
             fail();
         }
-        assertTrue(new File(ConfigTest.DATA_DIR + "sandpit/caffoOut.xml").exists(), "Streaming output exists");
+        assertTrue(new File(configTest.getDataDir() + "sandpit/caffoOut.xml").exists(), "Streaming output exists");
     }
 
 
@@ -514,9 +514,9 @@ public class TransformTests {
 
         String[] args = {
                 "-t",
-                "-s:" + ConfigTest.DATA_DIR + "caffo/Input.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "caffo/Transform2Streamable.xslt",
-                "-export:" + ConfigTest.DATA_DIR + "sandpit/caffo.xsl.sef",
+                "-s:" + configTest.getDataDir() + "caffo/Input.xml",
+                "-xsl:" + configTest.getDataDir() + "caffo/Transform2Streamable.xslt",
+                "-export:" + configTest.getDataDir() + "sandpit/caffo.xsl.sef",
                 "-nogo"};
         try {
             Transform.main(args);
@@ -524,13 +524,13 @@ public class TransformTests {
             e.printStackTrace();
             fail();
         }
-        assertTrue(new File(ConfigTest.DATA_DIR + "sandpit/caffo.xsl.sef").exists(), "Streaming output exists");
+        assertTrue(new File(configTest.getDataDir() + "sandpit/caffo.xsl.sef").exists(), "Streaming output exists");
 
         String[] args2 = {
                 "-t",
-                "-s:" + ConfigTest.DATA_DIR + "caffo/Input.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "sandpit/caffo.xsl.sef",
-                "-o:" + ConfigTest.DATA_DIR + "sandpit/caffoOut.xml",
+                "-s:" + configTest.getDataDir() + "caffo/Input.xml",
+                "-xsl:" + configTest.getDataDir() + "sandpit/caffo.xsl.sef",
+                "-o:" + configTest.getDataDir() + "sandpit/caffoOut.xml",
                 "-init:commands.TransformTests$RequireStreaming"};
         try {
             Transform.main(args2);
@@ -538,17 +538,17 @@ public class TransformTests {
             e.printStackTrace();
             fail();
         }
-        assertTrue(new File(ConfigTest.DATA_DIR + "sandpit/caffoOut.xml").exists(), "Streaming output exists");
+        assertTrue(new File(configTest.getDataDir() + "sandpit/caffoOut.xml").exists(), "Streaming output exists");
     }
 
     @Test
     public void testResourceCatalog() {
         String[] args = {
                 "-t",
-                "-catalog:" + ConfigTest.DATA_DIR + "resolvers/catalog.xml",
-                "-s:" + ConfigTest.DATA_DIR + "resolvers/input.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "resolvers/style.xsl",
-                "-o:" + ConfigTest.DATA_DIR + "sandpit/catalogTestOut.xml"
+                "-catalog:" + configTest.getDataDir() + "resolvers/catalog.xml",
+                "-s:" + configTest.getDataDir() + "resolvers/input.xml",
+                "-xsl:" + configTest.getDataDir() + "resolvers/style.xsl",
+                "-o:" + configTest.getDataDir() + "sandpit/catalogTestOut.xml"
         };
         try {
             Transform.main(args);
@@ -556,7 +556,7 @@ public class TransformTests {
             e.printStackTrace();
             fail();
         }
-        assertTrue(new File(ConfigTest.DATA_DIR + "sandpit/catalogTestOut.xml").exists(), "Test output exists");
+        assertTrue(new File(configTest.getDataDir() + "sandpit/catalogTestOut.xml").exists(), "Test output exists");
 
     }
 
@@ -591,9 +591,9 @@ public class TransformTests {
         String[] args = {
                 "-ext:off",
                 "-quit:off",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-xsd:" + ConfigTest.DATA_DIR + "books11.xsd",
-                "-xsl:" + ConfigTest.DATA_DIR + "books-strip-types.xsl",
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-xsd:" + configTest.getDataDir() + "books11.xsd",
+                "-xsl:" + configTest.getDataDir() + "books-strip-types.xsl",
                 "-val:strict"
         };
         try {
@@ -614,9 +614,9 @@ public class TransformTests {
         String[] args = {
                 "-ext:off",
                 "-quit:off",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-xsd:" + ConfigTest.DATA_DIR + "books11.xsd",
-                "-xsl:" + ConfigTest.DATA_DIR + "books-preserve-types.xsl",
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-xsd:" + configTest.getDataDir() + "books11.xsd",
+                "-xsl:" + configTest.getDataDir() + "books-preserve-types.xsl",
                 "-val:lax"
         };
         try {

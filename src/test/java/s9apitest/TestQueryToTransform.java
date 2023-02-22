@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class TestQueryToTransform {
+    private final ConfigTest configTest = new ConfigTest();
 
     @Test
     public void testQueryToTransform() throws Exception {
@@ -36,7 +36,7 @@ public class TestQueryToTransform {
 
         XsltCompiler comp_xslt = proc.newXsltCompiler();
         comp_xslt.setSchemaAware(false);
-        XsltExecutable template = comp_xslt.compile(new StreamSource(new File(ConfigTest.DATA_DIR + "identity.xsl")));
+        XsltExecutable template = comp_xslt.compile(new StreamSource(new File(configTest.getDataDir() + "identity.xsl")));
         XsltTransformer trans1 = template.load();
 
         for (XdmItem item : result) {
@@ -62,7 +62,7 @@ public class TestQueryToTransform {
 
         XsltCompiler comp_xslt = proc.newXsltCompiler();
         comp_xslt.setSchemaAware(false);
-        XsltExecutable template = comp_xslt.compile(new StreamSource(new File(ConfigTest.DATA_DIR + "identity.xsl")));
+        XsltExecutable template = comp_xslt.compile(new StreamSource(new File(configTest.getDataDir() + "identity.xsl")));
         XsltTransformer trans1 = template.load();
 
         XdmDestination resultTree = new XdmDestination();
@@ -129,32 +129,6 @@ public class TestQueryToTransform {
             assertTrue(staticErrors.isEmpty());
             assertFalse(dynamicErrors.isEmpty());
             assertTrue(dynamicErrors.get(0).getMessage().contains("division by zero"));
-        }
-    }
-
-    @Test
-    public void testFnTransform40() {
-        try {
-            Processor proc = new Processor(true);
-            XdmNode source = proc.newDocumentBuilder().build(new StreamSource(new StringReader("<a/>")));
-            XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setLanguageVersion("4.0");
-            comp.setBaseURI(new URI("file:///c:/aplEjXML/"));
-            String qry_base = "transform(map{"
-                    + "'xslt-version':4.0,"
-                    + "'stylesheet-text':"
-                    + "'<a xsl:version=\"4.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" z=\"{node-name() otherwise 42}\"/>',"
-                    + "'source-node':.})?output";
-
-            XQueryExecutable exp = comp.compile(qry_base);
-            XQueryEvaluator qe = exp.load();
-            qe.setContextItem(source);
-            StringWriter sw = new StringWriter();
-            qe.run(proc.newSerializer(sw));
-            assertTrue(sw.toString().contains("z=\"42\""));
-        } catch (URISyntaxException | SaxonApiException e) {
-            System.err.println(e.getMessage());
-            fail(e);
         }
     }
 }

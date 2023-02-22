@@ -36,12 +36,13 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Tests for JAXP schema validation interface
  */
 public class SchemaTests {
+    private final ConfigTest configTest = new ConfigTest();
 
     @Test
     public void testStreamNotClosed() {
         try {
             InputStream inStream = new BufferedInputStream(new FileInputStream(new
-                    File(ConfigTest.DATA_DIR + "books.xml")), 100000);  // size of blah is << 100000
+                    File(configTest.getDataDir() + "books.xml")), 100000);  // size of blah is << 100000
 
             inStream.mark(99999);
 
@@ -55,7 +56,7 @@ public class SchemaTests {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
             SchemaFactory schemaFactory = new com.saxonica.ee.jaxp.SchemaFactoryImpl(config);
             Schema schemaGrammar = schemaFactory.newSchema(
-                    new StreamSource[]{new StreamSource(new File(ConfigTest.DATA_DIR + "books.xsd"))});
+                    new StreamSource[]{new StreamSource(new File(configTest.getDataDir() + "books.xsd"))});
 
             Validator schemaValidator = schemaGrammar.newValidator();
 
@@ -75,7 +76,7 @@ public class SchemaTests {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setNamespaceAware(true);
-            Document doc = docFactory.newDocumentBuilder().parse(new File(ConfigTest.DATA_DIR + "books.xsd"));
+            Document doc = docFactory.newDocumentBuilder().parse(new File(configTest.getDataDir() + "books.xsd"));
             Element top = doc.getDocumentElement();
             DOMSource source = new DOMSource(top);
 
@@ -85,7 +86,7 @@ public class SchemaTests {
 
             Validator schemaValidator = schemaGrammar.newValidator();
 
-            schemaValidator.validate(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml")));
+            schemaValidator.validate(new StreamSource(new File(configTest.getDataDir() + "books.xml")));
 
         } catch (SAXException e) {
             e.printStackTrace();
@@ -104,7 +105,7 @@ public class SchemaTests {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setNamespaceAware(true);
-            Document doc = docFactory.newDocumentBuilder().parse(new File(ConfigTest.DATA_DIR + "books.xsd"));
+            Document doc = docFactory.newDocumentBuilder().parse(new File(configTest.getDataDir() + "books.xsd"));
             DOMSource source = new DOMSource(doc);
 
             EnterpriseConfiguration config = new EnterpriseConfiguration();
@@ -113,7 +114,7 @@ public class SchemaTests {
 
             Validator schemaValidator = schemaGrammar.newValidator();
 
-            schemaValidator.validate(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml")));
+            schemaValidator.validate(new StreamSource(new File(configTest.getDataDir() + "books.xml")));
 
         } catch (SAXException e) {
             e.printStackTrace();
@@ -310,7 +311,7 @@ public class SchemaTests {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setNamespaceAware(true);
-            Document doc = docFactory.newDocumentBuilder().parse(new File(ConfigTest.DATA_DIR + "books-wrapper.xsd"));
+            Document doc = docFactory.newDocumentBuilder().parse(new File(configTest.getDataDir() + "books-wrapper.xsd"));
             Element top = doc.getDocumentElement();
             DOMSource source = new DOMSource(top);
 
@@ -321,7 +322,7 @@ public class SchemaTests {
 
             Validator schemaValidator = schemaGrammar.newValidator();
 
-            schemaValidator.validate(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml")));
+            schemaValidator.validate(new StreamSource(new File(configTest.getDataDir() + "books.xml")));
             fail("undetected failure");
         } catch (SAXException | IOException | ParserConfigurationException e) {
             // failed as expected

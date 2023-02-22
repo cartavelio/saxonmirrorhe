@@ -36,7 +36,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XPathCompiler
  */
 public class TestXPathCompiler {
-
+    private final ConfigTest configTest = new ConfigTest();
+    
     @Test
     public void testSimple() {
         try {
@@ -414,7 +415,7 @@ public class TestXPathCompiler {
 //        try {
 //            Processor p = new Processor(true);
 //            p.getSchemaManager().load(
-//                    new StreamSource(new File(ConfigTest.DATA_DIR + "books.xsd").toURI().toString()));
+//                    new StreamSource(new File(configTest.getDataDir() + "books.xsd").toURI().toString()));
 //            p.registerExtensionFunction(
 //                    new ExtensionFunctionDefinition() {
 //
@@ -465,7 +466,7 @@ public class TestXPathCompiler {
 //            );
 //            DocumentBuilder builder = p.newDocumentBuilder();
 //            builder.setSchemaValidator(p.getSchemaManager().newSchemaValidator());
-//            XdmNode doc = builder.build(new File(ConfigTest.DATA_DIR + "books.xml"));
+//            XdmNode doc = builder.build(new File(configTest.getDataDir() + "books.xml"));
 //            XPathCompiler c = p.newXPathCompiler();
 //            c.importSchemaNamespace("");
 //            c.setSchemaAware(true);
@@ -518,7 +519,7 @@ public class TestXPathCompiler {
         try {
 
             // 1. load schema into EnterpriseConfiguration
-            conf.addSchemaSource(new StreamSource(ConfigTest.DATA_DIR + "malix/schema.xsd"));
+            conf.addSchemaSource(new StreamSource(configTest.getDataDir() + "malix/schema.xsd"));
             XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
             xqueryCompiler.setSchemaAware(true);
 
@@ -854,7 +855,7 @@ public class TestXPathCompiler {
             Processor processor = new Processor(true);
 
             DocumentBuilder docBuilder = processor.newDocumentBuilder();
-            File inputFile = new File(ConfigTest.DATA_DIR + "xbrlInstance.xml");
+            File inputFile = new File(configTest.getDataDir() + "xbrlInstance.xml");
             XdmItem contextItem = docBuilder.build(inputFile);
 
             XPathCompiler xpathCompiler = processor.newXPathCompiler();

@@ -46,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XsltCompiler
  */
 public class TestXsltCompiler {
+    private final ConfigTest configTest = new ConfigTest();
 
     private void xpathVersionTest(String label, String expression, int version, boolean expectSuccess) {
         try {
@@ -998,7 +999,7 @@ public class TestXsltCompiler {
             sm.exportComponents(scmOut);
 
             XsltPackage pack = comp.compilePackage(new StreamSource(new StringReader(xsl1)));
-            File sefFile = new File(ConfigTest.TEMP_DIR + "6969test.sef");
+            File sefFile = new File(configTest.getTempDir() + "6969test.sef");
             pack.save(sefFile);
 
             Processor proc2 = new Processor(true);

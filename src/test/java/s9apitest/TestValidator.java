@@ -50,7 +50,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Tests for the s9api schema validation interface
  */
 public class TestValidator {
-
+    private final ConfigTest configTest = new ConfigTest();
+    
     @Test
     public void testReportMultipleErrors() {
 
@@ -73,7 +74,7 @@ public class TestValidator {
         final List<TransformerException> errorList = new ArrayList<>();
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
+            out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
             Processor proc = new Processor(true);
             SchemaManager sm = proc.getSchemaManager();
             StreamSource source_xsd = new StreamSource(new StringReader(xsd));
@@ -136,12 +137,12 @@ public class TestValidator {
         try {
             Processor proc = new Processor(true);
             DocumentBuilder builder = proc.newDocumentBuilder();
-            XdmNode doc = builder.build(new File(ConfigTest.DATA_DIR + "book-wrapper.xml"));
+            XdmNode doc = builder.build(new File(configTest.getDataDir() + "book-wrapper.xml"));
             assertEquals(3, getAllBaseUris(doc).size(), "3 distinct base URIs in input");
             assertTrue(doc.getBaseURI().toString().endsWith("book-wrapper.xml"), "input doc base URI");
 
             SchemaManager mgr = proc.getSchemaManager();
-            mgr.load(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xsd")));
+            mgr.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
             SchemaValidator v = mgr.newSchemaValidator();
             XdmDestination dest = new XdmDestination();
             v.setDestination(dest);
@@ -303,10 +304,10 @@ public class TestValidator {
     public void testSchemaAwareQueryUsingSCM() {
         try {
             Processor proc = new Processor(true);
-            proc.getSchemaManager().importComponents(new StreamSource(new File(ConfigTest.DATA_DIR + "dita/concept.scm")));
+            proc.getSchemaManager().importComponents(new StreamSource(new File(configTest.getDataDir() + "dita/concept.scm")));
             // define a ns prefix to be associated with a default attribute added to the instance during validation
             proc.getUnderlyingConfiguration().getNamePool().suggestPrefix("dita", "http://dita.oasis-open.org/architecture/2005/");
-            XdmNode doc = proc.newDocumentBuilder().build(new StreamSource(new File(ConfigTest.DATA_DIR + "dita/concept.xml")));
+            XdmNode doc = proc.newDocumentBuilder().build(new StreamSource(new File(configTest.getDataDir() + "dita/concept.xml")));
             XQueryCompiler c = proc.newXQueryCompiler();
             c.setSchemaAware(true);
             XQueryEvaluator e = c.compile("validate{.}").load();
@@ -662,7 +663,7 @@ public class TestValidator {
 
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
+            out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.IMPLICIT_SCHEMA_IMPORTS, true);
 
@@ -754,7 +755,7 @@ public class TestValidator {
 
             dest = proc.newSerializer(sw);
             dest.setOutputProperty(Serializer.Property.INDENT, "yes");
-            validator.setValidityReporting(dest);//ConfigTest.DATA_DIR+"/validationReort.xml");
+            validator.setValidityReporting(dest);//configTest.getDataDir()+"/validationReort.xml");
             StreamSource source1 = new StreamSource(new StringReader(invalid_xml));
             source1.setSystemId("http://doc1");
             validator.validate(source1);
@@ -825,16 +826,16 @@ public class TestValidator {
 
             dest = proc.newSerializer();
             dest.setOutputProperty(Serializer.Property.INDENT, "yes");
-            dest.setOutputFile(new File(ConfigTest.TEMP_DIR + "/validationReport.xml"));
+            dest.setOutputFile(new File(configTest.getTempDir() + "/validationReport.xml"));
 
             // dest.setOutputWriter(writer);
-            validator.setValidityReporting(dest);//ConfigTest.DATA_DIR+"/validationReort.xml");
+            validator.setValidityReporting(dest);//configTest.getDataDir()+"/validationReort.xml");
             //validator.validate(new StreamSource(new File("/Users/ond1/work/development/files/millicom/_XMLDestination.xml")));//new StringReader(invalid_xml)));
             StreamSource source2 = new StreamSource(new StringReader(invalid_xml));
             source2.setSystemId("http://doc2");
             validator.validate(source2);
             System.err.println("Doc 1 OK");
-            File file = new File(ConfigTest.TEMP_DIR + "/validationReport.xml");
+            File file = new File(configTest.getTempDir() + "/validationReport.xml");
             XdmNode resultdoc = proc.newDocumentBuilder().build(file);
             System.out.println(resultdoc.getStringValue());
             assertTrue(file.exists(), "File exists: ");
@@ -1038,8 +1039,8 @@ public class TestValidator {
     }
 
     public void runSchemaListener(SchemaFactory schemaFactory) throws SAXException, IOException {
-        File schemaFile = new File(ConfigTest.DATA_DIR + "personal.xsd");
-        File xmlFile = new File(ConfigTest.DATA_DIR + "personal-schema.xml");
+        File schemaFile = new File(configTest.getDataDir() + "personal.xsd");
+        File xmlFile = new File(configTest.getDataDir() + "personal-schema.xml");
         MyErrorHandler errorHandler = new MyErrorHandler();
 
         // Set error handler
@@ -1063,8 +1064,8 @@ public class TestValidator {
     // Documents are not in the repository
     public void testMillicomErrorListener() {
         String[] args = {
-                "-xsd:" + ConfigTest.DATA_DIR + "SubsidyTrackingFactXSD11.xsd",
-                "-s:" + ConfigTest.DATA_DIR + "id2278_HN201506_SubsidyTrackingFact.xml",
+                "-xsd:" + configTest.getDataDir() + "SubsidyTrackingFactXSD11.xsd",
+                "-s:" + configTest.getDataDir() + "id2278_HN201506_SubsidyTrackingFact.xml",
                 "-verbose",
                 "-xsdversion:1.1"};
 
@@ -1084,18 +1085,18 @@ public class TestValidator {
         try {
             final Processor processor = new Processor(true);
             processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION_MODE, "lax");
-            processor.getSchemaManager().load(new StreamSource(new File(ConfigTest.DATA_DIR + "leak/schema.xsd")));
+            processor.getSchemaManager().load(new StreamSource(new File(configTest.getDataDir() + "leak/schema.xsd")));
 
             final DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setTreeModel(TreeModel.TINY_TREE);
 
-            XdmNode node = builder.build(new StreamSource(new File(ConfigTest.DATA_DIR + "leak/instance.xml")));
+            XdmNode node = builder.build(new StreamSource(new File(configTest.getDataDir() + "leak/instance.xml")));
             WeakReference<TinyTree> tinyTree = new WeakReference<>(((TinyDocumentImpl) node.getUnderlyingNode()).getTree());
 
             final XPathCompiler compiler = processor.newXPathCompiler();
             compiler.importSchemaNamespace("http://example.org");
             compiler.evaluate("namespace-uri-from-QName(//*/foo)", node);
-            node = builder.build(new StreamSource(new File(ConfigTest.DATA_DIR + "leak/instance.xml")));
+            node = builder.build(new StreamSource(new File(configTest.getDataDir() + "leak/instance.xml")));
             System.gc();
             assertNull(tinyTree.get());
         } catch (SaxonApiException e) {
@@ -1130,7 +1131,7 @@ public class TestValidator {
 
             config.setBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, multiple);
 
-            String dir = ConfigTest.DATA_DIR + "/petrk/AbstractType-2/";
+            String dir = configTest.getDataDir() + "/petrk/AbstractType-2/";
 
             System.err.println("Loading from file:");
 
@@ -1269,7 +1270,7 @@ public class TestValidator {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, byteCodeOn);
             //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, byteCodeOn);
-            //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, ConfigTest.TEMP_DIR + "Saxon-bytecode");
+            //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, configTest.getTempDir() + "Saxon-bytecode");
             SchemaManager sm = proc.getSchemaManager();
             sm.load(new StreamSource(new StringReader(sch1)));
             XQueryCompiler comp = proc.newXQueryCompiler();
@@ -1327,7 +1328,7 @@ public class TestValidator {
             SchemaFactory proc = new SchemaFactoryImpl();
             proc.setProperty(FeatureKeys.GENERATE_BYTE_CODE, byteCodeOn);
             //proc.setProperty(Feature.DEBUG_BYTE_CODE.name, byteCodeOn);
-            //proc.setProperty(FeatureKeys.DEBUG_BYTE_CODE_DIR, ConfigTest.TEMP_DIR + "Saxon-bytecode");
+            //proc.setProperty(FeatureKeys.DEBUG_BYTE_CODE_DIR, configTest.getTempDir() + "Saxon-bytecode");
             Schema sch = proc.newSchema(new StreamSource(new StringReader(sch1)));
             Validator val = sch.newValidator();
             StringBuilder sb = new StringBuilder();
@@ -1367,11 +1368,11 @@ public class TestValidator {
         final List<TransformerException> errorList = new ArrayList<>();
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
+            out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
             Processor proc = new Processor(true);
             SchemaManager sm = proc.getSchemaManager();
-            StreamSource source_xsd = new StreamSource(new File(ConfigTest.DATA_DIR + "../bugs/4744/UniqueKeyBug.xsd"));
-            StreamSource source_xml = new StreamSource(new File(ConfigTest.DATA_DIR + "../bugs/4744/UniqueKeyBug.xml"));
+            StreamSource source_xsd = new StreamSource(new File(configTest.getDataDir() + "../bugs/4744/UniqueKeyBug.xsd"));
+            StreamSource source_xml = new StreamSource(new File(configTest.getDataDir() + "../bugs/4744/UniqueKeyBug.xml"));
             ErrorListener listener = new ErrorListener() {
                 @Override
                 public void error(TransformerException exception) {
@@ -1422,7 +1423,7 @@ public class TestValidator {
         try {
             Processor processor = new Processor(true);
             DocumentBuilder builder = processor.newDocumentBuilder();
-            XdmNode source = builder.build(new File(ConfigTest.DATA_DIR + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
+            XdmNode source = builder.build(new File(configTest.getDataDir() + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
 
             SchemaManager manager = processor.getSchemaManager();
             SchemaValidator validator = manager.newSchemaValidator();
@@ -1453,7 +1454,7 @@ public class TestValidator {
         try {
             Processor processor = new Processor(true);
             DocumentBuilder builder = processor.newDocumentBuilder();
-            XdmNode source = builder.build(new File(ConfigTest.DATA_DIR + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
+            XdmNode source = builder.build(new File(configTest.getDataDir() + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
 
             SchemaManager manager = processor.getSchemaManager();
             SchemaValidator validator = manager.newSchemaValidator();
@@ -1492,11 +1493,11 @@ public class TestValidator {
         final List<SAXParseException> errorList = new ArrayList<>();
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
+            out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
             Processor proc = new Processor(true);
             SchemaManager sm = proc.getSchemaManager();
-            StreamSource source_xsd = new StreamSource(new File(ConfigTest.DATA_DIR + "../bugs/4744/UniqueKeyBug.xsd"));
-            StreamSource source_xml = new StreamSource(new File(ConfigTest.DATA_DIR + "../bugs/4744/UniqueKeyBug.xml"));
+            StreamSource source_xsd = new StreamSource(new File(configTest.getDataDir() + "../bugs/4744/UniqueKeyBug.xsd"));
+            StreamSource source_xml = new StreamSource(new File(configTest.getDataDir() + "../bugs/4744/UniqueKeyBug.xml"));
             ErrorHandler handler = new ErrorHandler() {
                 @Override
                 public void error(SAXParseException exception) {
@@ -1579,5 +1580,61 @@ public class TestValidator {
             fail();
         }
     }
+
+    @Test
+    public void testSchemaForXslt30Direct() {
+        // This should use the resolver mechanism to load the schema locally
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager schemaManager = proc.getSchemaManager();
+            schemaManager.load(new StreamSource("https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd"));
+
+            SchemaValidator validator = schemaManager.newSchemaValidator();
+            validator.validate(new StreamSource(new File(configTest.getDataDir(), "caffo/Transform2.xslt")));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            fail();
+        }
+    }
+
+    @Test
+    public void testSchemaForXslt30viaXQuery() {
+        // This should use the resolver mechanism to load the schema locally
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager schemaManager = proc.getSchemaManager();
+
+            XQueryCompiler compiler = proc.newXQueryCompiler();
+            XQueryEvaluator eval = compiler.compile("doc('https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd')").load();
+            XdmNode schema = (XdmNode) eval.evaluate();
+
+            schemaManager.load(schema.asSource());
+            SchemaValidator validator = schemaManager.newSchemaValidator();
+            validator.validate(new StreamSource(new File(configTest.getDataDir(), "caffo/Transform2.xslt")));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            fail();
+        }
+    }
+
+    @Test
+    public void testSchemaForXslt30viaDocumentBuilder() {
+        // This should use the resolver mechanism to load the schema locally
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager schemaManager = proc.getSchemaManager();
+
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode schema = builder.build(new StreamSource("https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd"));
+            schemaManager.load(schema.asSource());
+
+            SchemaValidator validator = schemaManager.newSchemaValidator();
+            validator.validate(new StreamSource(new File(configTest.getDataDir(), "caffo/Transform2.xslt")));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            fail();
+        }
+    }
+
 }
 

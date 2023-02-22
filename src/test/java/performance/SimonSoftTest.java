@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class SimonSoftTest {
+    private final ConfigTest configTest = new ConfigTest();
 
     // See bug 2929 - cost of whitespace stripping
 
@@ -79,7 +80,7 @@ public class SimonSoftTest {
                 StreamSource xslSource = new StreamSource(new StringReader(xsl));
 
 
-                InputStream xml = new FileInputStream(ConfigTest.DATA_DIR + "xmark1.xml");
+                InputStream xml = new FileInputStream(configTest.getDataDir() + "xmark1.xml");
 
                 transformElements(xslSource, xml);
             } catch (FileNotFoundException | SaxonApiException e) {

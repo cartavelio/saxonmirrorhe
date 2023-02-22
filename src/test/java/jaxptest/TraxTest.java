@@ -46,20 +46,21 @@ import static org.junit.jupiter.api.Assertions.fail;
  * originally created by Scott Boag, but much evolved since.
  */
 public class TraxTest {
+    private final ConfigTest configTest = new ConfigTest();
 
-    private static final String d = ConfigTest.DATA_DIR + "trax/";
+    private final String d = configTest.getDataDir() + "trax/";
 
-    private static final String foo_xml = d+"xml/foo.xml";
-    private static final String foo_xsl = d+"xsl/foo.xsl";
-    private static final String baz_xml = d+"xml/baz.xml";
-    private static final String baz_xsl = d+"xsl/baz.xsl";
-    private static final String foo2_xsl = d+"xsl/foo2.xsl";
-    private static final String foo3_xsl = d+"xsl/foo3.xsl";
-    private static final String text_xsl = d+"xsl/text.xsl";
-    private static final String cities_xml = d+"xml/cities.xml";
-    private static final String embedded_xml = d+"xml/embedded.xml";
-    private static final String multidoc_xsl = d+"xsl/multidoc.xsl";
-    private static final String identity_xsl = d+"xsl/identity.xsl";
+    private final String foo_xml = d+"xml/foo.xml";
+    private final String foo_xsl = d+"xsl/foo.xsl";
+    private final String baz_xml = d+"xml/baz.xml";
+    private final String baz_xsl = d+"xsl/baz.xsl";
+    private final String foo2_xsl = d+"xsl/foo2.xsl";
+    private final String foo3_xsl = d+"xsl/foo3.xsl";
+    private final String text_xsl = d+"xsl/text.xsl";
+    private final String cities_xml = d+"xml/cities.xml";
+    private final String embedded_xml = d+"xml/embedded.xml";
+    private final String multidoc_xsl = d+"xsl/multidoc.xsl";
+    private final String identity_xsl = d+"xsl/identity.xsl";
 
     @Test
     public void testExampleParseOnly() {
@@ -108,7 +109,7 @@ public class TraxTest {
             Transformer transformer =
                     tfactory.newTransformer(new StreamSource(foo_xsl));
 
-            String outpath = ConfigTest.DATA_DIR + "temp/Simple2.out";
+            String outpath = configTest.getDataDir() + "temp/Simple2.out";
 
             // Transform the source XML to System.out.
             transformer.transform(new StreamSource(foo_xml),

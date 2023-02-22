@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TransformWithValidation {
+    private final ConfigTest configTest = new ConfigTest();
 
     private static int errorCount = 0;
 
@@ -43,11 +44,11 @@ public class TransformWithValidation {
         }
     };
 
-    private static final String dir = ConfigTest.DATA_DIR + "defaultAttTest/";
+    private final String dir = configTest.getDataDir() + "defaultAttTest/";
 
-    private static final String xslPath = dir+"samples/validation/bookstore/BookStore.xsl";
-    private static final String xmlPath = dir+"samples/validation/bookstore/BookStore.xml";
-    private static final String outPath = dir+"samples/validation/bookstore/out.xml";
+    private final String xslPath = dir+"samples/validation/bookstore/BookStore.xsl";
+    private final String xmlPath = dir+"samples/validation/bookstore/BookStore.xml";
+    private final String outPath = dir+"samples/validation/bookstore/out.xml";
 
     @Test
     public void testWithInputValidation() {

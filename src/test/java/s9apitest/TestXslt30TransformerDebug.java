@@ -52,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * with a TraceListener enabled.
  */
 public class TestXslt30TransformerDebug {
-
+    private final ConfigTest configTest = new ConfigTest();
     public static class MyTraceListener implements TraceListener {
 
         @Override
@@ -105,7 +105,7 @@ public class TestXslt30TransformerDebug {
 
             // Create a transformer for the stylesheet.
             Xslt30Transformer transformer = processor.newXsltCompiler().compile(
-                    new StreamSource(new File(ConfigTest.DATA_DIR + "caffo/Transform2.xslt"))).load30();
+                    new StreamSource(new File(configTest.getDataDir() + "caffo/Transform2.xslt"))).load30();
             transformer.setTraceListener(new MyTraceListener());
             // Create a serializer
             XdmDestination serializer = new XdmDestination();
@@ -115,7 +115,7 @@ public class TestXslt30TransformerDebug {
             for (int i = 0; i < 10; i++) {
                 // Load the source document
                 XdmNode input = processor.newDocumentBuilder().build(
-                        new File(ConfigTest.DATA_DIR + "caffo/Input.xml"));
+                        new File(configTest.getDataDir() + "caffo/Input.xml"));
                 // Set the root node of the source document to be the initial context node
                 transformer.applyTemplates(input, serializer);
             }
@@ -151,7 +151,7 @@ public class TestXslt30TransformerDebug {
             transformer.setTraceListener(new MyTraceListener());
 
             XdmNode input = processor.newDocumentBuilder().build(
-                    new File(ConfigTest.DATA_DIR + "caffo/Input.xml"));
+                    new File(configTest.getDataDir() + "caffo/Input.xml"));
 
             transformer.setGlobalContextItem(input);
 
@@ -202,7 +202,7 @@ public class TestXslt30TransformerDebug {
             Transformer transformer = transformerFactory.newTransformer(source);
 
             // Create XML  SAX source
-            Source xmlSource = new StreamSource(new File(ConfigTest.DATA_DIR + "caffo/Input.xml"));
+            Source xmlSource = new StreamSource(new File(configTest.getDataDir() + "caffo/Input.xml"));
 
             // Output stream result
 //		Result outputTarget = new StreamResult(new File(outPath));
@@ -239,10 +239,10 @@ public class TestXslt30TransformerDebug {
             InputSource inputSource = new InputSource(new StringReader(xx));
             Source source = new SAXSource(inputSource);
             Transformer transformer = transformerFactory.newTransformer(source);
-            transformer.setParameter("p", ConfigTest.DATA_DIR + "books.xml");
+            transformer.setParameter("p", configTest.getDataDir() + "books.xml");
 
             // Create XML  SAX source
-            Source xmlSource = new StreamSource(new File(ConfigTest.DATA_DIR + "caffo/Input.xml"));
+            Source xmlSource = new StreamSource(new File(configTest.getDataDir() + "caffo/Input.xml"));
 
             // Output stream result
 //		Result outputTarget = new StreamResult(new File(outPath));
@@ -317,7 +317,7 @@ public class TestXslt30TransformerDebug {
             XsltCompiler xqcomp = proc.newXsltCompiler();
 
             sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
-                    "<xsl:import href='file:///" + ConfigTest.DATA_DIR + "identity.xsl'/>\n" +
+                    "<xsl:import href='file:///" + configTest.getDataDir() + "identity.xsl'/>\n" +
                     "<xsl:import href='http://imported'/>\n" +
                     "<xsl:param name='x' select='0'/>\n" +
                     "<xsl:template match='/'>\n" +
@@ -402,7 +402,7 @@ public class TestXslt30TransformerDebug {
             XsltCompiler xqcomp = proc.newXsltCompiler();
             xqcomp.setErrorListener(listener);
 
-            Xslt30Transformer trans = xqcomp.compile(new StreamSource((new File(ConfigTest.DATA_DIR + "main.xsl")))).load30();
+            Xslt30Transformer trans = xqcomp.compile(new StreamSource((new File(configTest.getDataDir() + "main.xsl")))).load30();
             trans.setTraceListener(new MyTraceListener());
             Serializer serializer = proc.newSerializer();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -471,7 +471,7 @@ public class TestXslt30TransformerDebug {
 
             XsltCompiler compiler = processor.newXsltCompiler();
 
-            String d = ConfigTest.DATA_DIR + "trax/";
+            String d = configTest.getDataDir() + "trax/";
 
             String foo_xml = d + "xml/foo.xml";
             Source sources =
@@ -631,10 +631,10 @@ public class TestXslt30TransformerDebug {
             transformer.setTraceListener(new MyTraceListener());
 
             SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xsd")));
+            sm.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setSchemaValidator(sm.newSchemaValidator());
-            XdmNode books = builder.build(new File(ConfigTest.DATA_DIR + "books.xml"));
+            XdmNode books = builder.build(new File(configTest.getDataDir() + "books.xml"));
             // Create a serializer
             //String outfile = @"C:/MyJava/users/caffo/Output.xml";
             StringWriter sw = new StringWriter();
@@ -818,11 +818,11 @@ public class TestXslt30TransformerDebug {
             Processor processor = new Processor(true);
             processor.setConfigurationProperty(Feature.VALIDATION_WARNINGS, Boolean.TRUE);
             processor.getUnderlyingConfiguration().addSchemaSource(
-                    new StreamSource(ConfigTest.DATA_DIR + "books.xsd"));
+                    new StreamSource(configTest.getDataDir() + "books.xsd"));
             processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
 
             Serializer serializer = processor.newSerializer();
-            serializer.setOutputFile(new File(ConfigTest.TEMP_DIR + "validationWarnings.xml"));
+            serializer.setOutputFile(new File(configTest.getTempDir() + "validationWarnings.xml"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.setSchemaAware(true);
@@ -870,8 +870,8 @@ public class TestXslt30TransformerDebug {
             builder.setDTDValidation(false);
             builder.setLineNumbering(true);
 
-            XdmNode document = builder.build(new File(ConfigTest.DATA_DIR + "books.xml"));
-            XdmNode stylesheet = builder.build(new File(ConfigTest.DATA_DIR + "books.xsl"));
+            XdmNode document = builder.build(new File(configTest.getDataDir() + "books.xml"));
+            XdmNode stylesheet = builder.build(new File(configTest.getDataDir() + "books.xsl"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.setSchemaAware(processor.isSchemaAware());
@@ -1414,7 +1414,7 @@ public class TestXslt30TransformerDebug {
             SchemaManager manager = proc.getSchemaManager();
             comp.setSchemaAware(true);
 
-            manager.load(new StreamSource(new File(ConfigTest.DATA_DIR + "varietyOfTypes.xsd")));
+            manager.load(new StreamSource(new File(configTest.getDataDir() + "varietyOfTypes.xsd")));
 
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             Xslt30Transformer xsl = exec.load30();

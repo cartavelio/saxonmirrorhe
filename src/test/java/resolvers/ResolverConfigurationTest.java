@@ -25,6 +25,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class ResolverConfigurationTest {
+    private final ConfigTest configTest = new ConfigTest();
+    
     @Test
     public void defaultCatalogResourceResolver() {
         Configuration config = new Configuration();
@@ -67,6 +69,17 @@ public class ResolverConfigurationTest {
         }
     }
 
+    @Test
+    public void wrappedUriResolver() {
+        try {
+            Configuration config = new Configuration();
+            config.setResourceResolver(new ResourceResolverWrappingURIResolver(new StandardURIResolver(config)));
+            TreeInfo info = config.buildDocumentTree(new StreamSource(new File(configTest.getDataDir() + "books.xml")));
+            assertTrue(info.getRootNode().getBaseURI().endsWith("books.xml"));
+        } catch (XPathException e) {
+            fail();
+        }
+    }
 
     @Test
     public void wrappedUriResolver2() {
@@ -99,9 +112,9 @@ public class ResolverConfigurationTest {
                             }));
 
             //config.setResourceResolver(new ResourceResolverWrappingURIResolver(new StandardURIResolver(config)));
-            TreeInfo info = config.buildDocumentTree(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml")));
+            TreeInfo info = config.buildDocumentTree(new StreamSource(new File(configTest.getDataDir() + "books.xml")));
             XQueryCompiler xqc = proc.newXQueryCompiler();
-            xqc.setBaseURI(new File(ConfigTest.DATA_DIR).toURI());
+            xqc.setBaseURI(new File(configTest.getDataDir()).toURI());
             XQueryExecutable exec = xqc.compile("doc('books.xml')");
             exec.load().run(new NullDestination());
             assertTrue(info.getRootNode().getBaseURI().endsWith("books.xml"));
@@ -109,7 +122,7 @@ public class ResolverConfigurationTest {
             fail();
         }
     }
-    
+
     private class MyResolver extends CatalogResourceResolver {
         private final CatalogResourceResolver resolver;
 

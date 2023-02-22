@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests on Query Command Line options
  */
 public class QueryTests {
+    private final ConfigTest configTest = new ConfigTest();
 
     /**
      * Run a query using the command line interface capturing the result as a string
@@ -57,7 +58,7 @@ public class QueryTests {
     public void testQueryDirectWithSource() {
         String[] args = {
                 "-qs:count(//*)",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-s:" + configTest.getDataDir() + "books.xml",
                 "-t",
                 "!omit-xml-declaration=yes"};
         String result = runQuery(args);
@@ -68,7 +69,7 @@ public class QueryTests {
     public void testQueryLineNumbering() {
         String[] args = {
                 "-qs:saxon:line-number((//AUTHOR)[1])",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-s:" + configTest.getDataDir() + "books.xml",
                 "-l",
                 "-t",
                 "!omit-xml-declaration=yes"};
@@ -80,7 +81,7 @@ public class QueryTests {
     public void testQueryLineNumberingOff() {
         String[] args = {
                 "-qs:saxon:line-number((//AUTHOR)[1])",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-s:" + configTest.getDataDir() + "books.xml",
                 "-l:off",
                 "-t",
                 "!omit-xml-declaration=yes"};
@@ -91,7 +92,7 @@ public class QueryTests {
     @Test
     public void testQueryLineNumberingOnDoc() {
         String[] args = {
-                "-qs:saxon:line-number((doc('" + ConfigTest.DATA_DIR + "books.xml')//AUTHOR)[1])",
+                "-qs:saxon:line-number((doc('" + configTest.getDataDir() + "books.xml')//AUTHOR)[1])",
                 "-l:on",
                 "-t",
                 "!omit-xml-declaration=yes"};
@@ -105,7 +106,7 @@ public class QueryTests {
                 "-qs:declare variable $doc external; saxon:line-number(($doc//AUTHOR)[1])",
                 "-l:on",
                 "-t",
-                "+doc=" + ConfigTest.DATA_DIR + "books.xml",
+                "+doc=" + configTest.getDataDir() + "books.xml",
                 "!omit-xml-declaration=yes"};
         String result = runQuery(args);
         assertEquals("6", result);
@@ -115,7 +116,7 @@ public class QueryTests {
     public void testQueryDirectWithJsonSource() {
         String[] args = {
                 "-qs:?name",
-                "-json:" + ConfigTest.DATA_DIR + "sample.json",
+                "-json:" + configTest.getDataDir() + "sample.json",
                 "-t",
                 "!omit-xml-declaration=yes"};
         String result = runQuery(args);
@@ -126,7 +127,7 @@ public class QueryTests {
     public void testQueryProjection() {
         String[] args = {
                 "-qs:count(//CATEGORY)",
-                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-s:" + configTest.getDataDir() + "books.xml",
                 "-t",
                 "-projection:on"};
         try {
@@ -140,8 +141,8 @@ public class QueryTests {
     @Test
     public void testQueryUpdate() {
         // This is an update test; copy the file into temp
-        String tempfn = ConfigTest.DATA_DIR + "temp/books.xml";
-        String origfn = ConfigTest.DATA_DIR + "books.xml";
+        String tempfn = configTest.getDataDir() + "temp/books.xml";
+        String origfn = configTest.getDataDir() + "books.xml";
         InputStream instream = null;
         OutputStream outstream = null;
 

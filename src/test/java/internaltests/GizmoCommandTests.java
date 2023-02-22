@@ -26,7 +26,8 @@ import static net.sf.saxon.event.Builder.LINKED_TREE;
  * Test aspects of content completion in Gizmo
  */
 public class GizmoCommandTests {
-
+    private final ConfigTest configTest = new ConfigTest();
+    
     /**
      * Execute a Gizmo command and test the result
      * @param command the command to be executed. On entry the current document will be the "books.xml" sample document
@@ -41,8 +42,15 @@ public class GizmoCommandTests {
             Configuration config = gizmo.getConfiguration();
             Processor proc = new Processor(config);
             config.setTreeModel(LINKED_TREE);
-            TreeInfo doc = config.buildDocumentTree(new StreamSource(ConfigTest.DATA_DIR + "books.xml"));
-            gizmo.setCurrentDoc((DocumentImpl)doc.getRootNode());
+            TreeInfo doc;
+            try {
+                doc = config.buildDocumentTree(new StreamSource(configTest.getDataDir() + "books.xml"));
+            } catch (Exception ex) {
+                System.err.println("CAUGHT ONE");
+                ex.printStackTrace();
+                throw ex;
+            }
+            gizmo.setCurrentDoc((DocumentImpl) doc.getRootNode());
             String result = gizmo.executeTestCommand(command);
             XPathCompiler xpc = proc.newXPathCompiler();
             xpc.declareVariable(new QName("output"));
@@ -58,6 +66,9 @@ public class GizmoCommandTests {
                 }
             }
             Assert.assertTrue(ok);
+        } catch (NoClassDefFoundError ex) {
+            ex.printStackTrace();
+            throw ex;
         } catch (XPathException | SaxonApiException e) {
             Assert.fail(e.getMessage());
             e.printStackTrace();
@@ -70,7 +81,7 @@ public class GizmoCommandTests {
             Configuration config = gizmo.getConfiguration();
             Processor proc = new Processor(config);
             config.setTreeModel(LINKED_TREE);
-            TreeInfo doc = config.buildDocumentTree(new StreamSource(ConfigTest.DATA_DIR + "books.xml"));
+            TreeInfo doc = config.buildDocumentTree(new StreamSource(configTest.getDataDir() + "books.xml"));
             gizmo.setCurrentDoc((DocumentImpl) doc.getRootNode());
             StringBuilder resultString = new StringBuilder();
             for (String command : commands) {
@@ -257,7 +268,7 @@ public class GizmoCommandTests {
     @Test
     public void validate001() {
         runMultiTest(new String[]{
-                "schema " + ConfigTest.DATA_DIR + "books.xsd",
+                "schema " + configTest.getDataDir() + "books.xsd",
                 "validate"
         }, "data((//PRICE)[1]) instance of xs:decimal");
     }

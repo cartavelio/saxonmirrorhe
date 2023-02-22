@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class BinarySerializationTest {
-    public static final String TESTPDF = ConfigTest.DATA_DIR + "temp/testfile.pdf";
+    private final ConfigTest configTest = new ConfigTest();
+    public final String TESTPDF = configTest.getDataDir() + "temp/testfile.pdf";
 
     @Test
     public void testBase64OutputMethod() throws TransformerException,
@@ -43,7 +44,7 @@ public class BinarySerializationTest {
         Templates xsl = tfactory.newTemplates(xslSource);
         Transformer transformer = xsl.newTransformer();
 
-        StreamSource xmlSource = new StreamSource(new File(ConfigTest.DATA_DIR + "base64data.xml"));
+        StreamSource xmlSource = new StreamSource(new File(configTest.getDataDir() + "base64data.xml"));
 
         transformer.transform(xmlSource, transResult);
 
@@ -59,6 +60,8 @@ public class BinarySerializationTest {
          * Konstruktor
          */
         public MyOutputURIResolver() {
+            ConfigTest ctest = new ConfigTest();
+            String TESTPDF = ctest.getDataDir() + "temp/testfile.pdf";
 
             System.out.println("MyOutputURIResolver");
 

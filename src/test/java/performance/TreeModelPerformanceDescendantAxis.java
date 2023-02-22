@@ -27,9 +27,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class TreeModelPerformanceDescendantAxis extends PerformanceTestCase {
 
-    private static final String INPUT = ConfigTest.XMARK_DIR + "xmark10.xml";
-
-
+    private final String INPUT = configTest.getXMarkDir() + "xmark10.xml";
 
     private void searchXPathDescendants(final TreeModel model, final String fileName, final int expected) {
         Processor proc = new Processor(true);
