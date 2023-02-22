@@ -67,32 +67,37 @@ sxnc_value * xdmValue(sxnc_environment *environi, const char* type, const char* 
 
 
 
-sxnc_xpath * c_createXPathProcessor(sxnc_environment *environi, sxnc_processor * processor) {
+int c_createXPathProcessor(sxnc_environment *environi, sxnc_processor * processor, sxnc_xpath * xpath) {
 
 
     int64_t result = -1;
 
 
     if(processor) {
-        result = createXPathProcessorWithProcessor(environi->thread, processor->value);
+        result = createXPathProcessorWithProcessor(environi->thread, (void *)processor->value);
     } else {
         result = createXPathProcessor(environi->thread);
     }
 
-    if(result < 0) {
-        return NULL;
+    if(result == -2) {
+        return 0;
     }
 
+    (* xpath).xpathProc = result;
 
-    sxnc_xpath* xproc = (sxnc_value *)malloc(sizeof(sxnc_xpath));
-    xproc->xpathProc = result;
-
-     return xproc;
+     return 1;
 }
 
 sxnc_value * evaluate(sxnc_environment *environi, sxnc_xpath * proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen){
 	
 
+    	if(!proc) {
+    	    proc =  (sxnc_xpath *)malloc(sizeof(sxnc_xpath));
+    	    int check = c_createXPathProcessor(environi, NULL, proc);
+    	    if(check == -2) {
+    	        return NULL;
+    	    }
+    	}
 
     	int size = parLen + propLen;
          int64_t processorDataRef = createProcessorDataWithCapacity(environi->thread, size);
@@ -131,6 +136,14 @@ sxnc_value * evaluateSingle(sxnc_environment *environi, sxnc_xpath * proc, char 
 
 
 
+    	if(!proc) {
+    	    proc =  (sxnc_xpath *)malloc(sizeof(sxnc_xpath));
+    	    int check = c_createXPathProcessor(environi, NULL, proc);
+    	    if(check == -2) {
+    	        return NULL;
+    	    }
+    	}
+
     	int size = parLen + propLen;
          int64_t processorDataRef = createProcessorDataWithCapacity(environi->thread, size);
     	if(size >0) {
@@ -168,7 +181,11 @@ bool effectiveBooleanValue(sxnc_environment *environi, sxnc_xpath* proc, char * 
     	int size = parLen + propLen;
 
     	if(!proc) {
-    	    proc = c_createXPathProcessor(environi, NULL);
+    	    proc =  (sxnc_xpath *)malloc(sizeof(sxnc_xpath));
+    	    int check = c_createXPathProcessor(environi, NULL, proc);
+    	    if(check == -2) {
+    	        return NULL;
+    	    }
     	}
 
 

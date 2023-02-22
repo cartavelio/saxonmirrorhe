@@ -110,11 +110,17 @@ int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license)
     return createSaxonProcessor(thread, license);
 }
 
-sxnc_processor* c_createSaxonProcessor(sxnc_environment *environii, sxnc_processor * proc, int license)
+int c_createSaxonProcessor(sxnc_environment *environii, sxnc_processor * proc, int license)
 {
     int64_t result= createSaxonProcessor(environii->thread, license);
 
+    if(result == -2) {
+        return 0;
+    }
+
     (* proc).value = result;
+
+     return 1;
 }
 
 
@@ -154,7 +160,7 @@ int64_t getParameter(sxnc_parameter *parameters, int parLen, const char * name) 
 		if (strcmp(parameters[i].name, name) == 0)
 			return parameters[i].value;
 	}
-	return NULL;
+	return 0;
 }
 
 
@@ -175,7 +181,7 @@ char* getProperty(sxnc_property * properties, int propLen, const char * name) {
  * set a parameter
  */
 void setParameter(sxnc_parameter **parameters, int * parLen, int * parCap, const char * name, sxnc_value * value) {
-	if (getParameter(*parameters, parLen, name) != 0) {
+	if (getParameter(*parameters, *parLen, name) != 0) {
 		return;
 	}
 	(*parLen)++;
@@ -202,7 +208,7 @@ void setParameter(sxnc_parameter **parameters, int * parLen, int * parCap, const
  * set a property
  */
 void setProperty(sxnc_property ** properties, int *propLen, int *propCap, const char* name, const char* value) {
-	if (getProperty(*properties, propLen, name) != 0) {
+	if (getProperty(*properties, *propLen, name) != 0) {
 		return;
 	}
 

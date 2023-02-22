@@ -18,12 +18,10 @@ int main()
     
     int cap = 10;
     sxnc_parameter * parameters; /*!< array of paramaters used for the transformation as (string, value) pairs */
-    parameters;
     int parLen, parCap;
      parLen = 0;
     parCap = cap;
     sxnc_property * properties; /*!< array of properties used for the transformation as (string, string) pairs */
-    properties;
     int propLen, propCap;
     propCap = cap;
     propLen =0;
@@ -39,11 +37,19 @@ int main()
      */
 
     create_graalvm_isolate(environi);
-    c_createSaxonProcessor(environi, processor, 0);
+    int checkProc = c_createSaxonProcessor(environi, processor, 0);
+
+    if(!checkProc) {
+          const char * errorMessage = c_getErrorMessage(environi);
+          if(errorMessage) {
+            printf("Error message: %s \n", errorMessage);
+          }
+        return -1;
+    }
 
     //setDebugMode(environi->thread, 1);
 
-    char * verCh  = getProductVariantAndVersion(environi, processor);
+    const char * verCh  = getProductVariantAndVersion(environi, processor);
     printf("XQuery Tests\n\nSaxon version: %s \n", verCh);
     setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
 

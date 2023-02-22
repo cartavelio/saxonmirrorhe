@@ -127,29 +127,6 @@ typedef void* (*allocFn)(size_t length);
 extern const char * failure;
 
 
-// Graalvm entrypoint methods
-/*void vmLocatorSymbol(graal_isolatethread_t* thread);
-long long int  createSaxonProcessor(graal_isolatethread_t*, int license);
-
-long long int createProcessorData(graal_isolatethread_t*);
-
-long long int createProcessorDataWithCapacity(graal_isolatethread_t*, int cap);
-
-char * getProductVersion(graal_isolatethread_t*, int64_t processorRef);
-
-long long int createDocumentBuilder(graal_isolatethread_t*);
-
-void addProcessorDataPair(graal_isolatethread_t*, int64_t processorDataRef, char * name, int64_t valueRef);
-
-void addProcessorPropertyPair(graal_isolatethread_t*, int64_t processorDataRef, char * name, char * dataRef);
-
-void addProcessorValue(graal_isolatethread_t*,  int64_t processorDataRef, int64_t valueRef);
-
-void setCatalogFile(graal_isolatethread_t*, char * filename); */
-
-
-
-
 /*
 * Get resources directory.
 */
@@ -177,7 +154,11 @@ int detach_graalvm_thread(sxnc_environment * env);
 int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license);
 
 
-sxnc_processor* c_createSaxonProcessor(sxnc_environment *environi, sxnc_processor * proc, int license);
+/*
+ * Create pointer to the SaxonProcessor. Here we pass in the processor pointer which should have been allocated memory space in advance.
+ * Return status true = success, false = failed to create SaxonProcessor
+ */
+int c_createSaxonProcessor(sxnc_environment *environi, sxnc_processor* processor, int license);
 
 
 /*

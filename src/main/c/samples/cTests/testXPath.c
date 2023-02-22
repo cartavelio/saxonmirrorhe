@@ -1,11 +1,11 @@
 #include "../../Saxon.C.API/SaxonCXPath.h"
 #include <stdio.h>  /* defines FILENAME_MAX */
-#ifdef WINDOWS
-#include <direct.h>
-#define GetCurrentDir _getcwd
-#else
+#if  defined (__APPLE__) || defined __linux__
 #include <unistd.h>
 #define GetCurrentDir getcwd
+#else
+#include <direct.h>
+#define GetCurrentDir _getcwd
 #endif
 
 int main()
@@ -16,11 +16,9 @@ int main()
     printf("CWD = %s\n",cwd);
     int cap = 10;
     sxnc_parameter * parameters; /*!< array of paramaters used for the transformation as (string, value) pairs */
-    parameters;
     int parLen=0, parCap;
     parCap = cap;
     sxnc_property * properties; /*!< array of properties used for the transformation as (string, string) pairs */
-    properties;
     int propLen=0, propCap;
     propCap = cap;
     sxnc_environment * environi;
@@ -37,16 +35,26 @@ int main()
 
     c_createSaxonProcessor(environi, processor, 0);
 
-    sxnc_xpath * xpathProc = c_createXPathProcessor(environi, processor);
+    sxnc_xpath * xpathProc =  (sxnc_xpath *)malloc(sizeof(sxnc_xpath));
+
+    int checkProc = c_createXPathProcessor(environi, processor, xpathProc);
+
+    if(!checkProc) {
+          const char * errorMessage = c_getErrorMessage(environi);
+          if(errorMessage) {
+            printf("Error message: %s \n", errorMessage);
+          }
+        return -1;
+    }
 
     const char *verCh = version(environi, processor);
     printf("XPath Tests\n\nSaxon version: %s \n", verCh);
     setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
     
 
-    sxnc_value * result = evaluate(environi,xpathProc, cwd, "/out/person", 0, properties, 0, propLen);
+    sxnc_value * result = evaluate(environi,xpathProc, cwd, "/out/person", parameters, properties, 0, propLen);
 
-    bool resultBool = effectiveBooleanValue(environi,xpathProc, cwd, "count(/out/person)>0", 0, properties, 0, propLen);
+    bool resultBool = effectiveBooleanValue(environi,xpathProc, cwd, "count(/out/person)>0", parameters, properties, 0, propLen);
  
     if(!result) {
       printf("result is null");

@@ -55,7 +55,7 @@ void xsltSaveResultToFile(sxnc_environment *environi, sxnc_processor * proc, cha
 
 	}
 
-    long result = (environi->thread, (void *)proc->value, cwd, source, stylesheet, outputfile, (void *)processorDataRef);
+    long result = c_xsltSaveResultToFile(environi->thread, (void *)proc->value, cwd, source, stylesheet, outputfile, (void *)processorDataRef);
 
     if(result == -2) {
        printf("Error: Exception found\n");

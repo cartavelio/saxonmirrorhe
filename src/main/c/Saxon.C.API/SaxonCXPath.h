@@ -84,7 +84,7 @@ EXTERN_SAXONC
 
 sxnc_value * xdmValue(sxnc_environment *environi, const char* type, const char* str);
 
-sxnc_xpath * c_createXPathProcessor(sxnc_environment *environi, sxnc_processor * processor);
+int c_createXPathProcessor(sxnc_environment *environi, sxnc_processor * processor, sxnc_xpath * xpath);
 
 
     /**
