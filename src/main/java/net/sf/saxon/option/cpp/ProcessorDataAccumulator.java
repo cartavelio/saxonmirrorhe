@@ -1,5 +1,6 @@
 package net.sf.saxon.option.cpp;
 
+import net.sf.saxon.s9api.Processor;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
@@ -17,21 +18,48 @@ public class ProcessorDataAccumulator {
         values = new ArrayList();
     }
 
+    public ProcessorDataAccumulator(int cap){
+        paramNames = new ArrayList<String>(cap);
+        values = new ArrayList(cap);
+    }
+
 
     @CEntryPoint(name = "createProcessorData")
-    public static ProcessorDataAccumulator createProcessorData(IsolateThread thread){
+    public static long createProcessorData(IsolateThread thread){
         ProcessorDataAccumulator processorData = new ProcessorDataAccumulator();
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(processorData);
+        return handle.rawValue();
+    }
 
-        return processorData;
+
+    @CEntryPoint(name = "createProcessorDataWithCapacity")
+    public static long createProcessorDataWithCapacity(IsolateThread thread, int cap){
+        ProcessorDataAccumulator processorData = new ProcessorDataAccumulator(cap);
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(processorData);
+        return handle.rawValue();
     }
 
 
     @CEntryPoint(name = "addProcessorDataPair")
-    public static void addProcessorData(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cparamName, ObjectHandle objectRef){
+    public static void addProcessorDataPair(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cparamName, ObjectHandle objectRef){
 
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
         String paramNamei = CTypeConversion.toJavaString(cparamName);
         Object object = SaxonCAPI.objectHandles.get(objectRef);
+
+        processorData.paramNames.add(paramNamei);
+        processorData.values.add(object);
+
+    }
+
+
+
+    @CEntryPoint(name = "addProcessorPropertyPair")
+    public static void addProcessorPropertyPair(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cpropName, CCharPointer cpropvalue){
+
+        ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
+        String paramNamei = CTypeConversion.toJavaString(cpropName);
+        String object = CTypeConversion.toJavaString(cpropvalue);
 
         processorData.paramNames.add(paramNamei);
         processorData.values.add(object);

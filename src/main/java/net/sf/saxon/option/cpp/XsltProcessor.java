@@ -322,7 +322,7 @@ public class XsltProcessor extends SaxonCAPI {
      * @param params         - parameters and property names given as an array of stings
      * @param values         - the values of the paramaters and properties. given as a array of Java objects
      */
-    @CEntryPoint(name = "xsltSaveResultToFile")
+    @CEntryPoint(name = "c_xsltSaveResultToFile")
     public static void transformToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFilename, CCharPointer cstylesheet, CCharPointer coutFilename /*, String[] params, Object[] values*/) throws SaxonApiException {
         String cwd = CTypeConversion.toJavaString(ccwd);
         String sourceFilename = CTypeConversion.toJavaString(csourceFilename);
@@ -384,14 +384,13 @@ public class XsltProcessor extends SaxonCAPI {
      * In addition we can supply the source, stylesheet and output file names.
      * We can also supply values to xsl:param and xsl:variables required in the stylesheet.
      * The parameter names and values are supplied as a two arrays in the form of a key and value.
-     *
-     * @param cwd         - current working directory
+     *  @param cwd         - current working directory
      * @param processor   - required to use the same processor as for the compiled stylesheet
      * @param transformer - pass the current object to set local variables supplied in the parameters
      * @param params      - parameters and property names given as an array of stings
      * @param values      - the values of the parameters and properties. given as a array of Java objects
      */
-    public static void applyXsltTransformerProperties(SaxonCAPI api, String cwd, Processor processor, XsltTransformer transformer, String[] params, Object[] values) throws SaxonApiException {
+    public static void applyXsltTransformerProperties(String cwd, Processor processor, XsltTransformer transformer, String[] params, Object[] values) throws SaxonApiException {
         if (params != null) {
             String initialTemplate;
             String initialMode;
@@ -436,7 +435,7 @@ public class XsltProcessor extends SaxonCAPI {
                     } else if (params[i].equals("o") && outfile == null) {
                         if (values[i] instanceof String) {
                             outfile = (String) values[i];
-                            Serializer  serializer = api.resolveOutputFile(processor, cwd, outfile, ResourceRequest.XML_NATURE);
+                            Serializer  serializer = SaxonCAPI.resolveOutputFile(processor, cwd, outfile, ResourceRequest.XML_NATURE);
                             transformer.setDestination(serializer);
                         }
                     } else if (params[i].equals("it")) {
@@ -472,7 +471,7 @@ public class XsltProcessor extends SaxonCAPI {
                         }
                     } else if (params[i].equals("s")) {
                         if (values[i] instanceof String) {
-                            source = api.resolveFileToSource(processor, cwd, (String) values[i], ResourceRequest.XML_NATURE);
+                            source = SaxonCAPI.resolveFileToSource(processor, cwd, (String) values[i], ResourceRequest.XML_NATURE);
                             transformer.setSource(builder.build(source).asSource());
                         } else if (debug) {
                             System.err.println("DEBUG: value error for property 's'");
@@ -633,7 +632,7 @@ public class XsltProcessor extends SaxonCAPI {
 
 
             transformer.setDestination(destination);
-            applyXsltTransformerProperties(this, cwd, processor, transformer, params, values);
+            applyXsltTransformerProperties(cwd, processor, transformer, params, values);
 
             /*if (sourceFile == null && doc != null) {
                 transformer.setInitialContextNode(doc);
@@ -666,14 +665,21 @@ public class XsltProcessor extends SaxonCAPI {
      * @param values     - the values of the paramaters and properties. given as a array of Java objects
      * @return result as a string representation
      */
-    @CEntryPoint(name = "xsltApplyStylesheet")
-    public static CCharPointer transformToString(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFile, CCharPointer cstylesheet /*, String[] params, Object[] values*/) throws SaxonApiException {
+    @CEntryPoint(name = "c_xsltApplyStylesheet")
+    public static CCharPointer transformToString(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         String cwd = CTypeConversion.toJavaString(ccwd);
         String sourceFile = CTypeConversion.toJavaString(csourceFile);
         String stylesheet = CTypeConversion.toJavaString(cstylesheet);
 
         Processor processor = objectHandles.get(processorRef);
+        ProcessorDataAccumulator processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);
+        String[] params = null;
+        Object[] values = null;
+        if(processorDataAccumulator != null) {
+            params = processorDataAccumulator.getParameterNames();
+            values = processorDataAccumulator.getValues();
+        }
 
         if(processor == null) {
             throw new SaxonApiException("Processor object no found");
@@ -681,8 +687,6 @@ public class XsltProcessor extends SaxonCAPI {
 
         XsltExecutable executable = null;
 
-        String[] params = null; //TODO remove variable
-        Object[] values = null; //TODO remove variable
 
         if (debug) {
             System.err.println("xsltApplyStylesheet, Processor: " + System.identityHashCode(processor));
@@ -719,7 +723,7 @@ public class XsltProcessor extends SaxonCAPI {
             serializer = processor.newSerializer(sw);
             transformer.setDestination(serializer);
 
-            //applyXsltTransformerProperties(this, cwd, processor, transformer, params, values); TODO remove comment
+            applyXsltTransformerProperties(cwd, processor, transformer, params, values);
 
             /*if (sourceFile == null && doc != null) {
                 transformer.setInitialContextNode(doc);

@@ -373,8 +373,12 @@ public class Xslt30Processor extends SaxonCAPI {
 
     private static void setStaticParametersFromArray(XsltCompiler compiler, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator= objectHandles.get(processorDataAccumulatorRef);
-        String[] sparams = processorDataAccumulator.getParameterNames();
-        Object[] values = processorDataAccumulator.getValues();
+        String[] sparams = null;
+        Object[] values = null;
+        if(processorDataAccumulator != null) {
+            sparams = processorDataAccumulator.getParameterNames();
+            values = processorDataAccumulator.getValues();
+        }
         if (sparams != null && values != null) {
             for (int i = 0; i < sparams.length; i++) {
                 if (sparams[i].startsWith("sparam:")) {

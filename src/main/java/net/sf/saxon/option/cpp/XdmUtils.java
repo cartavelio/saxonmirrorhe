@@ -14,6 +14,11 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.Type;
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CTypeConversion;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,8 +48,31 @@ public class XdmUtils {
 
     }
 
-    public static String getStringValue(XdmValue value) {
-        return value.toString();
+    @CEntryPoint(name = "getStringValueForXdmValue")
+    public static CCharPointer getStringValue_XdmValue(IsolateThread thread, ObjectHandle value) {
+        XdmValue item = SaxonCAPI.objectHandles.get(value);
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(item.toString());
+        return holder.get();
+    }
+
+    @CEntryPoint(name = "getStringValueForXdmItem")
+    public static CCharPointer getStringValue_XdmItem(IsolateThread thread, ObjectHandle value) {
+        XdmItem item = SaxonCAPI.objectHandles.get(value);
+        if(item == null) {
+            return null;
+        }
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(item.getStringValue());
+        return holder.get();
+    }
+
+    @CEntryPoint(name = "xdmItemToString")
+    public static CCharPointer toString_XdmItem(IsolateThread thread, ObjectHandle value) {
+        XdmItem item = SaxonCAPI.objectHandles.get(value);
+        if(item == null) {
+            return null;
+        }
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(item.toString());
+        return holder.get();
     }
 
     /**
@@ -93,6 +121,19 @@ public class XdmUtils {
         XdmValue arr [] = new XdmValue[value.arrayLength()];
         value.asList().toArray(arr);
         return arr;
+
+    }
+
+    @CEntryPoint(name = "j_makeXdmArray")
+    public static long makeXdmArray(IsolateThread thread, ObjectHandle processorDataAccumulatorRef) {
+         ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
+
+         XdmValue [] xdmValues = (XdmValue[]) processorDataAccumulator.getValues();
+         XdmArray array = new XdmArray(xdmValues);
+
+         ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
+
+         return arrayHandle.rawValue();
 
     }
 
@@ -150,9 +191,17 @@ public class XdmUtils {
     /**
      * Convert the nodeKind enum type to a integer
      *
-     * @param nodeKind - XdmNodeKind type
+     * @param thread
+     * @param nodeRef
      */
-    public static int convertNodeKindType(XdmNodeKind nodeKind) {
+    @CEntryPoint(name = "j_getNodeKind")
+    public static int convertNodeKindType(IsolateThread thread, ObjectHandle nodeRef) {
+        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
+        if(node == null) {
+            return 0;
+        }
+
+        XdmNodeKind nodeKind = node.getNodeKind();
         switch (nodeKind) {
             case DOCUMENT:
                 return Type.DOCUMENT;
@@ -238,15 +287,18 @@ public class XdmUtils {
     /**
      * Create a string representation of the array of values. The is the result of serializing
      * the value using the adaptive serialization method.
-     * @param values - given as an array of XdmValue
+     * @param processorDataAccumulatorRef - ObjectHandle to array of XdmValue held as ProcessorDataAccumulator
      * @return a string representation of the value
      */
-    public static String xdmValueArrayToString(XdmValue [] values){
-
+    @CEntryPoint(name = "xdmValueArrayToString")
+    public static CCharPointer xdmValueArrayToString(ObjectHandle processorDataAccumulatorRef){
+        ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
+        XdmValue [] values = (XdmValue[]) processorDataAccumulator.getValues();
         if(values == null) {
             return null;
         }
-        return buildXdmValue(values).toString();
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(buildXdmValue(values).toString());
+        return holder.get();
     }
 
 
@@ -346,5 +398,108 @@ public class XdmUtils {
 
 
     }
+
+
+    @CEntryPoint(name = "j_makeStringValue")
+    public static long makeStringValue(IsolateThread thread,CCharPointer str){
+        String valueStr = CTypeConversion.toJavaString(str);
+
+        XdmAtomicValue value = new XdmAtomicValue(valueStr);
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+        return handle.rawValue();
+
+    }
+
+
+
+     /*!
+      * Factory method: makes either an Int64Value or a BigIntegerValue depending on the value supplied
+      *
+      * @param i the supplied primitive integer value
+      * @return the value as a XdmAtomicValue which is a BigIntegerValue or Int64Value as appropriate
+      */
+     @CEntryPoint(name = "j_makeIntegerValue")
+     public static long makeIntegerValue(IsolateThread thread, int i){
+
+         XdmAtomicValue value = new XdmAtomicValue(i);
+         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+         return handle.rawValue();
+
+     }
+
+
+     //! Factory method. make an XdmAtomicValue from a primitive double value
+     /*!
+      *
+      * @param d the value of the double
+      * @return a new XdmAtomicValue
+      */
+     @CEntryPoint(name = "j_makeIntegerValue")
+     public static long j_makeDoubleValue(IsolateThread thread, double d){
+
+         XdmAtomicValue value = new XdmAtomicValue(d);
+         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+         return handle.rawValue();
+     }
+
+     //! Factory method. make an XdmAtomicValue from a primitive float value
+     /*!
+      *
+      *
+      * @param f the value of the foat
+      * @return a new XdmAtomicValue
+      */
+     @CEntryPoint(name = "j_makeIntegerValue")
+     public static long j_makeFloatValue(IsolateThread thread, float f){
+
+         XdmAtomicValue value = new XdmAtomicValue(f);
+         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+         return handle.rawValue();
+     }
+
+     //! Factory method: makes either an Int64Value or a BigIntegerValue depending on the value supplied
+     /*!
+      *
+      *
+      * @param l the supplied primitive long value
+      * @return the value as a XdmAtomicValue which is a BigIntegerValue or Int64Value as appropriate
+      */
+     @CEntryPoint(name = "j_makeIntegerValue")
+     public static long makeLongValue(IsolateThread thread, long l){
+         XdmAtomicValue value = new XdmAtomicValue(l);
+         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+         return handle.rawValue();
+     }
+
+     /*
+      * Factory method: makes a XdmAtomicValue representing a boolean Value
+      *
+      * @param b true or false, to determine which boolean value is
+      *              required
+      * @return the XdmAtomicValue requested
+      */
+     @CEntryPoint(name = "j_makeIntegerValue")
+     public static long makeBooleanValue(IsolateThread thread, int b){
+         boolean bvalue = CTypeConversion.toBoolean(b);
+         XdmAtomicValue value = new XdmAtomicValue(bvalue);
+         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+         return handle.rawValue();
+     }
+
+     //! Create an QName Xdm value from string representation in clark notation
+     /**
+      *
+      * @param str - The value given in a string form in clark notation. {uri}local
+      * @return XdmAtomicValue - value
+     */
+     @CEntryPoint(name = "j_makeIntegerValue")
+     public static long makeQNameValue(IsolateThread thread, CCharPointer str) throws SaxonApiException {
+
+         XdmValue value = SaxonCAPI.createXdmAtomicItem("QName", CTypeConversion.toJavaString(str));
+         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+         return handle.rawValue();
+     }
+
+
 
 }

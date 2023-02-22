@@ -119,6 +119,18 @@ public class SaxonCAPI {
     }
 
 
+    @CEntryPoint(name = "createDocumentBuilder")
+    public static long createDocumentBuilder(IsolateThread thread, ObjectHandle processorRef) throws SaxonApiException {
+        Processor processor = objectHandles.get(processorRef);
+
+        if(processor != null) {
+            ObjectHandle handle = objectHandles.create(processor.newDocumentBuilder());
+            return handle.rawValue();
+        }
+        return -1;
+    }
+
+
     /**
      * Static method to create Processor object given a configuration file
      *
@@ -199,6 +211,13 @@ public class SaxonCAPI {
         Processor processor = objectHandles.get(processorRef);
         final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(processor.getUnderlyingConfiguration().getProductTitle());
         return holder.get();
+    }
+
+    @CEntryPoint(name = "setCatalogFile")
+    public static void setCatalog(IsolateThread thread, ObjectHandle processorRef, CCharPointer catalogFile) {
+        Processor processor = objectHandles.get(processorRef);
+
+        processor.setCatalogFiles(CTypeConversion.toJavaString(catalogFile));
     }
 
 
@@ -324,8 +343,12 @@ public class SaxonCAPI {
      */
     public static Map<String, Object> setupConfigurationAndBuildMap(ObjectHandle processorDataAccumulatorRef, Properties props, Map<QName, XdmValue> parameters, Map<QName, XdmValue> staticParameters, Map<QName, XdmValue> globals, Map<QName, XdmValue> initialTemplateParameters, boolean forXslt) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator= objectHandles.get(processorDataAccumulatorRef);
-        String[] params = processorDataAccumulator.getParameterNames();
-        Object[] values = processorDataAccumulator.getValues();
+        String[] params = null;
+        Object[] values = null;
+        if(processorDataAccumulator != null) {
+            params = processorDataAccumulator.getParameterNames();
+            values = processorDataAccumulator.getValues();
+        }
 
         Map<String, Object> map = new HashMap();
         if (params == null || values == null) {
@@ -544,22 +567,31 @@ public class SaxonCAPI {
 
     }
 
-
-
-    /**
-     * Create an Xdm atomic value from string representation
-     *
-     * @param ctypeStr  - Local name of a type in the XML Schema namespace.
-     * @param cvalueStr - The value given in a string form.
-     *                 In the case of a QName the value supplied must be in clark notation. {uri}local
-     * @return XdmValue - value
-     */
     @CEntryPoint(name = "createXdmAtomicItem")
     public static long createXdmAtomicItem(IsolateThread thread, CCharPointer ctypeStr, CCharPointer cvalueStr) throws SaxonApiException {
         String valueStr = CTypeConversion.toJavaString(cvalueStr);
         String typeStr = CTypeConversion.toJavaString(ctypeStr);
-        int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
+
         ObjectHandle handle = null;
+
+        handle = objectHandles.create(createXdmAtomicItem(valueStr, typeStr));
+        return handle.rawValue();
+
+    }
+
+    /**
+     * Create an Xdm atomic value from string representation
+     *
+     * @param typeStr  - Local name of a type in the XML Schema namespace.
+     * @param valueStr - The value given in a string form.
+     *                 In the case of a QName the value supplied must be in clark notation. {uri}local
+     * @return XdmValue - value
+     */
+
+    public static XdmValue createXdmAtomicItem(String typeStr, String valueStr) throws SaxonApiException {
+
+        int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
+
 
         BuiltInAtomicType type = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
         if (type == null) {
@@ -568,8 +600,7 @@ public class SaxonCAPI {
 
         if (type.isNamespaceSensitive()) {
             StructuredQName value = StructuredQName.fromClarkName(valueStr);
-            handle = objectHandles.create(XdmValue.wrap(new QNameValue(value, type)));
-            return handle.rawValue();
+            return XdmValue.wrap(new QNameValue(value, type));
         }
 
         ConversionRules rules = new ConversionRules();
@@ -577,8 +608,7 @@ public class SaxonCAPI {
 
 
         try {
-            handle = objectHandles.create(XdmValue.wrap(converter.convert(new StringValue(valueStr)).asAtomic()));
-            return handle.rawValue();
+            return XdmValue.wrap(converter.convert(new StringValue(valueStr)).asAtomic());
         } catch (ValidationException e) {
             throw new SaxonApiException(e);
         }
@@ -661,8 +691,8 @@ public class SaxonCAPI {
     @CEntryPoint(name = "getTypeName")
     public static CCharPointer getTypeName(IsolateThread thread, CCharPointer ctypeStr) {
         String typeStr = CTypeConversion.toJavaString(ctypeStr);
-        int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
-
+        int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr); 
+                                           
         BuiltInAtomicType typei = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
         StructuredQName sname = typei.getTypeName();
         String typeName =new QName(sname.getPrefix(), sname.getNamespaceUri().toString(), sname.getLocalPart()).getClarkName();
