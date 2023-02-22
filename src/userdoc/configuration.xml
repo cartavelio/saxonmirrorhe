@@ -432,7 +432,6 @@
     initialTemplate=""
     messageEmitter=""
     outputUriResolver=""
-    recoveryPolicy="recoverWithWarnings"
     resultDocumentThreads="10"
     schemaAware="false"
     staticErrorListener=""
