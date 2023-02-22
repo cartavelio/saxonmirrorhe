@@ -355,6 +355,7 @@ task eecs_setupPreprocess(
   exclude "**/xqj/**"
   exclude "**/stax/**"
   
+  exclude "com/saxonica/Idempotency.java"
   exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
   exclude "com/saxonica/config/DotNetExtensionLibrary.java"
   exclude "com/saxonica/config/DotNetLocalizerFactory.java"
