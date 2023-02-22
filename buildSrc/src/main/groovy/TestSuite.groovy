@@ -671,16 +671,20 @@ class TestSuite {
     println("Summary ${options['name']} (${os}): ${pass} pass, ${fail} fail, ${other} other")
 
     // HACK
-    def passing = "████████████████████████████████████████████████████████████████████████"
-    def failing = "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
+    def passing = "########################################################################"
+    def failing = "........................................................................"
     def barlen = passing.length()
 
-    def passperc = pass / total
-    def perc = sprintf("%4.2f", passperc * 100.0)
+    if (total > 0) {
+      def passperc = pass / total
+      def perc = sprintf("%4.2f", passperc * 100.0)
 
-    def passcount = Math.floor(passperc * barlen).intValue()
-    def failcount = barlen - passcount
+      def passcount = Math.floor(passperc * barlen).intValue()
+      def failcount = barlen - passcount
 
-    println("${passing.substring(0, passcount)}${failing.substring(0, failcount)} ${perc}%")
+      println("${passing.substring(0, passcount)}${failing.substring(0, failcount)} ${perc}%")
+    } else {
+      println("No tests ran.")
+    }
   }
 }
