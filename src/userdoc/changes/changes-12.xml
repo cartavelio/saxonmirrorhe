@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<release number="12" date="2022-11-25" xmlns="http://www.saxonica.com/ns/doc/changes">
+<release number="12" date="2022-12-06" xmlns="http://www.saxonica.com/ns/doc/changes">
+    
+    <category name="installation">
+        
+        <p class="javaonly">SaxonJ 12 requires Java 11 or later.</p>
+        
+        
+        
+        
+    </category>
     
     <category name="documentation">
         
