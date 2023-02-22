@@ -285,6 +285,7 @@ task eecs_setupPreprocess(
   exclude "net/sf/saxon/resource/ActiveStreamSource.java"
   exclude "net/sf/saxon/resource/JarCollection.java"
   exclude "net/sf/saxon/resource/Loader.java"
+  exclude "net/sf/saxon/sapling/*.java"
   exclude "net/sf/saxon/s9api/BuildingContentHandler.java"
   exclude "net/sf/saxon/s9api/BuildingStreamWriter.java"
   exclude "net/sf/saxon/s9api/BuildingStreamWriterImpl.java"
@@ -292,11 +293,16 @@ task eecs_setupPreprocess(
   exclude "net/sf/saxon/s9api/HostLanguage.java"
   exclude "net/sf/saxon/s9api/ItemType.java"
   exclude "net/sf/saxon/s9api/ItemTypeFactory.java"
+  exclude "net/sf/saxon/s9api/JdomBuilder.java"
   exclude "net/sf/saxon/s9api/MessageListener2Proxy.java"
+  exclude "net/sf/saxon/s9api/SaxonApiException.java"
+  exclude "net/sf/saxon/s9api/SaxonApiUncheckedException.java"
+  exclude "net/sf/saxon/s9api/SequenceType.java"
   exclude "net/sf/saxon/s9api/SAXDestination.java"
   exclude "net/sf/saxon/s9api/SequenceType.java"
   exclude "net/sf/saxon/s9api/streams/**"
   exclude "net/sf/saxon/s9api/QName.java"
+  exclude "net/sf/saxon/s9api/ValidationStatistics.java"
   exclude "net/sf/saxon/s9api/WhitespaceStrippingPolicy.java"
   exclude "net/sf/saxon/s9api/XdmExternalObject.java"
   exclude "net/sf/saxon/s9api/XdmArray.java"
@@ -383,6 +389,7 @@ task eecs_setupPreprocess(
   exclude "com/saxonica/ee/parallel/MultithreadedItemMappingIterator.java"
   exclude "com/saxonica/ee/parallel/PushToPull.java"
   exclude "com/saxonica/ee/schema/sdoc/LSSchemaResolver.java"
+  exclude "com/saxonica/ee/validate/StatisticsReporter.java"
   exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
   exclude "com/saxonica/expr/JavaExtensionFunctionCall.java"
   exclude "com/saxonica/expr/ObjectLookupExpression.java"
@@ -395,7 +402,7 @@ task eecs_setupPreprocess(
   exclude "com/saxonica/functions/extfn/Mailer2.java"
   exclude "com/saxonica/functions/extfn/ObjectMap.java"
   exclude "com/saxonica/functions/extfn/ParseHtml.java"
-  exclude "com/saxonica/functions/extfn/ReadBinaryResource.java"
+  //exclude "com/saxonica/functions/extfn/ReadBinaryResource.java"
   exclude "com/saxonica/functions/extfn/SendMail.java"
   exclude "com/saxonica/xqj/**"
 }
@@ -550,8 +557,9 @@ task hecs_transpile_to_xml(
   classpath = configurations.transpiler
   main = "ToXml"
   args "-j:${buildDir}/src/hecs",
+    "-repo:${projectDir}",
     "-xml:${buildDir}/he_xmlout",
-    "-h:${projectDir}/src/main/java"
+    "-h:${projectDir}/src/main/java",
     "-src:${projectDir}/src/main/java"
   doFirst {
     mkdir("${buildDir}/he_xmlout")
@@ -568,8 +576,9 @@ task eecs_transpile_to_xml(
   classpath = configurations.transpiler
   main = "ToXml"
   args "-j:${buildDir}/src/eecs",
+    "-repo:${projectDir}",
     "-xml:${buildDir}/ee_xmlout",
-    "-h:${projectDir}/src/main/java"
+    "-h:${projectDir}/src/main/java",
     "-src:${projectDir}/src/main/java"
   doFirst {
     mkdir("${buildDir}/ee_xmlout")
@@ -665,7 +674,7 @@ task hecs_generateCSharp(
 
 task eecs_generateCSharp(
   type: JavaExec,
-  dependsOn: ["eecs_refine_digest"],
+  dependsOn: ["eecs_refine_digest", "build_transpiler"],
   description: "Create the CS files for EE"
 ) {
   inputs.file "${buildDir}/ee_refined-digest.xml"
