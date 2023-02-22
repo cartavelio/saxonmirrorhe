@@ -1,13 +1,13 @@
-source = ["./build/cs/bin/Release/net5.0/osx-x64/publish/SaxonCS",
-          "./build/cs/bin/Release/net5.0/osx-x64/publish/SaxonCS.pdb",
-          "./build/cs/bin/Release/net5.0/osx-x64/publish/SaxonCS.xml",
-          "./build/cs/bin/Release/net5.0/osx-x64/publish/libSystem.IO.Compression.Native.dylib",
-          "./build/cs/bin/Release/net5.0/osx-x64/publish/libSystem.Native.dylib",
-          "./build/cs/bin/Release/net5.0/osx-x64/publish/libSystem.Net.Security.Native.dylib",
-          "./build/cs/bin/Release/net5.0/osx-x64/publish/libSystem.Security.Cryptography.Native.Apple.dylib",
-          "./build/cs/bin/Release/net5.0/osx-x64/publish/libSystem.Security.Cryptography.Native.OpenSsl.dylib",
-          "./build/cs/bin/Release/net5.0/osx-x64/publish/libclrjit.dylib",
-          "./build/cs/bin/Release/net5.0/osx-x64/publish/libcoreclr.dylib"]
+source = ["./build/cs/bin/Release/net6.0/osx-x64/publish/SaxonCS",
+          "./build/cs/bin/Release/net6.0/osx-x64/publish/SaxonCS.pdb",
+          "./build/cs/bin/Release/net6.0/osx-x64/publish/SaxonCS.xml",
+          "./build/cs/bin/Release/net6.0/osx-x64/publish/libSystem.IO.Compression.Native.dylib",
+          "./build/cs/bin/Release/net6.0/osx-x64/publish/libSystem.Native.dylib",
+          "./build/cs/bin/Release/net6.0/osx-x64/publish/libSystem.Net.Security.Native.dylib",
+          "./build/cs/bin/Release/net6.0/osx-x64/publish/libSystem.Security.Cryptography.Native.Apple.dylib",
+          "./build/cs/bin/Release/net6.0/osx-x64/publish/libSystem.Security.Cryptography.Native.OpenSsl.dylib",
+          "./build/cs/bin/Release/net6.0/osx-x64/publish/libclrjit.dylib",
+          "./build/cs/bin/Release/net6.0/osx-x64/publish/libcoreclr.dylib"]
 
 bundle_id = "com.saxonica.SaxonCS"
 
