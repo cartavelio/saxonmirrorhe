@@ -94,7 +94,7 @@
               <xsl:variable name="tokens" select="tokenize($line-pre-arrow, '\s')"/>
               <xsl:variable name="is-class" select="$tokens = 'class'"/>
               <xsl:variable name="is-interface" select="$tokens = 'interface'"/>
-              <xsl:variable name="is-delegate" select="$tokens = 'delegate'"/>
+              <xsl:variable name="is-delegate" select="$tokens = 'delegate'"/> 
               <xsl:variable name="is-enum" select="$tokens = 'enum'"/>
               <xsl:variable name="is-internal" select="$tokens = 'internal'"/>
               <xsl:variable name="is-public" select="$tokens = 'public'"/>
@@ -419,10 +419,11 @@
         <xsl:copy-of select="current-group()[1]"/>
       </xsl:for-each-group>
       <!-- ouput JType shortnames here -->
-      <xsl:for-each-group select="$in/*" group-starting-with="class|interface|enum">
+      <xsl:for-each-group select="$in/*" group-starting-with="class|interface|enum|delegate">
         <xsl:copy>
           <xsl:copy-of select="@*"/>
           <xsl:copy-of select="type"/>
+          <xsl:copy-of select="param"/>
           <xsl:apply-templates select="remove(current-group(), 1)" mode="refine">
             <xsl:with-param name="type" select="current-group()[1]/@name"/>
           </xsl:apply-templates>

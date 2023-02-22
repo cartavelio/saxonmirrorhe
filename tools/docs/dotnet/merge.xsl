@@ -14,7 +14,7 @@
   <xsl:variable name="names-doc" select="doc($names-file)"/> 
   <xsl:variable name="api-doc" select="doc($api-doc-file)"/>
   
-  <xsl:key name="class-by-name" match="class | interface | enum" 
+  <xsl:key name="class-by-name" match="class | interface | enum | delegate" 
     use="if (contains(@name,'.')) then tokenize(@name, '\.')[last()] else @name"/>
   
   <xsl:template name="main">
@@ -29,11 +29,11 @@
   </xsl:template>
   
   <!-- Do not include internal classes, interfaces, or enums -->
-  <xsl:template match="(class|interface|enum)[@internal='true']"/>
+  <xsl:template match="(class|interface|enum|delegate)[@internal='true']"/>
   
   <!-- class, interface, enum all begin 'T:' (enum followed by 'F:' classes) -->
 
-  <xsl:template match="class | interface | enum">
+  <xsl:template match="class | interface | enum | delegate">
     <xsl:param name="process-nested-class" select="false()"/>
     
     <!-- Generic class e.g. Feature<T> corresponding apiclass name is 
@@ -130,6 +130,9 @@
           </xsl:call-template>
         </xsl:if>
         <xsl:apply-templates select="type"/><!-- for classes and interfaces which are generic types -->
+        <xsl:if test="self::delegate">
+          <xsl:sequence select="f:params-from-names-doc(param)"/>
+        </xsl:if>
         <comments>
           <xsl:variable name="obsolete" select="reverse(preceding-sibling::*)[1]/self::obsolete"/>
           <xsl:apply-templates select="$obsolete" mode="comment"/>

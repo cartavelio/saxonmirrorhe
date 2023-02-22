@@ -41,21 +41,22 @@
         </xsl:if>
     </xsl:template>
 
-    <xsl:variable name="s-titles" select="('Interface','Class', 'Enum','Exception')" as="xs:string+"/>
+    <xsl:variable name="s-titles" select="('Interface', 'Delegate', 'Class', 'Enum', 'Exception')" as="xs:string+"/>
 
     <xsl:template match="document-node()" mode="summarise-pkg">
         <xsl:variable name="package" select="package"/>
         <xsl:variable name="classes" select="$package/class"/>
-        <xsl:for-each select="1 to 4">
+        <xsl:for-each select="1 to 5">
             <xsl:variable name="i" select="." as="xs:integer"/>
             <xsl:variable name="f-classes"
                 select="if ($i eq 1) then ($package/interface | $classes[@interface='true'])
-                        else if ($i eq 2) then
+                else if ($i eq 2) then ($package/delegate)
+                        else if ($i eq 3) then
                             $classes[not(
                                 @interface='true'
                                 or @superclass='Enum'
                                 or ends-with(@superclass,'Exception'))]
-                        else if ($i eq 3) then ($package/enum | $classes[@superclass='Enum'])
+                        else if ($i eq 4) then ($package/enum | $classes[@superclass='Enum'])
                         else $classes[ends-with(@superclass,'Exception')]"/>
             <xsl:if test="exists($f-classes)">
                 <table border="1" style="width:100%">
