@@ -252,7 +252,7 @@ namespace SaxonCS_NUnit {
                 proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "showDomNodes"), showDomType, args => {
                     System.Collections.Generic.List<XdmAtomicValue> result = new();
                     foreach (XdmItem item in args[0]) {
-                        XmlElement domElement = (XmlElement) ((XdmNode) item).getUnderlyingXmlNode();
+                        XmlElement domElement = (XmlElement) ((XdmNode) item).GetUnderlyingXmlNode();
                         result.Add(new XdmAtomicValue("[" + domElement.Name + "]"));
                     }
 
