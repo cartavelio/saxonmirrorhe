@@ -338,7 +338,10 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         register("namespace-uri", 0, ContextItemAccessorFunction.class, BuiltInAtomicType.ANY_URI, ONE, CITEM | LATE);
 
-        register("namespace-uri", 1, NamespaceUri_1.class, BuiltInAtomicType.ANY_URI, ONE, 0)
+        /*register("namespace-uri", 1, NamespaceUri_1.class, BuiltInAtomicType.ANY_URI, ONE, 0)
+                .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING); */
+
+        register("namespace-uri", 1, () -> new NamespaceUri_1(), BuiltInAtomicType.ANY_URI, ONE, 0)
                 .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING);
 
         register("namespace-uri-for-prefix", 2, NamespaceForPrefix.class, BuiltInAtomicType.ANY_URI, OPT, 0)

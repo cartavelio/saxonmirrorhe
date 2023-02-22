@@ -31,6 +31,7 @@ import net.sf.saxon.value.SequenceType;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * This class is used to contain information about a set of built-in functions.
@@ -86,7 +87,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     protected static final int NAV = 1 << 27;   // = usage NAVIGATION (function navigates from this node)
 
 
-    private final HashMap<String, Entry> functionTable = new HashMap<>(200);
+    private final HashMap<String, net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry> functionTable = new HashMap<>(200);
     //private List<BuiltInFunctionSet> importedFunctions = new ArrayList<BuiltInFunctionSet>();
 
     // Sequence-variadic functions (XPath 4.0+) are registered in a table indexed by the local
@@ -98,7 +99,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      * @param importee the function set to be imported. (No cycles allowed!)
      */
 
-    public final void importFunctionSet(BuiltInFunctionSet importee) {
+    public final void importFunctionSet(net.sf.saxon.functions.registry.BuiltInFunctionSet importee) {
         if (!importee.getNamespace().equals(getNamespace())) {
             throw new IllegalArgumentException(importee.getNamespace());
         }
@@ -115,10 +116,10 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      * @return the entry for the required function, or null if not found
      */
 
-    public Entry getFunctionDetails(String name, int arity) {
+    public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry getFunctionDetails(String name, int arity) {
         if (arity == -1) {
             for (int i=0; i<20; i++) {
-                Entry found = getFunctionDetails(name, i);
+                net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry found = getFunctionDetails(name, i);
                 if (found != null) {
                     return found;
                 }
@@ -126,7 +127,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             return null;
         }
         String key = name + "#" + arity;
-        Entry entry = functionTable.get(key);
+        net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry entry = functionTable.get(key);
         if (entry != null) {
             return entry;
         }
@@ -174,7 +175,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         StructuredQName functionName = symbolicName.getComponentName();
         int arity = symbolicName.getArity();
         String localName = functionName.getLocalPart();
-        Entry entry = getFunctionDetails(localName, arity);
+        net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry entry = getFunctionDetails(localName, arity);
         if (functionName.hasURI(getNamespace()) && entry != null) {
             if ((entry.properties & SEQV) != 0) {
                 // sequence-variadic functions in 4.0 (e.g..concat, codepoints-to-string)
@@ -229,7 +230,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     }
 
     public SystemFunction makeFunction(String name, int arity) throws XPathException {
-        Entry entry = getFunctionDetails(name, arity);
+        net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry entry = getFunctionDetails(name, arity);
         if (entry == null) {
             String diagName = getNamespace().equals(NamespaceConstant.FN) ?
                     "System function " + name :
@@ -248,8 +249,9 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             }
         }
 
-        Class<? extends SystemFunction> functionClass = entry.implementationClass;
-        SystemFunction f = instantiate(name, functionClass);
+        //Class<? extends SystemFunction> functionClass = entry.implementationClass;
+        //SystemFunction f = instantiate(name, functionClass);
+        SystemFunction f = entry.implementationClass.get();
         f.setDetails(entry);
         f.setArity(arity);
         return f;
@@ -299,7 +301,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         if (!qn.hasURI(getNamespace())) {
             return false;
         }
-        Entry entry = getFunctionDetails(qn.getLocalPart(), symbolicName.getArity());
+        net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry entry = getFunctionDetails(qn.getLocalPart(), symbolicName.getArity());
         if (entry == null) {
             return false;
         }
@@ -359,6 +361,24 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         }
     }
 
+
+    protected Entry register(String name,
+                             int arity,
+                             Class<? extends SystemFunction> implementationClass,
+                             ItemType itemType,
+                             int cardinality,
+                             int properties) {
+        return register(name, arity, () -> {
+            try {
+                return implementationClass.newInstance();
+            } catch (Exception err) {
+                throw new RuntimeException(err);
+            }
+        }, itemType, cardinality, properties);
+
+    }
+
+
     /**
      * Register a system function in the table of function details.
      *
@@ -375,14 +395,14 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     /*@NotNull*/
     protected Entry register(String name,
                              int arity,
-                             Class<? extends SystemFunction> implementationClass,
+                             Supplier<SystemFunction> functionFactory,
                              ItemType itemType,
                              int cardinality,
                              int properties) {
         Entry e = new Entry();
         e.name = new StructuredQName(getConventionalPrefix(), getNamespace(), name);
         e.arity = arity;
-        e.implementationClass = implementationClass;
+        e.implementationClass = functionFactory;
         e.functionSet = this;
         e.itemType = itemType;
         e.cardinality = cardinality;
@@ -413,9 +433,9 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      */
 
     protected void registerReducedArityVariants(String key, int min, int max) {
-        Entry master = functionTable.get(key);
+        net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry master = functionTable.get(key);
         for (int arity = min; arity <= max; arity++) {
-            Entry e = new Entry();
+            net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry e = new net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry();
             e.name = master.name;
             e.arity = arity;
             e.implementationClass = master.implementationClass;
@@ -466,11 +486,11 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         /**
          * The class containing the implementation of this function (always a subclass of SystemFunction)
          */
-        public Class<? extends SystemFunction> implementationClass;
+        public Supplier<SystemFunction> implementationClass;
         /**
          * The function set in which this function is defined
          */
-        public BuiltInFunctionSet functionSet;
+        public net.sf.saxon.functions.registry.BuiltInFunctionSet functionSet;
         /**
          * The arity of the function
          */
@@ -519,7 +539,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          * @return this entry (to allow chaining)
          */
 
-        public Entry arg(int a, ItemType type, int options, Sequence resultIfEmpty) {
+        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry arg(int a, ItemType type, int options, Sequence resultIfEmpty) {
             int cardinality = options & StaticProperty.CARDINALITY_MASK;
             OperandUsage usage = OperandUsage.NAVIGATION;
             if ((options & ABS) != 0) {
@@ -545,7 +565,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          * Add details for options parameters (only applies to one argument, the function is expected to know which)
          */
 
-        public Entry setOptionDetails(OptionsParameter details) {
+        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry setOptionDetails(OptionsParameter details) {
             this.optionDetails = details;
             return this;
         }
