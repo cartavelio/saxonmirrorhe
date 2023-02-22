@@ -33,6 +33,7 @@ public class GenericTreeInfo implements TreeInfo
     private Map<String, Object> userData;
     private long documentNumber = -1;
     private SpaceStrippingRule spaceStrippingRule = NoElementsSpaceStrippingRule.getInstance();
+    private Durability durability;
 
     /**
      * Create the TreeInfo
@@ -183,6 +184,15 @@ public class GenericTreeInfo implements TreeInfo
     public NodeInfo selectID(String id, boolean getParent) {
         return null;
     }
+
+    public void setDurability(Durability durability) {
+        this.durability = durability;
+    }
+
+    public Durability getDurability() {
+        return durability;
+    }
+
 
     /**
      * Get the list of unparsed entities defined in this document

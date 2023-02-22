@@ -8,10 +8,11 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.Durability;
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Timer;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
@@ -62,6 +63,7 @@ public abstract class Builder implements Receiver {
     protected NodeInfo currentRoot;
     protected boolean lineNumbering = false;
     protected boolean useEventLocation = true;
+    protected Durability durability = Durability.LASTING;
 
     protected boolean started = false;
     protected boolean timing = false;
@@ -202,6 +204,14 @@ public abstract class Builder implements Receiver {
     /*@Nullable*/
     public String getBaseURI() {
         return baseURI;
+    }
+
+    public void setDurability(Durability durability) {
+        this.durability = durability;
+    }
+
+    public Durability getDurability() {
+        return durability;
     }
 
 

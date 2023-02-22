@@ -12,6 +12,7 @@ package net.sf.saxon.tree.linked;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.CopyOptions;
+import net.sf.saxon.om.Durability;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -441,7 +442,7 @@ public abstract class ParentNodeImpl extends NodeImpl {
                 case Type.ELEMENT:
                     Builder builder = null;
                     try {
-                        builder = new LinkedTreeBuilder(getConfiguration().makePipelineConfiguration());
+                        builder = new LinkedTreeBuilder(getConfiguration().makePipelineConfiguration(), Durability.MUTABLE);
                         builder.open();
                         source.copy(builder, CopyOptions.ALL_NAMESPACES, Loc.NONE);
                         builder.close();

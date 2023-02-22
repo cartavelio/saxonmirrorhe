@@ -16,10 +16,7 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -284,6 +281,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                 Builder builder;
                 builder = controller.makeBuilder();
                 builder.setUseEventLocation(false);
+                builder.setDurability(Durability.TEMPORARY);
 
                 if (builder instanceof TinyBuilder) {
                     ((TinyBuilder) builder).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);

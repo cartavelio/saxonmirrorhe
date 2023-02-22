@@ -172,6 +172,16 @@ public interface TreeInfo {
 
     Object getUserData(String key);
 
+    /**
+     * Get the durability of nodes in the tree. This affects how they are handled in a memo function
+     * cache, to optimize memory and garbage collection. By default, all nodes are considered durable
+     * unless otherwise specified
+     */
+
+    default Durability getDurability() {
+        return isMutable() ? Durability.MUTABLE : Durability.LASTING;
+    }
+
 
 }
 

@@ -646,6 +646,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
             throw new SaxonApiException(e);
         }
         sourceTreeBuilder = controller.makeBuilder();
+        sourceTreeBuilder.setDurability(Durability.LASTING);
         if (sourceTreeBuilder instanceof TinyBuilder) {
             ((TinyBuilder) sourceTreeBuilder).setStatistics(context.getConfiguration().getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
         }

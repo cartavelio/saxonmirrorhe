@@ -12,10 +12,7 @@ import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.om.DocumentKey;
-import net.sf.saxon.om.NoElementsSpaceStrippingRule;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StylesheetSpaceStrippingRule;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.IPackageLoader;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -91,7 +88,7 @@ public class StylesheetModule {
         Configuration config = compilation.getConfiguration();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         pipe.setErrorReporter(compilation.getCompilerInfo().getErrorReporter());
-        LinkedTreeBuilder styleBuilder = new LinkedTreeBuilder(pipe);
+        LinkedTreeBuilder styleBuilder = new LinkedTreeBuilder(pipe, Durability.LASTING);
         styleBuilder.setSystemId(styleSource.getSystemId());
         //styleBuilder.freezeSystemIdAndBaseURI();
         styleBuilder.setNodeFactory(compilation.getStyleNodeFactory(topLevelModule));
@@ -194,7 +191,7 @@ public class StylesheetModule {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         pipe.setErrorReporter(compilation.getCompilerInfo().getErrorReporter());
 
-        LinkedTreeBuilder styleBuilder = new LinkedTreeBuilder(pipe);
+        LinkedTreeBuilder styleBuilder = new LinkedTreeBuilder(pipe, Durability.LASTING);
         styleBuilder.setSystemId(styleSource.getSystemId());
         //styleBuilder.freezeSystemIdAndBaseURI();
         styleBuilder.setNodeFactory(compilation.getStyleNodeFactory(true));

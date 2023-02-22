@@ -671,10 +671,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
 
     @Override
     public void generateId(/*@NotNull*/ StringBuilder buffer) {
-        buffer.append("d");
-        buffer.append(tree.getDocumentNumber());
-        buffer.append(NODE_LETTER[getNodeKind()]);
-        buffer.append(nodeNr);
+        buffer.append("d").append(tree.getDocumentNumber()).append(NODE_LETTER[getNodeKind()]).append(nodeNr);
     }
 
     /**

@@ -249,6 +249,7 @@ public class MessageInstr extends Instruction {
         controller.incrementMessageCounter(errorCode);
 
         Builder builder = controller.makeBuilder();
+        builder.setDurability(Durability.TEMPORARY);
         Receiver rec = new MessageAdapter(new TreeReceiver(builder), errorCode.getEQName(), getLocation());
         rec.open();
 
