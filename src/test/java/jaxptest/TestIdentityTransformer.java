@@ -1,6 +1,5 @@
 package jaxptest;
 
-import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.FeatureKeys;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -30,11 +29,17 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestIdentityTransformer {
     private final ConfigTest configTest = new ConfigTest();
 
+    private static TransformerFactory makeFactory() {
+        // We don't simply do newInstance(), because that can give us Xalan in cases where the test is
+        // run from a development environment.
+        return TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", ClassLoader.getSystemClassLoader());
+    }
+
     @Test
     public void testIdentityTransformToDom() {
         try {
             Node node = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-            Transformer identityTransformer = new net.sf.saxon.TransformerFactoryImpl().newTransformer();
+            Transformer identityTransformer = makeFactory().newTransformer();
             SAXSource source = new SAXSource(new InputSource(new ByteArrayInputStream("<hello/>".getBytes())));
             identityTransformer.transform(source, new DOMResult(node));
             assertEquals("hello", node.getChildNodes().item(0).getNodeName());
@@ -58,7 +63,7 @@ public class TestIdentityTransformer {
             root.setAttribute("xmlns:mpeg7", "urn:mpeg:mpeg7:schema:2001");
             root.setAttribute("xsi:schemaLocation", "urn:mpeg:mpeg7:schema:2001 Mpeg7-2001.xsd");
             doc.appendChild(root);
-            Transformer tFormer = new TransformerFactoryImpl().newTransformer();
+            Transformer tFormer = makeFactory().newTransformer();
             tFormer.setOutputProperty(OutputKeys.METHOD, "xml");
             doc.normalize();
             Source sourceMPEG7 = new DOMSource(doc);
@@ -91,7 +96,7 @@ public class TestIdentityTransformer {
                     "<r><c>1</c><c>2000</c><c>inq1</c><c>inquiry1</c></r>" +
                     "</rows>";
             //System.setProperty(TRANSFORMERFACTORY_PROPERTY,TRANSFORMERFACTORY_IMPL);
-            TransformerFactory transFactory = new TransformerFactoryImpl();
+            TransformerFactory transFactory = makeFactory();
             transFactory.setAttribute(
                     FeatureKeys.STRIP_WHITESPACE, "all");
             SAXTransformerFactory saxTransFactory = (SAXTransformerFactory)transFactory;
@@ -138,7 +143,7 @@ public class TestIdentityTransformer {
         try {
             System.setProperty("javax.xml.transform.TransformerFactory",
             "net.sf.saxon.TransformerFactoryImpl");
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            Transformer transformer = makeFactory().newTransformer();
             //System.err.println(transformer.getOutputProperty(OutputKeys.METHOD));
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             assertEquals("xml", transformer.getOutputProperty(OutputKeys.METHOD));
@@ -166,7 +171,7 @@ public class TestIdentityTransformer {
 
         MyErrorListener listener = new MyErrorListener();
         try {
-            TransformerFactory factory = new TransformerFactoryImpl();
+            TransformerFactory factory = makeFactory();
             Transformer trans = factory.newTransformer();
             trans.setErrorListener(listener);
             String in = "<illformed>";
@@ -213,7 +218,7 @@ public class TestIdentityTransformer {
                     "     <command>say hello</command>\n" +
                     "  </subelement> \n" +
                     "</test>";
-            TransformerFactory factory = new TransformerFactoryImpl();
+            TransformerFactory factory = makeFactory();
             Transformer copy = factory.newTransformer();
             StringWriter sw = new StringWriter();
             copy.transform(new StreamSource(new StringReader(xml)), new StreamResult(sw));
@@ -234,8 +239,8 @@ public class TestIdentityTransformer {
             DocumentBuilder db = factory.newDocumentBuilder();
             Document doc = db.parse(new FileInputStream(configTest.getXMarkDir() + "xmark1.xml"));
 
-            Transformer saxon = new TransformerFactoryImpl().newTransformer();
-            Transformer xalan = saxon; //new com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl().newTransformer();
+            Transformer saxon = makeFactory().newTransformer();
+            //Transformer xalan = TransformerFactory.newDefaultInstance();
 
             for (int i=0; i<10; i++) {
                 saxon.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
@@ -248,10 +253,10 @@ public class TestIdentityTransformer {
                 saxon.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
                 System.out.println("Saxon: " + (System.nanoTime() - start) / 1000000 + "ms in " + (getUsedMemory()-used) + "bytes");
 
-                used = getUsedMemory();
-                start = System.nanoTime();
-                xalan.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
-                System.out.println("           Xalan: " + (System.nanoTime() - start) / 1000000 + "ms in " + (getUsedMemory() - used) + "bytes");
+//                used = getUsedMemory();
+//                start = System.nanoTime();
+//                xalan.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
+//                System.out.println("           Xalan: " + (System.nanoTime() - start) / 1000000 + "ms in " + (getUsedMemory() - used) + "bytes");
             }
 
         } catch (ParserConfigurationException | TransformerException | SAXException | IOException e) {
