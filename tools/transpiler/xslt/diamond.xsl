@@ -158,7 +158,7 @@
    <xsl:template match="*[type/@RESOLVED_TYPE='net.sf.saxon.value.ObjectValue']
                          [arguments/argument[1]/@RESOLVED_TYPE]" 
       priority="50">
-      <xsl:value-of select="arguments/argument[1]/@RESOLVED_TYPE"/>
+      <xsl:value-of select="arguments/argument[1]/@RESOLVED_TYPE => f:adjustTypeNamespace()"/>
    </xsl:template>
    
    <!-- Special-case `new SequenceExtent.Of<>(List<X>)` -->
@@ -166,7 +166,7 @@
    <xsl:template match="*[type/@RESOLVED_TYPE='net.sf.saxon.value.SequenceExtent.Of']
                          [arguments/argument[1]/@RESOLVED_TYPE]" 
                          priority="50">
-      <xsl:value-of select="f:extract-type-arguments(arguments/argument[1]/@RESOLVED_TYPE) => replace('\[\]', '')"/>
+      <xsl:value-of select="f:extract-type-arguments(arguments/argument[1]/@RESOLVED_TYPE) => replace('\[\]', '') => f:adjustTypeNamespace()"/>
    </xsl:template>
    
    <!-- Special-case `new SequenceExtent.Of<>(new X[])` -->
@@ -174,13 +174,13 @@
    <xsl:template match="*[type/@RESOLVED_TYPE='net.sf.saxon.value.SequenceExtent.Of']
                          [arguments/argument[1]/@RESOLVED_TYPE]
                          [*/@nodeType='ArrayCreationExpr']" priority="60">
-      <xsl:value-of select="f:extract-type-arguments(arguments/argument[1]/elementType/@RESOLVED_TYPE)"/>
+      <xsl:value-of select="f:extract-type-arguments(arguments/argument[1]/elementType/@RESOLVED_TYPE) => f:adjustTypeNamespace()"/>
    </xsl:template>
    
    <!-- Special-case `new ListIterator.of<>(List<X>)` -->
    
    <xsl:template match="*[type/@RESOLVED_TYPE='net.sf.saxon.tree.iter.ListIterator.Of'][arguments/argument[1]/@RESOLVED_TYPE]" priority="50">
-      <xsl:value-of select="f:extract-type-arguments(arguments/argument[1]/@RESOLVED_TYPE) => replace('\[\]', '')"/>
+      <xsl:value-of select="f:extract-type-arguments(arguments/argument[1]/@RESOLVED_TYPE) => replace('\[\]', '') => f:adjustTypeNamespace()"/>
    </xsl:template>
    
    <!-- Special-case `new ArrayIterator.Of<>(X[])`, `new SequenceExtent.Of(X[])` -->
@@ -188,7 +188,7 @@
    <xsl:template match="*[type/@RESOLVED_TYPE=('net.sf.saxon.tree.iter.ArrayIterator.Of', 'net.sf.saxon.value.SequenceExtent.Of')]
                          [arguments/argument[1]/@RESOLVED_TYPE[ends-with(., '[]')]]" 
                          priority="60">
-      <xsl:value-of select="arguments/argument[1]/@RESOLVED_TYPE => replace('\[\]$', '')"/>
+      <xsl:value-of select="arguments/argument[1]/@RESOLVED_TYPE => replace('\[\]$', '') => f:adjustTypeNamespace()"/>
    </xsl:template>
    
    <!-- Special-case `new ArrayIterator.OfNodes<>(X[])` -->
@@ -196,7 +196,7 @@
    <xsl:template match="*[type/@RESOLVED_TYPE='net.sf.saxon.tree.iter.ArrayIterator.OfNodes']
       [arguments/argument[1]/@RESOLVED_TYPE[ends-with(., '[]')]]" 
       priority="50">
-      <xsl:value-of select="arguments/argument[1]/@RESOLVED_TYPE => replace('\[\]$', '')"/>
+      <xsl:value-of select="arguments/argument[1]/@RESOLVED_TYPE => replace('\[\]$', '') => f:adjustTypeNamespace()"/>
    </xsl:template>
    
  

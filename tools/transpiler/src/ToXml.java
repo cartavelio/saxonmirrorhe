@@ -30,6 +30,7 @@ public class ToXml {
      */
 
     public static void main(String[] args) throws Exception {
+        System.err.println("Transpiler ToXML v2021-07-09");
         new ToXml().go(args);
     }
 
@@ -275,13 +276,20 @@ public class ToXml {
         trans.callTemplate(null, processor.newSerializer(digest));
     }
 
+    
     public void processXmlDirToCSharp(File xmlDir, File digestFile, File csDir) throws Exception {
         XdmNode digest = parseDigest(digestFile);
-        xmlToCSharp = compiler.compile(new StreamSource(new File("tools/transpiler/xslt/xml-to-cs.xsl")));
-        processXmlFileToCSharp(xmlDir, csDir, digest, xmlToCSharp);
+        xmlToCSharp = compiler.compile(new StreamSource(new File("/Users/mike/GitHub/saxon2020/tools/transpiler/xslt/xml-to-cs.xsl")));
+        File xmlDirEE = new File(new File(xmlDir, "com"), "saxonica");
+        File csDirEE = new File(new File(csDir, "Saxon"), "Eej");
+        processXmlSubDirectoryToCSharp(xmlDirEE, csDirEE, digest, xmlToCSharp);
+        File xmlDirHE = new File(new File(new File(xmlDir, "net"), "sf"), "saxon");
+        File csDirHE = new File(new File(csDir, "Saxon"), "Hej");
+        processXmlSubDirectoryToCSharp(xmlDirHE, csDirHE, digest, xmlToCSharp);
     }
 
-    public void processXmlFileToCSharp(File xmlDir, File csDir, XdmNode digest, XsltExecutable xmlToCSharp) throws Exception {
+    public void processXmlSubDirectoryToCSharp(File xmlDir, File csDir, XdmNode digest, XsltExecutable xmlToCSharp) throws Exception {
+        System.err.println("Processing dir " + xmlDir + " to " + csDir);
         String[] files = xmlDir.list();
         if (files != null) {
             for (String file : files) {
@@ -293,8 +301,8 @@ public class ToXml {
     public void processXmlFileToCSharp(File directory, String filename, File csDir, XdmNode digest, XsltExecutable xmlToCSharp) throws Exception {
         File file = new File(directory, filename);
         if (file.isDirectory()) {
-            System.err.println("Processing directory " + file);
-            processXmlFileToCSharp(file, new File(csDir, filename), digest, xmlToCSharp);
+            System.err.println("Processing subdirectory " + file);
+            processXmlSubDirectoryToCSharp(file, new File(csDir, filename), digest, xmlToCSharp);
         } else if (filename.endsWith(".xml") && file.canRead()) {
             try {
                 System.err.println("Processing file " + file);
