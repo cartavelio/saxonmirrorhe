@@ -7,10 +7,19 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.eval.PushEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -210,6 +219,14 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
         return new MonoIterator<>(this);
     }
 
+    /**
+     * Perform type-checking on the child expression. This may cause the child expression to be replaced
+     * with a different child expression.
+     * @param visitor the expression visitor
+     * @param contextInfo information about the static context
+     * @throws XPathException if type checking fails
+     */
+
     public void typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         try {
             setChildExpression(getChildExpression().typeCheck(visitor, contextInfo));
@@ -224,6 +241,15 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
             }
         }
     }
+
+    /**
+     * Perform optimization on the child expression. This may cause the child expression to be replaced
+     * with a different child expression.
+     *
+     * @param visitor     the expression visitor
+     * @param contextInfo information about the static context
+     * @throws XPathException if optimization fails
+     */
 
     public void optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         try {
@@ -240,6 +266,12 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
         }
     }
 
+    /**
+     * Get the type-determined usage of the operand, as defined in the XSLT 3.0 streaming spec
+     * @param type the type required by the context in which the expression appears
+     * @return the type-determined usage
+     */
+
     public static OperandUsage typeDeterminedUsage(net.sf.saxon.type.ItemType type) {
         if (type.isPlainType()) {
             return OperandUsage.ABSORPTION;
@@ -250,5 +282,48 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
         }
     }
 
+    //#if EE=true
+    PushEvaluator pushEvaluator = null;
+    PullEvaluator pullEvaluator = null;
+    ItemEvaluator itemEvaluator = null;
+    //#endif
+
+    public void process(Outputter outputter, XPathContext context) throws XPathException {
+        //#HE-ONLY// childExpression.process(outputter, context);
+        //#if EE=true
+        if (pushEvaluator == null) {
+            pushEvaluator = Elaborator.makeElaborator(childExpression).elaborateForPush();
+        }
+        pushEvaluator.process(outputter, context);
+        //#endif
+    }
+
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
+        //#HE-ONLY// return childExpression.iterate(context);
+        //#if EE=true
+        if (pullEvaluator == null) {
+            pullEvaluator = Elaborator.makeElaborator(childExpression).elaborateForPull();
+        }
+        return pullEvaluator.eval(context);
+        //#endif
+    }
+
+    public Item evaluateItem(XPathContext context) throws XPathException {
+        //#HE-ONLY// return childExpression.evaluateItem(context);
+        //#if EE=true
+        if (itemEvaluator == null) {
+            itemEvaluator = Elaborator.makeElaborator(childExpression).elaborateForItem();
+        }
+        return itemEvaluator.eval(context);
+        //#endif
+    }
+
+    public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
+        //#HE-ONLY// return childExpression.evaluateAsString(context);
+        //#if EE=true
+        Item it = evaluateItem(context);
+        return it == null ? EmptyUnicodeString.getInstance() : it.getUnicodeStringValue();
+        //#endif
+    }
 }
 

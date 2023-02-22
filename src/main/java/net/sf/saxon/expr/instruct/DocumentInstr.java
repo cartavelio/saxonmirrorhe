@@ -239,7 +239,7 @@ public class DocumentInstr extends ParentNodeConstructor {
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         if (preservingTypes && !textOnly) {
             output.startDocument(ReceiverOption.NONE);
-            getContentExpression().process(output, context);
+            getContentOperand().process(output, context);
             output.endDocument();
             return null;
         } else {
@@ -267,7 +267,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                 textValue = constantText;
             } else {
                 UnicodeBuilder sb = new UnicodeBuilder();
-                SequenceIterator iter = getContentExpression().iterate(context);
+                SequenceIterator iter = getContentOperand().iterate(context);
                 Item item;
                 while ((item = iter.next()) != null) {
                     sb.accept(item.getUnicodeStringValue());
@@ -299,7 +299,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                 out.open();
                 out.startDocument(ReceiverOption.NONE);
 
-                getContentExpression().process(out, context);
+                getContentOperand().process(out, context);
 
                 out.endDocument();
                 out.close();
