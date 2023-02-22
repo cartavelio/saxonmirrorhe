@@ -251,19 +251,6 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// The <c>XmlResolver</c> to be used at run-time to resolve and dereference URIs
-        /// supplied to the <c>doc()</c> and <c>document()</c> functions.
-        /// </summary>
-
-        public XmlResolver XmlResolver {
-            get => ((StandardURIResolver) s9Transformer.getURIResolver()).getXmlResolver();
-            set => s9Transformer.setURIResolver(
-                new StandardURIResolver(
-                    s9Transformer.getUnderlyingController().getConfiguration(), 
-                    value));
-        }
-        
-        /// <summary>
         /// The <code>TextResolver</code> to be used at run-time to resolve and dereference URIs
         /// supplied to the <c>unparsed-text()</c>, <c>unparsed-text-lines()</c>,
         /// <c>unparsed-text-available()</c>, and <c>json-doc()</c> functions.

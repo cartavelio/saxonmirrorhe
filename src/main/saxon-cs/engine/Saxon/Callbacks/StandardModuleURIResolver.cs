@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Xml;
+using Saxon.Api;
 using Saxon.Ejava.net;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
 
 namespace Saxon.Callbacks {
     public class StandardModuleURIResolver : Saxon.Hej.lib.ModuleURIResolver {
-        public const string XQUERY_NATURE = "https://www.iana.org/assignments/media-types/application/xquery";
         private XmlResolver resolver;
         private Saxon.Hej.Configuration config;
         
@@ -34,9 +34,11 @@ namespace Saxon.Callbacks {
 
         public Saxon.Ejavax.xml.transform.stream.StreamSource[] resolve(string moduleURI, string baseURI, string[] locations) {
             if ((locations.Length == 0)) {
-                StreamSource source = resolvedNamespaceURI(moduleURI, baseURI);
+                IResource source = resolvedNamespaceURI(moduleURI, baseURI);
                 if (source != null) {
-                    return new []{source};
+                    if (source is TextResource text) {
+                        return new []{new StreamSource(text.TextReader, text.ResourceUri.ToString())};
+                    }
                 }
                 Saxon.Hej.trans.XPathException err =
                     new Saxon.Hej.trans.XPathException(("Cannot locate module for namespace " + moduleURI));
@@ -108,14 +110,17 @@ namespace Saxon.Callbacks {
             }
         }
         
-        private StreamSource resolvedNamespaceURI(string moduleURI, string baseURI) {
+        private IResource resolvedNamespaceURI(string moduleURI, string baseURI) {
             try {
-                StreamSource source = null;
+                IResource source = null;
                 if (config != null) {
-                    source = config.getCommonResourceResolver().DereferenceNamespace(moduleURI, XQUERY_NATURE, null);
+                    ResourceRequest request = new() {
+                        Nature = ResourceRequest.XQUERY_NATURE
+                    };
+                    source = config.getCommonResourceResolver().DereferenceNamespace(moduleURI, request);
                     if (source == null && baseURI != null) {
                         Uri resuri = new Uri(new Uri(baseURI), moduleURI);
-                        source = config.getCommonResourceResolver().DereferenceNamespace(resuri.ToString(), XQUERY_NATURE, null);
+                        source = config.getCommonResourceResolver().DereferenceNamespace(resuri.ToString(), request);
                     }
                 }
 

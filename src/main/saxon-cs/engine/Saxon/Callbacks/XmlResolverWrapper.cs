@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Xml;
 using Org.XmlResolver;
+using Saxon.Api;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
 
@@ -19,33 +20,21 @@ namespace Saxon.Callbacks {
             return newResolver;
         }
 
-        public override StreamSource DereferenceLocation(Uri baseUri, string href, string nature, string purpose) {
+        public override IResource DereferenceLocation(ResourceRequest request) {
+            Uri baseUri = request.BaseUri ?? request.Uri;
+            string href = request.RelativeUri ?? request.Uri.ToString();
             Uri abs = xmlResolver.ResolveUri(baseUri, href);
             object obj = xmlResolver.GetEntity(abs, null, typeof(System.IO.Stream));
             if ((obj is Stream stream)) {
-                Saxon.Ejavax.xml.transform.stream.StreamSource source = new(stream, abs.ToString());
-                return source;
-                // source.setSystemId(abs.ToString());
-                // Saxon.Hej.lib.AugmentedSource @as =
-                //     Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(source);
-                // @as.setPleaseCloseAfterUse(true);
-                // return @as;
-            }
-            else if ((obj is TextReader reader)) {
-                Saxon.Ejavax.xml.transform.stream.StreamSource source = new(reader);
-                source.setSystemId(abs.ToString());
-                return source;
-            }
-            else if ((obj == null)) {
-                throw new Saxon.Hej.trans.XPathException("XmlResolver returned null");
+                return new TextResource(stream, baseUri);
             }
             else {
                 throw new Saxon.Hej.trans.XPathException(
-                    ("Unrecognized object returned by XmlResolver (type " + obj.GetType().Name));
+                    "XmlResolver returned type " + obj.GetType().Name + " (expected Stream)");
             }
         }
 
-        public override StreamSource DereferenceNamespace(string namespaceUri, string nature, string purpose) {
+        public override IResource DereferenceNamespace(string namespaceUri, ResourceRequest request) {
             throw new NotImplementedException();
         }
 
