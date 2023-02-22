@@ -13,10 +13,13 @@ cimport saxoncClasses
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.map cimport map
+from nodekind import *
 from cython.operator import dereference, postincrement
 from os.path import isfile
+
 from libc.stdlib cimport free, malloc, realloc
 from libc.string cimport memcpy
+
 from cython import Py_ssize_t
 
 from cpython.ref cimport PyObject
@@ -25,6 +28,7 @@ class PySaxonApiError(RuntimeError):
   pass
 
 cdef public PyObject* pysaxonapierror = <PyObject*>PySaxonApiError
+
 
 
 def create_xdm_dict(proc, mmap):
@@ -55,7 +59,7 @@ def create_xdm_dict(proc, mmap):
             elif isinstance(value,int):
                 xdmValue_ = proc.make_integer_value(value)
             elif isinstance(value,float):
-                xdmValue_ = proc.make_integer_value(value)
+                xdmValue_ = proc.make_integer_value(double)
             elif value in (True, False):
                 xdmValue_ = proc.make_boolean_value(value)
 
@@ -354,7 +358,7 @@ cdef class PySaxonProcessor:
         """
         cdef char * c_str_
         py_name_string = name.encode('utf-8') if name is not None else None
-        c_str_ = py_name_string if name is not None else ""
+        c_str_ = py_value_string if name is not None else ""
         cdef const char* c_string = self.thisptr.EQNameToClarkName(c_str_)
         ustring = make_py_str(c_string)
         return ustring
@@ -373,7 +377,7 @@ cdef class PySaxonProcessor:
         """
         cdef char * c_str_
         py_name_string = name.encode('utf-8') if name is not None else None
-        c_str_ = py_name_string if name is not None else ""
+        c_str_ = py_value_string if name is not None else ""
         cdef const char* c_string = self.thisptr.clarkNameToEQName(c_str_)
         ustring = make_py_str(c_string)
         return ustring
@@ -521,13 +525,13 @@ cdef class PySaxonProcessor:
           elif isinstance(values[x], PyXdmAtomicValue):
             avalue_ = values[x]
             argumentV[x] = <saxoncClasses.XdmValue*> avalue_.derivedaptr
-          elif isinstance(values[x], PyXdmNode):
+          elif isinstance(values[x], PyXdmNodeValue):
             nvalue_ = values[x]
             argumentV[x] =  <saxoncClasses.XdmValue *>nvalue_.derivednptr
-          elif isinstance(values[x], PyXdmArray):
+          elif isinstance(values[x], PyXdmArrayValue):
             aavalue_ = values[x]
             argumentV[x] =  <saxoncClasses.XdmValue *>aavalue_.derivedaaptr
-          elif isinstance(values[x], PyXdmMap):
+          elif isinstance(values[x], PyXdmMapValue):
             mvalue_ = values[x]
             argumentV[x] =  <saxoncClasses.XdmValue *>mvalue_.derivedmmptr
           else:
@@ -3987,10 +3991,10 @@ cdef class PyXdmNode(PyXdmItem):
      def node_kind(self):
         """
         node_kind(self)
-        Node kind property. This will be a value such as ELEMENT=1 or
-        ATTRIBUTE=2.
-        There are seven kinds of node: document=9, element=1, attribute=2, text=3, comment=8, processing-instruction=7,
-        and namespace=13.
+        Node kind property. This will be a value such as net.sf.saxon.type.Type#ELEMENT or
+        net.sf.saxon.type.Type#ATTRIBUTE.
+        There are seven kinds of node: documents, elements, attributes, text, comments, processing-instructions,
+        and namespaces.
         Returns:
             int: an integer identifying the kind of node. These integer values are the same as those used in the DOM
         """
@@ -4007,22 +4011,21 @@ cdef class PyXdmNode(PyXdmItem):
         """
         cdef str kind
         cdef int nk = self.derivednptr.getNodeKind()
-
-        if nk ==9:
+        if nk == DOCUMENT:
             return 'document'
-        elif nk == 1:
+        elif nk == ELEMENT:
             return 'element'
-        elif nk == 2:
+        elif nk == ATTRIBUTE:
             return 'attribute'
-        elif nk == 3:
+        elif nk == TEXT:
             return 'text'
-        elif nk == 8:
+        elif nk == COMMENT:
             return 'comment'
-        elif nk == 7:
+        elif nk == PROCESSING_INSTRUCTION:
             return 'processing-instruction'
-        elif nk == 13:
+        elif nk == NAMESPACE:
             return 'namespace'
-        elif nk == 0:
+        elif nk == UNKNOWN:
             return 'unknown'
         else:
             raise ValueError('Unknown node kind: %d' % nk)
