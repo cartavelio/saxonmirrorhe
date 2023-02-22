@@ -1,171 +1,203 @@
-// Find GraalVM to build the SaxonC releases
-def graalHome = null
-["${graalVM}",
- "/Library/Java/JavaVirtualMachines/graalvm-ce-java11-22.2.0/Contents/Home/bin",
- "/lib/jvm/graalvm-ce-java11-22.2.0/bin",
- "c:/irrelevant"].each { graal ->
-  if (graalHome == null && graal != "" && pathExists(graal)) {
-    graalHome = graal
+def graalCeHome = null
+def graalEeHome = null
+
+private String findGraalHome(String edition) {
+  String home = System.getenv("GRAALVM_${edition.toUpperCase()}_HOME")
+  if (home == null) {
+    String prefix = "graalvm-${edition.toLowerCase()}"
+    // Where might we find GraalVM?
+    ["/Library/Java/JavaVirtualMachines", "/lib/jvm", "C:/GraalVM"].each { root ->
+      File rdir = new File(root)
+      if (rdir.exists() && rdir.isDirectory()) {
+        rdir.list().each { fn ->
+          if (fn.startsWith(prefix) && fn.contains(graalVersion)) {
+            home = "${root}/${fn}"
+          }
+          if (fn.startsWith(prefix) && fn.contains(graalVersion)) {
+            home = "${root}/${fn}"
+          }
+        }
+      }
+    }
+  }
+  def vm = "GraalVM ${edition.toUpperCase()}"
+  if (home == null) {
+    throw new GradleException("Cannot build SaxonC, cannot find ${vm}")
+  }
+  File bin = new File("${home}/bin")
+  if (! bin.exists()) {
+    bin = new File("${home}/Contents/Home/bin")
+    if (! bin.exists()) {
+      throw new GradleException("Cannot build SaxonC, unknown ${vm} configuration")
+    }
+  }      
+
+  File image = new File("${bin}/native-image")
+  if (!image.exists()) {
+    throw new GradleException("Cannot build SaxonC, cannot find ${vm} native-image")
+  }
+
+  return bin.toString()
+}
+
+task graal_ce_home(
+) {
+  doLast {
+    graalCeHome = findGraalHome("ce")
   }
 }
 
-if (graalHome == null)
-{
-  graalHome = System.getenv("GRAALVM_HOME")
+task graal_ee_home(
+) {
+  doLast {
+    graalEeHome = findGraalHome("ee")
+  }
 }
+
+// ============================================================
 
 def saxonApiDir = "${buildDir}/../src/main/c/Saxon.C.API"
 def commandDir = "${buildDir}/../src/main/c/command"
 def sharedLibDir = "${buildDir}/c"
 
- task buildSaxonGlue(type: Exec) {
-     dependsOn 'graalImage'
-     workingDir "${commandDir}"
-     commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "-c", "${saxonApiDir}/SaxonCGlue.c", "-o", "${commandDir}/SaxonCGlue.o"
-     doLast {
-       println "built Saxon glue"
-     }
- }
-
- task buildTransform(type: Exec) {
-     dependsOn 'buildSaxonGlue'
-     workingDir "${commandDir}"
-     commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Transform.c", "-o", "${commandDir}/transform", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
-     doLast {
-       println "built transform wrapper"
-     }
- }
-
- task buildQuery(type: Exec) {
-     dependsOn 'buildSaxonGlue'
-     workingDir "${commandDir}"
-     commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Query.c", "-o", "${commandDir}/query", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
-     doLast {
-       println "built query wrapper"
-     } 
+task buildSaxonGlue(type: Exec) {
+  dependsOn 'graalImage'
+  workingDir "${commandDir}"
+  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "-c", "${saxonApiDir}/SaxonCGlue.c", "-o", "${commandDir}/SaxonCGlue.o"
+  doLast {
+    println "built Saxon glue"
+  }
 }
 
- task buildValidate(type: Exec) {
-     dependsOn 'buildSaxonGlue'
-     workingDir "${commandDir}"
-     commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Validate.c", "-o", "${commandDir}/validate", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
-     doLast {
-       println "built validate wrapper"
-     }
- }
-
- task buildCWrappers (
-    dependsOn: ['buildTransform', 'buildQuery', 'buildValidate']){
- }
-
-task test_graalHome(
-  description: "Test that graalHome is configured"
-) {
+task buildTransform(type: Exec) {
+  dependsOn 'buildSaxonGlue'
+  workingDir "${commandDir}"
+  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Transform.c", "-o", "${commandDir}/transform", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
   doLast {
-    if (graalHome == null) {
-      throw new GradleException("Cannot build SaxonC, cannot find GraalVM")
-    } else {
-      println("Running GraalVM from ${graalHome}")
-      def ni = new File("${graalHome}/native-image");
-      if (!ni.exists()) {
-        throw new GradleException("Cannot build SaxonC, cannot find native-image")
+    println "built transform wrapper"
+  }
+}
+
+task buildQuery(type: Exec) {
+  dependsOn 'buildSaxonGlue'
+  workingDir "${commandDir}"
+  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Query.c", "-o", "${commandDir}/query", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
+  doLast {
+    println "built query wrapper"
+  } 
+}
+
+task buildValidate(type: Exec) {
+  dependsOn 'buildSaxonGlue'
+  workingDir "${commandDir}"
+  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Validate.c", "-o", "${commandDir}/validate", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
+  doLast {
+    println "built validate wrapper"
+  }
+}
+
+task buildCWrappers (
+  dependsOn: ['buildTransform', 'buildQuery', 'buildValidate']){
+}
+
+["he", "pe", "ee"].each { saxonEdition ->
+  def graalEdition = saxonEdition == "he" ? "ce" : "ee"
+  
+  task "setup_${saxonEdition}c_graalJar"(
+    dependsOn: ["graal_${saxonEdition}c_jar"],
+    description: "Setup the ${saxonEdition.toUpperCase()} jar file for GraalVM"
+  ) {
+    inputs.file "${buildDir}/c/jars/${saxonEdition}c/saxon-${saxonEdition}-${saxonVersion}.jar"
+    inputs.files fileTree(dir: "${projectDir}/src/graalvm/META-INF")
+    outputs.files fileTree(dir: "${buildDir}/graalvm/META-INF");
+
+    doLast {
+      mkdir("${buildDir}/graalvm");
+    }
+    doLast {
+      copy {
+        def zipFile = file("${buildDir}/c/jars/${saxonEdition}c/saxon-${saxonEdition}-${saxonVersion}.jar")
+        def outputDir = "${buildDir}/graalvm"
+        from(zipTree(zipFile)) {
+          exclude "META-INF/TE*"
+        }
+        into outputDir
+      }
+    }
+    doLast {
+      copy {
+        from("${projectDir}/src/graalvm/META-INF")
+        into("${buildDir}/graalvm/META-INF")
       }
     }
   }
-}
 
-task setup_graalJar(
-  dependsOn: ["test_graalHome", "graal_eec_jar"],
-  description: "Setup the EE jar file for GraalVM"
-) {
-  inputs.file "${buildDir}/c/jars/eec/saxon-ee-${saxonVersion}.jar"
-  inputs.files fileTree(dir: "${projectDir}/src/graalvm/META-INF")
-  outputs.files fileTree(dir: "${buildDir}/graalvm/META-INF");
+  task "${saxonEdition}c_graalJar"(
+    type: Jar,
+    dependsOn: ["setup_${saxonEdition}c_graalJar"],
+    description: "Build the ${saxonEdition.toUpperCase()} jar file for GraalVM"
+  ) {
+    inputs.files fileTree(dir: "${buildDir}/graalvm")
+    outputs.file "${buildDir}/libs/libsaxon-${saxonEdition}c-${saxonVersion}.jar"
 
-  doLast {
-    mkdir("${buildDir}/graalvm");
+    def prefixLen = "${buildDir}/graalvm".length()
+
+    archiveBaseName = "libsaxon-${saxonEdition}c-${saxonVersion}"
+    manifest {
+      from "${buildDir}/graalvm/META-INF/MANIFEST.MF"
+    }
+    from("${buildDir}/graalvm")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   }
-  doLast {
-    copy {
-      def zipFile = file("${buildDir}/c/jars/eec/saxon-ee-${saxonVersion}.jar")
-      def outputDir = "${buildDir}/graalvm"
-      from(zipTree(zipFile)) {
-        exclude "META-INF/TE*"
+
+  task "${saxonEdition}c_graalImage"(
+    dependsOn: ["${saxonEdition}c_graalJar", "graal_${graalEdition}_home"],
+    description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
+  ) {
+    inputs.file "${buildDir}/libs/libsaxon-${saxonEdition}c-${saxonVersion}.jar"
+    outputs.files fileTree(dir: "${buildDir}/c",
+                           include: "libsaxon-${saxonEdition}c-${saxonVersion}.*")
+
+    doLast {
+      def home = graalEdition == "ce" ? graalCeHome : graalEeHome
+      exec {
+        commandLine "${home}/native-image",
+          "-cp", "${buildDir}/libs/libsaxon-${saxonEdition}c-${saxonVersion}.jar",
+          "-o","${buildDir}/c/libsaxon-${saxonEdition}c-${saxonVersion}",
+          "--no-fallback", "-H:Path=${buildDir}/c",
+          "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
+          "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+          "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+          "-H:+ReportExceptionStackTraces",
+          "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
+          "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
+          "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
+          "--enable-url-protocols=https",
+          "--shared"
       }
-      into outputDir
     }
   }
-  doLast {
-    copy {
-      from("${projectDir}/src/graalvm/META-INF")
-      into("${buildDir}/graalvm/META-INF")
-    }
+
+  task "${saxonEdition}c_graalImageExe"(
+    type: Exec,
+    dependsOn: ["${saxonEdition}c_graalJar", "graal_${graalEdition}_home"],
+    description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
+  ) {
+    def home = graalEdition == "ce" ? graalCeHome : graalEeHome
+    commandLine "${home}/native-image",
+      "-cp", "${buildDir}/libs/libsaxon-${saxonEdition}c-${saxonVersion}.jar",
+      "net.sf.saxon.Transform", "-o","${buildDir}/c/saxon-${saxonEdition}c-${saxonVersion}",
+      "--no-fallback", "-H:Path=${buildDir}/c",
+      "-H:+AllowVMInspection",
+      "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
+      "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+      "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+      "-H:+ReportExceptionStackTraces",
+      "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
+      "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
+      "--trace-class-initialization=jdk.xml.internal.SecuritySupport"
   }
 }
-
-task graalJar(
-  type: Jar,
-  dependsOn: ["setup_graalJar"],
-  description: "Build the EE jar file for GraalVM"
-) {
-  inputs.files fileTree(dir: "${buildDir}/graalvm")
-  outputs.file "${buildDir}/libs/libsaxon-eec-${saxonVersion}.jar"
-
-  def prefixLen = "${buildDir}/graalvm".length()
-
-  archiveBaseName = "libsaxon-eec-${saxonVersion}"
-  manifest {
-    from "${buildDir}/graalvm/META-INF/MANIFEST.MF"
-  }
-  from("${buildDir}/graalvm")
-  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-task graalImage(
-  type: Exec,
-  dependsOn: ["graalJar"],
-  description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
-) {
-  inputs.file "${buildDir}/libs/libsaxon-eec-${saxonVersion}.jar"
-  outputs.files fileTree(dir: "${buildDir}/c", include: "libsaxon-eec-${saxonVersion}.*")
-
-  commandLine "${graalHome}/native-image",
-    "-cp", "${buildDir}/libs/libsaxon-eec-${saxonVersion}.jar", "-o","${buildDir}/c/libsaxon-eec-${saxonVersion}",
-    "--no-fallback", "-H:Path=${buildDir}/c",
-    "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
-    "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-    "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-    "-H:+ReportExceptionStackTraces",
-    "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
-    "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
-    "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
-    "--enable-url-protocols=https",
-    "--shared"
-}
-
-
-
-task graalImageExe(
-  dependsOn: ["graalJar"],
-  description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
-) {
-  doLast {
-    exec {
-      commandLine "${graalHome}/native-image",
-        "-cp", "${buildDir}/libs/libsaxon-eec-${saxonVersion}.jar", "net.sf.saxon.Transform", "-o","${buildDir}/c/saxon-eec-${saxonVersion}",
-        "--no-fallback", "-H:Path=${buildDir}/c",
-        "-H:+AllowVMInspection",
-        "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
-        "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-        "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-        "-H:+ReportExceptionStackTraces",
-        "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
-        "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
-        "--trace-class-initialization=jdk.xml.internal.SecuritySupport"
-    }
-  }
-}
-
 
 task hec_graal_setupPreprocess(
   type: Copy,
@@ -399,14 +431,20 @@ task graal_eecCompile(
   destinationDirectory = new File("${buildDir}/classes/eec")
 }
 
-
-
 task graal_hec_jar(
   type: Jar,
   dependsOn: ["graal_hecCompile", "hej_MetaInf", "rejar_Xerces", "compile_function_library"],
   description: "Build the HE jar file for SaxonC"
 ) {
-  archiveBaseName = "saxon9he"
+  inputs.files fileTree(dir: "${buildDir}/services/saxon-he/META-INF")
+  inputs.files fileTree(dir: "${buildDir}/classes/hec")
+  inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
+  inputs.files fileTree(dir: "${buildDir}/xerces")
+  inputs.files fileTree(dir: "${buildDir}/icu")
+  inputs.file  "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
+  outputs.file "${buildDir}/c/jars/hec/saxon-he-${saxonVersion}.jar"
+
+  archiveBaseName = "saxon-he-${saxonVersion}"
   destinationDirectory = file("${buildDir}/c/jars/hec")
   manifest {
     attributes "Project-Name": "Saxon-HE"
@@ -440,7 +478,15 @@ task graal_pec_jar(
   dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "compile_function_library"],
   description: "Build the PE jar file for SaxonC \"unjar_ICU4jJar\","
 ) {
-  archiveBaseName = "saxon9pe"
+  inputs.files fileTree(dir: "${buildDir}/services/saxon-pe/META-INF")
+  inputs.files fileTree(dir: "${buildDir}/classes/pec")
+  inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
+  inputs.files fileTree(dir: "${buildDir}/xerces")
+  inputs.files fileTree(dir: "${buildDir}/icu")
+  inputs.file  "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
+  outputs.file "${buildDir}/c/jars/pec/saxon-pe-${saxonVersion}.jar"
+
+  archiveBaseName = "saxon-pe-${saxonVersion}"
   destinationDirectory = file("${buildDir}/c/jars/pec")
   manifest {
     attributes "Project-Name": "Saxon-PE"
