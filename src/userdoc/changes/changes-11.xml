@@ -74,6 +74,8 @@
             to <code>StaticError</code> can generally be replaced with references to <code>XmlProcessingError</code>. The name
             <code>StaticError</code> had become misleading because its instances were in many cases dynamic errors.</p>
         
+        <p>New methods <code>firstItem()</code> and <code>lastItem()</code> have been added to <code>XdmStream</code>.</p>
+        
  
     </category>
 
@@ -87,6 +89,69 @@
         <code>Receiver</code>. The <code>ParseOptions</code> can be ignored if not required; they
         are relevant primarily in cases where the <code>ActiveSource</code> performs XML parsing.</p>
 
+    </category>
+    
+    <category name="Saxon.Api">
+        <div class="csonly">
+        <p>In Saxon-CS, the broad structure of the API remains unchanged from the older .NET product, 
+                including some features retained for legacy reasons, but the detail has been modernized and made
+                more consistent.</p>
+            
+            <p>The interface <code>XmlDestination</code> is renamed as <code>IDestination</code>, firstly to use the
+                standard naming convention for interfaces, and secondly to reflect the fact that the content sent to
+                an <code>IDestination</code> is not always XML.
+            </p>
+            
+            <p>The class <code>TextWriterDestination</code> is renamed as <code>XmlWriterDestination</code> to
+                better reflect its purpose and usage.</p>
+            
+            <p>The value of property <code>XdmNode.NodeKind</code> is now an <code>XdmNodeKind</code>, and the
+                corresponding <code>XmlNodeType</code> is obtained using the new <code>XdmNode.NodeType</code> property
+                (the need for both arises because there isn't an exact correspondence between node types in DOM and node
+                kinds in XDM.)</p>
+            
+            <p>The method <code>XdmItem.GetStringValue()</code> is replaced with a property <code>XdmItem.StringValue</code>.</p>
+            
+            <p>There have been some changes to the API for declaring collections.</p>
+            
+            <p>The classes <code>Saxon.Api.Predicate</code> and <code>Saxon.Api.IPredicate</code> have gone, 
+                replaced by use of <code>System.Predicate</code>. All the predicates obtained using the <code>Saxon.Api.Predicates</code> 
+                factory class (e.g. <code>Predicates.IsElement()</code>) remain available. 
+                It's now possible to use a lambda expression wherever a predicate was expected, 
+                e.g. as the argument to <code>Step.Where()</code> or <code>XdmNode.Children()</code>.
+            </p>
+            <p>It's no longer possible to combine predicates using <code>P.And(Q)</code> or <code>P.Or(Q)</code>. Instead you can do 
+                <code>Predicates.AllOf(P, Q, R, ...)</code> or <code>Predicates.AnyOf(P, Q, R, ...)</code>. 
+                Also it's no longer possible to define a subclass of <code>Saxon.Api.Predicate</code>, 
+                but there's not much of a use case for doing that anyway.
+            </p>
+            <p>The <code>BaseUri</code> property of <code>Saxon.Api.XPathCompiler</code> and <code>Saxon.Api.XQueryCompiler</code>
+                is now a <code>Uri</code> rather than a <code>string</code>, bringing these classes into line with
+                <code>Saxon.Api.XsltCompiler</code>.</p>
+            
+            <p>A number of callbacks have been changed from interfaces to delegates, allowing them to be implemented
+                more conveniently as lambda expressions. These include the <code>MessageListener</code>, the <code>ResultDocumentHandler</code>,
+                the <code>CollectionFinder</code>, the <code>ErrorReporter</code>, and the <code>XQueryResolver</code> (module resolver). 
+                The class <code>SimpleUriResolver</code> is an implementation of the .NET-defined interface
+                <code>XmlResolver</code> that allows the actual resolution logic to be written as a lambda expression, for example
+                <code>XmlResolver resolver = new SimpleUriResolver(uri => new WebClient().OpenRead(uri))</code>.</p>
+            
+            <p>A number of getter and setter methods (such as <code>ValidationFailure.GetLineNumber()</code>) have been changed
+                to properties: <code>ValidationFailure.LineNumber</code> in this case.</p>
+            
+            <p>The <code>Xslt30Compiler</code> class (and others????) no longer has an <code>ErrorList</code> property.
+                Replace <code>compiler.ErrorList = errorList;</code> by <code>compiler.ErrorReporter = errorList.Add;</code>.</p>
+            
+            <p>The <code>MessageListener</code> property of <code>XsltTransformer</code> and <code>Xslt30Transformer</code>
+                is now a delegate in the form <code>Consumer&lt;Message&gt;</code></p>
+            
+            <p>The <code>ValidationFailure</code> object which provides information about errors detected during schema
+                validation now delivers information about the error in the form of C# properties rather than Java-like 
+                methods: for example <code>ValidationFailure.LineNumber</code> replaces <code>ValidationFailure.GetLineNumber()</code>.
+            </p>
+            
+        </div>
+            
     </category>
     
     <category name="localization">
@@ -126,9 +191,9 @@
                 character.</li>
             <li><code>Twine24</code>: a string of arbitrary codepoints, held in an array with three bytes per
                 character.</li>
-            <li><code>Slice8</code>: a range of an array using one byte per character.</li>
-            <li><code>Slice16</code>: a range of an array using two bytes per character.</li>
-            <li><code>Slice24</code>: a range of an array using two bytes per character.</li>
+            <li><code>Slice8</code>: a sub-range of an array using one byte per character.</li>
+            <li><code>Slice16</code>: a sub-range of an array using two bytes per character.</li>
+            <li><code>Slice24</code>: a sub-range of an array using two bytes per character.</li>
             <li><code>BMPString</code>: a wrapper around a Java/C# string known to contain no surrogate pairs.</li>
             <li><code>StringView</code>: a wrapper around an arbitrary Java/C# string.</li>
             <li><code>ZenoString</code>: a composite string held as a list of segments, each of which is itself a <code>UnicodeString</code>.
@@ -149,7 +214,9 @@
         to a string (which is the same as the result of <code>getStringValue()</code>). To obtain the previous effect of the 
             <code>toString()</code> method, use the new <code>show()</code> method.</p>
         
-        <p></p>
+        <p class="javaonly">Unicode normalization of strings (for example in the <code>fn:normalize-unicode()</code> function)
+        now uses the JDK class <code>java.text.Normalizer</code> rather than code derived from the Unicode Consortium's implementation. 
+        This appears to be substantially faster.</p>
         
         <h2>Sequence and SequenceIterator</h2>
 
@@ -276,10 +343,17 @@
         alternative spellings such as <code>saxon:printStack</code> for <code>saxon:print-stack</code>,
         or <code>saxon:stringToBase64Binary</code> for <code>saxon:string-to-base64Binary</code>.</p>
         
-        <p>The functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> now accept
+        <p class="javaonly">On the Java platform, the functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> now accept
         any encoding supported by the Java VM.</p>
         
+        <p class="csonly">On the Saxon-CS platform, the functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> now accept
+            any encoding supported by the .Net method <code>Encoding.GetEncoding()</code>.</p>
+        
         <h2>New Extension Functions</h2>
+        
+        <p>The function <code>saxon:xquery()</code> allows dynamic evaluation of XQuery expressions:
+        it replaces the existing <code>saxon:compile-query()</code> and <code>saxon:query()</code>,
+        which are now obsolescent.</p>
         
         <p>The new function <code>saxon:unindexed()</code> returns the value of its argument unchanged,
         and a static call will normally be optimized away. The purpose of the function is to suppress
@@ -287,9 +361,8 @@
         would normally be optmized by building an index, but <code>saxon:unindexed(//x[@y=$z])</code>
         suppresses this optimization. This may be useful if it is known, for example, (a) that the
         expression will not be evaluated often enough to justify the cost of index construction, or (b)
-        that the sequence <code>//x</code> contains very few items, or (b)
-        that the predicate is likely to select a high proportion of the 
-        items in the filtered sequence.</p>
+        that the sequence <code>//x</code> contains very few items, or (c) that the predicate is likely 
+        to select a high proportion of the items in the filtered sequence.</p>
         
         <p>Added <code>saxon:slice()</code> based on proposed XPath 4.0 function fn:slice(). For example
         <code>slice(("a", "b", "c"), -1)</code> returns <code>"c"</code></p>
@@ -306,6 +379,15 @@
 
         <p>The undocumented and untested functions <code>saxon:pause-tracing</code> and <code>saxon:resume-tracing</code>
         have been dropped. (The underlying methods in the <code>Controller</code> class remain available if required).</p>
+ 
+        <p class="csonly">A number of extension functions in the Saxon namespace have not been carried forward to the Saxon-CS
+        product, either because they are obsolete, or because implementation is non-trivial. These include 
+            <code>saxon:compile-query</code>, <code>saxon:is-defaulted</code>, <code>saxon:key-map</code>, <code>saxon:last-modified</code>,
+        <code>saxon:parse-dateTime</code>, <code>saxon:send-mail</code>, <code>saxon:query</code>,
+            <code>saxon:unparsed-entities</code>.</p>
+        
+        <p class="csonly">Some EXSLT and EXPath function libraries are not implemented in Saxon-CS,
+        including the EXSLT date/time library and the EXPath archive library.</p>
  
         <h2>Extensions to Standard Functions</h2>
         
@@ -324,6 +406,8 @@
  
         <h2>XPath Syntax Extensions</h2>
         
+        <p><i>These extensions are all experimental, and may change as a result of community standardisation efforts.</i></p>
+        
         <p>The range expression <code>A to B</code> has been extended to allow <code>A by S to B</code>, for example
         <code>1 by 3 to 10</code> returns <code>(1, 4, 7, 10)</code>. The step may be negative: <code>10 by -1 to 6</code>
         returns <code>(10, 9, 8, 7, 6)</code>.</p>
@@ -339,22 +423,27 @@
  
         <h2>XSLT extensions</h2>
         
+        <p><i>These extensions are all experimental, and may change as a result of community standardisation efforts.</i></p>
+        
+        
         <p>Implemented <code>xsl:for-each-group break-when="expression"</code>. For example,
             <code>&lt;xsl:for-each-group break-when="sum($group!@length) + $next!@length) gt 30"</code>
            starts a new group based on a calculation applied to the current candidate group.</p>
         
-        <p>TODO: streamability.</p>
+        <p>TODO: documented where?</p>
+        
+        <p>In general, streamability of new constructs introduced beyond XSLT 3.0 has not been
+            addressed in the specification or in testing. Constructs that are handled purely
+            at compile time (such as the ternary operator <code>A ?? B !! C</code>) should
+            work without problems, but constructs requiring run-time support will generally
+        not be streamable.</p>
         
  
         
         <h2>XSD extensions</h2>
         
  
- 
-        <h2>SQL extensions</h2>
 
-        <p>It is no longer necessary, when establishing a SQL connection, to supply the name of the
-        JDBC Driver class.</p>
 
         <p>TODO: other changes - NDW??</p>
         
@@ -365,9 +454,12 @@
     
     </category>
     
-    <!--<category name="sql">
+    <category name="sql">
+        
+        <p>It is no longer necessary, when establishing a SQL connection, to supply the name of the
+            JDBC Driver class.</p>
   
-    </category>-->
+    </category>
     
     <category name="sourcedocs">
         
@@ -380,10 +472,13 @@
         
     </category>
     
-    <!--<category name="xquery-update">
+    <category name="xquery-update">
         
+       <p class="csonly">Code supporting XQuery Update is included in Saxon-CS, but it is largely untested. (The same was
+       true, but not acknowledged, in the old .NET product). Any user feedback indicating whether or not XQuery Update is required,
+       and whether or not it works, will be appreciated.</p>
   
-    </category>-->
+    </category>
     
     <!--<category name="xquery31">
         
