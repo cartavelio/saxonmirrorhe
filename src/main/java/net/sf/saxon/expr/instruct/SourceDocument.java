@@ -30,6 +30,7 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Non-streamable implementation of the xsl:source-document instruction
@@ -112,7 +113,7 @@ public class SourceDocument extends Instruction {
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         hrefOp.typeCheck(visitor, contextInfo);
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:stream/href", 0);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:stream/href", 0);
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
         hrefOp.setChildExpression(tc.staticTypeCheck(
                 hrefOp.getChildExpression(), SequenceType.SINGLE_STRING, role, visitor));

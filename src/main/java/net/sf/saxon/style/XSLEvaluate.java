@@ -34,6 +34,7 @@ import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Handler for xsl:evaluate elements in XSLT 3.0 stylesheet. <br>
@@ -216,25 +217,23 @@ public class XSLEvaluate extends StyleElement {
         try {
             ExpressionVisitor visitor = makeExpressionVisitor();
             TypeChecker tc = getConfiguration().getTypeChecker(false);
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:evaluate/xpath", 0);
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:evaluate/xpath", 0);
             xpath = tc.staticTypeCheck(xpath, SequenceType.SINGLE_STRING, role, visitor);
 
-            role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:evaluate/context-item", 0);
-            role.setErrorCode("XTTE3210");
+            role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:evaluate/context-item", 0, "XTTE3210");
             contextItem = tc.staticTypeCheck(contextItem, SequenceType.OPTIONAL_ITEM, role, visitor);
 
-            role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:evaluate/namespace-context", 0);
-            role.setErrorCode("XTTE3170");
+            role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:evaluate/namespace-context", 0, "XTTE3170");
             if (namespaceContext != null) {
                 namespaceContext = tc.staticTypeCheck(namespaceContext, SequenceType.SINGLE_NODE, role, visitor);
             }
 
-            role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:evaluate/with-params", 0);
-            role.setErrorCode("XTTE3170");
+            role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:evaluate/with-params", 0, "XTTE3170");
             withParams = tc.staticTypeCheck(withParams,
                                             SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE), role, visitor);
 
-            role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:evaluate/saxon:options", 0);
+            role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:evaluate/saxon:options", 0);
             options = tc.staticTypeCheck(options,
                                          SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE), role, visitor);
 

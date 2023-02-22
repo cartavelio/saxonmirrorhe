@@ -23,6 +23,8 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
+import java.util.function.Supplier;
+
 
 /**
  * A lookup expression is an expression of the form A?B. Here A must be a sequence of maps or arrays.
@@ -167,7 +169,7 @@ public class LookupExpression extends BinaryExpression {
         // Now check the second operand
 
         getRhs().typeCheck(visitor, contextInfo);
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 1);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 1);
         TypeChecker tc = config.getTypeChecker(false);
         SequenceType req = BuiltInAtomicType.ANY_ATOMIC.zeroOrMore();
         if (isArrayLookup) {

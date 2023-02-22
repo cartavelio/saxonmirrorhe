@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class MergeInstr extends Instruction {
 
@@ -304,7 +305,8 @@ public class MergeInstr extends Instruction {
             } else if (mergeSource.getForEachSource() != null) {
                 mergeSource.forEachStreamOp.typeCheck(visitor, contextInfo);
 
-                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:merge/for-each-source", 0);
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:merge/for-each-source", 0);
                 mergeSource.setForEachStream(tc.staticTypeCheck(
                         mergeSource.getForEachSource(), SequenceType.STRING_SEQUENCE, role, visitor));
 
@@ -323,9 +325,8 @@ public class MergeInstr extends Instruction {
                     Expression sortKey = skd.getSortKey();
                     sortKey = sortKey.typeCheck(visitor, cit);
                     if (sortKey != null) {
-                        RoleDiagnostic role =
-                                new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:merge-key/select", 0);
-                        role.setErrorCode("XTTE1020");
+                        Supplier<RoleDiagnostic> role = () ->
+                                new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:merge-key/select", 0, "XTTE1020");
                         sortKey = CardinalityChecker.makeCardinalityChecker(sortKey, StaticProperty.ALLOWS_ZERO_OR_ONE, role);
 
                         skd.setSortKey(sortKey, true);

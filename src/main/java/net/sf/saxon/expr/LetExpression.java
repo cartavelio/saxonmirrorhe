@@ -23,6 +23,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 
 /**
@@ -144,7 +145,8 @@ public class LetExpression extends Assignation implements TailCallReturner {
 
         getSequenceOp().typeCheck(visitor, contextInfo);
 
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
+        Supplier<RoleDiagnostic> role =
+                () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
         //role.setSourceLocator(this);
         setSequence(TypeChecker.strictTypeCheck(
                 getSequence(), requiredType, role, visitor.getStaticContext()));
@@ -180,7 +182,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
      *
      * @param req                 the required type
      * @param backwardsCompatible true if backwards compatibility mode applies
-     * @param role                the role of the expression in relation to the required type
+     * @param roleSupplier                the role of the expression in relation to the required type
      * @param visitor             an expression visitor
      * @return the expression after type checking (perhaps augmented with dynamic type checking code)
      * @throws XPathException if failures occur, for example if the static type of one branch of the conditional
@@ -190,10 +192,10 @@ public class LetExpression extends Assignation implements TailCallReturner {
     @Override
     public Expression staticTypeCheck(SequenceType req,
                                       boolean backwardsCompatible,
-                                      RoleDiagnostic role, ExpressionVisitor visitor)
+                                      Supplier<RoleDiagnostic> roleSupplier, ExpressionVisitor visitor)
             throws XPathException {
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(backwardsCompatible);
-        setAction(tc.staticTypeCheck(getAction(), req, role, visitor));
+        setAction(tc.staticTypeCheck(getAction(), req, roleSupplier, visitor));
         return this;
     }
 

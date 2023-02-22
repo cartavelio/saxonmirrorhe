@@ -43,6 +43,7 @@ import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Handler for xsl:accumulator elements in a stylesheet (XSLT 3.0).
@@ -179,7 +180,8 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
             Expression init = accumulator.getInitialValueExpression();
             ExpressionVisitor visitor = ExpressionVisitor.make(getStaticContext());
             init = init.typeCheck(visitor, config.getDefaultContextItemStaticInfo());
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
             init = config.getTypeChecker(false).staticTypeCheck(init, accumulator.getType(), role, visitor);
             init = init.optimize(visitor, config.getDefaultContextItemStaticInfo());
             SlotManager stackFrameMap = config.makeSlotManager();
@@ -199,7 +201,8 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
             Expression newValueExp = rule.getNewValueExpression(compilation, decl);
             ExpressionVisitor visitor = ExpressionVisitor.make(getStaticContext());
             newValueExp = newValueExp.typeCheck(visitor, config.makeContextItemStaticInfo(pattern.getItemType(), false));
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
             newValueExp = config.getTypeChecker(false).staticTypeCheck(newValueExp, accumulator.getType(), role, visitor);
             newValueExp = newValueExp.optimize(visitor, getConfiguration().makeContextItemStaticInfo(pattern.getItemType(), false));
             slotManager.allocateSlotNumber(new StructuredQName("", "", "value"));

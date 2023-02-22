@@ -28,6 +28,7 @@ import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * This class implements the rules for options parameters, as used in functions such as parse-json, serialize,
@@ -139,8 +140,8 @@ public class OptionsParameter {
                         }
                     }
                     if (!ok) {
-                        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.OPTION, nominalKey, 0);
-                        role.setErrorCode("XPTY0004");
+                        Supplier<RoleDiagnostic> role =
+                                () -> new RoleDiagnostic(RoleDiagnostic.OPTION, nominalKey, 0, "XPTY0004");
                         actual = th.applyFunctionConversionRules(
                                 actual, required, role, Loc.NONE);
                     }

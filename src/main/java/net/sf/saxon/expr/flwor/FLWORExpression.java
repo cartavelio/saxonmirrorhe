@@ -20,6 +20,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * This class represents a FLWOR expression, evaluated using tuple streams
@@ -207,7 +208,7 @@ public class FLWORExpression extends Expression {
      *
      * @param req                 the required type
      * @param backwardsCompatible true if backwards compatibility mode applies
-     * @param role                the role of the expression in relation to the required type
+     * @param roleSupplier                the role of the expression in relation to the required type
      * @param visitor             an expression visitor
      * @return the expression after type checking (perhaps augmented with dynamic type checking code)
      * @throws XPathException if failures occur, for example if the static type of one branch of the conditional
@@ -217,12 +218,12 @@ public class FLWORExpression extends Expression {
     @Override
     public Expression staticTypeCheck(SequenceType req,
                                       boolean backwardsCompatible,
-                                      RoleDiagnostic role, ExpressionVisitor visitor)
+                                      Supplier<RoleDiagnostic> roleSupplier, ExpressionVisitor visitor)
             throws XPathException {
         // only called if implementsStaticTypeCheck() returns true
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(backwardsCompatible);
         returnClauseOp.setChildExpression(
-                tc.staticTypeCheck(getReturnClause(), req, role, visitor));
+                tc.staticTypeCheck(getReturnClause(), req, roleSupplier, visitor));
         return this;
     }
 

@@ -22,6 +22,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.*;
 
+import java.util.function.Supplier;
+
 /**
  * A namespace constructor instruction. (xsl:namespace in XSLT 2.0, or namespace{}{} in XQuery 1.1)
  */
@@ -78,7 +80,7 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
         StaticContext env = visitor.getStaticContext();
         nameOp.typeCheck(visitor, contextItemType);
 
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "namespace/name", 0);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "namespace/name", 0);
         // See bug 2110. XQuery does not use the function conversion rules here, and disallows xs:anyURI.
         // In XSLT the name is an AVT so we automatically get a string; in XQuery we'll use the standard
         // mechanism to get an atomic value, and then check the type "by hand" at run time.

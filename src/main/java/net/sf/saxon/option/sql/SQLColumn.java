@@ -19,6 +19,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
+import java.util.function.Supplier;
+
 
 /**
  * An sql:column element in the stylesheet.
@@ -90,11 +92,10 @@ public class SQLColumn extends StyleElement {
     public void validate(ComponentDeclaration decl) throws XPathException {
         select = typeCheck("select", select);
         try {
-            RoleDiagnostic role =
+            Supplier<RoleDiagnostic> role = () ->
                     new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "sql:column/select", 0);
             select = getConfiguration().getTypeChecker(false).staticTypeCheck(select,
-                    SequenceType.SINGLE_ATOMIC,
-                                                                              role, makeExpressionVisitor());
+                    SequenceType.SINGLE_ATOMIC, role, makeExpressionVisitor());
 
         } catch (XPathException err) {
             compileError(err);

@@ -22,6 +22,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
+import java.util.function.Supplier;
+
 /**
  * Arithmetic Expression: an expression using one of the operators
  * plus, minus, multiply, div, idiv, mod, in backwards
@@ -73,10 +75,10 @@ public class ArithmeticExpression10 extends ArithmeticExpression implements Call
         SequenceType atomicType = SequenceType.OPTIONAL_ATOMIC;
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(true);
 
-        RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
+        Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
         setLhsExpression(tc.staticTypeCheck(getLhsExpression(), atomicType, role0, visitor));
 
-        RoleDiagnostic role1 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
+        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
 
         final ItemType itemType0 = getLhsExpression().getItemType();

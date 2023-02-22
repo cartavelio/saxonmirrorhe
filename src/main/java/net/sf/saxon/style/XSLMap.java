@@ -28,6 +28,8 @@ import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
+import java.util.function.Supplier;
+
 /**
  * Handler for xsl:map instructions in an XSLT 3.0 stylesheet. <br>
  */
@@ -100,8 +102,8 @@ public class XSLMap extends StyleElement {
         select = select.simplify();
         // Custom type-checking; the checking performed by map:merge() gives poor diagnostics
         TypeChecker tc = getConfiguration().getTypeChecker(false);
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "xsl:map sequence constructor", 0);
-        role.setErrorCode("XTTE3375");
+        Supplier<RoleDiagnostic> role =
+                () -> new RoleDiagnostic(RoleDiagnostic.MISC, "xsl:map sequence constructor", 0, "XTTE3375");
         select = tc.staticTypeCheck(
                 select,
                 SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.ALLOWS_ZERO_OR_MORE),

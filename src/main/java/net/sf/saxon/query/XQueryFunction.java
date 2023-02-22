@@ -23,6 +23,7 @@ import net.sf.saxon.value.SequenceType;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * A user-defined function in an XQuery module
@@ -369,9 +370,8 @@ public class XQueryFunction implements Declaration, Location {
                     //body = config.getOptimizer().promoteExpressionsToGlobal(body, visitor);
 
                     //body.setContainer(this);
-                    RoleDiagnostic role =
+                    Supplier<RoleDiagnostic> role = () ->
                             new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, functionName.getDisplayName(), 0);
-                    //role.setSourceLocator(this);
                     body = config.getTypeChecker(false).staticTypeCheck(body, resultType, role, visitor);
 
                 } catch (XPathException e) {

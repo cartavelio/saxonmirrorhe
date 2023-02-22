@@ -34,6 +34,7 @@ import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * An xsl:template element in the style sheet.
@@ -702,9 +703,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         if (visibility != Visibility.ABSTRACT) {
             try {
                 if (requiredType != null && requiredType != SequenceType.ANY_SEQUENCE) {
-                    RoleDiagnostic role =
-                            new RoleDiagnostic(RoleDiagnostic.TEMPLATE_RESULT, diagnosticId, 0);
-                    role.setErrorCode("XTTE0505");
+                    Supplier<RoleDiagnostic> role = () ->
+                            new RoleDiagnostic(RoleDiagnostic.TEMPLATE_RESULT, diagnosticId, 0, "XTTE0505");
                     body = config.getTypeChecker(false).staticTypeCheck(body, requiredType, role, makeExpressionVisitor());
                 }
             } catch (XPathException err) {

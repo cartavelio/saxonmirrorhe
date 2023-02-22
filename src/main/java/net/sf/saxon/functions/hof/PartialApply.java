@@ -23,6 +23,7 @@ import net.sf.saxon.value.SequenceType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * This expression class implements the operation of currying (or performing partial application) of a function.
@@ -91,7 +92,9 @@ public class PartialApply extends Expression {
             if (op != null) {
                 Expression arg = op.getChildExpression();
                 if (baseType instanceof SpecificFunctionType && i < ((SpecificFunctionType) baseType).getArity()) {
-                    RoleDiagnostic argRole = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "saxon:call", i);
+                    final int pos = i;
+                    Supplier<RoleDiagnostic> argRole =
+                            () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "saxon:call", pos);
                     SequenceType requiredArgType = ((SpecificFunctionType) baseType).getArgumentTypes()[i];
                     argTypes[i] = requiredArgType;
                     Expression a3 = tc.staticTypeCheck(
@@ -109,7 +112,8 @@ public class PartialApply extends Expression {
                         (baseType instanceof AnyFunctionType) ? ((AnyFunctionType) baseType).getResultType() : SequenceType.ANY_SEQUENCE),
                         StaticProperty.EXACTLY_ONE);
 
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "saxon:call", 0);
+        Supplier<RoleDiagnostic> role =
+                () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "saxon:call", 0);
         setBaseExpression(tc.staticTypeCheck(getBaseExpression(), requiredFunctionType, role, visitor));
         return this;
     }

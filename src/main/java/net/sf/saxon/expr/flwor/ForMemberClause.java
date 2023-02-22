@@ -17,6 +17,7 @@ import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import static net.sf.saxon.expr.flwor.Clause.ClauseName.FOR_MEMBER;
 
@@ -54,14 +55,16 @@ public class ForMemberClause extends ForClause {
     public void typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         SequenceType decl = rangeVariable.getRequiredType();
         if (allowsEmpty && !Cardinality.allowsZero(decl.getCardinality())) {
-            RoleDiagnostic emptyRole = new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
+            Supplier<RoleDiagnostic> emptyRole =
+                    () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
             Expression checker =
                     CardinalityChecker.makeCardinalityChecker(
                             getSequence(), StaticProperty.ALLOWS_ONE_OR_MORE, emptyRole);
             setSequence(checker);
         }
         SequenceType sequenceType = SequenceType.makeSequenceType(new ArrayItemType(decl), StaticProperty.EXACTLY_ONE);
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FOR_MEMBER, rangeVariable.getVariableQName().getDisplayName(), 0);
+        Supplier<RoleDiagnostic> role =
+                () -> new RoleDiagnostic(RoleDiagnostic.FOR_MEMBER, rangeVariable.getVariableQName().getDisplayName(), 0);
         setSequence(
                 TypeChecker.strictTypeCheck(
                         getSequence(), sequenceType, role, visitor.getStaticContext()));

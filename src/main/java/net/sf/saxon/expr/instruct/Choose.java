@@ -29,6 +29,7 @@ import net.sf.saxon.value.SequenceType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 
 /**
@@ -460,7 +461,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
      *
      * @param req                 the required type
      * @param backwardsCompatible true if backwards compatibility mode applies
-     * @param role                the role of the expression in relation to the required type
+     * @param roleSupplier                the role of the expression in relation to the required type
      * @param visitor             an expression visitor
      * @return the expression after type checking (perhaps augmented with dynamic type checking code)
      * @throws XPathException if failures occur, for example if the static type of one branch of the conditional
@@ -470,13 +471,13 @@ public class Choose extends Instruction implements ConditionalInstruction {
     @Override
     public Expression staticTypeCheck(SequenceType req,
                                       boolean backwardsCompatible,
-                                      RoleDiagnostic role, ExpressionVisitor visitor)
+                                      Supplier<RoleDiagnostic> roleSupplier, ExpressionVisitor visitor)
             throws XPathException {
         int count = size();
         TypeChecker tc = getConfiguration().getTypeChecker(backwardsCompatible);
         for (int i = 0; i < count; i++) {
             try {
-                setAction(i, tc.staticTypeCheck(getAction(i), req, role, visitor));
+                setAction(i, tc.staticTypeCheck(getAction(i), req, roleSupplier, visitor));
             } catch (XPathException err) {
                 if (err.isStaticError()) {
                     throw err;
@@ -502,6 +503,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
             }
             c[count] = Literal.makeLiteral(BooleanValue.TRUE, this);
             String cond = count == 1 ? "The condition is not" : "None of the conditions is";
+            RoleDiagnostic role = roleSupplier.get();
             String message =
                     "Conditional expression: " + cond + " satisfied, so an empty sequence is returned, " +
                             "but this is not allowed as the " + role.getMessage();

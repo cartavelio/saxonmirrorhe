@@ -18,6 +18,8 @@ import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 
 /**
  * IdentityComparison: a boolean expression that compares two nodes
@@ -86,13 +88,13 @@ public final class IdentityComparison extends BinaryExpression {
             }
         }
 
-        RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
+        Supplier<RoleDiagnostic> role0 =
+                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-        //role0.setSourceLocator(this);
         setLhsExpression(tc.staticTypeCheck(getLhsExpression(), SequenceType.OPTIONAL_NODE, role0, visitor));
 
-        RoleDiagnostic role1 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
-        //role1.setSourceLocator(this);
+        Supplier<RoleDiagnostic> role1 =
+                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), SequenceType.OPTIONAL_NODE, role1, visitor));
 
         if (!Cardinality.allowsZero(getLhsExpression().getCardinality()) && !Cardinality.allowsZero(getRhsExpression().getCardinality())) {

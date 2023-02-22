@@ -35,6 +35,7 @@ import javax.xml.transform.dom.DOMSource;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * An <code>XQueryEvaluator</code> represents a compiled and loaded query ready for execution.
@@ -730,8 +731,9 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
                 net.sf.saxon.value.SequenceType type = fn.getParameterDefinitions()[i].getRequiredType();
                 GroundedValue gVal = arguments[i].getUnderlyingValue();
                 if (!type.matches(gVal, th)) {
-                    RoleDiagnostic role = new RoleDiagnostic(
-                            RoleDiagnostic.FUNCTION, function.getStructuredQName().getDisplayName(), i);
+                    final int pos = i;
+                    Supplier<RoleDiagnostic> role =
+                            () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, function.getStructuredQName().getDisplayName(), pos);
                     gVal = th.applyFunctionConversionRules(gVal, type, role, Loc.NONE);
                 }
                 vr[i] = gVal;

@@ -27,6 +27,7 @@ import net.sf.saxon.value.SequenceType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.function.Supplier;
 
 
 /**
@@ -191,9 +192,9 @@ public class SlashExpression extends BinaryExpression
 
         Configuration config = visitor.getConfiguration();
         TypeChecker tc = config.getTypeChecker(false);
-        RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "/", 0);
-        role0.setErrorCode("XPTY0019");
-        setStart(tc.staticTypeCheck(getStart(), SequenceType.NODE_SEQUENCE, role0, visitor));
+        Supplier<RoleDiagnostic> roleSupplier =
+                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "/", 0, "XPTY0019");
+        setStart(tc.staticTypeCheck(getStart(), SequenceType.NODE_SEQUENCE, roleSupplier, visitor));
 
         // Now check the second operand
 

@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 /**
@@ -1854,7 +1855,8 @@ public class XQueryParser extends XPathParser {
             nextToken();
             Expression exp = parseExprSingle();
             exp.setRetainedStaticContext(env.makeRetainedStaticContext());
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "context item declaration", 0);
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "context item declaration", 0);
             exp = CardinalityChecker.makeCardinalityChecker(exp, StaticProperty.EXACTLY_ONE, role);
             ExpressionVisitor visitor = ExpressionVisitor.make(env);
             exp = exp.simplify();
@@ -1874,7 +1876,8 @@ public class XQueryParser extends XPathParser {
                 t.setState(Tokenizer.DEFAULT_STATE);
                 nextToken();
                 Expression exp = parseExprSingle();
-                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "context item declaration", 0);
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "context item declaration", 0);
                 exp = CardinalityChecker.makeCardinalityChecker(exp, StaticProperty.EXACTLY_ONE, role);
                 exp.setRetainedStaticContext(env.makeRetainedStaticContext());
                 req.setDefaultValue(exp);
@@ -2642,7 +2645,8 @@ public class XQueryParser extends XPathParser {
 
                 LocalVariableBinding v = new LocalVariableBinding(varQName, type);
                 Expression value = parseExprSingle();
-                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "grouping key", 0);
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.MISC, "grouping key", 0);
                 Expression atomizedValue = Atomizer.makeAtomizer(value, role);
                 letClause.initSequence(flwor, atomizedValue);
                 letClause.setRangeVariable(v);

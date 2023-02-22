@@ -18,6 +18,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 import static net.sf.saxon.expr.flwor.Clause.ClauseName.ORDER_BY;
 
 /**
@@ -141,8 +143,12 @@ public class OrderByClause extends Clause {
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
         for (SortKeyDefinition skd : sortKeys) {
             Expression sortKey = skd.getSortKey();
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.ORDER_BY, "", i);
-            role.setErrorCode("XPTY0004");
+            final int pos = i;
+            Supplier<RoleDiagnostic> role = () -> {
+                RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.ORDER_BY, "", pos);
+                role0.setErrorCode("XPTY0004");
+                return role0;
+            };
             sortKey = tc.staticTypeCheck(sortKey, SequenceType.OPTIONAL_ATOMIC, role, visitor);
             skd.setSortKey(sortKey, false);
             skd.typeCheck(visitor, contextInfo);

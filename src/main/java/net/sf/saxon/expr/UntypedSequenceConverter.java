@@ -176,7 +176,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
         UntypedSequenceConverter atomicConverter = new UntypedSequenceConverter(getBaseExpression().copy(rebindings), getRequiredItemType());
         ExpressionTool.copyLocationInfo(this, atomicConverter);
         atomicConverter.setConverter(converter);
-        atomicConverter.setRoleDiagnostic(getRoleDiagnostic());
+        atomicConverter.setRoleDiagnostic(getRoleSupplier());
         return atomicConverter;
     }
 
@@ -257,8 +257,8 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("cvUntyped", this);
         destination.emitAttribute("to", AlphaCode.fromItemType(getRequiredItemType()));
-        if (getRoleDiagnostic() != null) {
-            destination.emitAttribute("diag", getRoleDiagnostic().save());
+        if (getRoleSupplier() != null) {
+            destination.emitAttribute("diag", getRoleSupplier().get().save());
         }
         getBaseExpression().export(destination);
         destination.endElement();

@@ -66,6 +66,7 @@ import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * This class reads the XML exported form of a package and reconstructs the package object in memory.
@@ -1660,7 +1661,8 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("atomSing", (loader, element) -> {
             Expression body = loader.getFirstChildExpression(element);
-            RoleDiagnostic role = RoleDiagnostic.reconstruct(element.getAttributeValue("", "diag"));
+            String savedRole = element.getAttributeValue("", "diag");
+            Supplier<RoleDiagnostic> role = () -> RoleDiagnostic.reconstruct(savedRole);
             String cardAtt = element.getAttributeValue("", "card");
             boolean allowEmpty = "?".equals(cardAtt);
             return new SingletonAtomizer(body, role, allowEmpty);
@@ -1841,7 +1843,8 @@ public class PackageLoaderHE implements IPackageLoader {
                 default:
                     throw new IllegalStateException("Occurrence indicator: '" + cardAtt + "'");
             }
-            RoleDiagnostic role = RoleDiagnostic.reconstruct(element.getAttributeValue("", "diag"));
+            String savedRole = element.getAttributeValue("", "diag");
+            Supplier<RoleDiagnostic> role = () -> RoleDiagnostic.reconstruct(savedRole);
             return CardinalityChecker.makeCardinalityChecker(body, c, role);
         });
 
@@ -1983,7 +1986,7 @@ public class PackageLoaderHE implements IPackageLoader {
             }
             String diag = element.getAttributeValue("", "diag");
             if (diag != null) {
-                asc.setRoleDiagnostic(RoleDiagnostic.reconstruct(diag));
+                asc.setRoleDiagnostic(() -> RoleDiagnostic.reconstruct(diag));
             }
             return asc;
         });
@@ -2071,7 +2074,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 UntypedSequenceConverter cv = UntypedSequenceConverter.makeUntypedSequenceConverter(loader.config, body, (PlainType) toType);
                 String diag = element.getAttributeValue("", "diag");
                 if (diag != null) {
-                    cv.setRoleDiagnostic(RoleDiagnostic.reconstruct(diag));
+                    cv.setRoleDiagnostic(() -> RoleDiagnostic.reconstruct(diag));
                 }
                 return cv;
             }
@@ -2080,7 +2083,8 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("data", (loader, element) -> {
             Expression body = loader.getFirstChildExpression(element);
             String diag = element.getAttributeValue("", "diag");
-            return new Atomizer(body, diag==null ? null : RoleDiagnostic.reconstruct(diag));
+            Supplier<RoleDiagnostic> role = () -> RoleDiagnostic.reconstruct(diag);
+            return new Atomizer(body, diag==null ? null : role);
         });
 
         eMap.put("dbl", (loader, element) -> {
@@ -2330,9 +2334,9 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("fnCoercer", (loader, element) -> {
             SpecificFunctionType type = (SpecificFunctionType) loader.parseAlphaCode(element, "to").getPrimaryType();
-            RoleDiagnostic role = RoleDiagnostic.reconstruct(element.getAttributeValue("", "diag"));
+            final String diag = element.getAttributeValue("", "diag");
             Expression arg = loader.getFirstChildExpression(element);
-            return new FunctionSequenceCoercer(arg, type, role);
+            return new FunctionSequenceCoercer(arg, type, () -> RoleDiagnostic.reconstruct(diag));
         });
 
         eMap.put("fnRef", (loader, element) -> {
@@ -3214,7 +3218,8 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("treat", (loader, element) -> {
             Expression body = loader.getFirstChildExpression(element);
             ItemType type = loader.parseAlphaCodeForItemType(element, "as");
-            RoleDiagnostic role = RoleDiagnostic.reconstruct(element.getAttributeValue("", "diag"));
+            String savedRole = element.getAttributeValue("", "diag");
+            Supplier<RoleDiagnostic> role = () -> RoleDiagnostic.reconstruct(savedRole);
             return new ItemChecker(body, type, role);
         });
 

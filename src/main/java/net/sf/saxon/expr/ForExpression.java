@@ -24,6 +24,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * A ForExpression maps an expression over a sequence.
@@ -79,7 +80,8 @@ public class ForExpression extends Assignation {
             SequenceType decl = requiredType;
             SequenceType sequenceType = SequenceType.makeSequenceType(
                     decl.getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE);
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, variableName.getDisplayName(), 0);
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, variableName.getDisplayName(), 0);
             setSequence(TypeChecker.strictTypeCheck(
                     getSequence(), sequenceType, role, visitor.getStaticContext()));
             ItemType actualItemType = getSequence().getItemType();

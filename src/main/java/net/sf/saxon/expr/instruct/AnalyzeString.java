@@ -25,6 +25,7 @@ import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * An xsl:analyze-string element in the stylesheet. New at XSLT 2.0
@@ -179,15 +180,15 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
 
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
 
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "analyze-string/select", 0);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "analyze-string/select", 0);
         SequenceType required = SequenceType.OPTIONAL_STRING;
         // see bug 7976
         setSelect(tc.staticTypeCheck(getSelect(), required, role, visitor));
 
-        role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "analyze-string/regex", 0);
+        role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "analyze-string/regex", 0);
         setRegex(tc.staticTypeCheck(getRegex(), SequenceType.SINGLE_STRING, role, visitor));
 
-        role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "analyze-string/flags", 0);
+        role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "analyze-string/flags", 0);
         setFlags(tc.staticTypeCheck(getFlags(), SequenceType.SINGLE_STRING, role, visitor));
 
         return this;

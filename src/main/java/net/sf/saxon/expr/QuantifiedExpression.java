@@ -21,6 +21,8 @@ import net.sf.saxon.type.UType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * A QuantifiedExpression tests whether some/all items in a sequence satisfy
  * some condition.
@@ -103,8 +105,8 @@ public class QuantifiedExpression extends Assignation {
         }
         SequenceType sequenceType = SequenceType.makeSequenceType(decl.getPrimaryType(),
                 StaticProperty.ALLOWS_ZERO_OR_MORE);
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
-        //role.setSourceLocator(this);
+        Supplier<RoleDiagnostic> role =
+                () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
         setSequence(TypeChecker.strictTypeCheck(
                 getSequence(), sequenceType, role, visitor.getStaticContext()));
         ItemType actualItemType = getSequence().getItemType();

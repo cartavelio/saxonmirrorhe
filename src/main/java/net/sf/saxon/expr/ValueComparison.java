@@ -19,6 +19,8 @@ import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * ValueComparison: a boolean expression that compares two atomic values
  * for equals, not-equals, greater-than or less-than. Implements the operators
@@ -159,10 +161,10 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         final SequenceType optionalAtomic = SequenceType.OPTIONAL_ATOMIC;
         TypeChecker tc = config.getTypeChecker(false);
 
-        RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
+        Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
         setLhsExpression(tc.staticTypeCheck(getLhsExpression(), optionalAtomic, role0, visitor));
 
-        RoleDiagnostic role1 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
+        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), optionalAtomic, role1, visitor));
 
         PlainType t0 = getLhsExpression().getItemType().getAtomizedItemType();

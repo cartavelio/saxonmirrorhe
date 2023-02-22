@@ -12,12 +12,15 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.function.Supplier;
 
 
 /**
@@ -101,7 +104,8 @@ public class GlobalParameterSet {
 
         if (requiredType != null) {
             if (convert) {
-                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, qName.getDisplayName(), -1);
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, qName.getDisplayName(), -1);
                 Configuration config = context.getConfiguration();
                 val = config.getTypeHierarchy().applyFunctionConversionRules(
                         val, requiredType, role, Loc.NONE);

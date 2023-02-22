@@ -15,7 +15,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AxisIterator;
-
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.z.IntHashSet;
@@ -23,6 +22,7 @@ import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 
 /**
@@ -147,8 +147,8 @@ public final class AxisExpression extends Expression {
                 }
                 ContextItemExpression exp = new ContextItemExpression();
                 ExpressionTool.copyLocationInfo(this, exp);
-                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.AXIS_STEP, "", axis);
-                role.setErrorCode("XPTY0020");
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.AXIS_STEP, "", axis, "XPTY0020");
                 ItemChecker checker = new ItemChecker(exp, AnyNodeTest.getInstance(), role);
                 ExpressionTool.copyLocationInfo(this, checker);
                 SimpleStepExpression step = new SimpleStepExpression(checker, thisExp);

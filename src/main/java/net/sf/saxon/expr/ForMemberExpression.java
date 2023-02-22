@@ -21,6 +21,8 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.IntegerValue;
 
+import java.util.function.Supplier;
+
 /**
  * A ForMemberExpression maps an expression over the members of an array. This is a Saxon
  * extension introduced in Saxon 10.0. The range variable is bound to each member of the
@@ -66,7 +68,7 @@ public class ForMemberExpression extends Assignation {
         // which in turn is required when type-checking the action part.
 
         getSequenceOp().typeCheck(visitor, contextInfo);
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "'in' clause of for-member", 0);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.MISC, "'in' clause of for-member", 0);
         Expression operand = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(
                 getSequence(), ArrayItemType.SINGLE_ARRAY,
                 role, visitor);

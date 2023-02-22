@@ -36,6 +36,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.function.Supplier;
 
 
 /**
@@ -387,8 +388,8 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         typeCheckChildren(visitor, contextInfo);
         if (isDocumentOrElementRequired()) {
             // this implies the expression is actually an XQuery validate{} expression, hence the error messages
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.TYPE_OP, "validate", 0);
-            role.setErrorCode("XQTY0030");
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.TYPE_OP, "validate", 0, "XQTY0030");
             Configuration config = visitor.getConfiguration();
             setSelect(config.getTypeChecker(false).staticTypeCheck(
                     getSelect(), SequenceType.SINGLE_NODE, role, visitor));

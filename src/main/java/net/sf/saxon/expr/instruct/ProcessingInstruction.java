@@ -20,6 +20,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.*;
 
+import java.util.function.Supplier;
+
 
 /**
  * An xsl:processing-instruction element in the stylesheet, or a processing-instruction
@@ -98,7 +100,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
         StaticContext env = visitor.getStaticContext();
         nameOp.typeCheck(visitor, contextItemType);
 
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "processing-instruction/name", 0);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "processing-instruction/name", 0);
         // See bug 2110. XQuery does not use the function conversion rules here, and disallows xs:anyURI.
         // In XSLT the name is an AVT so we automatically get a string; in XQuery we'll use the standard
         // mechanism to get an atomic value, and then check the type "by hand" at run time.

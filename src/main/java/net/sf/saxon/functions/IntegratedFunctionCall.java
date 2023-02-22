@@ -24,6 +24,8 @@ import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * Expression representing a call to a user-written extension
  * function implemented as a subtype of {@link ExtensionFunctionCall}
@@ -106,12 +108,15 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
         SequenceType[] actualArgumentTypes = new SequenceType[args];
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
         for (int i = 0; i < args; i++) {
+            final int pos = i;
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), pos);
             setArg(i, tc.staticTypeCheck(
                     getArg(i),
                     i < declaredArgumentTypes.length ?
                             declaredArgumentTypes[i] :
                             declaredArgumentTypes[declaredArgumentTypes.length - 1],
-                    new RoleDiagnostic(RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), i),
+                    role,
                     visitor));
 
             actualArgumentTypes[i] = SequenceType.makeSequenceType(
@@ -285,7 +290,8 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
         for (int i = 0; i < argValues.length; i++) {
             argValues[i] = SequenceTool.toLazySequence(getArg(i).iterate(context));
         }
-        final RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, getFunctionName().getDisplayName(), 0);
+        final Supplier<RoleDiagnostic> role =
+                () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, getFunctionName().getDisplayName(), 0);
         final Configuration config = context.getConfiguration();
         final TypeHierarchy th = config.getTypeHierarchy();
 
@@ -305,7 +311,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
             if (type != AnyItemType.getInstance()) {
                 result = new ItemMappingIterator(result, ItemMapper.of(item -> {
                      if (!type.matches(item, th)) {
-                         String msg = role.composeErrorMessage(type, item, th);
+                         String msg = role.get().composeErrorMessage(type, item, th);
                          XPathException err = new XPathException(msg, "XPTY0004");
                          err.setLocation(getLocation());
                          throw err;

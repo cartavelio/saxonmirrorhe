@@ -40,6 +40,7 @@ import net.sf.saxon.value.*;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 
 /**
@@ -442,7 +443,8 @@ public final class EvaluateInstr extends Expression {
             // Type check, and allocate slots for variables
 
             expr.setRetainedStaticContext(env.makeRetainedStaticContext());
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.EVALUATE_RESULT, exprText, 0);
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.EVALUATE_RESULT, exprText, 0);
             ExpressionVisitor visitor = ExpressionVisitor.make(env);
             TypeChecker tc = config.getTypeChecker(false);
             expr = tc.staticTypeCheck(expr, requiredType, role, visitor);

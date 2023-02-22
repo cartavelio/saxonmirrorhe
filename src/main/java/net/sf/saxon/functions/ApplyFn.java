@@ -25,6 +25,7 @@ import net.sf.saxon.value.SequenceType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 /**
  * This class implements the function fn:apply(), which is a standard function in XQuery 3.1.
@@ -106,10 +107,12 @@ public class ApplyFn extends SystemFunction  {
         // Use custom diagnostics for type errors on the argument of the call (bug 4772)
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(visitor.getStaticContext().isInBackwardsCompatibleMode());
         if (fnSet == MapFunctionSet.getInstance()) {
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "key value supplied when calling a map as a function", 0);
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.MISC, "key value supplied when calling a map as a function", 0);
             ((SystemFunctionCall) getter).setArg(1, tc.staticTypeCheck(key, SequenceType.SINGLE_ATOMIC, role, visitor));
         } else {
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "subscript supplied when calling an array as a function", 0);
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.MISC, "subscript supplied when calling an array as a function", 0);
             ((SystemFunctionCall) getter).setArg(1, tc.staticTypeCheck(key, SequenceType.SINGLE_INTEGER, role, visitor));
         }
         return getter.typeCheck(visitor, contextInfo);
@@ -153,11 +156,12 @@ public class ApplyFn extends SystemFunction  {
         } else {
             for (int i = 0; i < argArray.length; i++) {
                 SequenceType expected = fit.getArgumentTypes()[i];
-                RoleDiagnostic role;
+                Supplier<RoleDiagnostic> role;
                 if (isDynamicFunctionCall()) {
-                    role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, dynamicFunctionCall.toString(), 0);
+                    role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, dynamicFunctionCall.toString(), 0);
                 } else {
-                    role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "fn:apply", i + 1);
+                    final int pos = i;
+                    role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "fn:apply", pos + 1);
                 }
                 Sequence converted = th.applyFunctionConversionRules(
                         args.get(i), expected, role, Loc.NONE);
@@ -187,7 +191,8 @@ public class ApplyFn extends SystemFunction  {
             return rawResult;
         } else {
             // Check the result of the function
-            RoleDiagnostic resultRole = new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "fn:apply", -1);
+            Supplier<RoleDiagnostic> resultRole =
+                    () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "fn:apply", -1);
             return th.applyFunctionConversionRules(
                     rawResult, fit.getResultType(), resultRole, Loc.NONE);
         }

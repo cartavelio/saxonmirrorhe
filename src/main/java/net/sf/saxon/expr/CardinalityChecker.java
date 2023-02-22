@@ -25,6 +25,8 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
 
+import java.util.function.Supplier;
+
 
 /**
  * A CardinalityChecker implements the cardinality checking of "treat as": that is,
@@ -34,7 +36,7 @@ import net.sf.saxon.value.IntegerValue;
 public final class CardinalityChecker extends UnaryExpression {
 
     private int requiredCardinality = -1;
-    private final RoleDiagnostic role;
+    private final Supplier<RoleDiagnostic> roleSupplier;
 
     /**
      * Private Constructor: use factory method
@@ -44,10 +46,10 @@ public final class CardinalityChecker extends UnaryExpression {
      * @param role        information to be used in error reporting
      */
 
-    private CardinalityChecker(Expression sequence, int cardinality, RoleDiagnostic role) {
+    private CardinalityChecker(Expression sequence, int cardinality, Supplier<RoleDiagnostic> role) {
         super(sequence);
         requiredCardinality = cardinality;
-        this.role = role;
+        this.roleSupplier = role;
         //computeStaticProperties();
         //adoptChildExpression(sequence);
     }
@@ -58,20 +60,20 @@ public final class CardinalityChecker extends UnaryExpression {
      *
      * @param sequence    the base sequence whose cardinality is to be checked
      * @param cardinality the required cardinality
-     * @param role        information to be used in error reporting
+     * @param roleSupplier        information to be used in error reporting
      * @return a new Expression that does the CardinalityChecking (not necessarily a CardinalityChecker)
      */
 
-    public static Expression makeCardinalityChecker(Expression sequence, int cardinality, RoleDiagnostic role) {
+    public static Expression makeCardinalityChecker(Expression sequence, int cardinality, Supplier<RoleDiagnostic> roleSupplier) {
         Expression result;
         if (sequence instanceof Literal && Cardinality.subsumes(cardinality, SequenceTool.getCardinality(((Literal) sequence).getGroundedValue()))) {
             return sequence;
         }
         if (sequence instanceof Atomizer && !Cardinality.allowsMany(cardinality)) {
             Expression base = ((Atomizer) sequence).getBaseExpression();
-            result = new SingletonAtomizer(base, role, Cardinality.allowsZero(cardinality));
+            result = new SingletonAtomizer(base, roleSupplier, Cardinality.allowsZero(cardinality));
         } else {
-            result = new CardinalityChecker(sequence, cardinality, role);
+            result = new CardinalityChecker(sequence, cardinality, roleSupplier);
         }
         ExpressionTool.copyLocationInfo(sequence, result);
         return result;
@@ -133,6 +135,7 @@ public final class CardinalityChecker extends UnaryExpression {
             return base;
         }
         if ((base.getCardinality() & requiredCardinality) == 0) {
+            RoleDiagnostic role = roleSupplier.get();
             XPathException err = new XPathException("The " + role.getMessage() +
                     " does not satisfy the cardinality constraints", role.getErrorCode());
             err.setLocation(getLocation());
@@ -153,16 +156,16 @@ public final class CardinalityChecker extends UnaryExpression {
     }
 
 
-    /**
-     * Set the error code to be returned (this is used when evaluating the functions such
-     * as exactly-one() which have their own error codes)
-     *
-     * @param code the error code to be used
-     */
-
-    public void setErrorCode(String code) {
-        role.setErrorCode(code);
-    }
+//    /**
+//     * Set the error code to be returned (this is used when evaluating the functions such
+//     * as exactly-one() which have their own error codes)
+//     *
+//     * @param code the error code to be used
+//     */
+//
+//    public void setErrorCode(String code) {
+//        roleSupplier.setErrorCode(code);
+//    }
 
     /**
      * Get the RoleLocator, which contains diagnostic information for use if the cardinality check fails
@@ -171,7 +174,11 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     public RoleDiagnostic getRoleLocator() {
-        return role;
+        return roleSupplier.get();
+    }
+
+    public Supplier<RoleDiagnostic> getRoleSupplier() {
+        return roleSupplier;
     }
 
     /**
@@ -225,22 +232,25 @@ public final class CardinalityChecker extends UnaryExpression {
         if (SequenceTool.supportsGetLength(base)) {
             int count = SequenceTool.getLength(base);
             if (count == 0 && !Cardinality.allowsZero(requiredCardinality)) {
+                RoleDiagnostic role = roleSupplier.get();
                 typeError("An empty sequence is not allowed as the " +
                         role.getMessage(), role.getErrorCode(), context);
             } else if (count == 1 && requiredCardinality == StaticProperty.EMPTY) {
+                RoleDiagnostic role = roleSupplier.get();
                 typeError("The only value allowed for the " +
                         role.getMessage() + " is an empty sequence", role.getErrorCode(), context);
             } else if (count > 1 && !Cardinality.allowsMany(requiredCardinality)) {
+                RoleDiagnostic role = roleSupplier.get();
                 typeError("A sequence of more than one item is not allowed as the " +
                         role.getMessage() + depictSequenceStart(base, 2),
-                        role.getErrorCode(), context);
+                          role.getErrorCode(), context);
             }
             return base;
         }
 
         // Otherwise return an iterator that does the checking on the fly
 
-        return new CardinalityCheckingIterator(base, requiredCardinality, role, getLocation());
+        return new CardinalityCheckingIterator(base, requiredCardinality, roleSupplier, getLocation());
 
     }
 
@@ -285,20 +295,24 @@ public final class CardinalityChecker extends UnaryExpression {
             Item first = iter.next();
             if (first == null) {
                 if (!Cardinality.allowsZero(requiredCardinality)) {
+                    RoleDiagnostic role = roleSupplier.get();
                     typeError("An empty sequence is not allowed as the " +
                             role.getMessage(), role.getErrorCode(), context);
                 }
                 return null;
             } else {
                 if (requiredCardinality == StaticProperty.EMPTY) {
+                    RoleDiagnostic role = roleSupplier.get();
                     typeError("An empty sequence is required as the " +
                         role.getMessage(), role.getErrorCode(), context);
                     return null;
                 }
                 Item second = iter.next();
                 if (second != null) {
+                    RoleDiagnostic role = roleSupplier.get();
                     typeError("A sequence of more than one item is not allowed as the " +
-                        role.getMessage() + depictSequenceStart(new TwoItemIterator(first, second), 2), role.getErrorCode(), context);
+                        role.getMessage() + depictSequenceStart(
+                                new TwoItemIterator(first, second), 2), role.getErrorCode(), context);
                     return null;
                 }
             }
@@ -325,7 +339,7 @@ public final class CardinalityChecker extends UnaryExpression {
         }
         if ((next.getImplementationMethod() & PROCESS_METHOD) != 0 && !(type instanceof DocumentNodeTest)) {
             TypeCheckingFilter filter = new TypeCheckingFilter(output);
-            filter.setRequiredType(type, requiredCardinality, role, getLocation());
+            filter.setRequiredType(type, requiredCardinality, roleSupplier.get(), getLocation());
             next.process(filter, context);
             try {
                 filter.finalCheck();
@@ -382,7 +396,7 @@ public final class CardinalityChecker extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        CardinalityChecker c2 = new CardinalityChecker(getBaseExpression().copy(rebindings), requiredCardinality, role);
+        CardinalityChecker c2 = new CardinalityChecker(getBaseExpression().copy(rebindings), requiredCardinality, roleSupplier);
         ExpressionTool.copyLocationInfo(this, c2);
         return c2;
     }
@@ -419,7 +433,7 @@ public final class CardinalityChecker extends UnaryExpression {
             occ = "1";
         }
         out.emitAttribute("card", occ);
-        out.emitAttribute("diag", role.save());
+        out.emitAttribute("diag", roleSupplier.get().save());
         getBaseExpression().export(out);
         out.endElement();
     }

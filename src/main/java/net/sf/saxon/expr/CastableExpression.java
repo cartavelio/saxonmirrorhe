@@ -18,6 +18,8 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * Castable Expression: implements "Expr castable as atomic-type?".
  * The implementation simply wraps a cast expression with a try/catch.
@@ -50,7 +52,7 @@ public final class CastableExpression extends CastingExpression {
         SequenceType atomicType = SequenceType.ATOMIC_SEQUENCE;
 
         Configuration config = visitor.getConfiguration();
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.TYPE_OP, "castable as", 0);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.TYPE_OP, "castable as", 0);
 
         TypeChecker tc = config.getTypeChecker(false);
         Expression operand = tc.staticTypeCheck(getBaseExpression(), atomicType, role, visitor);

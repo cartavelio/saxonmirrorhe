@@ -28,6 +28,7 @@ import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntHashMap;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import static net.sf.saxon.expr.flwor.Clause.ClauseName.WINDOW;
 
@@ -177,11 +178,10 @@ public class WindowClause extends Clause {
                 break;
             case OVERLAPS:
             case SUBSUMED_BY:
-                RoleDiagnostic role = new RoleDiagnostic(
-                        RoleDiagnostic.VARIABLE,
-                        getVariableBinding(WindowClause.WINDOW_VAR).getVariableQName().getDisplayName(), 0);
-                itemTypeChecker = new ItemTypeCheckingFunction(
-                        required, role, getLocation(), config);
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE,
+                            getVariableBinding(WindowClause.WINDOW_VAR).getVariableQName().getDisplayName(), 0);
+                itemTypeChecker = new ItemTypeCheckingFunction(required, role, getLocation(), config);
                 break;
             case DISJOINT:
                 String message = "The items in the window will always be instances of "

@@ -20,6 +20,8 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
+import java.util.function.Supplier;
+
 /**
  * Handler for xsl:copy elements in stylesheet. <br>
  */
@@ -145,8 +147,8 @@ public class XSLCopy extends StyleElement {
 
         select = typeCheck("select", select);
         try {
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:copy/select", 0);
-            role.setErrorCode("XTTE3180");
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:copy/select", 0, "XTTE3180");
             select = getConfiguration().getTypeChecker(false).staticTypeCheck(select, SequenceType.OPTIONAL_ITEM,
                                                                               role, makeExpressionVisitor());
         } catch (XPathException err) {

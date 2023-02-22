@@ -30,6 +30,7 @@ import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 
 /**
@@ -212,12 +213,12 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         SequenceType atomicType = SequenceType.ATOMIC_SEQUENCE;
 
         TypeChecker tc = config.getTypeChecker(false);
-        RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
-        //role0.setSourceLocator(this);
+        Supplier<RoleDiagnostic> role0 =
+                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
         setLhsExpression(tc.staticTypeCheck(getLhsExpression(), atomicType, role0, visitor));
 
-        RoleDiagnostic role1 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
-        //role1.setSourceLocator(this);
+        Supplier<RoleDiagnostic> role1 =
+                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
 
         if (getLhsExpression() != oldOp0) {
