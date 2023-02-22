@@ -30,6 +30,7 @@ public class AccumulatorRule implements RuleTarget {
      *
      * @param newValueExpression the expression that computes a new value of the accumulator function
      * @param stackFrameMap      the stack frame used to evaluate this expression
+     * @param postDescent
      */
 
     public AccumulatorRule(Expression newValueExpression, SlotManager stackFrameMap, boolean postDescent) {

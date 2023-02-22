@@ -24,6 +24,7 @@ public abstract class TuplePull {
      * @return true if another tuple has been generated; false if the tuple stream is exhausted. If the
      *         method returns false, the values of the local variables corresponding to this tuple stream
      *         are undefined.
+     * @throws XPathException if any error occurs
      */
 
     public abstract boolean nextTuple(XPathContext context) throws XPathException;

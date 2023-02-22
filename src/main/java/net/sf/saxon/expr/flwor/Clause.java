@@ -80,7 +80,7 @@ public abstract class Clause {
      * Create a copy of this clause
      *
      * @param flwor the new FLWORExpression to contain the copied clause
-     * @param rebindings
+     * @param rebindings the rebinding map
      * @return the copied clause
      */
 
@@ -146,6 +146,7 @@ public abstract class Clause {
      * is written to the supplied output destination.
      *
      * @param out the expression presenter used to display the structure
+     * @throws XPathException if any error occurs
      */
 
     public abstract void explain(ExpressionPresenter out) throws XPathException;

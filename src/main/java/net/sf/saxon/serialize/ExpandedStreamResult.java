@@ -75,6 +75,7 @@ public class ExpandedStreamResult {
     /**
      * Make a Writer for this Emitter to use, given a StreamResult.
      *
+     * @return the new Writer
      * @throws net.sf.saxon.trans.XPathException if an error occurs
      */
 
@@ -257,6 +258,8 @@ public class ExpandedStreamResult {
 
     /**
      * Get the character set
+     *
+     * @return the CharacterSet
      */
 
     public CharacterSet getCharacterSet() {

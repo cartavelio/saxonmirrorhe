@@ -299,6 +299,7 @@ public class RetainedStaticContext implements NamespaceResolver {
 
     /**
      * Test whether this static context declares the same namespaces as another static context
+     * @param other the other static context
      * @return true if the namespace bindings (prefix:uri pairs) are the same
      */
 

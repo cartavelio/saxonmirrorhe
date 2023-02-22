@@ -44,6 +44,7 @@ public abstract class JavaCollationFactory {
      * @param uri the Collation URI
      * @param props  the desired properties of the collation
      * @return a collation with these properties
+     * @throws XPathException if any error occurs
      */
 
     /*@Nullable*/

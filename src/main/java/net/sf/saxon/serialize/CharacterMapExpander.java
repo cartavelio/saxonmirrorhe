@@ -60,6 +60,8 @@ public class CharacterMapExpander extends ProxyReceiver {
      * characters to prevent subsequent XML or HTML character escaping. The default value
      * is true (used for the XML and HTML output methods); the value false is used by the text
      * output method.
+     *
+     * @param use true if the result of character mapping should be marked using NUL characters
      */
 
     public void setUseNullMarkers(boolean use) {

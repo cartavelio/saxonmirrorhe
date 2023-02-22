@@ -63,6 +63,8 @@ public abstract class AbstractNumberer implements Numberer {
 
     /**
      * Get the language used by this numberer
+     *
+     * @return the language used by this numberer
      */
 
     public String getLanguage() {

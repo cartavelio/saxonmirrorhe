@@ -29,7 +29,8 @@ public class TraceClause extends Clause {
     /**
      * Create a traceClause
      *
-     * @param target    the clause whose evaluation is being traced
+     * @param expression the FLWOR expression
+     * @param target     the clause whose evaluation is being traced
      */
 
     public TraceClause(FLWORExpression expression, Clause target) {
