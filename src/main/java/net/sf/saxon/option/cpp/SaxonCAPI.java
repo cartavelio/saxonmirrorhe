@@ -126,18 +126,16 @@ public class SaxonCAPI {
     }
 
     @CEntryPoint(name = "j_run_transform", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long run_transform(IsolateThread thread, int argCount,  CCharPointer cargs){
+    public static long run_transform(IsolateThread thread, ObjectHandle processorDataRef){
 
-        String[] args = null;
+        String[] args;
 
 
-        if(cargs == WordFactory.nullPointer()) {
+        if(processorDataRef == WordFactory.nullPointer()) {
             return STATUS_FAIL;
         }   else {
-            args = new String[argCount];
-            for(int i=0; i < argCount; i++) {
-                args[i] = CTypeConversion.toJavaString(cargs.addressOf(i));
-            }
+           ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
+           args = processorDataAccumulator.getParameterNames();
         }
 
         new Transform().doTransform(args);
