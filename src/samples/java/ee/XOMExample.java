@@ -11,7 +11,7 @@ import java.io.IOException;
 import static net.sf.saxon.s9api.streams.Steps.child;
 
 /**
- * A simple example to show how SAXON can be used with a XOM tree.
+ * A simple example to show how Saxon can be used with a XOM tree.
  * It is designed to be used with the source document books.xml and the
  * stylesheet total.xsl
  */
@@ -22,13 +22,13 @@ public class XOMExample {
     /**
      * Method main
      */
-    public static void main(String argv[])
+    public static void main(String[] argv)
             throws SaxonApiException, IOException, ParsingException {
 
         if (argv.length == 2) {
             transform(argv[0], argv[1]);
         } else {
-            System.err.println("Usage: JDOM2Example source.xml style.xsl >out.xml");
+            System.err.println("Usage: XOMExample source.xml style.xsl >out.xml");
         }
 
     }

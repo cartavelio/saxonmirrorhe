@@ -39,9 +39,11 @@ public class XQJExamples {
     }
 
     /**
-     * Method main
+     * Method main. If there is no argument, all the tests are run. If there is an argument, it
+     * should either be the name of one of the tests, or "all" to run all tests. The working
+     * directory must be the "samples" directory.
      */
-    public static void main(String argv[]) {
+    public static void main(String[] argv) {
 
         List<Test> tests = new ArrayList<>();
         tests.add(new TestA());

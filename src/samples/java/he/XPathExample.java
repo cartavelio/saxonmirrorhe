@@ -17,10 +17,10 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
-  * Class XPathExample:
-  * This class illustrates the use of the JAXP XPath API. It is a simple command-line application,
+  * Class XPathExample
+  * <p>This class illustrates the use of the JAXP XPath API. It is a simple command-line application,
   * which prompts the user for a word, and replies with a list of all the lines containing that
-  * word within a Shakespeare play.
+  * word within a Shakespeare play.</p>
   */
 
 public class XPathExample implements XPathVariableResolver, NamespaceContext {
@@ -28,11 +28,12 @@ public class XPathExample implements XPathVariableResolver, NamespaceContext {
     private String currentWord;
 
     /**
-      * main()<BR>
-      * Expects one argument, the input filename<BR>
+      * Main method, for command-line invocation.
+      * Expects one argument, the input filename. For example, use <code>othello.xml</code>
+      * from the Saxon samples distribution.
       */
 
-    public static void main (String args[])
+    public static void main (String[] args)
     throws Exception
     {
         // Check the command-line arguments
@@ -177,7 +178,7 @@ public class XPathExample implements XPathVariableResolver, NamespaceContext {
      * @return <code>Iterator</code> for all prefixes bound to the
      *         Namespace URI in the current scope
      */
-    public Iterator getPrefixes(String namespaceURI) {
+    public Iterator<String> getPrefixes(String namespaceURI) {
         return null;  // not used by Saxon
     }
 

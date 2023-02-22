@@ -33,11 +33,11 @@ public class XPathExampleSA implements XPathVariableResolver, XPathFunctionResol
 
 
     /**
-      * main()<BR>
-      * Expects two arguments, the input filename, and the schema for the input document<BR>
+      * <p>Main entry point, for invocation from the command line.</p>
+      * <p>The command expects two arguments, the input filename, and the schema for the input document</p>
       */
 
-    public static void main (String args[])
+    public static void main (String[] args)
     throws Exception
     {
         // Check the command-line arguments
@@ -56,11 +56,9 @@ public class XPathExampleSA implements XPathVariableResolver, XPathFunctionResol
 
     public void go(String filename, String schema) throws Exception {
 
-        // Load an XPath factory. This should load the Saxon schema-aware factory if everything has
-        // been configured correctly.
+        // Load an XPath factory.
 
-        //XPathFactory xpf = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON);
-        XPathFactory xpf = new EnterpriseXPathFactory();
+        XPathFactoryImpl xpf = new EnterpriseXPathFactory();
         XPath xpe = xpf.newXPath();
         System.err.println("Loaded XPath Provider " + xpe.getClass().getName() +
                 " using factory " + xpf.getClass().getName());
@@ -89,7 +87,7 @@ public class XPathExampleSA implements XPathVariableResolver, XPathFunctionResol
         // is therefore Saxon-specific.
         InputSource is = new InputSource(new File(filename).toURI().toString());
         SAXSource ss = new SAXSource(is);
-        Configuration config = ((XPathFactoryImpl) xpf).getConfiguration();
+        Configuration config = xpf.getConfiguration();
         TreeInfo doc = config.buildDocumentTree(ss);
 
 
@@ -200,7 +198,7 @@ public class XPathExampleSA implements XPathVariableResolver, XPathFunctionResol
      * @return <code>Iterator</code> for all prefixes bound to the
      *         Namespace URI in the current scope
      */
-    public Iterator getPrefixes(String namespaceURI) {
+    public Iterator<String> getPrefixes(String namespaceURI) {
         return null;
         // not needed by Saxon implementation
     }
@@ -231,7 +229,7 @@ public class XPathExampleSA implements XPathVariableResolver, XPathFunctionResol
             }
         }
 
-        private static BigDecimal INCHES_TO_CM = new BigDecimal(2.54);
+        private final static BigDecimal INCHES_TO_CM = new BigDecimal("2.54");
     }
 
 }

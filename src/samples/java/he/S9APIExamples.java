@@ -57,7 +57,7 @@ public class S9APIExamples {
      *             name of a test, or "all" to run all tests, or "nonschema" to run all the tests that are not schema-aware.
      */
     public static void main(String[] argv) {
-        Processor processor = new Processor(false);
+        Processor processor = new Processor();
 
         List<Test> tests = new ArrayList<>();
         tests.add(new S9APIExamples.QueryA());
@@ -66,7 +66,7 @@ public class S9APIExamples {
         tests.add(new S9APIExamples.QueryD());
         tests.add(new S9APIExamples.QueryE());
 
-        if (!"HE".equals(processor.getUnderlyingConfiguration().getEditionCode())) {
+        if (!"HE".equals(processor.getSaxonEdition())) {
             // These tests will work on PE or EE but not HE
             tests.add(new S9APIExamples.QueryF());
             tests.add(new S9APIExamples.QueryG());

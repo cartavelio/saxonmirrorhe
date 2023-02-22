@@ -26,7 +26,6 @@ import net.sf.saxon.value.DateTimeValue;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.FileReader;
@@ -35,8 +34,8 @@ import java.util.Properties;
 
 
 /**
- * Runs the XMark XQuery benchmark: see
- * <a href="http://monetdb.cwi.nl/xml/index.html">http://monetdb.cwi.nl/xml/index.html</a
+ * Runs the XMark XQuery benchmark. This was originally published by the MonetDB project
+ * at <code>http://monetdb.cwi.nl/xml/index.html</code> but is no longer available at that location.
  *
  */
 public class XMarkBenchmark {
@@ -71,24 +70,24 @@ public class XMarkBenchmark {
      * <dt>-qN</dt><dd>Run query N only</dd>
      * </dl>
      */
-    public static void main(String argv[]) throws Exception {
+    public static void main(String[] argv) throws Exception {
 
         String dir = null;
-        for (int i=0; i<argv.length; i++) {
-            if (argv[i].startsWith("-dir:")) dir=argv[i].substring(5);
-            if (argv[i].equals("-pull")) pull = true;
-            if (argv[i].equals("-lazy")) lazy = true;
-            if (argv[i].equals("-sa")) saproduct = true;
-                // means use Saxon-EE optimizer (not the schema-aware version of the tests)
-            if (argv[i].equals("-satests")) satests = true;
-            if (argv[i].equals("-xslt")) xslt = true;
-            if (argv[i].equals("-runcomp")) runCompiled = true;
-            if (argv[i].equals("-check")) checkResults = true;
-            if (argv[i].equals("-val")) val = true;
-            if (argv[i].startsWith("-q")) {
-                test = Integer.parseInt(argv[i].substring(2));
+        for (String s : argv) {
+            if (s.startsWith("-dir:")) dir = s.substring(5);
+            if (s.equals("-pull")) pull = true;
+            if (s.equals("-lazy")) lazy = true;
+            if (s.equals("-sa")) saproduct = true;
+            // means use Saxon-EE optimizer (not the schema-aware version of the tests)
+            if (s.equals("-satests")) satests = true;
+            if (s.equals("-xslt")) xslt = true;
+            if (s.equals("-runcomp")) runCompiled = true;
+            if (s.equals("-check")) checkResults = true;
+            if (s.equals("-val")) val = true;
+            if (s.startsWith("-q")) {
+                test = Integer.parseInt(s.substring(2));
             }
-            if (argv[i].equals("-?")) {
+            if (s.equals("-?")) {
                 System.err.println("Options: -pull -lazy -sa -xslt -compile -runcomp");
             }
         }
@@ -98,7 +97,7 @@ public class XMarkBenchmark {
         }
 
         if (xslt) {
-            transform(lazy, saproduct, dir);
+            transform(saproduct, dir);
         } else {
             query(dir);
         }
@@ -107,7 +106,7 @@ public class XMarkBenchmark {
     /**
      * Run all the XQuery tests
      * @param dir the directory containing the tests
-     * @throws Exception
+     * @throws Exception if the query fails
      */
 
     public static void query(String dir) throws Exception {
@@ -124,14 +123,14 @@ public class XMarkBenchmark {
         System.out.println("<xmark-results product='Saxon' lang='query' version='" + Version.getProductVersion() +
                 "' options='" + options + "' when='" + when + "'>");
 
-        for (int f=0; f<tests.length; f++) {
-            File file = new File(dir + tests[f]);
+        for (String s : tests) {
+            File file = new File(dir + s);
 
             Configuration config = (saproduct ? new EnterpriseConfiguration() : new Configuration());
             if (satests) {
                 config.setSchemaValidationMode(Validation.STRICT);
                 config.addSchemaSource(new StreamSource(new File(dir + "schema.xsd")),
-                        new StandardErrorReporter());
+                                       new StandardErrorReporter());
                 config.setConfigurationProperty(Feature.USE_TYPED_VALUE_CACHE, false);
             }
             if (val) {
@@ -144,15 +143,15 @@ public class XMarkBenchmark {
             NodeInfo doc = config.buildDocumentTree(streamSource).getRootNode();
             long pend = System.currentTimeMillis();
 
-            System.out.println("  <file name='" + tests[f] +
-                    "' size='" + file.length() +
-                    "' build-time='" + (pend-pstart) + "'>");
+            System.out.println("  <file name='" + s +
+                                       "' size='" + file.length() +
+                                       "' build-time='" + (pend - pstart) + "'>");
             Properties props = new Properties();
             props.setProperty("method", "xml");
             props.setProperty("indent", "yes");
 
 
-            for (int q=1; q<=20; q++) {
+            for (int q = 1; q <= 20; q++) {
                 if (test != -1 && test != q) {
                     continue;
                 }
@@ -168,7 +167,7 @@ public class XMarkBenchmark {
                     long totalTime = 0;
                     long min = Integer.MAX_VALUE;
                     long max = 0;
-                    for (int t=0; t<1000; t++) {
+                    for (int t = 0; t < 1000; t++) {
                         final DynamicQueryContext context = new DynamicQueryContext(config);
                         context.setContextItem(doc);
                         Result result = new Sink(config.makePipelineConfiguration());
@@ -183,15 +182,15 @@ public class XMarkBenchmark {
                         if (time < min) min = time;
                         if (time > max) max = time;
                         totalTime += time;
-                        if (totalTime > 30000 && t>=2) break;
+                        if (totalTime > 30000 && t >= 2) break;
                     }
-                    double avg = ((double)totalTime) / runs;
+                    double avg = ((double) totalTime) / runs;
                     String avgs = format.format(avg);
                     System.out.println("    <query q='" + q +
-                                "' avg='" + avgs +
-                                "' runs='" + runs +
-                                "' min='" + min +
-                                "' max='" + max + "'/>");
+                                               "' avg='" + avgs +
+                                               "' runs='" + runs +
+                                               "' min='" + min +
+                                               "' max='" + max + "'/>");
                 } catch (XPathException err) {
                     System.err.println("Error in test " + q);
                     System.err.println(err.getMessageAndLocation());
@@ -204,42 +203,40 @@ public class XMarkBenchmark {
 
     /**
      * Run an XSLT transformation
-     * @param lazy true if lazy construction mode is to be set
-     * @param sa true if schema-aware
+     *
+     * @param sa  true if schema-aware
      * @param dir the directory containing the tests
-     * @throws Exception
+     * @throws Exception if the transformation fails
      */
 
-    public static void transform(boolean lazy, boolean sa, String dir) throws Exception {
+    public static void transform(boolean sa, String dir) throws Exception {
 
         String[] tests = {"xmark1.xml", "xmark4.xml", "xmark10.xml"};
 
         System.out.println("<xmark-results product='Saxon' lang='xslt' version='" + Version.getProductVersion() + "'>");
 
-        for (int f=0; f<tests.length; f++) {
-            File file = new File(dir + tests[f]);
+        for (String s : tests) {
+            File file = new File(dir + s);
 
-//            String factoryName = (sa ? "com.saxonica.config.EnterpriseTransformerFactory" : "net.sf.saxon.TransformerFactoryImpl");
-//            System.setProperty("java.xml.transform.TransformerFactory", factoryName);
-            TransformerFactory factory;
+            TransformerFactoryImpl factory;
             if (sa) {
                 factory = new EnterpriseTransformerFactory();
             } else {
                 factory = new TransformerFactoryImpl();
             }
-            Configuration config = ((TransformerFactoryImpl)factory).getConfiguration();
+            Configuration config = factory.getConfiguration();
 
             Source streamSource = new StreamSource(file);
             long pstart = System.currentTimeMillis();
             NodeInfo doc = config.buildDocumentTree(streamSource).getRootNode();
             long pend = System.currentTimeMillis();
 
-            System.out.println("  <file name='" + tests[f] +
-                    "' size='" + file.length() +
-                    "' schema-aware='" + config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT) +
-                    "' build-time='" + (pend-pstart) + "'>");
+            System.out.println("  <file name='" + s +
+                                       "' size='" + file.length() +
+                                       "' schema-aware='" + config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT) +
+                                       "' build-time='" + (pend - pstart) + "'>");
 
-            for (int q=1; q<=20; q++) {
+            for (int q = 1; q <= 20; q++) {
                 //if (q==9) continue;
                 File sheet = new File(dir + 'q' + q + ".xsl");
                 if (!sheet.exists()) {
@@ -251,7 +248,7 @@ public class XMarkBenchmark {
                 long totalTime = 0;
                 long min = Integer.MAX_VALUE;
                 long max = 0;
-                for (int t=0; t<10; t++) {
+                for (int t = 0; t < 10; t++) {
                     Result result = new Sink(config.makePipelineConfiguration());
                     long start, end;
 
@@ -264,13 +261,13 @@ public class XMarkBenchmark {
                     if (time < min) min = time;
                     if (time > max) max = time;
                     totalTime += time;
-                    if (totalTime > 1000 && t>=2) break;
+                    if (totalTime > 1000 && t >= 2) break;
                 }
                 System.out.println("    <query q='" + q +
-                            "' avg='" + (totalTime / runs) +
-                            "' runs='" + runs +
-                            "' min='" + min +
-                            "' max='" + max + "'/>");
+                                           "' avg='" + (totalTime / runs) +
+                                           "' runs='" + runs +
+                                           "' min='" + min +
+                                           "' max='" + max + "'/>");
             }
             System.out.println("  </file>");
         }
@@ -305,8 +302,6 @@ public class XMarkBenchmark {
             String actResult = (size1==-1 ? "" : new String(contents1, offset1, size1-offset1));
             String refResult = (size2==-1 ? "" : new String(contents2, offset2, size2-offset2));
 
-//            actResult = actResult.replace("\r\n", "\n");
-//            refResult = refResult.replace("\r\n", "\n");
             if (actResult.equals(refResult)) {
                 System.err.println("Results compared OK");
             } else {

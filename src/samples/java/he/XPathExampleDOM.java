@@ -14,13 +14,13 @@ import java.io.InputStreamReader;
 /**
   * Class XPathExampleDOM:
   *
-  * This is a variant of the XPathExample application written to use DOM interfaces. Using the DOM
+  * <p>This is a variant of the XPathExample application written to use DOM interfaces. Using the DOM
   * rather than Saxon's native tree model is not recommended unless the application has other reasons
-  * to use the DOM model, but this application shows how it can be done when necessary.
+  * to use the DOM model, but this application shows how it can be done when necessary.</p>
   *
-  * This class illustrates the use of the JAXP XPath API. It is a simple command-line application,
+  * <p>This class illustrates the use of the JAXP XPath API. It is a simple command-line application,
   * which prompts the user for a word, and replies with a list of all the lines containing that
-  * word within a Shakespeare play.
+  * word within a Shakespeare play.</p>
   */
 
 public class XPathExampleDOM implements XPathVariableResolver {
@@ -28,11 +28,12 @@ public class XPathExampleDOM implements XPathVariableResolver {
     private String currentWord;
 
     /**
-      * main()<BR>
-      * Expects one argument, the input filename<BR>
-      */
+     * Main method, for command-line invocation.
+     * Expects one argument, the input filename. For example, use <code>othello.xml</code>
+     * from the Saxon samples distribution.
+     */
 
-    public static void main (String args[])
+    public static void main (String[] args)
     throws Exception
     {
         // Check the command-line arguments

@@ -14,13 +14,13 @@ import java.io.File;
 /**
  * SchemaValidatorExample demonstrates the use of jaxp validation apis.
  *
- * This version was modified by Michael Kay from the version (named SchemaValidator)
+ * <p>This version was modified by Saxonica from the version (named SchemaValidator)
  * issued with the JAXP 1.3 distribution. It has been changed to set system properties
  * that force loading of Saxon, to improve the error reporting, and to improve the
- * comments.
+ * comments.</p>
  *
- * The original file contained no explicit terms and conditions or copyright statement,
- * but it should be assumed that it is subject to the usual Apache rules.
+ * <p>The original file contained no explicit terms and conditions or copyright statement,
+ * but it should be assumed that it is subject to the usual Apache rules.</p>
  */
 
 public class SchemaValidatorExample {
