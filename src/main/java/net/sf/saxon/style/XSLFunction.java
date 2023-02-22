@@ -570,7 +570,6 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
     public void setParameterDefinitions(UserFunction fn) {
         UserFunctionParameter[] params = new UserFunctionParameter[getNumberOfArguments()];
-        fn.setParameterDefinitions(params);
         int count = 0;
         for (NodeInfo node : children()) {
             if (node instanceof XSLLocalParam) {
@@ -587,6 +586,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                 break;
             }
         }
+        fn.setParameterDefinitions(params);
     }
 
     /**
