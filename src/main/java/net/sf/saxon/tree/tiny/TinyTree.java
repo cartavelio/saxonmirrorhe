@@ -760,68 +760,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         }
 
         if (root instanceof TinyDocumentImpl) {
-            boolean isID = false;
-            try {
-                if (ReceiverOption.contains(properties, ReceiverOption.IS_ID)) {
-                    isID = true;
-                } else if ((nameCode & NamePool.FP_MASK) == StandardNames.XML_ID) {
-                    isID = true;
-                } else if (type.isIdType()) {
-                    isID = true;
-                }
-            } catch (MissingComponentException e) {
-                // isID = false;
-            }
-            if (isID) {
-
-                // The attribute is marked as being an ID. But we don't trust it - it
-                // might come from a non-validating parser. Before adding it to the index, we
-                // check that it really is an ID.
-
-                String id = Whitespace.trim(attValue);
-
-                // Make an exception to our usual policy of storing the original string value.
-                // This is because xml:id processing applies whitespace trimming at an earlier stage
-                this.attValue[numberOfAttributes] = id;
-
-                if (NameChecker.isValidNCName(id)) {
-                    NodeInfo e = getNode(parent);
-                    registerID(e, id);
-                } else if (attType != null) {
-                    attType[numberOfAttributes] = BuiltInAtomicType.UNTYPED_ATOMIC;
-                }
-            }
-            boolean isIDREF = false;
-            try {
-                if (ReceiverOption.contains(properties, ReceiverOption.IS_IDREF)) {
-                    isIDREF = true;
-                } else if (type == BuiltInAtomicType.IDREF || type == BuiltInListType.IDREFS) {
-                    isIDREF = true;
-                } else if (type.isIdRefType()) {
-                    // The attribute has the idref property only if at least one item in its typed value
-                    // is an IDREF: see Saxon bug 2331
-                    try {
-                        AtomicSequence as = type.getTypedValue(
-                                StringView.of(attValue).tidy(), null, getConfiguration().getConversionRules());
-                        for (AtomicValue v : as) {
-                            if (v.getItemType().isIdRefType()) {
-                                isIDREF = true;
-                                break;
-                            }
-                        }
-                    } catch (ValidationException ve) {
-                        // isIDREF = false
-                    }
-                }
-            } catch (MissingComponentException e) {
-                // isIDREF = false
-            }
-            if (isIDREF) {
-                if (idRefAttributes == null) {
-                    idRefAttributes = new IntHashSet();
-                }
-                idRefAttributes.add(numberOfAttributes);
-            }
+          handleRootTinyDoc(parent, type, nameCode, attValue, properties);
         }
 
         // Note: IDREF attributes are not indexed at this stage; that happens only if and when
@@ -830,6 +769,72 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         // Note that an attTypes array will be created for all attributes if any IDREF value is reported.
 
         numberOfAttributes++;
+    }
+
+    private void handleRootTinyDoc(int parent, SimpleType type, int nameCode, String attValue, int properties)
+    {
+        boolean isID = false;
+        try {
+            if (ReceiverOption.contains(properties, ReceiverOption.IS_ID)) {
+                isID = true;
+            } else if ((nameCode & NamePool.FP_MASK) == StandardNames.XML_ID) {
+                isID = true;
+            } else if (type.isIdType()) {
+                isID = true;
+            }
+        } catch (MissingComponentException e) {
+            // isID = false;
+        }
+        if (isID) {
+
+            // The attribute is marked as being an ID. But we don't trust it - it
+            // might come from a non-validating parser. Before adding it to the index, we
+            // check that it really is an ID.
+
+            String id = Whitespace.trim(attValue);
+
+            // Make an exception to our usual policy of storing the original string value.
+            // This is because xml:id processing applies whitespace trimming at an earlier stage
+            this.attValue[numberOfAttributes] = id;
+
+            if (NameChecker.isValidNCName(id)) {
+                NodeInfo e = getNode(parent);
+                registerID(e, id);
+            } else if (attType != null) {
+                attType[numberOfAttributes] = BuiltInAtomicType.UNTYPED_ATOMIC;
+            }
+        }
+        boolean isIDREF = false;
+        try {
+            if (ReceiverOption.contains(properties, ReceiverOption.IS_IDREF)) {
+                isIDREF = true;
+            } else if (type == BuiltInAtomicType.IDREF || type == BuiltInListType.IDREFS) {
+                isIDREF = true;
+            } else if (type.isIdRefType()) {
+                // The attribute has the idref property only if at least one item in its typed value
+                // is an IDREF: see Saxon bug 2331
+                try {
+                    AtomicSequence as = type.getTypedValue(
+                            StringView.of(attValue).tidy(), null, getConfiguration().getConversionRules());
+                    for (AtomicValue v : as) {
+                        if (v.getItemType().isIdRefType()) {
+                            isIDREF = true;
+                            break;
+                        }
+                    }
+                } catch (ValidationException ve) {
+                    // isIDREF = false
+                }
+            }
+        } catch (MissingComponentException e) {
+            // isIDREF = false
+        }
+        if (isIDREF) {
+            if (idRefAttributes == null) {
+                idRefAttributes = new IntHashSet();
+            }
+            idRefAttributes.add(numberOfAttributes);
+        }
     }
 
     private void initializeAttributeTypeCodes() {
