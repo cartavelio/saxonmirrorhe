@@ -17,21 +17,18 @@ namespace Saxon.Impl.Helpers {
     /// 
     public class XmlWriterReceiver : net.sf.saxon.@event.TreeReceiver {
         private readonly XmlWriter writer;
-        private net.sf.saxon.@event.PipelineConfiguration pipe;
-        private string _systemId;
         private bool closeAfterUse = true;
         public XmlWriterReceiver(XmlWriter writer, PipelineConfiguration pipe) : base(new Sink(pipe)) {
-            this.pipe = pipe;
             this.writer = writer;
         }
         public void setCloseAfterUse(bool close) {
             closeAfterUse = close;
         }
         
-        public void characters(net.sf.saxon.str.CodePoints chars, net.sf.saxon.s9api.Location locationId, int properties) {
+        public override void characters(net.sf.saxon.str.CodePoints chars, net.sf.saxon.s9api.Location locationId, int properties) {
             writer.WriteString(chars.ToString());
         }
-        public void close() {
+        public override void close() {
             if (closeAfterUse) {
                 writer.Close();
             } else {
@@ -39,38 +36,30 @@ namespace Saxon.Impl.Helpers {
             }
         }
         
-        public void comment(net.sf.saxon.str.CodePoints content, net.sf.saxon.s9api.Location locationId, int properties) {
+        public override void comment(net.sf.saxon.str.CodePoints content, net.sf.saxon.s9api.Location locationId, int properties) {
             writer.WriteComment(content.ToString());
         }
-        public void endDocument() {
+        public override void endDocument() {
             writer.WriteEndDocument();
         }
-        public void endElement() {
+        public override void endElement() {
             writer.WriteEndElement();
         }
-        public net.sf.saxon.@event.PipelineConfiguration getPipelineConfiguration() {
-            return pipe;
+
+        public override void open() {
         }
-        
-        public void open() {
-        }
-        public void processingInstruction(string name, net.sf.saxon.str.CodePoints data, net.sf.saxon.s9api.Location locationId, int properties) {
+        public override void processingInstruction(string name, net.sf.saxon.str.CodePoints data, net.sf.saxon.s9api.Location locationId, int properties) {
             writer.WriteProcessingInstruction(name, data.ToString());
         }
-        public void setPipelineConfiguration(net.sf.saxon.@event.PipelineConfiguration pipe) {
-            this.pipe = pipe;
-        }
-        public void setSystemId(string systemId) {
-            this._systemId = systemId;
-        }
-        public void setUnparsedEntity(string name, string systemID, string publicID) {
+        
+        public override void setUnparsedEntity(string name, string systemID, string publicID) {
         }
         
-        public void startDocument(int properties) {
+        public override void startDocument(int properties) {
             writer.WriteStartDocument();
         }
 
-        public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces,
+        public override void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces,
             Location location, int properties) {
             writer.WriteStartElement(elemName.getPrefix(), elemName.getLocalPart(), elemName.getURI());
             
@@ -90,11 +79,8 @@ namespace Saxon.Impl.Helpers {
             }
             
         }
-
-        public string getSystemId() {
-            return _systemId;
-        }
-        public bool usesTypeAnnotations() {
+        
+        public override bool usesTypeAnnotations() {
             return false;
         }
     

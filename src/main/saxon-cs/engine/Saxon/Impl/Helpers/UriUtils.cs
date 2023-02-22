@@ -10,7 +10,7 @@ namespace Saxon.Impl.Helpers {
             return uri;
         }
 
-        public static string? GetQuery(System.Uri uri) {
+        public static string GetQuery(System.Uri uri) {
             string q = uri.Query;
             if (q.StartsWith("?")) {
                 return q.Substring(1);
@@ -35,7 +35,7 @@ namespace Saxon.Impl.Helpers {
             throw new(uri.ToString());
         }
 
-        private static Regex twoHexDigits = new Regex("[0-9a-fA-F][0-9a-fA-F]");
+        private static readonly Regex twoHexDigits = new Regex("[0-9a-fA-F][0-9a-fA-F]");
         public static bool passesAdditionalChecks(Sys.Uri uri) {
             if (uri.IsWellFormedOriginalString()) {
                 return true;

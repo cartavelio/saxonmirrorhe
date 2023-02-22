@@ -10,7 +10,7 @@ namespace net.sf.saxon.dotnet {
             builder.setPipelineConfiguration(pipe);
             return builder;
         }
-        public void close() {
+        public override void close() {
         }
     }
 }

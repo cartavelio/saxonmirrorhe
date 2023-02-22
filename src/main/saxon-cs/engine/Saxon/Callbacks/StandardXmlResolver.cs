@@ -8,7 +8,7 @@ using Saxon.Impl.Overrides;
 namespace Saxon.Callbacks {
     public class StandardXmlResolver : XmlUrlResolver {
         // Maps a URI to an Object containing the actual resource.
-        public override object? GetEntity(Uri absoluteUri, string? role, Type? ofObjectToReturn) {
+        public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn) {
             if (absoluteUri.Scheme == "http" || absoluteUri.Scheme == "https") {
                 try {
                     HttpResponseMessage response = ResourceLoader.readHttp(absoluteUri.ToString());
