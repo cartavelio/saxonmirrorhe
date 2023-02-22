@@ -20,10 +20,7 @@ import net.sf.saxon.event.Sink;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.NoElementsSpaceStrippingRule;
-import net.sf.saxon.om.NoNamespaceName;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pull.*;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.StaticQueryContext;
@@ -128,7 +125,7 @@ public class PullExamples {
 
     public NodeInfo buildStandardTree(PullProvider in) throws XPathException {
         PipelineConfiguration pipe = in.getPipelineConfiguration();
-        LinkedTreeBuilder builder = new LinkedTreeBuilder(pipe);
+        LinkedTreeBuilder builder = new LinkedTreeBuilder(pipe, Durability.MUTABLE);
         builder.open();
         new PullPushCopier(in, builder).copy();
         builder.close();
