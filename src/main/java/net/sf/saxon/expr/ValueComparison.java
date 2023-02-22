@@ -543,11 +543,16 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                 return context -> resultWhenEmpty;
             }
 
-            GenericAtomicComparer.AtomicComparisonFunction comparer = GenericAtomicComparer.makeAtomicComparisonFunction(
-                    (BuiltInAtomicType) expr.getLhsExpression().getItemType().getPrimitiveItemType(),
-                    (BuiltInAtomicType) expr.getRhsExpression().getItemType().getPrimitiveItemType(),
-                    defaultCollation,
-                    operator, true);
+            GenericAtomicComparer.AtomicComparisonFunction comparer;
+            try {
+                comparer = GenericAtomicComparer.makeAtomicComparisonFunction(
+                        operandType(expr.getLhsExpression()),
+                        operandType(expr.getRhsExpression()),
+                        defaultCollation,
+                        operator, true);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
 
 
             final boolean nullable0 = Cardinality.allowsZero(card0);
@@ -570,6 +575,15 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                 };
             }
 
+        }
+
+        private BuiltInAtomicType operandType(Expression operand) {
+            ItemType type = operand.getItemType();
+            if (type == AnyItemType.getInstance()) {
+                return BuiltInAtomicType.ANY_ATOMIC;
+            } else {
+                return (BuiltInAtomicType) type.getPrimitiveItemType();
+            }
         }
 
         public BooleanEvaluator elaborateForBoolean() {
