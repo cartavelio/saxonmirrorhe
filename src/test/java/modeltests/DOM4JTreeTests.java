@@ -27,5 +27,14 @@ public class DOM4JTreeTests extends ObjectModelTests {
             return null;
         }
     }
+
+    @Override
+    boolean stripsIgnorableWhitespace() {
+        return true;
+    }
+
+    boolean mergesAdjacentTextNodes() {
+        return false;
+    }
 }
 
