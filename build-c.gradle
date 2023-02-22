@@ -153,58 +153,69 @@ task rejar_Xerces(
 
   if (systemOs.isWindows()) {
     task "${release}c_copyAncillary"(
-      type: Copy,
       description: "Copy ancillary C files into the ${RELEASE} release build directory"
     ) {
-      into "${buildDir}/c/${release}c"
+      doLast {
+        copy {
+          into "${buildDir}/c/${release}c"
 
-      from("${projectDir}/src/main/c") {
-        include "Saxon.C.API/**/*.h"
-        include "Saxon.C.API/**/*.cpp"
-        include "Saxon.C.API/config.m4"
-        exclude "Saxon.C.API/HEC/**"
-        exclude "Saxon.C.API/PEC/**"
-        exclude "Saxon.C.API/EEC/**"
-        exclude "Saxon.C.API/Makefile"
-        exclude "Saxon.C.API/PHP7-Build/config.m4"
-        exclude "Saxon.C.API/Query.c"
-        exclude "Saxon.C.API/config.h"
-        include "Saxon.C.API/config.w32"
-        exclude "Saxon.C.API/dllmain.cpp"
-        exclude "Saxon.C.API/readme.txt"
-        exclude "Saxon.C.API/targetver.h"
+          from("${projectDir}/src/main/c") {
+            include "Saxon.C.API/**/*.h"
+            include "Saxon.C.API/**/*.cpp"
+            include "Saxon.C.API/config.m4"
+            exclude "Saxon.C.API/HEC/**"
+            exclude "Saxon.C.API/PEC/**"
+            exclude "Saxon.C.API/EEC/**"
+            exclude "Saxon.C.API/Makefile"
+            exclude "Saxon.C.API/PHP7-Build/config.m4"
+            exclude "Saxon.C.API/Query.c"
+            exclude "Saxon.C.API/config.h"
+            include "Saxon.C.API/config.w32"
+            exclude "Saxon.C.API/dllmain.cpp"
+            exclude "Saxon.C.API/readme.txt"
+            exclude "Saxon.C.API/targetver.h"
 
-        include "samples/**/*"
-        exclude "samples/cppTests/build*"
-        exclude "samples/cppTests/bin"
-        include "samples/cppTests/build64-mac.sh"
-        exclude "samples/cppTests/build32-linux.sh"
-        exclude "samples/cppTests/build64-linux.sh"
-        exclude "samples/cppTests/buildCPPSaxonEE.bat"
-        exclude "samples/cppTests/buildCPPSaxonHE.bat"
-        exclude "samples/cppTests/buildCPPSaxonPE.bat"
-        exclude "samples/cppTests/buildpec.sh"
-        exclude "samples/cTests/build-linux.sh"
-        exclude "samples/cTests/build.sh"
-        exclude "samples/cTests/build64-linux.sh"
-        exclude "samples/cTests/buildhec.sh"
-        exclude "samples/cTests/buildpec.sh"
+            include "samples/**/*"
+            exclude "samples/cppTests/build*"
+            exclude "samples/cppTests/bin"
+            include "samples/cppTests/build64-mac.sh"
+            exclude "samples/cppTests/build32-linux.sh"
+            exclude "samples/cppTests/build64-linux.sh"
+            exclude "samples/cppTests/buildCPPSaxonEE.bat"
+            exclude "samples/cppTests/buildCPPSaxonHE.bat"
+            exclude "samples/cppTests/buildCPPSaxonPE.bat"
+            exclude "samples/cppTests/buildpec.sh"
+            exclude "samples/cTests/build-linux.sh"
+            exclude "samples/cTests/build.sh"
+            exclude "samples/cTests/build64-linux.sh"
+            exclude "samples/cTests/buildhec.sh"
+            exclude "samples/cTests/buildpec.sh"
 
-        exclude "samples/data/config_file.xml"
-        exclude "samples/data/package*"
-        include "saxon-data/**/*"
+            exclude "samples/data/config_file.xml"
+            exclude "samples/data/package*"
+            include "saxon-data/**/*"
+          }
+
+          from("${projectDir}/src/docs") {
+            include "notices/JAMESCLARK.txt"
+            include "notices/UNICODE.txt"
+            include "notices/CERN.txt"
+            include "notices/LICENSE.txt"
+            include "notices/THAI.txt"
+          }
+
+          from("${projectDir}/src/main/c") {
+            include "command/*.c"
+            include "command/jni/**/*"
+            include "command/build${release}c-command.sh"
+          }
+        }
       }
-      from("${projectDir}/src/docs") {
-        include "notices/JAMESCLARK.txt"
-        include "notices/UNICODE.txt"
-        include "notices/CERN.txt"
-        include "notices/LICENSE.txt"
-        include "notices/THAI.txt"
-      }
-      from("${projectDir}/src/main/c") {
-        include "command/*.c"
-        include "command/jni/**/*"
-        include "command/build${release}c-command.sh"
+      doLast {
+        copy {
+          into "${buildDir}/c/${release}c/Saxon.C.API"
+          from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
+        }
       }
     }
 
@@ -223,58 +234,68 @@ task rejar_Xerces(
     }
   } else if (systemOs.isMacOsX()) {
     task "${release}c_copyAncillary"(
-      type: Copy,
       description: "Copy ancillary C files into the ${RELEASE} release build directory"
     ) {
-      into "${buildDir}/c/${release}c"
+      doLast {
+        copy {
+          into "${buildDir}/c/${release}c"
+          from("${projectDir}/src/main/c") {
+            include "Saxon.C.API/**/*.h"
+            include "Saxon.C.API/**/*.cpp"
+            include "Saxon.C.API/config.m4"
+            exclude "Saxon.C.API/HEC/**"
+            exclude "Saxon.C.API/PEC/**"
+            exclude "Saxon.C.API/EEC/**"
+            exclude "Saxon.C.API/Makefile"
+            exclude "Saxon.C.API/PHP7-Build/config.m4"
+            exclude "Saxon.C.API/Query.c"
+            exclude "Saxon.C.API/config.h"
+            exclude "Saxon.C.API/config.w32"
+            exclude "Saxon.C.API/dllmain.cpp"
+            exclude "Saxon.C.API/readme.txt"
+            exclude "Saxon.C.API/targetver.h"
 
-      from("${projectDir}/src/main/c") {
-        include "Saxon.C.API/**/*.h"
-        include "Saxon.C.API/**/*.cpp"
-        include "Saxon.C.API/config.m4"
-        exclude "Saxon.C.API/HEC/**"
-        exclude "Saxon.C.API/PEC/**"
-        exclude "Saxon.C.API/EEC/**"
-        exclude "Saxon.C.API/Makefile"
-        exclude "Saxon.C.API/PHP7-Build/config.m4"
-        exclude "Saxon.C.API/Query.c"
-        exclude "Saxon.C.API/config.h"
-        exclude "Saxon.C.API/config.w32"
-        exclude "Saxon.C.API/dllmain.cpp"
-        exclude "Saxon.C.API/readme.txt"
-        exclude "Saxon.C.API/targetver.h"
+            include "samples/**/*"
+            exclude "samples/cppTests/build*"
+            exclude "samples/cppTests/bin"
+            include "samples/cppTests/build64-mac.sh"
+            exclude "samples/cppTests/build32-linux.sh"
+            exclude "samples/cppTests/build64-linux.sh"
+            exclude "samples/cppTests/buildCPPSaxonEE.bat"
+            exclude "samples/cppTests/buildCPPSaxonHE.bat"
+            exclude "samples/cppTests/buildCPPSaxonPE.bat"
+            exclude "samples/cppTests/buildpec.sh"
+            exclude "samples/cTests/build-linux.sh"
+            exclude "samples/cTests/build.sh"
+            exclude "samples/cTests/build64-linux.sh"
+            exclude "samples/cTests/buildhec.sh"
+            exclude "samples/cTests/buildpec.sh"
 
-        include "samples/**/*"
-        exclude "samples/cppTests/build*"
-        exclude "samples/cppTests/bin"
-        include "samples/cppTests/build64-mac.sh"
-        exclude "samples/cppTests/build32-linux.sh"
-        exclude "samples/cppTests/build64-linux.sh"
-        exclude "samples/cppTests/buildCPPSaxonEE.bat"
-        exclude "samples/cppTests/buildCPPSaxonHE.bat"
-        exclude "samples/cppTests/buildCPPSaxonPE.bat"
-        exclude "samples/cppTests/buildpec.sh"
-        exclude "samples/cTests/build-linux.sh"
-        exclude "samples/cTests/build.sh"
-        exclude "samples/cTests/build64-linux.sh"
-        exclude "samples/cTests/buildhec.sh"
-        exclude "samples/cTests/buildpec.sh"
+            exclude "samples/data/config_file.xml"
+            exclude "samples/data/package*"
+            include "saxon-data/**/*"
+          }
 
-        exclude "samples/data/config_file.xml"
-        exclude "samples/data/package*"
-        include "saxon-data/**/*"
-      }
-      from("${projectDir}/src/docs") {
-        include "notices/JAMESCLARK.txt"
-        include "notices/UNICODE.txt"
-        include "notices/CERN.txt"
-        include "notices/LICENSE.txt"
-        include "notices/THAI.txt"
-      }
-      from("${projectDir}/src/main/c") {
-        include "command/*.c"
-        include "command/jni/**/*"
-        include "command/build${release}c-command.sh"
+          from("${projectDir}/src/docs") {
+            include "notices/JAMESCLARK.txt"
+            include "notices/UNICODE.txt"
+            include "notices/CERN.txt"
+            include "notices/LICENSE.txt"
+            include "notices/THAI.txt"
+          }
+
+          from("${projectDir}/src/main/c") {
+            include "command/*.c"
+            include "command/jni/**/*"
+            include "command/build${release}c-command.sh"
+          }
+        }
+      } 
+      doLast {
+        copy {
+          into "${buildDir}/c/${release}c/Saxon.C.API"
+          from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
+        }
       }
     }
 
