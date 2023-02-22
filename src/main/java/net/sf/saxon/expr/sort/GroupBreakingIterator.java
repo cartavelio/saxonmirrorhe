@@ -13,7 +13,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceExtent;
@@ -87,8 +86,8 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
     }
 
     @Override
-    public SequenceIterator iterateCurrentGroup() {
-        return new ListIterator.Of<>(currentMembers);
+    public Sequence currentGroup() throws XPathException {
+        return SequenceExtent.makeSequenceExtent(currentMembers);
     }
 
     @Override

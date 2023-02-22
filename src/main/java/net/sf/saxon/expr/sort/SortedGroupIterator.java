@@ -69,7 +69,7 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
             }
             gtbs.originalPosition = count++;
             gtbs.currentGroupingKey = groupIter.getCurrentGroupingKey();
-            gtbs.currentGroup = new MemoSequence(groupIter.iterateCurrentGroup());
+            gtbs.currentGroup = groupIter.currentGroup();
         }
     }
 
@@ -80,8 +80,8 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
     }
 
     @Override
-    public SequenceIterator iterateCurrentGroup() throws XPathException {
-        return ((GroupToBeSorted) values[position - 1]).currentGroup.iterate();
+    public Sequence currentGroup() throws XPathException {
+        return ((GroupToBeSorted) values[position - 1]).currentGroup;
     }
 
     //#if EE==true
@@ -107,10 +107,9 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
         }
 
         @Override
-        public SequenceIterator iterateCurrentGroup() throws XPathException {
-            return ((GroupToBeSorted) values[position() - 1]).currentGroup.iterate();
+        public Sequence currentGroup() throws XPathException {
+            return ((GroupToBeSorted) values[position() - 1]).currentGroup;
         }
-
     }
 //#endif
 

@@ -15,9 +15,9 @@ import net.sf.saxon.functions.DistinctValues;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -209,15 +209,9 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
         }
     }
 
-    /**
-     * Get an iterator over the items in the current group
-     *
-     * @return the iterator
-     */
-
     @Override
-    public SequenceIterator iterateCurrentGroup() {
-        return new ListIterator.Of<Item>(groups.get(position - 1));
+    public Sequence currentGroup() throws XPathException {
+        return SequenceExtent.makeSequenceExtent(groups.get(position - 1));
     }
 
     /**
@@ -295,11 +289,6 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
             currentGroupingKey = groupKeys.get(position - 1);
 
             setLengthFinder(() -> groups.size());
-        }
-
-        @Override
-        public SequenceIterator iterateCurrentGroup()  {
-            return new ListIterator.Of<>(currentGroup);
         }
 
         @Override

@@ -16,8 +16,8 @@ import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
-import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.value.SequenceExtent;
 
 import java.util.List;
 
@@ -46,8 +46,8 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
     }
 
     @Override
-    public SequenceIterator iterateCurrentGroup() {
-        return new ListIterator.Of<>(currentMembers);
+    public Sequence currentGroup() throws XPathException {
+        return SequenceExtent.makeSequenceExtent(currentMembers);
     }
 
     @Override
@@ -110,11 +110,9 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
         }
 
         @Override
-        public SequenceIterator iterateCurrentGroup() {
-            return new ListIterator.Of<>(cMembers);
+        public Sequence currentGroup() throws XPathException {
+            return SequenceExtent.makeSequenceExtent(cMembers);
         }
-
-
     }
 
 //#endif

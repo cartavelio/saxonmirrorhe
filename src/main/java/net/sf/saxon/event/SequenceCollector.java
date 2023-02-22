@@ -43,7 +43,7 @@ public final class SequenceCollector extends SequenceWriter {
      */
 
     public SequenceCollector(PipelineConfiguration pipe) {
-        this(pipe, 50);
+        this(pipe, 20);
     }
 
     public SequenceCollector(PipelineConfiguration pipe, int estimatedSize) {

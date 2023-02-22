@@ -11,7 +11,6 @@ import net.sf.saxon.transpile.CSharpSimpleEnum;
 
 /**
  * The Durability of a node affects how it is handled for the purposes of caching by memo functions.
- * If a node is
  */
 
 @CSharpSimpleEnum

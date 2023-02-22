@@ -17,9 +17,9 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -147,8 +147,8 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
     }
 
     @Override
-    public SequenceIterator iterateCurrentGroup() {
-        return new ListIterator.Of<>(currentMembers);
+    public Sequence currentGroup() throws XPathException {
+        return SequenceExtent.makeSequenceExtent(currentMembers);
     }
 
     @Override
@@ -219,11 +219,6 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
             this.savedcontext = savedContext;
             setCurrentGroupingKey(currentKey);
             setLengthFinder(() -> savedcontext.getLast());
-        }
-
-        @Override
-        public SequenceIterator iterateCurrentGroup() {
-            return new ListIterator.Of<>(currentMembers);
         }
 
     }
