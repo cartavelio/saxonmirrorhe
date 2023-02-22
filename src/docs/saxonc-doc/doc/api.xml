@@ -942,10 +942,10 @@
                   <code>void</code>
                </td>
                <td>
-                  <span class="signature">setTargetEdition(string edition)</span>
+                  <span class="signature">setTargetEdition(string $edition)</span>
                   <div class="fcomment">Set the target edition under which the stylesheet will be executed.
-                     The Saxon edition for the run-time environment. One of "EE", "PE", "HE",
-                     or "JS", "JS2", or "JS3"</div>
+                     The $edition argument is the Saxon edition for the run-time environment: one of "EE", "PE", "HE",
+                     or "JS", "JS2", or "JS3".</div>
                </td>
             </tr>
 
@@ -954,8 +954,11 @@
                   <code>void</code>
                </td>
                <td>
-                  <span class="signature">setXsltLanguageVersion(string version)</span>
-                  <div class="fcomment">Set the XSLT (and XPath) language level to be supported by the processor. The values "3.0" and "4.0" are recognized</div>
+                  <span class="signature">setXsltLanguageVersion(string $version)</span>
+                  <div class="fcomment">Set the XSLT (and XPath) language level to be supported by the
+                     processor. Set the value to "4.0" to enable support for experimental features defined in
+                     the XSLT 4.0 proposal (which is likely to change before it stabilizes).The values "3.0"
+                     and "4.0" are recognized.</div>
                </td>
             </tr>
 
@@ -964,7 +967,7 @@
                   <code>void</code>
                </td>
                <td>
-                  <span class="signature">setFastCompilation(bool fast)</span>
+                  <span class="signature">setFastCompilation(bool $fast)</span>
                   <div class="fcomment">Request fast compilation. This will generally be achieved at the expense of run-time performance
                         and quality of diagnostics. Fast compilation is a good trade-off if (a) the stylesheet is known to be correct,
                         and (b) once compiled, it is only executed once against a document of modest size.</div>
@@ -977,8 +980,11 @@
                   <code>void</code>
                </td>
                <td>
-                  <span class="signature">setRelocatable(bool relocatable)</span>
-                  <div class="fcomment">Indicate package deployable to a different location</div>
+                  <span class="signature">setRelocatable(bool $relocatable)</span>
+                  <div class="fcomment">Indicate whether any package produced by this compiler can be deployed
+                     to a different location, with a different base URI. If true then
+                     <code>static-base-uri()</code> represents the deployed location of the package, rather
+                     than its compile time location.</div>
                </td>
             </tr>
 
