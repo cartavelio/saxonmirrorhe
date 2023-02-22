@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions.registry;
 
+//import com.saxonica.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -36,7 +37,7 @@ public class XSLT30FunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        importFunctionSet(XPath40FunctionSet.getInstance());  // TODO: support different function sets for 3.0/4.0
+        importFunctionSet(correspondingXPathFunctionSet());
 
         register("accumulator-after", 1, e -> e.populate( AccumulatorFn.AccumulatorAfter::new, AnyItemType.getInstance(),
                  STAR, LATE | CITEM)

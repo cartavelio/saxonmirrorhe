@@ -17,8 +17,6 @@ import net.sf.saxon.functions.ExecutableFunctionLibrary;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.functions.registry.XPath31FunctionSet;
-import net.sf.saxon.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
@@ -549,7 +547,7 @@ public final class EvaluateInstr extends Expression {
                     for (FunctionLibrary lib : libraryList0.getLibraryList()) {
                         if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceUri.FN)) {
                             // Exclude XSLT-defined functions
-                            libraryList1.addFunctionLibrary(version == 40 ? XPath40FunctionSet.getInstance() : XPath31FunctionSet.getInstance());
+                            libraryList1.addFunctionLibrary(config.getXPathFunctionSet(version));
                         } else if (lib instanceof StylesheetFunctionLibrary || lib instanceof ExecutableFunctionLibrary) {
                             libraryList1.addFunctionLibrary(new PublicStylesheetFunctionLibrary(lib));
                         } else {

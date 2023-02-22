@@ -306,10 +306,12 @@ public class StyleNodeFactory implements NodeFactory {
                 return new XSLApplyImports();
             case StandardNames.XSL_APPLY_TEMPLATES:
                 return new XSLApplyTemplates();
+            //#if EE==true || PE==true
             case StandardNames.XSL_ARRAY:
                 return new XSLArray();
             case StandardNames.XSL_ARRAY_MEMBER:
                 return new XSLArrayMember();
+            //#endif
             case StandardNames.XSL_ASSERT:
                 return new XSLAssert();
             case StandardNames.XSL_ATTRIBUTE:
@@ -442,8 +444,10 @@ public class StyleNodeFactory implements NodeFactory {
             case StandardNames.XSL_TRANSFORM:
                 //noinspection RedundantCast
                 return topLevelModule ? (StyleElement)new XSLPackage() : (StyleElement)new XSLStylesheet();
+            //#if EE==true || PE==true
             case StandardNames.XSL_SWITCH:
                 return new XSLSwitch();
+            //#endif
             case StandardNames.XSL_TEMPLATE:
                 return new XSLTemplate();
             case StandardNames.XSL_TEXT:

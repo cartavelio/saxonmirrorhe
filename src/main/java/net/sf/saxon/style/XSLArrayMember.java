@@ -7,9 +7,11 @@
 
 package net.sf.saxon.style;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Literal;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.functions.registry.XPath40FunctionSet;
+import com.saxonica.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -26,11 +28,20 @@ public class XSLArrayMember extends XSLSequence {
 
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
+        if (isInXsltNamespace()) {
+            requireXslt40(null);
+        } else if (!getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+            compileError("xsl:array requires a Saxon-PE or -EE license");
+        }
         if (getSelectExpression() == null) {
             setSelectExpression(compileSequenceConstructor(exec, decl, false));
         }
+        Expression result = Literal.makeEmptySequence();
+        //#if EE==true || PE==true
         SystemFunction arrayMem = XPath40FunctionSet.getInstance().makeFunction("parcel", 1);
-        return arrayMem.makeFunctionCall(getSelectExpression());
+        result = arrayMem.makeFunctionCall(getSelectExpression());
+        //#endif
+        return result;
     }
 
 }

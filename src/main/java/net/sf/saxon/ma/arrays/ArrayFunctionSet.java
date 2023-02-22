@@ -7,19 +7,16 @@
 
 package net.sf.saxon.ma.arrays;
 
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StaticContext;
+import com.saxonica.functions.qt4.UnparcelFn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.Pingable;
 import net.sf.saxon.functions.Fold;
 import net.sf.saxon.functions.FoldingFunction;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.functions.UnparcelFn;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -31,7 +28,6 @@ import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in XPath 3.1
@@ -156,6 +152,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         register("tail", 1, e -> e.populate( ArrayTail::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
+        //#if EE==true || PE==true
         if (version >= 40) {
             register("foot", 1, e -> e.populate(ArrayFoot::new, AnyItemType.getInstance(), STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
@@ -180,11 +177,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
 
         }
-    }
-
-    @Override
-    public Expression bind(SymbolicName.F symbolicName, Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) throws XPathException {
-        return super.bind(symbolicName, staticArgs, keywords, env, reasons);
+        //#endif
     }
 
     @Override
@@ -497,39 +490,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
     }
 
-    /**
-     * Implementation of the proposed XP40 function array:members(array(*)) =&gt; parcel*
-     */
-    public static class ArrayMembers extends SystemFunction {
 
-        @Override
-        public GroundedValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-            ArrayItem input = (ArrayItem)arguments[0].head();
-            List<Parcel> parcels = new ArrayList<>(input.arrayLength());
-            for (GroundedValue member : input.members()) {
-                parcels.add(new Parcel(member));
-            }
-            return SequenceExtent.makeSequenceExtent(parcels);
-        }
-
-    }
-
-    /**
-     * Implementation of the proposed XP40 function array:of(parcel*) =&gt; array
-     */
-    public static class ArrayOf extends ArrayGeneratingFunction {
-
-        @Override
-        public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-            List<GroundedValue> members = new ArrayList<>(expectedSize());
-            SequenceIterator parcels = arguments[0].iterate();
-            for (Item parcel; (parcel = parcels.next()) != null;) {
-                members.add(UnparcelFn.unparcel(parcel, context));
-            }
-            return makeArray(members);
-        }
-
-    }
 
     /**
      * Implementation of the function array:put(arrays, index, newValue) =&gt; array
@@ -656,9 +617,44 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             return array.remove(0);
         }
     }
+    //#if EE==true || PE==true
 
     /**
-     * Implementation of the function array:tail(array) =&gt; item()*
+     * Implementation of the proposed XP40 function array:members(array(*)) =&gt; parcel*
+     */
+    public static class ArrayMembers extends SystemFunction {
+
+        @Override
+        public GroundedValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem input = (ArrayItem) arguments[0].head();
+            List<Parcel> parcels = new ArrayList<>(input.arrayLength());
+            for (GroundedValue member : input.members()) {
+                parcels.add(new Parcel(member));
+            }
+            return SequenceExtent.makeSequenceExtent(parcels);
+        }
+
+    }
+
+    /**
+     * Implementation of the proposed XP40 function array:of(parcel*) =&gt; array
+     */
+    public static class ArrayOf extends ArrayGeneratingFunction {
+
+        @Override
+        public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+            List<GroundedValue> members = new ArrayList<>(expectedSize());
+            SequenceIterator parcels = arguments[0].iterate();
+            for (Item parcel; (parcel = parcels.next()) != null; ) {
+                members.add(UnparcelFn.unparcel(parcel, context));
+            }
+            return makeArray(members);
+        }
+
+    }
+
+    /**
+     * Implementation of the function array:trunk(array) =&gt; item()*
      */
     public static class ArrayTrunk extends SystemFunction {
 
@@ -668,11 +664,12 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             assert array != null;
             int len = array.arrayLength();
             if (len < 1) {
-                throw new XPathException("Argument to array:truncate is an empty array", "FOAY0001");
+                throw new XPathException("Argument to array:trunk is an empty array", "FOAY0001");
             }
             return array.remove(len - 1);
         }
     }
+    //#endif
 
     /**
      * Implementation of the function array:_to-sequence(array) =&gt; item()* which
