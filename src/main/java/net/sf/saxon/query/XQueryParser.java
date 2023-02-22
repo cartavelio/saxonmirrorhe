@@ -4871,16 +4871,20 @@ public class XQueryParser extends XPathParser {
 
     @Override
     /*@NotNull*/
-    protected Literal makeStringLiteral(/*@NotNull*/ String token) throws XPathException {
-        StringLiteral lit;
-        if (token.indexOf('&') == -1) {
-            lit = new StringLiteral(token);
+    protected Literal makeStringLiteral(/*@NotNull*/ String token, boolean doUnescaping) throws XPathException {
+        if (doUnescaping) {
+            StringLiteral lit;
+            if (token.indexOf('&') == -1) {
+                lit = new StringLiteral(token);
+            } else {
+                CharSequence sb = unescape(token);
+                lit = new StringLiteral(StringValue.makeStringValue(sb));
+            }
+            setLocation(lit);
+            return lit;
         } else {
-            CharSequence sb = unescape(token);
-            lit = new StringLiteral(StringValue.makeStringValue(sb));
+            return super.makeStringLiteral(token, doUnescaping);
         }
-        setLocation(lit);
-        return lit;
     }
 
     /**
