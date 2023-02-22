@@ -37,4 +37,13 @@ public abstract class ExtensionInstruction extends StyleElement {
         return true;
     }
 
+    /**
+     * Ask whether the element is in the XSLT namespace
+     *
+     * @return true if the element is in the XSLT namespace
+     */
+    @Override
+    public boolean isInXsltNamespace() {
+        return false;
+    }
 }

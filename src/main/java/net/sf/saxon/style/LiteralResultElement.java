@@ -85,6 +85,16 @@ public class LiteralResultElement extends StyleElement {
     }
 
     /**
+     * Ask whether the element is in the XSLT namespace
+     *
+     * @return true if the element is in the XSLT namespace
+     */
+    @Override
+    public boolean isInXsltNamespace() {
+        return false;
+    }
+
+    /**
      * Process the attribute list
      */
 
@@ -151,13 +161,11 @@ public class LiteralResultElement extends StyleElement {
 
         resultNodeName = getNodeName();
 
-        String elementURI = getURI();
-
         if (toplevel) {
             // A top-level element can never be a "real" literal result element,
             // but this class gets used for unknown elements found at the top level
 
-            if (elementURI.isEmpty()) {
+            if (getURI().isEmpty()) {
                 compileError("Top level elements must have a non-null namespace URI", "XTSE0130");
                 // Now gets caught earlier - such elements are built as DataElement instances
             }
@@ -195,6 +203,7 @@ public class LiteralResultElement extends StyleElement {
 
                 // determine if there is an alias for the namespace of the element name
 
+                String elementURI = getURI();
                 NamespaceBinding elementAlias = sheet.getNamespaceAlias(elementURI);
                 if (elementAlias != null && !elementAlias.getURI().equals(elementURI)) {
                     resultNodeName = new FingerprintedQName(elementAlias.getPrefix(),

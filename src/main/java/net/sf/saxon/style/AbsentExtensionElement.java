@@ -36,6 +36,16 @@ public class AbsentExtensionElement extends StyleElement {
     CallTemplate instruction;
     boolean useTailRecursion;
 
+    /**
+     * Ask whether the element is in the XSLT namespace
+     *
+     * @return true if the element is in the XSLT namespace
+     */
+    @Override
+    public boolean isInXsltNamespace() {
+        return getNodeName().hasURI(NamespaceConstant.XSLT);
+    }
+
     @Override
     public boolean isInstruction() {
         return true;

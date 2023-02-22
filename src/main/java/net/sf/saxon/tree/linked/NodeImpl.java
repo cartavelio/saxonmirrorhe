@@ -697,7 +697,7 @@ public abstract class NodeImpl
     public NodeImpl getSuccessorElement(SteppingNode anchor, String uri, String local) {
         NodeImpl next = getNextInDocument((NodeImpl)anchor);
         while (next != null && !(next.getNodeKind() == Type.ELEMENT &&
-                                         (uri == null || uri.equals(next.getURI())) &&
+                                         (uri == null || next.getNodeName().hasURI(uri)) &&
                                          (local == null || local.equals(next.getLocalPart())))) {
             next = next.getNextInDocument((NodeImpl)anchor);
         }

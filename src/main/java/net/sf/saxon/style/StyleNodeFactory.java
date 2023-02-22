@@ -148,7 +148,7 @@ public class StyleNodeFactory implements NodeFactory {
 
             if (parent instanceof AbsentExtensionElement &&
                     ((AbsentExtensionElement)parent).forwardsCompatibleModeIsEnabled() &&
-                    parent.getURI().equals(NamespaceConstant.XSLT) &&
+                    ((AbsentExtensionElement)parent).isInXsltNamespace() &&
                     !(e instanceof XSLFallback)) {
                 // Parent is an unknown XSLT element in forwards-compatibility mode; siblings of xsl:fallback are ignored
                 AbsentExtensionElement temp = new AbsentExtensionElement();

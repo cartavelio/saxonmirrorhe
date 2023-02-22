@@ -7,7 +7,6 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.VersionedPackageName;
@@ -184,11 +183,11 @@ public class XSLPackage extends XSLModuleRoot {
                 if (getLocalPart().equals("package") &&
                         (fp == StandardNames.XSL_USE_PACKAGE || fp == StandardNames.XSL_EXPOSE)) {
                     // all is well
-                } else if (!NamespaceConstant.XSLT.equals(child.getURI()) && !"".equals(child.getURI())) {
+                } else if (!((StyleElement) child).isInXsltNamespace() && !"".equals(child.getURI())) {
                     // elements in other namespaces are allowed and ignored
                 } else if (child instanceof AbsentExtensionElement && ((StyleElement) child).forwardsCompatibleModeIsEnabled()) {
                     // this is OK: an unknown XSLT element is allowed in forwards compatibility mode
-                } else if (NamespaceConstant.XSLT.equals(child.getURI())) {
+                } else if (((StyleElement) child).isInXsltNamespace()) {
                     if (child instanceof AbsentExtensionElement) {
                         // then the error will be reported later
                     } else {

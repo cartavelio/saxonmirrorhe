@@ -7,7 +7,6 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
@@ -109,11 +108,11 @@ public class XSLStylesheet extends XSLModuleRoot {
                     curr instanceof DataElement) {
                 // all is well
             } else if (curr instanceof StyleElement) {
-                if (!NamespaceConstant.XSLT.equals(curr.getURI()) && !"".equals(curr.getURI())) {
+                if (!((StyleElement)curr).isInXsltNamespace() && !((StyleElement)curr).getNodeName().hasURI("")) {
                     // elements in other namespaces are allowed and ignored
                 } else if (curr instanceof AbsentExtensionElement && ((StyleElement) curr).forwardsCompatibleModeIsEnabled()) {
                     // this is OK: an unknown XSLT element is allowed in forwards compatibility mode
-                } else if (NamespaceConstant.XSLT.equals(curr.getURI())) {
+                } else if (((StyleElement) curr).isInXsltNamespace()) {
                     ((StyleElement) curr).compileError("Element " + curr.getDisplayName() +
                                                                " must not appear directly within " + getDisplayName(), "XTSE0010");
                 } else {
