@@ -23,8 +23,8 @@
 #endif
 
 //#define DEBUG //remove
-#define CVERSION "1.3.0"
-#define CVERSION_API_NO 130
+#define CVERSION "11.1"
+#define CVERSION_API_NO 1110
 
 
 
