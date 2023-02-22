@@ -13,8 +13,8 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.NoDynamicContextException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.value.SequenceType;
 
@@ -296,9 +296,14 @@ public abstract class FunctionCall extends Expression {
             return this;
         }
         try {
-            Literal lit = Literal.makeLiteral(SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext())), this);
-            Optimizer.trace(visitor.getConfiguration(), "Pre-evaluated function call " + toShortString(), lit);
-            return lit;
+            try {
+                Literal lit = Literal.makeLiteral(SequenceTool.toGroundedValue(
+                        iterate(visitor.getStaticContext().makeEarlyEvaluationContext())), this);
+                Optimizer.trace(visitor.getConfiguration(), "Pre-evaluated function call " + toShortString(), lit);
+                return lit;
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         } catch (NoDynamicContextException e) {
             // early evaluation failed, usually because implicit timezone required
             return this;

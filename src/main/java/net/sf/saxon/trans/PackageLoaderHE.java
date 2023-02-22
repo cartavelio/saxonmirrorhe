@@ -248,7 +248,7 @@ public class PackageLoaderHE implements IPackageLoader {
         }
         pack.setPackageVersion(
                 new PackageVersion(packageElement.getAttributeValue("", "packageVersion")));
-        pack.setVersion(getIntegerAttribute(packageElement, "version"));
+        pack.setLanguageVersion(getIntegerAttribute(packageElement, "version"));
         pack.setSchemaAware("1".equals(packageElement.getAttributeValue("", "schemaAware")));
         if (pack.isSchemaAware()) {
             needsEELicense("schema-awareness");
