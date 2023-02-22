@@ -223,13 +223,13 @@ namespace Saxon.Api
 
         private int checkSingleChar(String s)
         {
-            int[] e = net.sf.saxon.value.StringValue.expand(s);
-            if (e.Length != 1)
-            {
+            if (s.Length == 1) {
+                return s[0];
+            } else if (s.Length == 2 && Char.IsSurrogatePair(s, 0)) {
+                return Char.ConvertToUtf32(s, 0);
+            } else {
                 throw new ArgumentException("Attribute \"" + s + "\" should be a single character");
             }
-            return e[0];
-
         }
 
         /// <summary>
