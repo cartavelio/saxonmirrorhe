@@ -950,31 +950,6 @@ public class Choose extends Instruction implements ConditionalInstruction {
     }
 
     /**
-     * Identify which of the choices to take
-     * @param context the dynamic context
-     * @return integer the index of the first choice that matches, zero-based; or -1 if none of the choices
-     * matches
-     * @throws XPathException if evaluating a condition fails
-     */
-
-    private int choose(XPathContext context) throws XPathException {
-        int count = size();
-        for (int i = 0; i < count; i++) {
-            final boolean b;
-            try {
-                b = getCondition(i).effectiveBooleanValue(context);
-            } catch (XPathException e) {
-                e.maybeSetFailingExpression(getCondition(i));
-                throw e;
-            }
-            if (b) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
      * Evaluate an expression as a single item. This always returns either a single Item or
      * null (denoting the empty sequence). No conversion is done. This method should not be
      * used unless the static type of the expression is a subtype of "item" or "item?": that is,
@@ -1080,14 +1055,43 @@ public class Choose extends Instruction implements ConditionalInstruction {
             for (int i = 0; i < count; i++) {
                 actions[i] = expr.getAction(i).makeElaborator().elaborateForPull();
             }
-            return context -> {
-                for (int i = 0; i < count; i++) {
-                    if (conditions[i].eval(context)) {
-                        return actions[i].iterate(context);
-                    }
-                }
-                return EmptyIterator.getInstance();
-            };
+            switch (count) {
+                case 1:
+                    return context -> {
+                        if (conditions[0].eval(context)) return actions[0].iterate(context);
+                        return EmptyIterator.getInstance();
+                    };
+                case 2:
+                    return context -> {
+                        if (conditions[0].eval(context)) return actions[0].iterate(context);
+                        if (conditions[1].eval(context)) return actions[1].iterate(context);
+                        return EmptyIterator.getInstance();
+                    };
+                case 3:
+                    return context -> {
+                        if (conditions[0].eval(context)) return actions[0].iterate(context);
+                        if (conditions[1].eval(context)) return actions[1].iterate(context);
+                        if (conditions[2].eval(context)) return actions[2].iterate(context);
+                        return EmptyIterator.getInstance();
+                    };
+                case 4:
+                    return context -> {
+                        if (conditions[0].eval(context)) return actions[0].iterate(context);
+                        if (conditions[1].eval(context)) return actions[1].iterate(context);
+                        if (conditions[2].eval(context)) return actions[2].iterate(context);
+                        if (conditions[3].eval(context)) return actions[3].iterate(context);
+                        return EmptyIterator.getInstance();
+                    };
+                default:
+                    return context -> {
+                        for (int i = 0; i < count; i++) {
+                            if (conditions[i].eval(context)) {
+                                return actions[i].iterate(context);
+                            }
+                        }
+                        return EmptyIterator.getInstance();
+                    };
+            }
         }
 
         @Override
@@ -1099,14 +1103,44 @@ public class Choose extends Instruction implements ConditionalInstruction {
             for (int i = 0; i < count; i++) {
                 actions[i] = expr.getAction(i).makeElaborator().elaborateForItem();
             }
-            return (context) -> {
-                for (int i = 0; i < count; i++) {
-                    if (conditions[i].eval(context)) {
-                        return actions[i].eval(context);
-                    }
-                }
-                return null;
-            };
+            switch (count) {
+                case 1:
+                    return context -> {
+                        if (conditions[0].eval(context)) return actions[0].eval(context);
+                        return null;
+                    };
+                case 2:
+                    return context -> {
+                        if (conditions[0].eval(context)) return actions[0].eval(context);
+                        if (conditions[1].eval(context)) return actions[1].eval(context);
+                        return null;
+                    };
+                case 3:
+                    return context -> {
+                        if (conditions[0].eval(context)) return actions[0].eval(context);
+                        if (conditions[1].eval(context)) return actions[1].eval(context);
+                        if (conditions[2].eval(context)) return actions[2].eval(context);
+                        return null;
+                    };
+                case 4:
+                    return context -> {
+                        if (conditions[0].eval(context)) return actions[0].eval(context);
+                        if (conditions[1].eval(context)) return actions[1].eval(context);
+                        if (conditions[2].eval(context)) return actions[2].eval(context);
+                        if (conditions[3].eval(context)) return actions[3].eval(context);
+                        return null;
+                    };
+                default:
+                    return context -> {
+                        for (int i = 0; i < count; i++) {
+                            if (conditions[i].eval(context)) {
+                                return actions[i].eval(context);
+                            }
+                        }
+                        return null;
+                    };
+            }
+
         }
 
         @Override
@@ -1118,14 +1152,43 @@ public class Choose extends Instruction implements ConditionalInstruction {
             for (int i = 0; i < count; i++) {
                 actions[i] = expr.getAction(i).makeElaborator().elaborateForPush();
             }
-            return (out, context) -> {
-                for (int i = 0; i < count; i++) {
-                    if (conditions[i].eval(context)) {
-                        return actions[i].processLeavingTail(out, context);
-                    }
-                }
-                return null;
-            };
+            switch (count) {
+                case 1:
+                    return (output, context) -> {
+                        if (conditions[0].eval(context)) return actions[0].processLeavingTail(output, context);
+                        return null;
+                    };
+                case 2:
+                    return (output, context) -> {
+                        if (conditions[0].eval(context)) return actions[0].processLeavingTail(output, context);
+                        if (conditions[1].eval(context)) return actions[1].processLeavingTail(output, context);
+                        return null;
+                    };
+                case 3:
+                    return (output, context) -> {
+                        if (conditions[0].eval(context)) return actions[0].processLeavingTail(output, context);
+                        if (conditions[1].eval(context)) return actions[1].processLeavingTail(output, context);
+                        if (conditions[2].eval(context)) return actions[2].processLeavingTail(output, context);
+                        return null;
+                    };
+                case 4:
+                    return (output, context) -> {
+                        if (conditions[0].eval(context)) return actions[0].processLeavingTail(output, context);
+                        if (conditions[1].eval(context)) return actions[1].processLeavingTail(output, context);
+                        if (conditions[2].eval(context)) return actions[2].processLeavingTail(output, context);
+                        if (conditions[3].eval(context)) return actions[3].processLeavingTail(output, context);
+                        return null;
+                    };
+                default:
+                    return (output, context) -> {
+                        for (int i = 0; i < count; i++) {
+                            if (conditions[i].eval(context)) {
+                                return actions[i].processLeavingTail(output, context);
+                            }
+                        }
+                        return null;
+                    };
+            }
         }
 
         @Override

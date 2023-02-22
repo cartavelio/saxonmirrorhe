@@ -7,7 +7,7 @@ public abstract class UpdateElaborator extends Elaborator {
     }
 
     @Override
-    public EagerEvaluator eagerly() {
+    public SequenceEvaluator eagerly() {
         notAllowed();
         return null;
     }

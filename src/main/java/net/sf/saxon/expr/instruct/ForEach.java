@@ -17,7 +17,6 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.PrependSequenceIterator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
@@ -667,7 +666,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
             PullEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPull();
             if (forEach.getSeparatorExpression() == null) {
-                ContextMappingFunction mapper = CSharp.methodRef(action::iterate);
+                ContextMappingFunction mapper = cxt -> action.iterate(cxt);
                 return context -> {
                     XPathContextMinor c2 = context.newMinorContext();
                     c2.trackFocus(select.iterate(context));

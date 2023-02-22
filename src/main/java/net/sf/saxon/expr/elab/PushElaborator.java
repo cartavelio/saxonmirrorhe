@@ -26,7 +26,7 @@ public abstract class PushElaborator extends Elaborator {
     }
 
     @Override
-    public EagerEvaluator eagerly() {
+    public SequenceEvaluator eagerly() {
         PushEvaluator pushEval = elaborateForPush();
         return context -> {
             Controller controller = context.getController();
@@ -52,7 +52,7 @@ public abstract class PushElaborator extends Elaborator {
         return context -> {
             Controller controller = context.getController();
             assert controller != null;
-            SequenceCollector seq = controller.allocateSequenceOutputter();
+            SequenceCollector seq = controller.allocateSequenceOutputter(1);
             TailCall tc = pushEval.processLeavingTail(new ComplexContentOutputter(seq), context);
             Expression.dispatchTailCall(tc);
             seq.close();

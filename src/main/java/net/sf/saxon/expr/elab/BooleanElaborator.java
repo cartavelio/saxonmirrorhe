@@ -7,7 +7,7 @@ import net.sf.saxon.value.BooleanValue;
 public abstract class BooleanElaborator extends Elaborator {
 
     @Override
-    public EagerEvaluator eagerly() {
+    public SequenceEvaluator eagerly() {
         BooleanEvaluator b = elaborateForBoolean();
         return context -> BooleanValue.get(b.eval(context));
     }

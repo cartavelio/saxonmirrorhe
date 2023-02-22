@@ -8,11 +8,7 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.EagerEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.Ping;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -28,7 +24,6 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 
 /**
@@ -36,7 +31,7 @@ import java.util.function.Consumer;
  * corresponding expressions: [a,b,c,d]
  */
 
-public class SquareArrayConstructor extends Expression implements Consumer<Ping> {
+public class SquareArrayConstructor extends Expression implements Pingable {
 
 
     private OperandArray operanda;
@@ -282,7 +277,7 @@ public class SquareArrayConstructor extends Expression implements Consumer<Ping>
     }
 
     @Override
-    public void accept(Ping ping) {
+    public void ping() {
         numberOfConversions++;
     }
 
@@ -343,14 +338,14 @@ public class SquareArrayConstructor extends Expression implements Consumer<Ping>
         @Override
         public ItemEvaluator elaborateForItem() {
             SquareArrayConstructor expr = (SquareArrayConstructor)getExpression();
-            List<EagerEvaluator> eagerEvaluators = new ArrayList<>(expr.getOperanda().getNumberOfOperands());
+            List<SequenceEvaluator> eagerEvaluators = new ArrayList<>(expr.getOperanda().getNumberOfOperands());
             for (Operand o : expr.operands()) {
                 eagerEvaluators.add(o.getChildExpression().makeElaborator().eagerly());
             }
             return context -> {
                 List<GroundedValue> members = new ArrayList<>(eagerEvaluators.size());
-                for (EagerEvaluator e : eagerEvaluators) {
-                    members.add(e.evaluate(context));
+                for (SequenceEvaluator e : eagerEvaluators) {
+                    members.add((GroundedValue)e.evaluate(context));
                 }
                 return expr.makeArray(members);
             };

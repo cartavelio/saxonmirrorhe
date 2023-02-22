@@ -63,33 +63,9 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
                         Location locationId) throws XPathException {
         if (item instanceof ArrayItem) {
             SequenceCollector collector = context.getController().allocateSequenceOutputter();
-            Outputter cco = new ComplexContentOutputter(collector);
-            ProxyOutputter checker = new ProxyOutputter(cco) {
-                @Override
-                public void append(Item item) throws XPathException {
-                    if (item instanceof Parcel) {
-                        super.append(item);
-                    } else {
-                        mustBeParcel();
-                    }
-                }
-
-                @Override
-                public void append(Item item, Location locationId, int properties) throws XPathException {
-                    if (item instanceof Parcel) {
-                        super.append(item, locationId, properties);
-                    } else {
-                        mustBeParcel();
-                    }
-                }
-
-
-                private void mustBeParcel() throws XPathException {
-                    throw new XPathException("Template rule invoked when processing an array using the "
-                                                     + "shallow-copy-all rule must return a sequence of parcels (array members)", "XPTY0004");
-                }
-
-            };
+            ComplexContentOutputter cco = new ComplexContentOutputter(collector);
+            ProxyOutputter checker = new ShallowCopyProxyOutputterForArrays(cco, locationId);
+  
             collector.setSystemId(out.getSystemId());
             SequenceIterator iter = ((ArrayItem) item).parcels();
 
@@ -123,33 +99,9 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
             }
 
             SequenceCollector collector = context.getController().allocateSequenceOutputter();
-            Outputter cco = new ComplexContentOutputter(collector);
-            ProxyOutputter checker = new ProxyOutputter(cco) {
-                @Override
-                public void append(Item item) throws XPathException {
-                    if (item instanceof MapItem) {
-                        super.append(item);
-                    } else {
-                        mustBeParcel(locationId);
-                    }
-                }
+            ComplexContentOutputter cco = new ComplexContentOutputter(collector);
+            ProxyOutputter checker = new ShallowCopyProxyOutputterForMaps(cco, locationId);
 
-                @Override
-                public void append(Item item, Location locationId, int properties) throws XPathException {
-                    if (item instanceof MapItem) {
-                        super.append(item, locationId, properties);
-                    } else {
-                        mustBeParcel(locationId);
-                    }
-                }
-
-
-                private void mustBeParcel(Location locationId) throws XPathException {
-                    throw new XPathException("Template rule invoked when processing a map using the "
-                                                     + "shallow-copy-all rule must return a sequence of maps", "XPTY0004", locationId);
-                }
-
-            };
             collector.setSystemId(out.getSystemId());
             SequenceIterator iter = ((MapItem) item).entries();
 
@@ -186,6 +138,74 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
     @Override
     public String getName() {
         return "shallow-copy-all";
+    }
+
+    private static class ShallowCopyProxyOutputterForMaps extends ProxyOutputter {
+
+        private final Location locationId;
+
+        public ShallowCopyProxyOutputterForMaps(ComplexContentOutputter cco, Location locationId) {
+            super(cco);
+            this.locationId = locationId;
+        }
+
+        @Override
+        public void append(Item item) throws XPathException {
+            if (item instanceof MapItem) {
+                super.append(item);
+            } else {
+                mustBeParcel(locationId);
+            }
+        }
+
+        @Override
+        public void append(Item item, Location locationId, int properties) throws XPathException {
+            if (item instanceof MapItem) {
+                super.append(item, locationId, properties);
+            } else {
+                mustBeParcel(locationId);
+            }
+        }
+
+
+        private void mustBeParcel(Location locationId) throws XPathException {
+            throw new XPathException("Template rule invoked when processing a map using the "
+                                             + "shallow-copy-all rule must return a sequence of maps", "XPTY0004", locationId);
+        }
+    }
+
+    private static class ShallowCopyProxyOutputterForArrays extends ProxyOutputter {
+
+        private final Location locationId;
+
+        public ShallowCopyProxyOutputterForArrays(ComplexContentOutputter cco, Location locationId) {
+            super(cco);
+            this.locationId = locationId;
+        }
+
+        @Override
+        public void append(Item item) throws XPathException {
+            if (item instanceof Parcel) {
+                super.append(item);
+            } else {
+                mustBeParcel(locationId);
+            }
+        }
+
+        @Override
+        public void append(Item item, Location locationId, int properties) throws XPathException {
+            if (item instanceof Parcel) {
+                super.append(item, locationId, properties);
+            } else {
+                mustBeParcel(locationId);
+            }
+        }
+
+
+        private void mustBeParcel(Location locationId) throws XPathException {
+            throw new XPathException("Template rule invoked when processing an array using the "
+                                             + "shallow-copy-all rule must return a sequence of parcels", "XPTY0004", locationId);
+        }
     }
 
 

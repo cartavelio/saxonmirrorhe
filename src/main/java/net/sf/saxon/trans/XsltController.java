@@ -788,7 +788,7 @@ public class XsltController extends Controller {
                     SpaceStrippedDocument strippedDoc = new SpaceStrippedDocument(node.getTreeInfo(), spaceStrippingRule);
                     // Edge case: the item might itself be a whitespace text node that is stripped
                     if (!SpaceStrippedNode.isPreservedNode(node, strippedDoc, node.getParent())) {
-                        return EmptyIterator.emptyIterator();
+                        return EmptyIterator.getInstance();
                     }
                     node = strippedDoc.wrap(node);
                 }

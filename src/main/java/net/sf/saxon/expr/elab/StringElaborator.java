@@ -13,7 +13,7 @@ public abstract class StringElaborator extends Elaborator {
     }
 
     @Override
-    public EagerEvaluator eagerly() {
+    public SequenceEvaluator eagerly() {
         UnicodeStringEvaluator u = elaborateForUnicodeString(returnZeroLengthWhenAbsent());
         return context -> new StringValue(u.eval(context));
     }
@@ -24,7 +24,7 @@ public abstract class StringElaborator extends Elaborator {
         return context -> {
             UnicodeString value = strEval.eval(context);
             if (value == null) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             } else {
                 return SingletonIterator.makeIterator(StringValue.makeUStringValue(value));
             }

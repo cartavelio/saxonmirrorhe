@@ -185,7 +185,7 @@ public class GlobalVariableReference extends VariableReference implements Compon
     public static class GlobalVariableReferenceElaborator extends PullElaborator {
 
         @Override
-        public EagerEvaluator eagerly() {
+        public SequenceEvaluator eagerly() {
             GlobalVariableReference varRef = (GlobalVariableReference) getExpression();
             return CSharp.methodRef(varRef::evaluateVariable);
         }

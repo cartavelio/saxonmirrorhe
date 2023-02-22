@@ -80,13 +80,13 @@ public class Subsequence_2 extends SystemFunction implements Callable {
                 return seq;
             }
         } else if (startVal.isNaN()) {
-            return EmptyIterator.emptyIterator();
+            return EmptyIterator.getInstance();
         } else {
             startVal = startVal.round(0);
             if (startVal.compareTo(Int64Value.PLUS_ONE) <= 0) {
                 return seq;
             } else if (startVal.compareTo(Int64Value.MAX_LONG) > 0) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             } else {
                 lstart = startVal.longValue();
             }
@@ -94,7 +94,7 @@ public class Subsequence_2 extends SystemFunction implements Callable {
 
         if (lstart > Integer.MAX_VALUE) {
             // we don't allow sequences longer than an this
-            return EmptyIterator.emptyIterator();
+            return EmptyIterator.getInstance();
         }
 
         return TailIterator.make(seq, (int) lstart);

@@ -8,13 +8,16 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.ComplexNodePushElaborator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.CombinedNodeTest;
@@ -597,29 +600,66 @@ public class FixedElement extends ElementCreator {
         @Override
         @CSharpInnerClass(outer = false, extra = {"Saxon.Hej.expr.instruct.FixedElement instr", "Saxon.Hej.expr.elab.PushEvaluator contentPusher"})
         public PushEvaluator elaborateForPush() {
-            final FixedElement instr = (FixedElement) getExpression();
+            final FixedElement expr = (FixedElement) getExpression();
             final PushEvaluator contentPusher =
-                    instr.getContentExpression().makeElaborator().elaborateForPush();
-            final ElementCreationDetails details = new ElementCreationDetails() {
-                @Override
-                public NodeName getNodeName(XPathContext context) {
-                    return instr.getFixedElementName();
-                }
+                    expr.getContentExpression().makeElaborator().elaborateForPush();
 
-                @Override
-                public String getSystemId(XPathContext context) {
-                    return instr.getStaticBaseURIString();
-                }
+            SchemaType typeCode = expr.getValidationAction() == Validation.PRESERVE
+                    ? AnyType.getInstance()
+                    : Untyped.getInstance();
 
-                @Override
-                public void processContent(Outputter output, XPathContext context) throws XPathException {
-                    TailCall tc = contentPusher.processLeavingTail(output, context);
-                    Expression.dispatchTailCall(tc);
-                }
-            };
+            int properties = ReceiverOption.NONE;
+            if (!expr.bequeathNamespacesToChildren) {
+                properties |= ReceiverOption.DISINHERIT_NAMESPACES;
+            }
+            if (!expr.inheritNamespacesFromParent) {
+                properties |= ReceiverOption.REFUSE_NAMESPACES;
+            }
+            properties |= ReceiverOption.ALL_NAMESPACES;
+            final int finalProperties = properties;
 
             return (out, context) -> {
-                instr.specificProcess(out, context, details);
+                try {
+
+                    NodeName elemName = expr.getFixedElementName();
+
+                    Receiver elemOut = out;
+                    if (!expr.preservingTypes) {
+                        ParseOptions options = new ParseOptions(expr.getValidationOptions());
+                        options.setTopLevelElement(elemName.getStructuredQName());
+                        context.getConfiguration().prepareValidationReporting(context, options);
+                        Receiver validator = context.getConfiguration().getElementValidator(
+                                elemOut, options, expr.getLocation());
+
+                        if (validator != elemOut) {
+                            out = new ComplexContentOutputter(validator);
+                        }
+                    }
+
+                    if (out.getSystemId() == null) {
+                        out.setSystemId(expr.getStaticBaseURIString());
+                    }
+
+                    out.startElement(elemName, typeCode, expr.getLocation(), finalProperties);
+
+                    // output the required namespace nodes via a callback
+
+                    for (NamespaceBinding ns : expr.namespaceBindings) {
+                        out.namespace(ns.getPrefix(), ns.getNamespaceUri(), ReceiverOption.NONE);
+                    }
+
+                    // process subordinate instructions to generate attributes and content
+                    TailCall tc = contentPusher.processLeavingTail(out, context);
+                    Expression.dispatchTailCall(tc);
+
+                    // output the element end tag (which will fail if validation fails)
+                    out.endElement();
+
+                } catch (XPathException e) {
+                    e.maybeSetLocation(expr.getLocation());
+                    e.maybeSetContext(context);
+                    throw e;
+                }
                 return null;
             };
         }

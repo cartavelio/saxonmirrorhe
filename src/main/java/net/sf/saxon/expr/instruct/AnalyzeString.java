@@ -23,7 +23,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -344,33 +343,6 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         return dependencies;
     }
 
-    /**
-     * Get an iterator over the substrings defined by the regular expression
-     *
-     * @param context the evaluation context
-     * @return an iterator that returns matching and nonmatching substrings
-     * @throws XPathException if evaluation fails with a dynamic error
-     */
-
-    public RegexIterator getRegexIterator(XPathContext context) throws XPathException {
-        StringValue input = (StringValue)getSelect().evaluateItem(context);
-        if (input == null) {
-            input = StringValue.EMPTY_STRING;
-        }
-        RegularExpression re = getRegularExpression(context);
-        return re.analyze(input.getUnicodeStringValue());
-    }
-
-    public RegularExpression getRegularExpression(XPathContext context) throws XPathException {
-        if (pattern == null) {
-            String flagstr = getFlags().evaluateAsString(context).toString();
-            StringValue regexString = (StringValue) getRegex().evaluateItem(context);
-            return context.getConfiguration().compileRegularExpression(
-                    regexString.getUnicodeStringValue(), flagstr, "XP30", null);
-        } else {
-            return pattern;
-        }
-    }
 
     /**
      * Return an Iterator to iterate over the values of a sequence. The value of every
@@ -390,26 +362,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        RegexIterator iter = getRegexIterator(context);
-        XPathContextMajor c2 = context.newContext();
-        c2.setOrigin(this);
-        c2.trackFocus(iter);
-        c2.setCurrentRegexIterator(iter);
-
-        Expression matchingExpr = getMatching();
-        Expression nonMatchExpr = getNonMatching();
-        return new ContextMappingIterator(cxt -> {
-            if (iter.isMatching()) {
-                if (matchingExpr != null) {
-                    return matchingExpr.iterate(c2);
-                }
-            } else {
-                if (nonMatchExpr != null) {
-                    return nonMatchExpr.iterate(c2);
-                }
-            }
-            return EmptyIterator.getInstance();
-        }, c2);
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     /**
@@ -460,26 +413,31 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         return new AnalyzeStringElaborator();
     }
 
+    @FunctionalInterface
+    private interface RegexEvaluator {
+        RegularExpression compileRegex(XPathContext context) throws XPathException;
+    }
 
     public static class AnalyzeStringElaborator extends PullElaborator {
 
         @Override
         public PullEvaluator elaborateForPull() {
-            AnalyzeString insn = (AnalyzeString) getExpression();
-            UnicodeStringEvaluator input = insn.getSelect().makeElaborator().elaborateForUnicodeString(true);
-            PullEvaluator matching = insn.getMatching() == null
+            AnalyzeString expr = (AnalyzeString) getExpression();
+            UnicodeStringEvaluator input = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
+            PullEvaluator matching = expr.getMatching() == null
                     ? null
-                    : insn.getMatching().makeElaborator().elaborateForPull();
-            PullEvaluator nonMatching = insn.getNonMatching() == null
+                    : expr.getMatching().makeElaborator().elaborateForPull();
+            PullEvaluator nonMatching = expr.getNonMatching() == null
                     ? null
-                    : insn.getNonMatching().makeElaborator().elaborateForPull();
-            RegularExpression pattern = insn.getPatternExpression();
+                    : expr.getNonMatching().makeElaborator().elaborateForPull();
+            RegexEvaluator regexSupplier = getRegexSupplier(expr);
+
             return context -> {
-                RegularExpression re = pattern == null ? insn.getRegularExpression(context) : pattern;
+                RegularExpression re = regexSupplier.compileRegex(context);
                 UnicodeString in = input.eval(context);
                 RegexIterator iter = re.analyze(in);
                 XPathContextMajor c2 = context.newContext();
-                c2.setOrigin(insn);
+                c2.setOrigin(expr);
                 c2.trackFocus(iter);
                 c2.setCurrentRegexIterator(iter);
 
@@ -500,40 +458,60 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
 
         @Override
         public PushEvaluator elaborateForPush() {
-            AnalyzeString insn = (AnalyzeString) getExpression();
-            UnicodeStringEvaluator input = insn.getSelect().makeElaborator().elaborateForUnicodeString(true);
-            PushEvaluator matching = insn.getMatching() == null
+            AnalyzeString expr = (AnalyzeString) getExpression();
+            UnicodeStringEvaluator input = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
+            PushEvaluator matching = expr.getMatching() == null
                     ? null
-                    : insn.getMatching().makeElaborator().elaborateForPush();
-            PushEvaluator nonMatching = insn.getNonMatching() == null
+                    : expr.getMatching().makeElaborator().elaborateForPush();
+            PushEvaluator nonMatching = expr.getNonMatching() == null
                     ? null
-                    : insn.getNonMatching().makeElaborator().elaborateForPush();
-            RegularExpression pattern = insn.getPatternExpression();
+                    : expr.getNonMatching().makeElaborator().elaborateForPush();
+
+            RegexEvaluator regexSupplier = getRegexSupplier(expr);
+
             return (out, context) -> {
-                RegularExpression re = pattern == null ? insn.getRegularExpression(context) : pattern;
+                RegularExpression re = regexSupplier.compileRegex(context);
                 UnicodeString in = input.eval(context);
                 RegexIterator iter = re.analyze(in);
                 XPathContextMajor c2 = context.newContext();
-                c2.setOrigin(insn);
+                c2.setOrigin(expr);
                 FocusIterator focus = c2.trackFocus(iter);
                 c2.setCurrentRegexIterator(iter);
 
                 while(focus.next() != null) {
                     if (iter.isMatching()) {
                         if (matching != null) {
-                            TailCall tc = matching.processLeavingTail(out, c2);
-                            dispatchTailCall(tc);
+                            dispatchTailCall(matching.processLeavingTail(out, c2));
                         }
                     } else {
                         if (nonMatching != null) {
-                            TailCall tc = nonMatching.processLeavingTail(out, c2);
-                            dispatchTailCall(tc);
+                            dispatchTailCall(nonMatching.processLeavingTail(out, c2));
                         }
                     }
                 }
                 return null;
             };
 
+        }
+
+        private RegexEvaluator getRegexSupplier(AnalyzeString expr) {
+            RegularExpression pattern = expr.getPatternExpression();
+            RegexEvaluator regexSupplier;
+            if (expr.pattern != null) {
+                // regex and flags were known statically
+                regexSupplier = context -> pattern;
+            } else {
+                // regex or flags is dynamic
+                StringEvaluator flagsEval = expr.getFlags().makeElaborator().elaborateForString(true);
+                UnicodeStringEvaluator regexEval = expr.getRegex().makeElaborator().elaborateForUnicodeString(false);
+                regexSupplier = context -> {
+                    String flagsStr = flagsEval.eval(context);
+                    UnicodeString regexStr = regexEval.eval(context);
+                    return context.getConfiguration().compileRegularExpression(
+                            regexStr, flagsStr, "XP31", null);
+                };
+            }
+            return regexSupplier;
         }
     }
 

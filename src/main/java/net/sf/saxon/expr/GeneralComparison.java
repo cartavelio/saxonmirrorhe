@@ -7,12 +7,8 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.BooleanElaborator;
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
@@ -24,7 +20,6 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NamespaceResolver;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -44,7 +39,7 @@ import java.util.function.Supplier;
  * =, !=, &lt;, &gt;, etc. This implementation is not used when in backwards-compatible mode
  */
 
-public abstract class GeneralComparison extends BinaryExpression implements ComparisonExpression, Callable {
+public abstract class GeneralComparison extends BinaryExpression implements ComparisonExpression /*, Callable */ {
 
     @CSharpSimpleEnum
     public enum ComparisonCardinality {ONE_TO_ONE, MANY_TO_ONE, MANY_TO_MANY}
@@ -651,36 +646,36 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         return null;
     }
 
-    /**
-     * Evaluate the expression
-     *
-     * @param context   the dynamic evaluation context
-     * @param arguments the values of the arguments, supplied as SequenceIterators
-     * @return the result of the evaluation, in the form of a SequenceIterator
-     * @throws XPathException if a dynamic error occurs during the evaluation of the expression
-     */
-
-    @Override
-    public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        switch (comparisonCardinality) {
-            case ONE_TO_ONE: {
-                AtomicValue value0 = (AtomicValue) arguments[0].head();
-                AtomicValue value1 = (AtomicValue) arguments[1].head();
-                return BooleanValue.get(evaluateOneToOne(value0, value1, context));
-            }
-            case MANY_TO_ONE: {
-                SequenceIterator iter0 = arguments[0].iterate();
-                AtomicValue value1 = (AtomicValue) arguments[1].head();
-                return BooleanValue.get(evaluateManyToOne(iter0, value1, context));
-            }
-            case MANY_TO_MANY: {
-                SequenceIterator iter1 = arguments[0].iterate();
-                SequenceIterator iter2 = arguments[1].iterate();
-                return BooleanValue.get(evaluateManyToMany(iter1, iter2, context));
-            }
-        }
-        return null;
-    }
+//    /**
+//     * Evaluate the expression
+//     *
+//     * @param context   the dynamic evaluation context
+//     * @param arguments the values of the arguments, supplied as SequenceIterators
+//     * @return the result of the evaluation, in the form of a SequenceIterator
+//     * @throws XPathException if a dynamic error occurs during the evaluation of the expression
+//     */
+//
+//    //@Override
+//    public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+//        switch (comparisonCardinality) {
+//            case ONE_TO_ONE: {
+//                AtomicValue value0 = (AtomicValue) arguments[0].head();
+//                AtomicValue value1 = (AtomicValue) arguments[1].head();
+//                return BooleanValue.get(evaluateOneToOne(value0, value1, context));
+//            }
+//            case MANY_TO_ONE: {
+//                SequenceIterator iter0 = arguments[0].iterate();
+//                AtomicValue value1 = (AtomicValue) arguments[1].head();
+//                return BooleanValue.get(evaluateManyToOne(iter0, value1, context));
+//            }
+//            case MANY_TO_MANY: {
+//                SequenceIterator iter1 = arguments[0].iterate();
+//                SequenceIterator iter2 = arguments[1].iterate();
+//                return BooleanValue.get(evaluateManyToMany(iter1, iter2, context));
+//            }
+//        }
+//        return null;
+//    }
 
     /**
      * Evaluate the expression in a boolean context

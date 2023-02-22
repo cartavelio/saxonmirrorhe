@@ -121,12 +121,7 @@ public class NegateExpression extends UnaryExpression {
 
     @Override
     public NumericValue evaluateItem(XPathContext context) throws XPathException {
-
-        NumericValue v1 = (NumericValue) getBaseExpression().evaluateItem(context);
-        if (v1 == null) {
-            return backwardsCompatible ? DoubleValue.NaN : null;
-        }
-        return v1.negate();
+        return (NumericValue)makeElaborator().elaborateForItem().eval(context);
     }
 
 

@@ -35,11 +35,6 @@ public class EmptyIterator implements SequenceIterator,
         return theInstance;
     }
 
-    @SuppressWarnings("unchecked")
-    public static EmptyIterator emptyIterator() {
-        return theInstance;
-    }
-
     /**
      * Protected constructor
      */

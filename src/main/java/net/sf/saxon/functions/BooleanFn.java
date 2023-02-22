@@ -81,13 +81,11 @@ public class BooleanFn extends SystemFunction {
         } else if (exp.isCallOn(Count.class)) {
             // rewrite boolean(count(x)) => exists(x)
             Expression exists = SystemFunction.makeCall("exists", exp.getRetainedStaticContext(), ((SystemFunctionCall) exp).getArg(0));
-            assert exists != null;
             ExpressionTool.copyLocationInfo(exp, exists);
             return exists.optimize(visitor, contextItemType);
         } else if (exp.getItemType() instanceof NodeTest) {
             // rewrite boolean(x) => exists(x)
             Expression exists = SystemFunction.makeCall("exists", exp.getRetainedStaticContext(), exp);
-            assert exists != null;
             ExpressionTool.copyLocationInfo(exp, exists);
             return exists.optimize(visitor, contextItemType);
         } else {

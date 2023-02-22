@@ -64,7 +64,7 @@ public class TailIterator
         } else if (base instanceof GroundedIterator && ((GroundedIterator)base).isActuallyGrounded()) {
             GroundedValue value = SequenceTool.toGroundedValue(base);
             if (start > value.getLength()) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             } else {
                 return new ValueTailIterator(value, start - 1);
             }
@@ -73,7 +73,7 @@ public class TailIterator
             for (int i = 0; i < start - 1; i++) {
                 Item b = base.next();
                 if (b == null) {
-                    return EmptyIterator.emptyIterator();
+                    return EmptyIterator.getInstance();
                 }
             }
             return new TailIterator(base, start);

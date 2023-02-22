@@ -331,7 +331,7 @@ public final class ComputedAttribute extends AttributeCreator {
         return validateNodeName(nameValue, context);
     }
 
-    protected NodeName validateNodeName(Item nameValue, XPathContext context) throws XPathException {
+    private NodeName validateNodeName(Item nameValue, XPathContext context) throws XPathException {
         NamePool pool = context.getNamePool();
         String prefix;
         String localName;

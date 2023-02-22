@@ -12,6 +12,7 @@ import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -766,7 +767,7 @@ public class Block extends Instruction {
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
         if (size() == 0) {
-            return EmptyIterator.emptyIterator();
+            return EmptyIterator.getInstance();
         } else if (size() == 1) {
             return child(0).iterate(context);
         } else {
@@ -809,8 +810,8 @@ public class Block extends Instruction {
                 for (int i=0; i < expr.size(); i++) {
                     Expression child = expr.getOperanda()[i].getChildExpression();
                     if (child instanceof VariableReference) {
-                        EagerEvaluator eval = child.makeElaborator().eagerly();
-                        actions[i] = (chain, context) -> chain.appendSequence(eval.evaluate(context));
+                        SequenceEvaluator eval = child.makeElaborator().eagerly();
+                        actions[i] = (chain, context) -> chain.appendSequence((GroundedValue)eval.evaluate(context));
                     } else {
                         PullEvaluator pull = child.makeElaborator().elaborateForPull();
                         actions[i] = (chain, context) -> {

@@ -38,6 +38,7 @@ public class SomeFn extends SystemFunction {
         for (Item item; (item = iter.next()) != null; ) {
             boolean condition = ((BooleanValue) dynamicCall(predicate, context, new Sequence[]{item}).head()).getBooleanValue();
             if (condition) {
+                iter.close();
                 return BooleanValue.TRUE;
             }
         }

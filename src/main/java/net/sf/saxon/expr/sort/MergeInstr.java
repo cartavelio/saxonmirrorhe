@@ -13,7 +13,10 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorManager;
-import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.*;
@@ -28,7 +31,6 @@ import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -913,7 +915,8 @@ public class MergeInstr extends Instruction {
                     XPathContextMajor c3 = context.newContext();
                     c3.setCurrentMergeGroupIterator((GroupIterator) inputIterator);
                     c3.trackFocus(inputIterator);
-                    return new ContextMappingIterator(CSharp.methodRef(actionPull::iterate), c3);
+                    //noinspection Convert2MethodRef
+                    return new ContextMappingIterator(cxt -> actionPull.iterate(cxt), c3);
                 } catch (XPathException e) {
                     e.maybeSetLocation(expr.getLocation());
                     throw e;

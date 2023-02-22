@@ -8,10 +8,7 @@
 package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.SequenceEvaluator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
@@ -330,12 +327,12 @@ public class PartialApply extends Expression {
             PartialApply expr = (PartialApply)getExpression();
             ItemEvaluator functionEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
             final int len = expr.boundArgumentsOp.length;
-            SequenceEvaluator[] boundArgumentsPullers = new SequenceEvaluator[len];
+            SequenceEvaluator[] boundArgumentsEvaluators = new SequenceEvaluator[len];
             for (int i = 0; i < len; i++) {
                 if (expr.boundArgumentsOp[i] == null) {
-                    boundArgumentsPullers[i] = null;
+                    boundArgumentsEvaluators[i] = null;
                 } else {
-                    boundArgumentsPullers[i] = expr.boundArgumentsOp[i].getChildExpression().makeElaborator().eagerly();
+                    boundArgumentsEvaluators[i] = expr.boundArgumentsOp[i].getChildExpression().makeElaborator().eagerly();
                 }
             }
 
@@ -343,9 +340,9 @@ public class PartialApply extends Expression {
                 Function f = (Function) functionEval.eval(context);
                 assert f != null;
                 Sequence[] values = new Sequence[len];
-                for (int i = 0; i < boundArgumentsPullers.length; i++) {
-                    if (boundArgumentsPullers[i] != null) {
-                        values[i] = boundArgumentsPullers[i].evaluate(context);
+                for (int i = 0; i < boundArgumentsEvaluators.length; i++) {
+                    if (boundArgumentsEvaluators[i] != null) {
+                        values[i] = boundArgumentsEvaluators[i].evaluate(context);
                     }
                 }
                 return new CurriedFunction(f, values);

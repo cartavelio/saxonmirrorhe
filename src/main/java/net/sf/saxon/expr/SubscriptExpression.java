@@ -155,18 +155,7 @@ public class SubscriptExpression extends SingleItemFilter {
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        NumericValue index = (NumericValue) getSubscript().evaluateItem(context);
-        if (index == null) {
-            return null;
-        }
-        int intindex = index.asSubscript();
-        if (intindex != -1) {
-            SequenceIterator iter = getBaseExpression().iterate(context);
-            return getItemAt(iter, intindex);
-        } else {
-            // there is no item at the required position
-            return null;
-        }
+        return makeElaborator().elaborateForItem().eval(context);
     }
 
     /**

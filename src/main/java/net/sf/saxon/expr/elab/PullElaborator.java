@@ -12,7 +12,7 @@ public abstract class PullElaborator extends Elaborator {
     public abstract PullEvaluator elaborateForPull();
 
     @Override
-    public EagerEvaluator eagerly() {
+    public SequenceEvaluator eagerly() {
         PullEvaluator pull = elaborateForPull();
         return context -> {
             try {

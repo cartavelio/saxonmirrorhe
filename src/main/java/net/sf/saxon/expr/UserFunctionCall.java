@@ -632,7 +632,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     public static abstract class UserFunctionCallAbstractElaborator extends FunctionCallElaborator {
 
         @Override
-        public void allocateArgumentEvaluators(FunctionCall expr, boolean allowRepeatedUse) {
+        protected void allocateArgumentEvaluators(FunctionCall expr, boolean allowRepeatedUse) {
             argumentEvaluators = new SequenceEvaluator[expr.getArity()];
             UserFunction target = ((UserFunctionCall)expr).getFunction();
             int i = 0;
@@ -669,7 +669,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     }
                     Sequence[] actualArgs = evaluateArguments(context);
                     ((XPathContextMajor) context).requestTailCall(info, actualArgs);
-                    return EmptyIterator.emptyIterator();
+                    return EmptyIterator.getInstance();
                 };
             } else {
                 TailCallLoop.TailCallFunction info = new TailCallLoop.TailCallFunction();
@@ -677,7 +677,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 return context -> {
                     Sequence[] actualArgs = evaluateArguments(context);
                     ((XPathContextMajor) context).requestTailCall(info, actualArgs);
-                    return EmptyIterator.emptyIterator();
+                    return EmptyIterator.getInstance();
                 };
             }
         }

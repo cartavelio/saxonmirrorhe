@@ -403,13 +403,7 @@ public class CastExpression extends CastingExpression implements Callable {
     /*@Nullable*/
     @Override
     public AtomicValue evaluateItem(XPathContext context) throws XPathException {
-        try {
-            AtomicValue value = (AtomicValue) getBaseExpression().evaluateItem(context);
-            return doCast(value, context);
-        } catch (ClassCastException e) {
-            e.printStackTrace();
-            throw e;
-        }
+        return (AtomicValue) makeElaborator().elaborateForItem().eval(context);
     }
 
     /**

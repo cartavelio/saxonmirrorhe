@@ -257,7 +257,7 @@ public class SuppliedParameterReference extends Expression {
 
     public static class SuppliedParameterReferenceElaborator extends PullElaborator {
         @Override
-        public EagerEvaluator eagerly() {
+        public SequenceEvaluator eagerly() {
             SuppliedParameterReference varRef = (SuppliedParameterReference) getExpression();
             int slot = varRef.getSlotNumber();
             return context -> context.evaluateLocalVariable(slot).materialize();

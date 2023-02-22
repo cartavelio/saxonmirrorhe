@@ -432,14 +432,7 @@ public class Copy extends ElementCreator {
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        Controller controller = context.getController();
-        SequenceCollector seq = controller.allocateSequenceOutputter(1);
-        seq.getPipelineConfiguration().setHostLanguage(getPackageData().getHostLanguage());
-        process(new ComplexContentOutputter(seq), context);
-        seq.close();
-        Item item = seq.getFirstItem();
-        seq.reset();
-        return item;
+        return makeElaborator().elaborateForItem().eval(context);
     }
 
     /**
@@ -488,10 +481,6 @@ public class Copy extends ElementCreator {
         return new CopyElaborator();
     }
 
-    public CopyElementDetails makeElementCreationDetails(NodeInfo copiedNode) {
-        PushEvaluator contentPush = getContentExpression().makeElaborator().elaborateForPush();
-        return new CopyElementDetails(contentPush, copiedNode);
-    }
 
     public static class CopyElementDetails extends ElementCreationDetails {
 
@@ -519,8 +508,7 @@ public class Copy extends ElementCreator {
 
         @Override
         public void processContent(Outputter out, XPathContext context) throws XPathException {
-            TailCall tc = contentEvaluator.processLeavingTail(out, context);
-            Expression.dispatchTailCall(tc);
+            Expression.dispatchTailCall(contentEvaluator.processLeavingTail(out, context));
         }
     }
 
@@ -530,6 +518,21 @@ public class Copy extends ElementCreator {
         public PushEvaluator elaborateForPush() {
             Copy expr = (Copy)getExpression();
             PushEvaluator contentPush = expr.getContentExpression().makeElaborator().elaborateForPush();
+
+            SchemaType typeCode = expr.getValidationAction() == Validation.PRESERVE
+                    ? AnyType.getInstance()
+                    : Untyped.getInstance();
+
+            int properties = ReceiverOption.NONE;
+            if (!expr.bequeathNamespacesToChildren) {
+                properties |= ReceiverOption.DISINHERIT_NAMESPACES;
+            }
+            if (!expr.inheritNamespacesFromParent) {
+                properties |= ReceiverOption.REFUSE_NAMESPACES;
+            }
+            properties |= ReceiverOption.ALL_NAMESPACES;
+            final int finalProperties = properties;
+
             return (output, context) -> {
                 Controller controller = context.getController();
                 Item item = context.getContextItem();
@@ -549,8 +552,49 @@ public class Copy extends ElementCreator {
                 switch (source.getNodeKind()) {
 
                     case Type.ELEMENT:
-                        // use the generic code for creating new elements
-                        expr.specificProcess(output, context, new CopyElementDetails(contentPush, (NodeInfo) item));
+                        try {
+
+                            NodeName elemName = NameOfNode.makeName(source);
+
+                            Receiver elemOut = output;
+                            if (!expr.preservingTypes) {
+                                ParseOptions options = new ParseOptions(expr.getValidationOptions());
+                                options.setTopLevelElement(elemName.getStructuredQName());
+                                context.getConfiguration().prepareValidationReporting(context, options);
+                                Receiver validator = context.getConfiguration().getElementValidator(
+                                        elemOut, options, expr.getLocation());
+
+                                if (validator != elemOut) {
+                                    output = new ComplexContentOutputter(validator);
+                                }
+                                //elemOut = validator;
+                            }
+
+                            output.startElement(elemName, typeCode, expr.getLocation(), finalProperties);
+
+                            // output the required namespace nodes via a callback
+
+                            if (expr.copyNamespaces) {
+                                output.namespaces(source.getAllNamespaces(), ReceiverOption.NAMESPACE_OK);
+                            } else {
+                                // Always output the namespace of the element name itself
+                                NamespaceBinding ns = elemName.getNamespaceBinding();
+                                if (!ns.isDefaultUndeclaration()) {
+                                    output.namespace(ns.getPrefix(), ns.getNamespaceUri(), ReceiverOption.NONE);
+                                }
+                            }
+
+                            // process subordinate instructions to generate attributes and content
+                            Expression.dispatchTailCall(contentPush.processLeavingTail(output, context));
+
+                            // output the element end tag (which will fail if validation fails)
+                            output.endElement();
+
+                        } catch (XPathException e) {
+                            e.maybeSetLocation(expr.getLocation());
+                            e.maybeSetContext(context);
+                            throw e;
+                        }
                         return null;
 
                     case Type.ATTRIBUTE:
@@ -600,8 +644,7 @@ public class Copy extends ElementCreator {
                         }
                         output.startDocument(ReceiverOption.NONE);
                         copyUnparsedEntities(source, output);
-                        TailCall tc = contentPush.processLeavingTail(output, context);
-                        Expression.dispatchTailCall(tc);
+                        Expression.dispatchTailCall(contentPush.processLeavingTail(output, context));
                         output.endDocument();
                         break;
 

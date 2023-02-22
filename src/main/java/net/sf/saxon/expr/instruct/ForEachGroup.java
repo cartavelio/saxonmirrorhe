@@ -21,7 +21,6 @@ import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
@@ -915,7 +914,7 @@ public class ForEachGroup extends Instruction
                 c2.trackFocus(master);
                 c2.setCurrentGroupIterator(master);
                 c2.setCurrentTemplateRule(null);
-                return new ContextMappingIterator(CSharp.methodRef(action::iterate), c2);
+                return new ContextMappingIterator(cxt -> action.iterate(cxt), c2);
             };
         }
     }

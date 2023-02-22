@@ -12,7 +12,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.MemoClosure;
@@ -72,10 +71,13 @@ public abstract class Elaborator {
     /**
      * Get a function that evaluates the underlying expression eagerly
      *
-     * @return an evaluator for the expression that returns a {@link GroundedValue}
+     * @return an evaluator for the expression that returns a {@link GroundedValue}. The class
+     * {@code SequenceEvaluator} is declared to return a {@link Sequence} not a {@code GroundedValue};
+     * we can't specialize it because it's a limitation of C# delegates, but the result can safely
+     * be cast to {@link GroundedValue}.
      */
 
-    public EagerEvaluator eagerly() {
+    public SequenceEvaluator eagerly() {
         Expression expr = getExpression();
         int m = expr.getImplementationMethod();
         if ((m & Expression.EVALUATE_METHOD) != 0 && !Cardinality.allowsMany(expr.getCardinality())) {
@@ -87,7 +89,8 @@ public abstract class Elaborator {
                 };
             } else {
                 ItemEvaluator itemEvaluator = expr.makeElaborator().elaborateForItem();
-                return CSharp.methodRef(itemEvaluator::eval);
+                //noinspection Convert2MethodRef
+                return context -> itemEvaluator.eval(context);
             }
 
         } else if ((m & Expression.ITERATE_METHOD) != 0) {
@@ -135,8 +138,8 @@ public abstract class Elaborator {
                               StaticProperty.DEPENDS_ON_REGEX_GROUP)) != 0) {
             // we can't save these values in the closure, so we evaluate
             // the expression now if they are needed
-            EagerEvaluator eagerEvaluator = eagerly();
-            return CSharp.methodRef(eagerEvaluator::evaluate);
+            SequenceEvaluator eagerEvaluator = eagerly();
+            return context -> eagerEvaluator.evaluate(context);
         } else if (repeatable) {
             // TODO: supply a PullEvaluator to the MemoClosure, not the original expression
             return context -> new MemoClosure(expr, context);
