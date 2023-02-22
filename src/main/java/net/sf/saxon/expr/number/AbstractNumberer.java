@@ -766,7 +766,7 @@ public abstract class AbstractNumberer implements Numberer {
     }
 
     public String zero() {
-        return "zero";
+        return "Zero";
     }
 
     /**
