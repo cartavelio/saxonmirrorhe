@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -24,18 +25,32 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class QueryTests {
 
+    /**
+     * Run a query using the command line interface capturing the result as a string
+     * @param args the command line arguments
+     * @return the contents of System.out
+     */
+
+    private static String runQuery(String[] args) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(baos));
+            Query.main(args);
+            return baos.toString("utf-8");
+        } catch (Exception e) {
+            fail(e);
+            return "";
+        }
+    }
+
     @Test
     public void testQueryDirect() {
         String[] args = {
                 "-qs:2+2",
                 "-t",
                 "!omit-xml-declaration=yes"};
-        try {
-            Query.main(args);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+        String result = runQuery(args);
+        assertEquals("4", result);
     }
 
     @Test
@@ -45,12 +60,55 @@ public class QueryTests {
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
                 "-t",
                 "!omit-xml-declaration=yes"};
-        try {
-            Query.main(args);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+        String result = runQuery(args);
+        assertEquals("78", result);
+    }
+
+    @Test
+    public void testQueryLineNumbering() {
+        String[] args = {
+                "-qs:saxon:line-number((//AUTHOR)[1])",
+                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-l",
+                "-t",
+                "!omit-xml-declaration=yes"};
+        String result = runQuery(args);
+        assertEquals("6", result);
+    }
+
+    @Test
+    public void testQueryLineNumberingOff() {
+        String[] args = {
+                "-qs:saxon:line-number((//AUTHOR)[1])",
+                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-l:off",
+                "-t",
+                "!omit-xml-declaration=yes"};
+        String result = runQuery(args);
+        assertEquals("-1", result);
+    }
+
+    @Test
+    public void testQueryLineNumberingOnDoc() {
+        String[] args = {
+                "-qs:saxon:line-number((doc('" + ConfigTest.DATA_DIR + "books.xml')//AUTHOR)[1])",
+                "-l:on",
+                "-t",
+                "!omit-xml-declaration=yes"};
+        String result = runQuery(args);
+        assertEquals("6", result);
+    }
+
+    @Test
+    public void testQueryLineNumberingOnParam() {
+        String[] args = {
+                "-qs:declare variable $doc external; saxon:line-number(($doc//AUTHOR)[1])",
+                "-l:on",
+                "-t",
+                "+doc=" + ConfigTest.DATA_DIR + "books.xml",
+                "!omit-xml-declaration=yes"};
+        String result = runQuery(args);
+        assertEquals("6", result);
     }
 
     @Test
@@ -60,12 +118,8 @@ public class QueryTests {
                 "-json:" + ConfigTest.DATA_DIR + "sample.json",
                 "-t",
                 "!omit-xml-declaration=yes"};
-        try {
-            Query.main(args);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+        String result = runQuery(args);
+        assertEquals("A green door", result);
     }
 
     @Test

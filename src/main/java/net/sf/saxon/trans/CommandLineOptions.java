@@ -608,9 +608,6 @@ public class CommandLineOptions {
             if (!sourceList.isEmpty()) {
                 List<XdmNode> nodeList = new ArrayList<>(sourceList.size());
                 DocumentBuilder builder = processor.newDocumentBuilder();
-                if (!"off".equals(getOptionValue("l"))) {
-                    builder.setLineNumbering(true);
-                }
                 for (Source s : sourceList) {
                     nodeList.add(builder.build(s));
                 }
