@@ -15,7 +15,9 @@ import net.sf.saxon.value.DateTimeValue;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.TextStyle;
+import java.time.zone.ZoneRulesException;
 import java.util.*;
 
 /**
@@ -436,7 +438,12 @@ public class NamedTimeZone {
         } else {
             olsenName = region;
         }
-        ZoneId zone = ZoneId.of(olsenName);
+        ZoneId zone;
+        try {
+            zone = ZoneId.of(olsenName);
+        } catch (ZoneRulesException e) {
+            zone = ZoneId.ofOffset("UTC", ZoneOffset.UTC);
+        }
         return Optional.of(inDaylightTime(zone, date.secondsSinceEpoch().longValue()));
     }
 
@@ -459,8 +466,12 @@ public class NamedTimeZone {
      */
 
     public static int civilTimeOffset(DateTimeValue date, String olsenName) {
-        ZoneId zone = ZoneId.of(olsenName);
-        return getOffsetInSecondsAtDateTime(zone, date)*1000;
+        try {
+            ZoneId zone = ZoneId.of(olsenName);
+            return getOffsetInSecondsAtDateTime(zone, date)*1000;
+        } catch (ZoneRulesException e) {
+            return 0;
+        }
     }
 
     /**

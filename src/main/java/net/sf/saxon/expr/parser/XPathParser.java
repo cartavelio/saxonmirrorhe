@@ -1768,8 +1768,22 @@ public class XPathParser {
                     primaryType = parseArrayItemType();
                     break;
                 case "record":
-                case "tuple": // Retained as synonym for the time beinig
+                case "tuple": // Retained as synonym for the time being
                     primaryType = parseRecordTest(this);
+                    break;
+                case "atomic":
+                    // Allowed only in patterns, not in item types??
+                    nextToken();
+                    expect(Token.NAME);
+                    StructuredQName typeName = getQNameParser().parse(
+                            t.currentTokenValue, NamespaceConstant.SCHEMA);
+                    primaryType = getPlainType(typeName);
+                    if (!(primaryType instanceof AtomicType)) {
+                        grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
+                    }
+                    nextToken();
+                    expect(Token.RPAR);
+                    nextToken();
                     break;
                 case "union":
                     primaryType = parseUnionType();

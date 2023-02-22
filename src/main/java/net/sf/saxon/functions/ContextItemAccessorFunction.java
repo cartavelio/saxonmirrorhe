@@ -8,7 +8,10 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.functions.registry.BuiltInFunctionSet;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.FunctionItemType;
@@ -94,7 +97,16 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
     @CSharpModifiers(code={"public", "override"})
     public Expression makeFunctionCall(Expression[] arguments) {
         Expression arg = new ContextItemExpression();
-        return SystemFunction.makeCall(getFunctionName().getLocalPart(), getRetainedStaticContext(), arg);
+        if (getFunctionName().hasURI(NamespaceConstant.SAXON)) {
+            BuiltInFunctionSet.Entry entry = getDetails();
+            try {
+                return entry.functionSet.makeFunction(entry.name.getLocalPart(), 1).makeFunctionCall(arg);
+            } catch (XPathException e) {
+                throw new UncheckedXPathException(e); // Should not happen
+            }
+        } else {
+            return SystemFunction.makeCall(getFunctionName().getLocalPart(), getRetainedStaticContext(), arg);
+        }
     }
 
     /**

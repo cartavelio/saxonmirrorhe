@@ -365,6 +365,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         e.name = new StructuredQName(getConventionalPrefix(), getNamespace(), name);
         e.arity = arity;
         e.implementationClass = implementationClass;
+        e.functionSet = this;
         e.itemType = itemType;
         e.cardinality = cardinality;
         e.properties = properties;
@@ -444,6 +445,10 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          * The class containing the implementation of this function (always a subclass of SystemFunction)
          */
         public Class<? extends SystemFunction> implementationClass;
+        /**
+         * The function set in which this function is defined
+         */
+        public BuiltInFunctionSet functionSet;
         /**
          * The arity of the function
          */

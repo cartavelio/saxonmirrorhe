@@ -442,7 +442,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             List<GroundedValue> members = new ArrayList<>();
             SequenceIterator parcels = arguments[0].iterate();
             for (Item parcel; (parcel = parcels.next()) != null;) {
-                members.add(((Parcel)parcel).getObject());
+                members.add(((Parcel)parcel).getValue());
             }
             return new SimpleArrayItem(members);
         }

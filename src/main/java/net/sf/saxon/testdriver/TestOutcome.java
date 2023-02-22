@@ -941,7 +941,11 @@ public class TestOutcome {
             assertXpc.declareVariable(new QName("result"));
             XPathSelector s = assertXpc.compile("deep-equal($result , (" + assertion.getStringValue() + "))").load();
             s.setVariable(new QName("result"), result.value);
-            return ((XdmAtomicValue) s.evaluate()).getBooleanValue();
+            boolean ok = ((XdmAtomicValue) s.evaluate()).getBooleanValue();
+            if (driver.debug && !ok) {
+                System.err.println("Actual result: " + result.value);
+            }
+            return ok;
         }
     }
 

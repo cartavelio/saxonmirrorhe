@@ -35,6 +35,6 @@ public class UnparcelFn extends SystemFunction {
         if (!(arg instanceof Parcel)) {
             throw new XPathException("The first argument of fn:unparcel must be a parcel", "XPTY0004");
         }
-        return ((Parcel)arg).getObject();
+        return ((Parcel)arg).getValue();
     }
 }
