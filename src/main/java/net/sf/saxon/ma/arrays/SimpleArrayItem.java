@@ -8,17 +8,21 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.OperandRole;
+import net.sf.saxon.expr.freq.Ping;
 import net.sf.saxon.ma.Parcel;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
-import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * A simple implementation of XDM array items, in which the array is backed by a Java List.
@@ -34,6 +38,7 @@ public class SimpleArrayItem extends AbstractArrayItem {
 
     private final List<GroundedValue> _members;
     private boolean knownToBeGrounded = false;
+    private Consumer<Ping> conversionInformee;
 
     /**
      * Construct an array whose members are arbitrary sequences
@@ -54,17 +59,9 @@ public class SimpleArrayItem extends AbstractArrayItem {
 
     public static SimpleArrayItem makeSimpleArrayItem(SequenceIterator input) throws XPathException {
         List<GroundedValue> members = new ArrayList<>();
-        SequenceTool.supply(input, (ItemConsumer<? super Item>) item -> {
-            //#if CSHARP==false
-            if (item.getClass().getName().equals("com.saxonica.functions.extfn.ArrayMemberValue")) {
-                members.add((GroundedValue) ((ObjectValue<GroundedValue>) item).getObject());
-            } else {
-                //#endif
-                members.add(item);
-                //#if CSHARP==false
-            }
-            //#endif
-        });
+        for (Item item; (item = input.next()) != null; ) {
+            members.add(item);
+        }
         SimpleArrayItem result = new SimpleArrayItem(members);
         result.knownToBeGrounded = true;
         return result;
@@ -78,6 +75,26 @@ public class SimpleArrayItem extends AbstractArrayItem {
     @Override
     public OperandRole[] getOperandRoles() {
         return new OperandRole[]{OperandRole.SINGLE_ATOMIC};
+    }
+
+    /**
+     * Register an object to be notified if the SimpleArrayItem is converted to
+     * an ImmutableArrayItem. This indicates that it should probably have been created
+     * as an ImmutableArrayItem in the first place.
+     */
+
+    public void requestNotification(Consumer<Ping> informee) {
+        this.conversionInformee = informee;
+    }
+
+    /**
+     * Notify conversion to an ImmutableArrayItem
+     */
+
+    public void notifyConversion() {
+        if (conversionInformee != null) {
+            conversionInformee.accept(Ping.INSTANCE);
+        }
     }
 
     /**
@@ -135,6 +152,7 @@ public class SimpleArrayItem extends AbstractArrayItem {
      */
     @Override
     public ArrayItem put(int index, GroundedValue newValue) {
+        notifyConversion();
         ImmutableArrayItem a2 = new ImmutableArrayItem(this);
         return a2.put(index, newValue);
     }
@@ -194,6 +212,7 @@ public class SimpleArrayItem extends AbstractArrayItem {
 
     @Override
     public ArrayItem removeSeveral(IntSet positions) {
+        notifyConversion();
         ImmutableArrayItem a2 = new ImmutableArrayItem(this);
         return a2.removeSeveral(positions);
     }
@@ -208,6 +227,7 @@ public class SimpleArrayItem extends AbstractArrayItem {
 
     @Override
     public ArrayItem remove(int pos) {
+        notifyConversion();
         ImmutableArrayItem a2 = new ImmutableArrayItem(this);
         return a2.remove(pos);
     }
@@ -235,8 +255,25 @@ public class SimpleArrayItem extends AbstractArrayItem {
      */
     @Override
     public ArrayItem insert(int position, GroundedValue member) {
+        notifyConversion();
         ImmutableArrayItem a2 = new ImmutableArrayItem(this);
         return a2.insert(position, member);
+    }
+
+    /**
+     * Add a member to this array
+     *
+     * @param newMember the member to be added
+     * @return the new array, comprising the members of this array and then
+     * one additional member.
+     */
+
+
+    @Override
+    public ArrayItem append(GroundedValue newMember) {
+        notifyConversion();
+        ImmutableArrayItem a2 = new ImmutableArrayItem(this);
+        return a2.append(newMember);
     }
 
     /**
@@ -249,6 +286,7 @@ public class SimpleArrayItem extends AbstractArrayItem {
 
     @Override
     public ArrayItem concat(ArrayItem other) {
+        notifyConversion();
         ImmutableArrayItem a2 = new ImmutableArrayItem(this);
         return a2.concat(other);
     }

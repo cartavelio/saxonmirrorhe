@@ -9,10 +9,13 @@ package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Implementation of ArrayItem backed by a persistent immutable array, so that operations
@@ -27,8 +30,20 @@ public class ImmutableArrayItem extends AbstractArrayItem {
         this.vector = new ZenoChain<GroundedValue>().addAll(other.getMembers());
     }
 
+    public ImmutableArrayItem(List<GroundedValue> members ) {
+        this.vector = new ZenoChain<GroundedValue>().addAll(members);
+    }
+
     private ImmutableArrayItem(ZenoChain<GroundedValue> vector) {
         this.vector = vector;
+    }
+
+    public static ImmutableArrayItem from(SequenceIterator iter) {
+        ZenoChain<GroundedValue> content = new ZenoChain<>();
+        for (Item item; (item = iter.next()) != null; ) {
+            content = content.add(item);
+        }
+        return new ImmutableArrayItem(content);
     }
     
     /**
@@ -68,6 +83,19 @@ public class ImmutableArrayItem extends AbstractArrayItem {
     @Override
     public ArrayItem insert(int position, GroundedValue member) {
         ZenoChain<GroundedValue> v2 = vector.insert(position, member);
+        return new ImmutableArrayItem(v2);
+    }
+
+    /**
+     * Add a member to this array
+     *
+     * @param newMember the member to be added
+     * @return the new array, comprising the members of this array and then
+     * one additional member.
+     */
+    @Override
+    public ArrayItem append(GroundedValue newMember) {
+        ZenoChain<GroundedValue> v2 = vector.add(newMember);
         return new ImmutableArrayItem(v2);
     }
 

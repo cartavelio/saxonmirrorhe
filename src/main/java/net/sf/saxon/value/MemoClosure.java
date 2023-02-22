@@ -11,10 +11,13 @@ import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.expr.freq.Experience;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
+
+import java.util.function.Consumer;
 
 /**
  * A MemoClosure represents a value that has not yet been evaluated: the value is represented
@@ -53,7 +56,7 @@ import net.sf.saxon.tree.iter.GroundedIterator;
 public class MemoClosure extends Closure implements ContextOriginator {
 
     private Sequence sequence;
-    private MemoClosureStatisticsGatherer bindingExpression;
+    private Consumer<MemoClosureStatistics> bindingExpression;
 
     /**
      * Constructor should not be called directly, instances should be made using the make() method.
@@ -72,7 +75,7 @@ public class MemoClosure extends Closure implements ContextOriginator {
         saveContext(expr, context);
     }
 
-    public void setBindingExpression(MemoClosureStatisticsGatherer bindingExpression) {
+    public void setBindingExpression(Consumer<MemoClosureStatistics> bindingExpression) {
         this.bindingExpression = bindingExpression;
     }
 
@@ -107,7 +110,7 @@ public class MemoClosure extends Closure implements ContextOriginator {
                     MemoClosureStatistics stats = new MemoClosureStatistics();
                     stats.allRead = true;
                     stats.size = ((GroundedValue)sequence).getLength();
-                    bindingExpression.supplyFeedback(stats);
+                    bindingExpression.accept(stats);
                 }
             } else {
                 sequence = SequenceTool.toMemoSequence(inputIterator);
@@ -165,7 +168,7 @@ public class MemoClosure extends Closure implements ContextOriginator {
         return this;
     }
 
-    public static class MemoClosureStatistics {
+    public static class MemoClosureStatistics extends Experience {
         public boolean allRead;
         public int size;
     }

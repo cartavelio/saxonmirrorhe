@@ -20,6 +20,7 @@ import net.sf.saxon.value.MemoClosure;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 /**
  * A Sequence implementation that represents a lazy evaluation of a supplied iterator. Items
@@ -35,7 +36,7 @@ public class MemoSequence implements Sequence {
     private Item[] reservoir = null;
     private int used;
 
-    private MemoClosure.MemoClosureStatisticsGatherer callingExpression;
+    private Consumer<MemoClosure.MemoClosureStatistics> callingExpression;
 
     @CSharpSimpleEnum
     private enum State {
@@ -59,7 +60,7 @@ public class MemoSequence implements Sequence {
     }
 
 
-    public void setCallingExpression(MemoClosure.MemoClosureStatisticsGatherer caller) {
+    public void setCallingExpression(Consumer<MemoClosure.MemoClosureStatistics> caller) {
         this.callingExpression = caller;
     }
 
@@ -381,7 +382,7 @@ public class MemoSequence implements Sequence {
                 MemoClosure.MemoClosureStatistics stats = new MemoClosure.MemoClosureStatistics();
                 stats.allRead = allRead;
                 stats.size = container.used;
-                container.callingExpression.supplyFeedback(stats);
+                container.callingExpression.accept(stats);
             }
         }
 

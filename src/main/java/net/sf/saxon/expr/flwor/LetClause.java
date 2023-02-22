@@ -17,6 +17,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.MemoClosure;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static net.sf.saxon.expr.flwor.Clause.ClauseName.LET;
@@ -24,7 +25,7 @@ import static net.sf.saxon.expr.flwor.Clause.ClauseName.LET;
 /**
  * A "let" clause in a FLWOR expression
  */
-public class LetClause extends Clause implements MemoClosure.MemoClosureStatisticsGatherer {
+public class LetClause extends Clause implements Consumer<MemoClosure.MemoClosureStatistics> { //MemoClosure.MemoClosureStatisticsGatherer {
 
     private LocalVariableBinding rangeVariable;
     private Operand sequenceOp;
@@ -46,7 +47,7 @@ public class LetClause extends Clause implements MemoClosure.MemoClosureStatisti
     private int completed = 0;
     private int abandoned = 0;
 
-    public void supplyFeedback(MemoClosure.MemoClosureStatistics statistics) {
+    public void accept(MemoClosure.MemoClosureStatistics statistics) {
         // Note, does thread-unsafe updates to the statistics
         if (evaluator.getCode() == Evaluators.MAKE_MEMO_CLOSURE) {
             if (statistics.allRead) {

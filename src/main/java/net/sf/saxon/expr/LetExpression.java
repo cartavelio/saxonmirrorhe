@@ -25,6 +25,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 
@@ -34,7 +35,7 @@ import java.util.function.Supplier;
  */
 
 public class LetExpression extends Assignation
-        implements TailCallReturner, MemoClosure.MemoClosureStatisticsGatherer {
+        implements TailCallReturner, Consumer<MemoClosure.MemoClosureStatistics> {
 
     //private int evaluationMode = ExpressionTool.UNDECIDED;
     private Evaluator evaluator = null;
@@ -116,7 +117,7 @@ public class LetExpression extends Assignation
     private int completed = 0;
     private int abandoned = 0;
 
-    public void supplyFeedback(MemoClosure.MemoClosureStatistics statistics) {
+    public void accept(MemoClosure.MemoClosureStatistics statistics) {
         // Note, does thread-unsafe updates to the statistics
         if (evaluator.getCode() == Evaluators.MAKE_MEMO_CLOSURE && !needsLazyEvaluation) {
             if (statistics.allRead) {
