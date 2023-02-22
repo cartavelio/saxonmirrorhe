@@ -922,7 +922,7 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
         }
 
         for (int i = 0; i < length; i++) {
-            if (input[i] == nullptr || input[i]->getUnderlyingValue() != -1) {
+            if (input[i] == nullptr || input[i]->getUnderlyingValue() <= -1) {
                 std::cerr << "Error found when converting array of XdmValue to XdmArray";
                 return nullptr;
             }
