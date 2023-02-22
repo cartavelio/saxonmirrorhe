@@ -32,8 +32,17 @@
         <in-category name="instruction"/>
         <attribute name="select" required="no">
           <desc> The contents of the array may be given either by an expression in the <code>select</code>
-            attribute, or by expanding the sequence constructor contained in the <code>saxon:array</code> element</desc>
+            attribute, or by expanding the sequence constructor contained in the <code>saxon:array</code>
+            element.</desc>
           <data-type name="expression"/>
+        </attribute>
+        <attribute name="composite" required="no">
+          <desc>If this attribute is present with the
+          value "yes", then the contained sequence constructor must deliver a sequence of <i>parcels</i> 
+          (items of type <code>record(value, *)</code>) and each parcel becomes one member of the constructed
+          array. If the attribute is absent or has the value "no", then the sequence returned by the
+          sequence constructor is converted to an array, one item per array member.</desc>
+          <data-type name="boolean"/>
         </attribute>
         <model name="sequence-constructor"/>
         <allowed-parents>
@@ -43,7 +52,10 @@
       <description>
         <p>The <code>saxon:array</code> instruction is used to create an array from a sequence of items.
         Like the "curly array constructor" in XPath 3.1, each member of the created array will be a singleton
-        item.</p>       
+        item.</p>
+        <aside>Since Saxon 11, the implementation has been updated to align with the proposed new XSLT 4.0
+          instruction <a class="bodylink code" href="/xsl-elements/array">xsl:array</a> which is also
+          implemented experimentally. So <code>saxon:array</code> is now a synonym for <code>xsl:array</code>.</aside>
       </description>
       <details>
         <p>The content model is the same as <code>xsl:sequence</code>: either a <code>select</code> attribute,
@@ -71,6 +83,7 @@
       </examples>
       <saxon-edition>PE/EE 9.8</saxon-edition>
       <see-also name="array-member" type="extensions" subtype="instructions" namespace="saxon"/>
+      <see-also name="array" type="xsl-elements"/>
     </saxon-element>
   </section>
   
@@ -82,7 +95,7 @@
         <attribute name="select" required="no">
           <desc> The contents of the array may be given either by an expression in the <code>select</code>
             attribute, or by expanding the sequence constructor contained in the
-            <code>saxon:array-member</code> element</desc>
+            <code>saxon:array-member</code> element.</desc>
           <data-type name="expression"/>
         </attribute>
         <model name="sequence-constructor"/>
@@ -92,7 +105,10 @@
       </element-syntax>
       <description>
         <p>The <code>saxon:array-member</code> instruction is used to create a single member for an array from a sequence of
-          items.</p>       
+          items.</p>
+        <aside>Since Saxon 11, the implementation has been updated to align with the proposed new XSLT 4.0
+          instruction <a class="bodylink code" href="/xsl-elements/array-member">xsl:array-member</a> which is also
+          implemented experimentally. So <code>saxon:array-member</code> is now a synonym for <code>xsl:array-member</code>.</aside>
       </description>
       <details>
         <p>The content model is the same as <code>xsl:sequence</code>: either a <code>select</code> attribute,
@@ -103,11 +119,12 @@
         <aside>Internally, the result of <code>saxon:array-member</code> is an external Java object of class
           <code>com.saxonica.functions.extfn.ArrayMemberValue</code> that wraps an arbitrary sequence. This object
         is specially recognized by (for example) <code>saxon:array</code> and by curly array constructors, causing
-        the constructed array to contain the wrapped sequence as a member.</aside>
+          the constructed array to contain the wrapped sequence as a member.</aside>
       </details>
       <saxon-edition>PE/EE 9.8</saxon-edition>
       <see-also name="array" type="extensions" subtype="instructions" namespace="saxon"/>
       <see-also name="array-member" type="functions" namespace="saxon"/>
+      <see-also name="array-member" type="xsl-elements"/>
     </saxon-element>
   </section>
 
@@ -117,12 +134,12 @@
       <element-syntax name="assign">
         <in-category name="instruction"/>
         <attribute name="name" required="yes">
-          <desc> The name of the variable</desc>
+          <desc> The name of the variable.</desc>
           <data-type name="eqname"/>
         </attribute>
         <attribute name="select" required="no">
           <desc> The new value may be given either by an expression in the <code>select</code>
-            attribute, or by expanding the content of the <code>saxon:assign</code> element</desc>
+            attribute, or by expanding the content of the <code>saxon:assign</code> element.</desc>
           <data-type name="expression"/>
         </attribute>
         <model name="sequence-constructor"/>
@@ -214,15 +231,15 @@
       <element-syntax name="deep-update">
         <in-category name="instruction"/>
         <attribute name="root" required="yes">
-          <desc>An expression to select the root(s) of the tree(s) to be updated</desc>
+          <desc>An expression to select the root(s) of the tree(s) to be updated.</desc>
           <data-type name="expression"/>
         </attribute>
         <attribute name="select" required="yes">
-          <desc>An expression to select the maps or arrays that are to be directly updated</desc>
+          <desc>An expression to select the maps or arrays that are to be directly updated.</desc>
           <data-type name="expression"/>
         </attribute>
         <attribute name="action" required="yes">
-          <desc>An expression to perform the update on the selected maps or arrays</desc>
+          <desc>An expression to perform the update on the selected maps or arrays.</desc>
           <data-type name="expression"/>
         </attribute>
         <empty/>
@@ -628,7 +645,7 @@
       <element-syntax name="entity-ref">
         <in-category name="instruction"/>
         <attribute name="name" required="yes">
-          <desc>The name of the entity</desc>
+          <desc>The name of the entity.</desc>
           <data-type name="eqname"/>
         </attribute>
         <empty/>
@@ -660,12 +677,12 @@
       <element-syntax name="for-each-member">
         <in-category name="instruction"/>
         <attribute name="select" required="yes">
-          <desc>An XPath expression that must evaluate to an array</desc>
+          <desc>An XPath expression that must evaluate to an array.</desc>
           <data-type name="expression"/>
         </attribute>
         <attribute name="bind-to" required="yes">
           <desc>The name of a variable that will be bound to each member of the array in turn; the variable is in scope
-          within the contained sequence constructor</desc>
+          within the contained sequence constructor.</desc>
           <data-type name="QName"/>
         </attribute>
         <model name="sequence-constructor"/>
@@ -781,12 +798,18 @@
       <element-syntax name="item-type">
         <in-category name="declaration"/>
         <attribute name="name" required="yes">
-          <desc>The name to be used for the type</desc>
+          <desc>The name to be used for the type.</desc>
           <data-type name="eqname"/>
         </attribute>
         <attribute name="as" required="yes">
-          <desc>The item type represented by the name</desc>
+          <desc>The item type represented by the name.</desc>
           <data-type name="itemType"/>
+        </attribute>
+        <attribute name="visibility" required="no">
+          <desc>The visibility of the item type. Saxon 11 only allows the value "private", which means
+            the item type name is available only within the containing package.</desc>
+          <constant value="private"/>
+          <constant value="final"/>           
         </attribute>
         <empty/>
         <allowed-parents>
@@ -797,8 +820,11 @@
       <description>
         <p>The <code>saxon:item-type</code> element declares a simple name that can be used
           to represent an item type.</p>
-        <aside>The syntax for this instruction changed in 10, in earlier releases it
-          was called <code>saxon:type-alias</code>.</aside>
+        <aside><p>The syntax for this instruction changed in Saxon 10, in earlier releases it
+          was called <code>saxon:type-alias</code>.</p>
+          <p>Since Saxon 11, the implementation has been updated to align with the proposed new XSLT 4.0
+            instruction <a class="bodylink code" href="/xsl-elements/item-type">xsl:item-type</a> which is also
+            implemented experimentally. So <code>saxon:item-type</code> is now a synonym for <code>xsl:item-type</code>.</p></aside>
       </description>
       <details>
         <p>With maps and arrays, item types can become quite complex, and they are not always
@@ -842,6 +868,7 @@
 <saxon:item-type name="board" as="array(array(type(square)))"/>
 <saxon:item-type name="move" type="map(type(piece), type(square))"/>]]></samp></example></examples>
       <saxon-edition>PE/EE 9.8</saxon-edition>
+      <see-also name="item-type" type="xsl-elements"/>
     </saxon-element>
   </section>
   
@@ -1124,11 +1151,11 @@
       <element-syntax name="tabulate-maps">
         <in-category name="instruction"/>
         <attribute name="root" required="yes">
-          <desc>XPath expression selecting the root of a tree of maps and arrays</desc>
+          <desc>XPath expression selecting the root of a tree of maps and arrays.</desc>
           <data-type name="expression"/>
         </attribute>
         <attribute name="select" required="yes">
-          <desc>XPath expression selecting a sequence of maps relative to the root of the tree</desc>
+          <desc>XPath expression selecting a sequence of maps relative to the root of the tree.</desc>
           <data-type name="expression"/>
         </attribute>
         <empty/>
@@ -1219,7 +1246,7 @@
       <element-syntax name="update">
         <in-category name="instruction"/>
         <attribute name="select" required="yes">
-          <desc>An expression to select the nodes whose subtrees are to be updated</desc>
+          <desc>An expression to select the nodes whose subtrees are to be updated.</desc>
           <data-type name="expression"/>
         </attribute>
         <choice repeat="zero-or-more">
