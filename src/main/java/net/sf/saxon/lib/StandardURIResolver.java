@@ -267,7 +267,7 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
                 rr.relativeUri = relativeURI;
                 rr.baseUri = base;
                 rr.nature = ResourceRequest.XML_NATURE;
-                return rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+                return rr.resolve(new DirectResourceResolver(config));
             }
             if (source == null) {
                 source = new SAXSource();
