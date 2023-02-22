@@ -1,0 +1,17 @@
+using System;
+
+namespace Saxon.Api {
+    /// <summary>
+    /// A representation of the source (un-compiled) form of an XQuery module.
+    /// </summary>
+    /// <remarks>
+    /// <para>The content of the module is delivered as a string, which means that decoding of a binary stream
+    /// is the responsibility of the creator of the <c>XQueryModuleSource</c> object.
+    /// </remarks>
+    public class XQueryModuleSource 
+    {
+        public Uri BaseUri { get; set; }
+        
+        public string Content { get; set; }
+    }
+}

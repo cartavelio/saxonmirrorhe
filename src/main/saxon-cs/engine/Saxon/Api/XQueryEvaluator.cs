@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml;
 using Saxon.Hej.lib;
 using Saxon.Hej.om;
@@ -9,7 +10,9 @@ using Saxon.Hej.s9api;
 using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
+using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Impl.Helpers;
+using Action = System.Action;
 
 namespace Saxon.Api {
     /// <summary inherits="IEnumerable">
@@ -27,11 +30,8 @@ namespace Saxon.Api {
     public class XQueryEvaluator : IEnumerable<XdmItem> {
         private Saxon.Hej.s9api.XQueryEvaluator evaluator;
         private StandardLogger traceFunctionDestination;
+        private Action closeAction;
 
-        //private JXQueryExpression exp;
-        //private JDynamicQueryContext context;
-        //private JController controller;
-        //private StandardLogger traceFunctionDestination;
 
         // internal constructor
 
@@ -225,6 +225,7 @@ namespace Saxon.Api {
         public void Run(IDestination destination) {
             evaluator.setDestination(destination.GetUnderlyingDestination());
             evaluator.run();
+            closeAction?.Invoke();
         }
 
         /// <summary>
@@ -249,6 +250,20 @@ namespace Saxon.Api {
         }
 
         /// <summary>
+        /// Execute a streamed query.
+        /// </summary>
+        /// <param name="input">The input stream, which must contain a well-formed XML document</param>
+        /// <param name="baseUri">The base URI of the document supplied on the input stream</param>
+        /// <param name="destination">The destination to which the query result will be sent</param>
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if any run-time failure
+        /// occurs while evaluating the query, or if the query execution cannot be streamed.</exception>
+
+        public void RunStreamed(Stream input, Uri baseUri, IDestination destination) {
+            StreamSource source = new (input, baseUri.ToString());
+            Implementation.runStreamed(source, destination.GetUnderlyingDestination());
+        }
+
+        /// <summary>
         /// Call a global user-defined function in the compiled query.
         /// </summary>
         /// <remarks>
@@ -270,7 +285,7 @@ namespace Saxon.Api {
         /// signature.</exception>
         /// <exception cref="SaxonApiException">If a dynamic error occurs in evaluating the function.
         /// </exception>
-        public XdmValue CallFunction(QName function, XdmValue[] arguments) {
+        public XdmValue CallFunction(QName function, params XdmValue[] arguments) {
             return evaluator.callFunction(function, arguments);
         }
 
@@ -282,5 +297,6 @@ namespace Saxon.Api {
         private Saxon.Hej.s9api.XQueryEvaluator Implementation {
             get { return evaluator; }
         }
+        
     }
 }

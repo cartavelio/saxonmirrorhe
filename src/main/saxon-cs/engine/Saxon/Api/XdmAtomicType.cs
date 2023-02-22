@@ -21,236 +21,236 @@ namespace Saxon.Api {
         public static readonly XdmAtomicType Instance =
             new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC);
 
-        private XdmAtomicType(AtomicType type) : base (type) {
+        internal XdmAtomicType(AtomicType type) : base (type) {
         }
 
         /// <summary>
         ///  ItemType representing the built-in (but non-primitive) type xs:short
         /// </summary>
-        public static readonly XdmAtomicType SHORT = BuiltInAtomicType(StandardNames.XS_SHORT);
+        public static readonly XdmAtomicType Short = BuiltInAtomicType(StandardNames.XS_SHORT);
 
 
         /// <summary>
         /// ItemType representing the primitive type xs:string
         /// </summary>
-        public static readonly XdmAtomicType STRING = BuiltInAtomicType(StandardNames.XS_STRING);
+        public static readonly XdmAtomicType String = BuiltInAtomicType(StandardNames.XS_STRING);
 
         /// <summary>
         /// ItemType representing the primitive type xs:boolean
         /// </summary>
-        public static readonly XdmAtomicType BOOLEAN = BuiltInAtomicType(StandardNames.XS_BOOLEAN);
+        public static readonly XdmAtomicType Boolean = BuiltInAtomicType(StandardNames.XS_BOOLEAN);
 
         /// <summary>
         /// ItemType representing the primitive type xs:duration
         /// </summary>
-        public static readonly XdmAtomicType DURATION = BuiltInAtomicType(StandardNames.XS_DURATION);
+        public static readonly XdmAtomicType Duration = BuiltInAtomicType(StandardNames.XS_DURATION);
 
         /// <summary>
         /// ItemType representing the primitive type xs:dateTime
         /// </summary>
-        public static readonly XdmAtomicType DATE_TIME = BuiltInAtomicType(StandardNames.XS_DATE_TIME);
+        public static readonly XdmAtomicType DateTime = BuiltInAtomicType(StandardNames.XS_DATE_TIME);
 
         /// <summary>
         /// ItemType representing the primitive type xs:date
         /// </summary>
-        public static readonly XdmAtomicType DATE = BuiltInAtomicType(StandardNames.XS_DATE);
+        public static readonly XdmAtomicType Date = BuiltInAtomicType(StandardNames.XS_DATE);
 
         /// <summary>
         /// ItemType representing the primitive type xs:time
         /// </summary>
-        public static readonly XdmAtomicType TIME = BuiltInAtomicType(StandardNames.XS_TIME);
+        public static readonly XdmAtomicType Time = BuiltInAtomicType(StandardNames.XS_TIME);
 
         /// <summary>
         /// ItemType representing the primitive type xs:gYearMonth
         /// </summary>
-        public static readonly XdmAtomicType G_YEAR_MONTH = BuiltInAtomicType(StandardNames.XS_G_YEAR_MONTH);
+        public static readonly XdmAtomicType GYearMonth = BuiltInAtomicType(StandardNames.XS_G_YEAR_MONTH);
 
         /// <summary>
         ///  ItemType representing the primitive type xs:gMonth
         /// </summary>
-        public static readonly XdmAtomicType G_MONTH = BuiltInAtomicType(StandardNames.XS_G_MONTH);
+        public static readonly XdmAtomicType GMonth = BuiltInAtomicType(StandardNames.XS_G_MONTH);
 
         /// <summary>
         /// ItemType representing the primitive type xs:gMonthDay
         /// </summary>
-        public static readonly XdmAtomicType G_MONTH_DAY = BuiltInAtomicType(StandardNames.XS_G_MONTH_DAY);
+        public static readonly XdmAtomicType GMonthDay = BuiltInAtomicType(StandardNames.XS_G_MONTH_DAY);
 
         /// <summary>
         /// ItemType representing the primitive type xs:gYear
         /// </summary>
-        public static readonly XdmAtomicType G_YEAR = BuiltInAtomicType(StandardNames.XS_G_YEAR);
+        public static readonly XdmAtomicType GYear = BuiltInAtomicType(StandardNames.XS_G_YEAR);
 
         /// <summary>
         /// ItemType representing the primitive type xs:gDay
         /// </summary>
-        public static readonly XdmAtomicType G_DAY = BuiltInAtomicType(StandardNames.XS_G_DAY);
+        public static readonly XdmAtomicType GDay = BuiltInAtomicType(StandardNames.XS_G_DAY);
 
         /// <summary>
         /// ItemType representing the primitive type xs:hexBinary
         /// </summary>
-        public static readonly XdmAtomicType HEX_BINARY = BuiltInAtomicType(StandardNames.XS_HEX_BINARY);
+        public static readonly XdmAtomicType HexBinary = BuiltInAtomicType(StandardNames.XS_HEX_BINARY);
 
         /// <summary>
         ///  ItemType representing the primitive type xs:base64Binary
         /// </summary>
-        public static readonly XdmAtomicType BASE64_BINARY = BuiltInAtomicType(StandardNames.XS_BASE64_BINARY);
+        public static readonly XdmAtomicType Base64Binary = BuiltInAtomicType(StandardNames.XS_BASE64_BINARY);
 
         /// <summary>
         /// ItemType representing the primitive type xs:anyURI
         /// </summary>
-        public static readonly XdmAtomicType ANY_URI = BuiltInAtomicType(StandardNames.XS_ANY_URI);
+        public static readonly XdmAtomicType AnyUri = BuiltInAtomicType(StandardNames.XS_ANY_URI);
 
         /// <summary>
         /// ItemType representing the primitive type xs:QName
         /// </summary>
-        public static readonly XdmAtomicType QNAME = BuiltInAtomicType(StandardNames.XS_QNAME);
+        public static readonly XdmAtomicType QName = BuiltInAtomicType(StandardNames.XS_QNAME);
 
         /// <summary>
         /// ItemType representing the primitive type xs:NOTATION
         /// </summary>
-        public static readonly XdmAtomicType NOTATION = BuiltInAtomicType(StandardNames.XS_NOTATION);
+        public static readonly XdmAtomicType Notation = BuiltInAtomicType(StandardNames.XS_NOTATION);
 
         /// <summary>
         ///  ItemType representing the XPath-defined type xs:untypedAtomic
         /// </summary>
-        public static readonly XdmAtomicType UNTYPED_ATOMIC = BuiltInAtomicType(StandardNames.XS_UNTYPED_ATOMIC);
+        public static readonly XdmAtomicType UntypedAtomic = BuiltInAtomicType(StandardNames.XS_UNTYPED_ATOMIC);
 
         /// <summary>
         /// ItemType representing the primitive type xs:decimal
         /// </summary>
-        public static readonly XdmAtomicType DECIMAL = BuiltInAtomicType(StandardNames.XS_DECIMAL);
+        public static readonly XdmAtomicType Decimal = BuiltInAtomicType(StandardNames.XS_DECIMAL);
 
         /// <summary>
         /// ItemType representing the primitive type xs:float
         /// </summary>
-        public static readonly XdmAtomicType FLOAT = BuiltInAtomicType(StandardNames.XS_FLOAT);
+        public static readonly XdmAtomicType Float = BuiltInAtomicType(StandardNames.XS_FLOAT);
 
         /// <summary>
         /// ItemType representing the primitive type xs:double
         /// </summary>
-        public static readonly XdmAtomicType DOUBLE = BuiltInAtomicType(StandardNames.XS_DOUBLE);
+        public static readonly XdmAtomicType Double = BuiltInAtomicType(StandardNames.XS_DOUBLE);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:integer
         /// </summary>
-        public static readonly XdmAtomicType INTEGER = BuiltInAtomicType(StandardNames.XS_INTEGER);
+        public static readonly XdmAtomicType Integer = BuiltInAtomicType(StandardNames.XS_INTEGER);
 
         /// <summary>
-        /// 
+        /// ItemType representing the built-in (but non-primitive) type xs:nonPositiveInteger
         /// </summary>
-        public static readonly XdmAtomicType NON_POSITIVE_INTEGER = BuiltInAtomicType(StandardNames.XS_NON_POSITIVE_INTEGER);
+        public static readonly XdmAtomicType NonPositiveInteger = BuiltInAtomicType(StandardNames.XS_NON_POSITIVE_INTEGER);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:negativeInteger
         /// </summary>
-        public static readonly XdmAtomicType NEGATIVE_INTEGER = BuiltInAtomicType(StandardNames.XS_NEGATIVE_INTEGER);
+        public static readonly XdmAtomicType NegativeInteger = BuiltInAtomicType(StandardNames.XS_NEGATIVE_INTEGER);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:long
         /// </summary>
-        public static readonly XdmAtomicType LONG = BuiltInAtomicType(StandardNames.XS_LONG);
+        public static readonly XdmAtomicType Long = BuiltInAtomicType(StandardNames.XS_LONG);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:int
         /// </summary>
-        public static readonly XdmAtomicType INT = BuiltInAtomicType(StandardNames.XS_INT);
+        public static readonly XdmAtomicType Int = BuiltInAtomicType(StandardNames.XS_INT);
 
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:byte
         /// </summary>
-        public static readonly XdmAtomicType BYTE = BuiltInAtomicType(StandardNames.XS_BYTE);
+        public static readonly XdmAtomicType Byte = BuiltInAtomicType(StandardNames.XS_BYTE);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:nonNegativeInteger
         /// </summary>
-        public static readonly XdmAtomicType NON_NEGATIVE_INTEGER = BuiltInAtomicType(StandardNames.XS_NON_NEGATIVE_INTEGER);
+        public static readonly XdmAtomicType NonNegativeInteger = BuiltInAtomicType(StandardNames.XS_NON_NEGATIVE_INTEGER);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:positiveInteger
         /// </summary>
-        public static readonly XdmAtomicType POSITIVE_INTEGER = BuiltInAtomicType(StandardNames.XS_POSITIVE_INTEGER);
+        public static readonly XdmAtomicType PositiveInteger = BuiltInAtomicType(StandardNames.XS_POSITIVE_INTEGER);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:unsignedLong
         /// </summary>
-        public static readonly XdmAtomicType UNSIGNED_LONG = BuiltInAtomicType(StandardNames.XS_UNSIGNED_LONG);
+        public static readonly XdmAtomicType UnsignedLong = BuiltInAtomicType(StandardNames.XS_UNSIGNED_LONG);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:unsignedInt
         /// </summary>
-        public static readonly XdmAtomicType UNSIGNED_INT = BuiltInAtomicType(StandardNames.XS_UNSIGNED_INT);
+        public static readonly XdmAtomicType UnsignedInt = BuiltInAtomicType(StandardNames.XS_UNSIGNED_INT);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:unsignedShort
         /// </summary>
-        public static readonly XdmAtomicType UNSIGNED_SHORT = BuiltInAtomicType(StandardNames.XS_UNSIGNED_SHORT);
+        public static readonly XdmAtomicType UnsignedShort = BuiltInAtomicType(StandardNames.XS_UNSIGNED_SHORT);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:unsignedByte
         /// </summary>
-        public static readonly XdmAtomicType UNSIGNED_BYTE = BuiltInAtomicType(StandardNames.XS_UNSIGNED_BYTE);
+        public static readonly XdmAtomicType UnsignedByte = BuiltInAtomicType(StandardNames.XS_UNSIGNED_BYTE);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:yearMonthDuration
         /// </summary>
-        public static readonly XdmAtomicType YEAR_MONTH_DURATION = BuiltInAtomicType(StandardNames.XS_YEAR_MONTH_DURATION);
+        public static readonly XdmAtomicType YearMonthDuration = BuiltInAtomicType(StandardNames.XS_YEAR_MONTH_DURATION);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:dayTimeDuration
         /// </summary>
-        public static readonly XdmAtomicType DAY_TIME_DURATION = BuiltInAtomicType(StandardNames.XS_DAY_TIME_DURATION);
+        public static readonly XdmAtomicType DayTimeDuration = BuiltInAtomicType(StandardNames.XS_DAY_TIME_DURATION);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:normalizedString
         /// </summary>
-        public static readonly XdmAtomicType NORMALIZED_STRING = BuiltInAtomicType(StandardNames.XS_NORMALIZED_STRING);
+        public static readonly XdmAtomicType NormalizedString = BuiltInAtomicType(StandardNames.XS_NORMALIZED_STRING);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:token
         /// </summary>
-        public static readonly XdmAtomicType TOKEN = BuiltInAtomicType(StandardNames.XS_TOKEN);
+        public static readonly XdmAtomicType Token = BuiltInAtomicType(StandardNames.XS_TOKEN);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:language
         /// </summary>
-        public static readonly XdmAtomicType LANGUAGE = BuiltInAtomicType(StandardNames.XS_LANGUAGE);
+        public static readonly XdmAtomicType Language = BuiltInAtomicType(StandardNames.XS_LANGUAGE);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:Name
         /// </summary>
-        public static readonly XdmAtomicType NAME = BuiltInAtomicType(StandardNames.XS_NAME);
+        public static readonly XdmAtomicType Name = BuiltInAtomicType(StandardNames.XS_NAME);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:NMTOKEN
         /// </summary>
-        public static readonly XdmAtomicType NMTOKEN = BuiltInAtomicType(StandardNames.XS_NMTOKEN);
+        public static readonly XdmAtomicType NMToken = BuiltInAtomicType(StandardNames.XS_NMTOKEN);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:NCName
         /// </summary>
-        public static readonly XdmAtomicType NCNAME = BuiltInAtomicType(StandardNames.XS_NCNAME);
+        public static readonly XdmAtomicType NCName = BuiltInAtomicType(StandardNames.XS_NCNAME);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:ID
         /// </summary>
-        public static readonly XdmAtomicType ID = BuiltInAtomicType(StandardNames.XS_ID);
+        public static readonly XdmAtomicType Id = BuiltInAtomicType(StandardNames.XS_ID);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:IDREF
         /// </summary>
-        public static readonly XdmAtomicType IDREF = BuiltInAtomicType(StandardNames.XS_IDREF);
+        public static readonly XdmAtomicType IdRef = BuiltInAtomicType(StandardNames.XS_IDREF);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:ENTITY
         /// </summary>
-        public static readonly XdmAtomicType ENTITY = BuiltInAtomicType(StandardNames.XS_ENTITY);
+        public static readonly XdmAtomicType Entity = BuiltInAtomicType(StandardNames.XS_ENTITY);
 
         /// <summary>
         /// ItemType representing the built-in (but non-primitive) type xs:dateTimeStamp
         /// (introduced in XSD 1.1)
         /// </summary>
-        public static readonly XdmAtomicType DATE_TIME_STAMP = BuiltInAtomicType(StandardNames.XS_DATE_TIME_STAMP);
+        public static readonly XdmAtomicType DateTimeStamp = BuiltInAtomicType(StandardNames.XS_DATE_TIME_STAMP);
 
 
         /// <summary>
@@ -424,7 +424,7 @@ namespace Saxon.Api {
         /// The name of the atomic type, or null if the type is anonymous.
         /// </summary>
 
-        public QName Name {
+        public QName TypeName {
             get {
                 StructuredQName jQName = ((AtomicType) underlyingType).getTypeName();
                 if (jQName == null) {
@@ -447,7 +447,7 @@ namespace Saxon.Api {
         }
 
         public override string ToString() {
-            return Name.EQName;
+            return TypeName.EQName;
         }
 
         /// <summary>

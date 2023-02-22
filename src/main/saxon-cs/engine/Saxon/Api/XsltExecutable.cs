@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Saxon.Hej.value;
 
 namespace Saxon.Api {
     /// <summary>
@@ -15,7 +16,7 @@ namespace Saxon.Api {
     /// </remarks>    
 
     [Serializable]
-    public class XsltExecutable
+    public partial class XsltExecutable
     {
 
         private Processor processor;
@@ -115,85 +116,15 @@ namespace Saxon.Api {
         public Dictionary<QName, ParameterDetails> GetGlobalParameters()
         {
             Dictionary<QName, Saxon.Hej.s9api.XsltExecutable.ParameterDetails> globals = jExecutable.getGlobalParameters();
-            Dictionary<QName, ParameterDetails> params1 = new Dictionary<QName, ParameterDetails>();
-            int count = globals.Count;
+            Dictionary<QName, ParameterDetails> params1 = new ();
             foreach (KeyValuePair<QName, Saxon.Hej.s9api.XsltExecutable.ParameterDetails> pair in globals) {
-                XdmSequenceType sType = XdmSequenceType.FromSequenceType(pair.Value.getUnderlyingDeclaredType());
+                SequenceType st = pair.Value.getUnderlyingDeclaredType();
+                XdmItemType xit = XdmItemType.MakeXdmItemType(st.getPrimaryType(), processor.Implementation);
+                char indicator = (Cardinality.getOccurrenceIndicator(st.getCardinality()) + " ")[0];
+                XdmSequenceType sType = new (xit, indicator);
                 params1.Add(pair.Key, new ParameterDetails(sType, false));
             }
             return params1;
         }
-
-        /// <summary>
-        /// Information about a global parameter to a stylesheet.
-        /// </summary>
-
-        public class ParameterDetails
-        {
-            private XdmSequenceType type;
-            private bool isRequired;
-
-            /// <summary>
-            /// Create parameter details.
-            /// </summary>
-            /// <param name="type">The declared type of the parameter.</param>
-            /// <param name="isRequired">Indicates whether the parameter is required or optional.</param>
-            
-            public ParameterDetails(XdmSequenceType type, bool isRequired)
-            {
-                this.type = type;
-                this.isRequired = isRequired;
-            }
-
-            /// <summary>
-            /// Gets the declared item type of the parameter.
-            /// </summary>
-            /// <returns>The type defined in the <code>as</code> attribute of the <code>xsl:param</code> element,
-            /// without its occurrence indicator</returns>
-            public XdmItemType GetDeclaredItemType()
-            {
-                return type.itemType;
-            }
-
-
-            /// <summary>
-            /// Gets the declared cardinality of the parameter.
-            /// </summary>
-            /// <returns>The occurrence indicator from the type appearing in the <code>as</code> attribute
-            /// of the <code>xsl:param</code> element</returns>
-
-            public char GetDeclaredCardinality()
-            {
-                return type.occurrenceIn;
-            }
-
-            /// <summary>
-            /// Gets the underlying declared type of the parameter.
-            /// </summary>
-            /// <returns>The underlying declared type.</returns>
-
-            public XdmSequenceType GetUnderlyingDeclaredType()
-            {
-                return type;
-            }
-
-
-            /// <summary>
-            /// Ask whether the parameter is required (mandatory) or optional
-            /// </summary>
-            /// <returns><c>true</c> if the parameter is mandatory (<code>required="yes"</code>), false
-            /// if it is optional.</returns>
-
-            public bool IsRequired
-            {
-                set { this.isRequired = value; }
-                get { return this.isRequired; }
-
-            }
-        }
-
-
-
-
     }
 }

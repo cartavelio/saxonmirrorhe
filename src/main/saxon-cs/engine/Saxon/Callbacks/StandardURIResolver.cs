@@ -17,7 +17,7 @@ namespace Saxon.Callbacks {
 
         public StandardURIResolver(Configuration config) {
             this.config = config;
-            this.resolver = new StandardXmlResolver();
+            this.resolver = new StandardXmlResolver(config);
         }
 
         public StandardURIResolver(Configuration config, XmlResolver resolver) {

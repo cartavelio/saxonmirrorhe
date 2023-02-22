@@ -240,19 +240,18 @@ namespace Saxon.Api {
         /// <returns>The result of converting to a boolean (Note: this is not the same as the
         /// effective boolean value).</returns> 
         public bool GetBooleanValue() {
-            AtomicValue av = (AtomicValue) this.value;
-            if (av is BooleanValue) {
-                return ((BooleanValue) av).getBooleanValue();
-            }
-            else if (av is NumericValue) {
-                return !av.isNaN() && ((NumericValue) av).signum() != 0;
-            }
-            else if (av is StringValue) {
-                String s = av.getStringValue().Trim();
-                return "1".Equals(s) || "true".Equals(s);
-            }
-            else {
-                throw new ArgumentException("Cannot cast item to a boolean");
+            AtomicValue av = (AtomicValue) value;
+            switch (av) {
+                case BooleanValue booleanValue:
+                    return booleanValue.getBooleanValue();
+                case NumericValue numericValue:
+                    return !numericValue.isNaN() && numericValue.signum() != 0;
+                case StringValue: {
+                    String s = av.getStringValue().Trim();
+                    return "1".Equals(s) || "true".Equals(s);
+                }
+                default:
+                    throw new ArgumentException("Cannot cast item to a boolean");
             }
         }
 
@@ -262,24 +261,25 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>The result of converting to a long</returns>
         public long GetLongValue() {
-            AtomicValue av = (AtomicValue) this.value;
-            if (av is BooleanValue) {
-                return ((BooleanValue) av).getBooleanValue() ? 0L : 1L;
-            }
-            else if (av is NumericValue) {
-                try {
-                    return ((NumericValue) av).longValue();
+            AtomicValue av = (AtomicValue) value;
+            switch (av) {
+                case BooleanValue booleanValue:
+                    return booleanValue.getBooleanValue() ? 0L : 1L;
+                case NumericValue numericValue:
+                    try {
+                        return numericValue.longValue();
+                    }
+                    catch (Exception) {
+                        throw new ArgumentException("Cannot cast item to an integer");
+                    }
+
+                    break;
+                case StringValue: {
+                    StringToDouble converter = StringToDouble.getInstance();
+                    return (long) converter.stringToNumber(av.getUnicodeStringValue());
                 }
-                catch (Exception) {
+                default:
                     throw new ArgumentException("Cannot cast item to an integer");
-                }
-            }
-            else if (av is StringValue) {
-                StringToDouble converter = StringToDouble.getInstance();
-                return (long) converter.stringToNumber(av.getUnicodeStringValue());
-            }
-            else {
-                throw new ArgumentException("Cannot cast item to an integer");
             }
         }
 
@@ -292,23 +292,21 @@ namespace Saxon.Api {
         /// <returns>The result of converting to a double</returns>
         public double GetDoubleValue() {
             AtomicValue av = (AtomicValue) this.value;
-            if (av is BooleanValue) {
-                return ((BooleanValue) av).getBooleanValue() ? 0.0 : 1.0;
-            }
-            else if (av is NumericValue) {
-                return ((NumericValue) av).getDoubleValue();
-            }
-            else if (av is StringValue) {
-                try {
-                    StringToDouble converter = StringToDouble11.getInstance();
-                    return converter.stringToNumber(av.getUnicodeStringValue());
-                }
-                catch (Exception e) {
-                    throw new ArgumentException(e.Message);
-                }
-            }
-            else {
-                throw new ArgumentException("Cannot cast item to a double");
+            switch (av) {
+                case BooleanValue booleanValue:
+                    return booleanValue.getBooleanValue() ? 0.0 : 1.0;
+                case NumericValue numericValue:
+                    return numericValue.getDoubleValue();
+                case StringValue:
+                    try {
+                        return StringToDouble11.getInstance().stringToNumber(av.getUnicodeStringValue());
+                    }
+                    catch (Exception e) {
+                        throw new ArgumentException(e.Message);
+                    }
+
+                default:
+                    throw new ArgumentException("Cannot cast item to a double");
             }
         }
 
@@ -317,24 +315,23 @@ namespace Saxon.Api {
         /// Get the value converted to a decimal using the XPath casting rules.
         /// </summary>
         /// <returns>The result of converting to a decimal</returns>
-        public Decimal GetDecimalValue() {
+        public decimal GetDecimalValue() {
             AtomicValue av = (AtomicValue) this.value;
-            if (av is BooleanValue) {
-                return ((BooleanValue) av).getBooleanValue() ? 0 : 1;
-            }
-            else if (av is NumericValue) {
-                try {
-                    return Convert.ToDecimal(((NumericValue) av).getDecimalValue().ToString());
-                }
-                catch (Exception) {
+            switch (av) {
+                case BooleanValue booleanValue:
+                    return booleanValue.getBooleanValue() ? 0 : 1;
+                case NumericValue numericValue:
+                    try {
+                        return Convert.ToDecimal(numericValue.getDecimalValue().ToString());
+                    }
+                    catch (Exception) {
+                        throw new ArgumentException("Cannot cast item to a decimal");
+                    }
+
+                case StringValue:
+                    return Convert.ToDecimal(av.getUnicodeStringValue().ToString());
+                default:
                     throw new ArgumentException("Cannot cast item to a decimal");
-                }
-            }
-            else if (av is StringValue) {
-                return Convert.ToDecimal(av.getUnicodeStringValue().ToString());
-            }
-            else {
-                throw new ArgumentException("Cannot cast item to a decimal");
             }
         }
 
@@ -344,7 +341,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>The value converted to a string, according to the rules
         /// of the XPath cast expression</returns>        
-        public override String ToString() {
+        public override string ToString() {
             return ((AtomicValue) value).getStringValue();
         }
 
@@ -354,14 +351,13 @@ namespace Saxon.Api {
         /// <param name="other">The object to be compared</param>
         /// <returns>The result of the equality comparison, using the rules of the
         /// <c>op:is-same-key()</c> comparison used for comparing key values in maps.</returns>
-        public override Boolean Equals(object other) {
-            if (other is XdmAtomicValue) {
+        public override bool Equals(object other) {
+            if (other is XdmAtomicValue otherValue) {
                 return ((AtomicValue) value).asMapKey()
-                    .Equals(((AtomicValue) ((XdmAtomicValue) other).value).asMapKey());
+                    .Equals(((AtomicValue) otherValue.value).asMapKey());
             }
-            else {
-                return false;
-            }
+
+            return false;
         }
 
         /// <summary>
@@ -376,21 +372,13 @@ namespace Saxon.Api {
         /// Get the name of the value's XDM type
         /// </summary>
         /// <returns>The type of the value, as a QName.</returns>
-        public QName GetTypeName() {
-            StructuredQName sqname = ((AtomicValue) value).getItemType().getStructuredQName();
-            return new QName(sqname.getPrefix(),
-                sqname.getURI(),
-                sqname.getLocalPart());
-        }
-
-        /// <summary>
-        /// Get the name of the value's XDM type
-        /// </summary>
-        /// <param name="processor">The <code>Processor</code> object. 
-        /// This parameter is no longer used, but is accepted for backwards compatibility.</param>
-        /// <returns>The type of the value, as a QName.</returns>
-        public QName GetTypeName(Processor processor) {
-            return GetTypeName();
+        public QName TypeName {
+            get {
+                StructuredQName sqname = ((AtomicValue) value).getItemType().getStructuredQName();
+                return new QName(sqname.getPrefix(),
+                    sqname.getURI(),
+                    sqname.getLocalPart());
+            }
         }
 
         /// <summary>
@@ -401,11 +389,13 @@ namespace Saxon.Api {
         /// type <c>xs:untypedAtomic</c>. For the purposes of this method, <c>xs:integer</c> is considered
         /// to be a primitive type.
         /// </returns>
-        public QName GetPrimitiveTypeName() {
-            int fp = ((AtomicValue) value).getItemType().getPrimitiveType();
-            return new QName(StandardNames.getPrefix(fp),
-                StandardNames.getURI(fp),
-                StandardNames.getLocalName(fp));
+        public QName PrimitiveTypeName {
+            get {
+                int fp = ((AtomicValue) value).getItemType().getPrimitiveType();
+                return new QName(StandardNames.getPrefix(fp),
+                    StandardNames.getURI(fp),
+                    StandardNames.getLocalName(fp));
+            }
         }
 
         /// <summary>Get the value as a CLI object of the nearest equivalent type.</summary>
@@ -427,33 +417,29 @@ namespace Saxon.Api {
         /// </remarks>
         /// <returns>The value converted to the most appropriate CLI type</returns>
 
-        public Object Value {
+        public object Value {
             get {
-                if (value is IntegerValue) {
-                    return ((IntegerValue) value).longValue();
+                if (value is IntegerValue integerValue) {
+                    return integerValue.longValue();
                 }
-                else if (value is DoubleValue) {
-                    return ((DoubleValue) value).getDoubleValue();
+                else if (value is DoubleValue doubleValue) {
+                    return doubleValue.getDoubleValue();
                 }
-                else if (value is FloatValue) {
-                    return ((FloatValue) value).getFloatValue();
+                else if (value is FloatValue floatValue) {
+                    return floatValue.getFloatValue();
                 }
-                else if (value is DecimalValue) {
-                    return Decimal.Parse(((DecimalValue) value).getStringValue());
+                else if (value is DecimalValue decimalValue) {
+                    return decimal.Parse(decimalValue.getStringValue());
                 }
-                else if (value is BooleanValue) {
-                    return ((BooleanValue) value).getBooleanValue();
+                else if (value is BooleanValue booleanValue) {
+                    return booleanValue.getBooleanValue();
                 }
-                else if (value is AnyURIValue) {
-                    return new Uri(((AnyURIValue) value).getStringValue());
+                else if (value is AnyURIValue uriValue) {
+                    return new Uri(uriValue.getStringValue());
                 }
-                else if (value is QNameValue) {
-                    return new QName((QNameValue) value);
+                else if (value is QNameValue nameValue) {
+                    return new QName(nameValue);
                 }
-                // else if (value is JDotNetObjectValue) // TODO: can't happen?
-                // {
-                //     return ((JDotNetObjectValue) value).getObject();
-                // }
                 else {
                     return ((AtomicValue) value).getStringValue();
                 }

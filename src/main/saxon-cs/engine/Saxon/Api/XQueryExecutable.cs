@@ -1,4 +1,8 @@
 using System;
+using System.Collections.Generic;
+using Saxon.Hej.expr.instruct;
+using Saxon.Hej.om;
+using Saxon.Hej.value;
 
 namespace Saxon.Api {
     /// <summary>
@@ -26,6 +30,30 @@ namespace Saxon.Api {
         /// update list rather than a conventional value).</summary>
 
         public bool IsUpdateQuery => executable.isUpdateQuery();
+        
+        /// <summary>
+        /// Get information about the external variables declared in the query
+        /// </summary>
+
+        public IDictionary<QName, ParameterDetails> GetExternalVariables() {
+            Saxon.Hej.query.XQueryExpression expression = executable.getUnderlyingCompiledQuery();
+            IEnumerable<GlobalVariable> globalVariables = expression.getMainModule().getAllGlobalVariables();
+            Dictionary<QName, ParameterDetails> result = new();
+            foreach (GlobalVariable globalVariable in globalVariables) 
+            {
+                if (globalVariable is GlobalParam) {
+                    StructuredQName name = globalVariable.getVariableQName();
+                    bool isRequired = globalVariable.isRequiredParam();
+                    SequenceType type = globalVariable.getRequiredType();
+                    ParameterDetails parameterDetails = new (XdmSequenceType.FromSequenceType(type), isRequired);
+                    parameterDetails.Location = new Location(globalVariable.getLocation());
+                    result[new QName(name)] = parameterDetails;
+                }
+            }
+
+            return result;
+        }
+
 
         /// <summary>Escape-hatch method to get the underlying Saxon implementation object if required.
         /// This provides access to methods that may not be stable from release to release.</summary>

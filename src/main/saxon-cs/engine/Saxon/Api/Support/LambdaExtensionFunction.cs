@@ -36,12 +36,12 @@ namespace Saxon.Api.Support {
         }
 
         public XdmSequenceType GetResultType() {
-            return XdmSequenceType.FromSequenceType(SequenceType.ANY_SEQUENCE);
+            return XdmSequenceType.AnySequenceType;
         }
 
         public XdmSequenceType[] GetArgumentTypes() {
             XdmSequenceType[] result = new XdmSequenceType[arity];
-            Arrays.fill(result, XdmSequenceType.FromSequenceType(SequenceType.ANY_SEQUENCE));
+            Arrays.fill(result, XdmSequenceType.AnySequenceType);
             return result;
         }
 

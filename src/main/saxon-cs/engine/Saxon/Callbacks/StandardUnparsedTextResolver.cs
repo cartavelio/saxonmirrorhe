@@ -14,12 +14,13 @@ using Exception = System.Exception;
 
 namespace Saxon.Callbacks {
     public class StandardUnparsedTextResolver : Saxon.Hej.lib.UnparsedTextURIResolver {
-        private XmlResolver resolver = new StandardXmlResolver();
+        private XmlResolver resolver;
 
         public StandardUnparsedTextResolver() {
         }
 
         public TextReader resolve(Uri absoluteURI, string encoding, Configuration config) {
+            resolver ??= new StandardXmlResolver(config);
             // Handle a URI using the data: URI scheme
             if (absoluteURI.Scheme == "data") {
                 Saxon.Hej.lib.Resource resource;
