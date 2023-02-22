@@ -88,6 +88,7 @@
          </xsl:if>
          <xsl:apply-templates select="extendedTypes/extendedType"/>
          <xsl:apply-templates select="implementedTypes/implementedType"/>
+         <xsl:apply-templates select="members/member[@nodeType='ConstructorDeclaration']"/>
          <xsl:apply-templates select="members/member[@nodeType='FieldDeclaration']"/>
          <xsl:apply-templates select="members/member[@nodeType='MethodDeclaration']">
             <xsl:with-param name="isInterface" select="false()" tunnel="yes"/>
@@ -102,7 +103,11 @@
    </xsl:template>
    
    <xsl:template match="*[@nodeType='EnumDeclaration']">
-      <enum name="{f:degenerify(name/@identifier)}"/>
+      <enum name="{f:degenerify(name/@identifier)}">
+         <xsl:if test="annotations/annotation/name/@identifier='CSharpSimpleEnum'">
+            <xsl:attribute name="simple" select="1"/>
+         </xsl:if>
+      </enum>
    </xsl:template>
    
    <xsl:template match="extendedType">
@@ -121,6 +126,12 @@
             <xsl:attribute name="params" select="$typeParams"/>
          </xsl:if>
       </implements>
+   </xsl:template>
+   
+   <xsl:template match="member[@nodeType='ConstructorDeclaration']">
+      <constructor>
+         <xsl:attribute name="params" select="string-join(parameters/parameter/type/@RESOLVED_TYPE, '|')"/>
+      </constructor>
    </xsl:template>
    
    <xsl:template match="member[@nodeType='MethodDeclaration']">

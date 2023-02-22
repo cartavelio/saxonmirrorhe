@@ -5,6 +5,9 @@ namespace com.saxonica.glue {
         public static int unsignedRightShift(int i, int shift) {
             return (int) ((uint) i >> shift);
         }
+        public static long unsignedRightShift(long i, int shift) {
+            return (long) ((ulong) i >> shift);
+        }
         
  
         // Test "instanceof" a generic type. For example,

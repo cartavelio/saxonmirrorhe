@@ -1,3 +1,4 @@
+using System;
 using SysArray = System.Array;
 using SysCollGen = System.Collections.Generic;
 
@@ -27,6 +28,10 @@ namespace java.util
             T[] dest = new T[length];
             SysArray.Copy(source, 0, dest, 0, length);
             return dest;
+        }
+        
+        public static T[] copyOfRange<T>(T[] source, int start, int end) {
+            throw new NotImplementedException();
         }
 
         public static java.util.List<T> asList<T>(T[] array) {

@@ -3,7 +3,7 @@ using SysRunComp = System.Runtime.CompilerServices;
 using java.lang;
 
 namespace java.util {
-    public class WeakHashMap<K, V> : Map<K, V> where K : referencetype {
+    public class WeakHashMap<K, V> : Map<K, V> /*where K : referencetype*/ {
         protected SysRunComp.ConditionalWeakTable<K, V> dict;
         public WeakHashMap() {
             dict = new Dictionary<K, V>();

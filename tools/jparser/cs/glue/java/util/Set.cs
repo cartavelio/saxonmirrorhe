@@ -5,6 +5,6 @@ namespace java.util {
         int size();
         bool contains(object key);
         bool containsAll(Set<E> subset);
-        void add(E entry);
+        bool add(E entry);
     }
 }

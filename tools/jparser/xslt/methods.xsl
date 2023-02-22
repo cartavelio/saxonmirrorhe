@@ -33,9 +33,40 @@
    </xsl:template>
    
    <xsl:template match="*[name/@identifier='getClass'][empty(arguments/argument)]" priority="100" mode="methods">
-      <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+      <xsl:choose>
+         <xsl:when test="scope">
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:text>this</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>     
       <xsl:text>.GetType()</xsl:text>
    </xsl:template>
+   
+   <xsl:template match="*[name/@identifier='hashCode'][empty(arguments/argument)]" priority="100" mode="methods">
+      <xsl:choose>
+         <xsl:when test="scope">
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:text>this</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>     
+      <xsl:text>.GetHashCode()</xsl:text>
+   </xsl:template>
+   
+   <!-- Special for System.err.println() -->
+   
+   <xsl:template match="*[@nodeType='MethodCallExpr']
+                           [name/@identifier='println']
+                           [scope[@RESOLVED_TYPE='java.lang.System' and name/@identifier='err']]" 
+                 priority="50">
+      <text>System.Console.Error.WriteLine(</text>
+      <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+      <xsl:text>)</xsl:text>
+   </xsl:template>
+ 
    
    <!-- Convert calls on delegate methods -->
    <!-- For example 'consumer.accept(item)' becomes 'consumer(item)' if consumer is a functional interface
@@ -104,7 +135,12 @@
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
-         </xsl:when>         
+         </xsl:when> 
+         <xsl:when test="name/@identifier = 'intern'">
+            <xsl:text>System.String.Intern(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when> 
          <xsl:when test="name/@identifier = 'isEmpty'">
             <xsl:text>(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
@@ -116,6 +152,14 @@
          </xsl:when>
          <xsl:when test="name/@identifier = 'matches'">
             <xsl:text>System.Text.RegularExpressions.Regex.IsMatch(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>, </xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'replaceAll'">
+            <!-- Java str.replaceAll(pattern, replacement) ==> C# Regex.Replace(str, pattern, replacement) -->
+            <xsl:text>System.Text.RegularExpressions.Regex(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
@@ -135,6 +179,51 @@
             <xsl:text>(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>.</xsl:text>
+            <xsl:apply-templates select="f:capitalize(name/@identifier)" mode="xml-to-cs"/>
+            <xsl:text>(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Convert method calls applied to built-in numeric types (java.lang.Integer, etc) -->
+   <xsl:template match="*[@RESOLVED_TYPE='java.lang.Integer']" 
+      priority="30" mode="methods">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'parseInt'">
+            <xsl:text>System.Int32.Parse(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>.</xsl:text>
+            <xsl:apply-templates select="f:capitalize(name/@identifier)" mode="xml-to-cs"/>
+            <xsl:text>(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Convert method calls applied to built-in numeric types (java.lang.Integer, etc) -->
+   <xsl:template match="*[@RESOLVED_TYPE=('java.lang.Long', 'java.lang.Double')]" 
+      priority="30" mode="methods">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'parseLong'">
+            <xsl:text>System.Int64.Parse(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'toHexString'">
+            <xsl:text>(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>).ToString("X")</xsl:text>
          </xsl:when>
          <xsl:otherwise>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
@@ -175,7 +264,27 @@
             <xsl:text>)</xsl:text>
          </xsl:otherwise>
       </xsl:choose>
-   </xsl:template> 
+   </xsl:template>
+   
+   <!-- Convert .ordinal() and .values() methods on an enumeration value -->
+   
+   <xsl:template match="*[name/@identifier=('ordinal', 'values')]
+         [empty(arguments/argument)]
+         [key('digestClassKey', @RESOLVED_TYPE, $digest)[self::enum]]" 
+      priority="30" mode="methods">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='ordinal'">
+            <xsl:text>((int)</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier='values'">
+            <xsl:text>System.Enum.GetValues(typeof({@RESOLVED_TYPE}))</xsl:text>
+         </xsl:when>
+      </xsl:choose>
+      
+   </xsl:template>
+
    
    <!-- Convert method calls applied to java.lang.Class (which becomes System.Type) -->
    <xsl:template match="*[@RESOLVED_TYPE = 'java.lang.Class' or starts-with(@RESOLVED_TYPE, 'java.lang.Class&lt;')]" 
@@ -212,6 +321,28 @@
          <xsl:otherwise>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>.</xsl:text>
+            <xsl:apply-templates select="f:capitalize(name/@identifier)" mode="xml-to-cs"/>
+            <xsl:text>(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Convert method calls applied to java.lang.Math (which becomes System.Math) -->
+   <xsl:template match="*[@RESOLVED_TYPE = 'java.lang.Math']" priority="30" mode="methods">
+      <!--<xsl:message>Class.{name/@identifier}()</xsl:message>-->
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'random' and count(arguments/argument)=0">
+            <xsl:text>(new System.Random()).NextDouble()</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'round' and count(arguments/argument)=1">
+            <xsl:text>(long)(System.Math.Round(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>, System.MidpointRounding.ToPositiveInfinity)</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:text>System.Math.</xsl:text>
             <xsl:apply-templates select="f:capitalize(name/@identifier)" mode="xml-to-cs"/>
             <xsl:text>(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
@@ -387,6 +518,16 @@
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
+         <xsl:when test="name/@identifier = 'intValue'">
+            <xsl:text>((int)</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'longValueExact'">
+            <xsl:text>((long)</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
          <xsl:when test="name/@identifier = 'setScale'">
             <xsl:text>com.saxonica.glue.BigDecimalUtils.SetScale(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
@@ -396,6 +537,11 @@
          </xsl:when>
          <xsl:when test="name/@identifier = 'stripTrailingZeros'">
             <xsl:text>com.saxonica.glue.BigDecimalUtils.StripTrailingZeros(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'toBigInteger'">
+            <xsl:text>((System.Numerics.BigInteger)</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
@@ -410,7 +556,7 @@
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'longValue'">
-            <xsl:text>((long(</xsl:text>
+            <xsl:text>((long)</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
@@ -427,6 +573,23 @@
             <xsl:text>(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Special-case Character.getType() -->
+   <!-- Note, the result is of type UnicodeCategory, which will cause problems if it is bound to a variable -->
+   <xsl:template match="*[starts-with(@RESOLVED_TYPE, 'java.lang.Character')]" 
+      priority="20" mode="methods">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'getType'">
+            <!-- TODO: this assumes .NET 5; earlier versions only accept a char) -->
+            <xsl:text>System.Globalization.CharUnicodeInfo.GetUnicodeCategory((char)</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
@@ -451,17 +614,31 @@
       </xsl:choose>
    </xsl:template>
    
+   <!-- Special-case List.remove, which causes problems because Java has both
+      List.remove(int) and List.remove(object), which conflict in C# -->
+   <xsl:template match="*[f:degenerify(@RESOLVED_TYPE) = ('java.util.List', 'java.util.ArrayList', 'java.util.LinkedList')]
+      [name/@identifier='remove'][count(arguments/argument)=1][arguments/argument[1][@nodeType='IntegerLiteralExpr' or @RESOLVED_TYPE='int' or @operator=('PLUS', 'MINUS')]]" 
+      priority="20" mode="methods">
+      <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+      <xsl:text>.removeAt(</xsl:text>
+      <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+      <xsl:text>)</xsl:text>
+   </xsl:template>
+   
    <!-- Special-case Collections.emptyIterator() and similar methods -->
-   <!-- Currently handled only when appearing in a return statement, the type is taken from the containing method declaration -->
+   <!-- Reuse the "diamond" logic for determining the required type -->
    <xsl:template match="*[@RESOLVED_TYPE = 'java.util.Collections']" 
       priority="20" mode="methods">
      <!-- <xsl:message>Collections.{name/@identifier}()</xsl:message>-->
-      <xsl:variable name="targetClass" as="xs:string?">
+      <!--<xsl:variable name="targetClass" as="xs:string?">
          <xsl:choose>
             <xsl:when test="../@nodeType='ReturnStmt'">
                <xsl:sequence select="ancestor::member/type/typeArguments/typeArgument[1]/@RESOLVED_TYPE ! string()"/>
             </xsl:when>
          </xsl:choose>
+      </xsl:variable>-->
+      <xsl:variable name="targetClass" as="xs:string">
+         <xsl:apply-templates select="." mode="diamond"/>
       </xsl:variable>
       <xsl:choose>
          <xsl:when test="name/@identifier = 'emptyIterator' and $targetClass">
@@ -474,7 +651,7 @@
             <xsl:text>java.util.Collections.emptySet&lt;{f:rename-generic-type($targetClass)}>()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'emptyMap' and $targetClass">
-            <xsl:variable name="targetClass2" select="ancestor::member/type/typeArguments/typeArgument[2]/@RESOLVED_TYPE ! string()"/>
+            <xsl:variable name="targetClass2" select="string(ancestor::member/type/typeArguments/typeArgument[2]/@RESOLVED_TYPE)"/>
             <xsl:text>java.util.Collections.emptyMap&lt;{f:rename-generic-type($targetClass), f:rename-generic-type($targetClass2)}>()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'singleton' and $targetClass">
@@ -513,15 +690,19 @@
    </xsl:template>
    
    <xsl:template match="*" priority="10" mode="methods">
-      <xsl:variable name="digestMethod" select="key('digestMethodArityKey', 
-         (@RESOLVED_TYPE,@DECLARING_TYPE)[1] || '#' || name/@identifier || '!' || count(arguments/argument), $digest)"/>
-      <!--<xsl:message>Default rule for method calls</xsl:message>-->
+      <xsl:variable name="targetType" select="(@RESOLVED_TYPE,@DECLARING_TYPE)[1]" as="xs:string?"/>
+      <xsl:variable name="methodName" select="name/@identifier"/>
+      <xsl:variable name="arity" select="count(arguments/argument)"/>
+      <xsl:variable name="digestMethod" select="f:candidateMethods($targetType, $methodName, $arity)"/>
+      <!--<xsl:message>Method call = {$methodName}#{$arity} digestMethods={count($digestMethod)} 
+         returns={$digestMethod/@returns} csReturns={$digestMethod/@csReturns}</xsl:message>-->
       <!-- Be prepared to cast the result to the required type in the case where the C# method returns a supertype of 
            the return type of the corresponding Java method -->
       <xsl:variable name="optionalCast" 
-         select="if (not(parent::statement) and count($digestMethod)=1 and $digestMethod[@returns != @csReturns]) 
+         select="if (count($digestMethod)=1 and $digestMethod[@returns != @csReturns] and not(../@nodeType='ExpressionStmt')) 
                  then $digestMethod/@returns 
                  else ''"/>
+      <!--<xsl:message> cast = {$optionalCast}</xsl:message>-->
       <xsl:if test="$optionalCast">(({$optionalCast})</xsl:if>
       <xsl:if test="scope">
          <xsl:choose>

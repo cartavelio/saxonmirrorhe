@@ -9,9 +9,23 @@ namespace java.util
                 c.add(extra);
             }
         }
+        
+        public static void addAll<T>(Collection<T> c, Collection<T> additions)
+        {
+            foreach (T extra in additions)
+            {
+                c.add(extra);
+            }
+        }
 
         public static List<T> emptyList<T>() {
             return new ArrayList<T>();
+        }
+        
+        public static List<T> singletonList<T>(T entry) {
+            ArrayList<T> a =  new ArrayList<T>();
+            a.add(entry);
+            return a;
         }
         
         public static Set<T> emptySet<T>() {
@@ -20,6 +34,10 @@ namespace java.util
         
         public static java.util.Iterator<T> emptyIterator<T>() {
             return new EmptyIterator<T>();
+        }
+        
+        public static java.util.Map<K,V> emptyMap<K,V>() {
+            return new HashMap<K, V>();
         }
 
         public static java.util.Set<T> singleton<T>(T o) {

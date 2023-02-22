@@ -1,28 +1,46 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
-/**
- * A C# wrapper class that converts a Java Iterator to a C# Enumerator
- */
  
 namespace com.saxonica.glue {
+    
+ /**
+ * A C# wrapper class that converts a Java Iterator to a C# Enumerator
+ */
+
 
     public class EnumeratorFromIterator<T> : IEnumerator<T>
     {
         private java.util.Iterator<T> iter;
-        public T Current = default(T);
+        internal T _Current = default(T);
         public EnumeratorFromIterator(java.util.Iterator<T> iter) {
             this.iter = iter;
         } 
         public bool MoveNext() {
             if (iter.hasNext()) {
-                Current = iter.next();
+                _Current = iter.next();
                 return true;
             } else {
-                Current = default(T);
+                _Current = default(T);
                 return false;
             }
         }
 
+        public T Current {
+            get {
+                return _Current;
+            }
+        }
+
+        object IEnumerator.Current => Current;
+
+        public void Reset() {
+            throw new NotSupportedException();
+        }
+
+        public void Dispose() {
+            // no action
+        }
     }
 }

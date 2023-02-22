@@ -31,6 +31,21 @@ namespace java.net {
         public string toASCIIString() {
             return uri.OriginalString; // TODO - probably not correct
         }
+        public string getScheme() {
+            throw new NotImplementedException();
+        }
+
+        public string getSchemeSpecificPart() {
+            throw new NotImplementedException();
+        }
+
+        public string getQuery() {
+            throw new NotImplementedException();
+        }
+
+        public string getFragment() {
+            throw new NotImplementedException();
+        }
         //public java.net.URI(java.net.URI base, string href) {
         //    uri = System.Uri(new System.Uri(base.ToString(), href));
         //}

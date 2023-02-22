@@ -11,5 +11,14 @@ namespace java.lang {
         public static bool isDigit(Sys.Char c) {
             return Sys.Char.IsDigit(c);
         }
+
+        public static int digit(Sys.Char c, int radix) {
+            if (radix == 10) {
+                return c - '0';
+            }
+            else {
+                throw new Sys.NotImplementedException();
+            }
+        }
     }
 }

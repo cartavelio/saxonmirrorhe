@@ -8,7 +8,15 @@ namespace javax.xml.transform.stream {
 
         public StreamSource(string uri) {
         }
-
+        public StreamSource(Reader reader) {
+            
+        }
+        public StreamSource(Reader reader, string sysId) {
+            
+        }
+        public StreamSource(InputStream stream) {
+            
+        }
         public StreamSource(InputStream stream, string sysId) {
             
         }
