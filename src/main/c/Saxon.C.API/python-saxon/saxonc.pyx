@@ -167,13 +167,12 @@ cdef class PySaxonProcessor:
         if self._release is True:
             self.thisptr.release()
     def __enter__(self):
-      """enter method for use with the keyword 'with' context"""
+      """enter method for use with the keyword 'with' context
+      Deprecated. This may be removed in a later release. """
       return self
     
     def __exit__(self, exception_type, exception_value, traceback):
-        """The exit method for the context PySaxonProcessor. Here we release the Jet VM resources.
-        If we have more than one live PySaxonProcessor object the release() method has no effect.
-        """
+        """Deprecated. This method no longer does anything, and may be removed in a later release. """
         
         ''' if self.thisptr is not NULL:
           del self.thisptr
@@ -1942,10 +1941,13 @@ cdef class PyXsltExecutable:
         """
         apply_templates_returning_value(self, **kwds)
         Invoke the stylesheet by applying templates to a supplied input sequence, saving the results as a PyXdmValue.
+        It is possible to specify the initial match selection either as an argument or using the
+        set_initial_match_selection method. This method does not set the global context item for the transformation;
+        if that is required, it can be done separately using the set_global_context_item method.
         Args:
-            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue);
-                and base_output_uri (str) which is used for resolving relative URIs in the href attribute of
-                the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue) can be used to supply
+                the initial match selection; and base_output_uri (str) which is used for resolving relative URIs
+                in the href attribute of the xsl:result-document instruction.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
@@ -2043,10 +2045,13 @@ cdef class PyXsltExecutable:
         """
         apply_templates_returning_string(self, **kwds)
         Invoke the stylesheet by applying templates to a supplied input sequence, saving the results as a string.
+        It is possible to specify the initial match selection either as an argument or using the
+        set_initial_match_selection method. This method does not set the global context item for the transformation;
+        if that is required, it can be done separately using the set_global_context_item method.
         Args:
-            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue);
-                and base_output_uri (str) which is used for resolving relative URIs in the href attribute of
-                the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue) can be used to supply
+                the initial match selection; and base_output_uri (str) which is used for resolving relative URIs
+                in the href attribute of the xsl:result-document instruction.
         Returns:
             str: Result of the transformation as a str value
         Example:
@@ -2111,10 +2116,13 @@ cdef class PyXsltExecutable:
         apply_templates_returning_file(self, **kwds)
         Invoke the stylesheet by applying templates to a supplied input sequence, saving the results to file.
         It is possible to specify the output file as an argument or using the set_output_file method.
+        It is possible to specify the initial match selection either as an argument or using the
+        set_initial_match_selection method. This method does not set the global context item for the transformation;
+        if that is required, it can be done separately using the set_global_context_item method.
         Args:
-            **kwds: Possible arguments: source_file (str) or xdm_value (PyXdmValue); output_file (str), and
-                base_output_uri (str) which is used for resolving relative URIs in the href attribute of
-                the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue) can be used to supply
+                the initial match selection; output_file (str), and base_output_uri (str) which is used for
+                resolving relative URIs in the href attribute of the xsl:result-document instruction.
 
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
@@ -2176,7 +2184,9 @@ cdef class PyXsltExecutable:
      def call_template_returning_value(self, str template_name=None, **kwds):
         """
         call_template_returning_value(self, str template_name, **kwds)
-        Invoke a transformation by calling a named template and return the result as a PyXdmValue.
+        Invoke a transformation by calling a named template and return the result as a PyXdmValue. This method does not
+        set the global context item for the transformation; if that is required, it can be done separately using the
+        set_global_context_item method.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
             **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
@@ -2188,7 +2198,7 @@ cdef class PyXsltExecutable:
             xslt30_proc = saxon_proc.new_xslt30_processor()
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) result = executable.call_template_returning_value("main")\r
-            2) executable.set_initial_match_selection(file_name="cat.xml")\r
+            2) executable.set_global_context_item(file_name="cat.xml")\r
                result = executable.call_template_returning_value("main")
         """
         cdef const char * c_templateName = NULL
@@ -2280,7 +2290,9 @@ cdef class PyXsltExecutable:
      def call_template_returning_string(self, str template_name=None, **kwds):
         """
         call_template_returning_string(self, str template_name, **kwds)
-        Invoke a transformation by calling a named template and return the result as a string.
+        Invoke a transformation by calling a named template and return the result as a string. This method does not
+        set the global context item for the transformation; if that is required, it can be done separately using the
+        set_global_context_item method.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
             **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
@@ -2291,9 +2303,9 @@ cdef class PyXsltExecutable:
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) result = executable.call_template_returning_string("main")
-            2) executable.set_initial_match_selection(file_name="cat.xml")\r
+            2) executable.set_global_context_item(file_name="cat.xml")\r
                result = executable.call_template_returning_string("main")
-            3) executable.set_initial_match_selection(file_name="cat.xml")\r
+            3) executable.set_global_context_item(file_name="cat.xml")\r
                result = executable.call_template_returning_string()
 			   print(result)
         """
@@ -2351,8 +2363,9 @@ cdef class PyXsltExecutable:
      def call_template_returning_file(self, str template_name=None, **kwds):
         """
         call_template_returning_file(self, str template_name, **kwds)
-        Invoke a transformation by calling a named template with the result saved to file. It is possible to specify
-        the output file as an argument or using the set_output_file method.
+        Invoke a transformation by calling a named template with the result saved to file. It is possible to specify the
+        output file as an argument or using the set_output_file method. This method does not set the global context item
+        for the transformation; if that is required, it can be done separately using the set_global_context_item method.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
             **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode); output_file (str), and
@@ -2361,9 +2374,9 @@ cdef class PyXsltExecutable:
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.call_template_returning_file("main", output_file="result.xml")
-            2) executable.set_initial_match_selection(file_name="cat.xml")\r
+            2) executable.set_global_context_item(file_name="cat.xml")\r
                executable.call_template_returning_file("main", output_file="result.xml")
-            3) executable.set_initial_match_selection(file_name="cat.xml")\r
+            3) executable.set_global_context_item(file_name="cat.xml")\r
                executable.call_template_returning_file(output_file="result.xml")
 			   print(result)
         """
@@ -2424,7 +2437,9 @@ cdef class PyXsltExecutable:
      def call_function_returning_value(self, str function_name, list args, **kwds):
         """
         call_function_returning_value(self, str function_name, list args, **kwds)
-        Invoke a transformation by calling a named function and return the result as a PyXdmValue.
+        Invoke a transformation by calling a named function and return the result as a PyXdmValue. This method does not
+        set the global context item for the transformation; if that is required, it can be done separately using the
+        set_global_context_item method.
         Args:
 			function_name (str): The name of the function to invoke, in clark notation {uri}local
 			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
@@ -2435,7 +2450,7 @@ cdef class PyXsltExecutable:
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) result = executable.call_function_returning_value("{http://localhost/example}func", [])
-            2) executable.set_initial_match_selection(file_name="cat.xml")\r
+            2) executable.set_global_context_item(file_name="cat.xml")\r
                result = executable.call_function_returning_value("{http://localhost/test}add", [saxonproc.make_integer_value(2)])
             3) result = executable.call_function_returning_value("{http://example.com}func1", [], source_file="cat.xml")
             
@@ -2537,6 +2552,8 @@ cdef class PyXsltExecutable:
         """
         call_function_returning_string(self, str function_name, list args, **kwds)
         Invoke a transformation by calling a named function and return the result as a serialized string.
+        This method does not set the global context item for the transformation; if that is required, it can be done
+        separately using the set_global_context_item method.
         Args:
 			function_name (str): The name of the function to invoke, in clark notation {uri}local
 			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
@@ -2547,7 +2564,7 @@ cdef class PyXsltExecutable:
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) result = executable.call_function_returning_string("{http://localhost/example}func", [])
-            2) executable.set_initial_match_selection(file_name="cat.xml")\r
+            2) executable.set_global_context_item(file_name="cat.xml")\r
                result = executable.call_function_returning_string("{http://localhost/test}add", [saxonproc.make_integer_value(2)])
             3) result = executable.call_function_returning_string("{http://example.com}func1", [], source_file="cat.xml")
         """
@@ -2618,7 +2635,9 @@ cdef class PyXsltExecutable:
         """
         call_function_returning_file(self, str function_name, list args, **kwds)
         Invoke a transformation by calling a named function with the result saved to file. It is possible to specify
-        the output file as an argument or using the set_output_file method.
+        the output file as an argument or using the set_output_file method. This method does not set the global
+        context item for the transformation; if that is required, it can be done separately using the
+        set_global_context_item method.
         Args:
 			function_name(str): The name of the function to invoke, in clark notation {uri}local
 			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
@@ -2629,7 +2648,7 @@ cdef class PyXsltExecutable:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test2.xsl")
             1) executable.set_output_file("result.xml")
 			   executable.call_function_returning_file("{http://localhost/example}func", [])
-            2) executable.set_initial_match_selection(file_name="cat.xml")\r
+            2) executable.set_global_context_item(file_name="cat.xml")\r
                executable.call_function_returning_file("{http://localhost/test}add", [saxonproc.make_integer_value(2)], output_file="result.xml")
             3) executable.call_function_returning_file("{http://example.com}func1", [], output_file="result.xml", source_file="cat.xml")
         """
@@ -4492,7 +4511,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          function, provided a licensed Processor is used.
          Args:
              proc (PySaxonProcessor): the Saxon processor
-             name (str): the name of the requested function as an EQName
+             name (str): the name of the requested function as an EQName or clark name
              arity (int): the arity of the requested function
          Returns:
              PyXdmFunctionItem: the requested function
