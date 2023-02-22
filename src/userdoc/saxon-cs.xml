@@ -5,21 +5,25 @@
       <p>Saxon-CS is a new product that implements nearly all the functionality of the Java
       product, but running on .NET Core.</p>
    
-      <p>In the past Saxon has been delivered on .NET by cross-compiling the Java bytecode
+      <p>Features of Saxon-CS are covered throughout this documentation in the appropriate places.
+      This chapter focuses on the areas where Saxon-CS differs from the Java product, and where
+      it differs from the older Saxon/.NET product.</p>
+   
+      <p>Saxon/.NET was produced by translating the Java bytecode
       to .NET's equivalent IL code, using the IKVMC cross-compiler. IKVMC does not work
       with .NET Core, which Microsoft has indicated represents the future direction for
-      .NET, so a different approach was needed.</p>
+      .NET, so a different approach was needed. Saxon/.NET will not be developed beyond the 10.x release.</p>
    
-      <p>Saxon-CS is therefore built by converting the Java source code of the Java product
-      directly to C# source code.</p>
+      <p>Saxon-CS is built by converting the Java source code of the Java product
+      directly to C# source code. The translation is done by a purpose-written transpiler
+      written largely in XSLT. This is not a one-off conversion or a fork: the C# code is regenerated
+      after every change made to the Java source.</p>
    
-      <p>This chapter of the documentation highlights the differences between Saxon-CS
-      compared both with the Java product, and with the predecessor Saxon/.NET product.</p>
-
+      
  
  
    <p>The initial release of Saxon-CS corresponds in functionality to Saxon-EE on Java, and requires a license key that
-      enables all Saxon-EE facilities.</p>
+      enables Saxon-EE capability.</p>
          
          
 
@@ -46,7 +50,7 @@ as their Java counterparts, with some exceptions. They are described in the foll
       </ul>
 
       <p>An introduction to the API for Saxon on .NET is provided at <a class="bodylink" href="dotnetapi">Saxon API for .NET</a>;
-full specifications are available in the <a href="/dotnetdoc" class="apilink">.NET API</a>.</p>
+full specifications are available in the <a href="/dotnetdoc" class="bodylink">.NET API</a>.</p>
          
    <section id="dotnetapi" title="Saxon API for .NET" class="csonly">
       <h1>Saxon API for .NET</h1>
@@ -54,17 +58,22 @@ full specifications are available in the <a href="/dotnetdoc" class="apilink">.N
 
       <p>A new API has been developed providing access to XSLT, XQuery, XPath, and XML Schema processing on the .NET
 platform. This is available from any .NET-supported language, although the examples are all expressed in C# terms.</p>
+      
+      <aside>The Saxon-CS API follows the overall structure of the older .NET API very closely, but it is not 100% compatible.
+      The opportunity has been taken to modernize the design to take advantage of newer C# language features such as
+      delegates and lambda expressions.</aside>
 
       <p>This section provides a brief introduction to the structure and concepts of the API. Full specifications are
 available in the <a href="/dotnetdoc" class="apilink">.NET API</a>.</p>
 
-      <p>A set of example C# programs illustrating various use cases for the API is available in the <code>samples/cs</code>
+      <p>An example C# program illustrating various use cases for the API is available in the <code>samples/cs</code>
           directory, see <a class="bodylink" href="/samples/dotnetsamples">Example applications for
               .NET</a> for further information.</p>
 
       <p>All the classes referred to below are in the namespace <code>Saxon.Api</code>.</p>
 
-      <p>The first thing the application needs to do is to create a <a class="cslink" href="Saxon.Api.Processor">Processor</a>. The <code>Processor</code>
+      <p>The first thing the application needs to do is to create a <a class="cslink" href="Saxon.Api.Processor">Processor</a>. 
+         The <code>Processor</code>
 holds configuration information for Saxon, and shared resources such as the name pool and schema pool. It is possible
 to run multiple processors concurrently if required, but it is usually more economical for all Saxon processes within
 a single application to use the same <code>Processor</code>.</p>
@@ -135,7 +144,7 @@ and whether schema validation is performed. The resulting document can be
 used as the input to a transformation, a query, or an XPath expression. It might also contain a stylesheet or a schema
 which can then be used as input to the <a class="cslink" href="Saxon.Api.XsltCompiler">XsltCompiler</a> or the <a class="cslink" href="Saxon.Api.SchemaManager">SchemaManager</a>.</p>
 
-      <p>The <a class="cslink" href="Saxon.Api.SchemaManager">SchemaManager</a> exists only in the Saxon-EE product, and its job is to compile schema documents
+      <p>The <a class="cslink" href="Saxon.Api.SchemaManager">SchemaManager</a> exists to compile schema documents
 and to maintain a cache containing the compiled schemas. It thus contains methods to compile schemas from a variety
 of document sources. It also contains a factory method <code>NewSchemaValidator()</code>, which returns a 
          <a class="cslink" href="Saxon.Api.SchemaValidator">SchemaValidator</a>. The <code>SchemaValidator</code>, in turn, is used to validate a source document
@@ -152,7 +161,8 @@ an XSLT transformation whose result is then serialized.</p>
 
       <p>There are several places where the classes in the <code>Saxon.Api</code> package provide an "escape hatch" into
 the underlying implementation classes. These are provided for the benefit of applications that for some reason 
-need to mix use of the .NET API with the established Java API. The underlying implementation classes are documented
+need to mix use of the .NET API with the internal classes converted from the original Java code. The underlying implementation 
+classes are documented
 in Java terms and use Java calling conventions, but this does not stop them being used from any .NET language.
 The places where such escape hatches are provided are shown below:</p>
       <table>
@@ -221,9 +231,8 @@ The places where such escape hatches are provided are shown below:</p>
       <h1>XML Parsing in Saxon-CS</h1>
       
 
-      <p>When you run Saxon on the .NET platform, the XML parsing is delegated to
-         the <code>System.Xml</code> parser
-supplied with the .NET platform.</p>
+      <p>XML parsing in Saxon-CS is delegated to
+         the <code>System.Xml</code> parser supplied with the .NET platform.</p>
       
       <p>The Microsoft parser has some limitations:</p>
       
@@ -244,7 +253,7 @@ supplied with the .NET platform.</p>
          of external entity boundaries.</p></li>
       </ul>
       
-      <p>There are several ways the Microsoft parser can be used:</p>
+      <p>There are several ways the <code>System.Xml</code> parser can be used:</p>
       
       <ul>
          <li><p>In interfaces where a source XML document is provided by supplying a URI, or a <code>Stream</code>,
@@ -258,9 +267,9 @@ supplied with the .NET platform.</p>
          Some settings may produce behavior that is not conformant with the W3C specifications
          (for example, switching character checking off), and which could potentially cause
          Saxon to behave unpredictably.</p></li>
-         <li><p>You can also use the Microsoft parser to construct an in-memory DOM tree (represented
+         <li><p>You can also use the <code>System.Xml</code> parser to construct an in-memory DOM tree (represented
          by an <code>XmlDocument</code> or <code>XmlNode</code>). Some Saxon interfaces
-            also accept input in the form of an <code>XmlDocument</code> or <code>XmlNode</code>.
+            accept input in the form of an <code>XmlDocument</code> or <code>XmlNode</code>.
          There are two ways Saxon can handle a DOM:</p>
          <ul>
             <li><p>The DOM can be copied to an internal Saxon tree structure.</p>
@@ -276,7 +285,8 @@ supplied with the .NET platform.</p>
          </ul></li>
       </ul>
 
-      <p>To use OASIS catalogs with the Microsoft parser, download nuget package <code>Org.XmlResolver</code>
+      <p>To use URI catalogs and locally-cached documents with the Microsoft parser, 
+         download nuget package <code>Org.XmlResolver</code>
       and nominate this as your <code>XmlResolver</code> before invoking the parser.</p>
          
       
@@ -299,43 +309,51 @@ supplied with the .NET platform.</p>
    <section id="saxon-cs-extension-functions" title="Writing Extension Functions" class="csonly">
       <h1>Writing Extension Functions</h1>
       <p>Reflexive extension functions are not available in Saxon-CS.</p>
+      <p>There are two interfaces that allow extension functions to be written: a simple interface where the function
+      is written as a lambda expression, and a richer interface that gives access to the static and dynamic processing
+      context of the function call. Both interfaces are described at 
+         <a class="bodylink" href="/extensibility/extension-functions-CS">Writing Extension Functions in C#</a>.</p>
    </section>
    <section id="saxon-extensions" title="Built-in Extensions" class="csonly">
       <h1>Built-in Extensions</h1>
-      <p>All the extension functions in the <code>saxon</code> namespace are available with the
-      exception of <code>saxon:send-mail()</code>, <code>saxon:parse-dateTime()</code>, saxon:object-map...</p>
+      <p>Nearly all the extension functions provided in the Java product in the <code>saxon</code> namespace are available.
+         The exceptions are:</p>
+      <ul>
+         <li><code>saxon:key-map</code></li>
+         <li><code>saxon:last-modified</code></li>
+         <li><code>saxon:parse-dateTime</code></li>
+         <li><code>saxon:send-mail</code></li>
+         <li><code>saxon:object-map</code></li>
+         <li><code>saxon:unparsed-entities</code></li>
+      </ul>
       
-      <p>External objects wrapping C# objects... 
-      Available with restrictions. The external object lookup expression (a Saxon extension) is not available.</p>
+      <p>It is possible to wrap an external C# object in an <code>XdmExternalObject</code>. However, the external object lookup 
+         expression (a Saxon extension) is not available.</p>
       
-      <p>EXPath File module: available</p>
+      <p>The EXPath File and Binary modules ARE available</p>
       
-      <p>EXPath Binary module: available</p>
+      <p>The EXPath Archive module is NOT available</p>
       
-      <p>EXPath Archive module: NOT available</p>
-      
-      <p>The EXSLT modules Sets, Math, and Date are NOT available.</p>
+      <p>The EXSLT modules Sets, Math, Date, and Random are NOT available.</p>
       
       <p>The EXSLT module Common IS available.</p>
       
-      <p>EXSLT Random: ???</p>
-      
-      <p>The SQL extension is NOT available in Saxon-CS.</p>
+      <p>The SQL extension is NOT available.</p>
    </section>
    <section id="localization" title="Localization" class="csonly">
       <h1>Localization</h1>
       <p>Collation URIs for the Unicode Collation Algorithm are implemented using the ICU4N library, which is not as complete
       as its Java counterpart, ICU4J.</p>
       
-      <p>One known restriction is that the value <code>alternate=blanked</code> is not recognized.</p>
-      
+      <!--<p>One known restriction is that the value <code>alternate=blanked</code> is not recognized.</p>
+      -->
       <p>Localization of numbers and dates is not currently available for languages other than English.</p>
    </section>
    <section id="restrictions" title="Restrictions" class="csonly">
       <h1>Restrictions</h1>
       
       <p>Absolute URIs with single-character scheme names (for example, <code>a:/x/y/z</code>) are not handled correctly. 
-         (This is a limitation of Microsoft's <code>System.Uri</code> class - it treates such names as DOS filenames).</p>
+         (This is a limitation of the .NET <code>System.Uri</code> class - it treates such names as DOS filenames).</p>
       
       <h2>Restrictions Relative to Saxon-EE 11 on Java</h2>
       
