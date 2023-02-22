@@ -2582,7 +2582,7 @@ public class XQueryParser extends XPathParser {
             }
             if (t.currentToken == Token.ASSIGN) {
                 LetClause letClause = new LetClause();
-
+                setLocation(clause, t.currentTokenStartOffset);
                 clauseList.add(letClause);
                 nextToken();
 
