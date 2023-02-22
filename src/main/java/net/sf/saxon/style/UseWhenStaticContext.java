@@ -59,11 +59,12 @@ public class UseWhenStaticContext extends AbstractStaticContext implements Stati
         this.compilation = compilation;
         setPackageData(compilation.getPackageData());
         this.namespaceContext = namespaceContext;
-        setXPathLanguageLevel(31);
+        int version = compilation.getCompilerInfo().getXsltVersion();
+        setXPathLanguageLevel(version == 40 ? 40 : 31);
 
         FunctionLibraryList lib = new FunctionLibraryList();
-        lib.addFunctionLibrary(UseWhen30FunctionSet.getInstance());
-        lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList(31));
+        lib.addFunctionLibrary(UseWhen30FunctionSet.getInstance(version));
+        lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList(version));
         lib.addFunctionLibrary(new ConstructorFunctionLibrary(getConfiguration()));
         lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
         config.addExtensionBinders(lib);

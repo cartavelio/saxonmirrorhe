@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions.registry;
 
+import com.saxonica.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.type.BuiltInAtomicType;
 
@@ -17,19 +18,20 @@ import net.sf.saxon.type.BuiltInAtomicType;
 
 public class UseWhen30FunctionSet extends BuiltInFunctionSet {
 
-    private static final UseWhen30FunctionSet THE_INSTANCE = new UseWhen30FunctionSet();
+    private static final UseWhen30FunctionSet THE_INSTANCE_31 = new UseWhen30FunctionSet(31);
+    private static final UseWhen30FunctionSet THE_INSTANCE_40 = new UseWhen30FunctionSet(40);
 
-    public static UseWhen30FunctionSet getInstance() {
-        return THE_INSTANCE;
+    public static UseWhen30FunctionSet getInstance(int version) {
+        return version == 40 ? THE_INSTANCE_40 : THE_INSTANCE_31;
     }
 
-    protected UseWhen30FunctionSet() {
-        init();
+    protected UseWhen30FunctionSet(int version) {
+        init(version);
     }
 
-    protected void init() {
+    protected void init(int version) {
 
-        addXPathFunctions();
+        addXPathFunctions(version);
 
         register("available-system-properties", 0, e -> e.populate(AvailableSystemProperties::new, BuiltInAtomicType.QNAME,
                  STAR, LATE));
@@ -53,8 +55,8 @@ public class UseWhen30FunctionSet extends BuiltInFunctionSet {
 
     }
 
-    protected void addXPathFunctions() {
-        importFunctionSet(XPath31FunctionSet.getInstance());
+    protected void addXPathFunctions(int version) {
+        importFunctionSet(version == 40 ? XPath40FunctionSet.getInstance() : XPath31FunctionSet.getInstance());
     }
 
 
