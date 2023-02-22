@@ -16,6 +16,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
 import org.w3c.dom.*;
 
@@ -306,6 +307,8 @@ public class DOMWriter extends Builder {
                 // we create a DocumentOverNodeInfo, which is immutable, and will cause the DOMWriter to fail
                 document = new DocumentOverNodeInfo();
             }
+            nsStack.clear();
+            nsStack.push(getAllNamespaces(node));
         }
     }
 
@@ -341,6 +344,50 @@ public class DOMWriter extends Builder {
 
     protected Document getDOMDocumentNode() {
         return document;
+    }
+
+    /**
+     * Get all in-scope namespaces for the node to which we are attaching a new subtree
+     *
+     * @param anchor the (document or element) node to which we are attaching
+     * @return the in-scope namespaces of a supplied DOM node
+     */
+
+    private NamespaceMap getAllNamespaces(Node anchor) {
+        if (anchor.getNodeType() == Type.ELEMENT) {
+            NamespaceMap nsMap = NamespaceMap.emptyMap();
+            Element elem = (Element) anchor;
+            while (true) {
+                NamedNodeMap atts = elem.getAttributes();
+                if (atts != null) {
+                    int attsLen = atts.getLength();
+                    for (int i = 0; i < attsLen; i++) {
+                        Attr att = (Attr) atts.item(i);
+                        String attName = att.getName();
+                        if (attName.startsWith("xmlns")) {
+                            if (attName.length() == 5) {
+                                if (nsMap.getURI("") == null) {
+                                    nsMap = nsMap.bind("", att.getValue());
+                                }
+                            } else if (attName.charAt(5) == ':') {
+                                String prefix = attName.substring(6);
+                                if (nsMap.getURI(prefix) == null) {
+                                    nsMap = nsMap.bind(attName.substring(6), att.getValue());
+                                }
+                            }
+                        }
+                    }
+                }
+                Node parent = elem.getParentNode();
+                if (parent.getNodeType() != Type.ELEMENT) {
+                    return nsMap;
+                }
+                elem = (Element) parent;
+            }
+        } else {
+            // not an element node
+            return NamespaceMap.emptyMap();
+        }
     }
 }
 
