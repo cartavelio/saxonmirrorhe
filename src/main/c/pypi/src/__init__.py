@@ -7,6 +7,4 @@ else:
 	saxonc_home = "".join([main_dir, "/saxonc_home"])
 	os.environ['SAXONC_HOME'] = saxonc_home
 
-
-
-from saxonc import *
+from saxonc@@edition@@ import *
