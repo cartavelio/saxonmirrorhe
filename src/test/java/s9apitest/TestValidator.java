@@ -358,7 +358,8 @@ public class TestValidator {
     public void testImportUsingSchemaUriResolver() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.SCHEMA_URI_RESOLVER, new SchemaURIResolver() {
+            SchemaManager sm = p.getSchemaManager();
+            sm.setSchemaURIResolver(new SchemaURIResolver() {
 
                 @Override
                 public void setConfiguration(Configuration config) {
@@ -378,6 +379,47 @@ public class TestValidator {
                     }
                 }
             });
+
+            String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:b='http://two/'>\n" +
+                    "<xs:import namespace='http://two/'/>" +
+                    "<xs:element name='a' type='b:date'/>\n" +
+                    "</xs:schema>";
+
+
+            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
+            SchemaValidator sv = sm.newSchemaValidator();
+            final String xml0 = "<a>2010-11-02</a>";        // valid
+            final String xml1 = "<a>orange wednesday</a>";  // invalid
+            sv.validate(new StreamSource(new StringReader(xml0)));
+            try {
+                sv.validate(new StreamSource(new StringReader(xml1)));
+                fail("Invalidity not detected");
+            } catch (Exception ve) {
+                // OK
+            }
+
+        } catch (SaxonApiException err) {
+            fail();
+            err.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testImportUsingResourceResolver() {
+        try {
+            Processor p = new Processor(true);
+            p.getUnderlyingConfiguration().setResourceResolver(
+                    request -> {
+                        if (request.uri.equals("http://two/") && request.uriIsNamespace) {
+                            return new StreamSource(new StringReader(
+                                    "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" targetNamespace=\"http://two/\">\n" +
+                                            "    <xs:simpleType name='date'><xs:restriction base='xs:date'/></xs:simpleType>\n" +
+                                            "</xs:schema> "));
+                        } else {
+                            return null;
+                        }
+                    });
+
             SchemaManager sm = p.getSchemaManager();
             String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:b='http://two/'>\n" +
                     "<xs:import namespace='http://two/'/>" +
@@ -387,8 +429,50 @@ public class TestValidator {
 
             sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
             SchemaValidator sv = sm.newSchemaValidator();
-            final String xml0 = "<a>2010-11-02</a>";
-            final String xml1 = "<a>orange wednesday</a>";
+            final String xml0 = "<a>2010-11-02</a>";        // valid
+            final String xml1 = "<a>orange wednesday</a>";  // invalid
+            sv.validate(new StreamSource(new StringReader(xml0)));
+            try {
+                sv.validate(new StreamSource(new StringReader(xml1)));
+                fail("Invalidity not detected");
+            } catch (Exception ve) {
+                // OK
+            }
+
+        } catch (SaxonApiException err) {
+            fail();
+            err.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testLocalXLinkSchemaRelyingOnResolver() {
+        // Bug 5652. The user wants to pick up a local copy of the XLink schema, avoiding any
+        // built-in version of the schema. This test uses a resolver to pick it up.
+        try {
+            Processor p = new Processor(true);
+            p.getUnderlyingConfiguration().setResourceResolver(
+                    request -> {
+                        if (request.uri.equals(NamespaceConstant.XLINK) && request.uriIsNamespace) {
+                            return new StreamSource(new StringReader(
+                                    "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" targetNamespace='" + NamespaceConstant.XLINK + "'>\n" +
+                                            "    <xs:simpleType name='date'><xs:restriction base='xs:date'/></xs:simpleType>\n" +
+                                            "</xs:schema> "));
+                        } else {
+                            return null;
+                        }
+                    });
+            SchemaManager sm = p.getSchemaManager();
+            String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:b='" + NamespaceConstant.XLINK + "'>\n" +
+                    "<xs:import namespace='" + NamespaceConstant.XLINK + "'/>" +
+                    "<xs:element name='a' type='b:date'/>\n" +
+                    "</xs:schema>";
+
+            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
+            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
+            SchemaValidator sv = sm.newSchemaValidator();
+            final String xml0 = "<a>2010-11-02</a>";          // valid
+            final String xml1 = "<a>orange wednesday</a>";    // invalid
             sv.validate(new StreamSource(new StringReader(xml0)));
             try {
                 sv.validate(new StreamSource(new StringReader(xml1)));
@@ -402,6 +486,60 @@ public class TestValidator {
             err.printStackTrace();
         }
     }
+
+    @Test
+    public void testLocalXLinkSchemaRelyingOnLocationHint() {
+        // Bug 5652. The user wants to pick up a local copy of the XLink schema, avoiding any
+        // built-in version of the schema. This test tries to pick it up using a location hint,
+        // which doesn't work.
+        try {
+            Processor p = new Processor(true);
+            SchemaManager sm = p.getSchemaManager();
+            String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:b='" + NamespaceConstant.XLINK + "'>\n" +
+                    "<xs:import namespace='" + NamespaceConstant.XLINK + "' schemaLocation='file:///does.not.exist/dummy.xml'/>" +
+                    "<xs:element name='a' type='b:date'/>\n" +
+                    "</xs:schema>";
+
+            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
+            fail("Unexpected success");
+        } catch (SaxonApiException err) {
+            System.err.println(err.getMessage());
+            assertTrue(err.getMessage().contains("Errors were found in the schema"));
+        }
+    }
+
+    @Test
+    public void testLocalXLinkSchemaRelyingOnLocalCatalog() {
+        // Bug 5652. The user wants to pick up a local copy of the XLink schema, avoiding any
+        // built-in version of the schema. This test uses a catalog to pick it up.
+        try {
+            Processor p = new Processor(true);
+            p.setCatalogFiles(configTest.getDataDir() + "resolvers/xlink-catalog.xml");
+            SchemaManager sm = p.getSchemaManager();
+            String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:b='" + NamespaceConstant.XLINK + "'>\n" +
+                    "<xs:import namespace='" + NamespaceConstant.XLINK + "' schemaLocation='file:///does.not.exist/dummy.xml'/>" +
+                    "<xs:element name='a' type='b:date'/>\n" +
+                    "</xs:schema>";
+
+
+            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
+            SchemaValidator sv = sm.newSchemaValidator();
+            final String xml0 = "<a>2010-11-02</a>";           // valid
+            final String xml1 = "<a>orange wednesday</a>";     // invalid
+            sv.validate(new StreamSource(new StringReader(xml0)));
+            try {
+                sv.validate(new StreamSource(new StringReader(xml1)));
+                fail();
+            } catch (Exception ve) {
+                // OK
+            }
+
+        } catch (SaxonApiException err) {
+            fail();
+            err.printStackTrace();
+        }
+    }
+
 
     @Test
     public void testAssertionsHidingComments() {
