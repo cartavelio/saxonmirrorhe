@@ -115,7 +115,7 @@ public final class Comment extends SimpleNodeConstructor {
      */
 
     @Override
-    protected UnicodeString checkContent(UnicodeString comment, XPathContext context) throws XPathException {
+    public UnicodeString checkContent(UnicodeString comment, XPathContext context) throws XPathException {
         if (isXSLT()) {
             return checkContentXSLT(comment);
         } else {

@@ -275,7 +275,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
      * @throws XPathException if the content is invalid
      */
 
-    protected UnicodeString checkContent(UnicodeString data, XPathContext context) throws XPathException {
+    public UnicodeString checkContent(UnicodeString data, XPathContext context) throws XPathException {
         return data;
     }
 

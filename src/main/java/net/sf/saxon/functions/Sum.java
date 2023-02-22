@@ -90,7 +90,7 @@ public class Sum extends FoldingFunction {
      * Implementation of Fold class to do the summation in push mode
      */
 
-    private static class SumFold implements Fold {
+    public static class SumFold implements Fold {
         private final XPathContext context;
         private final AtomicValue zeroValue; // null means empty sequence
         private AtomicValue data;

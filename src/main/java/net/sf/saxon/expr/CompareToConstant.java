@@ -170,11 +170,12 @@ public abstract class CompareToConstant extends UnaryExpression implements Compa
 
     /**
      * Interpret the result of the comparison
-     * @param c -1, 0, or +1 depending how the operands compare
+     * @param operator the operator for example {@link Token#FEQ} or {@link Token#FLE}
+     * @param c -1, 0, or +1, depending on how the operands compare
      * @return true or false depending on the operator in use
      */
 
-    boolean interpretComparisonResult(int c) {
+    public static boolean interpretComparisonResult(int operator, int c) {
         switch (operator) {
             case Token.FEQ:
                 return c == 0;

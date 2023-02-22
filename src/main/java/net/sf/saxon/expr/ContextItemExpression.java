@@ -322,7 +322,7 @@ public class ContextItemExpression extends Expression {
         return item;
     }
 
-    private void reportAbsentContext(XPathContext context) throws XPathException {
+    public void reportAbsentContext(XPathContext context) throws XPathException {
         if (absentContextIsTypeError) {
             typeError("The context item is absent", getErrorCodeForUndefinedContext(), context);
         } else {

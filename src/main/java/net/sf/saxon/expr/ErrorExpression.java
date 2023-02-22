@@ -132,25 +132,17 @@ public class ErrorExpression extends Expression {
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        if (exception != null) {
-            // copy the exception for thread-safety, because we want to add context information
-            XPathException err = new XPathException(exception.getMessage());
-            err.setLocation(exception.getLocation());
-            err.maybeSetLocation(getLocation());
-            if (exception.getErrorCode() != null) {
-                err.setErrorCodeQName(exception.getErrorCode().getStructuredQName());
-            }
-            err.maybeSetContext(context);
-            err.setIsTypeError(exception.isTypeError());
-//            err.setIsStaticError(exception.isStaticError());
-//            err.setIsGlobalError(exception.isGlobalError());
-            throw err;
-        } else {
-            XPathException err = XPathException.fromXmlProcessingError(exception);
-            err.setLocation(getLocation());
-            err.setXPathContext(context);
-            throw err;
+        // copy the exception for thread-safety, because we want to add context information
+        XPathException err = new XPathException(exception.getMessage());
+        err.setLocation(exception.getLocation());
+        err.maybeSetLocation(getLocation());
+        if (exception.getErrorCode() != null) {
+            err.setErrorCodeQName(exception.getErrorCode().getStructuredQName());
         }
+        err.maybeSetContext(context);
+        err.setIsTypeError(exception.isTypeError());
+        throw err;
+
     }
 
     /**

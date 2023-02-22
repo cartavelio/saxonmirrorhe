@@ -156,7 +156,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      */
 
     @Override
-    protected UnicodeString checkContent(UnicodeString data, XPathContext context) throws XPathException {
+    public UnicodeString checkContent(UnicodeString data, XPathContext context) throws XPathException {
         if (isXSLT()) {
             return checkContentXSLT(data);
         } else {
@@ -228,7 +228,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
         }
     }
 
-    private String checkName(AtomicValue name, XPathContext context) throws XPathException {
+    public String checkName(AtomicValue name, XPathContext context) throws XPathException {
         if (name instanceof StringValue && !(name instanceof AnyURIValue)) {
             String expandedName = Whitespace.trim(name.getStringValue());
             if (!NameChecker.isValidNCName(expandedName)) {

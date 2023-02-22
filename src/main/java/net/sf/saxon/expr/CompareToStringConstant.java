@@ -121,7 +121,7 @@ public class CompareToStringConstant extends CompareToConstant {
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         UnicodeString s = getLhsExpression().evaluateItem(context).getUnicodeStringValue();
         int c = CodepointCollator.getInstance().compareStrings(s, comparand);
-        return interpretComparisonResult(c);
+        return interpretComparisonResult(operator, c);
     }
 
 
