@@ -3,7 +3,6 @@
 #Build file for SaxonC on C++
 parent_path=$( cd "$(dirname "$0")" ; pwd -P )
 library_dir=${1-$(pwd -P)}/../@@libdir@@
-echo "L set to '$library_dir'"
 #cd "$parent_path"
 gcc -m64 -fPIC -I../Saxon.C.API/graalvm  -c ../Saxon.C.API/SaxonCGlue.c -o SaxonCGlue.o $2
 
