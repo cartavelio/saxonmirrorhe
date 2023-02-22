@@ -1473,7 +1473,7 @@
       
       <p><a href="https://www.schematron.com">Schematron</a> is a language for specifying assertions about XML documents; it
       has a wide range of uses both in conjunction with, and as an alternative to, the XSD schema specification. Both the
-      original implementation by Rick Jeliffe, and the more recent implementation by David Maus (<a ref="https://github.com/schxslt/schxslt">SchXslt</a>),
+      original implementation by Rick Jeliffe, and the more recent implementation by David Maus (<a href="https://github.com/schxslt/schxslt">SchXslt</a>),
       rely heavily on Saxon "under the hood".</p>
       
       
