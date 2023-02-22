@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -50,18 +50,8 @@ public class AnyExternalObjectType implements ItemType {
      * @return the alphacode for the nearest containing built-in type
      */
     @Override
-    public String getAlphaCode() {
-        return "E";
-    }
-
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String generateJavaScriptItemTypeAcceptor(String errorCode, int targetVersion) throws XPathException {
-        throw new UnsupportedOperationException();
+    public String getBasicAlphaCode() {
+        return "X";
     }
 
     @Override
@@ -89,6 +79,13 @@ public class AnyExternalObjectType implements ItemType {
         return Genre.EXTERNAL;
     }
 
-
-
+    /**
+     * Get the default priority when this ItemType is used as an XSLT pattern
+     *
+     * @return the default priority
+     */
+    @Override
+    public double getDefaultPriority() {
+        return -1;
+    }
 }

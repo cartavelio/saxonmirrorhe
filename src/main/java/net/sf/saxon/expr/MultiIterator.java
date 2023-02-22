@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -37,6 +37,7 @@ public class MultiIterator<T> implements Iterator<T> {
      * @return <tt>true</tt> if the iterator has more elements.
      */
 
+    @Override
     public boolean hasNext() {
         while (true) {
             if (current >= array.size()) {
@@ -56,6 +57,7 @@ public class MultiIterator<T> implements Iterator<T> {
      * @throws java.util.NoSuchElementException
      *          iteration has no more elements.
      */
+    @Override
     public T next() {
         return array.get(current).next();
     }
@@ -74,6 +76,7 @@ public class MultiIterator<T> implements Iterator<T> {
      *                                       been called after the last call to the <tt>next</tt>
      *                                       method.
      */
+    @Override
     public void remove() {
         throw new UnsupportedOperationException();
     }

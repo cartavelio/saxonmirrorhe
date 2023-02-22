@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.serialize.SerializationProperties;
@@ -37,7 +38,7 @@ import java.util.function.Consumer;
  * Implementing a new {@code Destination} will generally require access
  * to implementation-level classes and methods within the Saxon product. The only method that
  * needs to be supplied is {@link #getReceiver}, which returns an instance of
- * {@link Receiver}, and unless you use an existing implementation of
+ * {@link Outputter}, and unless you use an existing implementation of
  * {@code Receiver}, you will need to handle internal Saxon concepts such as name codes
  * and name pools.
  * <p>
@@ -74,7 +75,7 @@ public interface Destination {
      * a call of <code>xsl:result-document</code> with no <code>href</code> attribute (or with an
      * <code>href</code> attribute that resolves to the base output URI of the transformation), the
      * method may be called a second time (with a potentially different set of serialization parameters,
-     * and perhaps a different validation request) to return a second {@link Receiver}, which will typically
+     * and perhaps a different validation request) to return a second {@link Outputter}, which will typically
      * write to the same destination. The XSLT rules ensure that it is not possible to write principal and
      * secondary output to the same destination, so only one of these Receivers will actually be used.
      *
@@ -110,7 +111,7 @@ public interface Destination {
      *         the query or transformation. If the {@code Destination} is to perform sequence normalization,
      *         this is typically done by returning a {@link net.sf.saxon.event.SequenceNormalizer} as the
      *         result of this method.</p>
-     *         <p>The returned {@code Receiver} is responsible for ensuring that when its {@link Receiver#close()}
+     *         <p>The returned {@code Receiver} is responsible for ensuring that when its {@link Outputter#close()}
      *         method is called, this results in all registered {@code onClose} actions being invoked.
      *         An implementation returning a {@code SequenceNormalizer} can achieve this by registering
      *         the actions with the {@link net.sf.saxon.event.SequenceNormalizer#onClose} method.</p>
@@ -123,11 +124,11 @@ public interface Destination {
     Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties params) throws SaxonApiException;
 
     /**
-     * Register a listener to be notified when a {@link Receiver} linked to this destination is closed.
+     * Register a listener to be notified when a {@link Outputter} linked to this destination is closed.
      * <p>Example: <code>destination.onClose(() -&gt; System.out.println("Finished writing to " + uri)</code></p>
      * <p>The method must be called before the call on {@link #getReceiver(PipelineConfiguration, SerializationProperties)}; the
      * effect of calling it after getting a {@code Receiver}, but before closing the
-     * {@link Receiver}, is undefined.</p>
+     * {@link Outputter}, is undefined.</p>
      *
      * @param listener an object to be notified when writing to the destination
      *                 is successfully completed

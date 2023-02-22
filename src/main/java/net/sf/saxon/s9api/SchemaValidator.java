@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -62,13 +62,14 @@ public abstract class SchemaValidator extends AbstractDestination {
 
     /**
      * Set the ErrorListener to be used while validating instance documents.
-     * The setErrorListener, setInvalidityHandler, and setValidityReporting
+     * The setErrorReporter, setInvalidityHandler, and setValidityReporting
      * are mutually exclusive - setting any one of them will cancel the others. Please note
-     * that setErrorListener has the drawback of creating an exception for every
+     * that setErrorReporter has the drawback of creating an exception for every
      * validation error, which is expensive.
      *
      * @param listener The error listener to be used. This is notified of all errors detected during the
      *                 validation episode.
+     * @deprecated since 10.0. Use {@link #setInvalidityHandler(InvalidityHandler)}
      */
 
     public abstract void setErrorListener(ErrorListener listener);
@@ -78,13 +79,14 @@ public abstract class SchemaValidator extends AbstractDestination {
      *
      * @return listener The error listener in use. This is notified of all errors detected during the
      *         validation episode. Returns null if no user-supplied ErrorListener has been set.
+     * @deprecated since 10.0. Use {@link #getInvalidityHandler()}
      */
 
     public abstract ErrorListener getErrorListener();
 
     /**
      * Set the InvalidityHandler to be used when validating instance documents.
-     * The setErrorListener, setInvalidityHandler, and setValidityReporting
+     * The setErrorReporter, setInvalidityHandler, and setValidityReporting
      * are mutually exclusive - setting any one of them will cancel the others.
      * @param handler the InvalidityHandler to be used.
      */
@@ -150,7 +152,7 @@ public abstract class SchemaValidator extends AbstractDestination {
      * interleaved, and it becomes an application responsibility to organize which failures relate to which
      * source document.
      *
-     * The setErrorListener, setInvalidityHandler, and setValidityReporting
+     * The setErrorReporter, setInvalidityHandler, and setValidityReporting
      * are mutually exclusive - setting any one of them will cancel the others.
      * @param destination where XML will be sent
      * @throws SaxonApiException if the destination is unsuitable
@@ -371,6 +373,7 @@ public abstract class SchemaValidator extends AbstractDestination {
     }
 //#endif
 
+    @Override
     public abstract Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties params) throws SaxonApiException;
 
     /**
@@ -378,6 +381,7 @@ public abstract class SchemaValidator extends AbstractDestination {
      * it has finished writing to the destination.
      */
 
+    @Override
     public abstract void close() throws SaxonApiException;
 
 }

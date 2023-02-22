@@ -7,9 +7,12 @@ import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ArrayPerformance extends PerformanceTestCase {
 
@@ -25,20 +28,15 @@ public class ArrayPerformance extends PerformanceTestCase {
                 ArrayItem a = array;
                 @Override
                 public void run() {
-                    try {
-                        ArrayItem a = array;
-                        for (int i=0; i<n; i++) {
-                            a = a.put(i, ((IntegerValue)a.get(i)).plus(Int64Value.PLUS_ONE));
-                        }
-                    } catch (XPathException e) {
-                        e.printStackTrace();
-                        fail(e.getMessage());
+                    ArrayItem a = array;
+                    for (int i=0; i<n; i++) {
+                        a = a.put(i, ((IntegerValue)a.get(i)).plus(Int64Value.PLUS_ONE));
                     }
                 }
 
                 @Override
-                public int expectedTimeMilliseconds() {
-                    return n/1000;
+                public int expectedTimeMicroseconds() {
+                    return n;
                 }
 
                 @Override
@@ -52,16 +50,19 @@ public class ArrayPerformance extends PerformanceTestCase {
         }
     }
 
+    @Test
     public void testPut1K() {
-        measurePut(1000);
+        measurePut(500);
     }
 
+    @Test
     public void testPut10K() {
-        measurePut(10000);
+        measurePut(5000);
     }
 
+    @Test
     public void testPut100K() {
-        measurePut(100000);
+        measurePut(50000);
     }
 
 //    public void testPut1M() {

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -28,6 +28,7 @@ public class Exists extends Aggregate {
     public Expression makeFunctionCall(Expression[] arguments) {
         return new SystemFunctionCall(this, arguments) {
 
+            @Override
             public Expression optimize(/*@NotNull*/ ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
                 Expression e2 = super.optimize(visitor, contextInfo);
                 if (e2 != this) {
@@ -62,7 +63,7 @@ public class Exists extends Aggregate {
                 try {
                     boolean result;
                     SequenceIterator iter = getArg(0).iterate(c);
-                    if ((iter.getProperties() & SequenceIterator.LOOKAHEAD) != 0) {
+                    if (iter.getProperties().contains(SequenceIterator.Property.LOOKAHEAD)) {
                         result = ((LookaheadIterator) iter).hasNext();
                     } else {
                         result = iter.next() != null;
@@ -89,6 +90,7 @@ public class Exists extends Aggregate {
     }
 
 
+    @Override
     public Expression makeOptimizedFunctionCall(
             ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, final Expression... arguments) throws XPathException {
 
@@ -120,7 +122,7 @@ public class Exists extends Aggregate {
 
     private static boolean exists(SequenceIterator iter) throws XPathException {
         boolean result;
-        if ((iter.getProperties() & SequenceIterator.LOOKAHEAD) != 0) {
+        if (iter.getProperties().contains(SequenceIterator.Property.LOOKAHEAD)) {
             result = ((LookaheadIterator) iter).hasNext();
         } else {
             result = iter.next() != null;
@@ -138,14 +140,17 @@ public class Exists extends Aggregate {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
+    @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return BooleanValue.get(exists(arguments[0].iterate()));
     }
 
+    @Override
     public String getCompilerName() {
         return "ExistsCompiler";
     }
 
+    @Override
     public String getStreamerName() {
         return "Exists";
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -39,9 +39,9 @@ public abstract class TreeModel {
     public final static TreeModel TINY_TREE_CONDENSED = new TinyTreeCondensed();
 
     /**
-     * The LinkedTree. This takes more memory than the TinyTree. The main advantage
-     * of this model is that it is updateable: the nodes in a LinkedTree can be modified
-     * using XQuery Updates.
+     * The LinkedTree. This takes more memory than the TinyTree, but offers flexibility
+     * for storing user-defined data in each element node; it is also mutable, supporting
+     * XQuery Update
      */
     public final static TreeModel LINKED_TREE = new LinkedTree();
 
@@ -69,8 +69,8 @@ public abstract class TreeModel {
     /**
      * Get the tree model corresponding to a given integer constant
      *
-     * @param symbolicValue one of the constants {@link Builder#TINY_TREE},
-     *                      {@link Builder#TINY_TREE_CONDENSED}, or {@link Builder#LINKED_TREE}
+     * @param symbolicValue typically one of the constants {@link Builder#TINY_TREE},
+     *                      {@link Builder#TINY_TREE_CONDENSED}, {@link Builder#LINKED_TREE}.
      * @return the corresponding TreeModel
      */
 
@@ -125,40 +125,48 @@ public abstract class TreeModel {
 
     private static class TinyTree extends TreeModel {
 
+        @Override
         public Builder makeBuilder(PipelineConfiguration pipe) {
             TinyBuilder builder = new TinyBuilder(pipe);
             builder.setStatistics(pipe.getConfiguration().getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
             return builder;
         }
 
+        @Override
         public int getSymbolicValue() {
             return Builder.TINY_TREE;
         }
 
+        @Override
         public boolean isSchemaAware() {
             return true;
         }
 
+        @Override
         public String getName() {
             return "TinyTree";
         }
     }
 
     private static class TinyTreeCondensed extends TreeModel {
+        @Override
         public Builder makeBuilder(PipelineConfiguration pipe) {
             TinyBuilderCondensed tbc = new TinyBuilderCondensed(pipe);
             tbc.setStatistics(pipe.getConfiguration().getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
             return tbc;
         }
 
+        @Override
         public int getSymbolicValue() {
             return Builder.TINY_TREE_CONDENSED;
         }
 
+        @Override
         public boolean isSchemaAware() {
             return true;
         }
 
+        @Override
         public String getName() {
             return "TinyTreeCondensed";
         }
@@ -167,27 +175,26 @@ public abstract class TreeModel {
     private static class LinkedTree extends TreeModel {
 
         /*@NotNull*/
+        @Override
         public Builder makeBuilder(PipelineConfiguration pipe) {
             return new LinkedTreeBuilder(pipe);
         }
 
+        @Override
         public int getSymbolicValue() {
             return Builder.LINKED_TREE;
         }
 
-        public boolean isMutable() {
-            return true;
-        }
-
+        @Override
         public boolean isSchemaAware() {
             return true;
         }
 
+        @Override
         public String getName() {
             return "LinkedTree";
         }
     }
-
 
 }
 

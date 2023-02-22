@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -63,6 +63,7 @@ public class GenericTreeInfo implements TreeInfo {
      *
      * @return the configuration
      */
+    @Override
     public Configuration getConfiguration() {
         return config;
     }
@@ -85,6 +86,7 @@ public class GenericTreeInfo implements TreeInfo {
      *
      * @return the root node
      */
+    @Override
     public NodeInfo getRootNode() {
         return root;
     }
@@ -95,6 +97,7 @@ public class GenericTreeInfo implements TreeInfo {
      * @param systemId the system ID
      */
 
+    @Override
     public void setSystemId(String systemId) {
         this.systemId = systemId;
     }
@@ -104,6 +107,7 @@ public class GenericTreeInfo implements TreeInfo {
      * @return the system ID
      */
 
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -123,6 +127,7 @@ public class GenericTreeInfo implements TreeInfo {
      * @return the document number
      */
 
+    @Override
     public long getDocumentNumber() {
         if (documentNumber == -1) {
             DocumentNumberAllocator dna = config.getDocumentNumberAllocator();
@@ -144,17 +149,6 @@ public class GenericTreeInfo implements TreeInfo {
         this.documentNumber = documentNumber;
     }
 
-
-    /**
-     * Ask whether the tree contains any nodes whose type annotation is anything other than
-     * UNTYPED
-     *
-     * @return true if the document contains elements or attributes whose type is other than UNTYPED
-     */
-    public boolean isTyped() {
-        return false;
-    }
-
     /**
      * Get the element with a given ID, if any
      *
@@ -167,6 +161,7 @@ public class GenericTreeInfo implements TreeInfo {
      * type ID)
      * @since 8.4. Second argument added in 9.2.
      */
+    @Override
     public NodeInfo selectID(String id, boolean getParent) {
         return null;
     }
@@ -179,6 +174,7 @@ public class GenericTreeInfo implements TreeInfo {
      * information is not available then an empty iterator is returned
      * @since 9.1
      */
+    @Override
     public Iterator<String> getUnparsedEntityNames() {
         List<String> e = Collections.emptyList();
         return e.iterator();
@@ -196,6 +192,7 @@ public class GenericTreeInfo implements TreeInfo {
      * be extended in the future to provide additional information.
      * @since 8.4
      */
+    @Override
     public String[] getUnparsedEntity(String name) {
         return null;
     }
@@ -209,6 +206,7 @@ public class GenericTreeInfo implements TreeInfo {
      *             document during its construction.
      * @since 9.9
      */
+    @Override
     public void setSpaceStrippingRule(SpaceStrippingRule rule) {
         this.spaceStrippingRule = rule;
     }
@@ -223,6 +221,7 @@ public class GenericTreeInfo implements TreeInfo {
      * indicating that no space stripping has been applied
      * @since 9.9
      */
+    @Override
     public SpaceStrippingRule getSpaceStrippingRule() {
         return spaceStrippingRule;
     }
@@ -236,6 +235,7 @@ public class GenericTreeInfo implements TreeInfo {
      *              by Saxon are prefixed "saxon:".
      * @param value The value to be set for the property. May be null, which effectively
      */
+    @Override
     public void setUserData(String key, Object value) {
         if (userData == null) {
             userData = new HashMap<String, Object>();
@@ -250,6 +250,7 @@ public class GenericTreeInfo implements TreeInfo {
      * @param key A string giving the name of the property to be retrieved.
      * @return the value of the property, or null if the property has not been defined.
      */
+    @Override
     public Object getUserData(String key) {
         if (userData == null) {
             return userData;

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
@@ -36,7 +37,7 @@ import java.net.URISyntaxException;
  */
 
 public class ForEachGroup extends Instruction
-        implements SortKeyEvaluator, ContextMappingFunction<Item<?>>, ContextSwitchingExpression {
+        implements SortKeyEvaluator, ContextMappingFunction, ContextSwitchingExpression {
 
     public static final int GROUP_BY = 0;
     public static final int GROUP_ADJACENT = 1;
@@ -98,6 +99,7 @@ public class ForEachGroup extends Instruction
      * @return the name of the instruction
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_FOR_EACH_GROUP;
     }
@@ -113,6 +115,7 @@ public class ForEachGroup extends Instruction
      * @return the select expression
      */
 
+    @Override
     public Expression getSelectExpression() {
         return selectOp.getChildExpression();
     }
@@ -123,6 +126,7 @@ public class ForEachGroup extends Instruction
      * @return the body of the xsl:for-each-group instruction
      */
 
+    @Override
     public Expression getActionExpression() {
         return actionOp.getChildExpression();
     }
@@ -236,6 +240,7 @@ public class ForEachGroup extends Instruction
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         selectOp.typeCheck(visitor, contextInfo);
@@ -334,6 +339,7 @@ public class ForEachGroup extends Instruction
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         selectOp.optimize(visitor, contextItemType);
         ItemType selectedItemType = getSelectExpression().getItemType();
@@ -396,6 +402,7 @@ public class ForEachGroup extends Instruction
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         SortKeyDefinition[] newKeyDef = null;
         if (getSortKeyDefinitions() != null) {
@@ -426,6 +433,7 @@ public class ForEachGroup extends Instruction
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getActionExpression().getItemType();
     }
@@ -440,6 +448,7 @@ public class ForEachGroup extends Instruction
      * @return the depencies, as a bit-mask
      */
 
+    @Override
     public int computeDependencies() {
         // some of the dependencies in the "action" part and in the grouping and sort keys aren't relevant,
         // because they don't depend on values set outside the for-each-group expression
@@ -491,6 +500,7 @@ public class ForEachGroup extends Instruction
      * (Nodes created by the condition can't contribute to the result).
      */
 
+    @Override
     public final boolean mayCreateNewNodes() {
         int props = getActionExpression().getSpecialProperties();
         return (props & StaticProperty.NO_NODES_NEWLY_CREATED) == 0;
@@ -527,6 +537,7 @@ public class ForEachGroup extends Instruction
      *         expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         PathMap.PathMapNodeSet target = getSelectExpression().addToPathMap(pathMap, pathMapNodeSet);
         if (getCollationNameExpression() != null) {
@@ -569,14 +580,16 @@ public class ForEachGroup extends Instruction
      * static validation can continue recursively.
      */
 
+    @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         getActionExpression().checkPermittedContents(parentType, false);
     }
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         Controller controller = context.getController();
         assert controller != null;
-        PipelineConfiguration pipe = context.getReceiver().getPipelineConfiguration();
+        PipelineConfiguration pipe = output.getPipelineConfiguration();
 
         GroupIterator groupIterator = getGroupIterator(context);
         XPathContextMajor c2 = context.newContext();
@@ -592,12 +605,12 @@ public class ForEachGroup extends Instruction
             Item item;
             while ((item = focusIterator.next()) != null) {
                 listener.startCurrentItem(item);
-                getActionExpression().process(c2);
+                getActionExpression().process(output, c2);
                 listener.endCurrentItem(item);
             }
         } else {
             while (focusIterator.next() != null) {
-                getActionExpression().process(c2);
+                getActionExpression().process(output, c2);
             }
         }
 
@@ -658,7 +671,7 @@ public class ForEachGroup extends Instruction
                     coll = getCollator(context);
                 }
                 XPathContext c2 = context.newMinorContext();
-                FocusIterator<?> population = c2.trackFocus(select.iterate(context));
+                FocusIterator population = c2.trackFocus(select.iterate(context));
                 groupIterator = new GroupByIterator(population, getGroupingKey(), c2, coll, composite);
                 break;
             }
@@ -716,14 +729,15 @@ public class ForEachGroup extends Instruction
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         GroupIterator master = getGroupIterator(context);
         XPathContextMajor c2 = context.newContext();
         c2.setOrigin(this);
         c2.trackFocus(master);
         c2.setCurrentGroupIterator(master);
         c2.setCurrentTemplateRule(null);
-        return new ContextMappingIterator<>(this, c2);
+        return new ContextMappingIterator(this, c2);
     }
 
     /**
@@ -736,7 +750,8 @@ public class ForEachGroup extends Instruction
      *         sequence.
      */
 
-    public SequenceIterator<?> map(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator map(XPathContext context) throws XPathException {
         return getActionExpression().iterate(context);
     }
 
@@ -744,6 +759,7 @@ public class ForEachGroup extends Instruction
      * Callback for evaluating the sort keys
      */
 
+    @Override
     public AtomicValue evaluateSortKey(int n, XPathContext c) throws XPathException {
         return (AtomicValue) getSortKeyDefinitions().getSortKeyDefinition(n).getSortKey().evaluateItem(c);
     }
@@ -761,6 +777,7 @@ public class ForEachGroup extends Instruction
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("forEachGroup", this);
         out.emitAttribute("algorithm", getAlgorithmName(algorithm));

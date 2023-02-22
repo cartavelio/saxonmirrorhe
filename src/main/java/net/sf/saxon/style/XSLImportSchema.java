@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,14 +11,13 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.lib.SchemaURIResolver;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.Whitespace;
@@ -43,19 +42,21 @@ public class XSLImportSchema extends StyleElement {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
         String namespace = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            String f = attName.getDisplayName();
             if (f.equals("schema-location")) {
                 //
             } else if (f.equals("namespace")) {
-                namespace = Whitespace.trim(atts.getValue(a));
+                namespace = Whitespace.trim(value);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -65,10 +66,12 @@ public class XSLImportSchema extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         checkTopLevel("XTSE0010", false);
     }
 
+    @Override
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) throws XPathException {
         //
     }
@@ -93,14 +96,12 @@ public class XSLImportSchema extends StyleElement {
                 xe.setLocator(this);
                 throw xe;
             }
-            AxisIterator kids = iterateAxis(AxisInfo.CHILD);
             NodeImpl inlineSchema = null;
-            Item child;
-            while ((child = kids.next()) != null) {
+            for (NodeImpl child : children()) {
                 if (inlineSchema != null) {
                     compileError(getDisplayName() + " must not have more than one child element");
                 }
-                inlineSchema = (NodeImpl) child;
+                inlineSchema = child;
                 if (inlineSchema.getFingerprint() != StandardNames.XS_SCHEMA) {
                     compileError("The only child element permitted for " + getDisplayName() + " is xs:schema");
                 }
@@ -116,7 +117,7 @@ public class XSLImportSchema extends StyleElement {
                 }
 
                 namespace = config.readInlineSchema(inlineSchema, namespace,
-                        getCompilation().getCompilerInfo().getErrorListener());
+                        getCompilation().getCompilerInfo().getErrorReporter());
                 getPrincipalStylesheetModule().addImportedSchema(namespace);
             }
             if (inlineSchema != null) {
@@ -144,8 +145,10 @@ public class XSLImportSchema extends StyleElement {
             }
             if (!namespaceKnown) {
                 PipelineConfiguration pipe = config.makePipelineConfiguration();
-                pipe.setSchemaURIResolver(config.makeSchemaURIResolver(getCompilation().getCompilerInfo().getURIResolver()));
-                pipe.setErrorListener(getCompilation().getCompilerInfo().getErrorListener());
+                SchemaURIResolver schemaResolver = config.makeSchemaURIResolver(
+                        getCompilation().getCompilerInfo().getURIResolver());
+                pipe.setSchemaURIResolver(schemaResolver);
+                pipe.setErrorReporter(getCompilation().getCompilerInfo().getErrorReporter());
                 namespace = config.readSchema(pipe, getBaseURI(), schemaLoc, namespace);
             }
             getPrincipalStylesheetModule().addImportedSchema(namespace);
@@ -157,6 +160,7 @@ public class XSLImportSchema extends StyleElement {
     }
 
 
+    @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) throws XPathException {
         // No action. The effect of import-schema is compile-time only
     }

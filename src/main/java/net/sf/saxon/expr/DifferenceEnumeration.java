@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -19,11 +19,11 @@ import net.sf.saxon.trans.XPathException;
  */
 
 
-public class DifferenceEnumeration implements SequenceIterator<NodeInfo> {
+public class DifferenceEnumeration implements SequenceIterator {
 
 
-    private SequenceIterator<? extends NodeInfo> p1;
-    private SequenceIterator<? extends NodeInfo> p2;
+    private SequenceIterator p1;
+    private SequenceIterator p2;
 
     /*@Nullable*/ private NodeInfo nextNode1 = null;
     private NodeInfo nextNode2 = null;
@@ -39,7 +39,7 @@ public class DifferenceEnumeration implements SequenceIterator<NodeInfo> {
      * @throws XPathException if a failure occurs reading from either input sequence
      */
 
-    public DifferenceEnumeration(SequenceIterator<? extends NodeInfo> p1, SequenceIterator<? extends NodeInfo> p2,
+    public DifferenceEnumeration(SequenceIterator p1, SequenceIterator p2,
                                  ItemOrderComparer comparer) throws XPathException {
         this.p1 = p1;
         this.p2 = p2;
@@ -65,6 +65,7 @@ public class DifferenceEnumeration implements SequenceIterator<NodeInfo> {
         // rely on type-checking to prevent a ClassCastException
     }
 
+    @Override
     public NodeInfo next() throws XPathException {
         // main merge loop: if the node in p1 has a lower key value that that in p2, return it;
         // if they are equal, advance both nodesets; if p1 is higher, advance p2.
@@ -110,23 +111,11 @@ public class DifferenceEnumeration implements SequenceIterator<NodeInfo> {
         return current;
     }
 
+    @Override
     public void close() {
         p1.close();
         p2.close();
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIterator#GROUNDED}, {@link SequenceIterator#LAST_POSITION_FINDER},
-     *         and {@link SequenceIterator#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    public int getProperties() {
-        return 0;
-    }
 }
 

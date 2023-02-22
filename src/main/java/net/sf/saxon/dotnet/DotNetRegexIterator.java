@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -25,6 +25,7 @@ import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntToIntHashMap;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -34,9 +35,9 @@ import java.util.List;
 
 public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
 
-    private String theString;   // the input string being matched
-    private Regex pattern;      // the regex against which the string is matched
-    private IEnumerator matcher;    // the Matcher object that does the matching, and holds the state
+    private final String theString;   // the input string being matched
+    private final Regex pattern;      // the regex against which the string is matched
+    private final IEnumerator matcher;    // the Matcher object that does the matching, and holds the state
     private Match match;        // the current match
     private String current;     // the string most recently returned by the iterator
     private String next;        // if the last string was a matching string, null; otherwise the next substring
@@ -74,6 +75,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      * @return the next item in the sequence
      */
 
+    @Override
     public StringValue next() {
         if (next == null && prevEnd >= 0) {
             // we've returned a match (or we're at the start), so find the next match
@@ -134,8 +136,9 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      * @return the properties of this iterator.
      */
 
-    public int getProperties() {
-        return LAST_POSITION_FINDER;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LAST_POSITION_FINDER);
     }
 
     /**
@@ -146,6 +149,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      *         does not match
      */
 
+    @Override
     public boolean isMatching() {
         return next == null && prevEnd >= 0;
     }
@@ -158,6 +162,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      *         within the regular expression
      */
 
+    @Override
     public String getRegexGroup(int number) {
         if (!isMatching()) return null;
         GroupCollection groups = match.get_Groups();
@@ -170,6 +175,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
     /**
      * Get the number of captured groups
      */
+    @Override
     public int getNumberOfGroups() {
         return match.get_Groups().get_Count();
     }
@@ -183,6 +189,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      * @param action  defines the processing to be performed at the start and end of a group
      */
 
+    @Override
     public void processMatchingSubstring(MatchHandler action) throws XPathException {
         GroupCollection groups = match.get_Groups();
         int c = groups.get_Count();
@@ -269,7 +276,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
                     }
                 }
                 if (k < current.length()) {
-                    buff.append(current.charAt(k));
+                    buff.cat(current.charAt(k));
                 }
             }
             if (buff.length() > 0) {
@@ -291,6 +298,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      *
      * @since 9.1
      */
+    @Override
     public void close() {
         //
     }

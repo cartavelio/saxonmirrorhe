@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -14,7 +14,8 @@ import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.SortKeyDefinition;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.ValidationFailure;
@@ -44,6 +45,7 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
      * @return true: yes, it may contain a sequence constructor
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
@@ -127,8 +129,7 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
     }
 
     @Override
-    protected void prepareAttributes() throws XPathException {
-        AttributeCollection atts = getAttributeList();
+    protected void prepareAttributes() {
 
         String selectAtt = null;
         String orderAtt = null;
@@ -138,31 +139,42 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
         String collationAtt = null;
         String stableAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
-            if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
-            } else if (f.equals("order")) {
-                orderAtt = Whitespace.trim(atts.getValue(a));
-                order = makeAttributeValueTemplate(orderAtt, a);
-            } else if (f.equals("data-type")) {
-                dataTypeAtt = Whitespace.trim(atts.getValue(a));
-                dataType = makeAttributeValueTemplate(dataTypeAtt, a);
-            } else if (f.equals("case-order")) {
-                caseOrderAtt = Whitespace.trim(atts.getValue(a));
-                caseOrder = makeAttributeValueTemplate(caseOrderAtt, a);
-            } else if (f.equals("lang")) {
-                langAtt = Whitespace.trim(atts.getValue(a));
-                lang = makeAttributeValueTemplate(langAtt, a);
-            } else if (f.equals("collation")) {
-                collationAtt = Whitespace.trim(atts.getValue(a));
-                collationName = makeAttributeValueTemplate(collationAtt, a);
-            } else if (f.equals("stable")) {
-                stableAtt = Whitespace.trim(atts.getValue(a));
-                stable = makeAttributeValueTemplate(stableAtt, a);
-            } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
+            switch (f) {
+                case "select":
+                    selectAtt = value;
+                    select = makeExpression(selectAtt, att);
+                    break;
+                case "order":
+                    orderAtt = Whitespace.trim(value);
+                    order = makeAttributeValueTemplate(orderAtt, att);
+                    break;
+                case "data-type":
+                    dataTypeAtt = Whitespace.trim(value);
+                    dataType = makeAttributeValueTemplate(dataTypeAtt, att);
+                    break;
+                case "case-order":
+                    caseOrderAtt = Whitespace.trim(value);
+                    caseOrder = makeAttributeValueTemplate(caseOrderAtt, att);
+                    break;
+                case "lang":
+                    langAtt = Whitespace.trim(value);
+                    lang = makeAttributeValueTemplate(langAtt, att);
+                    break;
+                case "collation":
+                    collationAtt = Whitespace.trim(value);
+                    collationName = makeAttributeValueTemplate(collationAtt, att);
+                    break;
+                case "stable":
+                    stableAtt = Whitespace.trim(value);
+                    stable = makeAttributeValueTemplate(stableAtt, att);
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
 
@@ -213,6 +225,7 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
 
 
     /*@Nullable*/
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         if (select == null) {
             Expression b = compileSequenceConstructor(exec, decl, true);

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -14,13 +14,11 @@ import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
+import net.sf.saxon.type.AlphaCode;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.SequenceType;
@@ -37,8 +35,9 @@ import net.sf.saxon.value.SequenceType;
 
 public class NodeSetPattern extends Pattern {
 
-    protected Operand selectionOp;
-    protected ItemType itemType;
+    private Operand selectionOp;
+    private ItemType itemType;
+
 
     /**
      * Create a node-set pattern.
@@ -83,13 +82,14 @@ public class NodeSetPattern extends Pattern {
      * @return the optimised Pattern
      */
 
+    @Override
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         selectionOp.setChildExpression(getSelectionExpression().typeCheck(visitor, contextItemType));
         RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MATCH_PATTERN, getSelectionExpression().toString(), 0);
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-        Expression checked = null;
+        Expression checked = getSelectionExpression();
         try {
-            checked = tc.staticTypeCheck(
+            tc.staticTypeCheck(
                     getSelectionExpression(), SequenceType.NODE_SEQUENCE, role, visitor);
         } catch (XPathException e) {
             visitor.issueWarning("Pattern will never match anything. " + e.getMessage(), getLocation());
@@ -97,6 +97,12 @@ public class NodeSetPattern extends Pattern {
         }
         selectionOp.setChildExpression(checked);
         itemType = getSelectionExpression().getItemType();
+        return this;
+    }
+
+    @Override
+    public Pattern optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
+        visitor.obtainOptimizer().optimizeNodeSetPattern(this);
         return this;
     }
 
@@ -114,6 +120,7 @@ public class NodeSetPattern extends Pattern {
      * on local variables. This is analyzed in those patterns where local variables may appear.
      */
 
+    @Override
     public int getDependencies() {
         return getSelectionExpression().getDependencies();
     }
@@ -143,6 +150,7 @@ public class NodeSetPattern extends Pattern {
      * @param nextFree    the next slot that is free to be allocated @return the next slot that is free to be allocated
      */
 
+    @Override
     public int allocateSlots(SlotManager slotManager, int nextFree) {
         return ExpressionTool.allocateSlots(getSelectionExpression(), nextFree, slotManager);
     }
@@ -155,11 +163,12 @@ public class NodeSetPattern extends Pattern {
      * @return an iterator over the selected nodes in the document.
      */
 
-    public SequenceIterator<? extends NodeInfo> selectNodes(TreeInfo doc, XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator selectNodes(TreeInfo doc, XPathContext context) throws XPathException {
         XPathContext c2 = context.newMinorContext();
-        ManualIterator<NodeInfo> mi = new ManualIterator<>(doc.getRootNode());
+        ManualIterator mi = new ManualIterator(doc.getRootNode());
         c2.setCurrentIterator(mi);
-        return (SequenceIterator<? extends NodeInfo>)getSelectionExpression().iterate(c2);
+        return getSelectionExpression().iterate(c2);
     }
 
     /**
@@ -169,10 +178,17 @@ public class NodeSetPattern extends Pattern {
      * @return true if the node matches the Pattern, false otherwise
      */
 
-    public boolean matches(Item<?> item, XPathContext context) throws XPathException {
+    @Override
+    public boolean matches(Item item, XPathContext context) throws XPathException {
         if (item instanceof NodeInfo) {
-            SequenceIterator iter = getSelectionExpression().iterate(context);
-            return SingletonIntersectExpression.containsNode(iter, (NodeInfo)item);
+            Expression exp = getSelectionExpression();
+            if (exp instanceof GlobalVariableReference) {
+                GroundedValue value = ((GlobalVariableReference)exp).evaluateVariable(context);
+                return value.containsNode((NodeInfo)item);
+            } else {
+                SequenceIterator iter = exp.iterate(context);
+                return SingletonIntersectExpression.containsNode(iter, (NodeInfo) item);
+            }
         } else {
             return false;
         }
@@ -192,6 +208,7 @@ public class NodeSetPattern extends Pattern {
      * Get a NodeTest that all the nodes matching this pattern must satisfy
      */
 
+    @Override
     public ItemType getItemType() {
         if (itemType == null) {
             itemType = getSelectionExpression().getItemType();
@@ -218,6 +235,7 @@ public class NodeSetPattern extends Pattern {
      * Hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         return 0x73108728 ^ getSelectionExpression().hashCode();
     }
@@ -230,16 +248,19 @@ public class NodeSetPattern extends Pattern {
      */
 
     /*@NotNull*/
+    @Override
     public Pattern copy(RebindingMap rebindings) {
         NodeSetPattern n = new NodeSetPattern(getSelectionExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, n);
+        n.setOriginalText(getOriginalText());
         return n;
     }
 
+    @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.nodeSet");
         if (itemType != null) {
-            presenter.emitAttribute("type", itemType.toExportString());
+            presenter.emitAttribute("test", AlphaCode.fromItemType(itemType));
         }
         getSelectionExpression().export(presenter);
         presenter.endElement();

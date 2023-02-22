@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -20,11 +20,9 @@ import net.sf.saxon.value.Closure;
  * be represented as an instance of Item. If you are confident that the sequence
  * will be of length one, call the head() function to get the first item.</p>
  *
- * @param <T> the type of items that can exist in the sequence
- *
- * @since 9.5. Generified in 9.9.
+ * @since 9.5. Generified in 9.9. Generics dropped in 10.0.
  */
-public interface Sequence<T extends Item<?>> {
+public interface Sequence {
 
     /**
      * Get the first item in the sequence.
@@ -35,7 +33,7 @@ public interface Sequence<T extends Item<?>> {
      *                        evaluation of the first item causes a dynamic error.
      */
 
-    T head() throws XPathException;
+    Item head() throws XPathException;
 
     /**
      * Get a {@link SequenceIterator} over all the items in the sequence
@@ -46,22 +44,7 @@ public interface Sequence<T extends Item<?>> {
      *                        constructing an iterator over the items causes a dynamic error.
      */
 
-    SequenceIterator<T> iterate() throws XPathException;
-
-    /**
-     * Get the contents of this value in the form of a Java {@link java.lang.Iterable},
-     * so that it can be used in a for-each expression. In the general case, obtaining
-     * the iterable may raise dynamic errors; but the {@link java.util.Iterator} obtained
-     * from the iterable will be error-free. Subclasses of {@link Sequence} that
-     * implement {@link GroundedValue} are directly iterable, so this method is a no-op
-     * in those cases.
-     *
-     * @return an Iterable containing the same sequence of items
-     */
-
-    default Iterable<T> asIterable() throws XPathException {
-        return iterate().materialize().asIterable();
-    }
+    SequenceIterator iterate() throws XPathException;
 
     /**
      * Create a {@link GroundedValue} containing the same items as this Sequence.
@@ -73,7 +56,7 @@ public interface Sequence<T extends Item<?>> {
      * a dynamic error.
      */
 
-    default GroundedValue<T> materialize() throws XPathException {
+    default GroundedValue materialize() throws XPathException {
         return iterate().materialize();
     }
 
@@ -89,7 +72,7 @@ public interface Sequence<T extends Item<?>> {
      * @throws XPathException if evaluation fails
      */
 
-    default Sequence<T> makeRepeatable() throws XPathException {
+    default Sequence makeRepeatable() throws XPathException {
         return this;
     }
 

@@ -2,12 +2,12 @@ package jaxptest;
 
 import com.saxonica.config.EnterpriseTransformerFactory;
 import com.saxonica.config.ProfessionalTransformerFactory;
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.dom.DocumentBuilderImpl;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.xpath.XPathEvaluator;
 import net.sf.saxon.xpath.XPathFactoryImpl;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -28,15 +28,20 @@ import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Test the DocumentBuilderImpl class, which builds a read-only DOM view of a TinyTree
  */
-public class DocumentBuilderImplTest extends TestCase {
+public class DocumentBuilderImplTest {
 
     /**
      * Test that namespaces are copied OK by an identity transform
      */
 
+    @Test
     public void testBasicNavigation() {
         try {
             String in = "<?xml version='1.0'?> \n" +
@@ -47,18 +52,18 @@ public class DocumentBuilderImplTest extends TestCase {
             InputSource is = new InputSource(new StringReader(in));
             Document doc = db.parse(is);
             Element element = doc.getDocumentElement();
-            assertEquals("name", "document", element.getTagName());
-            assertTrue("namespace", element.getNamespaceURI() == null);
+            assertEquals("document", element.getTagName(), "name");
+            assertTrue(element.getNamespaceURI() == null, "namespace");
             NodeList children = element.getChildNodes();
-            assertEquals("count", 3, children.getLength());
+            assertEquals(3, children.getLength(), "count");
             Element section = (Element)children.item(0);
-            assertEquals("name", "section", section.getTagName());
-            assertEquals("att", "abc", section.getAttribute("id"));
-            assertEquals("attNS", "abc", section.getAttributeNS(null, "id"));
-            assertEquals("isComment", Type.COMMENT, children.item(1).getNodeType());
-            assertEquals("isPI", Type.PROCESSING_INSTRUCTION, children.item(2).getNodeType());
-            assertEquals("commentVal", "comment", children.item(1).getNodeValue());
-            assertEquals("piVal", "data", children.item(2).getNodeValue());
+            assertEquals("section", section.getTagName(), "name");
+            assertEquals("abc", section.getAttribute("id"), "att");
+            assertEquals("abc", section.getAttributeNS(null, "id"), "attNS");
+            assertEquals(Type.COMMENT, children.item(1).getNodeType(), "isComment");
+            assertEquals(Type.PROCESSING_INSTRUCTION, children.item(2).getNodeType(), "isPI");
+            assertEquals("comment", children.item(1).getNodeValue(), "commentVal");
+            assertEquals("data", children.item(2).getNodeValue(), "piVal");
 
         } catch (Exception e) {
             fail(e.getMessage());
@@ -70,6 +75,7 @@ public class DocumentBuilderImplTest extends TestCase {
      * Test that namespaces are copied OK by an identity transform
      */
 
+    @Test
     public void testCopyNamespaces() {
         try {
             String in = "<?xml version='1.0'?> \n" +
@@ -89,9 +95,9 @@ public class DocumentBuilderImplTest extends TestCase {
             StringWriter sw = new StringWriter();
             transformer.transform(source, new StreamResult(sw));
             //System.err.println(sw.toString());
-            assertTrue("Namespace is present in output", sw.toString().contains("http://lost.namespace.com/"));
-            assertTrue("Namespace is present in output", sw.toString().contains("xmlns:xsi="));
-            assertTrue("Attribute is present in output", sw.toString().contains("xsi:value"));
+            assertTrue(sw.toString().contains("http://lost.namespace.com/"), "Namespace is present in output");
+            assertTrue(sw.toString().contains("xmlns:xsi="), "Namespace is present in output");
+            assertTrue(sw.toString().contains("xsi:value"), "Attribute is present in output");
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -101,14 +107,17 @@ public class DocumentBuilderImplTest extends TestCase {
      * Get the string value of a document node
      */
 
+    @Test
     public void testStringValueOfDocHE() {
         doTestStringValue(new TransformerFactoryImpl());
     }
 
+    @Test
     public void testStringValueOfDocPE() {
         doTestStringValue(new ProfessionalTransformerFactory());
     }
 
+    @Test
     public void testStringValueOfDocEE() {
         doTestStringValue(new EnterpriseTransformerFactory());
     }
@@ -152,6 +161,7 @@ public class DocumentBuilderImplTest extends TestCase {
      * Test JAXP XPath API delivering a DOM NodeList given a DOM Node as input
      */
 
+    @Test
     public void testXPathNodeList() {
         try {
             String in = "<?xml version='1.0'?> \n" +
@@ -161,7 +171,7 @@ public class DocumentBuilderImplTest extends TestCase {
             Document doc = db.parse(is);
             XPathEvaluator xpe = new XPathEvaluator(db.getConfiguration());
             NodeList isList = (NodeList) xpe.evaluate("/*/*", doc, XPathConstants.NODESET);
-            assertEquals("length", 3, isList.getLength());
+            assertEquals(3, isList.getLength(), "length");
         } catch (SAXException | XPathExpressionException e) {
             fail(e.getMessage());
         }
@@ -170,6 +180,7 @@ public class DocumentBuilderImplTest extends TestCase {
 
 
 
+    @Test
     public void testNullNamespace() {
         try {
             String xml =
@@ -200,7 +211,7 @@ public class DocumentBuilderImplTest extends TestCase {
             NodeList list = (NodeList) xpath.evaluate(path, doc, XPathConstants.NODESET);
 
             System.out.println(Integer.toString(list.getLength()));
-            assertEquals("length", 1, list.getLength());
+            assertEquals(1, list.getLength(), "length");
             for (int i = 0; i < list.getLength(); i++) {
                 Node n = list.item(i);
                 System.out.println(n);
@@ -215,28 +226,6 @@ public class DocumentBuilderImplTest extends TestCase {
 
 
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
 
 
 

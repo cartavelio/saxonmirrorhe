@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,19 +7,15 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.FingerprintedQName;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.SpaceStrippingRule;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleTarget;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ComplexType;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.value.Whitespace;
 
@@ -32,7 +28,6 @@ import java.util.Arrays;
  * It maintains details of which elements need to be stripped.
  * The code is written to act as a SAX-like filter to do the stripping.
  *
- * @author Michael H. Kay
  */
 
 
@@ -103,6 +98,7 @@ public class Stripper extends ProxyReceiver {
      * Callback interface for SAX: not for application use
      */
 
+    @Override
     public void open() throws XPathException {
         // System.err.println("Stripper#startDocument()");
         top = 0;
@@ -110,9 +106,12 @@ public class Stripper extends ProxyReceiver {
         super.open();
     }
 
-    public void startElement(NodeName elemName, SchemaType type, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         // System.err.println("startElement " + nameCode);
-        nextReceiver.startElement(elemName, type, location, properties);
+        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
 
         byte preserveParent = stripStack[top];
         byte preserve = (byte) (preserveParent & (PRESERVE_PARENT | ASSERTIONS_EXIST));
@@ -142,22 +141,31 @@ public class Stripper extends ProxyReceiver {
             stripStack = Arrays.copyOf(stripStack, top * 2);
         }
         stripStack[top] = preserve;
-    }
 
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-
-        // test for xml:space="preserve" | "default"
-
-        if (nameCode.equals(XML_SPACE)) {
-            if (Whitespace.normalizeWhitespace(value).equals("preserve")) {
+        String xmlSpace = attributes.getValue(NamespaceConstant.XML, "space");
+        if (xmlSpace != null) {
+            if (Whitespace.normalizeWhitespace(xmlSpace).equals("preserve")) {
                 stripStack[top] |= PRESERVE_PARENT;
             } else {
                 stripStack[top] &= ~PRESERVE_PARENT;
             }
         }
-        nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
     }
+
+//    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
+//            throws XPathException {
+//
+//        // test for xml:space="preserve" | "default"
+//
+//        if (nameCode.equals(XML_SPACE)) {
+//            if (Whitespace.normalizeWhitespace(value).equals("preserve")) {
+//                stripStack[top] |= PRESERVE_PARENT;
+//            } else {
+//                stripStack[top] &= ~PRESERVE_PARENT;
+//            }
+//        }
+//        nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
+//    }
 
     private static NodeName XML_SPACE = new FingerprintedQName("xml", NamespaceConstant.XML, "space", StandardNames.XML_SPACE);
 
@@ -165,6 +173,7 @@ public class Stripper extends ProxyReceiver {
      * Handle an end-of-element event
      */
 
+    @Override
     public void endElement() throws XPathException {
         nextReceiver.endElement();
         top--;
@@ -174,6 +183,7 @@ public class Stripper extends ProxyReceiver {
      * Handle a text node
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         // assume adjacent chunks of text are already concatenated
 
@@ -193,15 +203,18 @@ public class Stripper extends ProxyReceiver {
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return true;
     }
 
     public static class StripRuleTarget implements RuleTarget {
+        @Override
         public void export(ExpressionPresenter presenter) throws XPathException {
             // no-op
         }
 
+        @Override
         public void registerRule(Rule rule) {
             // no action
         }

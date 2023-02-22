@@ -1,10 +1,10 @@
 package jaxptest;
 
 
-import junit.framework.TestCase;
 import net.sf.saxon.xpath.XPathFactoryImpl;
 import com.saxonica.xqj.SaxonXQConnection;
 import com.saxonica.xqj.SaxonXQDataSource;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
 
 import javax.xml.xpath.XPath;
@@ -17,7 +17,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class JaxpPlusXqjTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class JaxpPlusXqjTest {
 
 	/**
 	 * A simple implementation of interface javax.xml.namespace.NamespaceContext.
@@ -65,6 +68,7 @@ public class JaxpPlusXqjTest extends TestCase {
 	/**
 	 * Testcase: XPath applied to XQJ result node, using namespace bindings.
 	 */
+    @Test
 	public void testNamespaceResolver() {
 		String queryText = "<hero xmlns='http://whoiswho.com'><name>Michael</name></hero>";
 		try {
@@ -93,7 +97,7 @@ public class JaxpPlusXqjTest extends TestCase {
             xp = factory.newXPath();
 
 			name = (String) xp.evaluate(path, n, XPathConstants.STRING);
-            assertEquals("testNSR1", name, "");
+            assertEquals("", name, "testNSR1");
 //            System.out.println("test#1:\npath=" + path + "\nname=" + name);
 //			System.out.println("============================================\n");
 
@@ -109,7 +113,7 @@ public class JaxpPlusXqjTest extends TestCase {
 			xp.setNamespaceContext(nsmap);
 
 			name = (String) xp.evaluate(path, n, XPathConstants.STRING);
-            assertEquals("testNSR2", name, "");
+            assertEquals("", name, "testNSR2");
 //            System.out.println("test#2:\npath=" + path + "\nprefix s: " + uri + "\nname=" + name);
 //			System.out.println("============================================\n");
 
@@ -127,7 +131,7 @@ public class JaxpPlusXqjTest extends TestCase {
 			name = (String) xp.evaluate(path, n, XPathConstants.STRING);
 //			System.out.println("test#3:\npath=" + path + "\nprefix s: " + uri + "\nname=" + name);
 //			System.out.println("============================================\n");
-            assertEquals("testNSR3", name, "Michael");
+            assertEquals("Michael", name, "testNSR3");
 
             // Test #4: path with unknown prefix
 			//          expected: exception;
@@ -151,9 +155,6 @@ public class JaxpPlusXqjTest extends TestCase {
 
 //			System.out.println("test#4:\npath=" + path + "\nprefix s: " + uri + "\nname=" + name);
 //			System.out.println("============================================");
-
-			return;
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -161,29 +162,6 @@ public class JaxpPlusXqjTest extends TestCase {
 
 
 }
-
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
 
 
 

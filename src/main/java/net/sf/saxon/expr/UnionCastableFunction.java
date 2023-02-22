@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -37,6 +37,7 @@ public class UnionCastableFunction extends UnionConstructorFunction {
      *
      * @return the function item's type
      */
+    @Override
     public FunctionItemType getFunctionItemType() {
         // The function accepts any sequence as input, so it can do its own atomization
         return new SpecificFunctionType(
@@ -48,6 +49,7 @@ public class UnionCastableFunction extends UnionConstructorFunction {
      *
      * @return the function name, or null for an anonymous function
      */
+    @Override
     public StructuredQName getFunctionName() {
         return null;
     }
@@ -120,6 +122,7 @@ public class UnionCastableFunction extends UnionConstructorFunction {
      * @return the result of invoking the function
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs within the function
      */
+    @Override
     public BooleanValue call(XPathContext context, Sequence[] args) throws XPathException {
         boolean value = effectiveBooleanValue(args[0].iterate(), context);
         return BooleanValue.get(value);
@@ -128,6 +131,6 @@ public class UnionCastableFunction extends UnionConstructorFunction {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 
 

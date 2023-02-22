@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -15,7 +15,8 @@ import net.sf.saxon.expr.instruct.NumberInstruction;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.number.NumberFormatter;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
@@ -49,14 +50,14 @@ public class XSLNumber extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
 
 
-    public void prepareAttributes() throws XPathException {
-
-        AttributeCollection atts = getAttributeList();
+    @Override
+    public void prepareAttributes() {
 
         String selectAtt = null;
         String valueAtt = null;
@@ -64,48 +65,64 @@ public class XSLNumber extends StyleElement {
         String fromAtt = null;
         String levelAtt = null;
         String formatAtt = null;
-        String gsizeAtt = null;
-        String gsepAtt = null;
+        AttributeInfo gsizeAtt = null;
+        AttributeInfo gsepAtt = null;
         String langAtt = null;
         String letterValueAtt = null;
         String ordinalAtt = null;
         String startAtAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
-            if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
-            } else if (f.equals("value")) {
-                valueAtt = atts.getValue(a);
-                value = makeExpression(valueAtt, a);
-            } else if (f.equals("count")) {
-                countAtt = atts.getValue(a);
-            } else if (f.equals("from")) {
-                fromAtt = atts.getValue(a);
-            } else if (f.equals("level")) {
-                levelAtt = Whitespace.trim(atts.getValue(a));
-            } else if (f.equals("format")) {
-                formatAtt = atts.getValue(a);
-                format = makeAttributeValueTemplate(formatAtt, a);
-            } else if (f.equals("lang")) {
-                langAtt = atts.getValue(a);
-                lang = makeAttributeValueTemplate(langAtt, a);
-            } else if (f.equals("letter-value")) {
-                letterValueAtt = Whitespace.trim(atts.getValue(a));
-                letterValue = makeAttributeValueTemplate(letterValueAtt, a);
-            } else if (f.equals("grouping-size")) {
-                gsizeAtt = Whitespace.trim(atts.getValue(a));
-            } else if (f.equals("grouping-separator")) {
-                gsepAtt = atts.getValue(a);
-            } else if (f.equals("ordinal")) {
-                ordinalAtt = atts.getValue(a);
-                ordinal = makeAttributeValueTemplate(ordinalAtt, a);
-            } else if (f.equals("start-at")) {
-                startAtAtt = atts.getValue(a);
-                startAt = makeAttributeValueTemplate(startAtAtt, a);
-            } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String attValue = att.getValue();
+            switch (f) {
+                case "select":
+                    selectAtt = attValue;
+                    select = makeExpression(selectAtt, att);
+                    break;
+                case "value":
+                    valueAtt = attValue;
+                    this.value = makeExpression(valueAtt, att);
+                    break;
+                case "count":
+                    countAtt = attValue;
+                    break;
+                case "from":
+                    fromAtt = attValue;
+                    break;
+                case "level":
+                    levelAtt = Whitespace.trim(attValue);
+                    break;
+                case "format":
+                    formatAtt = attValue;
+                    format = makeAttributeValueTemplate(formatAtt, att);
+                    break;
+                case "lang":
+                    langAtt = attValue;
+                    lang = makeAttributeValueTemplate(langAtt, att);
+                    break;
+                case "letter-value":
+                    letterValueAtt = Whitespace.trim(attValue);
+                    letterValue = makeAttributeValueTemplate(letterValueAtt, att);
+                    break;
+                case "grouping-size":
+                    gsizeAtt = att;
+                    break;
+                case "grouping-separator":
+                    gsepAtt = att;
+                    break;
+                case "ordinal":
+                    ordinalAtt = attValue;
+                    ordinal = makeAttributeValueTemplate(ordinalAtt, att);
+                    break;
+                case "start-at":
+                    startAtAtt = attValue;
+                    startAt = makeAttributeValueTemplate(startAtAtt, att);
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
 
@@ -162,8 +179,8 @@ public class XSLNumber extends StyleElement {
 
         if (gsepAtt != null && gsizeAtt != null) {
             // the spec says that if only one is specified, it is ignored
-            groupSize = makeAttributeValueTemplate(gsizeAtt, getAttributeList().getIndex("", "group-size"));
-            groupSeparator = makeAttributeValueTemplate(gsepAtt, getAttributeList().getIndex("", "group-separator"));
+            groupSize = makeAttributeValueTemplate(gsizeAtt.getValue(), gsizeAtt);
+            groupSeparator = makeAttributeValueTemplate(gsepAtt.getValue(), gsepAtt);
         }
 
         if (startAtAtt != null) {
@@ -176,6 +193,7 @@ public class XSLNumber extends StyleElement {
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         checkEmpty();
 
@@ -196,7 +214,7 @@ public class XSLNumber extends StyleElement {
             errorCode = "XTTE0990";
             ContextItemExpression implicitSelect = new ContextItemExpression();
             implicitSelect.setLocation(allocateLocation());
-            implicitSelect.setErrorCodeForUndefinedContext(errorCode);
+            implicitSelect.setErrorCodeForUndefinedContext(errorCode, false);
             select = implicitSelect;
         }
 
@@ -214,6 +232,7 @@ public class XSLNumber extends StyleElement {
         }
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         boolean valueSpecified = value != null;
         if (value == null) {

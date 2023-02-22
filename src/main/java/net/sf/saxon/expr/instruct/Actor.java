@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,16 +7,16 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.StyleElement;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.style.XSLGlobalParam;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.InstructionInfo;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.VisibilityProvenance;
@@ -36,7 +36,7 @@ import java.util.List;
  * convert the supplied arguments.</p>
  */
 
-public abstract class Actor implements InstructionInfo, ExpressionOwner {
+public abstract class Actor implements ExpressionOwner, Location {
 
     protected Expression body;
     private String systemId;
@@ -57,6 +57,23 @@ public abstract class Actor implements InstructionInfo, ExpressionOwner {
      */
 
     public abstract SymbolicName getSymbolicName();
+
+    /**
+     * Get the name of the component as a QName
+     * @return the component's name
+     */
+
+    public StructuredQName getComponentName() {
+        return getSymbolicName().getComponentName();
+    }
+
+    /**
+     * Get a string used to identify this kind of component when used in tracing output
+     */
+
+    public String getTracingTag() {
+        return StandardNames.getLocalName(getSymbolicName().getComponentKind());
+    }
 
     /**
      * Set basic data about the unit of compilation (XQuery module, XSLT package) to which this
@@ -86,6 +103,7 @@ public abstract class Actor implements InstructionInfo, ExpressionOwner {
 
     /**
      * Return the declaring component, creating it if it does not already exist.
+     *
      * @param declaration The source element in the stylesheet corresponding to the component
      * @return the component corresponding to this declaration.
      */
@@ -117,7 +135,7 @@ public abstract class Actor implements InstructionInfo, ExpressionOwner {
      */
 
     public void allocateAllBindingSlots(StylesheetPackage pack) {
-        if (getBody() != null && getDeclaringComponent().getDeclaringPackage() == pack && packageData.getHostLanguage() == Configuration.XSLT) {
+        if (getBody() != null && getDeclaringComponent().getDeclaringPackage() == pack && packageData.isXSLT()) {
             allocateBindingSlotsRecursive(pack, this, getBody(), getDeclaringComponent().getComponentBindings());
         }
     }
@@ -177,6 +195,11 @@ public abstract class Actor implements InstructionInfo, ExpressionOwner {
         return body;
     }
 
+    @Override
+    public final Expression getChildExpression() {
+        return getBody();
+    }
+
     public void setStackFrameMap(SlotManager map) {
         stackFrameMap = map;
     }
@@ -194,28 +217,33 @@ public abstract class Actor implements InstructionInfo, ExpressionOwner {
     }
 
     public Location getLocation() {
-        return this;
+        return (Location)this;
     }
 
+    @Override
     public int getLineNumber() {
         return lineNumber;
     }
 
+    @Override
     public String getSystemId() {
         return systemId;
     }
 
+    @Override
     public int getColumnNumber() {
         return -1;
     }
 
     /*@Nullable*/
+    @Override
     public String getPublicId() {
         return null;
     }
 
+    @Override
     public Location saveLocation() {
-        return this;
+        return (Location)this;
     }
 
     public void setRetainedStaticContext(RetainedStaticContext rsc) {
@@ -264,13 +292,6 @@ public abstract class Actor implements InstructionInfo, ExpressionOwner {
     }
 
     /**
-     * Get the kind of component that this represents, using integer constants such as
-     * {@link net.sf.saxon.om.StandardNames#XSL_FUNCTION}
-     */
-
-    public abstract int getComponentKind();
-
-    /**
      * Export expression structure. The abstract expression tree
      * is written to the supplied outputstream.
      *
@@ -283,6 +304,7 @@ public abstract class Actor implements InstructionInfo, ExpressionOwner {
         return true;
     }
 
+    @Override
     public void setChildExpression(Expression expr) {
         setBody(expr);
     }

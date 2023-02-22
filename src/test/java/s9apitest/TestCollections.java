@@ -1,13 +1,11 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.resource.AbstractResourceCollection;
 import net.sf.saxon.resource.DirectoryCollection;
 import net.sf.saxon.resource.JSONResource;
@@ -15,24 +13,28 @@ import net.sf.saxon.resource.XmlResource;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.DateTimeValue;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * JUnit tests for handling of Saxon collection URIs and collection URI resolver APIs
  */
-public class TestCollections extends TestCase {
+public class TestCollections {
 
+    @Test
     public void testDirectoryNoRecurse() {
         try {
             Processor p = new Processor(true);
@@ -41,12 +43,13 @@ public class TestCollections extends TestCase {
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml"));
             XdmValue val = eval.evaluate();
-            assertEquals(val.size(), 5);
+            assertEquals(5, val.size());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testDirectoryMatch() {
         try {
             Processor p = new Processor(true);
@@ -65,6 +68,7 @@ public class TestCollections extends TestCase {
         }
     }
 
+    @Test
     public void testDirectoryNoRecurse30() {
         try {
             Processor p = new Processor(true);
@@ -74,12 +78,13 @@ public class TestCollections extends TestCase {
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml"));
             XdmValue val = eval.evaluate();
-            assertEquals(val.size(), 5);
+            assertEquals(5, val.size());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testDirectoryRecurse() {
         try {
             Processor p = new Processor(true);
@@ -88,12 +93,29 @@ public class TestCollections extends TestCase {
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml;recurse=yes"));
             XdmValue val = eval.evaluate();
-            assertEquals(val.size(), 7);
+            assertEquals(7, val.size(), "found7");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
+    public void testDirectoryWithContentType() {
+        try {
+            Processor p = new Processor(true);
+            XPathCompiler c = p.newXPathCompiler();
+            XPathExecutable exec = c.compile("collection(.)");
+            XPathSelector eval = exec.load();
+            eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml;recurse=yes;content-type=text/plain"));
+            XdmValue val = eval.evaluate();
+            assertEquals(7, val.size(), "found7");
+            assertTrue(val.itemAt(0) instanceof XdmAtomicValue, "isString");
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
     public void testDirectoryUriNoRecurse() {
         try {
             Processor p = new Processor(true);
@@ -102,12 +124,13 @@ public class TestCollections extends TestCase {
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml"));
             XdmValue val = eval.evaluate();
-            assertEquals(val.size(), 5);
+            assertEquals(5, val.size());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testDirectoryUriRecurse() {
         try {
             Processor p = new Processor(true);
@@ -116,12 +139,14 @@ public class TestCollections extends TestCase {
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml;recurse=yes"));
             XdmValue val = eval.evaluate();
-            assertEquals(val.size(), 7);
+            assertEquals(7, val.size());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
+    @Tag("performance")
     public void testParallelSpeed() {
         try {
             for (int i = 0; i < 5; i++) {
@@ -132,7 +157,7 @@ public class TestCollections extends TestCase {
             System.err.println("Serial processing (HE): " + serial + "ms");
             long parallel = speedTest(true);
             System.err.println("Parallel processing (EE): " + parallel + "ms");
-            assertTrue("not faster!", parallel < serial);
+            assertTrue(parallel < serial, "not faster!");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
@@ -151,6 +176,7 @@ public class TestCollections extends TestCase {
         return result;
     }
 
+    @Test
     public void testStable() {
         try {
             Processor p = new Processor(true);
@@ -165,6 +191,7 @@ public class TestCollections extends TestCase {
         }
     }
 
+    @Test
     public void testUnstable() {
         try {
             Processor p = new Processor(true);
@@ -179,6 +206,7 @@ public class TestCollections extends TestCase {
         }
     }
 
+    @Test
     public void testStrictValidation() {
         try {
             Processor p = new Processor(true);
@@ -187,12 +215,13 @@ public class TestCollections extends TestCase {
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "?select=books.xml;recurse=no;validation=strict"));
             XdmValue val = eval.evaluate();
-            assertEquals(((XdmAtomicValue) val).getBooleanValue(), false);
+            assertEquals(false, ((XdmAtomicValue) val).getBooleanValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testNoValidation() {
         try {
             Processor p = new Processor(true);
@@ -201,16 +230,17 @@ public class TestCollections extends TestCase {
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "?select=books.xml;recurse=no;validation=skip"));
             XdmValue val = eval.evaluate();
-            assertEquals(((XdmAtomicValue) val).getBooleanValue(), true);
+            assertEquals(true, ((XdmAtomicValue) val).getBooleanValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testJSONCollection() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(FeatureKeys.ALLOW_MULTITHREADING, false);
+            p.setConfigurationProperty(Feature.ALLOW_MULTITHREADING, false);
             XPathCompiler c = p.newXPathCompiler();
             c.setLanguageVersion("3.1");
             XPathExecutable exec = c.compile("for $X in (collection(.))" +
@@ -225,6 +255,7 @@ public class TestCollections extends TestCase {
         }
     }
 
+    @Test
     public void testCustomMediaType() {
         try {
             Processor p = new Processor(true);
@@ -249,6 +280,8 @@ public class TestCollections extends TestCase {
         }
     }
 
+
+    @Test
     public void testMixedCollection() {
         try {
             Processor p = new Processor(true);
@@ -258,12 +291,13 @@ public class TestCollections extends TestCase {
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "collection2/?select=*"));
             XdmValue val = eval.evaluate();
-            assertEquals(Integer.parseInt(val.toString()), 2);
+            assertEquals(2, Integer.parseInt(val.toString()));
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testMixedCollectionWithMetadata() {
         try {
             Processor p = new Processor(true);
@@ -280,15 +314,16 @@ public class TestCollections extends TestCase {
                 XdmAtomicValue length = (XdmAtomicValue) map.call(p, new XdmAtomicValue("length"));
                 XdmAtomicValue lastModified = (XdmAtomicValue) map.call(p, new XdmAtomicValue("last-modified"));
                 XdmAtomicValue contentType = (XdmAtomicValue) map.call(p, new XdmAtomicValue("content-type"));
-                assertEquals(contentType.toString(), "application/xml");
+                assertEquals("application/xml", contentType.toString());
                 System.err.println(name + " " + lastModified + " " + length + " " + contentType);
             }
-            assertEquals(val.size(), 1);
+            assertEquals(1, val.size());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testMixedCollectionMetadataFetch() {
         try {
             Processor p = new Processor(true);
@@ -303,13 +338,14 @@ public class TestCollections extends TestCase {
             for (XdmItem item : val) {
                 assertTrue(item instanceof XdmNode);
             }
-            assertEquals(val.size(), 1);
+            assertEquals(1, val.size());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
 
+    @Test
     public void testCollectionWithHttp() {
         try {
             Processor p = new Processor(true);
@@ -317,15 +353,16 @@ public class TestCollections extends TestCase {
             c.setLanguageVersion("3.1");
             XPathExecutable exec = c.compile("count(collection(.))");
             XPathSelector eval = exec.load();
-            eval.setContextItem(new XdmAtomicValue("http://dev.saxonica.com/tests/collection/catalog.xml"));
+            eval.setContextItem(new XdmAtomicValue("https://dev.saxonica.com/tests/collection/catalog.xml"));
             XdmValue val = eval.evaluate();
-            assertEquals(Integer.parseInt(val.toString()), 2);
+            assertEquals(2, Integer.parseInt(val.toString()));
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testMixedWithHttpCollection() {
         try {
             Processor p = new Processor(true);
@@ -341,6 +378,7 @@ public class TestCollections extends TestCase {
         }
     }
 
+    @Test
     public void testMixedWithHttpCollection2() {
         try {
             Processor p = new Processor(true);
@@ -349,12 +387,13 @@ public class TestCollections extends TestCase {
             XQueryEvaluator eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "collection3.xml"));
             XdmValue val = eval.evaluate();
-            assertEquals(Integer.parseInt(val.toString()), 3);
+            assertEquals(3, Integer.parseInt(val.toString()));
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testJarCollection() {
         try {
             Processor p = new Processor(true);
@@ -364,12 +403,13 @@ public class TestCollections extends TestCase {
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "collection3/saxon9-test.jar"));
             XdmValue val = eval.evaluate();
-            assertEquals(Integer.parseInt(val.toString()), 34);
+            assertEquals(34, Integer.parseInt(val.toString()));
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testJarCollection2() {
         try {
             Processor p = new Processor(true);
@@ -385,6 +425,7 @@ public class TestCollections extends TestCase {
         }
     }
 
+    @Test
     public void testJarCollectionUri() {
         try {
             Processor p = new Processor(true);
@@ -394,12 +435,13 @@ public class TestCollections extends TestCase {
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "collection3/saxon9-test.jar"));
             XdmValue val = eval.evaluate();
             System.out.println(val.toString());
-            assertTrue("Uri retrieved successfully: ", true);
+            assertTrue(true, "Uri retrieved successfully: ");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testJarCollectionUriWithOptions() {
         try {
             Processor p = new Processor(true);
@@ -412,12 +454,13 @@ public class TestCollections extends TestCase {
             XQueryEvaluator eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "collection3/saxon9-test.jar?select=META-INF/*"));
             XdmValue val = eval.evaluate();
-            assertEquals(((XdmAtomicValue) val.itemAt(1)).getBooleanValue(), true);
+            assertEquals(true, ((XdmAtomicValue) val.itemAt(1)).getBooleanValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testJarCollectionUriWithXmlOptions() {
         try {
             Processor p = new Processor(true);
@@ -427,12 +470,29 @@ public class TestCollections extends TestCase {
             XQueryEvaluator eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "collection3/saxon9he.jar?select=*.xsl;validation=skip"));
             XdmValue val = eval.evaluate();
-            assertEquals(((XdmAtomicValue) val.itemAt(1)).getBooleanValue(), true);
+            assertEquals(true, ((XdmAtomicValue) val.itemAt(1)).getBooleanValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
+    public void testJarCollectionUriWithXmlOptions2() {
+        try {
+            Processor p = new Processor(true);
+            XQueryCompiler c = p.newXQueryCompiler();
+            XQueryExecutable exec = c.compile("for $x in collection(.) return " +
+                                                      "if($x instance of node()) then true() else false()");
+            XQueryEvaluator eval = exec.load();
+            eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "collection3/saxon9he.jar?select=*.xsl;validation=skip;content-type=text/plain"));
+            XdmValue val = eval.evaluate();
+            assertEquals(false, ((XdmAtomicValue) val.itemAt(1)).getBooleanValue());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
     public void testJarMetadataCollection() {
         try {
             Processor p = new Processor(true);
@@ -448,12 +508,13 @@ public class TestCollections extends TestCase {
                 assertTrue(map.call(p, new XdmAtomicValue("last-modified")).getUnderlyingValue() instanceof DateTimeValue);
             }
 
-            assertEquals(val.size(), 34);
+            assertEquals(34, val.size());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testCollectionFinder() {
         try {
             Processor p = new Processor(true);
@@ -476,51 +537,10 @@ public class TestCollections extends TestCase {
         }
     }
 
-    public void testCollectionURIResolver() {
-        try {
-            Processor p = new Processor(true);
-            p.getUnderlyingConfiguration().setCollectionURIResolver(new CollectionURIResolver() {
 
-                public SequenceIterator<AnyURIValue> resolve(String href, String base, XPathContext context) throws XPathException {
-                    File dir = new File(ConfigTest.DATA_DIR + "/");
-                    File[] contents = dir.listFiles(new FilenameFilter() {
-                        public boolean accept(File dir, String name) {
-                            return name.endsWith(".xml") && !name.equals("items.xml");
-                        }
-                    });
-                    List<AnyURIValue> sources = new ArrayList<AnyURIValue>();
-                    for (File file : contents) {
-                        new AnyURIValue(file.toURI().toString());
-                    }
-                    return new ListIterator<>(sources);
-                }
-            });
-            XQueryCompiler c = p.newXQueryCompiler();
-            XQueryExecutable exec = c.compile("every $x in collection(.) satisfies ($x instance of node())");
-            XQueryEvaluator eval = exec.load();
-            eval.setContextItem(new XdmAtomicValue("http://example.com/collection"));
-            XdmAtomicValue val = (XdmAtomicValue)eval.evaluateSingle();
-            assertTrue(val.getBooleanValue());
-        } catch (SaxonApiException e) {
-            fail(e.getMessage());
-        }
-    }
 
-    public void testOldStandardCollectionURIResolver() {
-        try {
-            Processor p = new Processor(true);
-            p.getUnderlyingConfiguration().setCollectionURIResolver(new StandardCollectionURIResolver());
-            XQueryCompiler c = p.newXQueryCompiler();
-            XQueryExecutable exec = c.compile("every $x in collection(.) satisfies ($x instance of node())");
-            XQueryEvaluator eval = exec.load();
-            eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "collection2/?select=*.xml"));
-            XdmAtomicValue val = (XdmAtomicValue) eval.evaluateSingle();
-            assertTrue(val.getBooleanValue());
-        } catch (SaxonApiException e) {
-            fail(e.getMessage());
-        }
-    }
 
+    @Test
     public void testRegisterMediaType() {
         try {
             Processor p = new Processor(true);
@@ -535,13 +555,14 @@ public class TestCollections extends TestCase {
             XdmValue val = eval.evaluate();
             assertEquals(6, val.size());
             for (XdmItem item : val) {
-                assertTrue("isText", ((XdmAtomicValue)item).getBooleanValue());
+                assertTrue(((XdmAtomicValue)item).getBooleanValue(), "isText");
             }
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testMediaTypeConfigFile() {
         try {
             String cf = "<configuration xmlns='http://saxon.sf.net/ns/configuration'\n" +
@@ -560,13 +581,14 @@ public class TestCollections extends TestCase {
             XdmValue val = eval.evaluate();
             assertEquals(6, val.size());
             for (XdmItem item : val) {
-                assertTrue("isText", ((XdmAtomicValue) item).getBooleanValue());
+                assertTrue(((XdmAtomicValue) item).getBooleanValue(), "isText");
             }
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testRegisteredCollection() {
         try {
             Processor p = new Processor(true);
@@ -599,13 +621,45 @@ public class TestCollections extends TestCase {
             XPathSelector eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("ftp://myCollection"));
             XdmValue val = eval.evaluate();
-            assertEquals(Integer.parseInt(val.toString()), 2);
+            assertEquals(2, Integer.parseInt(val.toString()));
             exec = c.compile("collection(.)/* ! name()");
             eval = exec.load();
             eval.setContextItem(new XdmAtomicValue("ftp://myCollection"));
             val = eval.evaluate();
-            assertEquals("one", "cities", val.itemAt(0).getStringValue());
-            assertEquals("two", "foo:document", val.itemAt(1).getStringValue());
+            assertEquals("cities", val.itemAt(0).getStringValue(), "one");
+            assertEquals("foo:document", val.itemAt(1).getStringValue(), "two");
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public static class Finder implements CollectionFinder {
+        @Override
+        public ResourceCollection findCollection(XPathContext context, String collectionURI) throws XPathException {
+            if (collectionURI.equals("http://example.com/collection")) {
+                File dir = new File(ConfigTest.DATA_DIR + "collection");
+                URIQueryParameters params = new URIQueryParameters("select=*.xml", context.getConfiguration());
+                return new DirectoryCollection(context.getConfiguration(), collectionURI, dir, params);
+            } else {
+                throw new XPathException("Collection " + collectionURI + " not found");
+            }
+        }
+    }
+
+    @Test
+    public void testCollectionFinderConfigFile() {
+        try {
+            String cf = "<configuration xmlns='http://saxon.sf.net/ns/configuration'\n" +
+                    "               edition='EE'\n" +
+                    "               label='Some label'>\n" +
+                    "          <global collectionFinder='s9apitest.TestCollections$Finder'/>\n" +
+                    "    </configuration>";
+            Processor p = new Processor(new StreamSource(new StringReader(cf)));
+            XQueryCompiler c = p.newXQueryCompiler();
+            XQueryExecutable exec = c.compile("distinct-values(collection(\"http://example.com/collection\")!node-name(*))");
+            XQueryEvaluator eval = exec.load();
+            XdmValue val = eval.evaluate();
+            assertEquals(39, val.size());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }

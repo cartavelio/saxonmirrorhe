@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.flwor;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -15,6 +16,8 @@ import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.ItemType;
 
 import java.util.List;
+
+import static net.sf.saxon.expr.flwor.Clause.ClauseName.LET;
 
 /**
  * A "let" clause in a FLWOR expression
@@ -26,7 +29,7 @@ public class LetClause extends Clause {
     private Evaluator evaluator;
 
     @Override
-    public int getClauseKey() {
+    public ClauseName getClauseKey() {
         return LET;
     }
 
@@ -37,6 +40,7 @@ public class LetClause extends Clause {
         return evaluator;
     }
 
+    @Override
     public LetClause copy(FLWORExpression flwor, RebindingMap rebindings) {
         LetClause let2 = new LetClause();
         let2.setLocation(getLocation());
@@ -96,13 +100,14 @@ public class LetClause extends Clause {
      * output to another tuple stream
      *
      * @param destination the output tuple stream
+     * @param output the destination for the result
      * @param context
      * @return the push tuple stream that implements the functionality of this clause of the FLWOR
      *         expression
      */
     @Override
-    public TuplePush getPushStream(TuplePush destination, XPathContext context) {
-        return new LetClausePush(destination, this);
+    public TuplePush getPushStream(TuplePush destination, Outputter output, XPathContext context) {
+        return new LetClausePush(output, destination, this);
     }
 
     /**
@@ -119,6 +124,7 @@ public class LetClause extends Clause {
      * Type-check the expression
      */
 
+    @Override
     public void typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
         setSequence(TypeChecker.strictTypeCheck(
@@ -199,6 +205,7 @@ public class LetClause extends Clause {
         out.endElement();
     }
 
+    @Override
     public String toShortString() {
         FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
         fsb.append("let $");

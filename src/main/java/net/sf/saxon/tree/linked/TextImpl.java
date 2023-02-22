@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,8 @@
 package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 
@@ -42,6 +43,7 @@ public class TextImpl extends NodeImpl {
      * @return the string value of the node
      */
 
+    @Override
     public String getStringValue() {
         return content;
     }
@@ -52,6 +54,7 @@ public class TextImpl extends NodeImpl {
      * @return Type.TEXT
      */
 
+    @Override
     public final int getNodeKind() {
         return Type.TEXT;
     }
@@ -60,8 +63,9 @@ public class TextImpl extends NodeImpl {
      * Copy this node to a given outputter
      */
 
+    @Override
     public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId) throws XPathException {
-        out.characters(content, locationId, 0);
+        out.characters(content, locationId, ReceiverOption.NONE);
     }
 
 
@@ -71,6 +75,7 @@ public class TextImpl extends NodeImpl {
      * @param stringValue the new string value
      */
 
+    @Override
     public void replaceStringValue(/*@NotNull*/ CharSequence stringValue) {
         if (stringValue.length() == 0) {
             delete();

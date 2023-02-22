@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,7 +18,6 @@ import javax.xml.transform.OutputKeys;
 import java.math.BigDecimal;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 
 /**
  * Provides string constants that can be used to set
@@ -28,6 +27,11 @@ import java.util.regex.Pattern;
  * defined in javax.xml.transform.OutputKeys. As well as Saxon extension
  * attributes, the list includes new attributes defined in XSLT 2.0 which
  * are not yet supported in JAXP</p>
+ *
+ * <p>Note that for JAXP compatibility, the names of properties use Clark format,
+ * that is <code>{uri}local</code>. However, from 10.0, the values of properties
+ * containing QNames, such as <code>cdata-section-elements</code>, use EQName
+ * format, that is <code>Q{uri}local</code>.</p>
  */
 
 public class SaxonOutputKeys {
@@ -43,25 +47,25 @@ public class SaxonOutputKeys {
      * String constant representing the saxon:xquery output method name
      */
 
-    /*@NotNull*/ public static final String SAXON_XQUERY_METHOD = "{http://saxon.sf.net/}xquery";
+    /*@NotNull*/ public static final String SAXON_XQUERY_METHOD = "Q{http://saxon.sf.net/}xquery";
 
     /**
      * String constant representing the saxon:base64Binary output method name
      */
 
-    /*@NotNull*/ public static final String SAXON_BASE64_BINARY_METHOD = "{http://saxon.sf.net/}base64Binary";
+    /*@NotNull*/ public static final String SAXON_BASE64_BINARY_METHOD = "Q{http://saxon.sf.net/}base64Binary";
 
     /**
      * String constant representing the saxon:hexBinary output method name
      */
 
-    /*@NotNull*/ public static final String SAXON_HEX_BINARY_METHOD = "{http://saxon.sf.net/}hexBinary";
+    /*@NotNull*/ public static final String SAXON_HEX_BINARY_METHOD = "Q{http://saxon.sf.net/}hexBinary";
 
     /**
-     * String constant representing the saxon:ptree output method name
+     * String constant representing the saxon:xml-to-json output method name
      */
 
-    /*@NotNull*/ public static final String SAXON_PTREE_METHOD = "{http://saxon.sf.net/}ptree";
+    /*@NotNull*/ public static final String SAXON_XML_TO_JSON_METHOD = "Q{http://saxon.sf.net/}xml-to-json";
 
     /**
      * allow-duplicate-names = yes|no.
@@ -177,7 +181,9 @@ public class SaxonOutputKeys {
 
     /**
      * stylesheet-version. This serialization parameter is set automatically by the XSLT processor
-     * to the value of the version attribute on the principal stylesheet module.
+     * to the value of the version attribute on the principal stylesheet module. This is because
+     * in backwards compatibility mode (version="1.0") the default output method for an XHTML result
+     * document is XML rather than XHTML.
      */
 
     /*@NotNull*/ public static final String STYLESHEET_VERSION = "{http://saxon.sf.net/}stylesheet-version";
@@ -185,7 +191,7 @@ public class SaxonOutputKeys {
     /**
      * use-character-map = list-of-qnames.
      * <p>Defines the character maps used in this output definition. The QNames
-     * are represented in Clark notation as {uri}local-name.</p>
+     * are represented in EQName notation as Q{uri}local-name.</p>
      */
 
     /*@NotNull*/ public static final String USE_CHARACTER_MAPS = "use-character-maps";
@@ -294,12 +300,6 @@ public class SaxonOutputKeys {
     /*@NotNull*/ public static final String WRAP = "{http://saxon.sf.net/}wrap-result-sequence";
 
     /**
-     * Property used internally to identify the XSLT implicit result document
-     */
-
-    /*@NotNull*/ public static final String IMPLICIT_RESULT_DOCUMENT = "{http://saxon.sf.net/}implicit-result-document";
-
-    /**
      * Property saxon:unfailing used to indicate that serialization should not fail. This is used when a serialization method such
      * as XML or JSON is invoked from the ADAPTIVE serialization method, and it tailors the error-handling behaviour
      * of the subsidiary output method. There is nothing to stop the property being set directly by the user, though
@@ -307,20 +307,19 @@ public class SaxonOutputKeys {
      */
 
     public static final String UNFAILING = "{http://saxon.sf.net/}unfailing";
-
-    private static Pattern publicIdPattern = Pattern.compile("^[\\s\\r\\na-zA-Z0-9\\-'()+,./:=?;!*#@$_%]*$");
-
+    
     /**
      * Process a serialization property whose value is a list of element names, for example cdata-section-elements
      *
      *
      * @param value        The value of the property as written
      * @param nsResolver   The namespace resolver to use; may be null if prevalidated is set or if names are supplied
-     *                     in Clark format
+     *                     in EQName format
      * @param useDefaultNS True if unprefixed names are to be treated as being in the default namespace
      * @param prevalidated true if the property has already been validated
      * @param allowStar  true if the pseudo-name "*" is permitted; it will be retained in the output
-     *@param errorCode    The error code to return in the event of problems  @return The list of element names with lexical QNames replaced by Clark names, starting with a single space
+     * @param errorCode    The error code to return in the event of problems
+     * @return The list of element names with lexical QNames replaced by EQName names, starting with a single space
      * @throws XPathException if any error is found in the list of element names, for example, an undeclared namespace prefix
      */
 
@@ -337,7 +336,7 @@ public class SaxonOutputKeys {
             } else if (prevalidated || (nsResolver == null)) {
                 s.append(' ').append(displayname);
             } else if (displayname.startsWith("Q{")) {
-                s.append(' ').append(displayname.substring(1));
+                s.append(' ').append(displayname);
             } else {
                 try {
                     String[] parts = NameChecker.getQNameParts(displayname);
@@ -345,7 +344,7 @@ public class SaxonOutputKeys {
                     if (muri == null) {
                         throw new XPathException("Namespace prefix '" + parts[0] + "' has not been declared", errorCode);
                     }
-                    s.append(" {").append(muri).append('}').append(parts[1]);
+                    s.append(" Q{").append(muri).append('}').append(parts[1]);
                 } catch (QNameException err) {
                     throw new XPathException("Invalid QName. " + err.getMessage(), errorCode);
                 }
@@ -419,7 +418,7 @@ public class SaxonOutputKeys {
                 return false;
             }
         } else {
-            return false;
+            return true; // Change in 10.0 to make HTML5 the default
         }
     }
 

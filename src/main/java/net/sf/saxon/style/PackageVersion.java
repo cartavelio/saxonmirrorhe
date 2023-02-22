@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -123,6 +123,7 @@ public class PackageVersion implements Comparable<PackageVersion> {
         return parts.equals(other.parts);
     }
 
+    @Override
     public int compareTo(PackageVersion o) {
         PackageVersion pv = (PackageVersion) o;
         List<Integer> p = pv.parts;
@@ -182,4 +183,4 @@ public class PackageVersion implements Comparable<PackageVersion> {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

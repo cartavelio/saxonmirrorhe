@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -14,7 +14,8 @@ import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.instruct.Message;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 
@@ -35,6 +36,7 @@ public final class XSLAssert extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -45,34 +47,37 @@ public final class XSLAssert extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
+    @Override
     public void prepareAttributes() {
 
         String testAtt = null;
         String selectAtt = null;
         String errorCodeAtt = null;
-        AttributeCollection atts = getAttributeList();
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             switch (f) {
                 case "test":
-                    testAtt = atts.getValue(a);
-                    test = makeExpression(testAtt, a);
+                    testAtt = value;
+                    test = makeExpression(testAtt, att);
                     break;
                 case "select":
-                    selectAtt = atts.getValue(a);
-                    select = makeExpression(selectAtt, a);
+                    selectAtt = value;
+                    select = makeExpression(selectAtt, att);
                     break;
                 case "error-code":
-                    errorCodeAtt = atts.getValue(a);
-                    errorCode = makeAttributeValueTemplate(errorCodeAtt, a);
+                    errorCodeAtt = value;
+                    errorCode = makeAttributeValueTemplate(errorCodeAtt, att);
                     break;
                 default:
-                    checkUnknownAttribute(atts.getNodeName(a));
+                    checkUnknownAttribute(attName);
                     break;
             }
         }
@@ -83,6 +88,7 @@ public final class XSLAssert extends StyleElement {
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         select = typeCheck("select", select);
         test = typeCheck("test", test);
@@ -93,6 +99,7 @@ public final class XSLAssert extends StyleElement {
         }
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         if (exec.getCompilerInfo().isAssertionsEnabled()) {
             Expression b = compileSequenceConstructor(exec, decl, true);
@@ -112,7 +119,7 @@ public final class XSLAssert extends StyleElement {
                 // resolve any QName prefix now
                 String code = ((StringLiteral) errorCode).getStringValue();
                 if (code.contains(":") && !code.startsWith("Q{")) {
-                    StructuredQName name = makeQName(code);
+                    StructuredQName name = makeQName(code, null, "error-code");
                     errorCode = new StringLiteral(name.getEQName());
                 }
             }

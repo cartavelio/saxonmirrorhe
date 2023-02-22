@@ -1,6 +1,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -40,10 +40,6 @@ public abstract class FeatureCode {
     public final static int COLLECTION_FINDER = 8;
     /** @see Feature#COLLECTION_FINDER_CLASS  */
     public final static int COLLECTION_FINDER_CLASS = 9;
-    /** @see Feature#COLLECTION_URI_RESOLVER  */
-    public final static int COLLECTION_URI_RESOLVER = 10;
-    /** @see Feature#COLLECTION_URI_RESOLVER_CLASS  */
-    public final static int COLLECTION_URI_RESOLVER_CLASS = 11;
     /** @see Feature#COMPILE_WITH_TRACING  */
     public final static int COMPILE_WITH_TRACING = 12;
     /** @see Feature#CONFIGURATION  */
@@ -268,9 +264,15 @@ public abstract class FeatureCode {
     public final static int THRESHOLD_FOR_FUNCTION_INLINING = 122;
     /** @see Feature#THRESHOLD_FOR_HOTSPOT_BYTE_CODE  */
     public final static int THRESHOLD_FOR_HOTSPOT_BYTE_CODE = 123;
+    /** @see Feature#ALLOWED_PROTOCOLS  */
+    public final static int ALLOWED_PROTOCOLS = 124;
+    /** @see Feature#RETAIN_NODE_FOR_DIAGNOSTICS  */
+    public final static int RETAIN_NODE_FOR_DIAGNOSTICS = 125;
+    /** @see Feature#ALLOW_UNRESOLVED_SCHEMA_COMPONENTS  */
+    public final static int ALLOW_UNRESOLVED_SCHEMA_COMPONENTS = 126;
 
 
-    public final static int MAX = 124;
+    public final static int MAX = 127;
 
 }
         

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,9 +11,14 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Sender;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.om.AllElementsSpaceStrippingRule;
+import net.sf.saxon.om.IgnorableSpaceStrippingRule;
+import net.sf.saxon.om.NoElementsSpaceStrippingRule;
+import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
+import net.sf.saxon.value.Whitespace;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
@@ -24,6 +29,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.sax.SAXSource;
 import java.io.File;
+import java.util.Objects;
 
 /**
  * This class implements the JAXP DocumentBuilder interface, allowing a Saxon TinyTree to be
@@ -32,6 +38,10 @@ import java.io.File;
  * implements the DOM interfaces, it is read-only, and all attempts to update it will throw
  * an exception. No schema or DTD validation is carried out on the document.
  * The DocumentBuilder is always namespace-aware.
+ *
+ * <p>A {@code DocumentBuilderImpl} object contains an instance of {@link ParseOptions}; many
+ * of the properties of the {@code DocumentBuilderImpl} map directly to the properties of the
+ * underlying {@code ParseOptions}, and changes can be made at either level.</p>
  */
 
 public class DocumentBuilderImpl extends DocumentBuilder {
@@ -84,6 +94,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      * namespaces. This implementation always returns true.
      */
 
+    @Override
     public boolean isNamespaceAware() {
         return true;
     }
@@ -106,6 +117,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      * XML documents against a DTD; false otherwise.
      */
 
+    @Override
     public boolean isValidating() {
         return parseOptions.getDTDValidationMode() == Validation.STRICT;
     }
@@ -117,6 +129,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      *                                       implementation is by using the parse() method.
      */
 
+    @Override
     public Document newDocument() {
         throw new UnsupportedOperationException("The only way to build a document using this DocumentBuilder is with the parse() method");
     }
@@ -137,6 +150,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      * @throws SAXException If any parse errors occur.
      */
 
+    @Override
     public Document parse(InputSource in) throws SAXException {
         try {
             if (config == null) {
@@ -168,11 +182,9 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      * @throws SAXException        If any parse errors occur.
      */
 
-    public Document parse(/*@Nullable*/ File f) throws SAXException {
-        if (f == null) {
-            throw new IllegalArgumentException("File cannot be null");
-        }
-
+    @Override
+    public Document parse(File f) throws SAXException {
+        Objects.requireNonNull(f);
         String uri = f.toURI().toString();
         InputSource in = new InputSource(uri);
         return parse(in);
@@ -187,6 +199,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      *           present in the XML document to be parsed.
      */
 
+    @Override
     public void setEntityResolver(EntityResolver er) {
         parseOptions.setEntityResolver(er);
     }
@@ -198,6 +211,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      */
 
 
+    @Override
     public void setErrorHandler(ErrorHandler eh) {
         parseOptions.setErrorHandler(eh);
     }
@@ -208,6 +222,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      * @return A new instance of a <code>DOMImplementation</code>.
      */
 
+    @Override
     public DOMImplementation getDOMImplementation() {
         return newDocument().getImplementation();
     }
@@ -239,6 +254,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      * @see javax.xml.parsers.DocumentBuilderFactory#setXIncludeAware(boolean)
      * @since JAXP 1.5, Saxon 8.9
      */
+    @Override
     public boolean isXIncludeAware() {
         return parseOptions.isXIncludeAware();
     }
@@ -249,10 +265,26 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      * @param stripAction one of {@link net.sf.saxon.value.Whitespace#IGNORABLE},
      *                    {@link net.sf.saxon.value.Whitespace#ALL}, or {@link net.sf.saxon.value.Whitespace#NONE}
      * @since 8.9
+     * @deprecated since 10.0: use {@link ParseOptions#setSpaceStrippingRule(SpaceStrippingRule)}
      */
 
     public void setStripSpace(int stripAction) {
-        parseOptions.setStripSpace(stripAction);
+        switch (stripAction) {
+            case Whitespace.ALL:
+                parseOptions.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+                break;
+            case Whitespace.NONE:
+                parseOptions.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+                break;
+            case Whitespace.IGNORABLE:
+                parseOptions.setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                break;
+            case Whitespace.UNSPECIFIED:
+                parseOptions.setSpaceStrippingRule(null);
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     /**
@@ -261,10 +293,22 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      * @return one of {@link net.sf.saxon.value.Whitespace#IGNORABLE},
      * {@link net.sf.saxon.value.Whitespace#ALL}, or {@link net.sf.saxon.value.Whitespace#NONE}
      * @since 8.9
+     * @deprecated since 10.0: use {@link ParseOptions#getSpaceStrippingRule()}
      */
 
     public int getStripSpace() {
-        return parseOptions.getStripSpace();
+        SpaceStrippingRule rule = parseOptions.getSpaceStrippingRule();
+        if (rule == AllElementsSpaceStrippingRule.getInstance()) {
+            return Whitespace.ALL;
+        } else if (rule == NoElementsSpaceStrippingRule.getInstance()) {
+            return Whitespace.NONE;
+        } else if (rule == IgnorableSpaceStrippingRule.getInstance()) {
+            return Whitespace.IGNORABLE;
+        } else if (rule == null) {
+            return Whitespace.IGNORABLE;
+        } else {
+            return Whitespace.XSLT;
+        }
     }
 
     /**

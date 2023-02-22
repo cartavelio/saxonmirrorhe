@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -34,7 +34,7 @@ public class Component {
 
     protected Actor actor;
     private Visibility visibility;
-    private List<ComponentBinding> bindings = new ArrayList<ComponentBinding>();
+    private List<ComponentBinding> bindings = new ArrayList<>();
     private StylesheetPackage containingPackage;
     private StylesheetPackage declaringPackage;
     private VisibilityProvenance provenance;
@@ -47,7 +47,7 @@ public class Component {
      * Create a component
      * @param actor             the compiled code that implements the component, for example a Template or Function
      * @param visibility        the visibility of the component
-     * @param provenance        indicates where the visibility property came from
+     * @param provenance        where the visibility property came from
      * @param containingPackage the package to which this component belongs
      * @param declaringPackage  the package in which the original declaration of the component appears
      */
@@ -95,7 +95,7 @@ public class Component {
     /**
      * Set the visibility of the component, and say whether it is explicit or defaulted
      * @param visibility the visibility of the component
-     * @param provenance indicates where the visibility property came from
+     * @param provenance where the visibility property came from
      */
 
     public void setVisibility(Visibility visibility, VisibilityProvenance provenance) {
@@ -116,10 +116,9 @@ public class Component {
     }
 
     /**
-     * Determine whether the visibility of the component is due to an explicit visibility attribute
-     * on the component declaration, or whether it was inferred, or came from an xsl:expose or xsl:accept
+     * Determine whether the visibility of the component is due to an explicit visibility attribute on the component
      * declaration
-     * @return the provenance of the visibility property
+     * @return the origin of the visibility information
      */
 
     public VisibilityProvenance getVisibilityProvenance() {
@@ -146,22 +145,6 @@ public class Component {
 
     public Actor getActor() {
         return actor;
-    }
-
-    public int getComponentKind() {
-        if (actor instanceof NamedTemplate) {
-            return StandardNames.XSL_TEMPLATE;
-        } else if (actor instanceof GlobalVariable) {
-            return StandardNames.XSL_VARIABLE;
-        } else if (actor instanceof Function) {
-            return StandardNames.XSL_FUNCTION;
-        } else if (actor instanceof AttributeSet) {
-            return StandardNames.XSL_ATTRIBUTE_SET;
-        } else if (actor instanceof Mode) {
-            return StandardNames.XSL_MODE;
-        } else {
-            return -1;
-        }
     }
 
     /**
@@ -216,7 +199,7 @@ public class Component {
         out.startElement("co");
         int id = obtainComponentId(this, componentIdMap);
         out.emitAttribute("id", ""+id);
-        if (getVisibilityProvenance() != VisibilityProvenance.DEFAULTED) {
+        if (provenance != VisibilityProvenance.DEFAULTED) {
             out.emitAttribute("vis", getVisibility().toString());
         }
         String refs = listComponentReferences(componentIdMap);
@@ -270,6 +253,23 @@ public class Component {
             this.actor = m;
         }
     }
+
+    public int getComponentKind() {
+        if (actor instanceof NamedTemplate) {
+            return StandardNames.XSL_TEMPLATE;
+        } else if (actor instanceof GlobalVariable) {
+            return StandardNames.XSL_VARIABLE;
+        } else if (actor instanceof Function) {
+            return StandardNames.XSL_FUNCTION;
+        } else if (actor instanceof AttributeSet) {
+            return StandardNames.XSL_ATTRIBUTE_SET;
+        } else if (actor instanceof Mode) {
+            return StandardNames.XSL_MODE;
+        } else {
+            return -1;
+        }
+    }
+
 
 }
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@ package net.sf.saxon.style;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.StartTagBuffer;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
@@ -22,12 +22,13 @@ import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.UsePack;
 import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
@@ -38,6 +39,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
@@ -53,7 +55,6 @@ import java.util.Stack;
 
 public class UseWhenFilter extends ProxyReceiver {
 
-    private StartTagBuffer startTag;
     private int depthOfHole = 0;
     private boolean emptyStylesheetElement = false;
     private Stack<String> defaultNamespaceStack = new Stack<>();
@@ -65,7 +66,7 @@ public class UseWhenFilter extends ProxyReceiver {
     private NestedIntegerValue precedence;
     private int importCount = 0;
     private boolean dropUnderscoredAttributes;
-    private DocumentImpl includedDoc = null;
+    private LinkedTreeBuilder treeBuilder;
 
 
 
@@ -81,23 +82,16 @@ public class UseWhenFilter extends ProxyReceiver {
         super(next);
         this.compilation = compilation;
         this.precedence = precedence;
-        assert(next instanceof LinkedTreeBuilder); //needed to make the fix for bug 4326 work
-    }
-
-    /**
-     * Set the start tag buffer
-     *
-     * @param startTag a preceding filter on the pipeline that buffers the attributes of a start tag
-     */
-
-    public void setStartTagBuffer(StartTagBuffer startTag) {
-        this.startTag = startTag;
+        assert (next instanceof LinkedTreeBuilder); // Currently always true; but the design
+                  // tries to avoid assuming it will always be true
+        treeBuilder = (LinkedTreeBuilder)next;
     }
 
     /**
      * Start of document
      */
 
+    @Override
     public void open() throws XPathException {
         nextReceiver.open();
 
@@ -121,39 +115,73 @@ public class UseWhenFilter extends ProxyReceiver {
 
     /**
      * Notify the start of an element.
-     * @param elemName   the name of the element.
-     * @param typeCode   integer code identifying the element's type within the name pool.
-     * @param location   location where the event originated
-     * @param properties bit-significant properties of the element node
      */
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
-        includedDoc = null;
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
+        int fp = elemName.obtainFingerprint(getNamePool());
         boolean inXsltNamespace = elemName.hasURI(NamespaceConstant.XSLT);
+        boolean inSaxonNamespace = elemName.hasURI(NamespaceConstant.SAXON);
         String stdAttUri = inXsltNamespace ? "" : NamespaceConstant.XSLT;
-        defaultNamespaceStack.push(startTag.getAttribute(stdAttUri, "xpath-default-namespace"));
+
+        String xpathDefaultNamespaceAtt = null;
+        String versionAtt = null;
+        String xmlBaseAtt = null;
+        String useWhenAtt = null;
+        String staticAtt = null;
+        boolean hasShadowAttributes = false;
+        DocumentImpl includedDoc = null;
+
+        for (AttributeInfo att : attributes) {
+            NodeName attName = att.getNodeName();
+            attName.obtainFingerprint(getNamePool());
+            String uri = attName.getURI();
+            if (uri.equals(stdAttUri)) {
+                String local = attName.getLocalPart();
+                switch (local) {
+                    case "xpath-default-namespace":
+                        xpathDefaultNamespaceAtt = att.getValue();
+                        break;
+                    case "version":
+                        versionAtt = att.getValue();
+                        break;
+                    case "use-when":
+                        useWhenAtt = att.getValue();
+                        break;
+                    case "static":
+                        staticAtt = att.getValue();
+                        break;
+                }
+                if (local.startsWith("_")
+                        && uri.equals("")
+                        && (inXsltNamespace || inSaxonNamespace)) {
+                    hasShadowAttributes = true;
+                }
+            } else if (inSaxonNamespace || uri.equals(NamespaceConstant.SAXON)) {
+                if (attName.getLocalPart().startsWith("_")) {
+                    hasShadowAttributes = true;
+                }
+            } else if (uri.equals(NamespaceConstant.XML)) {
+                if (attName.getLocalPart().equals("base")) {
+                    xmlBaseAtt = att.getValue();
+                }
+            }
+        }
+
+        defaultNamespaceStack.push(xpathDefaultNamespaceAtt);
         if (emptyStylesheetElement) {
             depthOfHole++;
             return;
         }
         if (depthOfHole == 0) {
-            URI baseUri = processBaseUri(location);
+            URI baseUri = processBaseUri(location, xmlBaseAtt);
 
             boolean ignore = false;
-            int fp = -1;
-            if (inXsltNamespace) {
-                fp = elemName.obtainFingerprint(getNamePool());
-            }
 
             int version = Integer.MIN_VALUE;
-            if (inXsltNamespace) {
-                if (fp != StandardNames.XSL_OUTPUT) {
-                    String versionAtt = startTag.getAttribute("", "version");
-                    version = processVersionAttribute(versionAtt);
-                }
-            } else {
-                // simplified stylesheet: look for xsl:version attribute
-                String versionAtt = startTag.getAttribute(NamespaceConstant.XSLT, "version");
+            if (versionAtt != null && fp != StandardNames.XSL_OUTPUT) {
                 version = processVersionAttribute(versionAtt);
             }
 
@@ -168,26 +196,24 @@ public class UseWhenFilter extends ProxyReceiver {
                 ignore = true;
             }
 
-            if (inXsltNamespace && !ignore) {
-                processShadowAttributes(elemName, location, baseUri);
+            if (hasShadowAttributes && !ignore) {
+                attributes = processShadowAttributes(elemName, attributes, namespaces, location, baseUri);
+                String uw = attributes.getValue(stdAttUri, "use-when");
+                if (uw != null) {
+                    useWhenAtt = uw;
+                }
             }
 
-            boolean isStylesheetElement = inXsltNamespace &&
-                    (elemName.getLocalPart().equals("stylesheet") || elemName.getLocalPart().equals("transform") || elemName.getLocalPart().equals("package"));
-
             if (!ignore) {
-                String useWhen = startTag.getAttribute(stdAttUri, "use-when");
-
-                if (useWhen != null) {
-                    AttributeCollection allAtts = startTag.getAllAttributes();
-                    NodeName attName = allAtts.getNodeName(allAtts.getIndex(stdAttUri, "use-when"));
-                    AttributeLocation attLoc = new AttributeLocation(elemName.getStructuredQName(), attName.getStructuredQName(), location);
-                    boolean use = evaluateUseWhen(useWhen, attLoc, baseUri.toString());
+                if (useWhenAtt != null) {
+                    AttributeLocation attLoc = new AttributeLocation(
+                            elemName.getStructuredQName(), new StructuredQName("", stdAttUri, "use-when"), location);
+                    boolean use = evaluateUseWhen(useWhenAtt, attLoc, baseUri.toString(), namespaces);
                     ignore = !use;
                 }
 
                 if (ignore) {
-                    if (isStylesheetElement) {
+                    if (fp == StandardNames.XSL_STYLESHEET || fp == StandardNames.XSL_TRANSFORM || fp == StandardNames.XSL_PACKAGE) {
                         emptyStylesheetElement = true;
                     } else {
                         depthOfHole = 1;
@@ -197,75 +223,75 @@ public class UseWhenFilter extends ProxyReceiver {
             }
 
             if (inXsltNamespace) {
+                
+                if (defaultNamespaceStack.size() == 2) {
+                    switch (fp) {
+                        case StandardNames.XSL_VARIABLE:
+                        case StandardNames.XSL_PARAM:
+                            if (hasShadowAttributes) {
+                                staticAtt = attributes.getValue("", "static");
+                            }
+                            if (staticAtt != null) {
+                                String staticStr = Whitespace.trim(staticAtt);
+                                if (StyleElement.isYes(staticStr)) {
+                                    processStaticVariable(elemName, attributes, namespaces,
+                                                          location, baseUri, precedence);
+                                }
+                            }
+                            break;
 
-                // Handle static variables and parameters
+                        case StandardNames.XSL_INCLUDE:
+                        case StandardNames.XSL_IMPORT:
+                            // We need to process the included/imported stylesheet now, because its static variables
+                            // can be used later in this module
+                            String href = attributes.getValue("", "href");
+                            includedDoc = processIncludeImport(elemName, location, baseUri, href, fp == StandardNames.XSL_IMPORT);
+                            break;
 
-                boolean isVariable = elemName.getLocalPart().equals("variable");
-                boolean isParam = elemName.getLocalPart().equals("param");
+                        case StandardNames.XSL_IMPORT_SCHEMA:
+                            compilation.setSchemaAware(true);   // bug 3105
+                            break;
 
-                // Note, the general policy here is to ignore errors on this initial pass through the stylesheet,
-                // if they will be checked and reported more thoroughly later on.
+                        case StandardNames.XSL_USE_PACKAGE:
+                            if (precedence.getDepth() > 1) {
+                                throw new XPathException("xsl:use-package cannot appear in an imported stylesheet", "XTSE3008");
+                            }
+                            String name = attributes.getValue("", "name");
+                            String pversion = attributes.getValue("", "package-version");
+                            if (name != null) {
+                                try {
+                                    UsePack use = new UsePack(name, pversion, location.saveLocation());
+                                    compilation.registerPackageDependency(use);
+                                } catch (XPathException err) {
+                                    // No action, error will be reported later.
+                                }
 
-                String staticStr = Whitespace.trim(startTag.getAttribute("", "static"));
-                if ((isVariable || isParam) &&
-                        defaultNamespaceStack.size() == 2 && StyleElement.isYes(staticStr)) {
-
-                    processStaticVariable(elemName, location, baseUri, precedence);
-                }
-
-                // Handle xsl:include and xsl:import
-
-                boolean isInclude = elemName.getLocalPart().equals("include");
-                boolean isImport = elemName.getLocalPart().equals("import");
-                if ((isInclude || isImport) && defaultNamespaceStack.size() == 2) {
-                    // We need to process the included/imported stylesheet now, because its static variables
-                    // can be used later in this module
-                    includedDoc = processIncludeImport(elemName, location, baseUri, isImport);
-                }
-
-                // Handle xsl:import-schema
-
-                if (elemName.getLocalPart().equals("import-schema") && defaultNamespaceStack.size() == 2) {
-                    compilation.setSchemaAware(true);   // bug 3105
-                }
-
-                // Handle xsl:use-package
-
-                if (elemName.getLocalPart().equals("use-package") && defaultNamespaceStack.size() == 2) {
-                    if (precedence.getDepth() > 1) {
-                        throw new XPathException("xsl:use-package cannot appear in an imported stylesheet", "XTSE3008");
-                    }
-                    AttributeCollection atts = startTag.getAllAttributes();
-                    String name = atts.getValue("", "name");
-                    String pversion = atts.getValue("", "package-version");
-                    if (name != null) {
-                        try {
-                            UsePack use = new UsePack(name, pversion, location.saveLocation());
-                            compilation.registerPackageDependency(use);
-                        } catch (XPathException err) {
-                            // No action, error will be reported later.
-                        }
-
+                            }
+                            break;
                     }
                 }
             }
             dropUnderscoredAttributes = inXsltNamespace;
-            nextReceiver.startElement(elemName, typeCode, location, properties);
+            nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
+            if (includedDoc != null) {
+                XSLGeneralIncorporate node = (XSLGeneralIncorporate)treeBuilder.getCurrentParentNode();
+                node.setTargetDocument(includedDoc);
+            }
         } else {
             depthOfHole++;
         }
     }
 
-    private DocumentImpl processIncludeImport(NodeName elemName, Location location, URI baseUri, boolean isImport) throws XPathException {
-        String href = Whitespace.trim(startTag.getAttribute("", "href"));
+    private DocumentImpl processIncludeImport(
+            NodeName elemName, Location location, URI baseUri, String href, boolean isImport) throws XPathException {
         if (href == null) {
             throw new XPathException("Missing href attribute on " + elemName.getDisplayName(), "XTSE0010");
         }
 
         URIResolver resolver = compilation.getCompilerInfo().getURIResolver();
         String baseUriStr = baseUri.toString();
-        DocumentURI key = DocumentFn.computeDocumentKey(href, baseUriStr, compilation.getPackageData(), resolver, false);
-        Map<DocumentURI, TreeInfo> map = compilation.getStylesheetModules();
+        DocumentKey key = DocumentFn.computeDocumentKey(href, baseUriStr, compilation.getPackageData(), resolver, false);
+        Map<DocumentKey, TreeInfo> map = compilation.getStylesheetModules();
         if (map.containsKey(key)) {
             return (DocumentImpl)map.get(key);
         } else {
@@ -302,14 +328,17 @@ public class UseWhenFilter extends ProxyReceiver {
         }
     }
 
-    private void processStaticVariable(NodeName elemName, Location location, URI baseUri, NestedIntegerValue precedence) throws XPathException {
-        String nameStr = startTag.getAttribute("", "name");
-        String asStr = startTag.getAttribute("", "as");
-        String requiredStr = Whitespace.trim(startTag.getAttribute("", "required"));
+    private void processStaticVariable(NodeName elemName, AttributeMap attributes,
+                                       NamespaceResolver nsResolver,
+                                       Location location, URI baseUri,
+                                       NestedIntegerValue precedence) throws XPathException {
+        String nameStr = attributes.getValue("", "name");
+        String asStr = attributes.getValue("", "as");
+        String requiredStr = Whitespace.trim(attributes.getValue("", "required"));
         boolean isRequired = StyleElement.isYes(requiredStr);
 
 
-        UseWhenStaticContext staticContext = new UseWhenStaticContext(compilation, startTag);
+        UseWhenStaticContext staticContext = new UseWhenStaticContext(compilation, nsResolver);
         staticContext.setBaseURI(baseUri.toString());
         staticContext.setContainingLocation(
                 new AttributeLocation(elemName.getStructuredQName(), new StructuredQName("", "", "as"), location));
@@ -326,7 +355,7 @@ public class UseWhenFilter extends ProxyReceiver {
 
         StructuredQName varName;
         try {
-            varName = StructuredQName.fromLexicalQName(nameStr, false, true, startTag);
+            varName = StructuredQName.fromLexicalQName(nameStr, false, true, nsResolver);
         } catch (XPathException err) {
             throw createXPathException(
                     "Invalid variable name:" + nameStr + ". " + err.getMessage(),
@@ -341,7 +370,7 @@ public class UseWhenFilter extends ProxyReceiver {
 
         if (isParam) {
             if (isRequired && !isSupplied) {
-                String selectStr = startTag.getAttribute("", "select");
+                String selectStr = attributes.getValue("", "select");
                 if (selectStr != null) {
                     throw createXPathException("Cannot supply a default value when required='yes'", "XTSE0010", attLoc);
                 } else {
@@ -352,7 +381,7 @@ public class UseWhenFilter extends ProxyReceiver {
             }
 
             if (isSupplied) {
-                Sequence<?> suppliedValue = compilation.getParameters()
+                Sequence suppliedValue = compilation.getParameters()
                         .convertParameterValue(varName, requiredType, true, staticContext.makeEarlyEvaluationContext());
 
                 compilation.declareStaticVariable(varName, suppliedValue.materialize(), precedence, isParam);
@@ -360,8 +389,8 @@ public class UseWhenFilter extends ProxyReceiver {
         }
 
         if (isVariable || !isSupplied) {
-            String selectStr = startTag.getAttribute("", "select");
-            GroundedValue<?> value;
+            String selectStr = attributes.getValue("", "select");
+            GroundedValue value;
             if (selectStr == null) {
                 if (isVariable) {
                     throw createXPathException(
@@ -378,7 +407,7 @@ public class UseWhenFilter extends ProxyReceiver {
             } else {
                 try {
                     staticContext.setContainingLocation(attLoc);
-                    Sequence<?> seq = evaluateStatic(selectStr, location, staticContext);
+                    Sequence seq = evaluateStatic(selectStr, location, staticContext);
                     value = seq.materialize();
                 } catch (XPathException e) {
                     throw createXPathException("Error in " + elemName.getLocalPart() + " expression. " + e.getMessage(),
@@ -388,7 +417,7 @@ public class UseWhenFilter extends ProxyReceiver {
             RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, varName.getDisplayName(), 0);
             role.setErrorCode("XTDE0050");
             TypeHierarchy th = getConfiguration().getTypeHierarchy();
-            Sequence<?> seq = th.applyFunctionConversionRules(value, requiredType, role, attLoc);
+            Sequence seq = th.applyFunctionConversionRules(value, requiredType, role, attLoc);
             value = seq.materialize();
             try {
                 compilation.declareStaticVariable(varName, value, precedence, isParam);
@@ -398,32 +427,40 @@ public class UseWhenFilter extends ProxyReceiver {
         }
     }
 
-    private void processShadowAttributes(NodeName elemName, Location location, URI baseUri) throws XPathException {
-        AttributeCollection atts = startTag.getAllAttributes();
-        for (int a=0; a<atts.getLength(); a++) {
-            String local = atts.getLocalName(a);
-            String uri = atts.getURI(a);
+    private AttributeMap processShadowAttributes(NodeName elemName, AttributeMap attributes, NamespaceResolver nsResolver, Location location, URI baseUri) throws XPathException {
+        Map<NodeName, AttributeInfo> attMap = new HashMap<>();
+        for (AttributeInfo att : attributes) {
+            NodeName attName = att.getNodeName();
+            attMap.put(attName, att);
+        }
+        for (AttributeInfo att : attributes) {
+            NodeName attName = att.getNodeName();
+            String local = attName.getLocalPart();
+            String uri = attName.getURI();
             if (local.startsWith("_") && (uri.isEmpty() || uri.equals(NamespaceConstant.SAXON)) && local.length() >= 2) {
-                String value = atts.getValue(a);
-                AttributeLocation attLocation = new AttributeLocation(elemName.getStructuredQName(), atts.getNodeName(a).getStructuredQName(), location);
-                String newValue = processShadowAttribute(value, baseUri.toString(), attLocation);
+                String value = att.getValue();
+                AttributeLocation attLocation =
+                        new AttributeLocation(elemName.getStructuredQName(), attName.getStructuredQName(), location);
+                String newValue = processShadowAttribute(value, baseUri.toString(), nsResolver, attLocation);
                 String plainName = local.substring(1);
                 NodeName newName = uri.isEmpty() ?
-                        new NoNamespaceName(plainName) : new FingerprintedQName(atts.getPrefix(a), NamespaceConstant.SAXON, plainName);
-                // if a corresponding attribute exists with no underscore, overwrite it. The attribute()
-                // method ensures that the shadow attribute won't be passed down the pipeline.
-                // Otherwise overwrite the shadow attribute itself.
-                int index = atts.getIndex("", plainName);
-                if (index == -1) {
-                    index = a;
-                }
-                ((AttributeCollectionImpl)atts).setAttribute(
-                        index, newName, BuiltInAtomicType.UNTYPED_ATOMIC, newValue, atts.getLocation(a), 0);
+                        new NoNamespaceName(plainName) : new FingerprintedQName(attName.getPrefix(), NamespaceConstant.SAXON, plainName);
+                // if a corresponding attribute exists with no underscore, overwrite it.
+                // Drop the shadow attribute itself.
+                AttributeInfo newAtt = new AttributeInfo(newName, att.getType(), newValue, att.getLocation(),ReceiverOption.NONE);
+                attMap.put(newName, newAtt);
+                attMap.remove(attName);
             }
         }
+        AttributeMap resultAtts = EmptyAttributeMap.getInstance();
+        for (AttributeInfo att : attMap.values()) {
+            resultAtts = resultAtts.put(new AttributeInfo(
+                    att.getNodeName(), att.getType(), att.getValue(), att.getLocation(), att.getProperties()));
+        }
+        return resultAtts;
     }
 
-    private URI processBaseUri(Location location) throws XPathException {
+    private URI processBaseUri(Location location, String xmlBaseAtt) throws XPathException {
         String systemId = location.getSystemId();
         if (systemId == null) {
             systemId = getSystemId();
@@ -438,12 +475,11 @@ public class UseWhenFilter extends ProxyReceiver {
                 throw new XPathException("Invalid URI for stylesheet entity: " + systemId);
             }
         }
-        String baseUriAtt = startTag.getAttribute(NamespaceConstant.XML, "base");
-        if (baseUriAtt != null) {
+        if (xmlBaseAtt != null) {
             try {
-                baseUri = baseUri.resolve(baseUriAtt);
+                baseUri = baseUri.resolve(xmlBaseAtt);
             } catch (IllegalArgumentException iae) {
-                throw new XPathException("Invalid URI in xml:base attribute: " + baseUriAtt + ". " + iae.getMessage());
+                throw new XPathException("Invalid URI in xml:base attribute: " + xmlBaseAtt + ". " + iae.getMessage());
             }
         }
         baseUriStack.push(baseUri);
@@ -464,8 +500,17 @@ public class UseWhenFilter extends ProxyReceiver {
         }
     }
 
-    private String processShadowAttribute(String expression, String baseUri, AttributeLocation loc) throws XPathException {
-        UseWhenStaticContext staticContext = new UseWhenStaticContext(compilation, startTag);
+    /**
+     * Perform evaluation of the nested expressions within a shadow attribute
+     * @param expression the value of the shadow attribute as written
+     * @param baseUri the base URI of the containing element
+     * @param loc the location of the attribute, for diagnostics
+     * @return the result of evaluating nested expressions in the value
+     * @throws XPathException if the syntax is invalid, or if evaluation of nested expressions fails
+     */
+
+    private String processShadowAttribute(String expression, String baseUri, NamespaceResolver nsResolver, AttributeLocation loc) throws XPathException {
+        UseWhenStaticContext staticContext = new UseWhenStaticContext(compilation, nsResolver);
         staticContext.setBaseURI(baseUri);
         staticContext.setContainingLocation(loc);
         setNamespaceBindings(staticContext);
@@ -477,78 +522,21 @@ public class UseWhenFilter extends ProxyReceiver {
         return expr.evaluateAsString(dynamicContext).toString();
     }
 
-    public XPathException createXPathException(String message, String errorCode, Location location) {
+    private XPathException createXPathException(String message, String errorCode, Location location) {
         XPathException err = new XPathException(message);
         err.setErrorCode(errorCode);
         err.setIsStaticError(true);
         err.setLocator(location.saveLocation());
-        getPipelineConfiguration().getErrorListener().fatalError(err);
+        getPipelineConfiguration().getErrorReporter().report(new XmlProcessingException(err));
         err.setHasBeenReported(true);
         return err;
-    }
-
-    /**
-     * Notify a namespace. Namespaces are notified <b>after</b> the startElement event, and before
-     * any children for the element. The namespaces that are reported are only required
-     * to include those that are different from the parent element; however, duplicates may be reported.
-     * A namespace must not conflict with any namespaces already used for element or attribute names.
-     *
-     * @param namespaceBindings the namespace to be notified
-     * @throws IllegalStateException: attempt to output a namespace when there is no open element
-     *                                start tag
-     */
-
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        if (depthOfHole == 0) {
-            nextReceiver.namespace(namespaceBindings, properties);
-        }
-    }
-
-    /**
-     * Notify an attribute. Attributes are notified after the startElement event, and before any
-     * children. Namespaces and attributes may be intermingled.
-     *
-     * @param attName    The name of the attribute
-     * @param typeCode   The type of the attribute
-     * @param locationId the location of the node in the source, or of the instruction that created it
-     * @param properties Bit significant value. The following bits are defined:
-     *                   <dl>
-     *                   <dd>DISABLE_ESCAPING</dd>    <dt>Disable escaping for this attribute</dt>
-     *                   <dd>NO_SPECIAL_CHARACTERS</dd>      <dt>Attribute value contains no special characters</dt>
-     *                   </dl>
-     * @throws IllegalStateException: attempt to output an attribute when there is no open element
-     *                                start tag
-     */
-
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
-        if (depthOfHole == 0 && (!dropUnderscoredAttributes || !(attName.getLocalPart().startsWith("_") && attName.hasURI("")))) {
-            nextReceiver.attribute(attName, typeCode, value, locationId, properties);
-        }
-    }
-
-    /**
-     * Notify the start of the content, that is, the completion of all attributes and namespaces.
-     * Note that the initial receiver of output from XSLT instructions will not receive this event,
-     * it has to detect it itself. Note that this event is reported for every element even if it has
-     * no attributes, no namespaces, and no content.
-     */
-
-    public void startContent() throws XPathException {
-        if (depthOfHole == 0) {
-            nextReceiver.startContent();
-            if (includedDoc != null) {
-                XSLGeneralIncorporate declaration = (XSLGeneralIncorporate) ((LinkedTreeBuilder) nextReceiver).getCurrentParentNode();
-                declaration.setTargetDoc(includedDoc);
-            }
-        }
-        dropUnderscoredAttributes = false;
-        includedDoc = null;
     }
 
     /**
      * End of element
      */
 
+    @Override
     public void endElement() throws XPathException {
         defaultNamespaceStack.pop();
         if (depthOfHole > 0) {
@@ -565,6 +553,7 @@ public class UseWhenFilter extends ProxyReceiver {
      * Character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (depthOfHole == 0) {
             nextReceiver.characters(chars, locationId, properties);
@@ -575,6 +564,7 @@ public class UseWhenFilter extends ProxyReceiver {
      * Processing Instruction
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) {
         // these are ignored in a stylesheet
     }
@@ -583,6 +573,7 @@ public class UseWhenFilter extends ProxyReceiver {
      * Output a comment
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         // these are ignored in a stylesheet
     }
@@ -597,8 +588,8 @@ public class UseWhenFilter extends ProxyReceiver {
      * @throws XPathException if evaluation of the expression fails
      */
 
-    public boolean evaluateUseWhen(String expression, AttributeLocation location, String baseUri) throws XPathException {
-        UseWhenStaticContext staticContext = new UseWhenStaticContext(compilation, startTag);
+    private boolean evaluateUseWhen(String expression, AttributeLocation location, String baseUri, NamespaceResolver nsResolver) throws XPathException {
+        UseWhenStaticContext staticContext = new UseWhenStaticContext(compilation, nsResolver);
         staticContext.setBaseURI(baseUri);
         staticContext.setContainingLocation(location);
         setNamespaceBindings(staticContext);
@@ -664,7 +655,7 @@ public class UseWhenFilter extends ProxyReceiver {
      * @throws XPathException if evaluation of the expression fails
      */
 
-    public Sequence<?> evaluateStatic(String expression, Location locationId, UseWhenStaticContext staticContext) throws XPathException {
+    public Sequence evaluateStatic(String expression, Location locationId, UseWhenStaticContext staticContext) throws XPathException {
         setNamespaceBindings(staticContext);
         Expression expr = ExpressionTool.make(expression, staticContext,
             0, Token.EOF, null);
@@ -696,6 +687,7 @@ public class UseWhenFilter extends ProxyReceiver {
          *                        resolve the URI.
          */
         /*@NotNull*/
+        @Override
         public Source resolve(String href, String base) throws XPathException {
             throw new XPathException("No external documents are available within an [xsl]use-when expression");
         }

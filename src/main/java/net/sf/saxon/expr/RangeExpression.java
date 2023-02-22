@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -45,6 +45,7 @@ public class RangeExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getLhs().typeCheck(visitor, contextInfo);
         getRhs().typeCheck(visitor, contextInfo);
@@ -78,6 +79,7 @@ public class RangeExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getLhs().optimize(visitor, contextInfo);
         getRhs().optimize(visitor, contextInfo);
@@ -116,6 +118,7 @@ public class RangeExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return BuiltInAtomicType.INTEGER;
     }
@@ -136,6 +139,7 @@ public class RangeExpression extends BinaryExpression {
      * Determine the static cardinality
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
@@ -174,6 +178,7 @@ public class RangeExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         RangeExpression exp = new RangeExpression(getLhsExpression().copy(rebindings), getRhsExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
@@ -224,7 +229,8 @@ public class RangeExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         IntegerValue av1 = (IntegerValue) getLhsExpression().evaluateItem(context);
         IntegerValue av2 = (IntegerValue) getRhsExpression().evaluateItem(context);
         return RangeIterator.makeRangeIterator(av1, av2);

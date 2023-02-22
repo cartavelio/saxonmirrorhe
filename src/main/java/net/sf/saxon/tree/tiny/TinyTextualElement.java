@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,17 +7,15 @@
 
 package net.sf.saxon.tree.tiny;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.event.CopyInformee;
 import net.sf.saxon.event.CopyNamespaceSensitiveException;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.tree.util.NamespaceIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -29,6 +27,7 @@ import javax.xml.transform.SourceLocator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
 /**
  * An element node in the TinyTree that has no attributes or namespace declarations and that
@@ -51,6 +50,16 @@ public class TinyTextualElement extends TinyElementImpl {
     }
 
     @Override
+    public NamespaceMap getAllNamespaces() {
+        TinyNodeImpl parent = getParent();
+        if (parent instanceof TinyElementImpl) {
+            return parent.getAllNamespaces();
+        } else {
+            return NamespaceMap.emptyMap();
+        }
+    }
+
+    @Override
     public String getAttributeValue(String uri, String local) {
         return null;
     }
@@ -66,13 +75,12 @@ public class TinyTextualElement extends TinyElementImpl {
         SchemaType type = typed ? getSchemaType() : Untyped.getInstance();
         boolean disallowNamespaceSensitiveContent =
                 ((copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0) &&
-                        ((copyOptions & CopyOptions.SOME_NAMESPACES) == 0);
+                        ((copyOptions & CopyOptions.ALL_NAMESPACES) == 0);
         if (disallowNamespaceSensitiveContent) {
             try {
                 checkNotNamespaceSensitiveElement(type, nodeNr);
             } catch (CopyNamespaceSensitiveException e) {
-                int lang = receiver.getPipelineConfiguration().getHostLanguage();
-                e.setErrorCode(lang == Configuration.XSLT ? "XTTE0950" : "XQTY0086");
+                e.setErrorCode(receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
                 throw e;
             }
         }
@@ -85,13 +93,16 @@ public class TinyTextualElement extends TinyElementImpl {
             }
         }
 
-        receiver.startElement(NameOfNode.makeName(this), type, location, 0);
+        NamespaceMap namespaces;
         if ((copyOptions & CopyOptions.ALL_NAMESPACES) != 0) {
             // Don't bother with LOCAL_NAMESPACES because there aren't any
-            NamespaceIterator.sendNamespaces(this, receiver);
+            namespaces = getAllNamespaces();
+        } else {
+            namespaces = NamespaceMap.emptyMap();
         }
-        receiver.startContent();
-        receiver.characters(getStringValueCS(), location, 0);
+        receiver.startElement(NameOfNode.makeName(this), type, EmptyAttributeMap.getInstance(),
+                              namespaces, location, ReceiverOption.NONE);
+        receiver.characters(getStringValueCS(), location, ReceiverOption.NONE);
         receiver.endElement();
     }
 
@@ -111,10 +122,10 @@ public class TinyTextualElement extends TinyElementImpl {
     }
 
     @Override
-    public AxisIterator iterateAxis(byte axisNumber) {
+    public AxisIterator iterateAxis(int axisNumber) {
         switch (axisNumber) {
             case AxisInfo.ATTRIBUTE:
-                return EmptyIterator.OfNodes.THE_INSTANCE;
+                return EmptyIterator.ofNodes();
 
             case AxisInfo.CHILD:
             case AxisInfo.DESCENDANT:
@@ -132,10 +143,10 @@ public class TinyTextualElement extends TinyElementImpl {
     }
 
     @Override
-    public AxisIterator iterateAxis(byte axisNumber, NodeTest nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ATTRIBUTE:
-                return EmptyIterator.OfNodes.THE_INSTANCE;
+                return EmptyIterator.ofNodes();
 
             case AxisInfo.CHILD:
             case AxisInfo.DESCENDANT:
@@ -143,10 +154,10 @@ public class TinyTextualElement extends TinyElementImpl {
 
             case AxisInfo.DESCENDANT_OR_SELF:
                 List<NodeInfo> list = new ArrayList<>(2);
-                if (nodeTest.matchesNode(this)) {
+                if (nodeTest.test(this)) {
                     list.add(this);
                 }
-                if (nodeTest.matchesNode(getTextNode())) {
+                if (nodeTest.test(getTextNode())) {
                     list.add(getTextNode());
                 }
                 return new ListIterator.OfNodes(list);
@@ -203,6 +214,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * @return the TreeInfo
          * @since 9.7
          */
+        @Override
         public TreeInfo getTreeInfo() {
             return TinyTextualElement.this.getTreeInfo();
         }
@@ -211,6 +223,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * Set the system ID for the entity containing the node.
          */
 
+        @Override
         public void setSystemId(String systemId) {
         }
 
@@ -220,6 +233,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * @return Type.TEXT (always)
          */
 
+        @Override
         public final int getNodeKind() {
             return Type.TEXT;
         }
@@ -228,6 +242,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * Get the String Value
          */
 
+        @Override
         public String getStringValue() {
             return getStringValueCS().toString();
         }
@@ -237,6 +252,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * the version of the method that returns a String.
          */
 
+        @Override
         public CharSequence getStringValueCS() {
             return TinyTextualElement.this.getStringValueCS();
         }
@@ -257,6 +273,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * Get a character string that uniquely identifies this node
          */
 
+        @Override
         public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
             TinyTextualElement.this.generateId(buffer);
             buffer.append("T");
@@ -267,6 +284,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         /*@Nullable*/
+        @Override
         public String getSystemId() {
             return TinyTextualElement.this.getSystemId();
         }
@@ -276,6 +294,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * the base URI of the parent node.
          */
 
+        @Override
         public String getBaseURI() {
             return TinyTextualElement.this.getBaseURI();
         }
@@ -290,6 +309,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * return true, and the two nodes will produce the same result for generateId())
          */
 
+        @Override
         public int compareOrder(NodeInfo other) {
             if (other.equals(this)) {
                 return 0;
@@ -304,6 +324,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * Get the fingerprint of the node, used for matching names
          */
 
+        @Override
         public int getFingerprint() {
             return -1;
         }
@@ -316,6 +337,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         /*@NotNull*/
+        @Override
         public String getPrefix() {
             return "";
         }
@@ -329,6 +351,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         /*@NotNull*/
+        @Override
         public String getURI() {
             return "";
         }
@@ -342,6 +365,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         /*@NotNull*/
+        @Override
         public String getDisplayName() {
             return "";
         }
@@ -354,6 +378,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         /*@NotNull*/
+        @Override
         public String getLocalPart() {
             return "";
         }
@@ -365,6 +390,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * <code>false</code> otherwise.
          */
 
+        @Override
         public boolean hasChildNodes() {
             return false;
         }
@@ -379,6 +405,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * if this node is not an element.
          * @since 9.4
          */
+        @Override
         public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
             return null;
         }
@@ -390,6 +417,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * -1 if not available
          */
 
+        @Override
         public int getLineNumber() {
             return getParent().getLineNumber();
         }
@@ -409,6 +437,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * @return The column number, or -1 if none is available.
          * @see #getLineNumber
          */
+        @Override
         public int getColumnNumber() {
             return getParent().getColumnNumber();
         }
@@ -419,6 +448,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * should not be saved for later use. The result of this operation holds the same location information,
          * but in an immutable form.
          */
+        @Override
         public Location saveLocation() {
             return this;
         }
@@ -435,6 +465,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * xs:anyType if it has.
          * @since 9.4
          */
+        @Override
         public SchemaType getSchemaType() {
             return null;
         }
@@ -455,7 +486,23 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         /*@Nullable*/
+        @Override
         public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
+            return null;
+        }
+
+        /**
+         * Get all the namespace bindings that are in-scope for this element.
+         * <p>For an element return all the prefix-to-uri bindings that are in scope. This may include
+         * a binding to the default namespace (represented by a prefix of ""). It will never include
+         * "undeclarations" - that is, the namespace URI will never be empty; the effect of an undeclaration
+         * is to remove a binding from the in-scope namespaces, not to add anything.</p>
+         * <p>For a node other than an element, returns null.</p>
+         *
+         * @return the in-scope namespaces for an element, or null for any other kind of node.
+         */
+        @Override
+        public NamespaceMap getAllNamespaces() {
             return null;
         }
 
@@ -469,6 +516,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         /*@NotNull*/
+        @Override
         public AtomicSequence atomize() throws XPathException {
             return new UntypedAtomicValue(getStringValueCS());
         }
@@ -481,7 +529,8 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         /*@NotNull*/
-        public AxisIterator iterateAxis(byte axisNumber) {
+        @Override
+        public AxisIterator iterateAxis(int axisNumber) {
             switch (axisNumber) {
                 case AxisInfo.ANCESTOR:
                     return TinyTextualElement.this.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
@@ -507,7 +556,7 @@ public class TinyTextualElement extends TinyElementImpl {
                 case AxisInfo.FOLLOWING_SIBLING:
                 case AxisInfo.NAMESPACE:
                 case AxisInfo.PRECEDING_SIBLING:
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
+                    return EmptyIterator.ofNodes();
 
                 case AxisInfo.SELF:
                 case AxisInfo.DESCENDANT_OR_SELF:
@@ -528,7 +577,8 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         /*@NotNull*/
-        public AxisIterator iterateAxis(byte axisNumber, /*@NotNull*/ NodeTest nodeTest) {
+        @Override
+        public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
             switch (axisNumber) {
                 case AxisInfo.ANCESTOR:
                     return getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);
@@ -562,7 +612,7 @@ public class TinyTextualElement extends TinyElementImpl {
                 case AxisInfo.FOLLOWING_SIBLING:
                 case AxisInfo.NAMESPACE:
                 case AxisInfo.PRECEDING_SIBLING:
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
+                    return EmptyIterator.ofNodes();
 
                 case AxisInfo.SELF:
                 case AxisInfo.DESCENDANT_OR_SELF:
@@ -580,6 +630,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         /*@NotNull*/
+        @Override
         public NodeInfo getParent() {
             return TinyTextualElement.this;
         }
@@ -591,6 +642,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         /*@NotNull*/
+        @Override
         public NodeInfo getRoot() {
             return getParent().getRoot();
         }
@@ -599,9 +651,10 @@ public class TinyTextualElement extends TinyElementImpl {
          * Copy the node to a given Outputter
          */
 
+        @Override
         public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId)
                 throws XPathException {
-            out.characters(getStringValueCS(), locationId, 0);
+            out.characters(getStringValueCS(), locationId, ReceiverOption.NONE);
         }
 
     }

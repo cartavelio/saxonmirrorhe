@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,7 +11,8 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
@@ -40,6 +41,7 @@ public class XSLCopy extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -50,35 +52,46 @@ public class XSLCopy extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
         String copyNamespacesAtt = null;
         String validationAtt = null;
         String typeAtt = null;
         String inheritAtt = null;
-        String selectAtt = null;
+        AttributeInfo selectAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
-            if (f.equals("use-attribute-sets")) {
-                use = atts.getValue(a);
-            } else if (f.equals("copy-namespaces")) {
-                copyNamespacesAtt = Whitespace.trim(atts.getValue(a));
-            } else if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-            } else if (f.equals("type")) {
-                typeAtt = Whitespace.trim(atts.getValue(a));
-            } else if (f.equals("validation")) {
-                validationAtt = Whitespace.trim(atts.getValue(a));
-            } else if (f.equals("inherit-namespaces")) {
-                inheritAtt = Whitespace.trim(atts.getValue(a));
-            } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
+            switch (f) {
+                case "use-attribute-sets":
+                    use = value;
+                    break;
+                case "copy-namespaces":
+                    copyNamespacesAtt = Whitespace.trim(value);
+                    break;
+                case "select":
+                    selectAtt = att;
+                    break;
+                case "type":
+                    typeAtt = Whitespace.trim(value);
+                    break;
+                case "validation":
+                    validationAtt = Whitespace.trim(value);
+                    break;
+                case "inherit-namespaces":
+                    inheritAtt = Whitespace.trim(value);
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
 
@@ -108,12 +121,13 @@ public class XSLCopy extends StyleElement {
         }
 
         if (selectAtt != null) {
-            select = makeExpression(selectAtt, getAttributeList().getIndex("", "select"));
+            select = makeExpression(selectAtt.getValue(), selectAtt);
             selectSpecified = true;
         }
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         if (use != null) {
             // get the names of referenced attribute sets
@@ -126,6 +140,7 @@ public class XSLCopy extends StyleElement {
         }
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
 
         select = typeCheck("select", select);

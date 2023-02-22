@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,6 +17,7 @@ import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.value.Cardinality;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -50,7 +51,13 @@ public abstract class BinaryExpression extends Expression {
 
     @Override
     final public Iterable<Operand> operands() {
-        return () -> new PairIterator<>(lhs, rhs);
+        // For .NEU - don't use a lambda expression here
+        return new Iterable<Operand>() {
+            @Override
+            public Iterator<Operand> iterator() {
+                return new PairIterator<>(lhs, rhs);
+            }
+        };
     }
 
 
@@ -124,6 +131,7 @@ public abstract class BinaryExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         resetLocalStaticProperties();
         lhs.typeCheck(visitor, contextInfo);
@@ -132,7 +140,7 @@ public abstract class BinaryExpression extends Expression {
         // if both operands are known, pre-evaluate the expression
         try {
             if ((getLhsExpression() instanceof Literal) && (getRhsExpression() instanceof Literal)) {
-                GroundedValue<?> v = evaluateItem(visitor.getStaticContext().makeEarlyEvaluationContext()).materialize();
+                GroundedValue v = evaluateItem(visitor.getStaticContext().makeEarlyEvaluationContext()).materialize();
                 return Literal.makeLiteral(v, this);
             }
         } catch (XPathException err) {
@@ -158,16 +166,19 @@ public abstract class BinaryExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         lhs.optimize(visitor, contextItemType);
         rhs.optimize(visitor, contextItemType);
 
         // if both operands are known, pre-evaluate the expression
         try {
-            if ((getLhsExpression() instanceof Literal) && (getRhsExpression() instanceof Literal)) {
-                Item<?> item = evaluateItem(visitor.getStaticContext().makeEarlyEvaluationContext());
+            Optimizer opt = visitor.obtainOptimizer();
+            if (opt.isOptionSet(OptimizerOptions.CONSTANT_FOLDING) &&
+                    (getLhsExpression() instanceof Literal) && (getRhsExpression() instanceof Literal)) {
+                Item item = evaluateItem(visitor.getStaticContext().makeEarlyEvaluationContext());
                 if (item != null) {
-                    GroundedValue<?> v = item.materialize();
+                    GroundedValue v = item.materialize();
                     return Literal.makeLiteral(v, this);
                 }
             }
@@ -189,6 +200,7 @@ public abstract class BinaryExpression extends Expression {
      *                  an atomic value
      */
 
+    @Override
     public void setFlattened(boolean flattened) {
         getLhsExpression().setFlattened(flattened);
         getRhsExpression().setFlattened(flattened);
@@ -211,6 +223,7 @@ public abstract class BinaryExpression extends Expression {
      * or array with cardinality [1..n] might be atomized to an empty sequence.
      */
 
+    @Override
     public int computeCardinality() {
         Expression lhs = getLhsExpression();
         Expression rhs = getRhsExpression();
@@ -231,6 +244,7 @@ public abstract class BinaryExpression extends Expression {
      *         for some subclasses.
      */
 
+    @Override
     public int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         return p | StaticProperty.NO_NODES_NEWLY_CREATED;
@@ -391,6 +405,7 @@ public abstract class BinaryExpression extends Expression {
      * result for (A op B) and for (B op A), whether or not the operator is commutative.
      */
 
+    @Override
     public int computeHashCode() {
         // Ensure that an operator and its inverse get the same hash code,
         // so that (A lt B) has the same hash code as (B gt A)
@@ -435,6 +450,7 @@ public abstract class BinaryExpression extends Expression {
      * @param out the output destination for the displayed expression tree
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement(tag(), this);
         out.emitAttribute("op", displayOperator());

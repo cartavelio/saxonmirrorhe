@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,22 +11,17 @@ import cli.System.Xml.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 
 
 /**
  * DotNetDomBuilder is a Receiver that constructs an XmlDocument, the .NET implementation of a DOM
  */
 
-@SuppressWarnings("unused")
 public class DotNetDomBuilder implements Receiver {
 
     protected PipelineConfiguration pipe;
@@ -39,6 +34,7 @@ public class DotNetDomBuilder implements Receiver {
      * Set the namePool in which all name codes can be found
      */
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         this.pipe = pipe;
         this.namePool = pipe.getConfiguration().getNamePool();
@@ -49,6 +45,7 @@ public class DotNetDomBuilder implements Receiver {
      */
 
     /*@NotNull*/
+    @Override
     public PipelineConfiguration getPipelineConfiguration() {
         return pipe;
     }
@@ -67,6 +64,7 @@ public class DotNetDomBuilder implements Receiver {
      * Set the System ID
      */
 
+    @Override
     public void setSystemId(String systemId) {
         this.systemId = systemId;
     }
@@ -75,6 +73,7 @@ public class DotNetDomBuilder implements Receiver {
      * Get the System ID
      */
 
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -84,6 +83,7 @@ public class DotNetDomBuilder implements Receiver {
      * Start of the document.
      */
 
+    @Override
     public void open() {
     }
 
@@ -91,6 +91,7 @@ public class DotNetDomBuilder implements Receiver {
      * End of the document.
      */
 
+    @Override
     public void close() {
     }
 
@@ -98,6 +99,7 @@ public class DotNetDomBuilder implements Receiver {
      * Start of a document node.
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         if (document == null) {
             document = new XmlDocument();
@@ -109,6 +111,7 @@ public class DotNetDomBuilder implements Receiver {
      * Notify the end of a document node
      */
 
+    @Override
     public void endDocument() throws XPathException {
     }
 
@@ -116,67 +119,54 @@ public class DotNetDomBuilder implements Receiver {
      * Start of an element.
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         if (document == null) {
             document = new XmlDocument();
             currentNode = document;
         }
-        String prefix = nameCode.getPrefix();
-        String local = nameCode.getLocalPart();
-        String uri = nameCode.getURI();
+        String prefix = elemName.getPrefix();
+        String local = elemName.getLocalPart();
+        String uri = elemName.getURI();
         try {
             XmlElement element = document.CreateElement(prefix, local, uri);
             currentNode.AppendChild(element);
             currentNode = element;
-        } catch (Exception err) {
-            throw new XPathException(err);
-        }
-    }
 
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        try {
-            for (NamespaceBinding ns : namespaceBindings) {
-                String prefix = ns.getPrefix();
-                String uri = ns.getURI();
-                XmlElement element = (XmlElement) currentNode;
-                if (!uri.equals(NamespaceConstant.XML)) {
+            for (NamespaceBinding ns : namespaces) {
+                String nsprefix = ns.getPrefix();
+                String nsuri = ns.getURI();
+                if (!nsuri.equals(NamespaceConstant.XML)) {
                     if (prefix.isEmpty()) {
                         element.SetAttribute("xmlns", uri);
                     } else {
                         // an odd way to do it, but using SetAttribute hits problems
-                        XmlAttribute decl = document.CreateAttribute("xmlns", prefix, "http://www.w3.org/2000/xmlns/");
-                        decl.set_InnerText(uri);
+                        XmlAttribute decl = document.CreateAttribute("xmlns", nsprefix, "http://www.w3.org/2000/xmlns/");
+                        decl.set_InnerText(nsuri);
                         element.get_Attributes().Append(decl);
                     }
                 }
+            }
+
+            for (AttributeInfo att : attributes) {
+                NodeName attName = att.getNodeName();
+                XmlAttribute attr = document.CreateAttribute(
+                        attName.getPrefix(), attName.getLocalPart(), attName.getURI());
+                attr.set_Value(att.getValue());
+                element.get_Attributes().Append(attr);
             }
         } catch (Exception err) {
             throw new XPathException(err);
         }
     }
 
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        String prefix = nameCode.getPrefix();
-        String localName = nameCode.getLocalPart();
-        String uri = nameCode.getURI();
-        try {
-            XmlElement element = (XmlElement) currentNode;
-            XmlAttribute attr = document.CreateAttribute(prefix, localName, uri);
-            attr.set_Value(value.toString());
-            element.get_Attributes().Append(attr);
-        } catch (Exception err) {
-            throw new XPathException(err);
-        }
-    }
-
-    public void startContent() throws XPathException {
-    }
-
     /**
      * End of an element.
      */
 
+    @Override
     public void endElement() throws XPathException {
         currentNode.Normalize();
         currentNode = currentNode.get_ParentNode();
@@ -188,6 +178,7 @@ public class DotNetDomBuilder implements Receiver {
      * Character data.
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         try {
             XmlText text = document.CreateTextNode(chars.toString());
@@ -202,6 +193,7 @@ public class DotNetDomBuilder implements Receiver {
      * Handle a processing instruction.
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
             throws XPathException {
         try {
@@ -217,6 +209,7 @@ public class DotNetDomBuilder implements Receiver {
      * Handle a comment.
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         try {
             XmlComment comment = document.CreateComment(chars.toString());
@@ -234,6 +227,7 @@ public class DotNetDomBuilder implements Receiver {
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return false;
     }
@@ -246,6 +240,7 @@ public class DotNetDomBuilder implements Receiver {
      * @param publicID The public identifier of the unparsed entity
      */
 
+    @Override
     public void setUnparsedEntity(String name, String systemID, String publicID) throws XPathException {
         // no-op
     }

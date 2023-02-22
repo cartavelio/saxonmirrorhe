@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,9 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -42,12 +44,14 @@ public class Valve extends ProxyReceiver {
     }
 
     @Override
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         if (!started) {
             started = true;
             if (elemName.getURI().equals(testNamespace)) {
                 alternativeReceiver.open();
-                alternativeReceiver.startDocument(0);
+                alternativeReceiver.startDocument(ReceiverOption.NONE);
                 try {
                     getNextReceiver().close();
                 } catch (XPathException err) {
@@ -56,7 +60,7 @@ public class Valve extends ProxyReceiver {
                 setUnderlyingReceiver(alternativeReceiver);
             }
         }
-        super.startElement(elemName, typeCode, location, properties);
+        super.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
     /**

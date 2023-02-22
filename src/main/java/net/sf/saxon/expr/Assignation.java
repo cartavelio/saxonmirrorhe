@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -82,10 +82,12 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * @return the variable name, as a QName
      */
 
+    @Override
     public StructuredQName getVariableQName() {
         return variableName;
     }
 
+    @Override
     public StructuredQName getObjectName() {
         return variableName;
     }
@@ -97,6 +99,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * @return the declared type
      */
 
+    @Override
     public SequenceType getRequiredType() {
         return requiredType;
     }
@@ -105,6 +108,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * If the variable is bound to an integer, get the minimum and maximum possible values.
      * Return null if unknown or not applicable
      */
+    @Override
     public IntegerValue[] getIntegerBoundsForVariable() {
         return getSequence().getIntegerBounds();
     }
@@ -114,6 +118,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * In other cases, return -1.
      */
 
+    @Override
     public int getLocalSlotNumber() {
         return slotNumber;
     }
@@ -143,8 +148,9 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * Get the value of the range variable
      */
 
-    public Sequence<?> evaluateVariable(XPathContext context) throws XPathException {
-        Sequence<?> actual = context.evaluateLocalVariable(slotNumber);
+    @Override
+    public Sequence evaluateVariable(XPathContext context) throws XPathException {
+        Sequence actual = context.evaluateLocalVariable(slotNumber);
         if (!(actual instanceof GroundedValue || actual instanceof NodeInfo)) {
             actual = actual.materialize();
             context.setLocalVariable(slotNumber, actual);
@@ -170,6 +176,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * value for the life of a query or transformation; any other binding is local.
      */
 
+    @Override
     public final boolean isGlobal() {
         return false;
     }
@@ -180,6 +187,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * attribute saxon:assignable="yes" is present.
      */
 
+    @Override
     public final boolean isAssignable() {
         return false;
     }
@@ -192,6 +200,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      *          if the expression has a non-permitted updateing subexpression
      */
 
+    @Override
     public void checkForUpdatingSubexpressions() throws XPathException {
         getSequence().checkForUpdatingSubexpressions();
         if (getSequence().isUpdatingExpression()) {
@@ -209,6 +218,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * @return true if this is an updating expression
      */
 
+    @Override
     public boolean isUpdatingExpression() {
         return getAction().isUpdatingExpression();
     }
@@ -263,6 +273,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
         return 1;
     }
 
+    @Override
     public boolean hasVariableBinding(Binding binding) {
         return this == binding;
     }
@@ -288,7 +299,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * and we assume that a sequence has length 5. The resulting estimates may be used, for
      * example, to reorder the predicates in a filter expression so cheaper predicates are
      * evaluated first.
-     * @return
+     * @return the estimated cost
      */
     @Override
     public double getCost() {
@@ -300,6 +311,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * is already performing validation. The default implementation does nothing.
      */
 
+    @Override
     public void suppressValidation(int validationMode) {
         getAction().suppressValidation(validationMode);
     }
@@ -324,6 +336,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      *         expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         PathMap.PathMapNodeSet varPath = getSequence().addToPathMap(pathMap, pathMapNodeSet);
         pathMap.registerPathForVariable(this, varPath);
@@ -373,11 +386,12 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * @param constantValue     the constant value to which the variable is bound (null if there is no constant value)
      * @param properties        other static properties of the expression to which the variable is bound
      * @param currentExpression the expression that binds the variable
+     * @throws XPathException if things go wrong
      */
 
     public void refineTypeInformation(final ItemType type,
                                       final int cardinality,
-                                      final GroundedValue<?> constantValue,
+                                      final GroundedValue constantValue,
                                       final int properties,
                                       final Assignation currentExpression) throws XPathException {
         ExpressionTool.processExpressionTree(currentExpression.getAction(), null, (exp, result) -> {
@@ -396,6 +410,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      *                           of a filter expression
      */
 
+    @Override
     public void addReference(VariableReference ref, boolean isLoopingReference) {
         hasLoopingReference |= isLoopingReference;
         if (references == null) {
@@ -514,6 +529,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * @return true if the variable should be indexable
      */
 
+    @Override
     public boolean isIndexedVariable() {
         return isIndexedVariable;
     }
@@ -544,6 +560,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * (because it is used in an appropriate filter expression)
      */
 
+    @Override
     public void setIndexedVariable() {
         isIndexedVariable = true;
     }

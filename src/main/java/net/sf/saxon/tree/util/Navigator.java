@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,10 +8,12 @@
 package net.sf.saxon.tree.util;
 
 import net.sf.saxon.Controller;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
@@ -87,7 +89,7 @@ public final class Navigator {
         }
         return null;
     }
-
+    
     /**
      * Helper method to get the name of a node as a structuredQName. Used from bytecode
      * @param node the node
@@ -116,34 +118,6 @@ public final class Navigator {
     /*@Nullable*/
     public static NodeInfo getOutermostElement(/*@NotNull*/ TreeInfo doc) {
         return doc.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
-    }
-
-    /**
-     * Helper method to construct a NodeTest for use with the {@link NodeInfo#iterateAxis} method
-     *
-     * @param pool      the NamePool.
-     * @param nodeKind  The kind of node required, for example {@link Type#ELEMENT} or {@link Type#ATTRIBUTE}.
-     *                  To select nodes of any kind, use {@link Type#NODE}.
-     * @param uri       The namespace URI of the nodes to be selected. Supply null to selects nodes from any
-     *                  namespace or none. Supply "" to select nodes that are not in a namespace.
-     * @param localName The local name of the nodes to be selected. Supply null to select nodes irrespective
-     *                  of their local name.
-     * @return a NodeTest that matches the requested nodes
-     * @since 9.0
-     */
-
-    /*@Nullable*/
-    public static NodeTest makeNodeTest(/*@NotNull*/ NamePool pool, int nodeKind, /*@Nullable*/ String uri, /*@Nullable*/ String localName) {
-        if (uri == null && localName == null) {
-            return NodeKindTest.makeNodeKindTest(nodeKind);
-        } else if (uri == null) {
-            return new LocalNameTest(pool, nodeKind, localName);
-        } else if (localName == null) {
-            return new NamespaceTest(pool, nodeKind, uri);
-        } else {
-            int fp = pool.allocateFingerprint(uri, localName);
-            return new NameTest(nodeKind, fp, pool);
-        }
     }
 
     /**
@@ -198,7 +172,7 @@ public final class Navigator {
                         return null;
                     }
                     String parentSystemId = parent.getSystemId();
-                    boolean isTopWithinEntity = false;
+                    boolean isTopWithinEntity = false; // TODO: variable is unused. What's going on here? - MHK 2020-07-04
                     if (node instanceof TinyElementImpl) {
                         isTopWithinEntity = ((TinyElementImpl)node).getTree().isTopWithinEntity(((TinyElementImpl) node).getNodeNumber());
                     } else {
@@ -665,12 +639,13 @@ public final class Navigator {
      * Generic (model-independent) implementation of deep copy algorithm for nodes.
      * This is available for use by any node implementations that choose to use it.
      *
-     * @param node        The node to be copied
+     * @param node        The node to be copied.
      * @param out         The receiver to which events will be sent
      * @param copyOptions Options for copying namespaces, type annotations, etc,
      *                    as defined in {@link net.sf.saxon.om.CopyOptions}
      * @param locationId  The location of the instruction invoking the copy
      * @throws XPathException on any failure reported by the Receiver
+     * @throws IllegalArgumentException if the node is an attribute or namespace node
      */
 
     public static void copy(/*@NotNull*/ NodeInfo node,
@@ -681,12 +656,7 @@ public final class Navigator {
         switch (node.getNodeKind()) {
             case Type.DOCUMENT: {
                 out.startDocument(CopyOptions.getStartDocumentProperties(copyOptions));
-                AxisIterator children0 = node.iterateAxis(AxisInfo.CHILD, AnyNodeTest.getInstance());
-                while (true) {
-                    NodeInfo child = children0.next();
-                    if (child == null) {
-                        break;
-                    }
+                for (NodeInfo child : node.children()) {
                     child.copy(out, copyOptions, locationId);
                 }
                 out.endDocument();
@@ -696,51 +666,17 @@ public final class Navigator {
                 SchemaType annotation = (copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0 ?
                         node.getSchemaType() :
                         Untyped.getInstance();
-                out.startElement(NameOfNode.makeName(node), annotation, locationId, 0);
 
-                // output the namespaces
+                NamespaceMap ns = CopyOptions.includes(copyOptions, CopyOptions.ALL_NAMESPACES) ? node.getAllNamespaces() : NamespaceMap.emptyMap();
 
-                if ((copyOptions & CopyOptions.LOCAL_NAMESPACES) != 0) {
-                    NamespaceBinding[] localNamespaces = node.getDeclaredNamespaces(null);
-                    for (NamespaceBinding ns : localNamespaces) {
-                        if (ns == null) {
-                            break;
-                        }
-                        out.namespace(ns, 0);
-                    }
-                } else if ((copyOptions & CopyOptions.ALL_NAMESPACES) != 0) {
-                    NamespaceIterator.sendNamespaces(node, out);
-                }
-
-                // output the attributes
-
-                AxisIterator attributes = node.iterateAxis(AxisInfo.ATTRIBUTE, AnyNodeTest.getInstance());
-                while (true) {
-                    NodeInfo att = attributes.next();
-                    if (att == null) {
-                        break;
-                    }
-                    att.copy(out, copyOptions, locationId);
-                }
-
-                // notify the start of content
-
-                out.startContent();
+                out.startElement(NameOfNode.makeName(node), annotation,
+                                 node.attributes(), ns,
+                                 locationId, ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY | ReceiverOption.NAMESPACE_OK);
 
                 // output the children
 
-                AxisIterator children = node.iterateAxis(AxisInfo.CHILD, AnyNodeTest.getInstance());
-                int options = copyOptions;
-                if ((options & CopyOptions.ALL_NAMESPACES) != 0) {
-                    // Avoid copying namespaces of ancestors unnecessarily
-                    options = options & ~CopyOptions.ALL_NAMESPACES | CopyOptions.LOCAL_NAMESPACES;
-                }
-                while (true) {
-                    NodeInfo child = children.next();
-                    if (child == null) {
-                        break;
-                    }
-                    child.copy(out, options, locationId);
+                for (NodeInfo child : node.children()) {
+                    child.copy(out, copyOptions, locationId);
                 }
 
                 // finally the end tag
@@ -749,30 +685,115 @@ public final class Navigator {
                 return;
             }
             case Type.ATTRIBUTE: {
-                SimpleType annotation = (copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0 ?
-                        (SimpleType) node.getSchemaType() :
-                        BuiltInAtomicType.UNTYPED_ATOMIC;
-                out.attribute(NameOfNode.makeName(node), annotation, node.getStringValueCS(), locationId, 0);
+                throw new IllegalArgumentException("Cannot copy attribute to Receiver");
+//                SimpleType annotation = (copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0 ?
+//                        (SimpleType) node.getSchemaType() :
+//                        BuiltInAtomicType.UNTYPED_ATOMIC;
+//                ((ComplexContentOutputter)out).attribute(NameOfNode.makeName(node), annotation, node.getStringValueCS(), locationId, ReceiverOption.NONE);
+//                return;
+            }
+            case Type.TEXT: {
+                CharSequence value = node.getStringValueCS();
+                if (value.length() != 0) {
+                    // zero-length text nodes can arise from external model wrappers
+                    out.characters(value, locationId, ReceiverOption.NONE);
+                }
+                return;
+            }
+            case Type.COMMENT: {
+                out.comment(node.getStringValueCS(), locationId, ReceiverOption.NONE);
+                return;
+            }
+            case Type.PROCESSING_INSTRUCTION: {
+                out.processingInstruction(node.getLocalPart(), node.getStringValueCS(), locationId, ReceiverOption.NONE);
+                return;
+            }
+            case Type.NAMESPACE: {
+                throw new IllegalArgumentException("Cannot copy namespace to Receiver");
+//                out.namespacesOLD(NamespaceMap.of(node.getLocalPart(), node.getStringValue()), ReceiverOption.NONE);
+//                return;
+            }
+            default:
+
+        }
+    }
+
+    /**
+     * Generic (model-independent) implementation of deep copy algorithm for nodes.
+     * This is available for use by any node implementations that choose to use it.
+     *
+     * @param node        The node to be copied.
+     * @param out         The outputter to which events will be sent
+     * @param copyOptions Options for copying namespaces, type annotations, etc,
+     *                    as defined in {@link net.sf.saxon.om.CopyOptions}
+     * @param locationId  The location of the instruction invoking the copy
+     * @throws XPathException on any failure reported by the Receiver
+     */
+
+    public static void copy(NodeInfo node, Outputter out,
+                            int copyOptions, Location locationId) throws XPathException {
+
+        boolean keepTypes = (copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0;
+        switch (node.getNodeKind()) {
+            case Type.DOCUMENT: {
+                out.startDocument(CopyOptions.getStartDocumentProperties(copyOptions));
+                for (NodeInfo child : node.children()) {
+                    copy(child, out, copyOptions, locationId);
+                }
+                out.endDocument();
+                break;
+            }
+            case Type.ELEMENT: {
+                SchemaType annotation = keepTypes ? node.getSchemaType() : Untyped.getInstance();
+
+                out.startElement(NameOfNode.makeName(node), annotation,
+                                 locationId, ReceiverOption.DISINHERIT_NAMESPACES | ReceiverOption.NAMESPACE_OK);
+
+                if ((copyOptions & CopyOptions.ALL_NAMESPACES) != 0) {
+                    for (NamespaceBinding ns : node.getAllNamespaces()) {
+                        out.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
+                    }
+                }
+
+                for (AttributeInfo attr : node.attributes()) {
+                    SimpleType attType = keepTypes ? attr.getType() : BuiltInAtomicType.UNTYPED_ATOMIC;
+                    out.attribute(attr.getNodeName(), attType, attr.getValue(), attr.getLocation(), attr.getProperties());
+                }
+
+                // output the children
+
+                for (NodeInfo child : node.children()) {
+                    copy(child, out, copyOptions, locationId);
+                }
+
+                // finally the end tag
+
+                out.endElement();
+                return;
+            }
+            case Type.ATTRIBUTE: {
+                SimpleType attType = keepTypes ? (SimpleType)node.getSchemaType() : BuiltInAtomicType.UNTYPED_ATOMIC;
+                out.attribute(NameOfNode.makeName(node), attType, node.getStringValueCS(), locationId, ReceiverOption.NONE);
                 return;
             }
             case Type.TEXT: {
                 CharSequence value = node.getStringValueCS();
                 if (value.length() != 0) {
                     // zero-length text nodes can arise from external model wrappers
-                    out.characters(value, locationId, 0);
+                    out.characters(value, locationId, ReceiverOption.NONE);
                 }
                 return;
             }
             case Type.COMMENT: {
-                out.comment(node.getStringValueCS(), locationId, 0);
+                out.comment(node.getStringValueCS(), locationId, ReceiverOption.NONE);
                 return;
             }
             case Type.PROCESSING_INSTRUCTION: {
-                out.processingInstruction(node.getLocalPart(), node.getStringValueCS(), locationId, 0);
+                out.processingInstruction(node.getLocalPart(), node.getStringValueCS(), locationId, ReceiverOption.NONE);
                 return;
             }
             case Type.NAMESPACE: {
-                out.namespace(new NamespaceBinding(node.getLocalPart(), node.getStringValue()), 0);
+                out.namespace(node.getLocalPart(), node.getStringValue(), ReceiverOption.NONE);
                 return;
             }
             default:
@@ -782,7 +803,7 @@ public final class Navigator {
 
     /**
      * Generic (model-independent) method to determine the relative position of two
-     * node in document order. The nodes must be in the same tree.
+     * nodes in document order. The nodes must be in the same tree.
      *
      * @param first  The first node
      * @param second The second node, whose position is to be compared with the first node
@@ -998,7 +1019,7 @@ public final class Navigator {
 
     public static void appendSequentialKey(/*@NotNull*/ SiblingCountingNode node, /*@NotNull*/ FastStringBuffer sb, boolean addDocNr) {
         if (addDocNr) {
-            sb.append('w');
+            sb.cat('w');
             sb.append(Long.toString(node.getTreeInfo().getDocumentNumber()));
         }
         if (node.getNodeKind() != Type.DOCUMENT) {
@@ -1007,7 +1028,7 @@ public final class Navigator {
                 appendSequentialKey((SiblingCountingNode) parent, sb, false);
             }
             if (node.getNodeKind() == Type.ATTRIBUTE) {
-                sb.append('A');
+                sb.cat('A');
             }
         }
         sb.append(alphaKey(node.getSiblingPosition()));
@@ -1110,11 +1131,11 @@ public final class Navigator {
      */
 
     /*@NotNull*/
-    public static AxisIterator filteredSingleton(/*@Nullable*/ NodeInfo node, /*@NotNull*/ NodeTest nodeTest) {
-        if (node != null && nodeTest.matchesNode(node)) {
+    public static AxisIterator filteredSingleton(NodeInfo node, Predicate<? super NodeInfo> nodeTest) {
+        if (node != null && nodeTest.test(node)) {
             return SingleNodeIterator.makeIterator(node);
         } else {
-            return EmptyIterator.OfNodes.THE_INSTANCE;
+            return EmptyIterator.ofNodes();
         }
     }
 
@@ -1150,7 +1171,7 @@ public final class Navigator {
 
     public static class AxisFilter implements AxisIterator {
         private AxisIterator base;
-        private NodeTest nodeTest;
+        private Predicate<? super NodeInfo> nodeTest;
 
         /**
          * Construct a AxisFilter
@@ -1162,19 +1183,20 @@ public final class Navigator {
          *             returned by the AxisFilter
          */
 
-        public AxisFilter(AxisIterator base, NodeTest test) {
+        public AxisFilter(AxisIterator base, Predicate<? super NodeInfo> test) {
             this.base = base;
             nodeTest = test;
         }
 
         /*@Nullable*/
+        @Override
         public NodeInfo next() {
             while (true) {
                 NodeInfo next = base.next();
                 if (next == null) {
                     return null;
                 }
-                if (nodeTest.matchesNode(next)) {
+                if (nodeTest.test(next)) {
                     return next;
                 }
             }
@@ -1202,6 +1224,7 @@ public final class Navigator {
         }
 
         /*@Nullable*/
+        @Override
         public NodeInfo next() {
             while (true) {
                 NodeInfo next = base.next();
@@ -1225,7 +1248,6 @@ public final class Navigator {
 
         private boolean includeSelf;
         private boolean atStart;
-        private NodeInfo start;
         private NodeInfo current;
 
         /**
@@ -1236,12 +1258,12 @@ public final class Navigator {
          */
 
         public AncestorEnumeration(NodeInfo start, boolean includeSelf) {
-            this.start = start;
             this.includeSelf = includeSelf;
             current = start;
             atStart = true;
         }
 
+        @Override
         public final NodeInfo next() {
             if (atStart) {
                 atStart = false;
@@ -1287,6 +1309,7 @@ public final class Navigator {
             this.forwards = forwards;
         }
 
+         @Override
          public final NodeInfo next() {
             if (descendants != null) {
                 NodeInfo nextd = descendants.next();
@@ -1341,7 +1364,7 @@ public final class Navigator {
                         }
                     }
                 } else {
-                    children = EmptyIterator.OfNodes.THE_INSTANCE;
+                    children = EmptyIterator.ofNodes();
                 }
                 if (forwards && includeSelf) {
                     return start;
@@ -1363,9 +1386,8 @@ public final class Navigator {
      */
 
     public static final class FollowingEnumeration implements AxisIterator {
-        private NodeInfo start;
         /*@NotNull*/ private AxisIterator ancestorEnum;
-        /*@Nullable*/ private AxisIterator siblingEnum = null;
+        /*@Nullable*/ private AxisIterator siblingEnum;
         /*@Nullable*/ private AxisIterator descendEnum = null;
 
         /**
@@ -1375,7 +1397,6 @@ public final class Navigator {
          */
 
         public FollowingEnumeration(/*@NotNull*/ NodeInfo start) {
-            this.start = start;
             ancestorEnum = new AncestorEnumeration(start, false);
             switch (start.getNodeKind()) {
                 case Type.ELEMENT:
@@ -1392,16 +1413,17 @@ public final class Navigator {
                     // gets children of the attribute's parent node
                     NodeInfo parent = start.getParent();
                     if (parent == null) {
-                        siblingEnum = EmptyIterator.OfNodes.THE_INSTANCE;
+                        siblingEnum = EmptyIterator.ofNodes();
                     } else {
                         siblingEnum = parent.iterateAxis(AxisInfo.CHILD);
                     }
                     break;
                 default:
-                    siblingEnum = EmptyIterator.OfNodes.THE_INSTANCE;
+                    siblingEnum = EmptyIterator.ofNodes();
             }
         }
 
+        @Override
         public final NodeInfo next() {
             if (descendEnum != null) {
                 NodeInfo nextd = descendEnum.next();
@@ -1428,7 +1450,7 @@ public final class Navigator {
             NodeInfo nexta = ancestorEnum.next();
             if (nexta != null) {
                 if (nexta.getNodeKind() == Type.DOCUMENT) {
-                    siblingEnum = EmptyIterator.OfNodes.THE_INSTANCE;
+                    siblingEnum = EmptyIterator.ofNodes();
                 } else {
                     //siblingEnum = new NodeWrapper.ChildEnumeration(next, false, true);
                     siblingEnum = nexta.iterateAxis(AxisInfo.FOLLOWING_SIBLING);
@@ -1449,9 +1471,8 @@ public final class Navigator {
 
     public static final class PrecedingEnumeration implements AxisIterator {
 
-        private NodeInfo start;
         /*@NotNull*/ private AxisIterator ancestorEnum;
-        /*@Nullable*/ private AxisIterator siblingEnum = null;
+        /*@Nullable*/ private AxisIterator siblingEnum;
         /*@Nullable*/ private AxisIterator descendEnum = null;
         private boolean includeAncestors;
 
@@ -1465,7 +1486,6 @@ public final class Navigator {
          */
 
         public PrecedingEnumeration(/*@NotNull*/ NodeInfo start, boolean includeAncestors) {
-            this.start = start;
             this.includeAncestors = includeAncestors;
             ancestorEnum = new AncestorEnumeration(start, false);
             switch (start.getNodeKind()) {
@@ -1477,10 +1497,11 @@ public final class Navigator {
                     siblingEnum = start.iterateAxis(AxisInfo.PRECEDING_SIBLING);
                     break;
                 default:
-                    siblingEnum = EmptyIterator.OfNodes.THE_INSTANCE;
+                    siblingEnum = EmptyIterator.ofNodes();
             }
         }
 
+        @Override
         public final NodeInfo next() {
             if (descendEnum != null) {
                 NodeInfo nextd = descendEnum.next();
@@ -1508,7 +1529,7 @@ public final class Navigator {
             NodeInfo nexta = ancestorEnum.next();
             if (nexta != null) {
                 if (nexta.getNodeKind() == Type.DOCUMENT) {
-                    siblingEnum = EmptyIterator.OfNodes.THE_INSTANCE;
+                    siblingEnum = EmptyIterator.ofNodes();
                 } else {
                     siblingEnum = nexta.iterateAxis(AxisInfo.PRECEDING_SIBLING);
                 }

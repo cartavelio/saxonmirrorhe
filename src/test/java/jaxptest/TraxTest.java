@@ -1,7 +1,6 @@
 package jaxptest;
 
 import com.saxonica.config.ProfessionalTransformerFactory;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.dom.NodeOverNodeInfo;
@@ -13,8 +12,7 @@ import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.sxpath.XPathDynamicContext;
-import net.sf.saxon.sxpath.XPathExpression;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -36,13 +34,16 @@ import java.io.*;
 import java.net.URL;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * JUnit tests for the JAXP Transformation API (trax).
  * Adapted by converting the TraxExamples file
  * originally created by Scott Boag, but much evolved since.
  */
-public class TraxTest extends TestCase {
+public class TraxTest {
 
     private static final String d = ConfigTest.DATA_DIR + "trax/";
 
@@ -58,6 +59,7 @@ public class TraxTest extends TestCase {
     private static final String multidoc_xsl = d+"xsl/multidoc.xsl";
     private static final String identity_xsl = d+"xsl/identity.xsl";
 
+    @Test
     public void testExampleParseOnly() {
         try {
             //System.setProperty("javax.xml.parsers.SAXParserFactory",
@@ -71,6 +73,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testExampleSimple1() {
 
         try {
@@ -90,11 +93,9 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testExampleSimple2() {
-
-
         try {
-
             // Create a transform factory instance.
             TransformerFactory tfactory = TransformerFactory.newInstance();
 
@@ -102,16 +103,19 @@ public class TraxTest extends TestCase {
             Transformer transformer =
                     tfactory.newTransformer(new StreamSource(foo_xsl));
 
+            String outpath = ConfigTest.DATA_DIR + "temp/Simple2.out";
+
             // Transform the source XML to System.out.
             transformer.transform(new StreamSource(foo_xml),
-                    new StreamResult(new File("Simple2.out")));
+                    new StreamResult(new File(outpath)));
 
-            System.out.println("\nOutput written to exampleSimple2.out\n");
+            System.out.println("\nOutput written to " + outpath + "\n");
         } catch (Exception ex) {
             handleException(ex);
         }
     }
 
+    @Test
     public void testExampleErrorListener() {
 
         try {
@@ -143,6 +147,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testExampleFromStream() {
 
 
@@ -175,6 +180,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testExampleFromReeader() {
 
         try {
@@ -207,6 +213,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testExampleUseTemplatesObj() {
 
         try {
@@ -233,6 +240,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testExampleUseTemplatesHandler() {
 
 
@@ -283,6 +291,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testExampleSAXResult() {
 
         try {
@@ -369,6 +378,7 @@ public class TraxTest extends TestCase {
 //    }
 
 
+    @Test
     public void testExampleContentHandlerToContentHandler() {
 
         try {
@@ -413,6 +423,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testExampleXMLReader() {
 
         try {
@@ -434,6 +445,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testExampleXMLFilter() {
         try {
 
@@ -466,6 +478,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testExampleXMLFilterChain() {
 
         try {
@@ -516,6 +529,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testSaxonToSaxon() {
         try {
 
@@ -544,6 +558,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testSaxonToSaxonNonRoot() {
 
         try {
@@ -556,10 +571,18 @@ public class TraxTest extends TestCase {
 
             NodeInfo doc = config.buildDocumentTree(new StreamSource(new File(foo_xml).toURI().toString())).getRootNode();
             System.err.println("Source document built OK");
-            net.sf.saxon.sxpath.XPathEvaluator xpath = new net.sf.saxon.sxpath.XPathEvaluator(config);
-            XPathExpression xpe = xpath.createExpression("/*/*[1]");
-            XPathDynamicContext c = xpe.createDynamicContext(doc);
-            NodeInfo start = (NodeInfo) xpe.evaluateSingle(c);
+            NodeInfo start = null;
+            out:
+            for (NodeInfo child : doc.children(NodeKindTest.ELEMENT)) {
+                for (NodeInfo gc : child.children(NodeKindTest.ELEMENT)) {
+                    start = gc;
+                    break out;
+                }
+            }
+//            net.sf.saxon.sxpath.XPathEvaluator xpath = new net.sf.saxon.sxpath.XPathEvaluator(config);
+//            XPathExpression xpe = xpath.createExpression("/*/*[1]");
+//            XPathDynamicContext c = xpe.createDynamicContext(doc);
+//            NodeInfo start = (NodeInfo) xpe.evaluateSingle(c);
 
             Transformer transformer = templates.newTransformer();
 
@@ -577,6 +600,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testDOMSubtree() {
 
         try {
@@ -617,6 +641,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testDOMtoDOM() {
 
         try {
@@ -697,6 +722,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testDOMtoDOMAlienDoc() {
 
         try {
@@ -774,6 +800,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testDOMtoDOMExisting() {
 
         try {
@@ -825,6 +852,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testDOMImport() {
 
         try {
@@ -874,6 +902,7 @@ public class TraxTest extends TestCase {
     }
 
 
+    @Test
     public void testNodeInfo() {
         try {
 
@@ -888,6 +917,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testSAXtoDOMNewIdentity() {
 
         try {
@@ -914,6 +944,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testParam() {
 
         try {
@@ -940,6 +971,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testTransformerReuse() {
 
         try {
@@ -968,6 +1000,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testOutputProperties() {
 
         try {
@@ -988,6 +1021,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testUseAssociated() {
 
         try {
@@ -1017,6 +1051,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testUseEmbedded() {
         try {
 
@@ -1045,6 +1080,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testContentHandlerToDOM() {
 
         try {
@@ -1097,6 +1133,7 @@ public class TraxTest extends TestCase {
     }
 
 
+    @Test
     public void testAsSerializer() {
         try {
 
@@ -1124,6 +1161,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testSerializerWithDOE() {
 
         try {
@@ -1155,6 +1193,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testNewDOMSerializer() {
         try {
             DocumentBuilderFactory dfactory =
@@ -1181,6 +1220,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testUsingURIResolver() {
 
         try {
@@ -1204,6 +1244,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testOutputURIResolver() {
 
         try {
@@ -1232,6 +1273,7 @@ public class TraxTest extends TestCase {
         }
     }
 
+    @Test
     public void testExtra() {
 
         try {
@@ -1449,6 +1491,7 @@ public class TraxTest extends TestCase {
     }
 
     // test case for bug 2178
+    @Test
     public void testExampleSetParam() {
 
         try {
@@ -1598,6 +1641,7 @@ public class TraxTest extends TestCase {
 
     }
 
+    @Test
     public void testBase64BinaryParam() {
         try {
             String xsl = "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +

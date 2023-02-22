@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -26,12 +26,17 @@ public interface ExtensionFunction {
     QName getName();
 
     /**
-     * Declare the result type of the external function
+     * Declare the result type of the external function. The default for this method
+     * returns the type <code>item()*</code>. Returning a more precise type enables
+     * Saxon to do better static type checking, and to avoid run-time conversions.
      *
-     * @return the result type of the external function
+     * @return the result type of the external function. Saxon will check at run-time that
+     * the actual value returned by the {@link #call} method is an instance of this type.
      */
 
-    SequenceType getResultType();
+    default SequenceType getResultType() {
+        return SequenceType.ANY;
+    }
 
     /**
      * Declare the types of the arguments

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,9 +7,12 @@
 
 package net.sf.saxon.trace;
 
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.LetExpression;
+import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.CodeInjector;
+import net.sf.saxon.functions.Trace;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.StandardNames;
 
 /**
  * A Simple trace listener for XSLT that writes messages (by default) to System.err
@@ -26,6 +29,7 @@ public class XSLTTraceListener extends AbstractTraceListener {
      * Generate attributes to be included in the opening trace element
      */
 
+    @Override
     protected String getOpeningAttributes() {
         return "xmlns:xsl=\"" + NamespaceConstant.XSLT + '\"';
     }
@@ -33,30 +37,43 @@ public class XSLTTraceListener extends AbstractTraceListener {
     /**
      * Get the trace element tagname to be used for a particular construct. Return null for
      * trace events that are ignored by this trace listener.
+     * @param info
      */
 
     /*@Nullable*/
-    protected String tag(int construct) {
-        return tagName(construct);
+    @Override
+    protected String tag(Traceable info) {
+        return tagName(info);
     }
 
-    public static String tagName(int construct) {
-        if (construct < 1024) {
-            return StandardNames.getDisplayName(construct);
-        }
-        switch (construct) {
-            case LocationKind.LITERAL_RESULT_ELEMENT:
+    public static String tagName(Traceable info) {
+        if (info instanceof Expression) {
+            Expression expr = (Expression) info;
+            if (expr instanceof FixedElement) {
                 return "LRE";
-            case LocationKind.LITERAL_RESULT_ATTRIBUTE:
+            } else if (expr instanceof FixedAttribute) {
                 return "ATTR";
-            case LocationKind.LET_EXPRESSION:
+            } else if (expr instanceof LetExpression) {
                 return "xsl:variable";
-            case LocationKind.EXTENSION_INSTRUCTION:
-                return "extension-instruction";
-            case LocationKind.TRACE_CALL:
-                return "user-trace";
-            default:
-                return null;
+            } else if (expr.isCallOn(Trace.class)) {
+                return "fn:trace";
+            } else  {
+                return expr.getExpressionName();
+            }
+        } else if (info instanceof UserFunction){
+            return "xsl:function";
+        } else if (info instanceof TemplateRule) {
+            return "xsl:template";
+        } else if (info instanceof NamedTemplate) {
+            return "xsl:template";
+        } else if (info instanceof GlobalParam) {
+            return "xsl:param";
+        } else if (info instanceof GlobalVariable) {
+            return "xsl:variable";
+        } else if (info instanceof Trace) {
+            return "fn:trace";
+        } else {
+            return "misc";
         }
     }
 

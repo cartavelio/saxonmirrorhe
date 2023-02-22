@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,7 +11,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -85,79 +84,75 @@ public class UntypedNumericComparer implements AtomicComparer {
      * @throws XPathException if the first operand is not convertible to a double
      */
 
-    public static int quickComparison (
+    private static int quickComparison(
             UntypedAtomicValue a0, NumericValue a1, ConversionRules rules)
             throws XPathException {
         double d1 = a1.getDoubleValue();
-        double d0;
-        ConversionResult cv = a0.getConversionResultIfKnown(StandardNames.XS_DOUBLE);
-        DoubleValue dv0 = cv == null ? null : (DoubleValue)cv.asAtomic();
-        if (dv0 != null) {
-            d0 = dv0.getDoubleValue();
-            return Double.compare(d0, d1);
-        } else {
-            CharSequence cs = Whitespace.trimWhitespace(a0.getStringValueCS());
 
-            boolean simple = true;
-            int wholePartLength = 0;
-            int firstDigit = -1;
-            int decimalPoints = 0;
-            char sign = '?';
-            for (int i = 0; i < cs.length(); i++) {
-                char c = cs.charAt(i);
-                if (c >= '0' && c <= '9') {
-                    if (firstDigit < 0) {
-                        firstDigit = c - '0';
-                    }
-                    if (decimalPoints == 0) {
-                        wholePartLength++;
-                    }
-                } else if (c == '-') {
-                    if (sign != '?' || wholePartLength > 0 || decimalPoints > 0) {
-                        simple = false;
-                        break;
-                    }
-                    sign = c;
-                } else if (c == '.') {
-                    if (decimalPoints > 0) {
-                        simple = false;
-                        break;
-                    }
-                    decimalPoints = 1;
-                } else {
+        CharSequence cs = Whitespace.trimWhitespace(a0.getStringValueCS());
+
+        boolean simple = true;
+        int wholePartLength = 0;
+        int firstDigit = -1;
+        int decimalPoints = 0;
+        char sign = '?';
+        for (int i = 0; i < cs.length(); i++) {
+            char c = cs.charAt(i);
+            if (c >= '0' && c <= '9') {
+                if (firstDigit < 0) {
+                    firstDigit = c - '0';
+                }
+                if (decimalPoints == 0) {
+                    wholePartLength++;
+                }
+            } else if (c == '-') {
+                if (sign != '?' || wholePartLength > 0 || decimalPoints > 0) {
                     simple = false;
                     break;
                 }
-            }
-            if (firstDigit < 0) {
-                simple = false;
-            }
-            if (simple && wholePartLength > 0 && wholePartLength <= 10) {
-                double lowerBound = bounds[firstDigit][wholePartLength];
-                double upperBound = bounds[firstDigit + 1][wholePartLength];
-                if (sign == '-') {
-                    double temp = lowerBound;
-                    lowerBound = -upperBound;
-                    upperBound = -temp;
+                sign = c;
+            } else if (c == '.') {
+                if (decimalPoints > 0) {
+                    simple = false;
+                    break;
                 }
-                if (upperBound < d1) {
-                    return -1;
-                }
-                if (lowerBound > d1) {
-                    return +1;
-                }
-
-            }
-            // The quick check was inconclusive, so we now parse the number.
-            // We use integer comparison if both sides are simple integers, or double comparison otherwise
-            if (simple && decimalPoints == 0 && wholePartLength <= 15 && a1 instanceof Int64Value) {
-                long l0 = Long.parseLong(cs.toString());
-                a0.setConversionResult(StandardNames.XS_INTEGER, Int64Value.makeIntegerValue(l0));
-                return Long.compare(l0, a1.longValue());
+                decimalPoints = 1;
             } else {
-                AtomicValue av = a0.obtainConversionResult(StandardNames.XS_DOUBLE, BuiltInAtomicType.DOUBLE.getStringConverter(rules)).asAtomic();
-                return Double.compare(((DoubleValue)av).getDoubleValue(), d1);
+                simple = false;
+                break;
             }
+        }
+        if (firstDigit < 0) {
+            simple = false;
+        }
+        if (simple && wholePartLength > 0 && wholePartLength <= 10) {
+            double lowerBound = bounds[firstDigit][wholePartLength];
+            double upperBound = bounds[firstDigit + 1][wholePartLength];
+            if (sign == '-') {
+                double temp = lowerBound;
+                lowerBound = -upperBound;
+                upperBound = -temp;
+            }
+            if (upperBound < d1) {
+                return -1;
+            }
+            if (lowerBound > d1) {
+                return +1;
+            }
+
+        }
+        // The quick check was inconclusive, so we now parse the number.
+        // We use integer comparison if both sides are simple integers, or double comparison otherwise
+        if (simple && decimalPoints == 0 && wholePartLength <= 15 && a1 instanceof Int64Value) {
+            long l0 = Long.parseLong(cs.toString());
+            return Long.compare(l0, a1.longValue());
+        } else {
+            ConversionResult result;
+            synchronized(a0) {
+                result = BuiltInAtomicType.DOUBLE.getStringConverter(rules).convertString(a0.getPrimitiveStringValue());
+            }
+            AtomicValue av = result.asAtomic();
+            return Double.compare(((DoubleValue)av).getDoubleValue(), d1);
         }
 
     }

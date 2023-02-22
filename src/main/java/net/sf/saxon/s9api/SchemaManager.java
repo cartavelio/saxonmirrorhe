@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.SchemaURIResolver;
 
 import javax.xml.transform.ErrorListener;
@@ -33,9 +34,6 @@ public abstract class SchemaManager {
     public SchemaManager() {
     }
 
-    ;
-
-
     /**
      * Set the version of XSD in use. The value must be "1.0" or "1.1". The default is currently "1.0",
      * but this may change in a future release.
@@ -58,6 +56,7 @@ public abstract class SchemaManager {
      *
      * @param listener The error listener to be used. This is notified of all errors detected during the
      *                 compilation. May be set to null to revert to the default ErrorListener.
+     * @deprecated since 10.0. Use {@link #setErrorReporter(ErrorReporter)}.
      */
 
     public abstract void setErrorListener(/*@Nullable*/ ErrorListener listener);
@@ -67,10 +66,15 @@ public abstract class SchemaManager {
      *
      * @return listener The error listener in use. This is notified of all errors detected during the
      *         compilation. Returns null if no user-supplied ErrorListener has been set.
+     * @deprecated since 10.0. Use {@link #getErrorReporter}
      */
 
     /*@Nullable*/
     public abstract ErrorListener getErrorListener();
+
+    public abstract void setErrorReporter(ErrorReporter reporter);
+
+    public abstract ErrorReporter getErrorReporter();
 
     /**
      * Set the SchemaURIResolver to be used during schema loading. This SchemaURIResolver, despite its name,

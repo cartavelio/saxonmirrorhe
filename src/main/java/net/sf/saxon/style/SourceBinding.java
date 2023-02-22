@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -16,10 +16,12 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.AttributeLocation;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
@@ -29,7 +31,10 @@ import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+
+import static net.sf.saxon.style.SourceBinding.BindingProperty.SELECT;
 
 
 /**
@@ -45,23 +50,15 @@ public class SourceBinding {
     private SequenceType inferredType = null;
     protected SlotManager slotManager = null;  // used only for global variable declarations
     private Visibility visibility;
-    private GroundedValue<?> constantValue = null;
+    private GroundedValue constantValue = null;
 
-    private int properties;
+    //private int properties;
 
-    public static final int PRIVATE = 1;
-    public static final int GLOBAL = 2;
-    public static final int PARAM = 4;
-    public static final int TUNNEL = 8;
-    public static final int REQUIRED = 16;
-    public static final int IMPLICITLY_REQUIRED = 32;
-    public static final int ASSIGNABLE = 64;
-    public static final int SELECT = 128;
-    public static final int AS = 256;
-    public static final int DISALLOWS_CONTENT = 512;
-    public static final int STATIC = 2048;
-    public static final int VISIBILITY = 4096;
-    public static final int IMPLICITLY_DECLARED = 8192;
+    public enum BindingProperty {
+        PRIVATE, GLOBAL, PARAM, TUNNEL, REQUIRED, IMPLICITLY_REQUIRED, ASSIGNABLE,
+        SELECT, AS, DISALLOWS_CONTENT, STATIC, VISIBILITY, IMPLICITLY_DECLARED};
+
+    private EnumSet<BindingProperty> properties = EnumSet.noneOf(BindingProperty.class);
 
     // List of VariableReference objects that reference this XSLVariableDeclaration
     private List<BindingReference> references = new ArrayList<>(10);
@@ -71,11 +68,11 @@ public class SourceBinding {
     }
 
 
-    public void prepareAttributes(int permittedAttributes) throws XPathException {
+    public void prepareAttributes(EnumSet<BindingProperty> permittedAttributes) {
 
-        AttributeCollection atts = sourceElement.getAttributeList();
+        AttributeMap atts = sourceElement.attributes();
 
-        String selectAtt = null;
+        AttributeInfo selectAtt = null;
         String asAtt = null;
         String extraAsAtt = null;
         String requiredAtt = null;
@@ -84,39 +81,42 @@ public class SourceBinding {
         String staticAtt = null;
         String visibilityAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : atts) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
             if (f.equals("name")) {
                 if (name == null || name.equals(errorName())) {
-                    processVariableName(atts.getValue(a));
+                    processVariableName(att.getValue());
                 }
             } else if (f.equals("select")) {
-                if ((permittedAttributes & SELECT) != 0) {
-                    selectAtt = atts.getValue(a);
+                if (permittedAttributes.contains(SELECT)) {
+                    selectAtt = att;
                 } else {
                     sourceElement.compileErrorInAttribute(
                             "The select attribute is not permitted on a function parameter", "XTSE0760", "select");
                 }
-            } else if (f.equals("as") && ((permittedAttributes & AS) != 0)) {
-                asAtt = atts.getValue(a);
-            } else if (f.equals("required") && ((permittedAttributes & REQUIRED) != 0)) {
-                requiredAtt = Whitespace.trim(atts.getValue(a));
+            } else if (f.equals("as") && permittedAttributes.contains(BindingProperty.AS)) {
+                asAtt = att.getValue();
+            } else if (f.equals("required") && permittedAttributes.contains(BindingProperty.REQUIRED)) {
+                requiredAtt = Whitespace.trim(att.getValue());
             } else if (f.equals("tunnel")) {
-                tunnelAtt = Whitespace.trim(atts.getValue(a));
-            } else if (f.equals("static") && ((permittedAttributes & STATIC) != 0)) {
-                staticAtt = Whitespace.trim(atts.getValue(a));
-            } else if (f.equals("visibility") && ((permittedAttributes & VISIBILITY) != 0)) {
-                visibilityAtt = Whitespace.trim(atts.getValue(a));
-            } else if (NamespaceConstant.SAXON.equals(atts.getURI(a))) {
-                if (atts.getLocalName(a).equals("assignable") && ((permittedAttributes & ASSIGNABLE) != 0)) {
-                    assignableAtt = Whitespace.trim(atts.getValue(a));
-                } else if (atts.getLocalName(a).equals("as")) {
-                    extraAsAtt = atts.getValue(a);
-                } else {
-                    sourceElement.checkUnknownAttribute(atts.getNodeName(a));
+                tunnelAtt = Whitespace.trim(att.getValue());
+            } else if (f.equals("static") && permittedAttributes.contains(BindingProperty.STATIC)) {
+                staticAtt = Whitespace.trim(att.getValue());
+            } else if (f.equals("visibility") && permittedAttributes.contains(BindingProperty.VISIBILITY)) {
+                visibilityAtt = Whitespace.trim(att.getValue());
+            } else if (NamespaceConstant.SAXON.equals(attName.getURI())) {
+                if (sourceElement.isExtensionAttributeAllowed(attName.getDisplayName())) {
+                    if (attName.getLocalPart().equals("assignable") && permittedAttributes.contains(BindingProperty.ASSIGNABLE)) {
+                        assignableAtt = Whitespace.trim(att.getValue());
+                    } else if (attName.getLocalPart().equals("as")) {
+                        extraAsAtt = att.getValue();
+                    } else {
+                        sourceElement.checkUnknownAttribute(att.getNodeName());
+                    }
                 }
             } else {
-                sourceElement.checkUnknownAttribute(atts.getNodeName(a));
+                sourceElement.checkUnknownAttribute(att.getNodeName());
             }
         }
 
@@ -126,12 +126,12 @@ public class SourceBinding {
         }
 
         if (selectAtt != null) {
-            select = sourceElement.makeExpression(selectAtt, sourceElement.getAttributeList().getIndex("", "select"));
+            select = sourceElement.makeExpression(selectAtt.getValue(), selectAtt);
         }
 
         if (requiredAtt != null) {
             boolean required = sourceElement.processBooleanAttribute("required", requiredAtt);
-            setProperty(REQUIRED, required);
+            setProperty(BindingProperty.REQUIRED, required);
             if (required && select != null) {
                 sourceElement.compileError("xsl:param: cannot supply a default value when required='yes'");
             }
@@ -139,24 +139,24 @@ public class SourceBinding {
 
         if (tunnelAtt != null) {
             boolean tunnel = sourceElement.processBooleanAttribute("tunnel", tunnelAtt);
-            if (tunnel && ((permittedAttributes & TUNNEL) == 0)) {
+            if (tunnel && !permittedAttributes.contains(BindingProperty.TUNNEL)) {
                 sourceElement.compileErrorInAttribute("The only permitted value of the 'tunnel' attribute is 'no'", "XTSE0020", "tunnel");
             }
-            setProperty(TUNNEL, tunnel);
+            setProperty(BindingProperty.TUNNEL, tunnel);
         }
 
         if (assignableAtt != null) {
             boolean assignable = sourceElement.processBooleanAttribute("saxon:assignable", assignableAtt);
-            setProperty(ASSIGNABLE, assignable);
+            setProperty(BindingProperty.ASSIGNABLE, assignable);
         }
 
         if (staticAtt != null) {
             boolean statick = sourceElement.processBooleanAttribute("static", staticAtt);
-            setProperty(STATIC, statick);
+            setProperty(BindingProperty.STATIC, statick);
             if (statick) {
-                setProperty(SourceBinding.DISALLOWS_CONTENT, true);
+                setProperty(BindingProperty.DISALLOWS_CONTENT, true);
             }
-            if (statick && !hasProperty(GLOBAL)) {
+            if (statick && !hasProperty(BindingProperty.GLOBAL)) {
                 sourceElement.compileErrorInAttribute("Only global declarations can be static", "XTSE0020", "static");
             }
         }
@@ -165,17 +165,17 @@ public class SourceBinding {
 
 
         if (visibilityAtt != null) {
-            if (hasProperty(PARAM)) {
+            if (hasProperty(BindingProperty.PARAM)) {
                 sourceElement.compileErrorInAttribute("The visibility attribute is not allowed on xsl:param", "XTSE0020", "visibility");
             } else {
                 visibility = sourceElement.interpretVisibilityValue(visibilityAtt, "");
             }
-            if (!hasProperty(GLOBAL)) {
+            if (!hasProperty(BindingProperty.GLOBAL)) {
                 sourceElement.compileErrorInAttribute("The visibility attribute is allowed only on global declarations", "XTSE0020", "visibility");
             }
         }
 
-        if (hasProperty(STATIC) && visibility != Visibility.PRIVATE && visibilityAtt != null) {
+        if (hasProperty(BindingProperty.STATIC) && visibility != Visibility.PRIVATE && visibilityAtt != null) {
             sourceElement.compileErrorInAttribute("A static variable or parameter must be private", "XTSE0020", "static");
         }
     }
@@ -184,36 +184,35 @@ public class SourceBinding {
      * This method is called to establish basic signature information for local parameters of a named template,
      * so that this can be checked against xsl:call-template instructions. It is called while a named template
      * is being indexed: see bug 3722.
-     *
-     * @throws XPathException if things go wrong
      */
 
-    public void prepareTemplateSignatureAttributes() throws XPathException {
+    public void prepareTemplateSignatureAttributes()  {
 
-        AttributeCollection atts = sourceElement.getAttributeList();
+        AttributeMap atts = sourceElement.attributes();
 
         String asAtt = null;
         String extraAsAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : atts) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
             if (f.equals("name")) {
                 if (name == null || name.equals(errorName())) {
-                    processVariableName(atts.getValue(a));
+                    processVariableName(att.getValue());
                 }
             } else if (f.equals("as")) {
-                asAtt = atts.getValue(a);
+                asAtt = att.getValue();
             } else if (f.equals("required")) {
-                String requiredAtt = Whitespace.trim(atts.getValue(a));
+                String requiredAtt = Whitespace.trim(att.getValue());
                 boolean required = sourceElement.processBooleanAttribute("required", requiredAtt);
-                setProperty(REQUIRED, required);
+                setProperty(BindingProperty.REQUIRED, required);
             } else if (f.equals("tunnel")) {
-                String tunnelAtt = Whitespace.trim(atts.getValue(a));
+                String tunnelAtt = Whitespace.trim(att.getValue());
                 boolean tunnel = sourceElement.processBooleanAttribute("tunnel", tunnelAtt);
-                setProperty(TUNNEL, tunnel);
-            } else if (NamespaceConstant.SAXON.equals(atts.getURI(a))) {
-                if (atts.getLocalName(a).equals("as")) {
-                    extraAsAtt = atts.getValue(a);
+                setProperty(BindingProperty.TUNNEL, tunnel);
+            } else if (NamespaceConstant.SAXON.equals(attName.getURI())) {
+                if (attName.getLocalPart().equals("as")) {
+                    extraAsAtt = att.getValue();
                 }
             }
         }
@@ -247,8 +246,8 @@ public class SourceBinding {
                 extraResultType = SequenceType.ANY_SEQUENCE;
             }
             if (asAtt != null) {
-                int rel = sourceElement.getConfiguration().getTypeHierarchy().sequenceTypeRelationship(extraResultType, declaredType);
-                if (rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMED_BY) {
+                Affinity rel = sourceElement.getConfiguration().getTypeHierarchy().sequenceTypeRelationship(extraResultType, declaredType);
+                if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY) {
                     declaredType = extraResultType;
                 } else {
                     sourceElement.compileErrorInAttribute("When both are present, @saxon:as must be a subtype of @as", "SXER7TBA", "as");
@@ -298,20 +297,15 @@ public class SourceBinding {
      * recovery purposes.
      *
      * @param nameAttribute the lexical QName
-     * @throws XPathException if the name is invalid
      */
 
-    private void processVariableName(String nameAttribute) throws XPathException {
-        try {
-            if (nameAttribute != null) {
-                name = sourceElement.makeQName(nameAttribute);
+    private void processVariableName(String nameAttribute)  {
+        if (nameAttribute != null) {
+            if (nameAttribute.startsWith("$")) {
+                sourceElement.compileErrorInAttribute("Invalid variable name (no '$' sign needed)", "XTSE0020", "name");
+                nameAttribute = nameAttribute.substring(1);
             }
-        } catch (XPathException err) {
-            name = errorName();
-            StructuredQName n = StructuredQName.fromClarkName("name");
-            throw new XPathException("Invalid variable name: " + err.getMessage() +
-                    (nameAttribute.startsWith("$") ? " (No '$' sign needed)" : ""), "XTSE0020",
-                    new AttributeLocation(sourceElement, n));
+            name = sourceElement.makeQName(nameAttribute, null, "name");
         }
     }
 
@@ -336,7 +330,7 @@ public class SourceBinding {
         if (select != null && sourceElement.hasChildNodes()) {
             sourceElement.compileError("An " + sourceElement.getDisplayName() + " element with a select attribute must be empty", "XTSE0620");
         }
-        if (hasProperty(DISALLOWS_CONTENT) && sourceElement.hasChildNodes()) {
+        if (hasProperty(BindingProperty.DISALLOWS_CONTENT) && sourceElement.hasChildNodes()) {
             if (isStatic()) {
                 sourceElement.compileError("A static variable or parameter must have no content", "XTSE0010");
             } else {
@@ -358,7 +352,7 @@ public class SourceBinding {
     public void postValidate() throws XPathException {
         checkAgainstRequiredType(declaredType);
 
-        if (select == null && !hasProperty(DISALLOWS_CONTENT) && visibility != Visibility.ABSTRACT) {
+        if (select == null && !hasProperty(BindingProperty.DISALLOWS_CONTENT) && visibility != Visibility.ABSTRACT) {
             AxisIterator kids = sourceElement.iterateAxis(AxisInfo.CHILD);
             NodeInfo first = kids.next();
             if (first == null) {
@@ -367,14 +361,14 @@ public class SourceBinding {
                     select.setRetainedStaticContext(sourceElement.makeRetainedStaticContext());
                 } else {
                     if (sourceElement instanceof XSLLocalParam || sourceElement instanceof XSLGlobalParam) {
-                        if (!hasProperty(REQUIRED)) {
+                        if (!hasProperty(BindingProperty.REQUIRED)) {
                             if (Cardinality.allowsZero(declaredType.getCardinality())) {
                                 select = Literal.makeEmptySequence();
                                 select.setRetainedStaticContext(sourceElement.makeRetainedStaticContext());
                             } else {
                                 // The implicit default value () is not valid for the required type, so
                                 // it is treated as if there is no default
-                                setProperty(IMPLICITLY_REQUIRED, true);
+                                setProperty(BindingProperty.IMPLICITLY_REQUIRED, true);
                             }
                         }
                     } else {
@@ -392,7 +386,7 @@ public class SourceBinding {
     }
 
     public boolean isStatic() {
-        return hasProperty(STATIC);
+        return hasProperty(BindingProperty.STATIC);
     }
 
     /**
@@ -428,7 +422,7 @@ public class SourceBinding {
             } catch (XPathException err) {
                 err.setLocator(sourceElement);   // because the expression wasn't yet linked into the module
                 sourceElement.compileError(err);
-                select = new ErrorExpression(err);
+                select = new ErrorExpression(new XmlProcessingException(err));
             }
         }
     }
@@ -442,11 +436,7 @@ public class SourceBinding {
 
     public StructuredQName getVariableQName() {
         if (name == null) {
-            try {
-                processVariableName(sourceElement.getAttributeValue("", "name"));
-            } catch (XPathException e) {
-                return errorName();
-            }
+            processVariableName(sourceElement.getAttributeValue("", "name"));
         }
         return name;
     }
@@ -454,15 +444,15 @@ public class SourceBinding {
     /**
      * Set a boolean property of the variable
      *
-     * @param prop the property to be set (e.g. {@link #TUNNEL})
+     * @param prop the property to be set (e.g. {@link BindingProperty#TUNNEL})
      * @param flag true to set the property on, false to set it off
      */
 
-    public void setProperty(int prop, boolean flag) {
+    public void setProperty(BindingProperty prop, boolean flag) {
         if (flag) {
-            properties |= prop;
+            properties.add(prop);
         } else {
-            properties &= ~prop;
+            properties.remove(prop);
         }
     }
 
@@ -473,8 +463,8 @@ public class SourceBinding {
      * @return true if the variable has the specified property, otherwise false
      */
 
-    public boolean hasProperty(int prop) {
-        return (properties & prop) != 0;
+    public boolean hasProperty(BindingProperty prop) {
+        return properties.contains(prop);
     }
 
     /**
@@ -539,8 +529,9 @@ public class SourceBinding {
                             select, declaredType, role, sourceElement.makeExpressionVisitor());
                 } catch (XPathException err) {
                     err.setLocator(sourceElement);
-                    sourceElement.compileError(err);
-                    select = new ErrorExpression(err);
+                    XmlProcessingError error = new XmlProcessingException(err);
+                    sourceElement.compileError(error);
+                    select = new ErrorExpression(error);
                 }
             }
         }
@@ -593,7 +584,7 @@ public class SourceBinding {
             return inferredType;
         }
         Visibility visibility = sourceElement.getVisibility();
-        if (hasProperty(PARAM) || hasProperty(ASSIGNABLE) ||
+        if (hasProperty(BindingProperty.PARAM) || hasProperty(BindingProperty.ASSIGNABLE) ||
                 !(visibility == Visibility.PRIVATE || visibility == Visibility.FINAL)) {
             SequenceType declared = getDeclaredType();
             return inferredType = declared == null ? SequenceType.ANY_SEQUENCE : declared;
@@ -648,17 +639,17 @@ public class SourceBinding {
     }
 
 
-    public GroundedValue<?> getConstantValue() {
+    public GroundedValue getConstantValue() {
         if (constantValue == null) {
             final SequenceType type = getInferredType(true);
             final TypeHierarchy th = sourceElement.getConfiguration().getTypeHierarchy();
-            if (!hasProperty(ASSIGNABLE) && !hasProperty(PARAM) && !(visibility == Visibility.PUBLIC || visibility == Visibility.ABSTRACT)) {
+            if (!hasProperty(BindingProperty.ASSIGNABLE) && !hasProperty(BindingProperty.PARAM) && !(visibility == Visibility.PUBLIC || visibility == Visibility.ABSTRACT)) {
                 if (select instanceof Literal) {
                     // we can't rely on the constant value because it hasn't yet been type-checked,
                     // which could change it (eg by numeric promotion). Rather than attempt all the type-checking
                     // now, we do a quick check. See test bug64
-                    int relation = th.relationship(select.getItemType(), type.getPrimaryType());
-                    if (relation == TypeHierarchy.SAME_TYPE || relation == TypeHierarchy.SUBSUMED_BY) {
+                    Affinity relation = th.relationship(select.getItemType(), type.getPrimaryType());
+                    if (relation == Affinity.SAME_TYPE || relation == Affinity.SUBSUMED_BY) {
                         constantValue = ((Literal) select).getValue();
                     }
                 }
@@ -678,7 +669,7 @@ public class SourceBinding {
         final TypeHierarchy th = sourceElement.getConfiguration().getTypeHierarchy();
         GroundedValue constantValue = null;
         int properties = 0;
-        if (!hasProperty(ASSIGNABLE) && !hasProperty(PARAM) && !(visibility == Visibility.PUBLIC || visibility == Visibility.ABSTRACT)) {
+        if (!hasProperty(BindingProperty.ASSIGNABLE) && !hasProperty(BindingProperty.PARAM) && !(visibility == Visibility.PUBLIC || visibility == Visibility.ABSTRACT)) {
             /*if (select instanceof Literal) {
                 // we can't rely on the constant value because it hasn't yet been type-checked,
                 // which could change it (eg by numeric promotion). Rather than attempt all the type-checking

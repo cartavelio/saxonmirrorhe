@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,14 +7,13 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.DoubleSortComparer;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.NumericValue;
 
@@ -24,10 +23,9 @@ import net.sf.saxon.value.NumericValue;
  * important common case.
  */
 
-public class CompareToIntegerConstant extends UnaryExpression implements ComparisonExpression {
+public class CompareToIntegerConstant extends CompareToConstant {
 
     private long comparand;
-    private int operator;
 
     /**
      * Create the expression
@@ -46,27 +44,6 @@ public class CompareToIntegerConstant extends UnaryExpression implements Compari
         this.comparand = comparand;
     }
 
-    @Override
-    protected OperandRole getOperandRole() {
-        return OperandRole.SINGLE_ATOMIC;
-    }
-
-    public Expression getLhsExpression() {
-        return getBaseExpression();
-    }
-
-    public Operand getLhs() {
-        return getOperand();
-    }
-
-    public Expression getRhsExpression() {
-        return new Literal(new Int64Value(comparand));
-    }
-
-    public Operand getRhs() {
-        return new Operand(this, getRhsExpression(), OperandRole.SINGLE_ATOMIC);
-    }
-
     /**
      * Get the integer value on the rhs of the expression
      *
@@ -78,30 +55,14 @@ public class CompareToIntegerConstant extends UnaryExpression implements Compari
     }
 
     /**
-     * Get the comparison operator
-     *
-     * @return one of {@link Token#FEQ}, {@link Token#FNE}, {@link Token#FGE},
-     *         {@link Token#FGT}, {@link Token#FLE}, {@link Token#FLT}
+     * Get the effective right-hand-side expression (so that general logic for comparison expressions
+     * can be used)
+     * @return a Literal representing the RHS expression
      */
 
-    public int getComparisonOperator() {
-        return operator;
-    }
-
-    /**
-     * An implementation of Expression must provide at least one of the methods evaluateItem(), iterate(), or process().
-     * This method indicates which of these methods is provided directly. The other methods will always be available
-     * indirectly, using an implementation that relies on one of the other methods.
-     *
-     * @return the value {@link #EVALUATE_METHOD}
-     */
-
-    public int getImplementationMethod() {
-        return EVALUATE_METHOD;
-    }
-
-    public int computeSpecialProperties() {
-        return StaticProperty.NO_NODES_NEWLY_CREATED;
+    @Override
+    public Expression getRhsExpression() {
+        return new Literal(new Int64Value(comparand));
     }
 
     /**
@@ -112,6 +73,7 @@ public class CompareToIntegerConstant extends UnaryExpression implements Compari
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         CompareToIntegerConstant c2 = new CompareToIntegerConstant(getLhsExpression().copy(rebindings), operator, comparand);
         ExpressionTool.copyLocationInfo(this, c2);
@@ -135,32 +97,12 @@ public class CompareToIntegerConstant extends UnaryExpression implements Compari
      * Hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         int h = 0x836b12a0;
         return h + getLhsExpression().hashCode() ^ (int)comparand;
     }
 
-
-
-    /**
-     * Evaluate an expression as a single item. This always returns either a single Item or
-     * null (denoting the empty sequence). No conversion is done. This method should not be
-     * used unless the static type of the expression is a subtype of "item" or "item?": that is,
-     * it should not be called if the expression may return a sequence. There is no guarantee that
-     * this condition will be detected.
-     *
-     * @param context The context in which the expression is to be evaluated
-     * @return the node or atomic value that results from evaluating the
-     *         expression; or null to indicate that the result is an empty
-     *         sequence
-     * @throws net.sf.saxon.trans.XPathException
-     *          if any dynamic error occurs evaluating the
-     *          expression
-     */
-
-    public BooleanValue evaluateItem(XPathContext context) throws XPathException {
-        return BooleanValue.get(effectiveBooleanValue(context));
-    }
 
     /**
      * Get the effective boolean value of the expression. This returns false if the value
@@ -174,57 +116,19 @@ public class CompareToIntegerConstant extends UnaryExpression implements Compari
      *          expression
      */
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         NumericValue n = (NumericValue) getLhsExpression().evaluateItem(context);
         if (n.isNaN()) {
             return operator == Token.FNE;
         }
         int c = n.compareTo(comparand);
-        switch (operator) {
-            case Token.FEQ:
-                return c == 0;
-            case Token.FNE:
-                return c != 0;
-            case Token.FGT:
-                return c > 0;
-            case Token.FLT:
-                return c < 0;
-            case Token.FGE:
-                return c >= 0;
-            case Token.FLE:
-                return c <= 0;
-            default:
-                throw new UnsupportedOperationException("Unknown operator " + operator);
-        }
+        return interpretComparisonResult(c);
     }
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
-    }
-
-    /**
-     * Perform optimisation of an expression and its subexpressions. This is the third and final
-     * phase of static optimization.
-     * <p>This method is called after all references to functions and variables have been resolved
-     * to the declaration of the function or variable, and after all type checking has been done.</p>
-     *
-     * @param visitor         the expression visitor
-     * @param contextInfo the static type of "." at the point where this expression is invoked.
-     *                        The parameter is set to null if it is known statically that the context item will be undefined.
-     *                        If the type of the context item is not known statically, the argument is set to
-     *                        {@link net.sf.saxon.type.Type#ITEM_TYPE}
-     * @return the original expression, rewritten if appropriate to optimize execution
-     * @throws XPathException if an error is discovered during this phase
-     *                        (typically a type error)
-     */
-
-    /*@NotNull*/
-    public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        getOperand().optimize(visitor, contextInfo);
-        if (getLhsExpression() instanceof Literal) {
-            return Literal.makeLiteral(BooleanValue.get(effectiveBooleanValue(null)), this);
-        }
-        return this;
     }
 
     /**
@@ -239,29 +143,12 @@ public class CompareToIntegerConstant extends UnaryExpression implements Compari
         return "compareToInt";
     }
 
-
-    /**
-     * Determine the data type of the expression, if possible. All expression return
-     * sequences, in general; this method determines the type of the items within the
-     * sequence, assuming that (a) this is known in advance, and (b) it is the same for
-     * all items in the sequence.
-     * <p>This method should always return a result, though it may be the best approximation
-     * that is available at the time.</p>
-     *
-     * @return a value such as Type.STRING, Type.BOOLEAN, Type.NUMBER,
-     *         Type.NODE, or Type.ITEM (meaning not known at compile time)
-     */
-
-    /*@NotNull*/
-    public ItemType getItemType() {
-        return BuiltInAtomicType.BOOLEAN;
-    }
-
     /**
      * Diagnostic print of expression structure. The abstract expression tree
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("compareToInt", this);
         destination.emitAttribute("op", Token.tokens[operator]);
@@ -298,29 +185,11 @@ public class CompareToIntegerConstant extends UnaryExpression implements Compari
      * Get the AtomicComparer used to compare atomic values. This encapsulates any collation that is used
      */
 
+    @Override
     public AtomicComparer getAtomicComparer() {
         return DoubleSortComparer.getInstance();
         // Note: this treats NaN=NaN as true, but it doesn't matter, because the rhs will never be NaN.
     }
 
-    /**
-     * Get the primitive (singleton) operator used: one of Token.FEQ, Token.FNE, Token.FLT, Token.FGT,
-     * Token.FLE, Token.FGE
-     */
-
-    public int getSingletonOperator() {
-        return operator;
-    }
-
-    /**
-     * Determine whether untyped atomic values should be converted to the type of the other operand
-     *
-     * @return true if untyped values should be converted to the type of the other operand, false if they
-     *         should be converted to strings.
-     */
-
-    public boolean convertsUntypedToOther() {
-        return true;
-    }
 }
 

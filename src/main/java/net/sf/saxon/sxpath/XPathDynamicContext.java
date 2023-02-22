@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,8 +12,7 @@ import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.TypeChecker;
 import net.sf.saxon.lib.CollectionFinder;
-import net.sf.saxon.lib.CollectionURIResolver;
-import net.sf.saxon.lib.UnfailingErrorListener;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.UnparsedTextURIResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -23,7 +22,6 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
 
 /**
@@ -51,7 +49,7 @@ public class XPathDynamicContext {
      * @throws XPathException if the node is in a document that was built under the wrong configuration
      */
 
-    public void setContextItem(Item<?> item) throws XPathException {
+    public void setContextItem(Item item) throws XPathException {
         if (item instanceof NodeInfo) {
             if (!((NodeInfo) item).getConfiguration().isCompatible(contextObject.getConfiguration())) {
                 throw new XPathException(
@@ -64,7 +62,7 @@ public class XPathDynamicContext {
             throw new XPathException("Supplied context item does not match required context item type " +
                                              contextItemType);
         }
-        ManualIterator<Item<?>> iter = new ManualIterator<>(item);
+        ManualIterator iter = new ManualIterator(item);
         contextObject.setCurrentIterator(iter);
     }
 
@@ -90,7 +88,7 @@ public class XPathDynamicContext {
      *                        (or another Configuration that shares the same namePool)
      */
 
-    public void setVariable(XPathVariable variable, Sequence<?> value) throws XPathException {
+    public void setVariable(XPathVariable variable, Sequence value) throws XPathException {
         SequenceType requiredType = variable.getRequiredType();
         if (requiredType != SequenceType.ANY_SEQUENCE) {
             XPathException err = TypeChecker.testConformance(value, requiredType, contextObject);
@@ -98,8 +96,8 @@ public class XPathDynamicContext {
                 throw err;
             }
         }
-        SequenceIterator<?> iter = value.iterate();
-        Item<?> item;
+        SequenceIterator iter = value.iterate();
+        Item item;
         while ((item = iter.next()) != null) {
             if (item instanceof NodeInfo && !((NodeInfo) item).getConfiguration().isCompatible(contextObject.getConfiguration())) {
                 throw new XPathException(
@@ -145,33 +143,6 @@ public class XPathDynamicContext {
     }
 
     /**
-     * Set the CollectionURIResolver used for resolving collection URIs.
-     * Defaults to the CollectionURIResolver registered with the Configuration
-     *
-     * @param resolver the resolver for references to collections
-     * @since 9.4
-     * @deprecated since 9.7 - use {@link #setCollectionFinder(CollectionFinder)}
-     */
-
-    public void setCollectionURIResolver(CollectionURIResolver resolver) {
-        contextObject.getController().setCollectionURIResolver(resolver);
-    }
-
-    /**
-     * Get the CollectionURIResolver used for resolving references to collections.
-     * If none has been set on the Controller, returns the
-     * CollectionURIResolver registered with the Configuration
-     *
-     * @return the resolver for references to collections
-     * @since 9.4
-     * @deprecated since 9.7 - use {@link #getCollectionFinder()}
-     */
-
-    public CollectionURIResolver getCollectionURIResolver() {
-        return contextObject.getController().getCollectionURIResolver();
-    }
-
-    /**
      * Get the collection finder associated with this configuration. This is used to dereference
      * collection URIs used in the fn:collection and fn:uri-collection functions
      *
@@ -203,10 +174,11 @@ public class XPathDynamicContext {
      *
      * @param listener the ErrorListener to be used
      * @since 9.2. Changed in 9.6 to set the ErrorListener locally.
+     * Changed in 10.0 to use an ErrorReporter rather than an ErrorListener
      */
 
-    public void setErrorListener(ErrorListener listener) {
-        contextObject.setErrorListener(listener);
+    public void setErrorReporter(ErrorReporter listener) {
+        contextObject.setErrorReporter(listener);
     }
 
     /**
@@ -217,10 +189,11 @@ public class XPathDynamicContext {
      * @return the ErrorListener in use. This will always be an UnfailingErrorListener,
      * which is a Saxon subclass of ErrorListener that throws no exceptions.
      * @since 9.2. Changed in 9.6 to use a local ErrorListener.
+     * Changed in 10.0 to use an ErrorReporter rather than an ErrorListener
      */
 
-    public UnfailingErrorListener getErrorListener() {
-        return contextObject.getErrorListener();
+    public ErrorReporter getErrorReporter() {
+        return contextObject.getErrorReporter();
     }
 
 

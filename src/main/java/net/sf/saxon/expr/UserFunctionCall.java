@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,12 +7,12 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.LocationKind;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AnyItemType;
@@ -91,6 +91,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * @param compiledFunction the function being called
      */
 
+    @Override
     public void setFunction(UserFunction compiledFunction) {
         function = compiledFunction;
     }
@@ -105,6 +106,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      */
 
 
+    @Override
     public void setBindingSlot(int slot) {
         this.bindingSlot = slot;
     }
@@ -117,6 +119,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * can be found.
      */
 
+    @Override
     public int getBindingSlot() {
         return bindingSlot;
     }
@@ -133,6 +136,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         return function;
     }
 
+    @Override
     public Component getFixedTarget() {
         Visibility v = function.getDeclaringComponent().getVisibility();
         if (v == Visibility.PRIVATE || v == Visibility.FINAL) {
@@ -162,6 +166,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * @return the qualified name
      */
 
+    @Override
     public final StructuredQName getFunctionName() {
         if (name == null) {
             return function.getFunctionName();
@@ -170,6 +175,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         }
     }
 
+    @Override
     public SymbolicName getSymbolicName() {
         return new SymbolicName.F(getFunctionName(), getArity());
     }
@@ -184,10 +190,10 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * @param evalModes the argument evaluation modes to be used
      */
 
-    public void setArgumentEvaluationModes(int[] evalModes) {
+    public void setArgumentEvaluationModes(EvaluationMode[] evalModes) {
         argumentEvaluators = new Evaluator[evalModes.length];
         for (int i=0; i<evalModes.length; i++) {
-            argumentEvaluators[i] = Evaluator.evaluatorForCode(evalModes[i]);
+            argumentEvaluators[i] = evalModes[i].getEvaluator();
         }
     }
 
@@ -257,6 +263,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * @param visitor an expression visitor
      */
 
+    @Override
     public Expression preEvaluate(ExpressionVisitor visitor) {
         return this;
     }
@@ -268,6 +275,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         if (staticType == null) {
             // the actual type is not known yet, so we return an approximation
@@ -294,6 +302,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         return f.getResultType().getPrimaryType().getUType();
     }
 
+    @Override
     public int getIntrinsicDependencies() {
         return StaticProperty.DEPENDS_ON_USER_FUNCTIONS;
     }
@@ -304,6 +313,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * @return true if this is an updating expression
      */
 
+    @Override
     public boolean isUpdatingExpression() {
         return function.isUpdating();
     }
@@ -317,6 +327,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * @return the special properties, as a bit-significant integer
      */
 
+    @Override
     protected int computeSpecialProperties() {
         // Inherit the properties of the function being called if possible. But we have to prevent
         // looping when the function is recursive. For safety, we only consider the properties of the
@@ -351,6 +362,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         if (function == null) {
             // not bound yet, we have no way to register the new copy with the XSLFunction
@@ -373,6 +385,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * Determine the cardinality of the result
      */
 
+    @Override
     public int computeCardinality() {
         if (staticType == null) {
             // the actual type is not known yet, so we return an approximation
@@ -383,6 +396,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         Expression e = super.typeCheck(visitor, contextInfo);
         if (e != this) {
@@ -399,16 +413,12 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
-        //function.setOnFirstCall(new DeferredAction(visitor, contextItemType));
         Expression e = super.optimize(visitor, contextItemType);
         if (e == this && function != null) {
-            Expression e2 = visitor.obtainOptimizer().tryInlineFunctionCall(
+            return visitor.obtainOptimizer().tryInlineFunctionCall(
                     this, visitor, contextItemType);
-//            if (e2 != this) {
-//                return e2.optimize(visitor, contextItemType);
-//            }
-            return e2;
         }
         return e;
     }
@@ -443,6 +453,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         return addExternalFunctionCallToPathMap(pathMap, pathMapNodeSet);
     }
@@ -453,12 +464,14 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * that a tail call was found.
      */
 
+    @Override
     public int markTailFunctionCalls(StructuredQName qName, int arity) {
         tailCall = getFunctionName().equals(qName) &&
                 arity == getArity() ? SELF_TAIL_CALL : FOREIGN_TAIL_CALL;
         return tailCall;
     }
 
+    @Override
     public int getImplementationMethod() {
         if (Cardinality.allowsMany(getCardinality())) {
             return ITERATE_METHOD | PROCESS_METHOD;
@@ -473,6 +486,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * it returns an Object representing the arguments to the next (recursive) call
      */
 
+    @Override
     public Item evaluateItem(XPathContext c) throws XPathException {
         return callFunction(c).head();
     }
@@ -483,7 +497,8 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext c) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext c) throws XPathException {
         return callFunction(c).iterate();
     }
 
@@ -497,12 +512,15 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * @param pul     the pending update list to which the results should be written
      */
 
+    @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         Sequence[] actualArgs = evaluateArguments(context);
         XPathContextMajor c2 = context.newCleanContext();
         c2.setOrigin(this);
         function.callUpdating(actualArgs, c2, pul);
     }
+
+    private static int depth = 0;
 
     /**
      * This is the method that actually does the function call (in pull mode)
@@ -511,9 +529,9 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * @return the result of the function
      * @throws XPathException if dynamic errors occur
      */
-    private Sequence<?> callFunction(XPathContext context) throws XPathException {
+    private Sequence callFunction(XPathContext context) throws XPathException {
         UserFunction targetFunction;
-        Sequence<?>[] actualArgs = evaluateArguments(context);
+        Sequence[] actualArgs = evaluateArguments(context);
         XPathContextMajor c2;
         if (isTailCall()) {
             requestTailCall(context, actualArgs);
@@ -538,20 +556,19 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         }
 
         try {
+            //Instrumentation.count(function.getFunctionName().getLocalPart());
             return targetFunction.call(c2, actualArgs);
         } catch (UncheckedXPathException e) {
             XPathException xe = e.getXPathException();
             xe.maybeSetLocation(getLocation());
             throw xe;
         } catch (StackOverflowError err) {
-            err.printStackTrace();
-            throw new XPathException.StackOverflow (
-                    "Too many nested function calls. May be due to infinite recursion",
+            throw new XPathException.StackOverflow("Too many nested function calls. May be due to infinite recursion",
                                      SaxonErrorCode.SXLM0001, getLocation());
         }
     }
 
-    private void requestTailCall(XPathContext context, Sequence<?>[] actualArgs) throws XPathException {
+    private void requestTailCall(XPathContext context, Sequence[] actualArgs) throws XPathException {
         if (bindingSlot >= 0) {
             TailCallLoop.TailCallComponent info = new TailCallLoop.TailCallComponent();
             Component target = getTargetComponent(context);
@@ -575,13 +592,16 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     /**
      * Process the function call in push mode
      *
+     *
+     * @param output the destination for the result
      * @param context the XPath dynamic context
      * @throws XPathException if a dynamic error occurs
      */
 
-    public void process(XPathContext context) throws XPathException {
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
 
-        Sequence<?>[] actualArgs = evaluateArguments(context);
+        Sequence[] actualArgs = evaluateArguments(context);
 
         if (isTailCall()) {
             requestTailCall(context, actualArgs);
@@ -597,11 +617,11 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
             XPathContextMajor c2 = targetFunction.makeNewContext(context, this);
             c2.setCurrentComponent(target);
             c2.setOrigin(this);
-            targetFunction.process(actualArgs, c2);
+            targetFunction.process(c2, actualArgs, output);
         } else {
             XPathContextMajor c2 = function.makeNewContext(context, this);
             c2.setOrigin(this);
-            function.process(actualArgs, c2);
+            function.process(c2, actualArgs, output);
         }
     }
 
@@ -614,18 +634,20 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         }
     }
 
+    @Override
     public UserFunction getTargetFunction(XPathContext context) {
         return (UserFunction) getTargetComponent(context).getActor();
     }
 
-    public Sequence<?>[] evaluateArguments(XPathContext c) throws XPathException {
+    @Override
+    public Sequence[] evaluateArguments(XPathContext c) throws XPathException {
         return evaluateArguments(c, false);
     }
 
 
-    public Sequence<?>[] evaluateArguments(XPathContext c, boolean streamed) throws XPathException {
+    public Sequence[] evaluateArguments(XPathContext c, boolean streamed) throws XPathException {
         int numArgs = getArity();
-        Sequence<?>[] actualArgs = SequenceTool.makeSequenceArray(numArgs);
+        Sequence[] actualArgs = SequenceTool.makeSequenceArray(numArgs);
         synchronized(this) {
             if (argumentEvaluators == null) {
                 // should have been done at compile time
@@ -651,6 +673,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("ufCall", this);
         if (getFunctionName() != null) {
@@ -662,7 +685,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         if (argumentEvaluators != null && getArity() > 0) {
             FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
             for (Evaluator e : argumentEvaluators) {
-                fsb.append(e.getCode() + " ");
+                fsb.append(e.getEvaluationMode().getCode() + " ");
             }
             out.emitAttribute("eval", Whitespace.trim(fsb));
         }
@@ -677,10 +700,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         out.endElement();
     }
 
-    public int getConstructType() {
-        return LocationKind.FUNCTION_CALL;
-    }
-
     /**
      * Get a name identifying the kind of expression, in terms meaningful to a user.
      *
@@ -693,6 +712,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         return "userFunctionCall";
     }
 
+    @Override
     public Object getProperty(String name) {
         if (name.equals("target")) {
             return function;
@@ -700,6 +720,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         return super.getProperty(name);
     }
 
+    @Override
     public StructuredQName getObjectName() {
         return getFunctionName();
     }

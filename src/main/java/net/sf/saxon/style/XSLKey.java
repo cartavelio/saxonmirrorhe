@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,9 +18,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.*;
@@ -44,11 +42,10 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
     private Expression use;
     private String collationName;
     private StructuredQName keyName;
-    SlotManager stackFrameMap;
+    private SlotManager stackFrameMap;
     private boolean rangeKey;
     private boolean composite = false;
     private KeyDefinition keyDefinition;
-
 
 
     /**
@@ -59,14 +56,17 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
      * @throws UnsupportedOperationException for second-class components such as keys that support outwards references
      *                                       but not inwards references
      */
+    @Override
     public Actor getActor() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public SymbolicName getSymbolicName() {
         return null;
     }
 
+    @Override
     public void checkCompatibility(Component component) {
         // no action: keys cannot be overridden
     }
@@ -82,6 +82,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
      * @return true: yes, it may contain a sequence constructor
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
@@ -90,47 +91,49 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
      * Get the Procedure object that looks after any local variables declared in the content constructor
      */
 
+    @Override
     public SlotManager getSlotManager() {
         return stackFrameMap;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         String nameAtt = null;
         String matchAtt = null;
-        String useAtt = null;
+        String useAtt;
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String uri = atts.getURI(a);
-            String local = atts.getLocalName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            String uri = attName.getURI();
+            String local = attName.getLocalPart();
             if ("".equals(uri)) {
                 switch (local) {
                     case "name":
-                        nameAtt = Whitespace.trim(atts.getValue(a));
+                        nameAtt = Whitespace.trim(value);
                         break;
                     case "use":
-                        useAtt = atts.getValue(a);
-                        use = makeExpression(useAtt, a);
+                        useAtt = value;
+                        use = makeExpression(useAtt, att);
                         break;
                     case "match":
-                        matchAtt = atts.getValue(a);
+                        matchAtt = value;
                         break;
                     case "collation":
-                        collationName = Whitespace.trim(atts.getValue(a));
+                        collationName = Whitespace.trim(value);
                         break;
                     case "composite":
-                        composite = processBooleanAttribute("composite", atts.getValue(a));
+                        composite = processBooleanAttribute("composite", value);
                         break;
                     default:
-                        checkUnknownAttribute(atts.getNodeName(a));
+                        checkUnknownAttribute(attName);
                         break;
                 }
             } else if (local.equals("range-key") && uri.equals(NamespaceConstant.SAXON)) {
-                rangeKey = processBooleanAttribute("range-key", atts.getValue(a));
+                rangeKey = processBooleanAttribute("range-key", value);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -138,12 +141,8 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
             reportAbsence("name");
             nameAtt = "_dummy_key_name";
         }
-        try {
-            keyName = makeQName(nameAtt);
-            setObjectName(keyName);
-        } catch (XPathException err) {
-            compileErrorInAttribute(err.getMessage(), err.getErrorCodeLocalPart(), "name");
-        }
+        keyName = makeQName(nameAtt, null, "name");
+        setObjectName(keyName);
 
         if (matchAtt == null) {
             reportAbsence("match");
@@ -159,20 +158,17 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
 
     public StructuredQName getKeyName() {
         //We use null to mean "not yet evaluated"
-        try {
-            if (getObjectName() == null) {
-                // allow for forwards references
-                String nameAtt = getAttributeValue("", "name");
-                if (nameAtt != null) {
-                    setObjectName(makeQName(nameAtt));
-                }
+        if (getObjectName() == null) {
+            // allow for forwards references
+            String nameAtt = getAttributeValue("", "name");
+            if (nameAtt != null) {
+                setObjectName(makeQName(nameAtt, null, "name"));
             }
-            return getObjectName();
-        } catch (XPathException err) {
-            return null;          // the errors will be picked up later
         }
+        return getObjectName();
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
 
         Configuration config = getConfiguration();
@@ -228,6 +224,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
     }
 
     private static class ContainsGlobalVariable implements Predicate<Expression> {
+        @Override
         public boolean test(Expression e) {
             return e instanceof GlobalVariableReference ||
                     e instanceof UserFunctionCall ||
@@ -238,6 +235,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
 
     private static ContainsGlobalVariable containsGlobalVariable = new ContainsGlobalVariable();
 
+    @Override
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) {
         StructuredQName keyName = getKeyName();
         if (keyName != null) {
@@ -245,6 +243,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
         }
     }
 
+    @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) throws XPathException {
         StaticContext env = getStaticContext();
         Configuration config = env.getConfiguration();
@@ -293,7 +292,6 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
             }
         }
 
-
         ItemType useItemType = use.getItemType();
         if (useItemType == ErrorType.getInstance()) {
             useItemType = BuiltInAtomicType.STRING; // corner case, prevents crashing
@@ -312,7 +310,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
         if ((match.getDependencies() & StaticProperty.DEPENDS_ON_CURRENT_ITEM) != 0) {
             nextFree = 1;
         }
-        int slots = match.allocateSlots(stackFrameMap, nextFree);
+        match.allocateSlots(stackFrameMap, nextFree);
 
         // If either the match pattern or the use expression references a global variable or parameter,
         // or a call on a function or template that might reference one, then
@@ -348,6 +346,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
      * @param declaration this xsl:key declaration
      */
 
+    @Override
     public void optimize(ComponentDeclaration declaration) throws XPathException {
         ExpressionVisitor visitor = makeExpressionVisitor();
         ContextItemStaticInfo contextItemType = getConfiguration().makeContextItemStaticInfo(match.getItemType(), false);
@@ -363,5 +362,6 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
      *
      * @param opt the optimizer
      */
+    @Override
     public void generateByteCode(Optimizer opt) {}
 }

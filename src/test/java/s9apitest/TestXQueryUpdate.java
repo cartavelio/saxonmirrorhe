@@ -1,11 +1,12 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
@@ -15,19 +16,41 @@ import java.util.Iterator;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
 import static net.sf.saxon.s9api.streams.Steps.descendant;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * JUnit tests for XQuery Update using the s9api XQueryCompiler
  */
-public class TestXQueryUpdate extends TestCase {
+public class TestXQueryUpdate {
+    @BeforeAll
+    static void setUp() throws IOException {
+        // Copy books.xml to the temp directory so that the updates don't matter
+        String tempfn = ConfigTest.TEMP_DIR + "books.xml";
+        String origfn = ConfigTest.DATA_DIR + "books.xml";
+        InputStream instream = null;
+        OutputStream outstream = null;
 
+        instream = new FileInputStream(new File(origfn));
+        outstream = new FileOutputStream(new File(tempfn));
+        byte[] buf = new byte[4096];
+        int length = -1;
+        while ((length = instream.read(buf)) > 0) {
+            outstream.write(buf, 0, length);
+        }
+        instream.close();
+        outstream.close();
+    }
+
+    @Test
     public void testUpdate() {
         try {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.TREE_MODEL, Builder.LINKED_TREE);
             proc.setConfigurationProperty(Feature.TREE_MODEL_NAME, "linkedTree");
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(new URI("file:///" + ConfigTest.DATA_DIR));
+            comp.setBaseURI(new URI("file:///" + ConfigTest.TEMP_DIR));
             comp.setUpdatingEnabled(true);
             XQueryExecutable exp =
                 comp.compile("for $p in doc('books.xml')//PRICE "
@@ -65,6 +88,7 @@ public class TestXQueryUpdate extends TestCase {
         }
     }
 
+    @Test
     public void testCopyModify() {
         try {
             Processor proc = new Processor(true);
@@ -72,9 +96,9 @@ public class TestXQueryUpdate extends TestCase {
             //proc.setConfigurationProperty(FeatureKeys.TREE_MODEL_NAME, "linkedTree");
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setTreeModel(TreeModel.LINKED_TREE);
-            XdmNode input = builder.build(new File(ConfigTest.DATA_DIR + "books.xml"));
+            XdmNode input = builder.build(new File(ConfigTest.TEMP_DIR + "books.xml"));
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(new URI("file:///" + ConfigTest.DATA_DIR));
+            comp.setBaseURI(new URI("file:///" + ConfigTest.TEMP_DIR));
             comp.setUpdatingEnabled(true);
             XQueryExecutable exp =
                 comp.compile("copy $doc := .\n" +
@@ -90,7 +114,7 @@ public class TestXQueryUpdate extends TestCase {
             eval.setDestination(ser);
             eval.run();
             System.err.println(writer);
-            assertTrue("renamed", writer.toString().contains("NEW-PRICE"));
+            assertTrue(writer.toString().contains("NEW-PRICE"), "renamed");
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
@@ -104,6 +128,7 @@ public class TestXQueryUpdate extends TestCase {
      * the revalidated content contains expanded default values.
      */
 
+    @Test
     public void testRevalidationWithDefaults() {
         try {
             Processor proc = new Processor(true);
@@ -152,6 +177,7 @@ public class TestXQueryUpdate extends TestCase {
      * Test that after an update to a document, stale indexes are not used
      */
 
+    @Test
     public void testIndexesCleared() {
         try {
             Processor proc = new Processor(true);
@@ -159,10 +185,10 @@ public class TestXQueryUpdate extends TestCase {
 
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setTreeModel(TreeModel.LINKED_TREE);
-            XdmNode doc = builder.build(new File (ConfigTest.DATA_DIR + "books.xml"));
+            XdmNode doc = builder.build(new File (ConfigTest.TEMP_DIR + "books.xml"));
 
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(new URI("file:///" + ConfigTest.DATA_DIR));
+            comp.setBaseURI(new URI("file:///" + ConfigTest.TEMP_DIR));
             comp.setUpdatingEnabled(true);
 
             XQueryExecutable exp1 =

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,7 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
@@ -22,7 +22,6 @@ import net.sf.saxon.type.SchemaType;
  * and constructing a Document tree. There is one concrete subclass for each
  * tree implementation.
  *
- * @author Michael H. Kay
  */
 
 public abstract class Builder implements Receiver {
@@ -34,11 +33,6 @@ public abstract class Builder implements Receiver {
      * Constant denoting the "linked tree" in which each node is represented as an object
      */
     public static final int LINKED_TREE = 0;
-    /**
-     * Alternative constant denoting the "linked tree" in which each node is represented as an object
-     * Retained for backwards compatibility
-     */
-    public static final int STANDARD_TREE = 0;
     /**
      * Constant denoting the "tiny tree" in which the tree is represented internally using arrays of integers
      */
@@ -53,13 +47,18 @@ public abstract class Builder implements Receiver {
     public static final int JDOM2_TREE = 4;
     public static final int AXIOM_TREE = 5;
     public static final int DOMINO_TREE = 6;
-    public static final int K_TREE = 7;
+
+    /**
+     * Constant denoting the "mutable linked tree" in which each node is represented as an object
+     */
+    public static final int MUTABLE_LINKED_TREE = 7;
 
     protected PipelineConfiguration pipe;
     protected Configuration config;
     protected NamePool namePool;
     protected String systemId;
     protected String baseURI;
+    protected boolean uniformBaseURI = true;
     protected NodeInfo currentRoot;
     protected boolean lineNumbering = false;
     protected boolean useEventLocation = true;
@@ -84,6 +83,7 @@ public abstract class Builder implements Receiver {
         namePool = config.getNamePool();
     }
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         this.pipe = pipe;
         config = pipe.getConfiguration();
@@ -92,6 +92,7 @@ public abstract class Builder implements Receiver {
     }
 
     /*@NotNull*/
+    @Override
     public PipelineConfiguration getPipelineConfiguration() {
         return pipe;
     }
@@ -123,7 +124,7 @@ public abstract class Builder implements Receiver {
     /**
      * Say that the system IDs of constructed nodes (especially element nodes) are to be
      * taken from the system ID property of the {@link Location} object passed as a parameter to
-     * the {@link #startElement(NodeName, SchemaType, Location, int)} event. This property
+     * the {@link Outputter#startElement(NodeName, SchemaType, Location, int)} event. This property
      * should be set to true when building a document from events originating with an XML parser,
      * because the {@link Location} object in this case will have a system ID that changes
      * as external entities are processed. The base URI of a node in this case is determined
@@ -144,7 +145,7 @@ public abstract class Builder implements Receiver {
     /**
      * Ask whether the system IDs of constructed nodes (especially element nodes) are to be
      * taken from the system ID property of the {@link Location} object passed as a parameter to
-     * the {@link #startElement(NodeName, SchemaType, Location, int)} event.
+     * the {@link Outputter#startElement(NodeName, SchemaType, Location, int)} event.
      * @return true if the system ID is to be taken from the Location parameter of
      *      each event. The default value is true.
      */
@@ -162,6 +163,7 @@ public abstract class Builder implements Receiver {
      * @param systemId the SystemId, that is, the document-uri.
      */
 
+    @Override
     public void setSystemId(/*@Nullable*/ String systemId) {
         this.systemId = systemId;
     }
@@ -176,6 +178,7 @@ public abstract class Builder implements Receiver {
      */
 
     /*@Nullable*/
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -238,19 +241,25 @@ public abstract class Builder implements Receiver {
         return timing;
     }
 
+    @Override
     public void open() {
         if (timing && !open) {
-            getConfiguration().getStandardErrorOutput().println(
-                    "Building tree for " + getSystemId() + " using " + getClass());
+            String sysId = getSystemId();
+            if (sysId == null) {
+                sysId = "(unknown systemId)";
+            }
+            getConfiguration().getLogger().info(
+                    "Building tree for " + sysId + " using " + getClass());
             startTime = System.nanoTime();
         }
         open = true;
     }
 
+    @Override
     public void close() throws XPathException {
         if (timing && open) {
             long endTime = System.nanoTime();
-            getConfiguration().getStandardErrorOutput().println(
+            getConfiguration().getLogger().info(
                     "Tree built in " + CommandLineOptions.showExecutionTimeNano(endTime - startTime));
             if (currentRoot instanceof TinyDocumentImpl) {
                 ((TinyDocumentImpl) currentRoot).showSize();
@@ -268,6 +277,7 @@ public abstract class Builder implements Receiver {
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return true;
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,21 +8,22 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
-import net.sf.saxon.om.*;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.EmptySequence;
 
-import java.util.function.Consumer;
+import java.util.EnumSet;
 
 
 /**
  * SingletonIterator: an iterator over a sequence of zero or one values
  */
 
-public class SingletonIterator<T extends Item<?>> implements SequenceIterator<T>, UnfailingIterator<T>,
-        ReversibleIterator<T>, LastPositionFinder, GroundedIterator<T>, LookaheadIterator<T> {
+public class SingletonIterator<T extends Item> implements SequenceIterator, UnfailingIterator,
+        ReversibleIterator, LastPositionFinder, GroundedIterator, LookaheadIterator {
 
-    private T item;
+    private final T item;
     boolean gone = false;
 
     /**
@@ -31,7 +32,7 @@ public class SingletonIterator<T extends Item<?>> implements SequenceIterator<T>
      * @param value the item to iterate over
      */
 
-    private SingletonIterator(T value) {
+    public SingletonIterator(T value) {
         this.item = value;
     }
 
@@ -44,7 +45,7 @@ public class SingletonIterator<T extends Item<?>> implements SequenceIterator<T>
      */
 
     /*@NotNull*/
-    public static <T extends Item<?>> UnfailingIterator<T> makeIterator(T item) {
+    public static <T extends Item> UnfailingIterator makeIterator(T item) {
         if (item == null) {
             return EmptyIterator.emptyIterator();
         } else {
@@ -60,7 +61,7 @@ public class SingletonIterator<T extends Item<?>> implements SequenceIterator<T>
      */
 
 
-    public static <T extends Item<?>> SingletonIterator<T> rawIterator(T item) {
+    public static <T extends Item> SingletonIterator<T> rawIterator(T item) {
         assert item != null;
         return new SingletonIterator<>(item);
     }
@@ -74,11 +75,13 @@ public class SingletonIterator<T extends Item<?>> implements SequenceIterator<T>
      * @return true if there are more items
      */
 
+    @Override
     public boolean hasNext() {
         return !gone;
     }
 
     /*@Nullable*/
+    @Override
     public T next() {
         if (gone) {
             return null;
@@ -88,19 +91,18 @@ public class SingletonIterator<T extends Item<?>> implements SequenceIterator<T>
         }
     }
 
+    @Override
     public int getLength() {
         return 1;
     }
 
-    public void close() {
-    }
-
     /*@NotNull*/
+    @Override
     public SingletonIterator<T> getReverseIterator() {
         return new SingletonIterator<>(item);
     }
 
-    public Item getValue() {
+    public T getValue() {
         return item;
     }
 
@@ -113,17 +115,17 @@ public class SingletonIterator<T extends Item<?>> implements SequenceIterator<T>
      */
 
     /*@NotNull*/
-    public GroundedValue<T> materialize() {
-        if (item instanceof GroundedValue) {
-            // noinspection unchecked
-            return (GroundedValue<T>)item;
+    @Override
+    public GroundedValue materialize() {
+        if (item != null) {
+            return item;
         } else {
-            return new ZeroOrOne<>(null);
+            return EmptySequence.getInstance();
         }
     }
 
     @Override
-    public GroundedValue<T> getResidue() {
+    public GroundedValue getResidue() {
         return gone ? EmptySequence.getInstance() : materialize();
     }
 
@@ -131,26 +133,16 @@ public class SingletonIterator<T extends Item<?>> implements SequenceIterator<T>
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return GROUNDED | LAST_POSITION_FINDER | LOOKAHEAD;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD, Property.GROUNDED, Property.LAST_POSITION_FINDER);
     }
 
-    @Override
-    public void forEach(Consumer<T> consumer) {
-        consumer.accept(item);
-    }
-
-    @Override
-    public void forEachOrFail(ItemConsumer<T> consumer) throws XPathException {
-        if (!gone) {
-            consumer.accept(item);
-        }
-    }
 }
 

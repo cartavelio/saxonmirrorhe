@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.flwor;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Int64Value;
@@ -20,7 +21,8 @@ public class CountClausePush extends TuplePush {
     int slot;
     int count = 0;
 
-    public CountClausePush(TuplePush destination, CountClause countClause) {
+    public CountClausePush(Outputter outputter, TuplePush destination, CountClause countClause) {
+        super(outputter);
         this.destination = destination;
         this.slot = countClause.getRangeVariable().getLocalSlotNumber();
     }
@@ -43,4 +45,4 @@ public class CountClausePush extends TuplePush {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

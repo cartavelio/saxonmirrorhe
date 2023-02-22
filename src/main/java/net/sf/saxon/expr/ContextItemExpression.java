@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -20,6 +20,7 @@ import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.value.SequenceType;
 
 
 /**
@@ -29,8 +30,9 @@ import net.sf.saxon.type.UType;
 
 public class ContextItemExpression extends Expression {
 
-    ContextItemStaticInfo staticInfo = ContextItemStaticInfo.DEFAULT;
-    String errorCodeForAbsentContext = "XPDY0002";
+    private ContextItemStaticInfo staticInfo = ContextItemStaticInfo.DEFAULT;
+    private String errorCodeForAbsentContext = "XPDY0002";
+    private boolean absentContextIsTypeError = false; // absurdly, but that's what the spec says
 
     /**
      * Create the expression
@@ -47,6 +49,7 @@ public class ContextItemExpression extends Expression {
      *         in explain() output displaying the expression.
      */
 
+    @Override
     public String getExpressionName() {
         return "dot";
     }
@@ -59,16 +62,18 @@ public class ContextItemExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ContextItemExpression cie2 = new ContextItemExpression();
         cie2.staticInfo = staticInfo;
-        cie2.setErrorCodeForUndefinedContext(errorCodeForAbsentContext);
+        cie2.setErrorCodeForUndefinedContext(errorCodeForAbsentContext, false);
         ExpressionTool.copyLocationInfo(this, cie2);
         return cie2;
     }
 
-    public void setErrorCodeForUndefinedContext(String errorCode) {
+    public void setErrorCodeForUndefinedContext(String errorCode, boolean isTypeError) {
         errorCodeForAbsentContext = errorCode;
+        absentContextIsTypeError = isTypeError;
     }
 
     public String getErrorCodeForUndefinedContext() {
@@ -89,10 +94,14 @@ public class ContextItemExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, /*@Nullable*/ ContextItemStaticInfo contextInfo) throws XPathException {
         if (contextInfo.getItemType() == ErrorType.getInstance()) {
             visitor.issueWarning("Evaluation will always fail: there is no context item", getLocation());
-            ErrorExpression ee = new ErrorExpression("There is no context item", getErrorCodeForUndefinedContext(), true);
+            ErrorExpression ee = new ErrorExpression(
+                    "There is no context item",
+                    getErrorCodeForUndefinedContext(),
+                    absentContextIsTypeError);
             ee.setOriginalExpression(this);
             ExpressionTool.copyLocationInfo(this, ee);
             return ee;
@@ -118,13 +127,14 @@ public class ContextItemExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         // In XSLT, we don't catch this error at the typeCheck() phase because it's done one XPath expression
         // at a time. So we repeat the check here.
         if (contextItemType == null) {
             XPathException err = new XPathException("The context item is undefined at this point");
             err.setErrorCode(getErrorCodeForUndefinedContext());
-            err.setIsTypeError(true);
+            err.setIsTypeError(absentContextIsTypeError);
             err.setLocation(getLocation());
             throw err;
         }
@@ -136,6 +146,7 @@ public class ContextItemExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return staticInfo.getItemType();
     }
@@ -148,6 +159,7 @@ public class ContextItemExpression extends Expression {
      * @return the static item type of the expression according to the XSLT 3.0 defined rules
      */
 
+    @Override
     public UType getStaticUType(UType contextItemType) {
         return contextItemType;
     }
@@ -167,6 +179,7 @@ public class ContextItemExpression extends Expression {
      * Get the static cardinality
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
@@ -177,6 +190,7 @@ public class ContextItemExpression extends Expression {
      * @return the value {@link StaticProperty#NO_NODES_NEWLY_CREATED}
      */
 
+    @Override
     public int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         return p | StaticProperty.NO_NODES_NEWLY_CREATED | StaticProperty.CONTEXT_DOCUMENT_NODESET;
@@ -199,10 +213,12 @@ public class ContextItemExpression extends Expression {
      * get HashCode for comparing two expressions
      */
 
+    @Override
     public int computeHashCode() {
         return "ContextItemExpression".hashCode();
     }
 
+    @Override
     public int getIntrinsicDependencies() {
         return StaticProperty.DEPENDS_ON_CONTEXT_ITEM;
     }
@@ -228,6 +244,7 @@ public class ContextItemExpression extends Expression {
      *         expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         if (pathMapNodeSet == null) {
             pathMapNodeSet = new PathMap.PathMapNodeSet(pathMap.makeNewRoot(this));
@@ -244,6 +261,7 @@ public class ContextItemExpression extends Expression {
      *         axes.
      */
 
+    @Override
     public boolean isSubtreeExpression() {
         return true;
     }
@@ -282,10 +300,11 @@ public class ContextItemExpression extends Expression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
-        Item<?> item = context.getContextItem();
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
+        Item item = context.getContextItem();
         if (item == null) {
-            dynamicError("The context item is absent", getErrorCodeForUndefinedContext(), context);
+            reportAbsentContext(context);
         }
         return SingletonIterator.makeIterator(item);
     }
@@ -294,12 +313,21 @@ public class ContextItemExpression extends Expression {
      * Evaluate the expression
      */
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         Item item = context.getContextItem();
         if (item == null) {
-            dynamicError("The context item is absent", getErrorCodeForUndefinedContext(), context);
+            reportAbsentContext(context);
         }
         return item;
+    }
+
+    private void reportAbsentContext(XPathContext context) throws XPathException {
+        if (absentContextIsTypeError) {
+            typeError("The context item is absent", getErrorCodeForUndefinedContext(), context);
+        } else {
+            dynamicError("The context item is absent", getErrorCodeForUndefinedContext(), context);
+        }
     }
 
     /**
@@ -317,11 +345,13 @@ public class ContextItemExpression extends Expression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("dot", this);
         ItemType type = getItemType();
         if (!(type == AnyItemType.getInstance())) {
-            destination.emitAttribute("type", type.toExportString());
+            SequenceType st = SequenceType.makeSequenceType(type,StaticProperty.EXACTLY_ONE);
+            destination.emitAttribute("type", st.toAlphaCode());
         }
         if (staticInfo.isPossiblyAbsent()) {
             destination.emitAttribute("flags", "a");

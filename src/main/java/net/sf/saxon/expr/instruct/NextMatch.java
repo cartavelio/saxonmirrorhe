@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
@@ -41,6 +42,7 @@ public class NextMatch extends ApplyNextMatchingTemplate {
      * Get the name of this instruction for diagnostic and tracing purposes
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_NEXT_MATCH;
     }
@@ -53,6 +55,7 @@ public class NextMatch extends ApplyNextMatchingTemplate {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         NextMatch nm2 = new NextMatch(useTailRecursion);
         nm2.setActualParams(WithParam.copy(nm2, getActualParams(), rebindings));
@@ -63,7 +66,8 @@ public class NextMatch extends ApplyNextMatchingTemplate {
 
 
     /*@Nullable*/
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
 
         Controller controller = context.getController();
         assert controller != null;
@@ -92,12 +96,12 @@ public class NextMatch extends ApplyNextMatchingTemplate {
         //Rule rule = controller.getRuleManager().getNextMatchHandler(currentItem, mode.getCode(), currentRule, context);
 
         if (rule == null) {             // use the default action for the node
-            mode.getBuiltInRuleSet().process(currentItem, params, tunnels, context, getLocation());
+            mode.getBuiltInRuleSet().process(currentItem, params, tunnels, output, context, getLocation());
         } else if (useTailRecursion) {
             // clear all the local variables: they are no longer needed
             Arrays.fill(context.getStackFrame().getStackFrameValues(), null);
             ((XPathContextMajor) context).setCurrentComponent(modeComponent); // bug 2818
-            return new NextMatchPackage(rule, params, tunnels, context);
+            return new NextMatchPackage(rule, params, tunnels, output, context);
         } else {
             TemplateRule nh = (TemplateRule) rule.getAction();
             nh.initialize();
@@ -108,9 +112,9 @@ public class NextMatch extends ApplyNextMatchingTemplate {
             c2.setLocalParameters(params);
             c2.setTunnelParameters(tunnels);
             c2.setCurrentTemplateRule(rule);
-            c2.setCurrentMergeGroupIterator(null);
             c2.setCurrentComponent(modeComponent); // needed in the case where next-match is called from a named template
-            nh.apply(c2);
+            c2.setCurrentMergeGroupIterator(null);
+            nh.apply(output, c2);
         }
         return null;
     }
@@ -120,6 +124,7 @@ public class NextMatch extends ApplyNextMatchingTemplate {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("nextMatch", this);
         String flags = "i";
@@ -148,6 +153,7 @@ public class NextMatch extends ApplyNextMatchingTemplate {
         private Rule rule;
         private ParameterSet params;
         private ParameterSet tunnelParams;
+        private Outputter output;
         private XPathContext evaluationContext;
 
         /**
@@ -164,10 +170,12 @@ public class NextMatch extends ApplyNextMatchingTemplate {
         public NextMatchPackage(Rule rule,
                                 ParameterSet params,
                                 ParameterSet tunnelParams,
+                                Outputter output,
                                 XPathContext evaluationContext) {
             this.rule = rule;
             this.params = params;
             this.tunnelParams = tunnelParams;
+            this.output = output;
             this.evaluationContext = evaluationContext;
         }
 
@@ -181,6 +189,7 @@ public class NextMatch extends ApplyNextMatchingTemplate {
          * @throws XPathException if a dynamic error occurs
          */
 
+        @Override
         public TailCall processLeavingTail() throws XPathException {
             TemplateRule nh = (TemplateRule) rule.getAction();
             nh.initialize();
@@ -191,12 +200,12 @@ public class NextMatch extends ApplyNextMatchingTemplate {
             c2.setTunnelParameters(tunnelParams);
             c2.openStackFrame(nh.getStackFrameMap());
             c2.setCurrentTemplateRule(rule);
-            c2.setCurrentMergeGroupIterator(null);
             c2.setCurrentComponent(evaluationContext.getCurrentComponent());
+            c2.setCurrentMergeGroupIterator(null);
 
             // System.err.println("Tail call on template");
 
-            return nh.applyLeavingTail(c2);
+            return nh.applyLeavingTail(output, c2);
         }
     }
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,7 @@ package net.sf.saxon.option.sql;
 
 import com.saxonica.functions.sql.SQLFunctionSet;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.style.Compilation;
@@ -17,7 +17,6 @@ import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
@@ -39,29 +38,29 @@ public class SQLInsert extends ExtensionInstruction {
     Expression connection;
     String table;
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        table = getAttributeList().getValue("", "table");
+        table = attributes().getValue("", "table");
         // TODO: allow table to be an AVT
         if (table == null) {
             reportAbsence("table");
         }
         table = SQLConnect.quoteSqlName(table);
 
-        String connectAtt = getAttributeList().getValue("", "connection");
+        AttributeInfo connectAtt = attributes().get("", "connection");
         if (connectAtt == null) {
             reportAbsence("connection");
         } else {
-            connection = makeExpression(connectAtt, getAttributeList().getIndex("", "connection"));
+            connection = makeExpression(connectAtt.getValue(), connectAtt);
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);
         connection = typeCheck("connection", connection);
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo curr;
-        while ((curr = kids.next()) != null) {
+        for (NodeInfo curr : children()) {
             if (curr instanceof SQLColumn) {
                 // OK
             } else if (curr.getNodeKind() == Type.TEXT && Whitespace.isWhite(curr.getStringValueCS())) {
@@ -73,6 +72,7 @@ public class SQLInsert extends ExtensionInstruction {
 
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
 
         // Collect names of columns to be added
@@ -80,17 +80,13 @@ public class SQLInsert extends ExtensionInstruction {
         StringBuilder statement = new StringBuilder(120);
         statement.append("INSERT INTO ").append(table).append(" (");
 
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
         int cols = 0;
-        while ((child = kids.next()) != null) {
-            if (child instanceof SQLColumn) {
-                if (cols++ > 0) {
-                    statement.append(',');
-                }
-                String colname = ((SQLColumn) child).getColumnName();
-                statement.append(colname);
+        for (NodeInfo child : children(SQLColumn.class::isInstance)) {
+            if (cols++ > 0) {
+                statement.append(',');
             }
+            String colname = ((SQLColumn) child).getColumnName();
+            statement.append(colname);
         }
         statement.append(") VALUES (");
 
@@ -111,12 +107,9 @@ public class SQLInsert extends ExtensionInstruction {
     /*@NotNull*/
     public List<Expression> getColumnInstructions(Compilation exec, ComponentDeclaration decl) throws XPathException {
         List<Expression> list = new ArrayList<>(10);
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        kids.forEachOrFail(child -> {
-            if (child instanceof SQLColumn) {
-                list.add(((SQLColumn) child).compile(exec, decl));
-            }
-        });
+        for (NodeInfo child : children(SQLColumn.class::isInstance)) {
+            list.add(((SQLColumn) child).compile(exec, decl));
+        }
         return list;
     }
 
@@ -141,15 +134,18 @@ public class SQLInsert extends ExtensionInstruction {
          * This method indicates which of the three is provided.
          */
 
+        @Override
         public int getImplementationMethod() {
             return Expression.EVALUATE_METHOD;
         }
 
+        @Override
         public String getExpressionType() {
             return "sql:insert";
         }
 
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
 
             // Prepare the SQL statement (only do this once)
 

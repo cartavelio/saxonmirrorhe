@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
@@ -106,6 +107,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
      * @return the select expression
      */
 
+    @Override
     public Expression getSelectExpression() {
         return selectOp.getChildExpression();
     }
@@ -117,6 +119,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
      * @return the body of the xsl:iterate loop
      */
 
+    @Override
     public Expression getActionExpression() {
         return actionOp.getChildExpression();
     }
@@ -126,6 +129,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         selectOp.typeCheck(visitor, contextInfo);
@@ -136,7 +140,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
             selectType = AnyItemType.getInstance();
         }
 
-        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(getSelectExpression().getItemType(), false);
+        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(selectType, false);
         cit.setContextSettingExpression(getSelectExpression());
         actionOp.typeCheck(visitor, cit);
 
@@ -151,6 +155,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         selectOp.optimize(visitor, contextInfo);
@@ -207,6 +212,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
      */
 
     /*@NotNull*/
+    @Override
     public final ItemType getItemType() {
         if (Literal.isEmptySequence(getOnCompletion())) {
             return getActionExpression().getItemType();
@@ -222,6 +228,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
      * (Nodes created by the condition can't contribute to the result).
      */
 
+    @Override
     public final boolean mayCreateNewNodes() {
         return (getActionExpression().getSpecialProperties() &
                 getOnCompletion().getSpecialProperties() &
@@ -265,6 +272,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
      * process() methods natively.
      */
 
+    @Override
     public int getImplementationMethod() {
         return PROCESS_METHOD;
     }
@@ -277,6 +285,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
      * static validation can continue recursively.
      */
 
+    @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         getActionExpression().checkPermittedContents(parentType, false);
         getOnCompletion().checkPermittedContents(parentType, false);
@@ -292,6 +301,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         IterateInstr exp = new IterateInstr(
                 getSelectExpression().copy(rebindings),
@@ -303,18 +313,19 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
     }
 
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         XPathContextMajor c2 = context.newContext();
         c2.setOrigin(this);
         FocusIterator iter = c2.trackFocus(getSelectExpression().iterate(context));
         c2.setCurrentTemplateRule(null);
-        PipelineConfiguration pipe = c2.getReceiver().getPipelineConfiguration();
+        PipelineConfiguration pipe = output.getPipelineConfiguration();
         pipe.setXPathContext(c2);
 
         boolean tracing = context.getController().isTracing();
         TraceListener listener = tracing ? context.getController().getTraceListener() : null;
 
-        getInitiallyExp().process(context);
+        getInitiallyExp().process(output, context);
 
         while (true) {
             Item item = iter.next();
@@ -322,7 +333,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
                 if (tracing) {
                     listener.startCurrentItem(item);
                 }
-                getActionExpression().process(c2);
+                getActionExpression().process(output, c2);
                 if (tracing) {
                     listener.endCurrentItem(item);
                 }
@@ -342,7 +353,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
                 // Execute on-completion instruction
                 XPathContextMinor c3 = context.newMinorContext();
                 c3.setCurrentIterator(null);
-                getOnCompletion().process(c3);
+                getOnCompletion().process(output, c3);
                 break;
             }
         }
@@ -356,6 +367,7 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("iterate", this);
         out.setChildRole("select");

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -40,9 +40,9 @@ public class URIQueryParameters {
     Integer onError = null;
     Maker<XMLReader> parserMaker = null;
     Boolean xinclude = null;
-    boolean unparsed;
     Boolean stable = null;
     Boolean metadata = null;
+    String contentType = null;
 
     public static final int ON_ERROR_FAIL = 1;
     public static final int ON_ERROR_WARNING = 2;
@@ -113,12 +113,8 @@ public class URIQueryParameters {
             } else if (value.equals("no")) {
                 xinclude = Boolean.FALSE;
             }
-        } else if (keyword.equals("unparsed")) {
-            if (value.equals("yes")) {
-                unparsed = true;
-            } else if (value.equals("no")) {
-                unparsed = false;
-            }
+        } else if (keyword.equals("content-type")) {
+            contentType = value;
         } else if (keyword.equals("on-error")) {
             switch (value) {
                 case "warning":
@@ -138,7 +134,7 @@ public class URIQueryParameters {
 
     public static FilenameFilter makeGlobFilter(String value) throws XPathException {
         FastStringBuffer sb = new FastStringBuffer(value.length() + 6);
-        sb.append('^');
+        sb.cat('^');
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
             if (c == '.') {
@@ -151,10 +147,10 @@ public class URIQueryParameters {
                 // replace "?" with ".?"
                 sb.append(".?");
             } else {
-                sb.append(c);
+                sb.cat(c);
             }
         }
-        sb.append('$');
+        sb.cat('$');
         try {
             return new RegexFilter(new JavaRegularExpression(sb, ""));
         } catch (XPathException e) {
@@ -222,11 +218,11 @@ public class URIQueryParameters {
     }
 
     /**
-     * Get the value of unparsed=yes|no, or false if unspecified
+     * Get the value of media-type, or null if absent
      */
 
-    public boolean isUnparsed() {
-        return unparsed;
+    public String getContentType() {
+        return contentType;
     }
 
     /**
@@ -268,6 +264,7 @@ public class URIQueryParameters {
          *         Returns true if the file is a directory or if it matches the glob pattern.
          */
 
+        @Override
         public boolean accept(File dir, String name) {
             return new File(dir, name).isDirectory() || pattern.matches(name);
         }

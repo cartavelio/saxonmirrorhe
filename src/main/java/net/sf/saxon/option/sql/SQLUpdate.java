@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,8 +10,8 @@ package net.sf.saxon.option.sql;
 import com.saxonica.functions.sql.SQLFunctionSet;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.style.Compilation;
@@ -19,7 +19,6 @@ import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
@@ -54,40 +53,37 @@ public class SQLUpdate extends ExtensionInstruction {
     String table;
     Expression where;
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        table = getAttributeList().getValue("", "table");
+        final AttributeMap atts = attributes();
+        table = atts.getValue("", "table");
         if (table == null) {
             reportAbsence("table");
         }
         table = SQLConnect.quoteSqlName(table);
 
-        String dbWhere = getAttributeList().getValue("", "where");
+        AttributeInfo dbWhere = atts.get("", "where");
         if (dbWhere == null) {
             where = new StringLiteral(StringValue.EMPTY_STRING);
         } else {
-            where = makeAttributeValueTemplate(dbWhere, getAttributeList().getIndex("", "where"));
+            where = makeAttributeValueTemplate(dbWhere.getValue(), dbWhere);
         }
 
-
-        String connectAtt = getAttributeList().getValue("", "connection");
+        AttributeInfo connectAtt = atts.get("", "connection");
         if (connectAtt == null) {
             reportAbsence("connection");
         } else {
-            connection = makeExpression(connectAtt, getAttributeList().getIndex("", "connection"));
+            connection = makeExpression(connectAtt.getValue(), connectAtt);
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);
         where = typeCheck("where", where);
         connection = typeCheck("connection", connection);
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        while (true) {
-            NodeInfo curr = kids.next();
-            if (curr == null) {
-                break;
-            }
+        for (NodeInfo curr : children()) {
             if (curr instanceof SQLColumn) {
                 // OK
             } else if (curr.getNodeKind() == Type.TEXT && Whitespace.isWhite(curr.getStringValueCS())) {
@@ -98,6 +94,7 @@ public class SQLUpdate extends ExtensionInstruction {
         }
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
 
         // Collect names of columns to be added
@@ -105,22 +102,14 @@ public class SQLUpdate extends ExtensionInstruction {
         FastStringBuffer statement = new FastStringBuffer(FastStringBuffer.C256);
         statement.append("UPDATE " + table + " SET ");
 
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
         int cols = 0;
-        while (true) {
-            child = kids.next();
-            if (child == null) {
-                break;
+        for (NodeInfo child : children(SQLColumn.class::isInstance)) {
+            if (cols++ > 0) {
+                statement.cat(',');
             }
-            if (child instanceof SQLColumn) {
-                if (cols++ > 0) {
-                    statement.append(',');
-                }
-                String colname = ((SQLColumn) child).getColumnName();
-                statement.append(colname);
-                statement.append("=?");
-            }
+            String colname = ((SQLColumn) child).getColumnName();
+            statement.append(colname);
+            statement.append("=?");
         }
 
         return new UpdateInstruction(connection, statement.toString(), getColumnInstructions(exec, decl), where);
@@ -130,16 +119,8 @@ public class SQLUpdate extends ExtensionInstruction {
     public List<Expression> getColumnInstructions(Compilation exec, ComponentDeclaration decl) throws XPathException {
         List<Expression> list = new ArrayList<>(10);
 
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
-        while (true) {
-            child = kids.next();
-            if (child == null) {
-                break;
-            }
-            if (child instanceof SQLColumn) {
-                list.add(((SQLColumn) child).compile(exec, decl));
-            }
+        for (NodeInfo child : children(SQLColumn.class::isInstance)) {
+            list.add(((SQLColumn) child).compile(exec, decl));
         }
 
         return list;
@@ -147,7 +128,6 @@ public class SQLUpdate extends ExtensionInstruction {
 
     private static class UpdateInstruction extends SimpleExpression {
 
-        private static final long serialVersionUID = -4234440812734827279L;
         public static final int CONNECTION = 0;
         public static final int WHERE = 1;
         public static final int FIRST_COLUMN = 2;
@@ -171,10 +151,12 @@ public class SQLUpdate extends ExtensionInstruction {
          * This method indicates which of the three is provided.
          */
 
+        @Override
         public int getImplementationMethod() {
             return Expression.EVALUATE_METHOD;
         }
 
+        @Override
         public String getExpressionType() {
             return "sql:update";
         }
@@ -185,7 +167,8 @@ public class SQLUpdate extends ExtensionInstruction {
             return u2.copyOperandsFrom(this);
         }
 
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
 
             // Prepare the SQL statement (only do this once)
 

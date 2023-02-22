@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -16,6 +16,7 @@ import net.sf.saxon.type.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.Objects;
 
 /**
  * A value of type xs:dayTimeDuration.
@@ -57,7 +58,7 @@ public final class DayTimeDurationValue extends DurationValue
      * constructor performs limited validation. The components (apart from sign) must all be non-negative
      * integers; they need not be normalized (for example, 36 hours is acceptable)
      * <p>Note: for historic reasons this constructor only supports microsecond precision. For nanosecond
-     * precision, use the constructor {@link DayTimeDurationValue#DayTimeDurationValue(int, int, int, long, int)}</p>
+     * precision, use the constructor {@link #DayTimeDurationValue(int, int, int, long, int)}</p>
      *
      * @param sign         positive number for positive durations, negative for negative duratoins
      * @param days         number of days
@@ -152,6 +153,7 @@ public final class DayTimeDurationValue extends DurationValue
      */
 
     /*@NotNull*/
+    @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
         DayTimeDurationValue v = DayTimeDurationValue.fromSeconds(getTotalSeconds());
         v.typeLabel = typeLabel;
@@ -165,6 +167,7 @@ public final class DayTimeDurationValue extends DurationValue
      * and xs:untypedAtomic. For external objects, the result is AnyAtomicType.
      */
 
+    @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.DAY_TIME_DURATION;
     }
@@ -175,11 +178,12 @@ public final class DayTimeDurationValue extends DurationValue
      * @return ISO 8601 representation.
      */
 
+    @Override
     public CharSequence getPrimitiveStringValue() {
 
         FastStringBuffer sb = new FastStringBuffer(32);
         if (negative) {
-            sb.append('-');
+            sb.cat('-');
         }
 
         int days = getDays();
@@ -187,12 +191,12 @@ public final class DayTimeDurationValue extends DurationValue
         int minutes = getMinutes();
         int seconds = getSeconds();
 
-        sb.append('P');
+        sb.cat('P');
         if (days != 0) {
             sb.append(days + "D");
         }
         if (days == 0 || hours != 0 || minutes != 0 || seconds != 0 || nanoseconds != 0) {
-            sb.append('T');
+            sb.cat('T');
         }
         if (hours != 0) {
             sb.append(hours + "H");
@@ -204,20 +208,7 @@ public final class DayTimeDurationValue extends DurationValue
             if (nanoseconds == 0) {
                 sb.append(seconds + "S");
             } else {
-                long ms = (seconds * 1_000_000_000L) + nanoseconds;
-                String mss = ms + "";
-                if (seconds == 0) {
-                    mss = "0000000000" + mss;
-                    mss = mss.substring(mss.length() - 10);
-                }
-                sb.append(mss.substring(0, mss.length() - 9));
-                sb.append('.');
-                int lastSigDigit = mss.length() - 1;
-                while (mss.charAt(lastSigDigit) == '0') {
-                    lastSigDigit--;
-                }
-                sb.append(mss.substring(mss.length() - 9, lastSigDigit + 1));
-                sb.append('S');
+                formatFractionalSeconds(sb, seconds, (seconds * 1_000_000_000L) + nanoseconds);
             }
         }
         return sb;
@@ -229,6 +220,7 @@ public final class DayTimeDurationValue extends DurationValue
      * @return an approximation to the length of the duration in seconds, expressed as a double.
      */
 
+    @Override
     public double getLengthInSeconds() {
         double a = seconds + ((double) nanoseconds / 1_000_000_000);
         // System.err.println("Duration length " + days + "/" + hours + "/" + minutes + "/" + seconds + " is " + a);
@@ -342,7 +334,6 @@ public final class DayTimeDurationValue extends DurationValue
      */
 
     public static DayTimeDurationValue fromNanoseconds(long nanoseconds) throws IllegalArgumentException {
-        int sign = Long.signum(nanoseconds);
         return new DayTimeDurationValue(
                     0, 0, 0, nanoseconds / 1_000_000_000L, (int) (nanoseconds % 1_000_000_000L));
     }
@@ -386,6 +377,7 @@ public final class DayTimeDurationValue extends DurationValue
      * @return the result of the multiplication
      */
 
+    @Override
     public DurationValue multiply(long factor) throws XPathException {
         // Fast path for simple cases
         if (Math.abs(factor) < 0x7fff_ffff && Math.abs(seconds) < 0x7fff_ffff) {
@@ -405,6 +397,7 @@ public final class DayTimeDurationValue extends DurationValue
      * exceeds Saxon limits (2^63 seconds)
      */
 
+    @Override
     public DayTimeDurationValue multiply(double n) throws XPathException {
         if (Double.isNaN(n)) {
             XPathException err = new XPathException("Cannot multiply a duration by NaN");
@@ -444,6 +437,7 @@ public final class DayTimeDurationValue extends DurationValue
      *                        exceeds Saxon limits (2^63 seconds)
      */
 
+    @Override
     public DurationValue divide(double n) throws XPathException {
         if (Double.isNaN(n)) {
             XPathException err = new XPathException("Cannot divide a duration by NaN");
@@ -477,6 +471,7 @@ public final class DayTimeDurationValue extends DurationValue
      * @return the ratio, as a decimal
      * @throws XPathException when dividing by zero, or when dividing two durations of different type
      */
+    @Override
     public BigDecimalValue divide(DurationValue other) throws XPathException {
         if (other instanceof DayTimeDurationValue) {
             BigDecimal v1 = getTotalSeconds();
@@ -498,6 +493,7 @@ public final class DayTimeDurationValue extends DurationValue
      * Add two dayTimeDurations
      */
 
+    @Override
     public DurationValue add(DurationValue other) throws XPathException {
         if (other instanceof DayTimeDurationValue) {
             DayTimeDurationValue d2 = (DayTimeDurationValue)other;
@@ -527,6 +523,7 @@ public final class DayTimeDurationValue extends DurationValue
      * Subtract two dayTime-durations
      */
 
+    @Override
     public DurationValue subtract(DurationValue other) throws XPathException {
         if (other instanceof DayTimeDurationValue) {
             DayTimeDurationValue d2 = (DayTimeDurationValue) other;
@@ -560,6 +557,7 @@ public final class DayTimeDurationValue extends DurationValue
      *                                  off from the limit for negative durations)
      */
 
+    @Override
     public DurationValue negate() throws IllegalArgumentException {
         DayTimeDurationValue d2 = new DayTimeDurationValue();
         d2.setTypeLabel(typeLabel);
@@ -575,21 +573,18 @@ public final class DayTimeDurationValue extends DurationValue
      * @param other The other dateTime value
      * @return negative value if this one is the smaller, 0 if they are equal,
      *         positive value if this one is the greater.
-     * @throws ClassCastException if the other value is not a DayTimeDurationValue
+     * @throws NullPointerException if the other value is null
      */
 
+    @Override
     public int compareTo(DayTimeDurationValue other) {
-        if (other instanceof DayTimeDurationValue) {
-            if (this.negative != other.negative) {
-                return this.negative ? -1 : +1;
-            } else if (this.seconds != other.seconds) {
-                return Long.compare(this.seconds, other.seconds) * (this.negative ? -1 : +1);
-            } else {
-                return Integer.compare(this.nanoseconds, other.nanoseconds) * (this.negative ? -1 : +1);
-            }
+        Objects.requireNonNull(other);
+        if (this.negative != other.negative) {
+            return this.negative ? -1 : +1;
+        } else if (this.seconds != other.seconds) {
+            return Long.compare(this.seconds, other.seconds) * (this.negative ? -1 : +1);
         } else {
-            throw new ClassCastException("Cannot compare a dayTimeDuration to an object of class "
-                    + other.getClass());
+            return Integer.compare(this.nanoseconds, other.nanoseconds) * (this.negative ? -1 : +1);
         }
     }
 
@@ -604,6 +599,7 @@ public final class DayTimeDurationValue extends DurationValue
      * @param implicitTimezone  XPath dynamic context
      */
 
+    @Override
     public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
         return this;
     }

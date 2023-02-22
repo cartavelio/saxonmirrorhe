@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,14 +7,16 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.LocationKind;
+import net.sf.saxon.trace.TraceableComponent;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
@@ -24,6 +26,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * The runtime object corresponding to a named xsl:template element in the stylesheet.
@@ -37,7 +40,7 @@ import java.util.List;
  * declaration has both attributes, two objects are created.</p>
  */
 
-public class NamedTemplate extends Actor {
+public class NamedTemplate extends Actor implements TraceableComponent {
 
     // The body of the template is represented by an expression,
     // which is responsible for any type checking that's needed.
@@ -84,10 +87,7 @@ public class NamedTemplate extends Actor {
         this.absentFocus = absentFocus;
     }
 
-    public int getComponentKind() {
-        return StandardNames.XSL_TEMPLATE;
-    }
-
+    @Override
     public SymbolicName getSymbolicName() {
         if (getTemplateName() == null) {
             return null;
@@ -96,12 +96,30 @@ public class NamedTemplate extends Actor {
         }
     }
 
+    @Override
+    public String getTracingTag() {
+        return "xsl:template";
+    }
+
+    /**
+     * Get the properties of this object to be included in trace messages, by supplying
+     * the property values to a supplied consumer function
+     *
+     * @param consumer the function to which the properties should be supplied, as (property name,
+     *                 value) pairs.
+     */
+    @Override
+    public void gatherProperties(BiConsumer<String, Object> consumer) {
+        consumer.accept("name", getTemplateName());
+    }
+
     /**
      * Set the expression that forms the body of the template
      *
      * @param body the body of the template
      */
 
+    @Override
     public void setBody(Expression body) {
         super.setBody(body);
         bodyIsTailCallReturner = (body instanceof TailCallReturner);
@@ -122,6 +140,7 @@ public class NamedTemplate extends Actor {
      * variable name, key name, element name, etc. This is used only where the name is known statically.
      */
 
+    @Override
     public StructuredQName getObjectName() {
         return templateName;
     }
@@ -205,6 +224,8 @@ public class NamedTemplate extends Actor {
      * Expand the template. Called when the template is invoked using xsl:call-template.
      * Invoking a template by this method does not change the current template.
      *
+     *
+     * @param output the destination for the result
      * @param context the XPath dynamic context
      * @return null if the template exited normally; but if it was a tail call, details of the call
      * that hasn't been made yet and needs to be made by the caller
@@ -212,7 +233,7 @@ public class NamedTemplate extends Actor {
      *                                           the template
      */
 
-    public TailCall expand(XPathContext context) throws XPathException {
+    public TailCall expand(Outputter output, XPathContext context) throws XPathException {
         Item contextItem = context.getContextItem();
         if (contextItem == null) {
             if (!mayOmitContextItem) {
@@ -240,28 +261,19 @@ public class NamedTemplate extends Actor {
             }
         }
         if (bodyIsTailCallReturner) {
-            return ((TailCallReturner) body).processLeavingTail(context);
+            return ((TailCallReturner) body).processLeavingTail(output, context);
         } else if (body != null) {
-            body.process(context);
+            body.process(output, context);
         }
         return null;
     }
 
 
     /**
-     * Get the type of construct. This will either be the fingerprint of a standard XSLT instruction name
-     * (values in {@link net.sf.saxon.om.StandardNames}: all less than 1024)
-     * or it will be a constant in class {@link LocationKind}.
-     */
-
-    public int getConstructType() {
-        return LocationKind.TEMPLATE;
-    }
-
-    /**
      * Output diagnostic explanation to an ExpressionPresenter
      */
 
+    @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("template");
         presenter.emitAttribute("name", getTemplateName());
@@ -278,16 +290,8 @@ public class NamedTemplate extends Actor {
 
     public void explainProperties(ExpressionPresenter presenter) throws XPathException {
         if (getRequiredContextItemType() != AnyItemType.getInstance()) {
-            presenter.emitAttribute("cxt", getRequiredContextItemType().toExportString());
-            if ("JS".equals(((ExpressionPresenter.ExportOptions) presenter.getOptions()).target)) {
-                try {
-                    int targetVersion = ((ExpressionPresenter.ExportOptions) presenter.getOptions()).targetVersion;
-                    presenter.emitAttribute("jsTest", getRequiredContextItemType().generateJavaScriptItemTypeTest(AnyItemType.getInstance(), targetVersion));
-                } catch (XPathException e) {
-                    e.maybeSetLocation(getLocation());
-                    throw e;
-                }
-            }
+            SequenceType st = SequenceType.makeSequenceType(getRequiredContextItemType(), StaticProperty.EXACTLY_ONE);
+            presenter.emitAttribute("cxt", st.toAlphaCode());
         }
 
         String flags = "";
@@ -299,7 +303,7 @@ public class NamedTemplate extends Actor {
         }
         presenter.emitAttribute("flags", flags);
         if (getRequiredType() != SequenceType.ANY_SEQUENCE) {
-            presenter.emitAttribute("as", getRequiredType().toExportString());
+            presenter.emitAttribute("as", getRequiredType().toAlphaCode());
         }
         presenter.emitAttribute("line", getLineNumber() + "");
         presenter.emitAttribute("module", getSystemId());

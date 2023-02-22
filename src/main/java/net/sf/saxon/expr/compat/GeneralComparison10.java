@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -65,6 +65,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
      * Determine the static cardinality. Returns [1..1]
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
@@ -76,6 +77,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         getLhs().typeCheck(visitor, contextInfo);
@@ -110,6 +112,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         Configuration config = visitor.getConfiguration();
@@ -141,10 +144,10 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
             atomize1 = false;
         }
 
-        if (th.relationship(type0, BuiltInAtomicType.BOOLEAN) == TypeHierarchy.DISJOINT) {
+        if (th.relationship(type0, BuiltInAtomicType.BOOLEAN) == Affinity.DISJOINT) {
             maybeBoolean0 = false;
         }
-        if (th.relationship(type1, BuiltInAtomicType.BOOLEAN) == TypeHierarchy.DISJOINT) {
+        if (th.relationship(type1, BuiltInAtomicType.BOOLEAN) == Affinity.DISJOINT) {
             maybeBoolean1 = false;
         }
 
@@ -160,12 +163,12 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
                 type1 = getRhsExpression().getItemType();
             }
             // Now consider numeric operands
-            int n0 = th.relationship(type0, NumericType.getInstance());
-            int n1 = th.relationship(type1, NumericType.getInstance());
-            boolean maybeNumeric0 = n0 != TypeHierarchy.DISJOINT;
-            boolean maybeNumeric1 = n1 != TypeHierarchy.DISJOINT;
-            boolean numeric0 = n0 == TypeHierarchy.SUBSUMED_BY || n0 == TypeHierarchy.SAME_TYPE;
-            boolean numeric1 = n1 == TypeHierarchy.SUBSUMED_BY || n1 == TypeHierarchy.SAME_TYPE;
+            Affinity n0 = th.relationship(type0, NumericType.getInstance());
+            Affinity n1 = th.relationship(type1, NumericType.getInstance());
+            boolean maybeNumeric0 = n0 != Affinity.DISJOINT;
+            boolean maybeNumeric1 = n1 != Affinity.DISJOINT;
+            boolean numeric0 = n0 == Affinity.SUBSUMED_BY || n0 == Affinity.SAME_TYPE;
+            boolean numeric1 = n1 == Affinity.SUBSUMED_BY || n1 == Affinity.SAME_TYPE;
             // Use the 2.0 path if we don't have to deal with the possibility of boolean values,
             // or the complications of converting values to numbers
 
@@ -200,6 +203,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
      * @return a BooleanValue representing the result of the numeric comparison of the two operands
      */
 
+    @Override
     public BooleanValue evaluateItem(XPathContext context) throws XPathException {
         return BooleanValue.get(effectiveBooleanValue(context));
     }
@@ -213,6 +217,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
      * @throws XPathException if a dynamic error occurs during the evaluation of the expression
      */
 
+    @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return BooleanValue.get(effectiveBooleanValue(arguments[0].iterate(), arguments[1].iterate(), context));
     }
@@ -224,6 +229,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
      * @return a boolean representing the result of the comparison of the two operands
      */
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         return effectiveBooleanValue(getLhsExpression().iterate(context), getRhsExpression().iterate(context), context);
     }
@@ -314,6 +320,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
         if (operator == Token.LT || operator == Token.LE || operator == Token.GT || operator == Token.GE) {
             final Configuration config = context.getConfiguration();
             ItemMappingFunction map = new ItemMappingFunction() {
+                @Override
                 public DoubleValue mapItem(Item item) throws XPathException {
                     return Number_1.convert((AtomicValue)item, config);
                 }
@@ -373,6 +380,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         GeneralComparison10 gc = new GeneralComparison10(getLhsExpression().copy(rebindings), operator, getRhsExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, gc);
@@ -449,11 +457,13 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return BuiltInAtomicType.BOOLEAN;
     }
 
 
+    @Override
     protected void explainExtraAttributes(ExpressionPresenter out) {
         out.emitAttribute("cardinality", "many-to-many (1.0)");
         out.emitAttribute("comp", comparer.save());

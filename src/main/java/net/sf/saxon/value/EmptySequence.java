@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -19,7 +19,7 @@ import java.util.Collections;
  */
 
 
-public final class EmptySequence<T extends Item<?>> implements GroundedValue<T> {
+public final class EmptySequence<T extends Item> implements GroundedValue {
 
     // This class has a single instance
     /*@NotNull*/ private static EmptySequence THE_INSTANCE = new EmptySequence();
@@ -39,16 +39,18 @@ public final class EmptySequence<T extends Item<?>> implements GroundedValue<T> 
      */
 
     @SuppressWarnings("unchecked")
-    public static <T extends Item<?>> EmptySequence<T> getInstance() {
+    public static <T extends Item> EmptySequence<T> getInstance() {
         return (EmptySequence<T>)THE_INSTANCE;
     }
 
+    @Override
     public String getStringValue() {
         return "";
     }
 
     public Collections a;
 
+    @Override
     public CharSequence getStringValueCS() {
         return "";
     }
@@ -59,6 +61,7 @@ public final class EmptySequence<T extends Item<?>> implements GroundedValue<T> 
      * @return the first item in the sequence if there is one, or null if the sequence
      *         is empty
      */
+    @Override
     public T head() {
         return null;
     }
@@ -68,7 +71,8 @@ public final class EmptySequence<T extends Item<?>> implements GroundedValue<T> 
      */
 
     /*@NotNull*/
-    public UnfailingIterator<T> iterate() {
+    @Override
+    public UnfailingIterator iterate() {
         return EmptyIterator.emptyIterator();
     }
 
@@ -89,6 +93,7 @@ public final class EmptySequence<T extends Item<?>> implements GroundedValue<T> 
      * @return always 0 for an empty sequence
      */
 
+    @Override
     public final int getLength() {
         return 0;
     }
@@ -114,6 +119,7 @@ public final class EmptySequence<T extends Item<?>> implements GroundedValue<T> 
      * Get the effective boolean value - always false
      */
 
+    @Override
     public boolean effectiveBooleanValue() {
         return false;
     }
@@ -130,6 +136,7 @@ public final class EmptySequence<T extends Item<?>> implements GroundedValue<T> 
      */
 
     /*@Nullable*/
+    @Override
     public T itemAt(int n) {
         return null;
     }
@@ -148,7 +155,8 @@ public final class EmptySequence<T extends Item<?>> implements GroundedValue<T> 
      */
 
     /*@NotNull*/
-    public GroundedValue<T> subsequence(int min, int length) {
+    @Override
+    public GroundedValue subsequence(int min, int length) {
         return this;
     }
 
@@ -169,8 +177,10 @@ public final class EmptySequence<T extends Item<?>> implements GroundedValue<T> 
      *
      * @return the simplified sequence
      */
-    public GroundedValue<T> reduce() {
+    @Override
+    public GroundedValue reduce() {
         return this;
     }
+
 }
 

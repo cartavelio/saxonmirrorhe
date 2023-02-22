@@ -24,8 +24,8 @@ import java.util.List;
  * by allocating memory to each item in the sequence.
  */
 
-public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
-    private List<T> value;
+public class SequenceSlice implements GroundedValue {
+    private List<? extends Item> value;
     private int offset;
     private int length;
 
@@ -33,14 +33,14 @@ public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
      * Construct an sequence from a slice of a list of items. Note, the list of items is used as is,
      * which means the caller must not subsequently change its contents.
      *
-     * @param value  the list of items
+     * @param value the list of items
      * @param offset the zero-based position of the first item to be included in the sequence
      * @param length the number of items to be included in the sequence; if this exceeds the number
      *               of items available for inclusion, include all items up to the end of the sequence
      * @throws IndexOutOfBoundsException if offset < 0 or length < 0 or offset + length < value.size()
      */
 
-    public SequenceSlice(List<T> value, int offset, int length) {
+    public SequenceSlice(List<? extends Item> value, int offset, int length) {
         this.value = value;
         this.offset = offset;
         if (offset < 0 || length < 0) {
@@ -53,10 +53,12 @@ public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
         }
     }
 
+    @Override
     public String getStringValue() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
 
+    @Override
     public CharSequence getStringValueCS() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
@@ -65,9 +67,10 @@ public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
      * Get the first item in the sequence.
      *
      * @return the first item in the sequence if there is one, or null if the sequence
-     * is empty
+     *         is empty
      */
-    public T head() {
+    @Override
+    public Item head() {
         return itemAt(0);
     }
 
@@ -77,6 +80,7 @@ public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
      * @return the number of items in the sequence
      */
 
+    @Override
     public int getLength() {
         return length;
     }
@@ -85,7 +89,7 @@ public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
      * Determine the cardinality
      *
      * @return the cardinality of the sequence, using the constants defined in
-     * net.sf.saxon.value.Cardinality
+     *         net.sf.saxon.value.Cardinality
      * @see Cardinality
      */
 
@@ -108,7 +112,8 @@ public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
      */
 
     /*@Nullable*/
-    public T itemAt(int n) {
+    @Override
+    public Item itemAt(int n) {
         if (n < 0 || n >= getLength()) {
             return null;
         } else {
@@ -120,14 +125,15 @@ public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
      * Return an iterator over this sequence.
      *
      * @return the required SequenceIterator, positioned at the start of the
-     * sequence
+     *         sequence
      */
 
     /*@NotNull*/
-    public ListIterator<T> iterate() {
-        return new ListIterator<>(value.subList(offset, offset + length));
+    @Override
+    public ListIterator<? extends Item> iterate() {
+        return new ListIterator<>(value.subList(offset, offset+length));
     }
-
+    
     /**
      * Get a subsequence of the value
      *
@@ -142,11 +148,12 @@ public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
      */
 
     /*@NotNull*/
-    public GroundedValue<T> subsequence(int start, int length) {
+    @Override
+    public GroundedValue subsequence(int start, int length) {
         if (start < 0) {
             start = 0;
         }
-        int newStart = start + offset;
+        int newStart = start+offset;
         if (newStart > value.size()) {
             return EmptySequence.getInstance();
         }
@@ -161,9 +168,9 @@ public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
             case 0:
                 return EmptySequence.getInstance();
             case 1:
-                return (GroundedValue<T>)value.get(newStart);
+                return value.get(newStart);
             default:
-                return new SequenceSlice<>(value, newStart, newLength);
+                return new SequenceSlice(value, newStart, newLength);
         }
     }
 
@@ -174,7 +181,7 @@ public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
             fsb.append(i == 0 ? "(" : ", ");
             fsb.append(itemAt(i).toString());
         }
-        fsb.append(')');
+        fsb.cat(')');
         return fsb.toString();
     }
 
@@ -186,12 +193,13 @@ public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
      *
      * @return the simplified sequence
      */
-    public GroundedValue<T> reduce() {
+    @Override
+    public GroundedValue reduce() {
         int len = getLength();
         if (len == 0) {
             return EmptySequence.getInstance();
         } else if (len == 1) {
-            return (GroundedValue<T>)itemAt(0);
+            return itemAt(0);
         } else {
             return this;
         }
@@ -200,21 +208,20 @@ public class SequenceSlice<T extends Item<?>> implements GroundedValue<T> {
     /**
      * Get the contents of this value in the form of a Java {@link Iterable},
      * so that it can be used in a for-each expression
-     *
      * @return an Iterable containing the same sequence of items
      */
 
-    public Iterable<T> asIterable() {
-        return value.subList(offset, offset + length);
+    @Override
+    public Iterable<? extends Item> asIterable() {
+        return value.subList(offset, offset+length);
     }
 
     /**
      * Get an iterator (a Java {@link Iterator}) over the items in this sequence.
-     *
      * @return an iterator over the items in this sequence.
      */
 
-    public Iterator<T> iterator() {
+    public Iterator<? extends Item> iterator() {
         return value.subList(offset, offset + length).iterator();
     }
 }

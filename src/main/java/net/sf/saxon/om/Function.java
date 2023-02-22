@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -22,7 +22,7 @@ import net.sf.saxon.type.FunctionItemType;
  * implement this interface.
  */
 
-public interface Function extends Item<Function>, Callable, GroundedValue<Function> {
+public interface Function extends Item, Callable, GroundedValue {
 
     /**
      * Ask whether this function item is a map
@@ -97,7 +97,8 @@ public interface Function extends Item<Function>, Callable, GroundedValue<Functi
      * @throws XPathException if a dynamic error occurs within the function
      */
 
-    Sequence<?> call(XPathContext context, Sequence[] args) throws XPathException;
+    @Override
+    Sequence call(XPathContext context, Sequence[] args) throws XPathException;
 
     /**
      * Test whether this FunctionItem is deep-equal to another function item,
@@ -157,7 +158,7 @@ public interface Function extends Item<Function>, Callable, GroundedValue<Functi
     }
 
     @SafeVarargs
-    static Sequence<?>[] argumentArray(Sequence<?>... args) {
+    static Sequence[] argumentArray(Sequence... args) {
         return args;
     }
 }

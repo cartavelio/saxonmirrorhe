@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,15 +10,17 @@ package net.sf.saxon.jaxp;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Sender;
-import net.sf.saxon.lib.DelegatingErrorListener;
+import net.sf.saxon.lib.ErrorReporterToListener;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.SAXParseException;
 
 import javax.xml.transform.*;
 import java.util.Enumeration;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -97,7 +99,7 @@ public class IdentityTransformer extends Transformer {
      */
     @Override
     public void setErrorListener(ErrorListener listener) throws IllegalArgumentException {
-        this.errorListener = listener;
+        this.errorListener = Objects.requireNonNull(listener);
     }
 
     /**
@@ -108,9 +110,6 @@ public class IdentityTransformer extends Transformer {
      */
     @Override
     public ErrorListener getErrorListener() {
-        if (errorListener instanceof DelegatingErrorListener) {
-            return ((DelegatingErrorListener)errorListener).getBaseErrorListener();
-        }
         return errorListener;
     }
 
@@ -175,6 +174,7 @@ public class IdentityTransformer extends Transformer {
      * @see net.sf.saxon.lib.SaxonOutputKeys
      */
 
+    @Override
     public Properties getOutputProperties() {
 
         // Make a copy, so that modifications to the returned properties object have no effect (even on the
@@ -297,9 +297,7 @@ public class IdentityTransformer extends Transformer {
         try {
             value = getConfiguration().getSerializerFactory().checkOutputProperty(name, value);
         } catch (XPathException err) {
-            if(!name.startsWith("{")) {
-                throw new IllegalArgumentException(err.getMessage());
-            }
+            throw new IllegalArgumentException(err.getMessage());
         }
         localOutputProperties.setProperty(name, value);
     }
@@ -358,12 +356,16 @@ public class IdentityTransformer extends Transformer {
      * Perform identify transformation from Source to Result
      */
 
+    @Override
     public void transform(Source source, Result result)
             throws TransformerException {
         try {
             SerializerFactory sf = getConfiguration().getSerializerFactory();
             Receiver receiver = sf.getReceiver(result, new SerializationProperties(getOutputProperties()));
             ParseOptions options = receiver.getPipelineConfiguration().getParseOptions();
+            if (errorListener != null) {
+                options.setErrorReporter(new ErrorReporterToListener(errorListener));
+            }
             options.setContinueAfterValidationErrors(true);
             Sender.send(source, receiver, options);
         } catch (XPathException err) {
@@ -394,7 +396,7 @@ public class IdentityTransformer extends Transformer {
             if (errorListener != null) {
                 errorListener.error(err);
             } else {
-                getConfiguration().getErrorListener().error(err);
+                getConfiguration().makeErrorReporter().report(new XmlProcessingException(err));
             }
         } catch (TransformerException e) {
             // no action if error reporting fails

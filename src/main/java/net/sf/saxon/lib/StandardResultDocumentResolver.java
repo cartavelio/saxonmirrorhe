@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,6 +11,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Result;
@@ -133,7 +134,14 @@ public class StandardResultDocumentResolver implements ResultDocumentResolver {
 
     public static synchronized StreamResult makeOutputFile(URI absoluteURI) throws XPathException {
         try {
-            return new StreamResult(new File(absoluteURI));
+            File outputFile = new File(absoluteURI);
+            if (outputFile.isDirectory()) {
+                throw new XPathException("Cannot write to a directory: " + absoluteURI, SaxonErrorCode.SXRD0004);
+            }
+            if (outputFile.exists() && !outputFile.canWrite()) {
+                throw new XPathException("Cannot write to URI " + absoluteURI, SaxonErrorCode.SXRD0004);
+            }
+            return new StreamResult(outputFile);
         } catch (IllegalArgumentException err) {
             throw new XPathException("Cannot write to URI " + absoluteURI + " (" + err.getMessage() + ")");
         }

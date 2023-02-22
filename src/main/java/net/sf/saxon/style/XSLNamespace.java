@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,10 +10,8 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.NamespaceConstructor;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
 
@@ -25,21 +23,18 @@ public class XSLNamespace extends XSLLeafNodeConstructor {
 
     /*@Nullable*/ Expression name;
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
         name = prepareAttributesNameAndSelect();
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         name = typeCheck("name", name);
         select = typeCheck("select", select);
         int countChildren = 0;
         NodeInfo firstChild = null;
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        while (true) {
-            NodeInfo child = kids.next();
-            if (child == null) {
-                break;
-            }
+        for (NodeInfo child : children()) {
             if (child instanceof XSLFallback) {
                 continue;
             }
@@ -77,10 +72,12 @@ public class XSLNamespace extends XSLLeafNodeConstructor {
      * @return the error code defined for this condition, for this particular instruction
      */
 
+    @Override
     protected String getErrorCodeForSelectPlusContent() {
         return "XTSE0910";
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         NamespaceConstructor inst = new NamespaceConstructor(name);
         compileContent(exec, decl, inst, new StringLiteral(StringValue.SINGLE_SPACE));

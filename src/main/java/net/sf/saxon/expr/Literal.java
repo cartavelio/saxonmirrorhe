@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,10 +8,10 @@
 package net.sf.saxon.expr;
 
 
-import com.saxonica.functions.hof.FunctionLiteral;
+import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
@@ -40,7 +40,7 @@ import java.util.Properties;
 
 public class Literal extends Expression {
 
-    private GroundedValue<?> value;
+    private GroundedValue value;
 
     /**
      * Create a literal as a wrapper around a Value
@@ -48,7 +48,7 @@ public class Literal extends Expression {
      * @param value the value of this literal
      */
 
-    protected Literal(GroundedValue<?> value) {
+    protected Literal(GroundedValue value) {
         this.value = value.reduce();
     }
 
@@ -63,7 +63,7 @@ public class Literal extends Expression {
         for (String s : strings) {
             values.add(new StringValue(s));
         }
-        GroundedValue<StringValue> gv = SequenceExtent.makeSequenceExtent(values);
+        GroundedValue gv = SequenceExtent.makeSequenceExtent(values);
         return makeLiteral(gv);
     }
 
@@ -73,7 +73,7 @@ public class Literal extends Expression {
      * @return the constant value
      */
 
-    public GroundedValue<?> getValue() {
+    public GroundedValue getValue() {
         return value;
     }
 
@@ -84,6 +84,7 @@ public class Literal extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         return this;
     }
@@ -95,6 +96,7 @@ public class Literal extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         return this;
     }
@@ -120,6 +122,7 @@ public class Literal extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         // Avoid getting the configuration if we can: it's a common source of NPE's
         if (value instanceof AtomicValue) {
@@ -158,6 +161,7 @@ public class Literal extends Expression {
      * Determine the cardinality
      */
 
+    @Override
     public int computeCardinality() {
         if (value.getLength() == 0) {
             return StaticProperty.EMPTY;
@@ -190,6 +194,7 @@ public class Literal extends Expression {
      */
 
 
+    @Override
     public int computeSpecialProperties() {
         if (value.getLength() == 0) {
             // An empty sequence has all special properties except "has side effects".
@@ -231,6 +236,7 @@ public class Literal extends Expression {
      * @return true if this expression is vacuous
      */
 
+    @Override
     public boolean isVacuousExpression() {
         return value.getLength() == 0;
     }
@@ -245,6 +251,7 @@ public class Literal extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         Literal l2 = new Literal(value);
         ExpressionTool.copyLocationInfo(this, l2);
@@ -277,6 +284,7 @@ public class Literal extends Expression {
      * expression is the first operand of a path expression or filter expression
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         return pathMapNodeSet;
     }
@@ -289,6 +297,7 @@ public class Literal extends Expression {
      * @return for a Value, this always returns zero.
      */
 
+    @Override
     public final int getDependencies() {
         return 0;
     }
@@ -309,7 +318,8 @@ public class Literal extends Expression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         return value.iterate();
     }
 
@@ -337,6 +347,7 @@ public class Literal extends Expression {
      * has been done to ensure that the value will be a singleton.
      */
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         return value.head();
     }
@@ -345,16 +356,16 @@ public class Literal extends Expression {
     /**
      * Process the value as an instruction, without returning any tail calls
      *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
-     *                the current variables, etc.
      */
 
-    public void process(XPathContext context) throws XPathException {
-        Receiver out = context.getReceiver();
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
         if (value instanceof Item) {
-            out.append((Item) value, getLocation(), ReceiverOptions.ALL_NAMESPACES);
+            output.append((Item) value, getLocation(), ReceiverOption.ALL_NAMESPACES);
         } else {
-            value.iterate().forEachOrFail(it -> out.append(it, getLocation(), ReceiverOptions.ALL_NAMESPACES));
+            value.iterate().forEachOrFail(it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES));
         }
     }
 
@@ -380,6 +391,7 @@ public class Literal extends Expression {
       *     expression is (), this method returns "".
       */
 
+    @Override
     public CharSequence evaluateAsString(XPathContext context) throws XPathException {
         AtomicValue value = (AtomicValue) evaluateItem(context);
         if (value == null) {
@@ -400,6 +412,7 @@ public class Literal extends Expression {
      *                                           expression
      */
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         return value.effectiveBooleanValue();
     }
@@ -415,6 +428,7 @@ public class Literal extends Expression {
      * @param pul     the pending update list to which the results should be written
      */
 
+    @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         if (value.getLength() == 0) {
             // do nothing
@@ -437,11 +451,11 @@ public class Literal extends Expression {
         if (!(obj instanceof Literal)) {
             return false;
         }
-        GroundedValue<?> v0 = value;
-        GroundedValue<?> v1 = ((Literal) obj).value;
+        GroundedValue v0 = value;
+        GroundedValue v1 = ((Literal) obj).value;
         try {
-            SequenceIterator<?> i0 = v0.iterate();
-            SequenceIterator<?> i1 = v1.iterate();
+            SequenceIterator i0 = v0.iterate();
+            SequenceIterator i1 = v1.iterate();
             while (true) {
                 Item m0 = i0.next();
                 Item m1 = i1.next();
@@ -491,6 +505,7 @@ public class Literal extends Expression {
      * Return a hash code to support the equals() function
      */
 
+    @Override
     public int computeHashCode() {
         if (value instanceof AtomicSequence) {
             return ((AtomicSequence) value).getSchemaComparable().hashCode();
@@ -514,11 +529,12 @@ public class Literal extends Expression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         exportValue(value, out);
     }
 
-    public static void exportValue(Sequence<?> value, ExpressionPresenter out) throws XPathException {
+    public static void exportValue(Sequence value, ExpressionPresenter out) throws XPathException {
         if (value.head() == null) {
             out.startElement("empty");
             out.endElement();
@@ -534,7 +550,7 @@ public class Literal extends Expression {
             final int nodeKind = ((NodeInfo) value).getNodeKind();
             out.emitAttribute("kind", nodeKind + "");
             if (((ExpressionPresenter.ExportOptions) out.getOptions()).explaining) {
-                String name = ((NodeInfo)value).getDisplayName();
+                String name = ((NodeInfo) value).getDisplayName();
                 if (!name.isEmpty()) {
                     out.emitAttribute("name", name);
                 }
@@ -547,13 +563,13 @@ public class Literal extends Expression {
                         props.setProperty("method", "xml");
                         props.setProperty("indent", "no");
                         props.setProperty("omit-xml-declaration", "yes");
-                        QueryResult.serialize(((NodeInfo)value), new StreamResult(sw), props);
+                        QueryResult.serialize(((NodeInfo) value), new StreamResult(sw), props);
                         out.emitAttribute("content", sw.toString());
                         out.emitAttribute("baseUri", ((NodeInfo) value).getBaseURI());
                         break;
                     case Type.TEXT:
                     case Type.COMMENT:
-                        out.emitAttribute("content", ((NodeInfo)value).getStringValue());
+                        out.emitAttribute("content", ((NodeInfo) value).getStringValue());
                         break;
                     case Type.ATTRIBUTE:
                     case Type.NAMESPACE:
@@ -648,13 +664,13 @@ public class Literal extends Expression {
             out.emitAttribute("uri", ((QualifiedNameValue) value).getNamespaceURI());
             out.emitAttribute("loc", ((QualifiedNameValue) value).getLocalName());
             if (!type.equals(BuiltInAtomicType.QNAME)) {
-                out.emitAttribute("type", type.getTypeName());
+                out.emitAttribute("type", type.getEQName());
             }
             out.endElement();
         } else {
             out.startElement("atomic");
             out.emitAttribute("val", val);
-            out.emitAttribute("type", type.toExportString());
+            out.emitAttribute("type", AlphaCode.fromItemType(type));
             out.endElement();
         }
     }
@@ -668,10 +684,10 @@ public class Literal extends Expression {
     public String toShortString() {
         if (value.getLength() == 0) {
             return "()";
-        } else if (value instanceof AtomicValue) {
-            return value.toString();
+        } else if (value.getLength() == 1) {
+            return value.toShortString();
         } else {
-            return "(" + value.head() + ",...)";
+            return "(" + value.head().toShortString() + ", ...{" + value.getLength() + "})";
         }
     }
 
@@ -761,6 +777,7 @@ public class Literal extends Expression {
      * axes.
      */
 
+    @Override
     public boolean isSubtreeExpression() {
         return true;
     }
@@ -783,14 +800,12 @@ public class Literal extends Expression {
      * @return the Literal
      */
 
-    public static <T extends Item<?>> Literal makeLiteral(GroundedValue<T> value) {
+    public static <T extends Item> Literal makeLiteral(GroundedValue value) {
         value = value.reduce();
         if (value instanceof StringValue) {
             return new StringLiteral((StringValue) value);
-//#ifdefined HOF
         } else if (value instanceof Function && !(value instanceof MapItem || value instanceof ArrayItem)) {
             return new FunctionLiteral((Function) value);
-//#endif
         } else {
             return new Literal(value);
         }
@@ -806,7 +821,7 @@ public class Literal extends Expression {
      * @return the Literal
      */
 
-    public static Literal makeLiteral(GroundedValue<?> value, Expression origin) {
+    public static Literal makeLiteral(GroundedValue value, Expression origin) {
         Literal lit = makeLiteral(value);
         //lit.setRetainedStaticContextLocally(origin.getLocalRetainedStaticContext());
         ExpressionTool.copyLocationInfo(origin, lit);

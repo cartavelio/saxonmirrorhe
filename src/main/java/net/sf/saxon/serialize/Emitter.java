@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,15 +7,17 @@
 
 package net.sf.saxon.serialize;
 
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.event.ReceiverWithOutputProperties;
 import net.sf.saxon.event.SequenceReceiver;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 
@@ -76,6 +78,7 @@ public abstract class Emitter extends SequenceReceiver implements ReceiverWithOu
      *         has not been called
      */
 
+    @Override
     public Properties getOutputProperties() {
         return outputProperties;
     }
@@ -125,7 +128,7 @@ public abstract class Emitter extends SequenceReceiver implements ReceiverWithOu
     protected OutputStream makeOutputStream() throws XPathException {
         String uriString = streamResult.getSystemId();
         if (uriString == null) {
-            throw new XPathException("Result has no system ID, writer, or output stream defined");
+            throw new XPathException("Result has no system ID, writer, or output stream defined", SaxonErrorCode.SXRD0004);
         }
 
         try {
@@ -136,12 +139,11 @@ public abstract class Emitter extends SequenceReceiver implements ReceiverWithOu
             streamResult.setOutputStream(outputStream);
             mustClose = true;
         } catch (FileNotFoundException | URISyntaxException | IllegalArgumentException fnf) {
+            // for example, the system ID doesn't use the file: scheme
             XPathException err = new XPathException("Unable to write to output destination", fnf);
             err.setErrorCode(SaxonErrorCode.SXRD0004);
             throw err;
-
-        } // for example, the system ID doesn't use the file: scheme
-
+        }
         return outputStream;
     }
 
@@ -259,9 +261,8 @@ public abstract class Emitter extends SequenceReceiver implements ReceiverWithOu
                     if (encoding.equalsIgnoreCase("UTF8")) {
                         throw new XPathException("Failed to create a UTF8 output writer");
                     }
-                    XPathException de = new XPathException("Encoding " + encoding + " is not supported: using UTF8");
-                    de.setErrorCode("SESU0007");
-                    getPipelineConfiguration().getErrorListener().error(de);
+                    XmlProcessingIncident de = new XmlProcessingIncident("Encoding " + encoding + " is not supported: using UTF8", "SESU0007");
+                    getPipelineConfiguration().getErrorReporter().report(de);
                     encoding = "UTF8";
                     characterSet = UTF8CharacterSet.getInstance();
                     allCharactersEncodable = true;
@@ -291,6 +292,7 @@ public abstract class Emitter extends SequenceReceiver implements ReceiverWithOu
      * @param publicId the entity public ID
      */
 
+    @Override
     public void setUnparsedEntity(String name, String uri, String publicId) throws XPathException {
     }
 
@@ -298,6 +300,7 @@ public abstract class Emitter extends SequenceReceiver implements ReceiverWithOu
      * Notify the end of the event stream
      */
 
+    @Override
     public void close() throws XPathException {
         if (mustClose && outputStream != null) {
             try {
@@ -316,6 +319,7 @@ public abstract class Emitter extends SequenceReceiver implements ReceiverWithOu
      *         may supply untyped nodes instead of supplying the type annotation (or conversely, it may
      *         avoid stripping unwanted type annotations)
      */
+    @Override
     public boolean usesTypeAnnotations() {
         return false;
     }
@@ -324,11 +328,12 @@ public abstract class Emitter extends SequenceReceiver implements ReceiverWithOu
      * Append an arbitrary item (node or atomic value) to the output
      */
 
+    @Override
     public void append(/*@Nullable*/ Item item, Location locationId, int copyNamespaces) throws XPathException {
         if (item instanceof NodeInfo) {
             decompose(item, locationId, copyNamespaces);
         } else {
-            characters(item.getStringValueCS(), locationId, 0);
+            characters(item.getStringValueCS(), locationId, ReceiverOption.NONE);
         }
     }
 

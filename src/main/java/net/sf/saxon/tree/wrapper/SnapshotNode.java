@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,20 +9,18 @@ package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
 
-import javax.xml.transform.SourceLocator;
+import java.util.function.Predicate;
 
 /**
  * This class represents a node within a tree produced by the snapshot() function, as a virtual copy of
@@ -77,6 +75,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
      */
 
     /*@NotNull*/
+    @Override
     protected SnapshotNode wrap(NodeInfo node) {
         SnapshotNode vc = new SnapshotNode(node, pivot);
         vc.tree = tree;
@@ -90,6 +89,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
      * as in the original tree.
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         if (Navigator.isAncestorOrSelf(original, pivot)) {
             return pivot.getStringValueCS();
@@ -105,6 +105,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo getParent() {
         if (parent == null) {
             NodeInfo basep = original.getParent();
@@ -129,11 +130,12 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
 
     /**
      * Copy this node to a given outputter
-     *  @param out         the Receiver to which the node should be copied
+     * @param out         the Receiver to which the node should be copied
      * @param copyOptions a selection of the options defined in {@link net.sf.saxon.om.CopyOptions}
      * @param locationId  Identifies the location of the instruction
      */
 
+    @Override
     public void copy(Receiver out, int copyOptions, Location locationId) throws XPathException {
         Navigator.copy(this, out, copyOptions, locationId);
     }
@@ -143,6 +145,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
      * @return the typed value.
      */
 
+    @Override
     public AtomicSequence atomize() throws XPathException {
         switch (getNodeKind()) {
             case Type.ATTRIBUTE:
@@ -169,6 +172,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
      * @return true if the node is an ID
      */
 
+    @Override
     public boolean isId() {
         return original.isId();
     }
@@ -179,6 +183,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
      * @return true if the node is an IDREF or IDREFS element or attribute
      */
 
+    @Override
     public boolean isIdref() {
         return original.isIdref();
     }
@@ -189,6 +194,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
      * @return true if the node has the is-nilled property
      */
 
+    @Override
     public boolean isNilled() {
         return original.isNilled();
     }
@@ -204,8 +210,9 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
      * @see #getSystemId
      */
     /*@Nullable*/
+    @Override
     public String getPublicId() {
-        return original instanceof SourceLocator ? original.getPublicId() : null;
+        return original != null ? original.getPublicId() : null;
     }
 
     /**
@@ -223,7 +230,8 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
      * @see net.sf.saxon.om.AxisInfo
      */
 
-    public AxisIterator iterateAxis(byte axisNumber, NodeTest nodeTest) {
+    @Override
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         switch (getNodeKind()) {
             case Type.ATTRIBUTE:
             case Type.NAMESPACE:
@@ -238,7 +246,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
                         case AxisInfo.CHILD:
                             // return only the child that is included in the snapshot, that is, the one
                             // that is an ancestor-or-self of the pivot node
-                            return SingleNodeIterator.makeIterator(getChildOfAncestorNode());
+                            return Navigator.filteredSingleton(getChildOfAncestorNode(), nodeTest);
                         case AxisInfo.DESCENDANT:
                         case AxisInfo.DESCENDANT_OR_SELF:
                             // Use the child axis recursively, for efficiency

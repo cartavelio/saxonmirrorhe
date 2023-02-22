@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -53,7 +53,7 @@ public class XdmArray extends XdmFunctionItem {
      */
 
     public XdmArray(XdmValue[] members) {
-        List<GroundedValue<?>> values = new ArrayList<>();
+        List<GroundedValue> values = new ArrayList<>();
         for (XdmValue member : members) {
             values.add(member.getUnderlyingValue());
         }
@@ -70,7 +70,7 @@ public class XdmArray extends XdmFunctionItem {
      */
 
     public XdmArray(Iterable<? extends XdmValue> members) {
-        List<GroundedValue<?>> values = new ArrayList<>();
+        List<GroundedValue> values = new ArrayList<>();
         for (XdmValue member : members) {
             values.add(member.getUnderlyingValue());
         }
@@ -98,12 +98,8 @@ public class XdmArray extends XdmFunctionItem {
      */
 
     public XdmValue get(int n) throws IndexOutOfBoundsException {
-        try {
-            Sequence<?> member = getUnderlyingValue().get(n);
-            return XdmValue.wrap(member);
-        } catch (XPathException e) {
-            throw new IndexOutOfBoundsException();
-        }
+        Sequence member = getUnderlyingValue().get(n);
+        return XdmValue.wrap(member);
     }
 
     /**
@@ -119,12 +115,8 @@ public class XdmArray extends XdmFunctionItem {
      */
 
     public XdmArray put(int n, XdmValue value) throws IndexOutOfBoundsException {
-        try {
-            GroundedValue member = value.getUnderlyingValue();
-            return (XdmArray)XdmValue.wrap(getUnderlyingValue().put(n, member));
-        } catch (XPathException e) {
-            throw new IndexOutOfBoundsException();
-        }
+        GroundedValue member = value.getUnderlyingValue();
+        return (XdmArray)XdmValue.wrap(getUnderlyingValue().put(n, member));
     }
 
     /**
@@ -166,7 +158,7 @@ public class XdmArray extends XdmFunctionItem {
      * @return a list of the members of this array.
      */
     public List<XdmValue> asList() {
-        Iterator<GroundedValue<?>> members = getUnderlyingValue().members().iterator();
+        Iterator<GroundedValue> members = getUnderlyingValue().members().iterator();
         List<XdmValue> result = new ArrayList<XdmValue>(getUnderlyingValue().getLength());
         while (members.hasNext()) {
             result.add(XdmValue.wrap(members.next()));

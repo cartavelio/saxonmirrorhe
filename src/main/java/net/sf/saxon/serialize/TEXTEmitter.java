@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,15 +7,15 @@
 
 package net.sf.saxon.serialize;
 
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.SaxonOutputKeys;
-import net.sf.saxon.om.NamespaceBindingSet;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 
 import javax.xml.transform.OutputKeys;
 import java.util.regex.Pattern;
@@ -35,9 +35,11 @@ public class TEXTEmitter extends XMLEmitter {
      * Start of the document.
      */
 
+    @Override
     public void open() throws XPathException {
     }
 
+    @Override
     protected void openDocument() throws XPathException {
 
         if (writer == null) {
@@ -75,23 +77,24 @@ public class TEXTEmitter extends XMLEmitter {
      * Output the XML declaration. This implementation does nothing.
      */
 
-    public void writeDeclaration() throws XPathException {
+    @Override
+    public void writeDeclaration() {
     }
 
     /**
      * Produce output using the current Writer. <BR>
      * Special characters are not escaped.
-     *
      * @param chars      Character sequence to be output
      * @param locationId the location of the node in the source, or of the instruction that created it
-     *@param properties bit fields holding special properties of the characters  @throws XPathException for any failure
+     * @param properties bit fields holding special properties of the characters  @throws XPathException for any failure
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (!started) {
             openDocument();
         }
-        if ((properties & ReceiverOptions.NO_SPECIAL_CHARS) == 0) {
+        if (!ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
             int badchar = testCharacters(chars);
             if (badchar != 0) {
                 throw new XPathException(
@@ -111,29 +114,21 @@ public class TEXTEmitter extends XMLEmitter {
     /**
      * Output an element start tag. <br>
      * Does nothing with this output method.
-     *  @param elemName   The element name (tag)
-     * @param typeCode   The type annotation
-     * @param location
-     * @param properties Bit fields holding any special properties of the element
      */
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) {
-        // no-op
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         previousAtomic = false;
     }
-
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) {
-    }
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) {
-    }
-
 
     /**
      * Output an element end tag. <br>
      * Does nothing  with this output method.
      */
 
+    @Override
     public void endElement() {
         // no-op
     }
@@ -143,6 +138,7 @@ public class TEXTEmitter extends XMLEmitter {
      * Does nothing with this output method.
      */
 
+    @Override
     public void processingInstruction(String name, /*@NotNull*/ CharSequence value, Location locationId, int properties)
             throws XPathException {
     }
@@ -152,6 +148,7 @@ public class TEXTEmitter extends XMLEmitter {
      * Does nothing with this output method.
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
     }
 

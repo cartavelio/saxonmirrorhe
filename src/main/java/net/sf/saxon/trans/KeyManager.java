@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -15,7 +15,10 @@ import net.sf.saxon.functions.IntegratedFunctionLibrary;
 import net.sf.saxon.functions.IsIdRef;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.BasePatternWithPredicate;
 import net.sf.saxon.pattern.MultipleNodeKindTest;
 import net.sf.saxon.pattern.NodeTestPattern;
@@ -23,7 +26,6 @@ import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.UType;
@@ -119,8 +121,7 @@ public class KeyManager {
 
     private synchronized void registerIdrefKey(Configuration config) {
         final StructuredQName qName = StandardNames.getStructuredQName(StandardNames.XS_IDREFS);
-        SymbolicName symbolicName = new SymbolicName(StandardNames.XSL_KEY, qName);
-        if (getKeyDefinitionSet(qName) == null) {
+        if (keyDefinitions.get(qName) == null) {
             BasePatternWithPredicate pp = new BasePatternWithPredicate(
                     new NodeTestPattern(new MultipleNodeKindTest(UType.ELEMENT_OR_ATTRIBUTE)),
                     IntegratedFunctionLibrary.makeFunctionCall(new IsIdRef(), new Expression[]{})
@@ -132,6 +133,8 @@ public class KeyManager {
                 RetainedStaticContext rsc = new RetainedStaticContext(sc);
                 Expression sf = SystemFunction.makeCall("string", rsc, new ContextItemExpression());
                 Expression use = SystemFunction.makeCall("tokenize", rsc, sf);    // Use the new tokenize#1
+
+                SymbolicName symbolicName = new SymbolicName(StandardNames.XSL_KEY, qName);
                 KeyDefinition key = new KeyDefinition(symbolicName, pp, use, null, null);
                 key.setPackageData(packageData);
                 key.setIndexedItemType(BuiltInAtomicType.STRING);
@@ -190,8 +193,8 @@ public class KeyManager {
             for (KeyDefinition kd : v) {
                 kd.setBackwardsCompatible(true);
                 if (!kd.getBody().getItemType().equals(BuiltInAtomicType.STRING)) {
-                    Expression exp = new AtomicSequenceConverter(kd.getBody(), BuiltInAtomicType.STRING);
-                    ((AtomicSequenceConverter) exp).allocateConverterStatically(config, false);
+                    AtomicSequenceConverter exp = new AtomicSequenceConverter(kd.getBody(), BuiltInAtomicType.STRING);
+                    exp.allocateConverterStatically(config, false);
                     kd.setBody(exp);
                 }
             }
@@ -249,6 +252,7 @@ public class KeyManager {
                                              TreeInfo doc,
                                              XPathContext context) throws XPathException {
         //System.err.println("Building index " + keySet.getKeyName() + " for doc " + doc.getDocumentNumber() + " in thread " + Thread.currentThread().getId());
+        //Instrumentation.count("buildIndex");
         KeyIndex index = new KeyIndex(keySet.isRangeKey());
         index.buildIndex(keySet, doc, context);
         //System.err.println("Done building index " + keySet.getKeyName() + " for doc " + doc.getDocumentNumber() + " in thread " + Thread.currentThread().getId());
@@ -263,16 +267,6 @@ public class KeyManager {
         index.buildIndex(keySet, doc, context);
     }
 
-    private static int getContextDepth(XPathContext c) {
-        int i = 0;
-        while (c != null) {
-            c = c.getCaller();
-            i++;
-        }
-        return i;
-    }
-
-
     /**
      * Get the nodes with a given key value
      *
@@ -284,13 +278,14 @@ public class KeyManager {
      * @throws XPathException if a dynamic error is encountered
      */
 
-    public SequenceIterator<NodeInfo> selectByKey(
+    public SequenceIterator selectByKey(
             KeyDefinitionSet keySet,
             TreeInfo doc,
             AtomicValue soughtValue,
             XPathContext context) throws XPathException {
+
         if (soughtValue == null) {
-            return EmptyIterator.OfNodes.THE_INSTANCE;
+            return EmptyIterator.ofNodes();
         }
 
         if (keySet.isBackwardsCompatible()) {
@@ -312,14 +307,7 @@ public class KeyManager {
         // No special action needed for anyURI to string promotion (it just seems to work: tests idky44, 45)
 
         KeyIndex index = obtainIndex(keySet, doc, context);
-
-        List<NodeInfo> nodes = index.get(soughtValue);
-        if (nodes == null) {
-            return EmptyIterator.OfNodes.THE_INSTANCE;
-        } else {
-            return new ListIterator<>(nodes);
-        }
-
+        return index.getNodes(soughtValue);
     }
 
     /**
@@ -336,19 +324,12 @@ public class KeyManager {
     public SequenceIterator selectByCompositeKey(
             KeyDefinitionSet keySet,
             TreeInfo doc,
-            SequenceIterator<?> soughtValue,
+            SequenceIterator soughtValue,
             XPathContext context) throws XPathException {
 
 
         KeyIndex index = obtainIndex(keySet, doc, context);
-
-        List<NodeInfo> nodes = index.getComposite(soughtValue);
-        if (nodes == null) {
-            return EmptyIterator.emptyIterator();
-        } else {
-            return new ListIterator<>(nodes);
-        }
-
+        return index.getComposite(soughtValue);
     }
 
     /**

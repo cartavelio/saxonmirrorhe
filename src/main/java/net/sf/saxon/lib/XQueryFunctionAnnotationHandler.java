@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,7 +12,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.Affinity;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -100,6 +100,7 @@ public class XQueryFunctionAnnotationHandler implements FunctionAnnotationHandle
      * @return the namespace handled by this function annotation handler, namely "http://www.w3.org/2012/xquery"
      */
 
+    @Override
     public String getAssertionNamespace() {
         return "http://www.w3.org/2012/xquery";
     };
@@ -113,6 +114,7 @@ public class XQueryFunctionAnnotationHandler implements FunctionAnnotationHandle
      * @return true if the assertion is satisfied, false if not
      */
 
+    @Override
     public boolean satisfiesAssertion(Annotation assertion, AnnotationList annotationList) {
         // annotation assertions are not defined for this namespace (surprisingly)
         return true;
@@ -126,9 +128,9 @@ public class XQueryFunctionAnnotationHandler implements FunctionAnnotationHandle
      *
      * @param firstList  the first list of annotation assertions
      * @param secondList the second list of annotation assertions
-     * @return the relationship between the two lists, as one of the values {@link TypeHierarchy#SAME_TYPE},
-     * {@link TypeHierarchy#DISJOINT}, {@link TypeHierarchy#OVERLAPS},
-     * {@link TypeHierarchy#SUBSUMES}, {@link TypeHierarchy#SUBSUMED_BY}.
+     * @return the relationship between the two lists, as one of the values {@link Affinity#SAME_TYPE},
+     * {@link Affinity#DISJOINT}, {@link Affinity#OVERLAPS},
+     * {@link Affinity#SUBSUMES}, {@link Affinity#SUBSUMED_BY}.
      * For example, if the first list is <code>%colour("blue")</code> and the second list is <code>%colour("green")</code>,
      * and no function can be both blue and green, then return <code>DISJOINT</code>. But if a function can have more than
      * one colour, return <code>OVERLAPS</code> because the set of functions conforming to the two assertions has a non-empty
@@ -143,8 +145,9 @@ public class XQueryFunctionAnnotationHandler implements FunctionAnnotationHandle
      * until run-time.</p>
      */
 
-    public int relationship(AnnotationList firstList, AnnotationList secondList) {
-        return TypeHierarchy.OVERLAPS;
+    @Override
+    public Affinity relationship(AnnotationList firstList, AnnotationList secondList) {
+        return Affinity.OVERLAPS;
     }
 
 

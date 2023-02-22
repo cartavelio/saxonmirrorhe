@@ -1,14 +1,17 @@
 package internaltests;
 
-import junit.framework.TestCase;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.*;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test aspects of Saxon Unicode handling, especially surrogate pairs
  */
-public class UnicodeTests extends TestCase {
+public class UnicodeTests {
 
+    @Test
     public void testCharacterIterator() {
         int[] ch = new int[]{65536, 65537, 65538};
         String s = new String(ch, 0, ch.length);
@@ -24,29 +27,23 @@ public class UnicodeTests extends TestCase {
     }
 
 
+    @Test
+    public void testEncoding() {
+        /*
+        146.00  =>   4046401A36E2EB1D
+36.30   =>   4042266666666666
+76.22   =>   40530E147AE147AE
+3865.20 =>   40DA06683E8C7FD4
+0.200   =>   3FC999999999999A
+         */
+
+        System.err.println(Double.longBitsToDouble(Long.parseLong("4046401A36E2EB1D", 16)));
+        System.err.println(Double.longBitsToDouble(Long.parseLong("4042266666666666", 16)));
+        System.err.println(Double.longBitsToDouble(Long.parseLong("40530E147AE147AE", 16)));
+        System.err.println(Double.longBitsToDouble(Long.parseLong("40DA06683E8C7FD4", 16)));
+        System.err.println(Double.longBitsToDouble(Long.parseLong("3FC999999999999A", 16)));
+    }
+
+
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
-
-
 

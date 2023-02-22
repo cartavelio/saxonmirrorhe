@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -27,6 +27,7 @@ public class Idref extends SystemFunction {
      * @param arguments the actual arguments to the function call
      */
 
+    @Override
     public int getSpecialProperties(Expression[] arguments) {
         int prop = StaticProperty.ORDERED_NODESET |
                 StaticProperty.SINGLE_DOCUMENT_NODESET |
@@ -49,14 +50,14 @@ public class Idref extends SystemFunction {
      * @throws XPathException if a dynamic error occurs
      */
 
-    public static SequenceIterator<NodeInfo> getIdrefMultiple(TreeInfo doc, SequenceIterator<StringValue> keys, XPathContext context)
+    public static SequenceIterator getIdrefMultiple(TreeInfo doc, SequenceIterator keys, XPathContext context)
             throws XPathException {
         IdrefMappingFunction map = new IdrefMappingFunction();
         map.document = doc;
         map.keyContext = context;
         map.keyManager = context.getController().getExecutable().getTopLevelPackage().getKeyManager();
         map.keySet = map.keyManager.getKeyDefinitionSet(StandardNames.getStructuredQName(StandardNames.XS_IDREFS));
-        SequenceIterator<? extends NodeInfo> allValues = new MappingIterator<>(keys, map);
+        SequenceIterator allValues = new MappingIterator(keys, map);
         return new DocumentOrderIterator(allValues, LocalOrderComparer.getInstance());
     }
 
@@ -69,17 +70,18 @@ public class Idref extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public ZeroOrMore<NodeInfo> call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo start = arguments.length == 1 ? getContextNode(context) : (NodeInfo) arguments[1].head();
         NodeInfo arg2 = start.getRoot();
         if (arg2.getNodeKind() != Type.DOCUMENT) {
             throw new XPathException("In the idref() function," +
                     " the tree being searched must be one whose root is a document node", "FODC0001", context);
         }
-        return SequenceTool.toLazySequence(getIdrefMultiple(arg2.getTreeInfo(), arguments[0].iterate(), context));
+        return new ZeroOrMore<>(getIdrefMultiple(arg2.getTreeInfo(), arguments[0].iterate(), context));
     }
 
-    private static class IdrefMappingFunction implements MappingFunction<StringValue, NodeInfo> {
+    private static class IdrefMappingFunction implements MappingFunction {
         public TreeInfo document;
         public XPathContext keyContext;
         public KeyManager keyManager;
@@ -89,8 +91,9 @@ public class Idref extends SystemFunction {
          * Implement the MappingFunction interface
          */
 
-        public SequenceIterator<NodeInfo> map(StringValue item) throws XPathException {
-            return keyManager.selectByKey(keySet, document, item, keyContext);
+        @Override
+        public SequenceIterator map(Item item) throws XPathException {
+            return keyManager.selectByKey(keySet, document, (StringValue)item, keyContext);
         }
     }
 

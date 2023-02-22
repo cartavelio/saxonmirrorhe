@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,7 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
@@ -21,13 +21,13 @@ import net.sf.saxon.value.AtomicValue;
  * It passes all events to the underlying receiver unchanged, but invokes a callback action when the
  * first item is written.
  */
-public class SignificantItemDetector extends ProxyReceiver {
+public class SignificantItemDetector extends ProxyOutputter {
 
     private int level = 0;
     private boolean empty = true;
     private Action trigger;
 
-    public SignificantItemDetector(Receiver next, Action trigger) {
+    public SignificantItemDetector(Outputter next, Action trigger) {
         super(next);
         this.trigger = trigger;
     }
@@ -45,27 +45,50 @@ public class SignificantItemDetector extends ProxyReceiver {
     @Override
     public void startDocument(int properties) throws XPathException {
         if (level++ != 0) {
-            super.startDocument(properties);
+            getNextOutputter().startDocument(properties);
         }
     }
 
     @Override
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+    public void startElement(NodeName elemName, SchemaType type,
+                             Location location, int properties) throws XPathException {
         start();
         level++;
-        super.startElement(elemName, typeCode, location, properties);
+        getNextOutputter().startElement(elemName, type, location, properties);
     }
 
+    /**
+     * Notify the start of an element, supplying all attributes and namespaces
+     */
     @Override
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
+    public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
         start();
-        super.namespace(namespaceBindings, properties);
+        level++;
+        getNextOutputter().startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
+    /**
+     * Notify a namespace binding.
+     */
     @Override
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
-        start();
-        super.attribute(nameCode, typeCode, value, locationId, properties);
+    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+        getNextOutputter().namespace(prefix, namespaceUri, properties);
+    }
+
+    /**
+     * Notify an attribute.
+     */
+    @Override
+    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+        getNextOutputter().attribute(attName, typeCode, value, location, properties);
+    }
+
+    /**
+     * Notify the start of the content, that is, the completion of all attributes and namespaces.
+     */
+    @Override
+    public void startContent() throws XPathException {
+        getNextOutputter().startContent();
     }
 
     @Override
@@ -73,19 +96,19 @@ public class SignificantItemDetector extends ProxyReceiver {
         if (chars.length() > 0) {
             start();
         }
-        super.characters(chars, locationId, properties);
+        getNextOutputter().characters(chars, locationId, properties);
     }
 
     @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
         start();
-        super.processingInstruction(target, data, locationId, properties);
+        getNextOutputter().processingInstruction(target, data, locationId, properties);
     }
 
     @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         start();
-        super.comment(chars, locationId, properties);
+        getNextOutputter().comment(chars, locationId, properties);
     }
 
     public static boolean isSignificant(Item item) {
@@ -99,9 +122,9 @@ public class SignificantItemDetector extends ProxyReceiver {
             if (((ArrayItem) item).isEmpty()) {
                 return true;
             } else {
-                for (Sequence<?> mem : ((ArrayItem) item).members()) {
+                for (Sequence mem : ((ArrayItem) item).members()) {
                     try {
-                        SequenceIterator<?> memIter = mem.iterate();
+                        SequenceIterator memIter = mem.iterate();
                         Item it;
                         while ((it = memIter.next()) != null) {
                             if (isSignificant(it)) {
@@ -132,7 +155,7 @@ public class SignificantItemDetector extends ProxyReceiver {
     @Override
     public void endDocument() throws XPathException {
         if (--level != 0) {
-            super.endDocument();
+            getNextOutputter().endDocument();
         }
     }
 
@@ -142,7 +165,7 @@ public class SignificantItemDetector extends ProxyReceiver {
     @Override
     public void endElement() throws XPathException {
         level--;
-        super.endElement();
+        getNextOutputter().endElement();
     }
 
     /**

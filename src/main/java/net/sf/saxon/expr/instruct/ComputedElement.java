@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
@@ -67,7 +67,7 @@ public class ComputedElement extends ElementCreator {
         }
         setValidationAction(validation, schemaType);
         preservingTypes = schemaType == null && validation == Validation.PRESERVE;
-        this.inheritNamespacesToChildren = inheritNamespaces;
+        this.bequeathNamespacesToChildren = inheritNamespaces;
         allowNameAsQName = allowQName;
     }
 
@@ -119,6 +119,7 @@ public class ComputedElement extends ElementCreator {
     }
 
     /*@NotNull*/
+    @Override
     public Expression simplify() throws XPathException {
         setNameExp(getNameExp().simplify());
         if (getNamespaceExp() != null) {
@@ -143,6 +144,7 @@ public class ComputedElement extends ElementCreator {
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         super.typeCheck(visitor, contextInfo);
         Configuration config = visitor.getConfiguration();
@@ -154,9 +156,9 @@ public class ComputedElement extends ElementCreator {
             setNameExp(config.getTypeChecker(false).staticTypeCheck(getNameExp(),
                                                                                 SequenceType.SINGLE_ATOMIC, role, visitor));
             ItemType supplied = getNameExp().getItemType();
-            if (th.relationship(supplied, BuiltInAtomicType.STRING) == TypeHierarchy.DISJOINT &&
-                    th.relationship(supplied, BuiltInAtomicType.UNTYPED_ATOMIC) == TypeHierarchy.DISJOINT &&
-                    th.relationship(supplied, BuiltInAtomicType.QNAME) == TypeHierarchy.DISJOINT) {
+            if (th.relationship(supplied, BuiltInAtomicType.STRING) == Affinity.DISJOINT &&
+                    th.relationship(supplied, BuiltInAtomicType.UNTYPED_ATOMIC) == Affinity.DISJOINT &&
+                    th.relationship(supplied, BuiltInAtomicType.QNAME) == Affinity.DISJOINT) {
                 XPathException de = new XPathException("The name of a constructed element must be a string, QName, or untypedAtomic");
                 de.setErrorCode("XPTY0004");
                 de.setIsTypeError(true);
@@ -211,11 +213,12 @@ public class ComputedElement extends ElementCreator {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ComputedElement ce = new ComputedElement(
                 getNameExp().copy(rebindings), getNamespaceExp() == null ? null : getNamespaceExp().copy(rebindings),
                 /*defaultNamespace,*/ getSchemaType(),
-                getValidationAction(), inheritNamespacesToChildren, allowNameAsQName);
+                getValidationAction(), bequeathNamespacesToChildren, allowNameAsQName);
         ExpressionTool.copyLocationInfo(this, ce);
         ce.setContentExpression(getContentExpression().copy(rebindings));
         return ce;
@@ -228,6 +231,7 @@ public class ComputedElement extends ElementCreator {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         if (itemType == null) {
             return super.getItemType();
@@ -244,6 +248,7 @@ public class ComputedElement extends ElementCreator {
      * static validation can continue recursively.
      */
 
+    @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         if (parentType instanceof SimpleType || ((ComplexType) parentType).isSimpleContent()) {
             String msg = "Elements are not permitted here: the containing element ";
@@ -275,6 +280,7 @@ public class ComputedElement extends ElementCreator {
      * @return the name code for the element name
      */
 
+    @Override
     public NodeName getElementName(XPathContext context, NodeInfo copiedNode)
             throws XPathException {
 
@@ -295,20 +301,29 @@ public class ComputedElement extends ElementCreator {
         //nameValue = nameValue.getPrimitiveValue();
         if (nameValue instanceof StringValue) {  // which includes UntypedAtomic
             // this will always be the case in XSLT
-            CharSequence rawName = nameValue.getStringValueCS();
-            rawName = Whitespace.trimWhitespace(rawName);
-            try {
-                String[] parts = NameChecker.getQNameParts(rawName);
-                prefix = parts[0];
-                localName = parts[1];
-            } catch (QNameException err) {
-                String message = "Invalid element name. " + err.getMessage();
-                if (rawName.length() == 0) {
-                    message = "Supplied element name is a zero-length string";
+            String rawName = nameValue.getStringValue();
+            rawName = Whitespace.trimWhitespace(rawName).toString();
+            if (rawName.startsWith("Q{") && allowNameAsQName) {
+                // Unclear whether this is allowed: see https://github.com/w3c/qtspecs/issues/9
+                // It clearly is NOT allowed in XSLT 3.0 (though for no good reason)
+                StructuredQName qn = StructuredQName.fromEQName(rawName);
+                prefix = "";
+                localName = qn.getLocalPart();
+                uri = qn.getURI();
+            } else {
+                try {
+                    String[] parts = NameChecker.getQNameParts(rawName);
+                    prefix = parts[0];
+                    localName = parts[1];
+                } catch (QNameException err) {
+                    String message = "Invalid element name. " + err.getMessage();
+                    if (rawName.length() == 0) {
+                        message = "Supplied element name is a zero-length string";
+                    }
+                    String errorCode = isXSLT() ? "XTDE0820" : "XQDY0074";
+                    XPathException err1 = new XPathException(message, errorCode, getLocation());
+                    throw dynamicError(getLocation(), err1, context);
                 }
-                String errorCode = isXSLT() ? "XTDE0820" : "XQDY0074";
-                XPathException err1 = new XPathException(message, errorCode, getLocation());
-                throw dynamicError(getLocation(), err1, context);
             }
         } else if (nameValue instanceof QNameValue && allowNameAsQName) {
             // this is allowed in XQuery
@@ -387,19 +402,20 @@ public class ComputedElement extends ElementCreator {
         return allowNameAsQName;
     }
 
+    @Override
     public String getNewBaseURI(XPathContext context, NodeInfo copiedNode) {
         return getStaticBaseURIString();
     }
 
     /**
      * Callback to output namespace nodes for the new element.
-     *
-     * @param context    The execution context
-     * @param out        the Receiver where the namespace nodes are to be written
-     * @param nameCode   The name of the element node being output
+     * @param out        the Outputter where the namespace nodes are to be written
+     * @param nodeName   The name of the element node being output
      * @param copiedNode Where this is a copied node, the node being copied
      */
-    public void outputNamespaceNodes(XPathContext context, Receiver out, NodeName nameCode, NodeInfo copiedNode) {
+    @Override
+    public void outputNamespaceNodes(Outputter out, NodeName nodeName, NodeInfo copiedNode)
+            throws XPathException {
         // no action
     }
 
@@ -408,6 +424,7 @@ public class ComputedElement extends ElementCreator {
      * Get the name of this instruction for diagnostic and tracing purposes
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_ELEMENT;
     }
@@ -417,6 +434,7 @@ public class ComputedElement extends ElementCreator {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("compElem", this);
         String flags = getInheritanceFlags();

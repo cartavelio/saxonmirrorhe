@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.sort;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.ErrorIterator;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
@@ -15,18 +14,22 @@ import net.sf.saxon.om.FocusTrackingIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+
+import java.util.Arrays;
+import java.util.EnumSet;
 
 /**
  * Class to do a sorted iteration
  */
 
-public class SortedIterator implements SequenceIterator<Item<?>>, LastPositionFinder, LookaheadIterator<Item<?>>, Sortable {
+public class SortedIterator implements SequenceIterator, LastPositionFinder, LookaheadIterator {
 
     // the items to be sorted
-    protected SequenceIterator<?> base;
+    protected SequenceIterator base;
 
     // the call-back function used to evaluate sort keys
     protected SortKeyEvaluator sortKeyEvaluator;
@@ -50,7 +53,7 @@ public class SortedIterator implements SequenceIterator<Item<?>>, LastPositionFi
     protected XPathContext context;
 
     // The host language (XSLT, XQuery, XPath). Used only to decide which error code to use on dynamic errors.
-    private int hostLanguage;
+    private HostLanguage hostLanguage;
 
     protected SortedIterator() {
     }
@@ -65,14 +68,14 @@ public class SortedIterator implements SequenceIterator<Item<?>>, LastPositionFi
      * @param createNewContext true if sort keys are computed relative to the item being sorted (as in XSLT but not XQuery)
      */
 
-    public SortedIterator(XPathContext context, SequenceIterator<?> base,
+    public SortedIterator(XPathContext context, SequenceIterator base,
                           SortKeyEvaluator sortKeyEvaluator, AtomicComparer[] comparators, boolean createNewContext) {
 
         if (createNewContext) {
             this.context = context.newMinorContext();
             this.base = this.context.trackFocus(base);
             this.context.setTemporaryOutputState(StandardNames.XSL_SORT);
-            //this.context.setCurrentOutputUri(null);  //See bug 4160
+            //this.context.setCurrentOutputUri(null);   // See bug 4160
         } else {
             this.base = base;
             this.context = context;
@@ -91,10 +94,10 @@ public class SortedIterator implements SequenceIterator<Item<?>>, LastPositionFi
     /**
      * Set the host language
      *
-     * @param language the host language (for example {@link Configuration#XQUERY})
+     * @param language the host language (for example {@link HostLanguage#XQUERY})
      */
 
-    public void setHostLanguage(int language) {
+    public void setHostLanguage(HostLanguage language) {
         hostLanguage = language;
     }
 
@@ -104,11 +107,12 @@ public class SortedIterator implements SequenceIterator<Item<?>>, LastPositionFi
      * next(). It is used only when there is an explicit need to tell if we
      * are at the last element.
      * <p>This method must not be called unless the result of getProperties() on the iterator
-     * includes the bit setting {@link net.sf.saxon.om.SequenceIterator#LOOKAHEAD}</p>
+     * includes the bit setting {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}</p>
      *
      * @return true if there are more items in the sequence
      */
 
+    @Override
     public boolean hasNext() {
         if (position < 0) {
             return false;
@@ -126,7 +130,7 @@ public class SortedIterator implements SequenceIterator<Item<?>>, LastPositionFi
                     // (a) it wouldn't have failed unless there was something to sort, and
                     // (b) it's going to fail again when next() is called
                     count = -1;
-                    base = new FocusTrackingIterator<>(new ErrorIterator(err));
+                    base = new FocusTrackingIterator(new ErrorIterator(err));
                     return true;
                 }
             }
@@ -140,6 +144,7 @@ public class SortedIterator implements SequenceIterator<Item<?>>, LastPositionFi
      */
 
     /*@Nullable*/
+    @Override
     public Item next() throws XPathException {
         if (position < 0) {
             return null;
@@ -155,6 +160,7 @@ public class SortedIterator implements SequenceIterator<Item<?>>, LastPositionFi
         }
     }
 
+    @Override
     public int getLength() throws XPathException {
         if (count < 0) {
             doSort();
@@ -162,21 +168,19 @@ public class SortedIterator implements SequenceIterator<Item<?>>, LastPositionFi
         return count;
     }
 
-    public void close() {
-    }
-
     /**
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return LAST_POSITION_FINDER;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LAST_POSITION_FINDER);
     }
 
     /**
@@ -187,7 +191,7 @@ public class SortedIterator implements SequenceIterator<Item<?>>, LastPositionFi
 
     protected void buildArray() throws XPathException {
         int allocated;
-        if ((base.getProperties() & SequenceIterator.LAST_POSITION_FINDER) != 0) {
+        if (base.getProperties().contains(Property.LAST_POSITION_FINDER)) {
             allocated = ((LastPositionFinder) base).getLength();
         } else {
             allocated = 100;
@@ -235,55 +239,35 @@ public class SortedIterator implements SequenceIterator<Item<?>>, LastPositionFi
 
         // sort the array
 
-        //QuickSort.sort(this, 0, count-1);
         try {
-            GenericSorter.quickSort(0, count, this);
+            Arrays.sort(values, 0, count, (a, b) -> {
+                try {
+                    for (int i = 0; i < comparators.length; i++) {
+                        int comp = comparators[i].compareAtomicValues(
+                                a.sortKeyValues[i], b.sortKeyValues[i]);
+                        if (comp != 0) {
+                            // we have found a difference, so we can return
+                            return comp;
+                        }
+                    }
+                } catch (NoDynamicContextException e) {
+                    throw new AssertionError("Sorting without dynamic context: " + e.getMessage());
+                }
+
+                // all sort keys equal: return the items in their original order
+                // TODO: unnecessary, we are now using a stable sort routine
+                return a.originalPosition - b.originalPosition;
+            });
+            //GenericSorter.quickSort(0, count, this);
         } catch (ClassCastException e) {
             XPathException err = new XPathException("Non-comparable types found while sorting: " + e.getMessage());
-            if (hostLanguage == Configuration.XSLT) {
+            if (hostLanguage == HostLanguage.XSLT) {
                 err.setErrorCode("XTDE1030");
             } else {
                 err.setErrorCode("XPTY0004");
             }
             throw err;
         }
-        //GenericSorter.mergeSort(0, count, this);
-    }
-
-    /**
-     * Compare two items in sorted sequence
-     * (needed to implement the Sortable interface)
-     *
-     * @return &lt;0 if obj[a]&lt;obj[b], 0 if obj[a]=obj[b], &gt;0 if obj[a]&gt;obj[b]
-     */
-
-    public int compare(int a, int b) {
-        try {
-            for (int i = 0; i < comparators.length; i++) {
-                int comp = comparators[i].compareAtomicValues(
-                        values[a].sortKeyValues[i], values[b].sortKeyValues[i]);
-                if (comp != 0) {
-                    // we have found a difference, so we can return
-                    return comp;
-                }
-            }
-        } catch (NoDynamicContextException e) {
-            throw new AssertionError("Sorting without dynamic context: " + e.getMessage());
-        }
-
-        // all sort keys equal: return the items in their original order
-
-        return values[a].originalPosition - values[b].originalPosition;
-    }
-
-    /**
-     * Swap two items (needed to implement the Sortable interface)
-     */
-
-    public void swap(int a, int b) {
-        ObjectToBeSorted temp = values[a];
-        values[a] = values[b];
-        values[b] = temp;
     }
 
 }

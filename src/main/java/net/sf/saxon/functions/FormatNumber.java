@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,8 +7,8 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -193,7 +193,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                 FastStringBuffer sb = new FastStringBuffer(s.length());
                 sb.append(s.substring(0, i));
                 for (int n = i; n < s.length(); n++) {
-                    sb.append(s.charAt(n) == '.' ? '.' : '0');
+                    sb.cat(s.charAt(n) == '.' ? '.' : '0');
                 }
                 trial = new BigDecimal(sb.toString());
             } else {
@@ -209,11 +209,11 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                     // number starts with 99999... or -99999. Try rounding up to 100000.. or -100000...
                     FastStringBuffer sb = new FastStringBuffer(s.length() + 1);
                     if (start == 1) {
-                        sb.append('-');
+                        sb.cat('-');
                     }
-                    sb.append('1');
+                    sb.cat('1');
                     for (int n = start; n < s.length(); n++) {
-                        sb.append(s.charAt(n) == '.' ? '.' : '0');
+                        sb.cat(s.charAt(n) == '.' ? '.' : '0');
                     }
                     trial = new BigDecimal(sb.toString());
                 } else {
@@ -227,9 +227,9 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                         // we're in the integer part
                         FastStringBuffer sb = new FastStringBuffer(s.length());
                         sb.append(s.substring(0, i));
-                        sb.append((char) ((int) s.charAt(i) + 1));
+                        sb.cat((char) ((int) s.charAt(i) + 1));
                         for (int n = i; n < s.length(); n++) {
-                            sb.append(s.charAt(n) == '.' ? '.' : '0');
+                            sb.cat(s.charAt(n) == '.' ? '.' : '0');
                         }
                         trial = new BigDecimal(sb.toString());
                     } else {
@@ -754,9 +754,9 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
             } else {
                 intDigits = fsb.length();
                 if (minFractionPartSize > 0) {
-                    fsb.append('.');
+                    fsb.cat('.');
                     for (int i = 0; i < minFractionPartSize; i++) {
-                        fsb.append('0');
+                        fsb.cat('0');
                     }
                 }
             }
@@ -766,19 +766,19 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                 fsb.prependRepeated('0', minWholePartSize - intDigits);
             }
             if (minExponentSize != 0) {
-                fsb.append('e');
+                fsb.cat('e');
                 IntegerValue exp = (IntegerValue) IntegerValue.makeIntegerValue(exponent);
                 String expStr = exp.toString();
                 char first = expStr.charAt(0);
                 if (first == '-') {
-                    fsb.append('-');
+                    fsb.cat('-');
                     expStr = expStr.substring(1);
                 }
                 int length = expStr.length();
                 if (length < minExponentSize) {
                     int zz = minExponentSize - length;
                     for (int i = 0; i < zz; i++) {
-                        fsb.append('0');
+                        fsb.cat('0');
                     }
                 }
                 fsb.append(expStr);
@@ -794,14 +794,14 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
 
         private void formatInteger(NumericValue value, FastStringBuffer fsb) {
             if (!(minWholePartSize == 0 && value.compareTo(0) == 0)) {
-                fsb.append(value.getStringValueCS());
+                fsb.cat(value.getStringValueCS());
                 int leadingZeroes = minWholePartSize - fsb.length();
                 fsb.prependRepeated('0', leadingZeroes);
             }
             if (minFractionPartSize != 0) {
-                fsb.append('.');
+                fsb.cat('.');
                 for (int i = 0; i < minFractionPartSize; i++) {
-                    fsb.append('0');
+                    fsb.cat('0');
                 }
             }
         }
@@ -870,6 +870,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
      * @throws XPathException if any dynamic error occurs
      */
 
+    @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         int numArgs = arguments.length;
         DecimalFormatManager dfm = getRetainedStaticContext().getDecimalFormatManager();
@@ -957,7 +958,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
 
     public static String formatExponential(DoubleValue value) {
         try {
-            DecimalSymbols dfs = new DecimalSymbols(Configuration.XSLT, 31);
+            DecimalSymbols dfs = new DecimalSymbols(HostLanguage.XSLT, 31);
             dfs.setInfinity("INF");
             SubPicture[] pics = getSubPictures("0.0##########################e0", dfs);
             return formatNumber(value, pics, dfs).toString();
@@ -982,7 +983,6 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
         copy.subPictures = subPictures;
         return copy;
     }
-
 
 }
 

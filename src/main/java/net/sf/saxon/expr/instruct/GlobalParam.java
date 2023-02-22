@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,12 +7,10 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -50,15 +48,20 @@ public final class GlobalParam extends GlobalVariable {
         return this.implicitlyRequired;
     }
 
+    @Override
+    public String getTracingTag() {
+        return "xsl:param";
+    }
+
     /**
      * Evaluate the variable
      */
     @Override
-    public GroundedValue<?> evaluateVariable(XPathContext context, Component target) throws XPathException {
+    public GroundedValue evaluateVariable(XPathContext context, Component target) throws XPathException {
         Controller controller = context.getController();
         assert controller != null;
         Bindery b = controller.getBindery(getPackageData());
-        GroundedValue<?> val = b.getGlobalVariableValue(this);
+        GroundedValue val = b.getGlobalVariableValue(this);
         if (val != null) {
             if (val instanceof Bindery.FailureValue) {
                 throw ((Bindery.FailureValue)val).getObject();
@@ -74,7 +77,7 @@ public final class GlobalParam extends GlobalVariable {
                     getVariableQName().getDisplayName());
             e.setXPathContext(context);
             e.setLocator(this);
-            e.setErrorCode(getPackageData().getHostLanguage() == Configuration.XSLT ? "XTDE0050" : "XPDY0002");
+            e.setErrorCode(getPackageData().isXSLT() ? "XTDE0050" : "XPDY0002");
             throw e;
         } else if (isImplicitlyRequiredParam()) {
             XPathException e = new XPathException("A value must be supplied for parameter $" +
@@ -94,7 +97,7 @@ public final class GlobalParam extends GlobalVariable {
      */
 
     @Override
-    public GroundedValue<?> evaluateVariable(XPathContext context) throws XPathException {
+    public GroundedValue evaluateVariable(XPathContext context) throws XPathException {
         return evaluateVariable(context, null);
     }
 

@@ -1,10 +1,11 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.sax.SAXSource;
@@ -13,11 +14,16 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * test The features and properties of a XML Parser in s9api
  */
-public class TestXMLParserOptions extends TestCase {
+public class TestXMLParserOptions {
 
+    @Test
     public void testEnableOnExternalEntityExpansion() {
         try {
             Processor processor = new Processor(false);
@@ -28,7 +34,7 @@ public class TestXMLParserOptions extends TestCase {
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
                     "  <!ENTITY welcome PUBLIC \"-//W3C//TEXT copyright//EN\"\n" +
-                    "    \"http://www.saxonica.com/welcome/welcome.xml\">\n" +
+                    "    \"https://www.saxonica.com/welcome/welcome.xml\">\n" +
                     "]>\n" +
                     "<saxonica>&welcome;</saxonica>");
             SAXSource source = new SAXSource(new InputSource(sr));
@@ -38,13 +44,14 @@ public class TestXMLParserOptions extends TestCase {
             XQueryEvaluator eval = c.compile("/saxonica/html").load();
             eval.setContextItem(doc);
             XdmValue val = eval.evaluate();
-            assertEquals(val.size(), 1);
+            assertEquals(1, val.size());
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testXmlVersions(){
         //test
 
@@ -56,6 +63,7 @@ public class TestXMLParserOptions extends TestCase {
 
     }
 
+    @Test
     public void testDisableOnExternalEntityExpansion() {
         try {
             Processor processor = new Processor(false);
@@ -75,13 +83,14 @@ public class TestXMLParserOptions extends TestCase {
             XQueryEvaluator eval = c.compile("empty(/saxonica/*)").load();
             eval.setContextItem(doc);
             XdmValue val = eval.evaluate();
-            assertEquals(((XdmAtomicValue) val).getBooleanValue(), true);
+            assertEquals(true, ((XdmAtomicValue) val).getBooleanValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
 
+    @Test
     public void testDisableOnExternalEntityExpansion2() {
         try {
             Processor processor = new Processor(false);
@@ -100,13 +109,14 @@ public class TestXMLParserOptions extends TestCase {
             XQueryEvaluator eval = c.compile("empty(/saxonica/*)").load();
             eval.setContextItem(doc);
             XdmValue val = eval.evaluate();
-            assertEquals(((XdmAtomicValue) val).getBooleanValue(), true);
+            assertEquals(true, ((XdmAtomicValue) val).getBooleanValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
 
+    @Test
     public void testEnableOnExternalEntityExpansion2() {
         try {
             Processor processor = new Processor(false);
@@ -115,7 +125,7 @@ public class TestXMLParserOptions extends TestCase {
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
                     "  <!ENTITY welcome PUBLIC \"-//W3C//TEXT copyright//EN\"\n" +
-                    "    \"http://www.saxonica.com/welcome/welcome.xml\">\n" +
+                    "    \"https://www.saxonica.com/welcome/welcome.xml\">\n" +
                     "]>\n" +
                     "<saxonica>&welcome;</saxonica>");
             SAXSource source = new SAXSource(new InputSource(sr));
@@ -125,12 +135,13 @@ public class TestXMLParserOptions extends TestCase {
             XQueryEvaluator eval = c.compile("/saxonica/html").load();
             eval.setContextItem(doc);
             XdmValue val = eval.evaluate();
-            assertEquals(val.size(), 1);
+            assertEquals(1, val.size());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testSettingOfProperty() {
         Processor processor = new Processor(true);
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://xml.org/sax/features/validation", true);
@@ -153,20 +164,21 @@ public class TestXMLParserOptions extends TestCase {
         DocumentBuilder builder = processor.newDocumentBuilder();
         try {
             XdmNode doc = builder.build(source);
-            assertTrue("XML document is valid", true);
+            assertTrue(true, "XML document is valid");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
 
     }
 
+    @Test
     public void testErrorSettingOfProperty() {
 
         // MHK 2015-11-10: Having trouble with this test. When the outermost element is one for which no declaration is
         // available (catalogg), Xerces reports a validation error as expected. If we get the outermost element name right
         // but give it invalid content, no errors are reported. No idea why, but as it's not our product I'm not pursuing it.
         Processor processor = new Processor(true);
-        processor.setConfigurationProperty(FeatureKeys.SOURCE_PARSER_CLASS, "org.apache.xerces.parsers.SAXParser");
+        processor.setConfigurationProperty(Feature.SOURCE_PARSER_CLASS, "org.apache.xerces.parsers.SAXParser");
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://xml.org/sax/features/validation", false);
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://apache.org/xml/features/validation/schema", true);
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_PROPERTY + "http://apache.org/xml/properties/schema/external-schemaLocation",
@@ -199,6 +211,7 @@ public class TestXMLParserOptions extends TestCase {
 
     }
 
+    @Test
     public void testUnknownFeature() {
         try {
             Processor processor = new Processor(false);
@@ -207,7 +220,7 @@ public class TestXMLParserOptions extends TestCase {
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
                     "  <!ENTITY welcome PUBLIC \"-//W3C//TEXT copyright//EN\"\n" +
-                    "    \"http://www.saxonica.com/welcome/welcome.xml\">\n" +
+                    "    \"https://www.saxonica.com/welcome/welcome.xml\">\n" +
                     "]>\n" +
                     "<saxonica>&welcome;</saxonica>");
             SAXSource source = new SAXSource(new InputSource(sr));
@@ -217,13 +230,14 @@ public class TestXMLParserOptions extends TestCase {
             XQueryEvaluator eval = c.compile("/saxonica/html").load();
             eval.setContextItem(doc);
             XdmValue val = eval.evaluate();
-            assertEquals(val.size(), 1);
-            assertTrue("Test should still pass, but warning with unknown parser feature", true);
+            assertEquals(1, val.size());
+            assertTrue(true, "Test should still pass, but warning with unknown parser feature");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testUnknownProperty() {
         try {
             Processor processor = new Processor(false);
@@ -233,7 +247,7 @@ public class TestXMLParserOptions extends TestCase {
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
                     "  <!ENTITY welcome PUBLIC \"-//W3C//TEXT copyright//EN\"\n" +
-                    "    \"http://www.saxonica.com/welcome/welcome.xml\">\n" +
+                    "    \"https://www.saxonica.com/welcome/welcome.xml\">\n" +
                     "]>\n" +
                     "<saxonica>&welcome;</saxonica>");
             SAXSource source = new SAXSource(new InputSource(sr));
@@ -243,12 +257,13 @@ public class TestXMLParserOptions extends TestCase {
             XQueryEvaluator eval = c.compile("/saxonica/html").load();
             eval.setContextItem(doc);
             XdmValue val = eval.evaluate();
-            assertEquals(val.size(), 1);
+            assertEquals(1, val.size());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testEnableXInclude() {
         Processor proc = new Processor(true);
 
@@ -256,7 +271,7 @@ public class TestXMLParserOptions extends TestCase {
 
         StringReader sr = new StringReader("\n" +
                 "<saxonica xmlns:xi=\"http://www.w3.org/2001/XInclude\">\n" +
-                "  <xi:include href=\"http://www.saxonica.com/welcome/welcome.xml\"/>\n" +
+                "  <xi:include href=\"https://www.saxonica.com/welcome/welcome.xml\"/>\n" +
                 "</saxonica>");
 
         SAXSource source = new SAXSource(new InputSource(sr));
@@ -267,7 +282,7 @@ public class TestXMLParserOptions extends TestCase {
             XQueryEvaluator eval = c.compile("empty(/saxonica/*:include) and exists(/saxonica/html)").load();
             eval.setContextItem(doc);
             XdmValue val = eval.evaluate();
-            assertEquals(((XdmAtomicValue) val).getBooleanValue(), true);
+            assertEquals(true, ((XdmAtomicValue) val).getBooleanValue());
         } catch (SaxonApiException e) {
             fail();
         }
@@ -275,9 +290,10 @@ public class TestXMLParserOptions extends TestCase {
     }
 
 
+    @Test
     public void testDisableXInclude() {
         Processor proc = new Processor(true);
-        proc.setConfigurationProperty(FeatureKeys.SOURCE_PARSER_CLASS, "org.apache.xerces.parsers.SAXParser");
+        proc.setConfigurationProperty(Feature.SOURCE_PARSER_CLASS, "org.apache.xerces.parsers.SAXParser");
         proc.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://apache.org/xml/features/xinclude", false);
 
         StringReader sr = new StringReader("\n" +
@@ -293,7 +309,7 @@ public class TestXMLParserOptions extends TestCase {
             XQueryEvaluator eval = c.compile("exists(/saxonica/*:include) and empty(/saxonica/html)").load();
             eval.setContextItem(doc);
             XdmValue val = eval.evaluate();
-            assertEquals(((XdmAtomicValue) val).getBooleanValue(), true);
+            assertEquals(true, ((XdmAtomicValue) val).getBooleanValue());
         } catch (SaxonApiException e) {
             fail();
         }

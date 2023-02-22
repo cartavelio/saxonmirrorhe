@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -53,7 +53,7 @@ public class Count extends SystemFunction {
      */
 
     public static int count(/*@NotNull*/ SequenceIterator iter) throws XPathException {
-        if ((iter.getProperties() & SequenceIterator.LAST_POSITION_FINDER) != 0) {
+        if (iter.getProperties().contains(SequenceIterator.Property.LAST_POSITION_FINDER)) {
             return ((LastPositionFinder) iter).getLength();
         } else {
             int n = 0;
@@ -91,16 +91,19 @@ public class Count extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
+    @Override
     public IntegerValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Sequence<?> arg = arguments[0];
+        Sequence arg = arguments[0];
         int size = arg instanceof GroundedValue ? ((GroundedValue)arg).getLength() : count(arg.iterate());
         return Int64Value.makeIntegerValue(size);
     }
 
+    @Override
     public String getCompilerName() {
         return "CountCompiler";
     }
 
+    @Override
     public String getStreamerName() {
         return "Count";
     }

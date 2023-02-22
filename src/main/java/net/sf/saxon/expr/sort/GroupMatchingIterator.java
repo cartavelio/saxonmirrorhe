@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -20,20 +20,21 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
+import java.util.EnumSet;
 import java.util.List;
 
 /**
  * A GroupMatchingIterator contains code shared between GroupStartingIterator and GroupEndingIterator
  */
 
-public abstract class GroupMatchingIterator implements LookaheadIterator<Item<?>>, LastPositionFinder, GroupIterator {
+public abstract class GroupMatchingIterator implements LookaheadIterator, LastPositionFinder, GroupIterator {
 
     protected Expression select;
     protected FocusIterator population;
     protected Pattern pattern;
     protected XPathContext baseContext;
     protected XPathContext runningContext;
-    protected List<Item<?>> currentMembers;
+    protected List<Item> currentMembers;
     /*@Nullable*/ protected Item next;
     protected Item current = null;
     protected int position = 0;
@@ -41,18 +42,22 @@ public abstract class GroupMatchingIterator implements LookaheadIterator<Item<?>
 
     protected abstract void advance() throws XPathException;
 
+    @Override
     public AtomicSequence getCurrentGroupingKey() {
         return null;
     }
 
-    public SequenceIterator<Item<?>> iterateCurrentGroup() {
+    @Override
+    public SequenceIterator iterateCurrentGroup() {
         return new ListIterator<>(currentMembers);
     }
 
+    @Override
     public boolean hasNext() {
         return next != null;
     }
 
+    @Override
     public Item next() throws XPathException {
         if (next != null) {
             current = next;
@@ -66,22 +71,25 @@ public abstract class GroupMatchingIterator implements LookaheadIterator<Item<?>
         }
     }
 
+    @Override
     public void close() {
         population.close();
     }
 
-    public int getProperties() {
-        return LOOKAHEAD | LAST_POSITION_FINDER;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD, Property.LAST_POSITION_FINDER);
     }
 
 //#if EE==true
 
+    @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
         return new ManualGroupMatchingIterator();
     }
 
     private class ManualGroupMatchingIterator extends ManualGroupIterator {
-        List<Item<?>> cMembers = currentMembers;
+        List<Item> cMembers = currentMembers;
         XPathContext savedcontext = runningContext.newMinorContext();
 
         ManualGroupMatchingIterator() {
@@ -89,11 +97,13 @@ public abstract class GroupMatchingIterator implements LookaheadIterator<Item<?>
             setLastPositionFinder(() -> savedcontext.getLast());
         }
 
+        @Override
         public AtomicSequence getCurrentGroupingKey() {
             return null;
         }
 
-        public SequenceIterator<Item<?>> iterateCurrentGroup() {
+        @Override
+        public SequenceIterator iterateCurrentGroup() {
             return new ListIterator<>(cMembers);
         }
 

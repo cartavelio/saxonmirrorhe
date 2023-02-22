@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -129,7 +129,8 @@ public class CollatingFunctionFree extends SystemFunction {
      * @return the result of invoking the function
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs within the function
      */
-    public Sequence<?> call(XPathContext context, Sequence[] args) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
         int c = getCollationArgument();
         String collation = args[c].head().getStringValue();
         collation = expandCollationURI(collation, getRetainedStaticContext().getStaticBaseUri());
@@ -142,6 +143,7 @@ public class CollatingFunctionFree extends SystemFunction {
         return fixed.call(context, retainedArgs);
     }
 
+    @Override
     public String getStreamerName() {
         try {
             return bindCollation(NamespaceConstant.CODEPOINT_COLLATION_URI).getStreamerName();

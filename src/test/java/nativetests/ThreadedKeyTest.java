@@ -1,10 +1,10 @@
 package nativetests;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -19,11 +19,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * Test that use of keys is threadsafe.
  */
-public class ThreadedKeyTest extends TestCase {
+public class ThreadedKeyTest {
 
 
     private static final String keyXsl =
@@ -36,6 +39,7 @@ public class ThreadedKeyTest extends TestCase {
             "</xsl:stylesheet>";
 
 
+    @Test
     public void testKeyTransformationThreaded() {
         try {
             Configuration config = new Configuration();
@@ -54,7 +58,7 @@ public class ThreadedKeyTest extends TestCase {
                             DOMResult result = new DOMResult();
                             transformer.transform(doc, result);
                             NodeList resultTags = ((Document)result.getNode()).getElementsByTagName("*");
-                            assertTrue(1 == resultTags.getLength());
+                            assertEquals(1, resultTags.getLength());
                             System.out.println("thread-#" + Thread.currentThread().getId() + " OK");
                         } catch (Throwable ex) {
                             System.err.println("thread-# " + Thread.currentThread().getId() + " ERROR");
@@ -67,34 +71,10 @@ public class ThreadedKeyTest extends TestCase {
             executor.awaitTermination(300, TimeUnit.SECONDS);
         } catch (TransformerConfigurationException e) {
             fail(e.getMessage());
-        } catch (XPathException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        } catch (InterruptedException e) {
+        } catch (XPathException | InterruptedException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
     }
 }
 
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//

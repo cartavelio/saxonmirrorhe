@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -34,15 +34,13 @@ public class Normalizer {
      */
     private int form;
 
-
     /**
      * Create a normalizer for a given form. Private constructor: use the {@link #make factory method}
      *
      * @param form   the normalization form required: for example {@link Normalizer#C}, {@link Normalizer#D}
-     * @param config the Saxon configuration
      * @throws XPathException if normalization fails
      */
-    private Normalizer(int form, Configuration config) throws XPathException {
+    private Normalizer(int form)  {
         this.form = form;
     }
 
@@ -58,7 +56,7 @@ public class Normalizer {
         if (data == null) {
             data = UnicodeDataParserFromXML.build(config);
         }
-        return new Normalizer(form, config);
+        return new Normalizer(form);
     }
 
     /**
@@ -122,7 +120,7 @@ public class Normalizer {
             ch32 = source.charAt(i++);
             if (ch32 < 128) {
                 // fast path - for ASCII characters, decomposition is a no-op
-                target.append((char) ch32);
+                target.cat((char) ch32);
                 continue;
             }
             if (UTF16CharacterSet.isHighSurrogate(ch32)) {

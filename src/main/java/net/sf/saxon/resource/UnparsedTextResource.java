@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -30,12 +30,12 @@ import java.net.URLConnection;
 public class UnparsedTextResource implements Resource {
     private String contentType;
     private String encoding;
-    private String href = null;
+    private String href;
     private String unparsedText = null;
-    //private InputStream inputStream;
 
     /**
      * Create an UnparsedTextResource
+     *
      * @param details information about the input
      * @throws XPathException for an unsupported encoding
      */
@@ -65,11 +65,13 @@ public class UnparsedTextResource implements Resource {
     }
 
     public final static ResourceFactory FACTORY = new ResourceFactory() {
+        @Override
         public Resource makeResource(Configuration config, AbstractResourceCollection.InputDetails details) throws XPathException {
             return new UnparsedTextResource(details);
         }
     };
 
+    @Override
     public String getResourceURI() {
         return href;
     }
@@ -85,15 +87,13 @@ public class UnparsedTextResource implements Resource {
                 URLConnection connection = url.openConnection();
                 InputStream stream = connection.getInputStream();
                 StringBuilder builder = null;
-                
+
                 String enc = encoding;
                 if (enc == null) {
                     enc = StandardUnparsedTextResolver.inferStreamEncoding(stream, null);
                 }
                 builder = CatalogCollection.makeStringBuilderFromStream(stream, enc);
                 unparsedText = builder.toString();
-            } catch (FileNotFoundException e) {
-                throw new XPathException(e);
             } catch (IOException e) {
                 throw new XPathException(e);
             }
@@ -101,15 +101,18 @@ public class UnparsedTextResource implements Resource {
         return unparsedText;
     }
 
+    @Override
     public Item getItem(XPathContext context) throws XPathException {
         return new StringValue(getContent());
     }
 
     /**
      * Get the media type (MIME type) of the resource if known
+     *
      * @return the string "text/plain"
      */
 
+    @Override
     public String getContentType() {
         return contentType == null ? "text/plain" : contentType;
     }

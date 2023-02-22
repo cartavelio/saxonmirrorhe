@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -35,7 +35,8 @@ public class InsertBefore extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NumericValue n = (NumericValue) arguments[1].head();
         int pos = (int) n.longValue();
         return SequenceTool.toLazySequence(
@@ -57,24 +58,25 @@ public class InsertBefore extends SystemFunction {
      * an iterator over the sequence to be inserted, and the insert position.
      */
 
-    public static class InsertIterator implements SequenceIterator<Item<?>> {
+    public static class InsertIterator implements SequenceIterator {
 
-        private SequenceIterator<?> base;
-        private SequenceIterator<?> insert;
+        private SequenceIterator base;
+        private SequenceIterator insert;
         private int insertPosition;
         private int position = 0;
         private boolean inserting = false;
 
-        public InsertIterator(SequenceIterator<?> base, SequenceIterator<?> insert, int insertPosition) {
+        public InsertIterator(SequenceIterator base, SequenceIterator insert, int insertPosition) {
             this.base = base;
             this.insert = insert;
-            this.insertPosition = insertPosition < 1 ? 1 : insertPosition;
+            this.insertPosition = Math.max(insertPosition, 1);
             this.inserting = insertPosition == 1;
         }
 
 
-        public Item<?> next() throws XPathException {
-            Item<?> nextItem;
+        @Override
+        public Item next() throws XPathException {
+            Item nextItem;
             if (inserting) {
                 nextItem = insert.next();
                 if (nextItem == null) {
@@ -106,27 +108,15 @@ public class InsertBefore extends SystemFunction {
             }
         }
 
+        @Override
         public void close() {
             base.close();
             insert.close();
         }
 
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-         *         and {@link #LOOKAHEAD}. It is always
-         *         acceptable to return the value zero, indicating that there are no known special properties.
-         *         It is acceptable for the properties of the iterator to change depending on its state.
-         */
-
-        public int getProperties() {
-            return 0;
-        }
-
     }
 
+    @Override
     public String getStreamerName() {
         return "InsertBefore";
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,17 +10,19 @@ package net.sf.saxon.trace;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.PreparedStylesheet;
+import net.sf.saxon.event.PushToReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.StreamWriterToReceiver;
 import net.sf.saxon.event.TransformerReceiver;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.instruct.GlobalParameterSet;
+import net.sf.saxon.expr.instruct.*;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Push;
+import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.trans.CompilerInfo;
@@ -28,8 +30,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.value.StringValue;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
@@ -42,24 +42,25 @@ import java.util.*;
 
 public class TimingTraceListener implements TraceListener {
 
-    private int repeat = 0;
+    private int runs = 0;
 
-    private static class InstructionDetails {
-        public InstructionInfo instruct;
-        public long gross;
-        public long net;
-        public long count;
+    private static class ComponentMetrics {
+        TraceableComponent component;
+        Map<String, Object> properties;
+        long gross;
+        long net;
+        long count;
     }
 
 
-    Logger out = new StandardLogger();
+    private Logger out = new StandardLogger();
     private long t_total;
-    /*@NotNull*/ private Stack<InstructionDetails> instructs = new Stack<>();
-    /*@NotNull*/ HashMap<InstructionInfo, InstructionDetails> instructMap = new HashMap<>();
-    /*@Nullable*/ protected Configuration config = null;
+    private Stack<ComponentMetrics> metrics = new Stack<>();
+    private HashMap<Traceable, ComponentMetrics> instructMap = new HashMap<>();
+    protected Configuration config = null;
 
-    private Map<InstructionInfo, Integer> recursionDepth = new HashMap<>();
-    private int lang = Configuration.XSLT;
+    private Map<Traceable, Integer> recursionDepth = new HashMap<>();
+    private HostLanguage lang = HostLanguage.XSLT;
 
     /**
      * Set the PrintStream to which the output will be written.
@@ -68,6 +69,7 @@ public class TimingTraceListener implements TraceListener {
      *               to System.err.
      */
 
+    @Override
     public void setOutputDestination(Logger stream) {
         out = stream;
     }
@@ -76,6 +78,7 @@ public class TimingTraceListener implements TraceListener {
      * Called at start
      */
 
+    @Override
     public void open(/*@NotNull*/ Controller controller) {
         config = controller.getConfiguration();
         lang = controller.getExecutable().getHostLanguage();
@@ -86,9 +89,10 @@ public class TimingTraceListener implements TraceListener {
      * Called at end. This method builds the XML out and analyzed html output
      */
 
+    @Override
     public void close() {
         t_total = System.nanoTime() - t_total;
-        repeat++;
+        runs++;
         try {
             PreparedStylesheet sheet = this.getStyleSheet();
             XsltController controller = sheet.newController();
@@ -102,50 +106,45 @@ public class TimingTraceListener implements TraceListener {
             tr.open();
             Receiver result = config.getSerializerFactory().getReceiver(out.asStreamResult(), props, controller.makePipelineConfiguration());
             tr.setDestination(result);
-            XMLStreamWriter writer = new StreamWriterToReceiver(tr);
-            writer.writeStartDocument();
 
-            writer.writeStartElement("trace");
-            writer.writeAttribute("t-total", Double.toString((double) t_total / 1000000));
-            for (InstructionDetails ins : instructMap.values()) {
-                writer.writeStartElement("fn");
-                String name = "UNKNOWN";
-                if (ins.instruct.getObjectName() != null) {
-                    name = ins.instruct.getObjectName().getDisplayName();
-                    writer.writeAttribute("name", name);
+            Push push = new PushToReceiver(tr);
+            Push.Document doc = push.document(true);
+            Push.Element trace = doc.element("trace")
+                    .attribute("t-total", Double.toString((double) t_total / 1000000));
+            for (ComponentMetrics ins : instructMap.values()) {
+                Push.Element fn = trace.element("fn");
+                String name;
+                if (ins.component.getObjectName() != null) {
+                    name = ins.component.getObjectName().getDisplayName();
+                    fn.attribute("name", name);
                 } else {
-                    if (ins.instruct.getProperty("name") != null) {
-                        name = ins.instruct.getProperty("name").toString();
-                        writer.writeAttribute("name", name);
+                    if (ins.properties.get("name") != null) {
+                        name = ins.properties.get("name").toString();
+                        fn.attribute("name", name);
                     }
                 }
-                if (ins.instruct.getProperty("match") != null) {
-                    name = ins.instruct.getProperty("match").toString();
-                    writer.writeAttribute("match", name);
+                if (ins.properties.get("match") != null) {
+                    name = ins.properties.get("match").toString();
+                    fn.attribute("match", name);
                 }
-                if (ins.instruct.getProperty("mode") != null) {
-                    name = ins.instruct.getProperty("mode").toString();
-                    writer.writeAttribute("mode", name);
+                if (ins.properties.get("mode") != null) {
+                    name = ins.properties.get("mode").toString();
+                    fn.attribute("mode", name);
                 }
-                writer.writeAttribute("construct", ins.instruct.getConstructType() == StandardNames.XSL_FUNCTION ? "function" : ins.instruct.getConstructType() == StandardNames.XSL_VARIABLE ? "variable" : "template");
-                String file = ins.instruct.getSystemId();
-                if (file != null) {
-                    writer.writeAttribute("file", file);
-                }
-                writer.writeAttribute("count", Long.toString(ins.count/ repeat)) ;
-                writer.writeAttribute("t-sum-net", Double.toString((double) ins.net / repeat/ 1000000));
-                writer.writeAttribute("t-avg-net", Double.toString(ins.net / (double) ins.count / 1000000));
-                writer.writeAttribute("t-sum", Double.toString((double) ins.gross / repeat/ 1000000));
-                writer.writeAttribute("t-avg", Double.toString(ins.gross / (double) ins.count / 1000000));
-                writer.writeAttribute("line", Long.toString(ins.instruct.getLineNumber()));
-                writer.writeEndElement();
+                fn.attribute("construct", ins.component.getTracingTag())
+                        .attribute("file", ins.component.getLocation().getSystemId())
+                        .attribute("count", Long.toString(ins.count/ runs))
+                        .attribute("t-sum-net", Double.toString((double) ins.net / runs / 1000000))
+                        .attribute("t-avg-net", Double.toString(ins.net / (double) ins.count / 1000000))
+                        .attribute("t-sum", Double.toString((double) ins.gross / runs / 1000000))
+                        .attribute("t-avg", Double.toString(ins.gross / (double) ins.count / 1000000))
+                        .attribute("line", Long.toString(ins.component.getLocation().getLineNumber()))
+                        .close();
             }
-            writer.writeEndElement();
-            writer.writeEndDocument();
-            writer.close();
+            doc.close();
         } catch (TransformerException e) {
             System.err.println("Unable to transform timing profile information: " + e.getMessage());
-        } catch (XMLStreamException e) {
+        } catch (SaxonApiException e) {
             System.err.println("Unable to generate timing profile information: " + e.getMessage());
         }
     }
@@ -154,51 +153,59 @@ public class TimingTraceListener implements TraceListener {
      * Called when an instruction in the stylesheet gets processed
      */
 
-    public void enter(/*@NotNull*/ InstructionInfo instruction, XPathContext context) {
-        int loc = instruction.getConstructType();
-        if (loc == StandardNames.XSL_FUNCTION || loc == StandardNames.XSL_TEMPLATE || loc == StandardNames.XSL_VARIABLE) {
+    @Override
+    public void enter(/*@NotNull*/ Traceable instruction, Map<String, Object> properties, XPathContext context) {
+        if (isTarget(instruction)) {
             long start = System.nanoTime();
-            InstructionDetails instructDetails = new InstructionDetails();
-            instructDetails.instruct = instruction;
-            instructDetails.gross = start;
-            instructs.add(instructDetails);
-
+            ComponentMetrics metric = new ComponentMetrics();
+            metric.component = (TraceableComponent)instruction;
+            metric.properties = properties;
+            metric.gross = start;
+            metrics.add(metric);
             Integer depth = recursionDepth.get(instruction);
             if (depth == null) {
                 recursionDepth.put(instruction, 0);
             } else {
-                recursionDepth.put(instruction, depth + 1);
+                recursionDepth.put(instruction, depth+1);
             }
         }
     }
 
+    private boolean isTarget(Traceable traceable) {
+        return traceable instanceof UserFunction ||
+            traceable instanceof GlobalVariable ||
+            traceable instanceof NamedTemplate ||
+            traceable instanceof TemplateRule;
+    }
+
     /**
      * Called after an instruction of the stylesheet got processed
+     * @param instruction the instruction or other construct that has now finished execution
      */
 
-    public void leave(/*@NotNull*/ InstructionInfo instruction) {
-        int loc = instruction.getConstructType();
-        if (loc == StandardNames.XSL_FUNCTION || loc == StandardNames.XSL_TEMPLATE || loc == StandardNames.XSL_VARIABLE) {
-            InstructionDetails instruct = instructs.peek();
-            long duration = System.nanoTime() - instruct.gross;
-            instruct.net = duration - instruct.net;
-            instruct.gross = duration;
-            InstructionDetails foundInstructDetails = instructMap.get(instruction);
+    @Override
+    public void leave(/*@NotNull*/ Traceable instruction) {
+        if (isTarget(instruction)) {
+            ComponentMetrics metric = metrics.peek();
+            long duration = System.nanoTime() - metric.gross;
+            metric.net = duration - metric.net;
+            metric.gross = duration;
+            ComponentMetrics foundInstructDetails = instructMap.get(instruction);
             if (foundInstructDetails == null) {
-                instruct.count = 1;
-                instructMap.put(instruction, instruct);
+                metric.count = 1;
+                instructMap.put(instruction, metric);
             } else {
                 foundInstructDetails.count++;
                 Integer depth = recursionDepth.get(instruction);
                 recursionDepth.put(instruction, --depth);
                 if (depth == 0) {
-                    foundInstructDetails.gross = foundInstructDetails.gross + instruct.gross;
+                    foundInstructDetails.gross = foundInstructDetails.gross + metric.gross;
                 }
-                foundInstructDetails.net = foundInstructDetails.net + instruct.net;
+                foundInstructDetails.net = foundInstructDetails.net + metric.net;
             }
-            instructs.pop();
-            if (!instructs.isEmpty()) {
-                InstructionDetails parentInstruct = instructs.peek();
+            metrics.pop();
+            if (!metrics.isEmpty()) {
+                ComponentMetrics parentInstruct = metrics.peek();
                 parentInstruct.net = parentInstruct.net + duration;
             }
         }
@@ -208,6 +215,7 @@ public class TimingTraceListener implements TraceListener {
      * Called when an item becomes current
      */
 
+    @Override
     public void startCurrentItem(Item item) {
     }
 
@@ -215,6 +223,7 @@ public class TimingTraceListener implements TraceListener {
      * Called after a node of the source tree got processed
      */
 
+    @Override
     public void endCurrentItem(Item item) {
     }
 
@@ -223,12 +232,12 @@ public class TimingTraceListener implements TraceListener {
      * This method can be overridden in a subclass to produce the output in a different format.
      */
     /*@NotNull*/
-    protected PreparedStylesheet getStyleSheet() throws XPathException {
+    private PreparedStylesheet getStyleSheet() throws XPathException {
         InputStream in = getStylesheetInputStream();
         StreamSource ss = new StreamSource(in, "profile.xsl");
         CompilerInfo info = config.getDefaultXsltCompilerInfo();
         info.setParameter(new StructuredQName("", "", "lang"),
-                          new StringValue(this.lang == Configuration.XSLT ? "XSLT" : "XQuery"));
+                          new StringValue(this.lang == HostLanguage.XSLT ? "XSLT" : "XQuery"));
         return Compilation.compileSingletonPackage(config, info, ss);
     }
 
@@ -237,7 +246,7 @@ public class TimingTraceListener implements TraceListener {
      * @return the input stream
      */
 
-    protected InputStream getStylesheetInputStream() {
+    private InputStream getStylesheetInputStream() {
         List<String> messages = new ArrayList<>();
         List<ClassLoader> classLoaders = new ArrayList<>();
         return Configuration.locateResource("profile.xsl", messages, classLoaders);

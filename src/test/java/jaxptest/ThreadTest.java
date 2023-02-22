@@ -1,8 +1,8 @@
 package jaxptest;
 
 import com.saxonica.config.EnterpriseTransformerFactory;
-import junit.framework.TestCase;
 import net.sf.saxon.lib.FeatureKeys;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Templates;
 import javax.xml.transform.TransformerFactory;
@@ -13,11 +13,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Test that DOM access is threadsafe. Test deleted - because DOM access is not thread-safe!
  */
-public class ThreadTest extends TestCase {
+public class ThreadTest {
 
+    @Test
     public void testDummy() {
         assertTrue(true);
     }
@@ -175,6 +179,7 @@ public class ThreadTest extends TestCase {
 //                    "    </beta>\n" +
 //                    "</alpha>";
 
+    @Test
     public void testParallelByteCodeGeneration() {
         //TransformerFactory factory = TransformerFactory.newInstance();
         try {
@@ -207,6 +212,7 @@ public class ThreadTest extends TestCase {
         }
     }
 
+    @Test
     public void testNonParallelByteCodeGeneration() {
         // Same stylesheet as above but not multithreaded, for comparison
         try {
@@ -237,6 +243,7 @@ public class ThreadTest extends TestCase {
                     "    </xsl:template>\n" +
                     "</xsl:stylesheet>";
 
+    @Test
     public void testParallelSchemaImport() {
         final TransformerFactory factory = new EnterpriseTransformerFactory();
         try {
@@ -268,29 +275,6 @@ public class ThreadTest extends TestCase {
     }
 
 }
-
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
 
 
 

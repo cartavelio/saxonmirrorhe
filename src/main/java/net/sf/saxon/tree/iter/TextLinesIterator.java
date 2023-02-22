@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,7 @@
 
 package net.sf.saxon.tree.iter;
 
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
@@ -21,10 +21,9 @@ import java.io.LineNumberReader;
 import java.net.URI;
 
 /**
- * An iterator that iterates over a file line by line. It is abstract because it does not supply the
- * getAnother() method
+ * An iterator that iterates over a file line by line, returning each line as a {@link StringValue}
  */
-public abstract class TextLinesIterator implements SequenceIterator<StringValue> {
+public abstract class TextLinesIterator implements SequenceIterator {
 
     protected LineNumberReader reader;
     protected IntPredicate checker;
@@ -63,6 +62,7 @@ public abstract class TextLinesIterator implements SequenceIterator<StringValue>
 //    }
 
     /*@Nullable*/
+    @Override
     public StringValue next() throws XPathException {
         if (position < 0) {
             // input already exhausted
@@ -101,6 +101,7 @@ public abstract class TextLinesIterator implements SequenceIterator<StringValue>
         }
     }
 
+    @Override
     public void close() {
         try {
             reader.close();

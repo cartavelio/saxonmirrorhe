@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -74,13 +74,13 @@ public final class AttributeGetter extends Expression {
     }
 
     @Override
-    public int getIntrinsicDependencies() {
-        return StaticProperty.DEPENDS_ON_CONTEXT_ITEM;
+    protected int computeSpecialProperties() {
+        return StaticProperty.NO_NODES_NEWLY_CREATED;
     }
 
     @Override
-    protected int computeSpecialProperties() {
-        return StaticProperty.NO_NODES_NEWLY_CREATED;
+    public int getIntrinsicDependencies() {
+        return StaticProperty.DEPENDS_ON_CONTEXT_ITEM;
     }
 
     @Override
@@ -90,6 +90,7 @@ public final class AttributeGetter extends Expression {
         return ag2;
     }
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         if (pathMapNodeSet == null) {
             ContextItemExpression cie = new ContextItemExpression();

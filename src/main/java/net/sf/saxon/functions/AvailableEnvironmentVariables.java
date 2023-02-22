@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,6 +13,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.lib.EnvironmentVariableResolver;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceExtent;
@@ -32,22 +33,24 @@ public class AvailableEnvironmentVariables extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<StringValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         EnvironmentVariableResolver resolver = context.getConfiguration().getConfigurationProperty(
             Feature.ENVIRONMENT_VARIABLE_RESOLVER);
-        List<StringValue> myList = new ArrayList<>();
+        List<Item> myList = new ArrayList<>();
         if (context.getConfiguration().getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
             for (java.lang.String s : resolver.getAvailableEnvironmentVariables()) {
                 myList.add(new StringValue(s));
             }
         }
-        return new SequenceExtent<>(myList);
+        return new SequenceExtent(myList);
     }
 
     @Override
     public Expression makeFunctionCall(Expression[] arguments) {
         return new SystemFunctionCall(this, arguments) {
             // Suppress early evaluation
+            @Override
             public Expression preEvaluate(ExpressionVisitor visitor) {
                 return this;
             }
@@ -55,4 +58,4 @@ public class AvailableEnvironmentVariables extends SystemFunction {
     }
 }
 
-//Copyright (c) 2010-2012 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

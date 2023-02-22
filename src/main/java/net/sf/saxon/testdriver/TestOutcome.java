@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -15,6 +15,7 @@ import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
@@ -60,28 +61,32 @@ public class TestOutcome {
     private SingleResultDoc principalResult = new SingleResultDoc();
     private Set<String> errorsReported;
     private boolean warningsReported;
-    private SaxonApiException exception;
+    private QName exception;
     private String comment;
     private Set<XdmNode> xslMessages = new HashSet<>(4);
     private Map<URI, SingleResultDoc> xslResultDocuments = new HashMap<>(4);
     private String wrongError;
-    private String resultVar;
+    private String resultVar = "result";
     private String baseOutputUri;
 
     public TestOutcome(TestDriver driver) {
         this.driver = driver;
     }
 
-    public void setException(SaxonApiException exception) {
+    public void setException(QName exception) {
         this.exception = exception;
     }
 
     public boolean isException() {
-        return exception != null;
+        return exception != null || (errorsReported != null && !errorsReported.isEmpty());
     }
 
     public void setResultVar(String variableName) {
         resultVar = variableName;
+    }
+
+    public QName getException() {
+        return exception;
     }
 
     public void setBaseOutputUri(String uri) {
@@ -92,9 +97,6 @@ public class TestOutcome {
         return baseOutputUri;
     }
 
-    public SaxonApiException getException() {
-        return exception;
-    }
 
     /**
      * Get a message giving details about the situation where the actual error code was not one of those
@@ -168,7 +170,7 @@ public class TestOutcome {
     }
 
     public String toString() {
-        return isException() ? "EXCEPTION " + exception.getMessage() : getPrincipalResult().toString();
+        return isException() ? "EXCEPTION " + exception.toString() : getPrincipalResult().toString();
     }
 
     public void setPrincipalSerializedResult(String result) {
@@ -224,7 +226,7 @@ public class TestOutcome {
             return "[[[NULL VALUE]]]";
         }
         if (isException()) {
-            return "EXCEPTION " + exception.getMessage();
+            return "EXCEPTION " + exception.toString();
         } else {
             StringWriter sw = new StringWriter();
             Serializer s = p.newSerializer(sw);
@@ -267,7 +269,7 @@ public class TestOutcome {
             return "[[[NULL VALUE]]]";
         }
         if (isException()) {
-            return "EXCEPTION " + exception.getMessage();
+            return "EXCEPTION " + exception.toString();
         } else {
             StringWriter sw = new StringWriter();
             Serializer s = p.newSerializer(sw);
@@ -413,11 +415,12 @@ public class TestOutcome {
                 //URI uri = new File(driver.resultsDir + "/results/output.xml").toURI().resolve(assertion.attribute("uri"));
                 URI uri;
                 try {
-                    uri = new URI(outcome.getBaseOutputUri()).resolve(assertion.attribute("uri"));
+                    uri = ResolveURI.makeAbsolute(assertion.attribute("uri"), outcome.getBaseOutputUri());
                 } catch (URISyntaxException e) {
                     System.err.println("**** Invalid output uri " + outcome.getBaseOutputUri());
                     return false;
                 }
+
                 SingleResultDoc doc = getSecondaryResult(uri);
                 if (doc == null) {
                     System.err.println("**** No output document found for " + uri);
@@ -435,7 +438,7 @@ public class TestOutcome {
 
             case "all-of":
                 for (XdmNode child : assertion.children("*")) {
-                    if (!testAssertion((XdmNode) child, outcome, result, assertXpc, catalogXpc, debug)) {
+                    if (!testAssertion(child, outcome, result, assertXpc, catalogXpc, debug)) {
                         return false;
                     }
                 }
@@ -514,7 +517,7 @@ public class TestOutcome {
                     if (first) {
                         first = false;
                     } else {
-                        fsb.append(' ');
+                        fsb.cat(' ');
                     }
                     fsb.append(item.getStringValue());
                 }
@@ -633,28 +636,22 @@ public class TestOutcome {
         if (isException()) {
             return false;
         } else {
-            XdmSequenceIterator iter = assertion.axisIterator(Axis.NAMESPACE);
+            XdmSequenceIterator<XdmNode> iter = assertion.axisIterator(Axis.NAMESPACE);
             while (iter.hasNext()) {
-                XdmNode namespace = (XdmNode) iter.next();
+                XdmNode namespace = iter.next();
                 if (namespace.getNodeName() != null) {
                     assertXpc.declareNamespace(namespace.getNodeName().getLocalName(), namespace.getStringValue());
                 }
             }
-            if (resultVar != null) {
-                assertXpc.declareVariable(new QName("result"));
-            }
+            QName resultVarName = new QName(resultVar);
+            assertXpc.declareVariable(resultVarName);
             driver.println("Testing " + assertion.getStringValue());
             XPathExecutable exp = assertXpc.compile(assertion.getStringValue());
             XPathSelector s = exp.load();
-            QName resultVarName = new QName("result");
-            if (resultVar != null) {
-                s.setVariable(new QName(resultVar), result.value);
-            } else if (exp.getRequiredCardinalityForVariable(resultVarName) == null) {
-                if (result.value instanceof XdmItem) { // this path used in XSLT tests
-                    s.setContextItem((XdmItem) result.value);
-                }
-            } else {
-                s.setVariable(resultVarName, result.value);
+
+            s.setVariable(resultVarName, result.value);
+            if (result.value instanceof XdmItem) { // this path used in XSLT tests
+                s.setContextItem((XdmItem) result.value);
             }
             boolean b = s.effectiveBooleanValue();
             if (!b && debug) {
@@ -768,8 +765,6 @@ public class TestOutcome {
                 } else {
                     driver.println("Serialized result:");
                     driver.println(principalSerializedResult);
-                    driver.println("Serialized result, codepoints:");
-                    driver.println(Arrays.toString(StringValue.expand(principalSerializedResult)));
                     return false;
                 }
             } catch (XPathException e) {
@@ -833,7 +828,7 @@ public class TestOutcome {
                 flag |= DeepEqual.WARNING_IF_FALSE;
             }
             try {
-                SequenceIterator<?> iter0;
+                SequenceIterator iter0;
                 if (result == null) {
                     System.err.println("Result value is null");
                     return false;
@@ -848,10 +843,10 @@ public class TestOutcome {
                 } else {
                     iter0 = value.getUnderlyingValue().iterate();
                 }
-                GroundedValue<?> val0 = iter0.materialize();
-                SequenceIterator<?> iter1 = expected.axisIterator(Axis.CHILD).next()
+                GroundedValue val0 = iter0.materialize();
+                SequenceIterator iter1 = expected.axisIterator(Axis.CHILD).next()
                         .getUnderlyingValue().iterateAxis(AxisInfo.CHILD);
-                GroundedValue<?> val1 = iter1.materialize();
+                GroundedValue val1 = iter1.materialize();
                 boolean success = DeepEqual.deepEqual(
                     val0.iterate(), val1.iterate(),
                     new GenericAtomicComparer(CodepointCollator.getInstance(), null),
@@ -895,10 +890,11 @@ public class TestOutcome {
         }
     }
 
-    private class RemoveWhitespace implements ItemMappingFunction<NodeInfo, NodeInfo> {
-        public NodeInfo mapItem(NodeInfo item) {
-            boolean isWhite = item.getNodeKind() == Type.TEXT && Whitespace.isWhite(item.getStringValueCS());
-            return isWhite ? null : item;
+    private static class RemoveWhitespace implements ItemMappingFunction {
+        @Override
+        public NodeInfo mapItem(Item item) {
+            boolean isWhite = ((NodeInfo)item).getNodeKind() == Type.TEXT && Whitespace.isWhite(item.getStringValueCS());
+            return isWhite ? null : (NodeInfo)item;
         }
     }
 
@@ -979,7 +975,7 @@ public class TestOutcome {
             expectedErrorQ = QName.fromEQName(expectedError);
         } else if (expectedError.contains(":")) {
             try {
-                NamespaceResolver resolver = new InscopeNamespaceResolver(assertion.getUnderlyingNode());
+                NamespaceResolver resolver = assertion.getUnderlyingNode().getAllNamespaces();
                 StructuredQName sq = StructuredQName.fromLexicalQName(expectedError, false, false, resolver);
                 expectedErrorQ = new QName(sq);
             } catch (XPathException e) {
@@ -990,8 +986,8 @@ public class TestOutcome {
         }
         //noinspection ThrowableResultOfMethodCallIgnored
         boolean ok = expectedError.equals("*") ||
-                (getException().getErrorCode() != null &&
-                        getException().getErrorCode().equals(expectedErrorQ)) ||
+                (getException() != null &&
+                        getException().equals(expectedErrorQ)) ||
                 hasReportedError(expectedError);
         if (ok) {
             wrongError = null;

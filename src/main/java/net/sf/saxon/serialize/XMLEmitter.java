@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,12 +8,10 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.SaxonOutputKeys;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NodeName;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
 import net.sf.saxon.trans.XPathException;
@@ -21,7 +19,6 @@ import net.sf.saxon.tree.tiny.CharSlice;
 import net.sf.saxon.tree.tiny.CompressedWhitespace;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.Whitespace;
 
 import javax.xml.transform.OutputKeys;
@@ -135,14 +132,17 @@ public class XMLEmitter extends Emitter {
      * file is deferred until some content is written to it.
      */
 
+    @Override
     public void open() throws XPathException {
     }
 
     /**
      * Start of a document node. Nothing is done at this stage: the opening of the output
      * file is deferred until some content is written to it.
+     * @param properties
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
     }
 
@@ -150,6 +150,7 @@ public class XMLEmitter extends Emitter {
      * Notify the end of a document node
      */
 
+    @Override
     public void endDocument() throws XPathException {
         // Following code removed as a result of bug 2323. If a failure occurs during xsl:result-document processing,
         // and the output is being written to a SAXResult, then the ContentHandler.endDocument() method is called in order
@@ -163,7 +164,7 @@ public class XMLEmitter extends Emitter {
      * Do the real work of starting the document. This happens when the first
      * content is written.
      *
-     * @throws XPathException f an error occurs opening the output file
+     * @throws XPathException if an error occurs opening the output file
      */
 
     protected void openDocument() throws XPathException {
@@ -333,6 +334,7 @@ public class XMLEmitter extends Emitter {
      * End of the document.
      */
 
+    @Override
     public void close() throws XPathException {
         // if nothing has been written, we should still create the file and write an XML declaration
         if (!started) {
@@ -352,66 +354,81 @@ public class XMLEmitter extends Emitter {
      * Start of an element. Output the start tag, escaping special characters.
      */
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
-        try {
-            previousAtomic = false;
-            if (!started) {
-                openDocument();
-            } else if (requireWellFormed && elementStack.isEmpty() && startedElement && !unfailing) {
-                XPathException err = new XPathException("When 'standalone' or 'doctype-system' is specified, " +
-                                                                "the document must be well-formed; but this document contains more than one top-level element");
-                err.setErrorCode("SEPM0004");
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
+        previousAtomic = false;
+        if (!started) {
+            openDocument();
+        } else if (requireWellFormed && elementStack.isEmpty() && startedElement && !unfailing) {
+            XPathException err = new XPathException("When 'standalone' or 'doctype-system' is specified, " +
+                                                            "the document must be well-formed; but this document contains more than one top-level element");
+            err.setErrorCode("SEPM0004");
+            throw err;
+        }
+        startedElement = true;
+
+        String displayName = elemName.getDisplayName();
+        if (!allCharactersEncodable) {
+            int badchar = testCharacters(displayName);
+            if (badchar != 0) {
+                XPathException err = new XPathException("Element name contains a character (decimal + " +
+                                                                badchar + ") not available in the selected encoding");
+                err.setErrorCode("SERE0008");
                 throw err;
             }
-            startedElement = true;
+        }
 
-            String displayName = elemName.getDisplayName();
-            if (!allCharactersEncodable) {
-                int badchar = testCharacters(displayName);
-                if (badchar != 0) {
-                    XPathException err = new XPathException("Element name contains a character (decimal + " +
-                                                                    badchar + ") not available in the selected encoding");
-                    err.setErrorCode("SERE0008");
-                    throw err;
+        elementStack.push(displayName);
+        elementCode = elemName;
+
+        try {
+            if (!started) {
+                String systemId = outputProperties.getProperty(OutputKeys.DOCTYPE_SYSTEM);
+                String publicId = outputProperties.getProperty(OutputKeys.DOCTYPE_PUBLIC);
+                // Treat "" as equivalent to absent. This goes beyond what the spec strictly allows.
+                if ("".equals(systemId)) {
+                    systemId = null;
                 }
+                if ("".equals(publicId)) {
+                    publicId = null;
+                }
+                if (systemId != null) {
+                    requireWellFormed = true;
+                    writeDocType(elemName, displayName, systemId, publicId);
+                } else if (writeDocTypeWithNullSystemId()) {
+                    writeDocType(elemName, displayName, null, publicId);
+                }
+                started = true;
+            }
+            if (openStartTag) {
+                closeStartTag();
+            }
+            writer.write('<');
+            writer.write(displayName);
+
+            if (indentForNextAttribute >= 0) {
+                indentForNextAttribute += displayName.length();
             }
 
-            elementStack.push(displayName);
-            elementCode = elemName;
+            boolean isFirst = true;
 
-            try {
-                if (!started) {
-                    String systemId = outputProperties.getProperty(OutputKeys.DOCTYPE_SYSTEM);
-                    String publicId = outputProperties.getProperty(OutputKeys.DOCTYPE_PUBLIC);
-                    // Treat "" as equivalent to absent. This goes beyond what the spec strictly allows.
-                    if ("".equals(systemId)) {
-                        systemId = null;
-                    }
-                    if ("".equals(publicId)) {
-                        publicId = null;
-                    }
-                    if (systemId != null) {
-                        requireWellFormed = true;
-                        writeDocType(elemName, displayName, systemId, publicId);
-                    } else if (writeDocTypeWithNullSystemId()) {
-                        writeDocType(elemName, displayName, null, publicId);
-                    }
-                    started = true;
-                }
-                if (openStartTag) {
-                    closeStartTag();
-                }
-                writer.write('<');
-                writer.write(displayName);
-                openStartTag = true;
-                indentForNextAttribute = -1;
-
-            } catch (java.io.IOException err) {
-                throw new XPathException("Failure writing to " + getSystemId(), err);
+            for (NamespaceBinding ns : namespaces) {
+                namespace(ns.getPrefix(), ns.getURI(), isFirst);
+                isFirst = false;
             }
-        } catch (XPathException e) {
-            e.maybeSetLocation(location);
-            throw e;
+
+            for (AttributeInfo att : attributes) {
+                attribute(att.getNodeName(), att.getValue(), att.getProperties(), isFirst);
+                isFirst = false;
+            }
+
+            openStartTag = true;
+            indentForNextAttribute = -1;
+
+        } catch (java.io.IOException err) {
+            throw new XPathException("Failure writing to " + getSystemId(), err);
         }
     }
 
@@ -419,44 +436,46 @@ public class XMLEmitter extends Emitter {
         return false;
     }
 
-
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
+    public void namespace(String nsprefix, String nsuri, boolean isFirst) throws XPathException {
         try {
-            for (NamespaceBinding ns : namespaceBindings) {
-                String nsprefix = ns.getPrefix();
-                String nsuri = ns.getURI();
 
-                String sep = getAttributeIndentString();
+            String sep = isFirst ? " " : getAttributeIndentString();
 
-                if (nsprefix.isEmpty()) {
+            if (nsprefix.isEmpty()) {
+                writer.write(sep);
+                writeAttribute(elementCode, "xmlns", nsuri, ReceiverOption.NONE);
+            } else if (nsprefix.equals("xml")) {
+                //return;
+            } else {
+                int badchar = testCharacters(nsprefix);
+                if (badchar != 0) {
+                    XPathException err = new XPathException("Namespace prefix contains a character (decimal + " +
+                                                                    badchar + ") not available in the selected encoding");
+                    err.setErrorCode("SERE0008");
+                    throw err;
+                }
+                if (undeclareNamespaces || !nsuri.isEmpty()) {
                     writer.write(sep);
-                    writeAttribute(elementCode, "xmlns", nsuri, 0);
-                } else if (nsprefix.equals("xml")) {
-                    //return;
-                } else {
-                    int badchar = testCharacters(nsprefix);
-                    if (badchar != 0) {
-                        XPathException err = new XPathException("Namespace prefix contains a character (decimal + " +
-                                                                        badchar + ") not available in the selected encoding");
-                        err.setErrorCode("SERE0008");
-                        throw err;
-                    }
-                    if (undeclareNamespaces || !nsuri.isEmpty()) {
-                        writer.write(sep);
-                        writeAttribute(elementCode, "xmlns:" + nsprefix, nsuri, 0);
-                    }
+                    writeAttribute(elementCode, "xmlns:" + nsprefix, nsuri, ReceiverOption.NONE);
                 }
             }
+
         } catch (java.io.IOException err) {
             throw new XPathException("Failure writing to " + getSystemId(), err);
         }
     }
 
+    /**
+     * Set the indentation to be used for attributes (this excludes the length of the
+     * element name itself)
+     * @param indent the number of spaces to be output before each attribute (on a new line)
+     */
+
     public void setIndentForNextAttribute(int indent) {
         indentForNextAttribute = indent;
     }
 
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
+    private void attribute(NodeName nameCode, CharSequence value, int properties, boolean isFirst)
             throws XPathException {
 
         String displayName = nameCode.getDisplayName();
@@ -475,7 +494,7 @@ public class XMLEmitter extends Emitter {
         }
 
         try {
-            writer.write(getAttributeIndentString());
+            writer.write(isFirst ? " " : getAttributeIndentString());
         } catch (java.io.IOException err) {
             throw new XPathException("Failure writing to " + getSystemId(), err);
         }
@@ -501,11 +520,6 @@ public class XMLEmitter extends Emitter {
             }
             return indentChars.substring(0, indent);
         }
-    }
-
-
-    public void startContent() throws XPathException {
-        // don't add ">" to the start tag until we know whether the element has content
     }
 
     /**
@@ -553,12 +567,12 @@ public class XMLEmitter extends Emitter {
         try {
             String val = value.toString();
             writer.write(attname);
-            if ((properties & ReceiverOptions.NO_SPECIAL_CHARS) != 0) {
+            if (ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
                 writer.write('=');
                 writer.write(delimiter);
                 writer.write(val);
                 writer.write(delimiter);
-            } else if ((properties & ReceiverOptions.USE_NULL_MARKERS) != 0) {
+            } else if (ReceiverOption.contains(properties, ReceiverOption.USE_NULL_MARKERS)) {
                 // null (0) characters will be used before and after any section of
                 // the value generated from a character map
                 writer.write('=');
@@ -612,7 +626,7 @@ public class XMLEmitter extends Emitter {
         for (int i = 0; i < chars.length(); i++) {
             char c = chars.charAt(i);
             if (c >= 20 && c < 127) {
-                buff.append(c);
+                buff.cat(c);
             } else {
                 buff.append("_" + (int) c + "_");
             }
@@ -624,6 +638,7 @@ public class XMLEmitter extends Emitter {
      * End of an element.
      */
 
+    @Override
     public void endElement() throws XPathException {
         String displayName = elementStack.pop();
         try {
@@ -644,6 +659,7 @@ public class XMLEmitter extends Emitter {
      * Character data.
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (!started) {
             openDocument();
@@ -661,14 +677,14 @@ public class XMLEmitter extends Emitter {
                 closeStartTag();
             }
 
-            if ((properties & ReceiverOptions.NO_SPECIAL_CHARS) != 0) {
+            if (ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
                 writeCharSequence(chars);
-            } else if ((properties & ReceiverOptions.DISABLE_ESCAPING) == 0) {
+            } else if (!ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING)) {
                 writeEscape(chars, false);
             } else {
                 // disable-output-escaping="yes"
                 if (testCharacters(chars) == 0) {
-                    if ((properties & ReceiverOptions.USE_NULL_MARKERS) == 0) {
+                    if (!ReceiverOption.contains(properties, ReceiverOption.USE_NULL_MARKERS)) {
                         // null (0) characters will be used before and after any section of
                         // the value generated from a character map
                         writeCharSequence(chars);
@@ -744,6 +760,7 @@ public class XMLEmitter extends Emitter {
      * Handle a processing instruction.
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
             throws XPathException {
         if (!started) {
@@ -921,6 +938,7 @@ public class XMLEmitter extends Emitter {
      * Handle a comment.
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (!started) {
             openDocument();
@@ -956,6 +974,7 @@ public class XMLEmitter extends Emitter {
      * may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return false;
     }

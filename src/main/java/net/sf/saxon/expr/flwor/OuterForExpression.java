@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.flwor;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -32,6 +33,7 @@ public class OuterForExpression extends ForExpression {
      *         in a subclass
      */
 
+    @Override
     protected int getRangeVariableCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_ONE;
     }
@@ -41,6 +43,7 @@ public class OuterForExpression extends ForExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         // Very conservative optimization for the time being
 
@@ -65,17 +68,17 @@ public class OuterForExpression extends ForExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         OuterForExpression forExp = new OuterForExpression();
         ExpressionTool.copyLocationInfo(this, forExp);
-        rebindings.put(this, forExp);
         forExp.setRequiredType(requiredType);
         forExp.setVariableQName(variableName);
         forExp.setSequence(getSequence().copy(rebindings));
+        rebindings.put(this, forExp);
         Expression newAction = getAction().copy(rebindings);
         forExp.setAction(newAction);
         forExp.variableName = variableName;
-        ExpressionTool.rebindVariableReferences(newAction, this, forExp);
         return forExp;
     }
 
@@ -84,7 +87,8 @@ public class OuterForExpression extends ForExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
 
         // First create an iteration of the base sequence.
 
@@ -109,7 +113,8 @@ public class OuterForExpression extends ForExpression {
      * outputter
      */
 
-    public void process(XPathContext context) throws XPathException {
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
         SequenceIterator base = getSequence().iterate(context);
         int position = 1;
         int slot = getLocalSlotNumber();
@@ -119,11 +124,11 @@ public class OuterForExpression extends ForExpression {
                 Item item = ahead.next();
                 if (item == null) break;
                 context.setLocalVariable(slot, item);
-                getAction().process(context);
+                getAction().process(output, context);
             }
         } else {
             context.setLocalVariable(getLocalSlotNumber(), EmptySequence.getInstance());
-            getAction().process(context);
+            getAction().process(output, context);
         }
     }
 
@@ -148,6 +153,7 @@ public class OuterForExpression extends ForExpression {
      * @param pul     the pending update list to which the results should be written
      */
 
+    @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         SequenceIterator base = getSequence().iterate(context);
         int position = 1;
@@ -167,6 +173,7 @@ public class OuterForExpression extends ForExpression {
     }
 
 
+    @Override
     protected void explainSpecializedAttributes(ExpressionPresenter out) {
         out.emitAttribute("outer", "true");
     }
@@ -174,6 +181,6 @@ public class OuterForExpression extends ForExpression {
 
 }
 
-//Copyright (c) Saxonica 2008. All rights reserved.
+// Copyright (c) 2008-2020 Saxonica Limited
 
 

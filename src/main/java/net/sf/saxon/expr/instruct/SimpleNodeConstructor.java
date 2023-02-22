@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -98,6 +99,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
      * @return the static cardinality
      */
 
+    @Override
     public int computeCardinality() {
         return getSelect().getCardinality(); // may allow empty sequence
     }
@@ -110,6 +112,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
      * @return a set of flags indicating static properties of this expression
      */
 
+    @Override
     public int computeSpecialProperties() {
         return super.computeSpecialProperties() |
                 StaticProperty.SINGLE_DOCUMENT_NODESET;
@@ -152,6 +155,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
         localTypeCheck(visitor, contextInfo);
@@ -183,6 +187,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         optimizeChildren(visitor, contextItemType);
         if (getSelect().isCallOn(String_1.class)) {
@@ -210,14 +215,17 @@ public abstract class SimpleNodeConstructor extends Instruction {
     /**
      * Process this instruction
      *
+     *
+     * @param output the destination for the result
      * @param context the dynamic context of the transformation
      * @return a TailCall to be executed by the caller, always null for this instruction
      */
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         CharSequence value = getSelect().evaluateAsString(context);
         try {
-            processValue(value, context);
+            processValue(value, output, context);
         } catch (XPathException e) {
             e.maybeSetLocation(getLocation());
             throw e;
@@ -230,18 +238,20 @@ public abstract class SimpleNodeConstructor extends Instruction {
      * Process the value of the node, to create the new node.
      *
      * @param value   the string value of the new node
+     * @param output the destination for the result
      * @param context the dynamic evaluation context
      * @throws XPathException if a dynamic error occurs
      */
 
-    public abstract void processValue(CharSequence value, XPathContext context) throws XPathException;
+    public abstract void processValue(CharSequence value, Outputter output, XPathContext context) throws XPathException;
 
     /**
      * Evaluate as an expression.
      */
 
-    public Item<?> evaluateItem(XPathContext context) throws XPathException {
-        Item<?> contentItem = getSelect().evaluateItem(context);
+    @Override
+    public Item evaluateItem(XPathContext context) throws XPathException {
+        Item contentItem = getSelect().evaluateItem(context);
         String content;
         if (contentItem == null) {
             content = "";
@@ -271,7 +281,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
 
     /**
      * Run-time method to compute the name of the node being constructed. This is overridden
-     * for nodes that have a name. The default implementation returns -1, which is suitable for
+     * for nodes that have a name. The default implementation returns null, which is suitable for
      * unnamed nodes such as comments
      *
      * @param context the XPath dynamic evaluation context
@@ -284,7 +294,8 @@ public abstract class SimpleNodeConstructor extends Instruction {
     }
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         return SingletonIterator.makeIterator(evaluateItem(context));
     }
 

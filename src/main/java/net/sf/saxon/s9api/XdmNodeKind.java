@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -31,16 +31,14 @@ public enum XdmNodeKind {
         return number;
     }
 
-
     /**
      * Get the node kind corresponding to one of the integer constants in class
      * {@link net.sf.saxon.type.Type}, for example {@link Type#ELEMENT}. These integer
      * constants are chosen to be consistent with those used in DOM, though the semantics
      * of the different node kinds are slightly different.
-     *
      * @param type the integer type code, for example {@link Type#ELEMENT} or {@link Type#TEXT}
      * @return the corresponding {@link XdmNodeKind};
-     * @since 9.9.1.5
+     * @since 10.0
      */
     public static XdmNodeKind forType(int type) {
         switch (type) {
@@ -62,6 +60,5 @@ public enum XdmNodeKind {
                 throw new IllegalArgumentException();
         }
     }
-
 }
 

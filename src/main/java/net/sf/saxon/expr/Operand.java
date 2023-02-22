@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,6 +12,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.value.SequenceType;
@@ -26,7 +27,7 @@ import java.util.Iterator;
 
 public final class Operand implements Iterable<Operand>, ExpressionOwner {
 
-    private Expression parentExpression;
+    private final Expression parentExpression;
     private Expression childExpression;
     private OperandRole role;
 
@@ -57,6 +58,7 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
      *
      * @return the child expression
      */
+    @Override
     public Expression getChildExpression() {
         return childExpression;
     }
@@ -68,6 +70,7 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
      * @param childExpression the new child expression
      */
 
+    @Override
     public void setChildExpression(Expression childExpression) {
         if (childExpression != this.childExpression) {
             if (role.isConstrainedClass()) {
@@ -86,7 +89,7 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
         }
     }
 
-    private static boolean DEBUG = false;
+    private static final boolean DEBUG = false;
     public void detachChild() {
         if (DEBUG) {
             childExpression.setParentExpression(null);
@@ -138,25 +141,26 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
     }
 
     /**
-     * Ask whether the operand is a higher-order operand, in the sense that the child expression
-     * is evaluated repeatedly during a single evaluation of the parent expression
-     *
-     * @return true if the operand is higher-order
-     */
-    public boolean isEvaluatedRepeatedly() {
-        return role.isEvaluatedRepeatedly();
-    }
-
-    /**
-     * Ask whether the operand is a higher-order operand, in the sense that the child expression
-     * is evaluated repeatedly during a single evaluation of the parent expression
+     * Ask whether the operand is a higher-order operand,: typically this means that the child expression
+     * is evaluated repeatedly during a single evaluation of the parent expression (but there are some cases
+     * like xsl:for-each select=".." where the operand is higher-order despite not being evaluated
+     * repeatedly).
      *
      * @return true if the operand is higher-order
      */
     public boolean isHigherOrder() {
         return role.isHigherOrder();
     }
-
+    /**
+     * Ask whether the operand is is evaluated repeatedly during a single evaluation of the parent
+     * expression. This is true if the operand is higher-order and the operand does not have the
+     * {@link OperandRole#SINGLETON} property.
+     *
+     * @return true if the operand is higher-order
+     */
+    public boolean isEvaluatedRepeatedly() {
+        return role.isEvaluatedRepeatedly();
+    }
 
     /**
      * Get the usage of the operand
@@ -199,8 +203,9 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
      * @return a singleton iterator
      */
 
+    @Override
     public Iterator<Operand> iterator() {
-        return new MonoIterator<Operand>(this);
+        return new MonoIterator<>(this);
     }
 
     public void typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
@@ -211,7 +216,7 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
             if (!e.isReportableStatically()) {
                 visitor.getStaticContext().issueWarning(
                         "Evaluation will always throw a dynamic error: " + e.getMessage(), getChildExpression().getLocation());
-                setChildExpression(new ErrorExpression(e));
+                setChildExpression(new ErrorExpression(new XmlProcessingException(e)));
             } else {
                 throw e;
             }
@@ -226,7 +231,7 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
             if (!e.isReportableStatically()) {
                 visitor.getStaticContext().issueWarning(
                         "Evaluation will always throw a dynamic error: " + e.getMessage(), getChildExpression().getLocation());
-                setChildExpression(new ErrorExpression(e));
+                setChildExpression(new ErrorExpression(new XmlProcessingException(e)));
             } else {
                 throw e;
             }

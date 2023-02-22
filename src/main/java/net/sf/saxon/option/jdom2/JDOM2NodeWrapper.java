@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,6 +10,7 @@ package net.sf.saxon.option.jdom2;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NamespaceBinding;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.function.Predicate;
 
 /**
  * A node in the XML parse tree representing an XML element, character content, or attribute.
@@ -44,6 +46,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     protected short nodeKind;
     private JDOM2NodeWrapper parent;     // null means unknown
     protected int index;            // -1 means unknown
+    protected NamespaceMap inScopeNamespaces; // computed lazily
 
     /**
      * This constructor is protected: nodes should be created using the wrap
@@ -121,6 +124,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * returned.
      */
 
+    @Override
     public Object getUnderlyingNode() {
         if (node instanceof List) {
             return ((List) node).get(0);
@@ -129,6 +133,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         }
     }
 
+    @Override
     public JDOM2DocumentWrapper getTreeInfo() {
         return (JDOM2DocumentWrapper)treeInfo;
     }
@@ -139,6 +144,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * @return one of the values Node.ELEMENT, Node.TEXT, Node.ATTRIBUTE, etc.
      */
 
+    @Override
     public int getNodeKind() {
         return nodeKind;
     }
@@ -153,6 +159,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      *         return true, and the two nodes will produce the same result for generateId())
      */
 
+    @Override
     public int compareOrder(NodeInfo other) {
         if (other instanceof SiblingCountingNode) {
             return Navigator.compareOrder(this, (SiblingCountingNode) other);
@@ -167,6 +174,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * the version of the method that returns a String.
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         if (node instanceof List) {
             // This wrapper is mapped to a list of adjacent text nodes
@@ -263,6 +271,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * @return the local part of the name. For an unnamed node, returns "".
      */
 
+    @Override
     public String getLocalPart() {
         switch (nodeKind) {
             case Type.ELEMENT:
@@ -289,6 +298,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * @return the prefix part of the name. For an unnamed node, return an empty string.
      */
 
+    @Override
     public String getPrefix() {
         switch (nodeKind) {
             case Type.ELEMENT:
@@ -309,6 +319,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      *         string.
      */
 
+    @Override
     public String getURI() {
         switch (nodeKind) {
             case Type.ELEMENT:
@@ -328,6 +339,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      *         For a node with no name, return an empty string.
      */
 
+    @Override
     public String getDisplayName() {
         switch (nodeKind) {
             case Type.ELEMENT:
@@ -347,6 +359,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * Get the NodeInfo object representing the parent of this node
      */
 
+    @Override
     public NodeInfo getParent() {
         if (parent == null) {
             if (node instanceof Element) {
@@ -383,6 +396,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * consecutive.
      */
 
+    @Override
     public int getSiblingPosition() {
         if (index == -1) {
             int ix = 0;
@@ -429,7 +443,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
+    protected AxisIterator iterateAttributes(Predicate<? super NodeInfo> nodeTest) {
         AxisIterator base = new AttributeEnumeration(this);
         if (nodeTest == AnyNodeTest.getInstance()) {
             return base;
@@ -439,7 +453,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected AxisIterator iterateChildren(NodeTest nodeTest) {
+    protected AxisIterator iterateChildren(Predicate<? super NodeInfo> nodeTest) {
         if (hasChildNodes()) {
             AxisIterator base = new ChildEnumeration(this, true, true);
             if (nodeTest == AnyNodeTest.getInstance()) {
@@ -448,12 +462,12 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                 return new Navigator.AxisFilter(base, nodeTest);
             }
         } else {
-            return EmptyIterator.OfNodes.THE_INSTANCE;
+            return EmptyIterator.ofNodes();
         }
     }
 
     @Override
-    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected AxisIterator iterateSiblings(Predicate<? super NodeInfo> nodeTest, boolean forwards) {
         if (nodeTest == AnyNodeTest.getInstance()) {
             return new ChildEnumeration(this, false, forwards);
         } else {
@@ -464,22 +478,23 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected AxisIterator iterateDescendants(Predicate<? super NodeInfo> nodeTest, boolean includeSelf) {
         Iterator<? extends Content> descendants;
-        if (nodeTest.getUType() == UType.ELEMENT) {
+        if (nodeTest instanceof NodeTest && ((NodeTest)nodeTest).getUType() == UType.ELEMENT) {
             // only select element nodes
             descendants = ((Parent) node).getDescendants(new ElementFilter());
         } else {
             descendants = ((Parent) node).getDescendants();
         }
         NodeWrappingFunction<Content, NodeInfo> wrappingFunct = new NodeWrappingFunction<Content, NodeInfo>() {
+            @Override
             public NodeInfo wrap(Content node) {
                 return makeWrapper(node, getTreeInfo());
             }
         };
         AxisIterator wrappedDescendants = new DescendantWrappingIterator<Content>(descendants, wrappingFunct);
 
-        if (includeSelf && nodeTest.matchesNode(this)) {
+        if (includeSelf && nodeTest.test(this)) {
             wrappedDescendants = new PrependAxisIterator(this, wrappedDescendants);
         }
 
@@ -516,6 +531,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      */
 
 
+    @Override
     public String getAttributeValue(String uri, String local) {
         if (nodeKind == Type.ELEMENT) {
             return ((Element) node).getAttributeValue(local,
@@ -533,6 +549,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * @return the NodeInfo representing the containing document
      */
 
+    @Override
     public NodeInfo getRoot() {
         return treeInfo.getRootNode();
     }
@@ -543,6 +560,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * <code>getEnumeration(AxisInfo.CHILD, AnyNodeTest.getInstance()).hasNext()</code></p>
      */
 
+    @Override
     public boolean hasChildNodes() {
         switch (nodeKind) {
             case Type.DOCUMENT:
@@ -562,6 +580,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      *               documents
      */
 
+    @Override
     public void generateId(FastStringBuffer buffer) {
         Navigator.appendSequentialKey(this, buffer, true);
         //buffer.append(Navigator.getSequentialKey(this));
@@ -581,6 +600,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      *         For a node other than an element, the method returns null.</p>
      */
 
+    @Override
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
         if (node instanceof Element) {
             Element elem = (Element) node;
@@ -604,11 +624,49 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     /**
+     * Get all the namespace bindings that are in-scope for this element.
+     * <p>For an element return all the prefix-to-uri bindings that are in scope. This may include
+     * a binding to the default namespace (represented by a prefix of ""). It will never include
+     * "undeclarations" - that is, the namespace URI will never be empty; the effect of an undeclaration
+     * is to remove a binding from the in-scope namespaces, not to add anything.</p>
+     * <p>For a node other than an element, returns null.</p>
+     *
+     * @return the in-scope namespaces for an element, or null for any other kind of node.
+     */
+    @Override
+    public NamespaceMap getAllNamespaces() {
+        if (getNodeKind() == Type.ELEMENT) {
+            if (inScopeNamespaces != null) {
+                return inScopeNamespaces;
+            } else {
+                NamespaceMap nsMap = getParent().getNodeKind() == Type.ELEMENT
+                        ? getParent().getAllNamespaces()
+                        : NamespaceMap.emptyMap();
+                Element elem = (Element) node;
+                List<Namespace> addl = elem.getAdditionalNamespaces();
+                Namespace ns = elem.getNamespace();
+                String prefix = ns.getPrefix();
+                String uri = ns.getURI();
+                nsMap = nsMap.bind(prefix, uri);
+                if (!addl.isEmpty()) {
+                    for (Namespace ns2 : addl) {
+                        nsMap = nsMap.bind(ns2.getPrefix(), ns2.getURI());
+                    }
+                }
+                return inScopeNamespaces = nsMap;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Determine whether this node has the is-id property
      *
      * @return true if the node is an ID
      */
 
+    @Override
     public boolean isId() {
         return node instanceof Attribute && ((Attribute) node).getAttributeType() == Attribute.ID_TYPE;
     }
@@ -619,6 +677,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * @return true if the node is an IDREF or IDREFS element or attribute
      */
 
+    @Override
     public boolean isIdref() {
         if (node instanceof Attribute) {
             AttributeType type = ((Attribute) node).getAttributeType();
@@ -645,6 +704,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             atts = ((Element) start.node).getAttributes().iterator();
         }
 
+        @Override
         public JDOM2NodeWrapper next() {
             if (atts.hasNext()) {
                 return makeWrapper(atts.next(), getTreeInfo(), start, ix++);
@@ -729,6 +789,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             }
         }
 
+        @Override
         public JDOM2NodeWrapper next() {
             if (forwards) {
                 if (children.hasNext()) {
@@ -811,4 +872,4 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 }
 
 
-// Original Code is Copyright (c) 2009 Saxonica Limited.
+// Original Code is Copyright (c) 2009-2020 Saxonica Limited

@@ -16,9 +16,7 @@ import net.sf.saxon.value.IntegerValue;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.temporal.ChronoField;
 import java.util.*;
 
@@ -107,7 +105,7 @@ public class TestReflexionHelper {
         return new Configuration().buildDocumentTree(new StreamSource(new StringReader("<doc/>"))).getRootNode();
     }
 
-    public static SequenceIterator<NodeInfo> makeDocsGood(XPathContext context) throws XPathException {
+    public static SequenceIterator makeDocsGood(XPathContext context) throws XPathException {
         Configuration config = context.getConfiguration();
         List<NodeInfo> list = new ArrayList<>();
         list.add(config.buildDocumentTree(new StreamSource(new StringReader("<doc1/>"))).getRootNode());
@@ -115,7 +113,7 @@ public class TestReflexionHelper {
         return new ListIterator<>(list);
     }
 
-    public static SequenceIterator<NodeInfo> makeDocsBad() throws XPathException {
+    public static SequenceIterator makeDocsBad() throws XPathException {
         Configuration config = new Configuration();
         List<NodeInfo> list = new ArrayList<>();
         list.add(config.buildDocumentTree(new StreamSource(new StringReader("<doc1/>"))).getRootNode());
@@ -123,14 +121,14 @@ public class TestReflexionHelper {
         return new ListIterator<>(list);
     }
 
-    public static One<DecimalValue> addDecimals(OneOrMore<DecimalValue> values) throws XPathException {
+    public static One addDecimals(OneOrMore<DecimalValue> values) throws XPathException {
         BigDecimal total = BigDecimal.ZERO;
         SequenceIterator iter = values.iterate();
         DecimalValue val;
         while ((val = (DecimalValue) iter.next()) != null) {
             total = total.add(val.getDecimalValue());
         }
-        return new One<>(new BigDecimalValue(total));
+        return new One(new BigDecimalValue(total));
     }
 
     public static boolean is2008d(Date value) {
@@ -150,29 +148,16 @@ public class TestReflexionHelper {
         return value.getYear() == 2008;
     }
 
-    public static List<Map<String, String>> getListOfMaps(String x, String y) {
-        Map<String, String> m = new HashMap<>();
-        m.put("Mon", "Monday");
-        m.put("Tues", "Tuesday");
-        m.put(x, y);
-        Map<String, String> n = new HashMap<>();
-        m.put("Jan", "January");
-        m.put("Feb", "February");
-        List<Map<String, String>> list = new ArrayList<>();
-        list.add(m);
-        list.add(n);
-        return list;
+    public static boolean is2008localDateTime(LocalDateTime value) {
+        return value.getYear() == 2008;
+    }
+
+    public static boolean is2008localDate(LocalDate value) {
+        return value.getYear() == 2008;
     }
 
     public static int mapSize(Map<?, ?> map) {
         return map.size();
-    }
-
-    public static Map<String, Integer> makeMap() {
-        Map<String, Integer> m = new HashMap<>();
-        m.put("a", 1);
-        m.put("b", 2);
-        return m;
     }
 
 

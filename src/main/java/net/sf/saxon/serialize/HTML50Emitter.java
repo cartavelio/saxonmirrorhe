@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,8 +8,12 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.SchemaType;
 
 import javax.xml.transform.OutputKeys;
 
@@ -61,34 +65,25 @@ public class HTML50Emitter extends HTMLEmitter {
         return uri.equals("") || uri.equals(NamespaceConstant.XHTML);
     }
 
+    @Override
     protected void openDocument() throws XPathException {
         version = 5;
-        String systemId = outputProperties.getProperty(OutputKeys.DOCTYPE_SYSTEM);
-        String publicId = outputProperties.getProperty(OutputKeys.DOCTYPE_PUBLIC);
-
-        // Treat "" as equivalent to absent. This goes beyond what the spec strictly allows.
-        if ("".equals(systemId)) {
-            systemId = null;
-        }
-        if ("".equals(publicId)) {
-            publicId = null;
-        }
         super.openDocument();
-        writeDocType(null, "html", systemId, publicId);
     }
 
     /**
      * Output the document type declaration
      *
      * @param displayName The element name
-     * @param systemId    The DOCTYP system identifier
+     * @param systemId    The DOCTYPE system identifier
      * @param publicId    The DOCTYPE public identifier
      */
 
+    @Override
     protected void writeDocType(NodeName name, String displayName, String systemId, String publicId) throws XPathException {
         try {
             if (systemId == null && publicId == null) {
-                writer.write("<!DOCTYPE HTML>\n");
+                writer.write("<!DOCTYPE HTML>");
             } else {
                 super.writeDocType(name, displayName, systemId, publicId);
             }
@@ -98,10 +93,40 @@ public class HTML50Emitter extends HTMLEmitter {
 
     }
 
+    @Override
     protected boolean writeDocTypeWithNullSystemId() {
         return true;
     }
 
+    /**
+     * Output element start tag
+     *
+     * @param elemName
+     * @param type
+     * @param attributes
+     * @param namespaces
+     * @param location
+     * @param properties
+     */
+    @Override
+    public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
+        if (!started) {
+            openDocument();
+            String systemId = outputProperties.getProperty(OutputKeys.DOCTYPE_SYSTEM);
+            String publicId = outputProperties.getProperty(OutputKeys.DOCTYPE_PUBLIC);
+
+            // Treat "" as equivalent to absent. This goes beyond what the spec strictly allows.
+            if ("".equals(systemId)) {
+                systemId = null;
+            }
+            if ("".equals(publicId)) {
+                publicId = null;
+            }
+            writeDocType(null, "html", systemId, publicId);
+            started = true;
+        }
+        super.startElement(elemName, type, attributes, namespaces, location, properties);
+    }
 
     /**
      * Ask whether control characters should be rejected: true for HTML4, false for HTML5

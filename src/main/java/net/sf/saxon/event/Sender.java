@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,15 +11,18 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.number.Numberer_en;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.pull.PullPushCopier;
 import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.pull.StaxBridge;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.sapling.SaplingDocument;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import org.xml.sax.*;
@@ -40,8 +43,6 @@ public abstract class Sender {
 
     // Converted to an abstract static class in Saxon 9.3
 
-    private static Class[] EMPTY_CLASS_ARRAY = new Class[0];
-
     private Sender() {
     }
 
@@ -54,14 +55,14 @@ public abstract class Sender {
      *                 an InputStream, then the InputStream will be closed after use.
      * @param receiver the destination to which it is to be copied. The pipelineConfiguration
      *                 of this receiver must have been initialized. The implementation sends a sequence
-     *                 of events to the {@code Receiver}, starting with an {@link Receiver#open()} call
-     *                 and ending with {@link Receiver#close()}; this will be a <b>regular event sequence</b>
+     *                 of events to the {@code Receiver}, starting with an {@link Outputter#open()} call
+     *                 and ending with {@link Outputter#close()}; this will be a <b>regular event sequence</b>
      *                 as defined by {@link RegularSequenceChecker}.
      * @param options  Parsing options. If source is an {@link AugmentedSource}, any options set in the
      *                 {@code AugmentedSource} are used in preference to those set in options. If neither specifies
      *                 a particular option, the defaults from the Configuration are used. If null is supplied,
      *                 the parse options from the PipelineConfiguration of the receiver are used.
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws XPathException
      *          if any error occurs
      */
 
@@ -125,7 +126,7 @@ public abstract class Sender {
                 throw new IllegalArgumentException("Sender can only handle document or element nodes");
             }
             next.setSystemId(baseURI);
-            ExplicitLocation loc = new ExplicitLocation(systemId, -1, -1);
+            Loc loc = new Loc(systemId, -1, -1);
             sendDocumentInfo(ns, next, loc);
             return;
 
@@ -146,7 +147,7 @@ public abstract class Sender {
             // Following code allows the .NET platform to use a Pull parser
             boolean dtdValidation = options.getDTDValidationMode() == Validation.STRICT;
             Source ps = Version.platform.getParserSource(
-                pipe, ss, schemaValidation, dtdValidation, options.getStripSpace());
+                pipe, ss, schemaValidation, dtdValidation);
             if (ps == ss) {
                 String url = source.getSystemId();
                 InputSource is = new InputSource(url);
@@ -176,13 +177,16 @@ public abstract class Sender {
             }
             return;
         } else if (source instanceof StAXSource) {
-            XMLStreamReader reader = ((StAXSource)source).getXMLStreamReader();
+            XMLStreamReader reader = ((StAXSource) source).getXMLStreamReader();
             if (reader == null) {
                 throw new XPathException("Saxon can only handle a StAXSource that wraps an XMLStreamReader");
             }
             StaxBridge bridge = new StaxBridge();
             bridge.setXMLStreamReader(reader);
             sendPullSource(new PullSource(bridge), next, options);
+            return;
+        } else if (source instanceof SaplingDocument) {
+            ((SaplingDocument)source).sendTo(next);
             return;
         } else {
             next = makeValidator(next, source.getSystemId(), options);
@@ -249,7 +253,7 @@ public abstract class Sender {
                 top.copy(receiver, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, location);
                 break;
             case Type.ELEMENT:
-                receiver.startDocument(0);
+                receiver.startDocument(ReceiverOption.NONE);
                 top.copy(receiver, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, location);
                 receiver.endDocument();
                 break;
@@ -277,9 +281,9 @@ public abstract class Sender {
         XMLReader parser = source.getXMLReader();
         boolean reuseParser = false;
         final Configuration config = pipe.getConfiguration();
-        UnfailingErrorListener listener = options.getErrorListener();
+        ErrorReporter listener = options.getErrorReporter();
         if (listener == null) {
-            listener = pipe.getErrorListener();
+            listener = pipe.getErrorReporter();
         }
         ErrorHandler errorHandler = options.getErrorHandler();
         if (errorHandler == null) {
@@ -404,7 +408,7 @@ public abstract class Sender {
 
 
         receiver = makeValidator(receiver, source.getSystemId(), options);
-        
+
         // Reuse the previous ReceivingContentHandler if possible (it contains a useful cache of names)
 
         ReceivingContentHandler ce;
@@ -448,7 +452,7 @@ public abstract class Sender {
                     //
                     XPathException de = new XPathException("Error reported by XML parser processing " +
                             source.getSystemId() + ": " + err.getMessage(), err);
-                    listener.fatalError(de);
+                    listener.report(new XmlProcessingException(de));
                     de.setHasBeenReported(true);
                     throw de;
                 } else {
@@ -473,7 +477,8 @@ public abstract class Sender {
                         " validation error" + (errs == 1 ? "" : "s");
                 if (dtdRecover) {
                     message += ". Processing continues, because recovery from validation errors was requested";
-                    listener.warning(new XPathException(message));
+                    XmlProcessingIncident warning = new XmlProcessingIncident(message).asWarning();
+                    listener.report(warning);
                 } else {
                     throw new XPathException(message);
                 }
@@ -543,7 +548,7 @@ public abstract class Sender {
      * Configure a SAX parser to ensure it has the correct namesapce properties set
      *
      * @param parser the parser to be configured
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws XPathException
      *          if the parser cannot be configured to the
      *          required settings (namespaces=true, namespace-prefixes=false). Note that the SAX
      *          specification requires every XMLReader to support these settings, so this error implies

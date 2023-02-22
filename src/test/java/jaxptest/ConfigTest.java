@@ -1,8 +1,8 @@
 package jaxptest;
 
 import com.saxonica.config.ProfessionalConfiguration;
+import com.saxonica.config.ProfessionalTransformerFactory;
 import com.saxonica.config.pe.ConfigurationReaderPE;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.Feature;
@@ -10,54 +10,75 @@ import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.ConfigurationReader;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
+import javax.xml.XMLConstants;
+import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TemplatesHandler;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Properties;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
  *  Test use of configuration files
  */
-public class ConfigTest extends TestCase {
+public class ConfigTest {
 
-    public static final String DATA_DIR = System.getProperty("junitTestData");// "/Users/Mike/repo2/tests/junit/testdata/";
-    public static final String XMARK_DIR = System.getProperty("junitTestData") + "../../xmark/";  //"/Users/Mike/repo2/tests/junit/testdata/";
+    public static final String DATA_DIR = baseDirectory(); // "/Users/mike/repo/tests/junit/testdata/";
+    public static final String TEMP_DIR = baseDirectory() + "temp/";
+    public static final String BUGS_DIR = baseDirectory() + "../../bugs/";
+    public static final String XMARK_DIR = baseDirectory() + "../../xmark/";  //"/Users/mike/repo/tests/junit/testdata/";
 
+    public static String baseDirectory() {
+        Properties p = System.getProperties();
+        if (System.getProperty("junitTestData") == null) {
+            throw new RuntimeException("The junitTestData directory is unspecified.");
+        }
+        return System.getProperty("junitTestData");
+    }
+
+    @Test
     public void testGeneralConfiguration() {
         try {
             Configuration config = new ConfigurationReader().makeConfiguration(
                     new StreamSource(DATA_DIR + "config.xml"));
-            assertTrue("lineNumbering?", config.isLineNumbering());
-            assertEquals("tvc?", config.getConfigurationProperty(FeatureKeys.USE_TYPED_VALUE_CACHE), Boolean.TRUE);
+            assertTrue(config.isLineNumbering(), "lineNumbering?");
+            assertEquals(Boolean.TRUE, config.getConfigurationProperty(Feature.USE_TYPED_VALUE_CACHE), "tvc?");
         } catch (XPathException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testWhitespaceDefault() {
         Configuration config = new Configuration();
         assertEquals("ignorable", config.getConfigurationProperty(Feature.STRIP_WHITESPACE));
     }
 
-
+    @Test
     public void testJaxpConfiguration() {
         try {
             TransformerFactoryImpl factory = new TransformerFactoryImpl();
             factory.setAttribute(FeatureKeys.CONFIGURATION_FILE, DATA_DIR + "config.xml");
             Configuration config = factory.getConfiguration();
-            assertTrue("lineNumbering?", config.isLineNumbering());
-            assertEquals("tvc?", config.getConfigurationProperty(FeatureKeys.USE_TYPED_VALUE_CACHE), Boolean.TRUE);
+            assertTrue(config.isLineNumbering(), "lineNumbering?");
+            assertEquals(Boolean.TRUE, config.getConfigurationProperty(Feature.USE_TYPED_VALUE_CACHE), "tvc?");
         } catch (Exception e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testCollationConfiguration() {
         try {
             String config =
@@ -72,18 +93,18 @@ public class ConfigTest extends TestCase {
             XPathCompiler compiler = proc.newXPathCompiler();
             XPathExecutable e1 = compiler.compile("compare('Alpha','alpha','http://uclc.com/')");
             XdmAtomicValue result1 = (XdmAtomicValue)e1.load().evaluateSingle();
-            assertEquals("e1 result", result1.getLongValue(), -1);
+            assertEquals(-1, result1.getLongValue(), "e1 result");
             XPathExecutable e2 = compiler.compile("compare('Alpha','alpha','http://lcuc.com/')");
             XdmAtomicValue result2 = (XdmAtomicValue)e2.load().evaluateSingle();
-            assertEquals("e2 result", result2.getLongValue(), +1);
+            assertEquals(+1, result2.getLongValue(), "e2 result");
 
             XQueryCompiler qcompiler = proc.newXQueryCompiler();
             XQueryExecutable e3 = qcompiler.compile("compare('Alpha','alpha','http://uclc.com/')");
             XdmAtomicValue result3 = (XdmAtomicValue)e3.load().evaluateSingle();
-            assertEquals("e3 result", result3.getLongValue(), -1);
+            assertEquals(-1, result3.getLongValue(), "e3 result");
             XQueryExecutable e4 = qcompiler.compile("compare('Alpha','alpha','http://lcuc.com/')");
             XdmAtomicValue result4 = (XdmAtomicValue)e4.load().evaluateSingle();
-            assertEquals("e4 result", result4.getLongValue(), +1);
+            assertEquals(+1, result4.getLongValue(), "e4 result");
 
             String stylesheet = "<a xmlns:x='http://www.w3.org/1999/XSL/Transform' x:version='2.0' \n" +
                     "default=\"{compare('Alpha','alpha')}\" " +
@@ -104,6 +125,7 @@ public class ConfigTest extends TestCase {
         }
     }
 
+    @Test
     public void testSerializationConfiguration() {
         try {
             String config =
@@ -124,7 +146,7 @@ public class ConfigTest extends TestCase {
             XQueryEvaluator ev3 = e3.load();
             ev3.setDestination(s3);
             ev3.run();
-            assertEquals("e3 result", "<a>\n        <b/>\n        <c:c xmlns:c=\"http://c.com\"><![CDATA[CCC]]></c:c>\n</a>\n", sw3.toString());
+            assertEquals("<a>\n        <b/>\n        <c:c xmlns:c=\"http://c.com\"><![CDATA[CCC]]></c:c>\n</a>\n", sw3.toString(), "e3 result");
 
             String stylesheet = "<a xmlns:x='http://www.w3.org/1999/XSL/Transform' x:version='2.0' \n" +
                     "><b/><c:c xmlns:c='http://c.com'>CCC</c:c></a>";
@@ -137,7 +159,7 @@ public class ConfigTest extends TestCase {
             t.transform();
             System.err.println(out);
             System.err.println(sw3);
-            assertEquals("xslt result", out.toString(), sw3.toString());
+            assertEquals(out.toString(), sw3.toString(), "xslt result");
         } catch (SaxonApiException err) {
             fail(err.getMessage());
         }
@@ -147,6 +169,7 @@ public class ConfigTest extends TestCase {
 
 
 
+    @Test
     public void testSchemaConfiguration() {
         try {
             String config =
@@ -173,6 +196,7 @@ public class ConfigTest extends TestCase {
         }
     }
 
+    @Test
     public void testSchemaConfigurationInHE() {
         // Bug 2731
         try {
@@ -191,6 +215,7 @@ public class ConfigTest extends TestCase {
         }
     }
 
+    @Test
     public void testInvalidPropertyValue() {
         // Bug 2731
         try {
@@ -208,6 +233,7 @@ public class ConfigTest extends TestCase {
         }
     }
 
+    @Test
     public void testWrongNamespace() {
         // Bug 4064
         try {
@@ -227,6 +253,7 @@ public class ConfigTest extends TestCase {
     }
 
 
+    @Test
     public void testSqlExtensionPE() {
         try {
             javax.xml.transform.TransformerFactory tf = new com.saxonica.config.ProfessionalTransformerFactory();
@@ -238,6 +265,7 @@ public class ConfigTest extends TestCase {
         }
     }
 
+    @Test
     public void testSqlExtensionPEWorkaround() {
         try {
             javax.xml.transform.TransformerFactory tf = new com.saxonica.config.ProfessionalTransformerFactory();
@@ -252,6 +280,7 @@ public class ConfigTest extends TestCase {
         }
     }
 
+    @Test
     public void testProfConfProblem() {
 
         // Bug 2609 - occurred using a TemplatesHandler with a ProfessionalConfiguration
@@ -271,29 +300,53 @@ public class ConfigTest extends TestCase {
         }
     }
 
+    // Test  XMLConstants.FEATURE_SECURE_PROCESSING under XSLT
+
+    private void testXsltSecureProcessing(Source xml, Source xsl, boolean expectFailure) {
+        try {
+            TransformerFactory factory = new ProfessionalTransformerFactory();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            Transformer t = factory.newTransformer(xsl);
+            StringWriter sw = new StringWriter();
+            t.transform(xml, new StreamResult(sw));
+            if (expectFailure) {
+                fail("Unexpected success");
+            }
+        } catch (TransformerException err) {
+            //assertTrue("message", err.getMessage().contains(failure));
+            if (!expectFailure) {
+                fail(err.getMessage());
+            } else {
+                System.err.println("Failed as expected: " + err.getMessage());
+            }
+            // OK, failure expected
+        }
+    }
+
+    @Test
+    public void testXsltSecureProcessing1() {
+        // Calling extension functions is insecure
+        String xsl = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
+                "<xsl:template match='/'><xsl:value-of select='Q{java:java.lang.System}getSystemProperty(\"user.dir\")'/>" +
+                "</xsl:template></xsl:transform>";
+        String xml = "<a/>";
+        testXsltSecureProcessing(new StreamSource(new StringReader(xml)),
+                                 new StreamSource(new StringReader(xsl)), true);
+    }
+
+    @Test
+    public void testXsltSecureProcessing2() {
+        // Calling doc() is NOT prevented
+        String xsl = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
+                "<xsl:template match='/'><xsl:value-of select='doc(static-base-uri())'/>" +
+                "</xsl:template></xsl:transform>";
+        String xml = "<a/>";
+        String base = new File(DATA_DIR + "config.xml").toURI().toASCIIString();
+        testXsltSecureProcessing(new StreamSource(new StringReader(xml), base),
+                                 new StreamSource(new StringReader(xsl), base), false);
+    }
+
 
 
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
 

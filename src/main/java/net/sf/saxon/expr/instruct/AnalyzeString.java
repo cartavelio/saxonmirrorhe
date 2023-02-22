@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
@@ -121,6 +122,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         }
     }
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_ANALYZE_STRING;
     }
@@ -135,6 +137,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
      * This method indicates which of these methods is prefered.
      */
 
+    @Override
     public int getImplementationMethod() {
         return Expression.PROCESS_METHOD | Expression.ITERATE_METHOD;
     }
@@ -160,6 +163,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         Configuration config = visitor.getConfiguration();
@@ -192,6 +196,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
 
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         Configuration config = visitor.getConfiguration();
@@ -252,6 +257,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rm) {
         AnalyzeString a2 = new AnalyzeString(
                 copy(getSelect(), rm), copy(getRegex(), rm), copy(getFlags(), rm), copy(getMatching(), rm), copy(getNonMatching(), rm), pattern);
@@ -272,6 +278,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
      * static validation can continue recursively.
      */
 
+    @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         if (getMatching() != null) {
             getMatching().checkPermittedContents(parentType, false);
@@ -288,6 +295,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         if (getMatching() != null) {
             if (getNonMatching() != null) {
@@ -315,6 +323,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
      * @return the depencies, as a bit-mask
      */
 
+    @Override
     public int computeDependencies() {
         // some of the dependencies in the "action" part and in the grouping and sort keys aren't relevant,
         // because they don't depend on values set outside the for-each-group expression
@@ -339,6 +348,8 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
      * must be implemented in each subclass. The results of the instruction are written
      * to the current Receiver, which can be obtained via the Controller.
      *
+     *
+     * @param output the destination for the result
      * @param context The dynamic context of the transformation, giving access to the current node,
      *                the current variables, etc.
      * @return null if the instruction has completed execution; or a TailCall indicating
@@ -346,25 +357,26 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
      *         been unwound so as to save stack space.
      */
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         RegexIterator iter = getRegexIterator(context);
         XPathContextMajor c2 = context.newContext();
         c2.setOrigin(this);
         FocusIterator focusIter = c2.trackFocus(iter);
         c2.setCurrentRegexIterator(iter);
 
-        PipelineConfiguration pipe = c2.getReceiver().getPipelineConfiguration();
+        PipelineConfiguration pipe = output.getPipelineConfiguration();
         pipe.setXPathContext(c2);
 
         Item it;
         while ((it = focusIter.next()) != null) {
             if (iter.isMatching()) {
                 if (getMatching() != null) {
-                    getMatching().process(c2);
+                    getMatching().process(output, c2);
                 }
             } else {
                 if (getNonMatching() != null) {
-                    getNonMatching().process(c2);
+                    getNonMatching().process(output, c2);
                 }
             }
         }
@@ -412,7 +424,8 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         RegexIterator iter = getRegexIterator(context);
         XPathContextMajor c2 = context.newContext();
         c2.setOrigin(this);
@@ -420,7 +433,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         c2.setCurrentRegexIterator(iter);
 
         AnalyzeMappingFunction fn = new AnalyzeMappingFunction(iter, c2, getNonMatching(), getMatching());
-        return new ContextMappingIterator<>(fn, c2);
+        return new ContextMappingIterator(fn, c2);
     }
 
     /**
@@ -440,6 +453,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("analyzeString", this);
         out.setChildRole("select");

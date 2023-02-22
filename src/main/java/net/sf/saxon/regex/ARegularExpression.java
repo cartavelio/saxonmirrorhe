@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,11 +9,12 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.value.StringValue;
 
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Glue class to interface the Jakarta regex engine to Saxon
@@ -70,6 +71,7 @@ public class ARegularExpression implements RegularExpression {
      * @param input the string to match
      * @return true if the string matches, false otherwise
      */
+    @Override
     public boolean matches(CharSequence input) {
         if (StringValue.isEmpty(input) && regex.isNullable()) {
             return true;
@@ -84,6 +86,7 @@ public class ARegularExpression implements RegularExpression {
      * @param input the string to match
      * @return true if the string matches, false otherwise
      */
+    @Override
     public boolean containsMatch(CharSequence input) {
         REMatcher matcher = new REMatcher(regex);
         return matcher.match(UnicodeString.makeUnicodeString(input), 0);
@@ -95,7 +98,8 @@ public class ARegularExpression implements RegularExpression {
      * @param input the string to be tokenized
      * @return a SequenceIterator containing the resulting tokens, as objects of type StringValue
      */
-    public SequenceIterator<StringValue> tokenize(CharSequence input) {
+    @Override
+    public AtomicIterator tokenize(CharSequence input) {
         return new ATokenIterator(UnicodeString.makeUnicodeString(input), new REMatcher(regex));
     }
 
@@ -108,6 +112,7 @@ public class ARegularExpression implements RegularExpression {
      * @param input the character string to be analyzed using the regular expression
      * @return an iterator over matched and unmatched substrings
      */
+    @Override
     public RegexIterator analyze(CharSequence input) {
         return new ARegexIterator(UnicodeString.makeUnicodeString(input), rawPattern, new REMatcher(regex));
     }
@@ -122,12 +127,33 @@ public class ARegularExpression implements RegularExpression {
      * @throws net.sf.saxon.trans.XPathException
      *          if the replacement string is invalid
      */
+    @Override
     public CharSequence replace(CharSequence input, CharSequence replacement) throws XPathException {
         REMatcher matcher = new REMatcher(regex);
         UnicodeString in = UnicodeString.makeUnicodeString(input);
         UnicodeString rep = UnicodeString.makeUnicodeString(replacement);
         try {
             return matcher.replace(in, rep);
+        } catch (RESyntaxException err) {
+            throw new XPathException(err.getMessage(), "FORX0004");
+        }
+    }
+
+    /**
+     * Replace all substrings of a supplied input string that match the regular expression
+     * with a replacement string.
+     *
+     * @param input       the input string on which replacements are to be performed
+     * @param replacer    the replacement string in the format of the XPath replace() function
+     * @return the result of performing the replacement
+     * @throws net.sf.saxon.trans.XPathException if the replacement string is invalid
+     */
+    @Override
+    public CharSequence replaceWith(CharSequence input, Function<CharSequence, CharSequence> replacer) throws XPathException {
+        REMatcher matcher = new REMatcher(regex);
+        UnicodeString in = UnicodeString.makeUnicodeString(input);
+        try {
+            return matcher.replaceWith(in, replacer);
         } catch (RESyntaxException err) {
             throw new XPathException(err.getMessage(), "FORX0004");
         }

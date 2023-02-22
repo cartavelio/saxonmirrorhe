@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -33,7 +33,7 @@ public interface MutableNodeInfo extends NodeInfo {
      * or attribute node.
      *
      * @param type the type annotation (possibly including high bits set to indicate the isID, isIDREF, and
-     *                 isNilled properties)
+     *             isNilled properties)
      */
 
     void setTypeAnnotation(SchemaType type);
@@ -91,6 +91,15 @@ public interface MutableNodeInfo extends NodeInfo {
     void insertSiblings(NodeInfo[] source, boolean before, boolean inherit);
 
     /**
+     * Set the attribute list for this (element) node
+     *
+     * @param attributes the new attribute list
+     * @throws UnsupportedOperationException if this is not an element node
+     */
+
+    void setAttributes(AttributeMap attributes);
+
+    /**
      * Remove an attribute from this element node
      * <p>If the target node is not an element, or if the supplied node is not an attribute
      * of this element, this method takes no action.</p>
@@ -120,6 +129,31 @@ public interface MutableNodeInfo extends NodeInfo {
      */
 
     void addAttribute(NodeName name, SimpleType attType, CharSequence value, int properties);
+
+    /**
+     * Remove a namespace node from this node. The namespaces of its descendant nodes are unaffected.
+     * The method has no effect on non-element nodes, nor on elements if there is no in-scope namespace
+     * with the required prefix, nor if the element name or one of its attributes uses this namespace
+     * prefix
+     *
+     * @param prefix the namespace prefix.
+     */
+
+    default void removeNamespace(String prefix) {
+        // default: no action
+    }
+
+    /**
+     * Add a namespace node from this node. The namespaces of its descendant nodes are unaffected.
+     * The method has no effect on non-element nodes. If there is an existing namespace using this
+     * prefix, the method throws an exception.
+     *
+     * @param prefix the namespace prefix.
+     */
+
+    default void addNamespace(String prefix, String uri) {
+        // default: no action
+    }
 
     /**
      * Delete this node (that is, detach it from its parent).
@@ -200,17 +234,16 @@ public interface MutableNodeInfo extends NodeInfo {
      * Add a namespace binding (that is, a namespace node) to this element. This call has no effect if applied
      * to a node other than an element.
      *
-     * @param nscode  The namespace code representing the (prefix, uri) pair of the namespace binding to be
-     *                added. If the target element already has a namespace binding with this (prefix, uri) pair, the call has
-     *                no effect. If the target element currently has a namespace binding with this prefix and a different URI, an
-     *                exception is raised. The new namespace binding will also be in scope for the subtree rooted
-     *                at this node (that is, the namespace is implicitly inherited)
-     * @param unused  Retained for backwards compatibility
+     * @param nscode The namespace code representing the (prefix, uri) pair of the namespace binding to be
+     *               added. If the target element already has a namespace binding with this (prefix, uri) pair, the call has
+     *               no effect. If the target element currently has a namespace binding with this prefix and a different URI, an
+     *               exception is raised. The new namespace binding will also be in scope for the subtree rooted
+     *               at this node (that is, the namespace is implicitly inherited)
      * @throws IllegalArgumentException if the namespace code is not present in the namepool, or if the target
      *                                  element already has a namespace binding for this prefix
      */
 
-    void addNamespace(NamespaceBinding nscode, boolean unused);
+    void addNamespace(NamespaceBinding nscode);
 
     /**
      * Remove type information from this node (and its ancestors, recursively).
@@ -224,7 +257,7 @@ public interface MutableNodeInfo extends NodeInfo {
      * Get a Builder suitable for building nodes that can be attached to this document.
      *
      * @return a new Builder that constructs nodes using the same object model implementation
-     *         as this one, suitable for attachment to this tree
+     * as this one, suitable for attachment to this tree
      */
 
     Builder newBuilder();

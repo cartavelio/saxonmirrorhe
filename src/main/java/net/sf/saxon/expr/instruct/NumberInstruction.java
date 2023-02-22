@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -147,6 +147,7 @@ public class NumberInstruction extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         NumberInstruction exp = new NumberInstruction(copy(selectOp, rebindings), level,
                                                       copy(getCount(), rebindings),
@@ -165,10 +166,12 @@ public class NumberInstruction extends Expression {
 
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return BuiltInAtomicType.INTEGER;
     }
 
+    @Override
     public int computeCardinality() {
         switch (level) {
             case SIMPLE:
@@ -224,7 +227,8 @@ public class NumberInstruction extends Expression {
         return this;
     }
 
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         List<IntegerValue> vec = new ArrayList<>(1);
         NodeInfo source = (NodeInfo) selectOp.getChildExpression().evaluateItem(context);
 
@@ -271,6 +275,7 @@ public class NumberInstruction extends Expression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("nodeNum", this);
         out.emitAttribute("level", LEVEL_NAMES[level]);

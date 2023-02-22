@@ -1,17 +1,15 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
-import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.dom4j.DOM4JNodeWrapper;
 import net.sf.saxon.option.dom4j.DOM4JObjectModel;
-import net.sf.saxon.option.jdom.JDOMNodeWrapper;
-import net.sf.saxon.option.jdom.JDOMObjectModel;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.option.xom.XOMDocumentWrapper;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,11 +22,17 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.function.Predicate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * JUnit tests for the s9api DocumentBuilder
  */
-public class TestDocumentBuilder extends TestCase {
+public class TestDocumentBuilder {
 
+    @Test
     public void testSaxSourceNoSystemId() {
         try {
             StringReader sr = new StringReader("<doc/>");
@@ -41,6 +45,7 @@ public class TestDocumentBuilder extends TestCase {
         }
     }
 
+    @Test
     public void testSaxSourceDTDValidation() {
         String validXML = "<!DOCTYPE a [<!ELEMENT a EMPTY>]><a/>";
         String invalidXML = "<!DOCTYPE a [<!ELEMENT a (b+)>]><a/>";
@@ -77,6 +82,7 @@ public class TestDocumentBuilder extends TestCase {
 
     }
 
+    @Test
     public void testNamespaceNodes() {
         try {
             StringReader sr = new StringReader("<doc xmlns='abc.uri'><e xmlns:a='one.uri' xmlns:b='two.uri'/></doc>");
@@ -97,12 +103,13 @@ public class TestDocumentBuilder extends TestCase {
             }
             assertEquals(4, nsBindings.size());
 
-            
+
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testDOMElementNode() {
         try {
 
@@ -134,6 +141,7 @@ public class TestDocumentBuilder extends TestCase {
         }
     }
 
+    @Test
     public void testXomBuilder() {
         try {
             String in = "<?xml version='1.0'?> \n" +
@@ -142,7 +150,7 @@ public class TestDocumentBuilder extends TestCase {
             DocumentBuilder db = proc.newDocumentBuilder();
             db.setTreeModel(XOMObjectModel.getInstance());
             XdmNode doc = db.build(new StreamSource(new StringReader(in)));
-            assertTrue("isXOM", doc.getUnderlyingNode() instanceof XOMDocumentWrapper);
+            assertTrue(doc.getUnderlyingNode() instanceof XOMDocumentWrapper, "isXOM");
             System.err.println(doc.toString());
         } catch (Exception e) {
             e.printStackTrace();
@@ -150,22 +158,7 @@ public class TestDocumentBuilder extends TestCase {
         }
     }
 
-    public void testJdomBuilder() {
-        try {
-            String in = "<?xml version='1.0'?> \n" +
-                    "<Document> <e a='13' xml:lang='en'> <c:f xmlns:c='http://c/'/><f xmlns='http://c/'/> </e> </Document>";
-            Processor proc = new Processor(false);
-            DocumentBuilder db = proc.newDocumentBuilder();
-            db.setTreeModel(JDOMObjectModel.getInstance());
-            XdmNode doc = db.build(new StreamSource(new StringReader(in)));
-            assertTrue("isJDOM", doc.getUnderlyingNode() instanceof JDOMNodeWrapper);
-            System.err.println(doc.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-    }
-
+    @Test
     public void testJdom2Builder() {
         try {
             String in = "<?xml version='1.0'?> \n" +
@@ -174,7 +167,7 @@ public class TestDocumentBuilder extends TestCase {
             DocumentBuilder db = proc.newDocumentBuilder();
             db.setTreeModel(JDOM2ObjectModel.getInstance());
             XdmNode doc = db.build(new StreamSource(new StringReader(in)));
-            assertTrue("isJDOM", doc.getUnderlyingNode() instanceof net.sf.saxon.option.jdom2.JDOM2NodeWrapper);
+            assertTrue(doc.getUnderlyingNode() instanceof net.sf.saxon.option.jdom2.JDOM2NodeWrapper, "isJDOM");
             System.err.println(doc.toString());
         } catch (Exception e) {
             e.printStackTrace();
@@ -182,6 +175,7 @@ public class TestDocumentBuilder extends TestCase {
         }
     }
 
+    @Test
     public void testDom4JBuilder() {
         try {
             String in = "<?xml version='1.0'?> \n" +
@@ -190,7 +184,7 @@ public class TestDocumentBuilder extends TestCase {
             DocumentBuilder db = proc.newDocumentBuilder();
             db.setTreeModel(DOM4JObjectModel.getInstance());
             XdmNode doc = db.build(new StreamSource(new StringReader(in)));
-            assertTrue("isDom4J", doc.getUnderlyingNode() instanceof DOM4JNodeWrapper);
+            assertTrue(doc.getUnderlyingNode() instanceof DOM4JNodeWrapper, "isDom4J");
             System.err.println(doc.toString());
         } catch (Exception e) {
             e.printStackTrace();
@@ -203,6 +197,7 @@ public class TestDocumentBuilder extends TestCase {
      * elements are preserved
      */
 
+    @Test
     public void testBaseUriFromEntities() {
         try {
             Processor processor = new Processor(false);
@@ -213,7 +208,7 @@ public class TestDocumentBuilder extends TestCase {
             XPathSelector s = xpc.compile("distinct-values(//*/base-uri())").load();
             s.setContextItem(d);
             XdmValue v = s.evaluate();
-            assertTrue("3 distinct base URIs", v.size() == 3);
+            assertEquals(3, v.size(), "3 distinct base URIs");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
@@ -224,6 +219,7 @@ public class TestDocumentBuilder extends TestCase {
      * elements are preserved
      */
 
+    @Test
     public void testBaseUriFromCopy() {
         try {
             Processor processor = new Processor(false);
@@ -237,7 +233,7 @@ public class TestDocumentBuilder extends TestCase {
             XPathSelector s = xpc.compile("distinct-values(//*/base-uri())").load();
             s.setContextItem(e);
             XdmValue v = s.evaluate();
-            assertTrue("3 distinct base URIs", v.size() == 3);
+            assertEquals(3, v.size(), "3 distinct base URIs");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
@@ -248,6 +244,7 @@ public class TestDocumentBuilder extends TestCase {
      * elements are preserved
      */
 
+    @Test
     public void testBaseUriOfAttribute() {
         try {
             Processor processor = new Processor(false);
@@ -258,7 +255,7 @@ public class TestDocumentBuilder extends TestCase {
             XPathSelector s = xpc.compile("//@CODE").load();
             s.setContextItem(d);
             for (XdmItem i:s.evaluate()) {
-                assertTrue("baseURI", ((XdmNode)i).getBaseURI().toString().endsWith("categories.xml"));
+                assertTrue(((XdmNode)i).getBaseURI().toString().endsWith("categories.xml"), "baseURI");
             }
         } catch (SaxonApiException e) {
             fail(e.getMessage());
@@ -269,6 +266,7 @@ public class TestDocumentBuilder extends TestCase {
      * Test document builder with document projection
      */
 
+    @Test
     public void testProjection001() {
         try {
 
@@ -291,7 +289,7 @@ public class TestDocumentBuilder extends TestCase {
             eval.setContextItem(doc);
             eval.run(destination);
 
-            assertTrue("contains CAT", sw.toString().contains("CODE=\"P\" DESC=\"Paperback\""));
+            assertTrue(sw.toString().contains("CODE=\"P\" DESC=\"Paperback\""), "contains CAT");
 
             // Test that the projected doc omits the ITEM elements
 
@@ -303,8 +301,8 @@ public class TestDocumentBuilder extends TestCase {
             XQueryEvaluator eval2 = exp.load();
             eval2.setContextItem(doc);
             eval2.run(destination2);
-            
-            assertTrue("omits ITEM", sw2.toString().equals("0"));
+
+            assertTrue(sw2.toString().equals("0"), "omits ITEM");
 
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -312,11 +310,12 @@ public class TestDocumentBuilder extends TestCase {
         }
     }
 
+    @Test
     public void testSvg11Dtd() {
         // Test that the SVG 1.1 DTD can be retrieved from the local cache
         try {
             Processor proc = new Processor(false);
-            proc.setConfigurationProperty(FeatureKeys.TIMING, true);
+            proc.setConfigurationProperty(Feature.TIMING, true);
             DocumentBuilder b = proc.newDocumentBuilder();
             b.setDTDValidation(true);
             StringReader sr = new StringReader(
@@ -352,11 +351,12 @@ public class TestDocumentBuilder extends TestCase {
         }
     }
 
+    @Test
     public void testSvg10Dtd() {
         // Test that the SVG 1.0 DTD can be retrieved from the local cache
         try {
             Processor proc = new Processor(false);
-            proc.setConfigurationProperty(FeatureKeys.TIMING, true);
+            proc.setConfigurationProperty(Feature.TIMING, true);
             DocumentBuilder b = proc.newDocumentBuilder();
             b.setDTDValidation(true);
             StringReader sr = new StringReader(
@@ -392,6 +392,7 @@ public class TestDocumentBuilder extends TestCase {
         }
     }
 
+    @Test
     public void testWhitespacePolicyUntyped() {
         try {
             Processor proc = new Processor(false);
@@ -420,6 +421,7 @@ public class TestDocumentBuilder extends TestCase {
         }
     }
 
+    @Test
     public void testWhitespacePolicySchemaTyped() {
         String s;
         s = buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy.IGNORABLE);
@@ -457,6 +459,7 @@ public class TestDocumentBuilder extends TestCase {
         }
     }
 
+    @Test
     public void testWhitespacePolicyWithDTDValidation() {
         String s;
         s = useDTDIgnorableWhitespace(WhitespaceStrippingPolicy.ALL);
@@ -493,6 +496,7 @@ public class TestDocumentBuilder extends TestCase {
 
     }
 
+    @Test
     public void testCustomWhitespacePolicy() {
         try {
             Processor proc = new Processor(false);

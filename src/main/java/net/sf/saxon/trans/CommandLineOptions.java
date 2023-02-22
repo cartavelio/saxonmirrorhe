@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,10 +9,8 @@ package net.sf.saxon.trans;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
-import net.sf.saxon.expr.number.RegularGroupFormatter;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.regex.EmptyString;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.SchemaException;
@@ -50,17 +48,17 @@ public class CommandLineOptions {
     public static final int VALUE_REQUIRED = 1 << 8;
     public static final int VALUE_PROHIBITED = 2 << 8;
 
-    /*@NotNull*/ HashMap<String, Integer> recognizedOptions = new HashMap<>();
-    /*@NotNull*/ HashMap<String, String> optionHelp = new HashMap<>();
-    /*@NotNull*/ protected Properties namedOptions = new Properties();
-    /*@NotNull*/ Properties configOptions = new Properties();
-    /*@NotNull*/ Map<String, Set<String>> permittedValues = new HashMap<>();
-    /*@NotNull*/ Map<String, String> defaultValues = new HashMap<>();
-    /*@NotNull*/ List<String> positionalOptions = new ArrayList<>();
-    /*@NotNull*/ Properties paramValues = new Properties();
-    /*@NotNull*/ Properties paramExpressions = new Properties();
-    /*@NotNull*/ Properties paramFiles = new Properties();
-    /*@NotNull*/ Properties serializationParams = new Properties();
+    private HashMap<String, Integer> recognizedOptions = new HashMap<>();
+    private HashMap<String, String> optionHelp = new HashMap<>();
+    private Properties namedOptions = new Properties();
+    private Properties configOptions = new Properties();
+    private Map<String, Set<String>> permittedValues = new HashMap<>();
+    private Map<String, String> defaultValues = new HashMap<>();
+    private List<String> positionalOptions = new ArrayList<>();
+    private Properties paramValues = new Properties();
+    private Properties paramExpressions = new Properties();
+    private Properties paramFiles = new Properties();
+    private Properties serializationParams = new Properties();
 
     /**
      * Set the permitted options.
@@ -110,7 +108,7 @@ public class CommandLineOptions {
             } else {
                 sb.append(val);
             }
-            sb.append('|');
+            sb.cat('|');
         }
         sb.setLength(sb.length() - 1);
         return sb.toString();
@@ -127,6 +125,8 @@ public class CommandLineOptions {
         for (String arg : args) {
             if ("-".equals(arg)) {
                 positionalOptions.add(arg);
+            } else if (arg.equals("--?")) {
+                System.err.println("Configuration features:" + featureKeys());
             } else if (arg.charAt(0) == '-') {
                 String option;
                 String value = "";
@@ -265,14 +265,13 @@ public class CommandLineOptions {
                 if (f == null) {
                     throw new XPathException("Unknown configuration feature " + name);
                 }
-                Object typedValue;
+
                 if (f.type == Boolean.class) {
-                    typedValue = Configuration.requireBoolean(name, value);
+                    Configuration.requireBoolean(name, value);
                 } else if (f.type == Integer.class) {
-                    typedValue = Integer.valueOf(value);
-                } else if (f.type == String.class) {
-                    typedValue = value;
-                } else {
+                    //noinspection ResultOfMethodCallIgnored
+                    Integer.valueOf(value);
+                } else if (f.type != String.class) {
                     throw new XPathException("Property --" + name + " cannot be supplied as a string");
                 }
             }
@@ -328,27 +327,22 @@ public class CommandLineOptions {
             }
         }
 
-        value = getOptionValue("cr");
-        if (value != null) {
-            Object resolver = config.getInstance(value, null);
-            if (!(resolver instanceof CollectionURIResolver)) {
-                throw new XPathException("Class specified using -cr is not a CollectionURIResolver");
-            }
-            processor.setConfigurationProperty(Feature.COLLECTION_URI_RESOLVER, (CollectionURIResolver)resolver);
-        }
-
         value = getOptionValue("dtd");
         if (value != null) {
-            if ("on".equals(value)) {
-                config.setBooleanProperty(Feature.DTD_VALIDATION, true);
-                config.getParseOptions().setDTDValidationMode(Validation.STRICT);
-            } else if ("off".equals(value)) {
-                config.setBooleanProperty(Feature.DTD_VALIDATION, false);
-                config.getParseOptions().setDTDValidationMode(Validation.SKIP);
-            } else if ("recover".equals(value)) {
-                config.setBooleanProperty(Feature.DTD_VALIDATION, true);
-                config.setBooleanProperty(Feature.DTD_VALIDATION_RECOVERABLE, true);
-                config.getParseOptions().setDTDValidationMode(Validation.LAX);
+            switch (value) {
+                case "on":
+                    config.setBooleanProperty(Feature.DTD_VALIDATION, true);
+                    config.getParseOptions().setDTDValidationMode(Validation.STRICT);
+                    break;
+                case "off":
+                    config.setBooleanProperty(Feature.DTD_VALIDATION, false);
+                    config.getParseOptions().setDTDValidationMode(Validation.SKIP);
+                    break;
+                case "recover":
+                    config.setBooleanProperty(Feature.DTD_VALIDATION, true);
+                    config.setBooleanProperty(Feature.DTD_VALIDATION_RECOVERABLE, true);
+                    config.getParseOptions().setDTDValidationMode(Validation.LAX);
+                    break;
             }
         }
 
@@ -426,12 +420,16 @@ public class CommandLineOptions {
 
         value = getOptionValue("tree");
         if (value != null) {
-            if ("linked".equals(value)) {
-                config.setTreeModel(Builder.LINKED_TREE);
-            } else if ("tiny".equals(value)) {
-                config.setTreeModel(Builder.TINY_TREE);
-            } else if ("tinyc".equals(value)) {
-                config.setTreeModel(Builder.TINY_TREE_CONDENSED);
+            switch (value) {
+                case "linked":
+                    config.setTreeModel(Builder.LINKED_TREE);
+                    break;
+                case "tiny":
+                    config.setTreeModel(Builder.TINY_TREE);
+                    break;
+                case "tinyc":
+                    config.setTreeModel(Builder.TINY_TREE_CONDENSED);
+                    break;
             }
         }
 
@@ -441,20 +439,6 @@ public class CommandLineOptions {
                 processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION, Validation.STRICT);
             } else if ("lax".equals(value)) {
                 processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION, Validation.LAX);
-            }
-        }
-
-        value = getOptionValue("warnings");
-        if (value != null) {
-            if ("silent".equals(value)) {
-                processor.setConfigurationProperty(Feature.RECOVERY_POLICY,
-                        Configuration.RECOVER_SILENTLY);
-            } else if ("recover".equals(value)) {
-                processor.setConfigurationProperty(Feature.RECOVERY_POLICY,
-                        Configuration.RECOVER_WITH_WARNINGS);
-            } else if ("fatal".equals(value)) {
-                processor.setConfigurationProperty(Feature.RECOVERY_POLICY,
-                        Configuration.DO_NOT_RECOVER);
             }
         }
 
@@ -515,6 +499,7 @@ public class CommandLineOptions {
             sb.append(" -");
             sb.append(opt);
         }
+        sb.append(" --?");
         return sb.toString();
     }
 
@@ -654,10 +639,8 @@ public class CommandLineOptions {
 
 
     /**
-     * Apply XSLT 3.0 static parameters to a compilerInfo. Actually this sets all parameter values,
-     * whether static or dynamic. This is possible because the stylesheet is compiled for once-only use.
-     * However, file-valued params (+name=value) are always handled as dynamic parameters because
-     * of potential problems with exported SEF files.
+     * Apply XSLT 3.0 static parameters to a compilerInfo. Actually this sets all parameter values, whether static or dynamic.
+     * This is possible because the stylesheet is compiled for once-only use.
      *
      * @param compiler The XsltCompiler object into which the parameters are copied
      * @throws SaxonApiException if invalid options are found
@@ -682,6 +665,7 @@ public class CommandLineOptions {
         }
 
     }
+
 
     /**
      * Apply XSLT 3.0 file-valued parameters to an XSLT transformer. Most parameters are applied
@@ -757,7 +741,7 @@ public class CommandLineOptions {
                 if (files != null) {
                     for (String file1 : files) {
                         File file = new File(sourceFile, file1);
-                        if (!file.isDirectory()) {
+                        if (!file.isDirectory() && !file.isHidden()) {
                             if (useSAXSource) {
                                 InputSource eis = new InputSource(file.toURI().toString());
                                 sourceInput = new SAXSource(parser, eis);
@@ -804,6 +788,13 @@ public class CommandLineOptions {
         }
     }
 
+    public static String featureKeys() {
+        final int index = "http://saxon.sf.net/feature/".length();
+        StringBuilder sb = new StringBuilder();
+        Feature.getNames().forEachRemaining(s -> sb.append("\n  ").append(s.substring(index)));
+        return sb.toString();
+    }
+
     private static DayTimeDurationValue milliSecond = new DayTimeDurationValue(1, 0, 0, 0, 0, 1000);
 
     public static String showExecutionTimeNano(long nanosecs) {
@@ -837,12 +828,6 @@ public class CommandLineOptions {
         }
     }
 
-    public static String showMemoryUsed() {
-        long value = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        return new RegularGroupFormatter(3, ",", EmptyString.THE_INSTANCE).format(new FastStringBuffer(value + ""));
-    }
-
-
     public static String getCommandName(Object command) {
         String s = command.getClass().getName();
         if (s.startsWith("cli.Saxon.Cmd.DotNet")) {
@@ -851,5 +836,9 @@ public class CommandLineOptions {
         return s;
     }
 
+    public static void showMemoryUsed() {
+        long value = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        System.err.println("Memory used: " + (value / 1_000_000) + "Mb");
+    }
 }
 

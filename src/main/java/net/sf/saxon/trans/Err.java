@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -28,6 +28,7 @@ public class Err {
     public static final int VARIABLE = 5;
     public static final int GENERAL = 6;
     public static final int URI = 7;
+    public static final int EQNAME = 8;
 
     /**
      * Add delimiters to represent variable information within an error message
@@ -72,7 +73,7 @@ public class Err {
                         sb.append("\\x");
                         sb.append(Integer.toHexString(c));
                     } else {
-                        sb.append(c);
+                        sb.cat(c);
                     }
             }
         }
@@ -93,6 +94,8 @@ public class Err {
             }
         } else if (valueType == URI) {
             s = abbreviateURI(sb.toString());
+        } else if (valueType == EQNAME) {
+            s = abbreviateEQName(sb.toString());
         } else {
             s = len > 30 ? sb.toString().substring(0, 30) + "..." : sb.toString();
         }
@@ -107,6 +110,8 @@ public class Err {
                 return "$" + s;
             case VALUE:
                 return "\"" + s + "\"";
+            case EQNAME:
+                return s;
             default:
                 return "{" + s + "}";
         }
@@ -142,12 +147,12 @@ public class Err {
         }
     }
 
-    public static CharSequence depictSequence(Sequence<?> seq) {
+    public static CharSequence depictSequence(Sequence seq) {
         if (seq == null) {
             return "(*null*)";
         }
         try {
-            GroundedValue<?> val = seq.materialize();
+            GroundedValue val = seq.materialize();
             if (val.getLength() == 0) {
                 return "()";
             } else if (val.getLength() == 1) {
@@ -175,7 +180,7 @@ public class Err {
                     return sb.toString();
                 }
 
-                sb.append(Err.depict(next));
+                sb.cat(Err.depict(next));
             }
             sb.append(") ");
             return sb.toString();
@@ -211,6 +216,18 @@ public class Err {
             return uri;
         } else {
             return "..." + uri.substring(lastSlash);
+        }
+    }
+
+    public static String abbreviateEQName(String eqName) {
+        try {
+            if (eqName.startsWith("{")) {
+                eqName = "Q" + eqName;
+            }
+            StructuredQName sq = StructuredQName.fromEQName(eqName);
+            return "Q{" + abbreviateURI(sq.getURI()) + "}" + sq.getLocalPart();
+        } catch (Exception e) {
+            return eqName;
         }
     }
 

@@ -1,9 +1,9 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.TransformerException;
@@ -16,7 +16,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class TestSecondaryDestination extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class TestSecondaryDestination {
+    @Test
     public void testSecondaryDestination1() {
         // new processor, custom output resolver
         try {
@@ -100,6 +104,7 @@ public class TestSecondaryDestination extends TestCase {
                     "   </xsl:template>\n" +
                     "</xsl:stylesheet>";
 
+    @Test
     public void testNullPrimaryDestination() {
         try {
             Processor proc = new Processor(true);
@@ -125,12 +130,14 @@ public class TestSecondaryDestination extends TestCase {
         }
     }
 
+    @Test
     public void testNullSecondaryDestination() {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
             XsltExecutable exec = comp.compile(new StreamSource(new StringReader(STYLE)));
             Xslt30Transformer t = exec.load30();
+            Map<String, String> results = new HashMap<>();
             t.setResultDocumentHandler(uri -> new NullDestination());
             Destination out = new NullDestination();
             out.setDestinationBaseURI(new URI("http://www.example.com/"));

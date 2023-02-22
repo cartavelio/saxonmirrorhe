@@ -1,7 +1,7 @@
 package xqjtests;
 
-import junit.framework.TestCase;
 import com.saxonica.xqj.SaxonXQDataSource;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -27,13 +27,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class RennauBugs extends TestCase {
+
+public class RennauBugs {
 
     /**
      * Testcase: XPath applied to XQJ result node produces runtime
      * error.
      */
+    @Test
     public void testXPath() {
         String queryText = "<place><name>abc</name></place>";
         try {
@@ -67,6 +73,7 @@ public class RennauBugs extends TestCase {
     /**
      * Testcase: omit-xml-declaration="no"
      */
+    @Test
     public void testOmitXmlDeclaration() {
         String queryText = "<place><name>abc</name></place>";
         try {
@@ -77,11 +84,11 @@ public class RennauBugs extends TestCase {
             Properties props = new Properties();
             props.setProperty("omit-xml-declaration", "no");
             String s = seq.getSequenceAsString(props);
-            assertTrue("no XML declaration", s.startsWith("<?xml "));
+            assertTrue(s.startsWith("<?xml "), "no XML declaration");
             props.setProperty("omit-xml-declaration", "yes");
             seq = ex.executeQuery();
             s = seq.getSequenceAsString(props);
-            assertFalse("has XML declaration", s.startsWith("<?xml "));
+            assertFalse(s.startsWith("<?xml "), "has XML declaration");
             try {
                 seq = ex.executeQuery();
                 props.setProperty("omit-xml-declaration", "maybe");
@@ -93,9 +100,6 @@ public class RennauBugs extends TestCase {
                 // OK
             }
 
-        } catch (XQException e) {
-            e.printStackTrace();
-            fail();
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -103,10 +107,12 @@ public class RennauBugs extends TestCase {
     }
 
 
+    @Test
     public void testWriteToResult1() {
         writeToResult(1);
     }
 
+    @Test
     public void testWriteToResult2() {
         writeToResult(2);
     }
@@ -214,6 +220,7 @@ public class RennauBugs extends TestCase {
      * Bug with binding GregorianCalendar object
      */
 
+    @Test
     public void testGregorianCalendar() {
         try {
             XQDataSource ds = new SaxonXQDataSource(); // XQJ implementation
@@ -221,7 +228,7 @@ public class RennauBugs extends TestCase {
             XQExpression ex = con.createExpression();
             DatatypeFactory dtfact = DatatypeFactory.newInstance();
             XMLGregorianCalendar date = dtfact.newXMLGregorianCalendar("2010-04-01");
-            assertEquals("dateOK", date.toString(), "2010-04-01");
+            assertEquals("2010-04-01", date.toString(), "dateOK");
             System.out.println("dateObject=" + date);
             ex.bindObject(new QName("date"), date, con.createAtomicType(XQItemType.XQBASETYPE_DATE));
         } catch (Exception e) {
@@ -231,6 +238,7 @@ public class RennauBugs extends TestCase {
 
     }
 
+    @Test
     public void testGetInt() {
         try {
            StringBuffer buffer = new StringBuffer();
@@ -243,12 +251,13 @@ public class RennauBugs extends TestCase {
                buffer.append(result.getInt());
                buffer.append(',');
            }
-           assertEquals("eq", buffer.toString(), "120,121,122,123,124,125,126,127,128,129,130,");
+           assertEquals(buffer.toString(), "120,121,122,123,124,125,126,127,128,129,130,", "eq");
         } catch (Exception e) {
               e.printStackTrace();
         }
     }
 
+    @Test
     public void testGetShort() {
         try {
            StringBuffer buffer = new StringBuffer();
@@ -261,7 +270,7 @@ public class RennauBugs extends TestCase {
                buffer.append(result.getShort());
                buffer.append(',');
            }
-           assertEquals("eq", buffer.toString(), "120,121,122,123,124,125,126,127,128,129,130,");
+           assertEquals(buffer.toString(), "120,121,122,123,124,125,126,127,128,129,130,", "eq");
         } catch (Exception e) {
               e.printStackTrace();
         }
@@ -281,6 +290,7 @@ public class RennauBugs extends TestCase {
      * @author Hans-Jurgen
      *
      */
+    @Test
     public void testBindInt() {
         try {
             XQDataSource ds = new SaxonXQDataSource();
@@ -324,7 +334,7 @@ public class RennauBugs extends TestCase {
             } catch (XQException e) {
                 sb.append("N");
             }
-            assertEquals("results", "NNNNYYNNNNNNN", sb.toString());
+            assertEquals("NNNNYYNNNNNNN", sb.toString(), "results");
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -346,6 +356,7 @@ public class RennauBugs extends TestCase {
      * @author Hans-Jurgen
      *
      */
+    @Test
     public void testBindAtomicValue() {
         try {
             XQDataSource ds = new SaxonXQDataSource();
@@ -389,7 +400,7 @@ public class RennauBugs extends TestCase {
             } catch (XQException e) {
                 sb.append("N");
             }
-            assertEquals("results", "NNNNNYNNNNNNNNN", sb.toString());
+            assertEquals("NNNNNYNNNNNNNNN", sb.toString(), "results");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -411,6 +422,7 @@ public class RennauBugs extends TestCase {
      * @author Hans-Jurgen
      *
      */
+    @Test
     public void testBindObject() {
         try {
             XQDataSource ds = new SaxonXQDataSource();
@@ -452,7 +464,7 @@ public class RennauBugs extends TestCase {
             } catch (XQException e) {
                 sb.append("N");
             }
-            assertEquals("results", "NNNNNYNNNNNNN", sb.toString());
+            assertEquals("NNNNNYNNNNNNN", sb.toString(), "results");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -469,9 +481,8 @@ public class RennauBugs extends TestCase {
      * However, presently (Saxon 9.2) all attempts are successful, because Saxon applies
      * the function conversion rules to supplied parameters.
      *
-     * @author Michael Kay
-     *
      */
+    @Test
     public void testExpectDouble() {
         try {
             XQDataSource ds = new SaxonXQDataSource();
@@ -515,12 +526,13 @@ public class RennauBugs extends TestCase {
             } catch (XQException e) {
                 sb.append("N");
             }
-            assertEquals("results", "NNYY", sb.toString());
+            assertEquals("NNYY", sb.toString(), "results");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    @Test
     public void testStaticContext() {
         try {
             XQDataSource ds = new SaxonXQDataSource();

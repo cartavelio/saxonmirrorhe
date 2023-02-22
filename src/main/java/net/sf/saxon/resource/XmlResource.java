@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -29,7 +29,7 @@ import java.io.StringReader;
  */
 
 public class XmlResource implements Resource {
-//    private Source source;
+    //    private Source source;
 //    private ParseOptions options;
     private NodeInfo doc;
     private Configuration config;
@@ -37,6 +37,7 @@ public class XmlResource implements Resource {
     //private int onError = URIQueryParameters.ON_ERROR_FAIL;
 
     public final static ResourceFactory FACTORY = new ResourceFactory() {
+        @Override
         public Resource makeResource(Configuration config, AbstractResourceCollection.InputDetails details) throws XPathException {
             return new XmlResource(config, details);
             //            String resourceURI = details.resourceUri;
@@ -65,7 +66,7 @@ public class XmlResource implements Resource {
     /**
      * Create an XML resource using a specific node
      *
-     * @param doc    the node in question (usually but not necessarily a document node)
+     * @param doc the node in question (usually but not necessarily a document node)
      */
 
     public XmlResource(NodeInfo doc) {
@@ -75,9 +76,10 @@ public class XmlResource implements Resource {
 
     /**
      * Create an XML resource using a specific node. (Method retained for backwards compatibility).
+     *
      * @param config the Saxon Configuration. This must be the configuration to which the node
      *               belongs.
-     * @param doc the node in question (usually but not necessarily a document node)
+     * @param doc    the node in question (usually but not necessarily a document node)
      */
 
     public XmlResource(Configuration config, NodeInfo doc) {
@@ -111,6 +113,7 @@ public class XmlResource implements Resource {
 //        this.onError = onError;
 //    }
 
+    @Override
     public String getResourceURI() {
         if (doc == null) {
             return details.resourceUri;
@@ -121,11 +124,13 @@ public class XmlResource implements Resource {
 
     /**
      * Get an item representing the resource: in this case a document node for the XML document.
+     *
      * @param context the XPath evaluation context
      * @return the document; or null if there is an error and the error is to be ignored
      * @throws XPathException if (for example) XML parsing fails
      */
 
+    @Override
     public Item getItem(XPathContext context) throws XPathException {
         if (doc == null) {
             String resourceURI = details.resourceUri;
@@ -176,6 +181,7 @@ public class XmlResource implements Resource {
      * @return the string "application/xml"
      */
 
+    @Override
     public String getContentType() {
         return "application/xml";
     }

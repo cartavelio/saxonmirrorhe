@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,11 +8,9 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ContextItemStaticInfo;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RoleDiagnostic;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItem;
@@ -20,7 +18,8 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -105,6 +104,15 @@ public class ApplyFn extends SystemFunction  {
         Expression key = ((SquareArrayConstructor)arguments[1]).getOperanda().getOperand(0).getChildExpression();
         Expression getter = fnSet.makeFunction("get", 2).makeFunctionCall(target, key);
         getter.setRetainedStaticContext(target.getRetainedStaticContext());
+        // Use custom diagnostics for type errors on the argument of the call (bug 4772)
+        TypeChecker tc = visitor.getConfiguration().getTypeChecker(visitor.getStaticContext().isInBackwardsCompatibleMode());
+        if (fnSet == MapFunctionSet.getInstance()) {
+            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "key value supplied when calling a map as a function", 0);
+            ((SystemFunctionCall) getter).setArg(1, tc.staticTypeCheck(key, SequenceType.SINGLE_ATOMIC, role, visitor));
+        } else {
+            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "subscript supplied when calling an array as a function", 0);
+            ((SystemFunctionCall) getter).setArg(1, tc.staticTypeCheck(key, SequenceType.SINGLE_INTEGER, role, visitor));
+        }
         return getter.typeCheck(visitor, contextInfo);
     }
 
@@ -120,7 +128,8 @@ public class ApplyFn extends SystemFunction  {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         final Function function = (Function) arguments[0].head();
         ArrayItem args = (ArrayItem)arguments[1].head();
 
@@ -149,12 +158,12 @@ public class ApplyFn extends SystemFunction  {
                 } else {
                     role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "fn:apply", i + 1);
                 }
-                Sequence<?> converted = th.applyFunctionConversionRules(
-                    args.get(i), expected, role, ExplicitLocation.UNKNOWN_LOCATION);
+                Sequence converted = th.applyFunctionConversionRules(
+                        args.get(i), expected, role, Loc.NONE);
                 argArray[i] = converted.materialize();
             }
         }
-        Sequence<?> rawResult = dynamicCall(function, context, argArray);
+        Sequence rawResult = dynamicCall(function, context, argArray);
         if (function.isTrustedResultType()) {
             // trust system functions to return a result of the correct type
             return rawResult;
@@ -162,7 +171,7 @@ public class ApplyFn extends SystemFunction  {
             // Check the result of the function
             RoleDiagnostic resultRole = new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "fn:apply", -1);
             return th.applyFunctionConversionRules(
-                rawResult, fit.getResultType(), resultRole, ExplicitLocation.UNKNOWN_LOCATION);
+                    rawResult, fit.getResultType(), resultRole, Loc.NONE);
         }
     }
 

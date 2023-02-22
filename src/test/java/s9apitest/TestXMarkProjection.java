@@ -1,18 +1,21 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Test the XMark queries with and without document projection, comparing the results
  */
-public class TestXMarkProjection extends TestCase {
+public class TestXMarkProjection {
 
     private void doTest(String query) {
         try {
@@ -34,7 +37,7 @@ public class TestXMarkProjection extends TestCase {
             XdmValue v2 = ev1.evaluate();
 
             Serializer s = proc.newSerializer();
-            assertEquals("same result", serialize(s, v1), serialize(s, v2));
+            assertEquals(serialize(s, v1), serialize(s, v2), "same result");
         } catch (SaxonApiException | IOException e) {
             e.printStackTrace();
             fail();
@@ -50,82 +53,102 @@ public class TestXMarkProjection extends TestCase {
         return s.toString();
     }
 
+    @Test
     public void testQ1() {
         doTest("q1");
     }
 
+    @Test
     public void testQ2() {
         doTest("q2");
     }
 
+    @Test
     public void testQ3() {
         doTest("q3");
     }
 
+    @Test
     public void testQ4() {
         doTest("q4");
     }
 
+    @Test
     public void testQ5() {
         doTest("q5");
     }
 
+    @Test
     public void testQ6() {
         doTest("q6");
     }
 
+    @Test
     public void testQ7() {
         doTest("q7");
     }
 
+    @Test
     public void testQ8() {
         doTest("q8");
     }
 
+    @Test
     public void testQ9() {
         doTest("q9");
     }
 
+    @Test
     public void testQ10() {
         doTest("q10");
     }
 
+    @Test
     public void testQ11() {
         doTest("q11");
     }
 
+    @Test
     public void testQ12() {
         doTest("q12");
     }
 
+    @Test
     public void testQ13() {
         doTest("q13");
     }
 
+    @Test
     public void testQ14() {
         doTest("q14");
     }
 
+    @Test
     public void testQ15() {
         doTest("q15");
     }
 
+    @Test
     public void testQ16() {
         doTest("q16");
     }
 
+    @Test
     public void testQ17() {
         doTest("q17");
     }
 
+    @Test
     public void testQ18() {
         doTest("q18");
     }
 
+    @Test
     public void testQ19() {
         doTest("q19");
     }
 
+    @Test
     public void testQ20() {
         doTest("q20");
     }

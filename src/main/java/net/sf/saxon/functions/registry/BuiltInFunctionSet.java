@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,7 +17,6 @@ import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
@@ -36,21 +35,7 @@ import java.util.List;
  */
 public abstract class BuiltInFunctionSet implements FunctionLibrary {
 
-    public static Sequence<?> EMPTY = EmptySequence.getInstance();
-
-    /**
-     * Categories of functions, bit significant
-     */
-
-    public static final int CORE = 1;
-    public static final int XSLT = 2;
-    public static final int USE_WHEN = 4;
-    public static final int XQUPDATE = 8;
-    public static final int XPATH30 = 16;
-    public static final int INTERNAL = 32;
-    public static final int XSLT30 = 64;
-    public static final int XPATH31 = 128;
-    public static final int HOF = 256;
+    public static Sequence EMPTY = EmptySequence.getInstance();
 
     /**
      * Local names used for cardinality values
@@ -91,10 +76,10 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      * with bit settings used for cardinalities
      */
 
-    public static final int INS = 1 << 24;   // = usage INSPECTION
-    public static final int ABS = 1 << 25;   // = usage ABSORPTION (implicit when type is atomic)
-    public static final int TRA = 1 << 26;   // = usage TRANSMISSION (node is included in function result)
-    public static final int NAV = 1 << 27;   // = usage NAVIGATION (function navigates from this node)
+    protected static final int INS = 1 << 24;   // = usage INSPECTION
+    protected static final int ABS = 1 << 25;   // = usage ABSORPTION (implicit when type is atomic)
+    protected static final int TRA = 1 << 26;   // = usage TRANSMISSION (node is included in function result)
+    protected static final int NAV = 1 << 27;   // = usage NAVIGATION (function navigates from this node)
 
 
     private HashMap<String, Entry> functionTable = new HashMap<>(200);
@@ -140,16 +125,8 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         if (name.equals("concat") && arity >= 2 && getNamespace().equals(NamespaceConstant.FN)) {
             key = "concat#-1";
             entry = functionTable.get(key);
-            if (entry != null) {
-                return entry;
-            }
+            return entry;
         }
-//        for (BuiltInFunctionSet lib : importedFunctions) {
-//            entry = lib.getFunctionDetails(name, arity);
-//            if (entry != null) {
-//                return entry;
-//            }
-//        }
         return null;
     }
 
@@ -275,7 +252,6 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         return this;
     }
 
-//#ifdefined HOF
     /**
      * Test whether a function with a given name and arity is available; if so, return a function
      * item that can be dynamically called.
@@ -302,7 +278,6 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             return null;
         }
     }
-//#endif
 
     /**
      * Register a system function in the table of function details.
@@ -311,7 +286,6 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      * @param implementationClass the class used to implement the function
      * @param itemType            the item type of the result of the function
      * @param cardinality         the cardinality of the result of the function
-     * @param applicability       the host languages (and versions thereof) in which this function is available
      * @param properties          bitwise properties of the function
      * @return the entry describing the function. The entry is incomplete, it does not yet contain information
      * about the function arguments.
@@ -323,7 +297,6 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                              Class<? extends SystemFunction> implementationClass,
                              ItemType itemType,
                              int cardinality,
-                             int applicability,
                              int properties) {
         Entry e = new Entry();
         e.name = new StructuredQName(getConventionalPrefix(), getNamespace(), name);
@@ -331,7 +304,6 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         e.implementationClass = implementationClass;
         e.itemType = itemType;
         e.cardinality = cardinality;
-        e.applicability = applicability;
         e.properties = properties;
         if (e.arity == -1) {
             // special case for concat()
@@ -340,7 +312,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             e.usage = new OperandUsage[1];
         } else {
             e.argumentTypes = new SequenceType[arity];
-            e.resultIfEmpty = (Sequence<?>[])new Sequence[arity];
+            e.resultIfEmpty = (Sequence[])new Sequence[arity];
             e.usage = new OperandUsage[arity];
         }
         functionTable.put(name + "#" + arity, e);
@@ -361,10 +333,9 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             e.implementationClass = master.implementationClass;
             e.itemType = master.itemType;
             e.cardinality = master.cardinality;
-            e.applicability = master.applicability;
             e.properties = master.properties;
             e.argumentTypes = new SequenceType[arity];
-            e.resultIfEmpty = (Sequence<?>[])new Sequence[arity];
+            e.resultIfEmpty = (Sequence[])new Sequence[arity];
             e.usage = new OperandUsage[arity];
             for (int i=0; i<arity; i++) {
                 e.argumentTypes[i] = master.argumentTypes[i];
@@ -398,7 +369,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     /**
      * An entry in the table describing the properties of a function
      */
-    public static class Entry implements java.io.Serializable {
+    public static class Entry {
         /**
          * The name of the function as a QName
          */
@@ -420,10 +391,6 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          */
         public int cardinality;
         /**
-         * Flags indicating which host languages the function is applicable to
-         */
-        public int applicability;
-        /**
          * The syntactic context of each argument for the purposes of streamability analysis
          */
         public OperandUsage[] usage;
@@ -436,7 +403,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          * as the value of this argument allows the result to be determined irrespective of the values of the
          * other arguments; null if there is no such calculation possible
          */
-        public Sequence<?>[] resultIfEmpty;
+        public Sequence[] resultIfEmpty;
         /**
          * Any additional properties. Various bit settings are defined: for example SAME_AS_FIRST_ARGUMENT indicates that
          * the result type is the same as the type of the first argument
@@ -446,10 +413,6 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          * For options parameters, details of the accepted options, their defaults, and required type
          */
         public OptionsParameter optionDetails;
-        /**
-         * Class used to provide a streaming implementation of the function
-         */
-        public Class streamingAdjunct;
 
         /**
          * Add information to a function entry about the argument types of the function
@@ -463,7 +426,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          * @return this entry (to allow chaining)
          */
 
-        public Entry arg(int a, ItemType type, int options, Sequence<?> resultIfEmpty) {
+        public Entry arg(int a, ItemType type, int options, Sequence resultIfEmpty) {
             int cardinality = options & StaticProperty.CARDINALITY_MASK;
             OperandUsage usage = OperandUsage.NAVIGATION;
             if ((options & ABS) != 0) {
@@ -492,14 +455,6 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         public Entry optionDetails(OptionsParameter details) {
             this.optionDetails = details;
             return this;
-        }
-
-        /**
-         * Define the class to be used to provide a streaming implementation of the function
-         */
-
-        public void setStreamingAdjunctClass(Class streamer) {
-            this.streamingAdjunct = streamer;
         }
 
     }

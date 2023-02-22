@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -213,7 +213,7 @@ public class RECompiler {
         // Get min ('m' of {m,n}) number
         FastStringBuffer number = new FastStringBuffer(16);
         while (idx < len && isAsciiDigit(pattern.uCharAt(idx))) {
-            number.append((char) pattern.uCharAt(idx++));
+            number.cat((char) pattern.uCharAt(idx++));
         }
         try {
             bracketMin = Integer.parseInt(number.toString());
@@ -258,7 +258,7 @@ public class RECompiler {
         // Get max number
         number.setLength(0);
         while (idx < len && isAsciiDigit(pattern.uCharAt(idx))) {
-            number.append((char) pattern.uCharAt(idx++));
+            number.cat((char) pattern.uCharAt(idx++));
         }
         try {
             bracketMax = Integer.parseInt(number.toString());

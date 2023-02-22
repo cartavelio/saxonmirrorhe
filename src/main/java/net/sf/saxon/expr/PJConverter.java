@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,7 +18,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
-import net.sf.saxon.value.StringValue;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -30,8 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.time.Instant;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -175,7 +173,7 @@ public abstract class PJConverter {
      */
 
     /*@Nullable*/
-    public abstract Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context)
+    public abstract Object convert(Sequence value, Class<?> targetClass, XPathContext context)
             throws XPathException;
 
     /**
@@ -262,7 +260,8 @@ public abstract class PJConverter {
                         try {
                             final Constructor constructor = targetClass.getConstructor(String.class);
                             return new PJConverter() {
-                                public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+                                @Override
+                                public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
                                     try {
                                         return constructor.newInstance(value.head().getStringValue());
                                     } catch (InstantiationException | IllegalAccessException e) {
@@ -385,6 +384,8 @@ public abstract class PJConverter {
                         return CalendarValueToInstant.INSTANCE;
                     } else if (targetClass == ZonedDateTime.class) {
                         return CalendarValueToZonedDateTime.INSTANCE;
+                    } else if (targetClass == LocalDateTime.class) {
+                        return CalendarValueToLocalDateTime.INSTANCE;
                     } else {
                         throw cannotConvert(itemType, targetClass, config);
                     }
@@ -399,6 +400,12 @@ public abstract class PJConverter {
                         return CalendarValueToInstant.INSTANCE;
                     } else if (targetClass == ZonedDateTime.class) {
                         return CalendarValueToZonedDateTime.INSTANCE;
+                    } else if (targetClass == OffsetDateTime.class) {
+                        return CalendarValueToOffsetDateTime.INSTANCE;
+                    } else if (targetClass == LocalDateTime.class) {
+                        return CalendarValueToLocalDateTime.INSTANCE;
+                    } else if (targetClass == LocalDate.class) {
+                        return DateValueToLocalDate.INSTANCE;
                     } else {
                         throw cannotConvert(itemType, targetClass, config);
                     }
@@ -515,7 +522,8 @@ public abstract class PJConverter {
 
         public static final ToSequenceIterator INSTANCE = new ToSequenceIterator();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             return value.iterate();
         }
 
@@ -525,7 +533,8 @@ public abstract class PJConverter {
 
         public static final ToNull INSTANCE = new ToNull();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             return null;
         }
 
@@ -535,7 +544,8 @@ public abstract class PJConverter {
 
         public static final ToSequenceExtent INSTANCE = new ToSequenceExtent();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             return value.iterate().materialize();
         }
 
@@ -550,7 +560,8 @@ public abstract class PJConverter {
 
         public static final ToCollection INSTANCE = new ToCollection();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             Collection<Object> list;
             if (targetClass.isAssignableFrom(ArrayList.class)) {
                 list = new ArrayList<>(100);
@@ -568,8 +579,8 @@ public abstract class PJConverter {
                 }
             }
             Configuration config = context.getConfiguration();
-            SequenceIterator<?> iter = value.iterate();
-            Item<?> it;
+            SequenceIterator iter = value.iterate();
+            Item it;
             while ((it = iter.next()) != null) {
                 if (it instanceof AtomicValue) {
                     PJConverter pj = allocate(
@@ -598,14 +609,15 @@ public abstract class PJConverter {
             this.itemConverter = itemConverter;
         }
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             if (value instanceof ExternalObject && targetClass.isAssignableFrom(((ExternalObject) value).getObject().getClass())) {
                 return ((ExternalObject) value).getObject();
             }
             Class componentClass = targetClass.getComponentType();
             List<Object> list = new ArrayList<>(20);
-            SequenceIterator<?> iter = value.iterate();
-            Item<?> item;
+            SequenceIterator iter = value.iterate();
+            Item item;
             while ((item = iter.next()) != null) {
                 Object obj = itemConverter.convert(item, componentClass, context);
                 if (obj != null) {
@@ -631,9 +643,10 @@ public abstract class PJConverter {
 
         public static final ToOne INSTANCE = new ToOne();
 
-        public One<Item<?>> convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public One convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             // Assume all the type checking has already been done
-            return new One<>(value.head());
+            return new One(value.head());
         }
 
     }
@@ -647,9 +660,10 @@ public abstract class PJConverter {
 
         public static final ToZeroOrOne INSTANCE = new ToZeroOrOne();
 
-        public ZeroOrOne<Item<?>> convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public ZeroOrOne convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             // Assume all the type checking has already been done
-            return new ZeroOrOne<>(value.head());
+            return new ZeroOrOne(value.head());
         }
 
     }
@@ -663,7 +677,8 @@ public abstract class PJConverter {
 
         public static final ToOneOrMore INSTANCE = new ToOneOrMore();
 
-        public OneOrMore<?> convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public OneOrMore<Item> convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             return OneOrMore.makeOneOrMore(value);
         }
 
@@ -679,7 +694,8 @@ public abstract class PJConverter {
 
         public static final ToZeroOrMore INSTANCE = new ToZeroOrMore();
 
-        public ZeroOrMore<Item<?>> convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public ZeroOrMore<Item> convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             return new ZeroOrMore<>(value.iterate());
         }
 
@@ -690,7 +706,8 @@ public abstract class PJConverter {
 
         public static final Identity INSTANCE = new Identity();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             if (value instanceof Closure) {
                 value = ((Closure) value).reduce();
             }
@@ -730,7 +747,8 @@ public abstract class PJConverter {
 
         public static final UnwrapExternalObject INSTANCE = new UnwrapExternalObject();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             Item head = value.head();
             if (head == null) {
                 return null;
@@ -757,7 +775,8 @@ public abstract class PJConverter {
 
         public static final StringValueToString INSTANCE = new StringValueToString();
 
-        public String convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public String convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             Item first = value.head();
             return first == null ? null : first.getStringValue();
         }
@@ -768,7 +787,8 @@ public abstract class PJConverter {
 
         public static final StringValueToChar INSTANCE = new StringValueToChar();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             Item first = value.head();
             if (first == null) {
                 return null;
@@ -791,7 +811,8 @@ public abstract class PJConverter {
 
         public static final BooleanValueToBoolean INSTANCE = new BooleanValueToBoolean();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             BooleanValue bv = (BooleanValue) value.head();
             assert bv != null;
             return bv.getBooleanValue();
@@ -803,7 +824,8 @@ public abstract class PJConverter {
 
         public static final IntegerValueToBigInteger INSTANCE = new IntegerValueToBigInteger();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             IntegerValue val = (IntegerValue) value.head();
             return val == null ? null : val.asBigInteger();
         }
@@ -814,7 +836,8 @@ public abstract class PJConverter {
 
         public static final IntegerValueToLong INSTANCE = new IntegerValueToLong();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             IntegerValue iv = (IntegerValue) value.head();
             assert iv != null;
             return iv.longValue();
@@ -826,7 +849,8 @@ public abstract class PJConverter {
 
         public static final IntegerValueToInt INSTANCE = new IntegerValueToInt();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             IntegerValue iv = (IntegerValue) value.head();
             assert iv != null;
             return (int) iv.longValue();
@@ -838,7 +862,8 @@ public abstract class PJConverter {
 
         public static final IntegerValueToShort INSTANCE = new IntegerValueToShort();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             IntegerValue iv = (IntegerValue) value.head();
             assert iv != null;
             return (short) iv.longValue();
@@ -850,7 +875,8 @@ public abstract class PJConverter {
 
         public static final IntegerValueToByte INSTANCE = new IntegerValueToByte();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             IntegerValue iv = (IntegerValue) value.head();
             assert iv != null;
             return (byte) iv.longValue();
@@ -862,7 +888,8 @@ public abstract class PJConverter {
 
         public static final IntegerValueToChar INSTANCE = new IntegerValueToChar();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             IntegerValue iv = (IntegerValue) value.head();
             assert iv != null;
             return (char) iv.longValue();
@@ -874,7 +901,8 @@ public abstract class PJConverter {
 
         public static final NumericValueToBigDecimal INSTANCE = new NumericValueToBigDecimal();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             NumericValue nv = (NumericValue) value.head();
             return nv == null ? null : nv.getDecimalValue();
         }
@@ -885,7 +913,8 @@ public abstract class PJConverter {
 
         public static final NumericValueToDouble INSTANCE = new NumericValueToDouble();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             NumericValue nv = (NumericValue) value.head();
             assert nv != null;
             return nv.getDoubleValue();
@@ -897,7 +926,8 @@ public abstract class PJConverter {
 
         public static final NumericValueToFloat INSTANCE = new NumericValueToFloat();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             NumericValue nv = (NumericValue) value.head();
             assert nv != null;
             return nv.getFloatValue();
@@ -909,7 +939,8 @@ public abstract class PJConverter {
 
         public static final AnyURIValueToURI INSTANCE = new AnyURIValueToURI();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             AnyURIValue av = (AnyURIValue) value.head();
             try {
                 return av == null ? null : new URI(((AnyURIValue) value).getStringValue());
@@ -924,7 +955,8 @@ public abstract class PJConverter {
 
         public static final AnyURIValueToURL INSTANCE = new AnyURIValueToURL();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             AnyURIValue av = (AnyURIValue) value.head();
             try {
                 return av == null ? null : new URL(((AnyURIValue) value).getStringValue());
@@ -939,7 +971,8 @@ public abstract class PJConverter {
 
         public static final QualifiedNameValueToQName INSTANCE = new QualifiedNameValueToQName();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             QualifiedNameValue qv = (QualifiedNameValue) value.head();
             return qv == null ? null : qv.toJaxpQName();
         }
@@ -950,7 +983,8 @@ public abstract class PJConverter {
 
         public static final CalendarValueToInstant INSTANCE = new CalendarValueToInstant();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             CalendarValue cv = (CalendarValue) value.head();
             return cv == null ? null : cv.toDateTime().toJavaInstant();
         }
@@ -961,9 +995,34 @@ public abstract class PJConverter {
 
         public static final CalendarValueToZonedDateTime INSTANCE = new CalendarValueToZonedDateTime();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             CalendarValue cv = (CalendarValue) value.head();
             return cv == null ? null : cv.toDateTime().toZonedDateTime();
+        }
+
+    }
+
+    public static class CalendarValueToOffsetDateTime extends PJConverter {
+
+        public static final CalendarValueToOffsetDateTime INSTANCE = new CalendarValueToOffsetDateTime();
+
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
+            CalendarValue cv = (CalendarValue) value.head();
+            return cv == null ? null : cv.toDateTime().toOffsetDateTime();
+        }
+
+    }
+
+    public static class CalendarValueToLocalDateTime extends PJConverter {
+
+        public static final CalendarValueToLocalDateTime INSTANCE = new CalendarValueToLocalDateTime();
+
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
+            CalendarValue cv = (CalendarValue) value.head();
+            return cv == null ? null : cv.toDateTime().toLocalDateTime();
         }
 
     }
@@ -972,9 +1031,22 @@ public abstract class PJConverter {
 
         public static final CalendarValueToDate INSTANCE = new CalendarValueToDate();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             CalendarValue cv = (CalendarValue) value.head();
             return cv == null ? null : cv.getCalendar().getTime();
+        }
+
+    }
+
+    public static class DateValueToLocalDate extends PJConverter {
+
+        public static final DateValueToLocalDate INSTANCE = new DateValueToLocalDate();
+
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
+            DateValue cv = (DateValue) value.head();
+            return cv == null ? null : cv.toLocalDate();
         }
 
     }
@@ -983,7 +1055,8 @@ public abstract class PJConverter {
 
         public static final CalendarValueToCalendar INSTANCE = new CalendarValueToCalendar();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             CalendarValue cv = (CalendarValue) value.head();
             return cv == null ? null : cv.getCalendar();
         }
@@ -1034,7 +1107,8 @@ public abstract class PJConverter {
 
         public static final Atomic INSTANCE = new Atomic();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             // TODO: not really worth separating from General
             AtomicValue item = (AtomicValue) value.head();
             if (item == null) {
@@ -1056,10 +1130,11 @@ public abstract class PJConverter {
 
         public static final General INSTANCE = new General();
 
-        public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context)
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context)
                 throws XPathException {
             Configuration config = context.getConfiguration();
-            GroundedValue<?> gv = value.materialize();
+            GroundedValue gv = value.materialize();
             PJConverter converter = allocate(
                     config, SequenceTool.getItemType(gv, config.getTypeHierarchy()), SequenceTool.getCardinality(gv), targetClass);
             if (converter instanceof General) {

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -21,26 +21,26 @@ import java.util.Stack;
 
 public class StackFrame {
     protected SlotManager map;
-    protected Sequence<?>[] slots;
-    protected Stack<Sequence<?>> dynamicStack;
+    protected Sequence[] slots;
+    protected Stack<Sequence> dynamicStack;
 
     public static final StackFrame EMPTY = new StackFrame(SlotManager.EMPTY, new Sequence[0]);
 
     public StackFrame(SlotManager map, Sequence[] slots) {
         this.map = map;
-        this.slots = (Sequence<?>[])slots;
+        this.slots = (Sequence[])slots;
     }
 
     public SlotManager getStackFrameMap() {
         return map;
     }
 
-    public Sequence<?>[] getStackFrameValues() {
+    public Sequence[] getStackFrameValues() {
         return slots;
     }
 
     public void setStackFrameValues(Sequence[] values) {
-        slots = (Sequence<?>[])values;
+        slots = (Sequence[])values;
     }
 
     public StackFrame copy() {
@@ -53,7 +53,7 @@ public class StackFrame {
         return s;
     }
 
-    public void pushDynamicValue(Sequence<?> value) {
+    public void pushDynamicValue(Sequence value) {
         if (this == StackFrame.EMPTY) {
             throw new IllegalStateException("Immutable stack frame");
         }
@@ -63,7 +63,7 @@ public class StackFrame {
         dynamicStack.push(value);
     }
 
-    public Sequence<?> popDynamicValue() {
+    public Sequence popDynamicValue() {
         return dynamicStack.pop();
     }
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -49,6 +49,7 @@ public class DotNetInputStream extends InputStream {
      *         stream is reached.
      * @throws java.io.IOException if an I/O error occurs.
      */
+    @Override
     public int read() throws IOException {
         int i = stream.ReadByte();
         if (i != -1) {
@@ -113,7 +114,8 @@ public class DotNetInputStream extends InputStream {
      * @throws NullPointerException if <code>b</code> is <code>null</code>.
      * @see java.io.InputStream#read()
      */
-    public int read(byte b[], int off, int len) throws IOException {
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
         int i = stream.Read(b, off, len);
         if (i > 0) {
             currentOffset += i;
@@ -135,6 +137,7 @@ public class DotNetInputStream extends InputStream {
      * @see java.io.InputStream#mark(int)
      * @see java.io.InputStream#reset()
      */
+    @Override
     public boolean markSupported() {
         return stream.get_CanSeek();
     }
@@ -160,6 +163,7 @@ public class DotNetInputStream extends InputStream {
      *                  the mark position becomes invalid.
      * @see java.io.InputStream#reset()
      */
+    @Override
     public synchronized void mark(int readlimit) {
         markedOffset = currentOffset;
     }
@@ -200,6 +204,7 @@ public class DotNetInputStream extends InputStream {
      * @see java.io.InputStream#mark(int)
      * @see java.io.IOException
      */
+    @Override
     public synchronized void reset() throws IOException {
         currentOffset = markedOffset;
         stream.Seek(markedOffset, SeekOrigin.wrap(SeekOrigin.Begin));
@@ -214,6 +219,7 @@ public class DotNetInputStream extends InputStream {
      *
      * @throws java.io.IOException if an I/O error occurs.
      */
+    @Override
     public void close() throws IOException {
         stream.Close();
     }

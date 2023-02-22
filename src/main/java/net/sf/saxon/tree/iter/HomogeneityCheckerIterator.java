@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,7 @@
 
 package net.sf.saxon.tree.iter;
 
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.om.Item;
@@ -23,21 +23,22 @@ import java.util.List;
  * all nodes, or all non-nodes; if they are all nodes, it delivers them in document order.
  */
 
-public class HomogeneityCheckerIterator implements SequenceIterator<Item<?>> {
+public class HomogeneityCheckerIterator implements SequenceIterator {
 
-    SequenceIterator<?> base = null;
+    SequenceIterator base = null;
     Location loc;
     int state;
     // state = 0: initial state, will accept either nodes or atomic values
     // state = +1: have seen a node, all further items must be nodes
     // state = -1: have seen an atomic value or function item, all further items must be the same
 
-    public HomogeneityCheckerIterator(SequenceIterator<?> base, Location loc) {
+    public HomogeneityCheckerIterator(SequenceIterator base, Location loc) {
         this.base = base;
         this.loc = loc;
         state = 0;
     }
 
+    @Override
     public void close() {
         base.close();
     }
@@ -50,11 +51,9 @@ public class HomogeneityCheckerIterator implements SequenceIterator<Item<?>> {
         return err;
     }
 
-    public int getProperties() {
-        return 0;
-    }
 
     /*@Nullable*/
+    @Override
     public Item next() throws XPathException {
         Item item = base.next();
         if (item == null) {
@@ -63,7 +62,7 @@ public class HomogeneityCheckerIterator implements SequenceIterator<Item<?>> {
         //first item in iterator
         if (state == 0) {
             if (item instanceof NodeInfo) {
-                List<Item<?>> nodes = new ArrayList<>(50);
+                List<Item> nodes = new ArrayList<>(50);
                 nodes.add(item);
                 while ((item = base.next()) != null) {
                     if (!(item instanceof NodeInfo)) {

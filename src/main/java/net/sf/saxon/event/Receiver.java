@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,14 +7,14 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceBindingSet;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 
 import javax.xml.transform.Result;
 
@@ -29,6 +29,8 @@ import javax.xml.transform.Result;
  * internal use, and not as a completely stable part of the public Saxon API.</p>
  *
  * @since 8.0. Extended in 9.9 to support additional methods with default implementations.
+ * Changed in 10.0 to accept all the attributes and namespaces as part of the startElement event
+ * (thus eliminating the need for a separate startContent event).
  */
 
 public interface Receiver extends Result {
@@ -57,6 +59,7 @@ public interface Receiver extends Result {
      *                 if there is no xml:base attribute)
      */
 
+    @Override
     void setSystemId(String systemId);
 
     /**
@@ -71,7 +74,7 @@ public interface Receiver extends Result {
      * Notify the start of a document node
      *
      * @param properties bit-significant integer indicating properties of the document node.
-     *                   The definitions of the bits are in class {@link ReceiverOptions}
+     *                   The definitions of the bits are in class {@link ReceiverOption}
      * @throws XPathException if an error occurs
      */
 
@@ -100,69 +103,20 @@ public interface Receiver extends Result {
      * Notify the start of an element
      *
      * @param elemName   the name of the element.
-     * @param typeCode   the type annotation of the element.
+     * @param type   the type annotation of the element.
+     * @param attributes the attributes of this element
+     * @param namespaces the in-scope namespaces of this element: generally this is all the in-scope
+     *                   namespaces, without relying on inheriting namespaces from parent elements
      * @param location   an object providing information about the module, line, and column where the node originated
-     * @param properties bit-significant properties of the element node. If there are no revelant
-     *                   properties, zero is supplied. The definitions of the bits are in class {@link ReceiverOptions}
+     * @param properties bit-significant properties of the element node. If there are no relevant
+     *                   properties, zero is supplied. The definitions of the bits are in class {@link ReceiverOption}
      * @throws XPathException if an error occurs
      */
 
-    void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties)
+    void startElement(NodeName elemName, SchemaType type,
+                      AttributeMap attributes, NamespaceMap namespaces,
+                      Location location, int properties)
             throws XPathException;
-
-    /**
-     * Notify one or more namespaces. Namespaces are notified <b>after</b> the startElement event, and before
-     * any children for the element. The namespaces that are reported are only required
-     * to include those that are different from the parent element. The events represent namespace
-     * declarations and undeclarations rather than in-scope namespace nodes: an undeclaration is represented
-     * by a namespace code of zero. If the sequence of namespace events contains two
-     * A namespace must not conflict with any namespaces already used for element or attribute names.
-     *
-     * @param namespaceBindings contains the namespace prefix and namespace URI
-     * @param properties       The most important property is REJECT_DUPLICATES. If this property is set, the
-     *                         namespace declaration will be rejected if it conflicts with a previous declaration of the same
-     *                         prefix. If the property is not set, the namespace declaration will be ignored if it conflicts
-     *                         with a previous declaration. This reflects the fact that when copying a tree, namespaces for child
-     *                         elements are emitted before the namespaces of their parent element. Unfortunately this conflicts
-     *                         with the XSLT rule for complex content construction, where the recovery action in the event of
-     *                         conflicts is to take the namespace that comes last. XSLT therefore doesn't recover from this error:
-     * @throws XPathException if an error occurs
-     * @since 9.8: changed in 9.8 to allow multiple namespace bindings to be supplied in a single call
-     */
-
-    void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException;
-
-    /**
-     * Notify an attribute. Attributes are notified after the startElement event, and before any
-     * children. Namespaces and attributes may be intermingled.
-     *
-     * @param attName    The name of the attribute
-     * @param typeCode   The type annotation of the attribute
-     * @param value      the string value of the attribute
-     * @param location  provides information such as line number and system ID.
-     * @param properties Bit significant value. The following bits are defined:
-     *                   <dl>
-     *                   <dt>DISABLE_ESCAPING</dt>    <dd>Disable escaping for this attribute</dd>
-     *                   <dt>NO_SPECIAL_CHARACTERS</dt>      <dd>Attribute value contains no special characters</dd>
-     *                   </dl>
-     * @throws IllegalStateException: attempt to output an attribute when there is no open element
-     *                                start tag
-     * @throws XPathException         if an error occurs
-     */
-
-    void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties)
-            throws XPathException;
-
-    /**
-     * Notify the start of the content, that is, the completion of all attributes and namespaces.
-     * Note that the initial receiver of output from XSLT instructions will not receive this event,
-     * it has to detect it itself. Note that this event is reported for every element even if it has
-     * no attributes, no namespaces, and no content.
-     *
-     * @throws XPathException if an error occurs
-     */
-
-    void startContent() throws XPathException;
 
     /**
      * Notify the end of an element. The receiver must maintain a stack if it needs to know which
@@ -197,7 +151,7 @@ public interface Receiver extends Result {
      * @param data       The data portion of the processing instruction
      * @param location   provides information such as line number and system ID.
      * @param properties Additional information about the PI.
-     * @throws IllegalArgumentException: the content is invalid for an XML processing instruction
+     * @throws IllegalArgumentException  if the content is invalid for an XML processing instruction
      * @throws XPathException            if an error occurs
      */
 
@@ -210,7 +164,7 @@ public interface Receiver extends Result {
      * @param content    The content of the comment
      * @param location  provides information such as line number and system ID.
      * @param properties Additional information about the comment.
-     * @throws IllegalArgumentException: the content is invalid for an XML comment
+     * @throws IllegalArgumentException  if the content is invalid for an XML comment
      * @throws XPathException            if an error occurs
      */
 
@@ -219,13 +173,13 @@ public interface Receiver extends Result {
     /**
      * Append an arbitrary item (node, atomic value, or function) to the output. The default
      * implementation throws {@code UnsupportedOperationException}.
-     *
      * @param item           the item to be appended
      * @param locationId     the location of the calling instruction, for diagnostics
      * @param properties if the item is an element node, this indicates whether its namespaces
-     *                       need to be copied. Values are {@link ReceiverOptions#ALL_NAMESPACES},
-     *                       {@link ReceiverOptions#LOCAL_NAMESPACES}; the default (0) means
-     *                       no namespaces
+*                       need to be copied. Values are {@link ReceiverOption#ALL_NAMESPACES}; the default (0) means
+     * @throws XPathException if an error occurs
+     * @throws UnsupportedOperationException if this Receiver does not allow appending of items (at any time,
+     * or at this particular point in the sequence of events)
      */
 
      default void append(Item item, Location locationId, int properties) throws XPathException {
@@ -239,11 +193,11 @@ public interface Receiver extends Result {
      * default implementation throws {@code UnsupportedOperationException}
      *
      * @param item the item to be appended
-     * @throws net.sf.saxon.trans.XPathException if the operation fails
+     * @throws XPathException if the operation fails
      */
 
     default void append(Item item) throws XPathException {
-        append(item, ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.ALL_NAMESPACES);
+        append(item, Loc.NONE, ReceiverOption.ALL_NAMESPACES);
     }
 
     /**
@@ -284,8 +238,6 @@ public interface Receiver extends Result {
     default boolean handlesAppend() {
         return false;
     }
-
-
 
 
 }

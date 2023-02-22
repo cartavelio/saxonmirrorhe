@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -21,7 +21,7 @@ import java.util.*;
 
 public class CharacterMapIndex implements Iterable<CharacterMap> {
 
-    private HashMap<StructuredQName, CharacterMap> index = new HashMap<StructuredQName, CharacterMap>(10);
+    private HashMap<StructuredQName, CharacterMap> index = new HashMap<>(10);
 
     public CharacterMapIndex() {
     }
@@ -51,6 +51,7 @@ public class CharacterMapIndex implements Iterable<CharacterMap> {
      * @return an iterator over the character maps
      */
 
+    @Override
     public Iterator<CharacterMap> iterator() {
         return index.values().iterator();
     }

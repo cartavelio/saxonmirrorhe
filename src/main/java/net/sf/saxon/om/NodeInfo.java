@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,22 +9,23 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Navigator;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.Type;
-import net.sf.saxon.type.Untyped;
+import net.sf.saxon.type.*;
 import org.xml.sax.Locator;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
+import java.util.Collections;
+import java.util.function.Predicate;
 
 /**
  * The NodeInfo interface represents a node in Saxon's implementation of the XPath 2.0 data model.
@@ -55,7 +56,7 @@ import javax.xml.transform.SourceLocator;
  * a new implementation of this interface.
  */
 
-public interface NodeInfo extends Source, Item<NodeInfo>, Location {
+public interface NodeInfo extends Source, Item, Location {
 
     /**
      * Get information about the tree to which this NodeInfo belongs
@@ -157,6 +158,7 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
      */
 
     /*@Nullable*/
+    @Override
     String getSystemId();
 
     /**
@@ -169,6 +171,7 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
      * @since 9.7
      */
 
+    @Override
     default String getPublicId() {
         return null;
     }
@@ -206,6 +209,7 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
      * @since 8.4
      */
 
+    @Override
     default int getLineNumber() {
         return -1;
     }
@@ -230,6 +234,7 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
      * @since 9.1
      */
 
+    @Override
     default int getColumnNumber() {
         return -1;
     }
@@ -266,6 +271,7 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
      * @since 8.4
      */
 
+    @Override
     String getStringValue();
 
     /**
@@ -391,6 +397,7 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
      * @since 8.5. Changed in 9.5 to return the new type AtomicSequence.
      */
 
+    @Override
     AtomicSequence atomize() throws XPathException;
 
     /**
@@ -418,7 +425,7 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
      * @since 8.4
      */
 
-    default AxisIterator iterateAxis(byte axisNumber) {
+    default AxisIterator iterateAxis(int axisNumber) {
         return iterateAxis(axisNumber, AnyNodeTest.getInstance());
     }
 
@@ -437,10 +444,11 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
      * @throws UnsupportedOperationException if the namespace axis is
      *                                       requested and this axis is not supported for this implementation.
      * @see AxisInfo
-     * @since 8.4
+     * @since 8.4. Changed in 10.0 to accept any {@code Predicate<NodeInfo>} as the second argument. It is still
+     * possible to supply an {@link NodeTest}, because {@code NodeTest} implements {@code Predicate<NodeInfo>}.
      */
 
-    AxisIterator iterateAxis(byte axisNumber, NodeTest nodeTest);
+    AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest);
 
     /**
      * Get the string value of a given attribute of this node
@@ -479,6 +487,54 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
     boolean hasChildNodes();
 
     /**
+     * Return the sequence of children of this node, as an {@code Iterable}. This
+     * method is designed to allow iteration over the children in a Java "for each" loop,
+     * in the form <code>for (NodeInfo child : children()) {...}</code>
+     * @return the children of the node, as an {@code Iterable}.
+     */
+
+    default Iterable<? extends NodeInfo> children() {
+        if (hasChildNodes()) {
+            NodeInfo parent = this;
+            return () -> parent.iterateAxis(AxisInfo.CHILD).asIterator();
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Return the sequence of children of this node, filtered by a supplied predicate,
+     * as an {@code Iterable}.
+     * @param filter a condition that the selected children must satisfy
+     * @return the children of the node, as an {@code Iterable}.
+     */
+
+    default Iterable<? extends NodeInfo> children(Predicate<? super NodeInfo> filter) {
+        if (hasChildNodes()) {
+            NodeInfo parent = this;
+            return () -> parent.iterateAxis(AxisInfo.CHILD, filter).asIterator();
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+
+    default AttributeMap attributes() {
+        AttributeMap atts = EmptyAttributeMap.getInstance();
+        if (getNodeKind() == Type.ELEMENT) {
+            AxisIterator iter = iterateAxis(AxisInfo.ATTRIBUTE);
+            NodeInfo attr;
+            while ((attr = iter.next()) != null) {
+                atts = atts.put(new AttributeInfo(NameOfNode.makeName(attr), (SimpleType) attr.getSchemaType(),
+                                                  attr.getStringValue(),
+                                                  Loc.NONE,
+                                                  ReceiverOption.NONE));
+            }
+        }
+        return atts;
+    }
+
+    /**
      * Construct a character string that uniquely identifies this node.
      * Note: a.isSameNode(b) if and only if generateId(a)==generateId(b)
      *
@@ -505,6 +561,7 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
      *                    that requested this copy. If zero, indicates that the location information
      *                    is not available
      * @throws XPathException if any downstream error occurs
+     * @throws IllegalArgumentException if the node is an attribute or namespace node
      */
 
     default void copy(Receiver out, int copyOptions, Location locationId) throws XPathException {
@@ -519,6 +576,11 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
      * (However, not all implementations support the namespace axis, whereas all implementations are
      * required to support this method.)</p>
      *
+     * <p>In many cases (and in particular with Saxon's TinyTree and LinkedTree implementations),
+     * from 10.0 onwards it is more efficient to call {@link #getAllNamespaces()} to get all the in-scope
+     * namespaces at once, rather than building up the list be calling {@code getDeclaredNamespaces} on
+     * each ancestor node.</p>
+     *
      * @param buffer If this is non-null, and the result array fits in this buffer, then the result
      *               may overwrite the contents of this array, to avoid the cost of allocating a new array on the heap.
      * @return An array of namespace binding objects representing the namespace declarations and undeclarations present on
@@ -531,6 +593,19 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
      */
 
     NamespaceBinding[] getDeclaredNamespaces(/*@Nullable*/ NamespaceBinding[] buffer);
+
+    /**
+     * Get all the namespace bindings that are in-scope for this element.
+     * <p>For an element return all the prefix-to-uri bindings that are in scope. This may include
+     * a binding to the default namespace (represented by a prefix of "").  The map does NOT include
+     * the implicit binding of the XML namespace. It will never include
+     * "undeclarations" - that is, the namespace URI will never be empty; the effect of an undeclaration
+     * is to remove a binding from the in-scope namespaces, not to add anything.</p>
+     * <p>For a node other than an element, returns null.</p>
+     * @return the in-scope namespaces for an element, or null for any other kind of node.
+     */
+
+    NamespaceMap getAllNamespaces();
 
     /**
      * Ask whether this node has the is-id property
@@ -571,6 +646,7 @@ public interface NodeInfo extends Source, Item<NodeInfo>, Location {
      * The default implementation returns false.
      */
 
+    @Override
     default boolean isStreamed() {
         return false;
     }

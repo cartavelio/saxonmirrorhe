@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,6 +10,8 @@ package net.sf.saxon.option.sql;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.style.Compilation;
@@ -39,60 +41,69 @@ public class SQLConnect extends ExtensionInstruction {
     Expression password;
     Expression autoCommit = Literal.makeEmptySequence();
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         // Get mandatory database attribute
 
-        String dbAtt = getAttributeValue("", "database");
+        AttributeMap atts = attributes();
+        AttributeInfo dbAtt = atts.get("", "database");
+        String dbName = "";
         if (dbAtt == null) {
             reportAbsence("database");
-            dbAtt = ""; // for error recovery
+        } else {
+            dbName = dbAtt.getValue();
         }
-        database = makeAttributeValueTemplate(dbAtt, getAttributeList().getIndex("", "database"));
+        database = makeAttributeValueTemplate(dbName, dbAtt);
 
         // Get driver attribute
 
-        String dbDriver = getAttributeValue("", "driver");
+        AttributeInfo dbDriver = atts.get("", "driver");
+        String dbDriverName = null;
         if (dbDriver == null) {
-            if (dbAtt.length() > 9 && dbAtt.substring(0, 9).equals("jdbc:odbc")) {
-                dbDriver = "sun.jdbc.odbc.JdbcOdbcDriver";
+            if (dbName.length() > 9 && dbName.substring(0, 9).equals("jdbc:odbc")) {
+                dbDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
             } else {
                 reportAbsence("driver");
             }
+        } else {
+            dbDriverName = dbDriver.getValue();
         }
-        driver = makeAttributeValueTemplate(dbDriver, getAttributeList().getIndex("", "driver"));
+        driver = makeAttributeValueTemplate(dbDriverName, dbDriver);
 
 
         // Get and expand user attribute, which defaults to empty string
 
-        String userAtt = getAttributeValue("", "user");
+        AttributeInfo userAtt = atts.get("", "user");
         if (userAtt == null) {
             user = new StringLiteral(StringValue.EMPTY_STRING);
         } else {
-            user = makeAttributeValueTemplate(userAtt, getAttributeList().getIndex("", "user"));
+            user = makeAttributeValueTemplate(userAtt.getValue(), userAtt);
         }
 
         // Get and expand password attribute, which defaults to empty string
 
-        String pwdAtt = getAttributeValue("", "password");
+        AttributeInfo pwdAtt = atts.get("", "password");
         if (pwdAtt == null) {
             password = new StringLiteral(StringValue.EMPTY_STRING);
         } else {
-            password = makeAttributeValueTemplate(pwdAtt, getAttributeList().getIndex("", "password"));
+            password = makeAttributeValueTemplate(pwdAtt.getValue(), pwdAtt);
         }
 
         // Get auto-commit attribute if specified
 
-        String autoCommitAtt = getAttributeValue("", "auto-commit");
+        AttributeInfo autoCommitAtt = atts.get("", "auto-commit");
         if (autoCommitAtt != null) {
-            autoCommit = makeAttributeValueTemplate(autoCommitAtt, getAttributeList().getIndex("", "auto-commit"));
+            autoCommit = makeAttributeValueTemplate(autoCommitAtt.getValue(), autoCommitAtt);
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);
         getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION,
@@ -105,6 +116,7 @@ public class SQLConnect extends ExtensionInstruction {
         autoCommit = typeCheck("auto-commit", autoCommit);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return new ConnectInstruction(database, driver, user, password, autoCommit);
     }
@@ -133,22 +145,27 @@ public class SQLConnect extends ExtensionInstruction {
          * This method indicates which of the three is provided.
          */
 
+        @Override
         public int getImplementationMethod() {
             return Expression.EVALUATE_METHOD;
         }
 
+        @Override
         public int computeCardinality() {
             return StaticProperty.EXACTLY_ONE;
         }
 
+        @Override
         public String getExpressionType() {
             return "sql:connect";
         }
 
+        @Override
         public ConnectInstruction copy(RebindingMap rebindings) {
             return (ConnectInstruction)new ConnectInstruction().copyOperandsFrom(this);
         }
 
+        @Override
         public ExternalObject<Connection> call(XPathContext context, Sequence[] arguments) throws XPathException {
 
             // Establish the JDBC connection
@@ -200,7 +217,7 @@ public class SQLConnect extends ExtensionInstruction {
 
         }
 
-        private String str(/*@NotNull*/ Sequence<?> iterator) throws XPathException {
+        private String str(/*@NotNull*/ Sequence iterator) throws XPathException {
             Item item = iterator.head();
             return item == null ? "" : item.getStringValue();
         }

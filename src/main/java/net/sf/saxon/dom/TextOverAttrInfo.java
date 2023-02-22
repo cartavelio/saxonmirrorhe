@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,6 @@
 package net.sf.saxon.dom;
 
 import net.sf.saxon.type.Type;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Node;
 
 /**
@@ -17,7 +16,7 @@ import org.w3c.dom.Node;
  */
 public class TextOverAttrInfo extends TextOverNodeInfo {
 
-    private AttrOverNodeInfo attr;
+    private final AttrOverNodeInfo attr;
 
     public TextOverAttrInfo(AttrOverNodeInfo attr) {
         this.attr = attr;
@@ -33,6 +32,7 @@ public class TextOverAttrInfo extends TextOverNodeInfo {
      *
      * @since DOM Level 3
      */
+    @Override
     public boolean isElementContentWhitespace() {
         return false;
     }
@@ -43,6 +43,7 @@ public class TextOverAttrInfo extends TextOverNodeInfo {
      * in Saxon (see {@link net.sf.saxon.type.Type}) are the same as those assigned in the DOM
      */
 
+    @Override
     public short getNodeType() {
         return Type.TEXT;
     }
@@ -52,12 +53,11 @@ public class TextOverAttrInfo extends TextOverNodeInfo {
      * DOM Level 3 method.
      *
      * @param other the other node.
-     * @return Returns how the node is positioned relatively to the reference
-     *         node.
-     * @throws org.w3c.dom.DOMException
+     * @return Returns how the node is positioned relatively to the reference node.
      */
 
-    public short compareDocumentPosition(Node other) throws DOMException {
+    @Override
+    public short compareDocumentPosition(Node other)  {
         final short DOCUMENT_POSITION_FOLLOWING = 0x04;
         if (other instanceof TextOverAttrInfo) {
             if (node.equals(((TextOverAttrInfo) other).node)) {
@@ -79,6 +79,7 @@ public class TextOverAttrInfo extends TextOverNodeInfo {
      * @return The Node object describing the containing element or root node.
      */
 
+    @Override
     public Node getParentNode() {
         return attr;
     }

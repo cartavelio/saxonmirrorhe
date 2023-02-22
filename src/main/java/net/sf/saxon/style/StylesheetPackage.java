@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,7 +13,6 @@ import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.ComponentBinding;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.instruct.*;
-import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.functions.ExecutableFunctionLibrary;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
@@ -23,12 +22,14 @@ import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.query.XQueryFunctionLibrary;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.TypeHierarchy;
 
 import java.util.*;
@@ -63,7 +64,6 @@ public class StylesheetPackage extends PackageData {
     private StructuredQName defaultMode;
     private boolean declaredModes;
     protected Map<StructuredQName, Properties> namedOutputProperties = new HashMap<>(4);
-    private boolean implicitPackage;
 
     // table of imported schemas. The members of this set are strings holding the target namespace.
     protected Set<String> schemaIndex = new HashSet<>(10);
@@ -74,6 +74,7 @@ public class StylesheetPackage extends PackageData {
     private ExecutableFunctionLibrary underriding;
     private int maxFunctionArity = -1;
     private boolean retainUnusedFunctions = false;
+    private boolean implicitPackage;
 
 
     // Table of components declared in this package or imported from used packages. Key is the symbolic identifier of the
@@ -96,7 +97,7 @@ public class StylesheetPackage extends PackageData {
 
     public StylesheetPackage(Configuration config) {
         super(config);
-        setHostLanguage(Configuration.XSLT);
+        setHostLanguage(HostLanguage.XSLT);
         setAccumulatorRegistry(config.makeAccumulatorRegistry());
     }
 
@@ -201,6 +202,7 @@ public class StylesheetPackage extends PackageData {
 
     /**
      * Ask if this is an implicit package (one rooted at xsl:stylesheet or xsl:transform rather than xsl:package
+     *
      * @return true if this package was rooted at an xsl:stylesheet or xsl:transform element
      */
     public boolean isImplicitPackage() {
@@ -209,6 +211,7 @@ public class StylesheetPackage extends PackageData {
 
     /**
      * Say whether this is an implicit package (one rooted at xsl:stylesheet or xsl:transform rather than xsl:package
+     *
      * @param implicitPackage true if this package was rooted at an xsl:stylesheet or xsl:transform element
      */
 
@@ -438,7 +441,7 @@ public class StylesheetPackage extends PackageData {
                         "The package contains two xsl:global-context-item declarations with conflicting @use attributes", "XTSE3087");
             }
             TypeHierarchy th = getConfiguration().getTypeHierarchy();
-            if (th.relationship(requirement.getRequiredItemType(), globalContextRequirement.getRequiredItemType()) != TypeHierarchy.SAME_TYPE) {
+            if (th.relationship(requirement.getRequiredItemType(), globalContextRequirement.getRequiredItemType()) != Affinity.SAME_TYPE) {
                 throw new XPathException("The package contains two xsl:global-context-item declarations with conflicting item types", "XTSE3087");
             }
         }
@@ -653,8 +656,8 @@ public class StylesheetPackage extends PackageData {
                 if (acceptedVisibility != null) {
                     if (!XSLAccept.isCompatible(oldV, acceptedVisibility)) {
                         throw new XPathException("Cannot accept a " + oldV.show() +
-                            " component (" + name + ") from package " + usedPackage.getPackageName()
-                                + " with visibility " + acceptedVisibility.show(), "XTSE3040");
+                                                         " component (" + name + ") from package " + usedPackage.getPackageName()
+                                                         + " with visibility " + acceptedVisibility.show(), "XTSE3040");
                     }
                     newV = acceptedVisibility;
                 } else {
@@ -839,14 +842,13 @@ public class StylesheetPackage extends PackageData {
 
     public void createFunctionLibrary() {
 
-        String target = getTargetEdition();
         FunctionLibraryList functionLibrary = new FunctionLibraryList();
-        boolean includeHOF = !("HE".equals(target) || "JS".equals(target));
+        boolean includeHOF = !("HE".equals(getTargetEdition()) || "JS".equals(getTargetEdition()));
         functionLibrary.addFunctionLibrary(includeHOF ? config.getXSLT30FunctionSet() : new Configuration().getXSLT30FunctionSet());
         functionLibrary.addFunctionLibrary(new StylesheetFunctionLibrary(this, true));
         functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList());
         functionLibrary.addFunctionLibrary(new ConstructorFunctionLibrary(config));
-        if ("JS".equals(target) || "JS2".equals(target)) {
+        if ("JS".equals(getTargetEdition())) {
             addIxslFunctionLibrary(functionLibrary);
         }
 
@@ -855,6 +857,7 @@ public class StylesheetPackage extends PackageData {
         functionLibrary.addFunctionLibrary(config.getIntegratedFunctionLibrary());
         config.addExtensionBinders(functionLibrary);
         functionLibrary.addFunctionLibrary(new StylesheetFunctionLibrary(this, false));
+
         this.functionLibrary = functionLibrary;
     }
 
@@ -868,6 +871,15 @@ public class StylesheetPackage extends PackageData {
 
     public FunctionLibraryList getFunctionLibrary() {
         return functionLibrary;
+    }
+
+    /**
+     * Get the library of functions exposed by this stylesheet package, that
+     * is, functions whose visibility is public or final
+     */
+
+    public FunctionLibrary getPublicFunctions() {
+        return new PublicStylesheetFunctionLibrary(functionLibrary);
     }
 
     /**
@@ -970,7 +982,7 @@ public class StylesheetPackage extends PackageData {
         if (isSchemaAware() || !schemaIndex.isEmpty()) {
             pss.setSchemaAware(true);
         }
-        pss.setHostLanguage(Configuration.XSLT);
+        pss.setHostLanguage(HostLanguage.XSLT);
 
         //pss.setStylesheetFunctionLibrary(stylesheetFunctionLibrary);
 
@@ -1008,12 +1020,12 @@ public class StylesheetPackage extends PackageData {
 
         // Finish off the lists of template rules
 
-        ruleManager.checkConsistency();
-        ruleManager.computeRankings();
-        ruleManager.invertStreamableTemplates();
-        if (config.obtainOptimizer().isOptionSet(OptimizerOptions.RULE_SET)) {
-            ruleManager.optimizeRules();
-        }
+//        ruleManager.checkConsistency();
+//        ruleManager.computeRankings();
+//        ruleManager.invertStreamableTemplates();
+//        if (config.obtainOptimizer().isOptionSet(OptimizerOptions.RULE_SET)) {
+//            ruleManager.optimizeRules();
+//        }
         pss.setRuleManager(ruleManager);
 
 

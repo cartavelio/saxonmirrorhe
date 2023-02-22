@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -55,6 +55,7 @@ public class Numberer_frBE extends AbstractNumberer {
       *      long)
       */
     /*@NotNull*/
+    @Override
     protected String ordinalSuffix(String ordinalParam, long number) {
         if (number != 1) {
             return "e";
@@ -68,6 +69,7 @@ public class Numberer_frBE extends AbstractNumberer {
       *
       * @see net.sf.saxon.expr.number.Numberer_en#toWords(long)
       */
+    @Override
     public String toWords(long number) {
         return toWords(number, true);
     }
@@ -77,6 +79,7 @@ public class Numberer_frBE extends AbstractNumberer {
       *
       * @see net.sf.saxon.expr.number.Numberer_en#toWords(long, int)
       */
+    @Override
     public String toWords(long number, int wordCase) {
         String s = toWords(number);
         if (wordCase == UPPER_CASE) {
@@ -157,6 +160,7 @@ public class Numberer_frBE extends AbstractNumberer {
       * @see net.sf.saxon.expr.number.Numberer_en#toOrdinalWords(java.lang.String,
       *      long, int)
       */
+    @Override
     public String toOrdinalWords(String ordinalParam, long number, int wordCase) {
         String ord;
         if (number < 20) {
@@ -220,6 +224,7 @@ public class Numberer_frBE extends AbstractNumberer {
       *
       * @see net.sf.saxon.lib.Numberer#monthName(int, int, int)
       */
+    @Override
     public String monthName(int month, int minWidth, int maxWidth) {
         String name = frenchMonths[month - 1];
         if (maxWidth < 3) {
@@ -239,6 +244,7 @@ public class Numberer_frBE extends AbstractNumberer {
       *
       * @see net.sf.saxon.lib.Numberer#dayName(int, int, int)
       */
+    @Override
     public String dayName(int day, int minWidth, int maxWidth) {
         String name = frenchDays[day - 1];
         if (maxWidth < 3) {

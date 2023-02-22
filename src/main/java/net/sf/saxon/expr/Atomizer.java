@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,19 +7,20 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.instruct.TerminationException;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.functions.Error;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomizingIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -28,6 +29,8 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.EmptySequence;
+
+import java.util.EnumSet;
 
 
 /**
@@ -71,6 +74,7 @@ public final class Atomizer extends UnaryExpression {
         }
     }
 
+    @Override
     protected OperandRole getOperandRole() {
         return OperandRole.ATOMIC_SEQUENCE;
     }
@@ -84,6 +88,7 @@ public final class Atomizer extends UnaryExpression {
      *         {@link #PROCESS_METHOD}
      */
 
+    @Override
     public int getImplementationMethod() {
         return ITERATE_METHOD | WATCH_METHOD;
     }
@@ -95,12 +100,17 @@ public final class Atomizer extends UnaryExpression {
         return operandItemType;
     }
 
+    public void setRoleDiagnostic(RoleDiagnostic role) {
+        this.roleDiagnostic = role;
+    }
+
     /**
      * Simplify an expression
      *
      */
 
     /*@NotNull*/
+    @Override
     public Expression simplify() throws XPathException {
         //untyped = !getContainer().getPackageData().isSchemaAware();
         untyped = !getPackageData().isSchemaAware();
@@ -139,7 +149,8 @@ public final class Atomizer extends UnaryExpression {
             // if all items in the sequence are atomic (they generally will be, since this is
             // done at compile time), then return the sequence
             return operand;
-        } else if (operand instanceof ValueOf && (((ValueOf) operand).getOptions() & ReceiverOptions.DISABLE_ESCAPING) == 0) {
+        } else if (operand instanceof ValueOf &&
+                !ReceiverOption.contains(((ValueOf) operand).getOptions(), ReceiverOption.DISABLE_ESCAPING)) {
             // XSLT users tend to use ValueOf unnecessarily
             return ((ValueOf) operand).convertToCastAsString();
         }
@@ -152,6 +163,7 @@ public final class Atomizer extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
         untyped = untyped | !visitor.getStaticContext().getPackageData().isSchemaAware();
@@ -184,7 +196,7 @@ public final class Atomizer extends UnaryExpression {
 
     private void computeSingleValued(TypeHierarchy th) {
         ItemType operandType = getOperandItemType();
-        if (th.relationship(operandType, ArrayItemType.ANY_ARRAY_TYPE) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(operandType, ArrayItemType.ANY_ARRAY_TYPE) != Affinity.DISJOINT) {
             singleValued = false;
         } else {
             singleValued = untyped;
@@ -234,6 +246,7 @@ public final class Atomizer extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         Expression exp = super.optimize(visitor, contextInfo);
         if (exp == this) {
@@ -242,7 +255,8 @@ public final class Atomizer extends UnaryExpression {
             if (th.isSubType(operand.getItemType(), BuiltInAtomicType.ANY_ATOMIC)) {
                 return operand;
             }
-            if (operand instanceof ValueOf && (((ValueOf) operand).getOptions() & ReceiverOptions.DISABLE_ESCAPING) == 0) {
+            if (operand instanceof ValueOf &&
+                    !ReceiverOption.contains(((ValueOf) operand).getOptions(), ReceiverOption.DISABLE_ESCAPING)) {
                 // XSLT users tend to use ValueOf unnecessarily
                 Expression cast = ((ValueOf) operand).convertToCastAsString();
                 return cast.optimize(visitor, contextInfo);
@@ -304,6 +318,7 @@ public final class Atomizer extends UnaryExpression {
      * @return {@link StaticProperty#NO_NODES_NEWLY_CREATED}.
      */
 
+    @Override
     public int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         p &= ~StaticProperty.NODESET_PROPERTIES;
@@ -324,10 +339,11 @@ public final class Atomizer extends UnaryExpression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables that need to be rebound
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         Atomizer copy = new Atomizer(getBaseExpression().copy(rebindings), roleDiagnostic);
         copy.untyped = untyped;
@@ -346,12 +362,15 @@ public final class Atomizer extends UnaryExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         try {
             SequenceIterator base = getBaseExpression().iterate(context);
             return getAtomizingIterator(base, untyped && operandItemType instanceof NodeTest);
+        } catch (TerminationException | Error.UserDefinedXPathException e) {
+            throw e;
         } catch (XPathException e) {
-            if (roleDiagnostic == null || e instanceof TerminationException || e.getErrorCodeQName() == null || !e.getErrorCodeQName().hasURI(NamespaceConstant.ERR)) {
+            if (roleDiagnostic == null) {
                 throw e;
             } else {
                 String message = expandMessage(e.getMessage());
@@ -368,6 +387,7 @@ public final class Atomizer extends UnaryExpression {
      * which will only be the case if the underlying expression has cardinality zero-or-one.
      */
 
+    @Override
     public AtomicValue evaluateItem(XPathContext context) throws XPathException {
         Item i = getBaseExpression().evaluateItem(context);
         if (i == null) {
@@ -385,6 +405,7 @@ public final class Atomizer extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         operandItemType = getBaseExpression().getItemType();
         TypeHierarchy th = getConfiguration().getTypeHierarchy();
@@ -461,6 +482,7 @@ public final class Atomizer extends UnaryExpression {
      * Determine the static cardinality of the expression
      */
 
+    @Override
     public int computeCardinality() {
         ItemType in = getOperandItemType();
         Expression operand = getBaseExpression();
@@ -503,13 +525,14 @@ public final class Atomizer extends UnaryExpression {
      *         expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         PathMap.PathMapNodeSet result = getBaseExpression().addToPathMap(pathMap, pathMapNodeSet);
         if (result != null) {
             TypeHierarchy th = getConfiguration().getTypeHierarchy();
             ItemType operandItemType = getBaseExpression().getItemType();
-            if (th.relationship(NodeKindTest.ELEMENT, operandItemType) != TypeHierarchy.DISJOINT ||
-                    th.relationship(NodeKindTest.DOCUMENT, operandItemType) != TypeHierarchy.DISJOINT) {
+            if (th.relationship(NodeKindTest.ELEMENT, operandItemType) != Affinity.DISJOINT ||
+                    th.relationship(NodeKindTest.DOCUMENT, operandItemType) != Affinity.DISJOINT) {
                 result.setAtomized();
             }
         }
@@ -529,9 +552,9 @@ public final class Atomizer extends UnaryExpression {
      *          if a dynamic evaluation error occurs
      */
 
-    public static SequenceIterator<? extends AtomicValue> getAtomizingIterator(SequenceIterator base, boolean oneToOne) throws XPathException {
-        int properties = base.getProperties();
-        if ((properties & SequenceIterator.LAST_POSITION_FINDER) != 0) {
+    public static SequenceIterator getAtomizingIterator(SequenceIterator base, boolean oneToOne) throws XPathException {
+        EnumSet<SequenceIterator.Property> properties = base.getProperties();
+        if (properties.contains(SequenceIterator.Property.LAST_POSITION_FINDER)) {
             int count = ((LastPositionFinder) base).getLength();
             if (count == 0) {
                 return EmptyIterator.emptyIterator();
@@ -539,7 +562,7 @@ public final class Atomizer extends UnaryExpression {
                 Item first = base.next();
                 return first.atomize().iterate();
             }
-        } else if ((properties & SequenceIterator.ATOMIZING) != 0) {
+        } else if (properties.contains(SequenceIterator.Property.ATOMIZING)) {
             return new AxisAtomizingIterator((AtomizedValueIterator)base);
         }
         if (oneToOne) {
@@ -549,13 +572,13 @@ public final class Atomizer extends UnaryExpression {
         }
     }
 
-    public static AtomicSequence atomize(Sequence<?> sequence) throws XPathException {
+    public static AtomicSequence atomize(Sequence sequence) throws XPathException {
         if (sequence instanceof AtomicSequence) {
             return (AtomicSequence)sequence;
         } else if (sequence instanceof EmptySequence) {
             return EmptyAtomicSequence.getInstance();
         } else {
-            SequenceIterator<? extends AtomicValue> iter = getAtomizingIterator(sequence.iterate(), false);
+            SequenceIterator iter = getAtomizingIterator(sequence.iterate(), false);
             return new AtomicArray(iter);
         }
     }
@@ -565,6 +588,7 @@ public final class Atomizer extends UnaryExpression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public String getExpressionName() {
         return "data";
     }
@@ -584,6 +608,11 @@ public final class Atomizer extends UnaryExpression {
         return getBaseExpression().toShortString();
     }
 
-
+    @Override
+    protected void emitExtraAttributes(ExpressionPresenter out) {
+        if (roleDiagnostic != null) {
+            out.emitAttribute("diag", roleDiagnostic.save());
+        }
+    }
 }
 

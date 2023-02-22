@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,8 +7,8 @@
 
 package net.sf.saxon.type;
 
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Invalidity;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AbsolutePath;
@@ -121,6 +121,7 @@ public class ValidationFailure
      *         or -1 if there is no constraint reference
      */
 
+    @Override
     public int getSchemaPart() {
         return schemaPart;
     }
@@ -132,6 +133,7 @@ public class ValidationFailure
      *         the published XML Schema specification; or null if the information is not available.
      */
 
+    @Override
     public String getConstraintName() {
         return constraintName;
     }
@@ -144,6 +146,7 @@ public class ValidationFailure
      *         by semicolons. Or null if the information is not available.
      */
 
+    @Override
     public String getConstraintClauseNumber() {
         return clause;
     }
@@ -157,6 +160,7 @@ public class ValidationFailure
      */
 
     /*@NotNull*/
+    @Override
     public String getConstraintReference() {
         return constraintName + '.' + clause;
     }
@@ -209,6 +213,7 @@ public class ValidationFailure
     }
 
 
+    @Override
     public AbsolutePath getPath() {
         return path;
     }
@@ -217,6 +222,7 @@ public class ValidationFailure
         this.path = path;
     }
 
+    @Override
     public AbsolutePath getContextPath() {
         return contextPath;
     }
@@ -225,6 +231,7 @@ public class ValidationFailure
         this.contextPath = contextPath;
     }
 
+    @Override
     public NodeInfo getInvalidNode() {
         return invalidNode;
     }
@@ -235,6 +242,7 @@ public class ValidationFailure
 
 
 
+    @Override
     public String getMessage() {
         return message;
     }
@@ -257,6 +265,7 @@ public class ValidationFailure
         return sb.toString();
     }
 
+    @Override
     public String getPublicId() {
         SourceLocator loc = getLocator();
         if (publicId == null && loc != null && loc != this) {
@@ -266,6 +275,7 @@ public class ValidationFailure
         }
     }
 
+    @Override
     public String getSystemId() {
         SourceLocator loc = getLocator();
         if (systemId == null && loc != null && loc != this) {
@@ -275,6 +285,7 @@ public class ValidationFailure
         }
     }
 
+    @Override
     public int getLineNumber() {
         SourceLocator loc = getLocator();
         if (lineNumber == -1 && loc != null && loc != this) {
@@ -284,6 +295,7 @@ public class ValidationFailure
         }
     }
 
+    @Override
     public int getColumnNumber() {
         SourceLocator loc = getLocator();
         if (columnNumber == -1 && loc != null && loc != this) {
@@ -298,8 +310,9 @@ public class ValidationFailure
      * should not be saved for later use. The result of this operation holds the same location information,
      * but in an immutable form.
      */
+    @Override
     public Location saveLocation() {
-        return new ExplicitLocation(this);
+        return new Loc(this);
     }
 
     public void setPublicId(String id) {
@@ -355,11 +368,12 @@ public class ValidationFailure
 
     /**
      * Get the error code associated with the validity error. This is relevant only when validation
-     * is run from within XSLT or XQuery, which define different error codes for validition errors
+     * is run from within XSLT or XQuery, which define different error codes for validation errors.
      *
      * @return the error code associated with the error, if any. The error is returned as a simple
      * string if it is in the standard error namespace, or as an EQName (that is Q{uri}local) otherwise.
      */
+    @Override
     public String getErrorCode() {
         if (errorCode == null) {
             return null;
@@ -413,6 +427,7 @@ public class ValidationFailure
      */
 
     /*@NotNull*/
+    @Override
     public AtomicValue asAtomic() throws ValidationException {
         throw makeException();
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -41,11 +41,11 @@ public class TextValueTemplateNode extends TextImpl {
     public void validate() throws XPathException {
         boolean disable = false;
         NodeInfo parent = getParent();
-        if (parent instanceof XSLText && isYes(parent.getAttributeValue("", "disable-output-escaping"))) {
+        if (parent instanceof XSLText && isYes(parent.getAttributeValue("","disable-output-escaping"))) {
             disable = true;
         }
         contentExp = AttributeValueTemplate.make(getStringValue(), getStaticContext());
-        contentExp = new ValueOf(contentExp, disable, true);
+        contentExp = new ValueOf(contentExp, disable, false);
         contentExp.setRetainedStaticContext(((StyleElement)getParent()).makeRetainedStaticContext());
         contentExp = ((StyleElement)getParent()).typeCheck("tvt", contentExp);
     }

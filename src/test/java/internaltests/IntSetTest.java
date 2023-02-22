@@ -1,16 +1,20 @@
 package internaltests;
 
-import junit.framework.TestCase;
 import net.sf.saxon.z.IntHashSet;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
- *  Tests of the NodeInfo interface as implemented by the tinytree
+ *  Tests of the integer set classes
  */
-public class IntSetTest extends TestCase {
+public class IntSetTest {
 
+    @Test
     public void testInsertRemove() {
         try {
             IntHashSet set = new IntHashSet(10);
@@ -21,11 +25,11 @@ public class IntSetTest extends TestCase {
                 int r = rand.nextInt(10000);
                 if (b) {
                     boolean added = set.add(r);
-                    assertTrue("Size after adding", set.size() == size + (added ? 1 : 0));
+                    assertTrue(set.size() == size + (added ? 1 : 0), "Size after adding");
                     size = set.size();
                 } else {
                     boolean removed = set.remove(r);
-                    assertTrue("Size after removing", set.size() == size - (removed ? 1 : 0));
+                    assertTrue(set.size() == size - (removed ? 1 : 0), "Size after removing");
                     size = set.size();
                 }
             }
@@ -34,11 +38,11 @@ public class IntSetTest extends TestCase {
                 int r = rand.nextInt(10);
                 if (b) {
                     boolean added = set.add(r);
-                    assertTrue("Size after adding", set.size() == size + (added ? 1 : 0));
+                    assertTrue(set.size() == size + (added ? 1 : 0), "Size after adding");
                     size = set.size();
                 } else {
                     boolean removed = set.remove(r);
-                    assertTrue("Size after removing", set.size() == size - (removed ? 1 : 0));
+                    assertTrue(set.size() == size - (removed ? 1 : 0), "Size after removing");
                     size = set.size();
                 }
             }

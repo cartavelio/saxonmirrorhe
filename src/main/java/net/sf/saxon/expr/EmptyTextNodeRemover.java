@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -63,6 +63,7 @@ public class EmptyTextNodeRemover extends UnaryExpression
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         EmptyTextNodeRemover e2 = new EmptyTextNodeRemover(getBaseExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, e2);
@@ -74,6 +75,7 @@ public class EmptyTextNodeRemover extends UnaryExpression
      * This method indicates which of these methods is prefered.
      */
 
+    @Override
     public int getImplementationMethod() {
         return Expression.ITERATE_METHOD | ITEM_FEED_METHOD | WATCH_METHOD;
     }
@@ -95,7 +97,7 @@ public class EmptyTextNodeRemover extends UnaryExpression
 
     /*@NotNull*/
     @Override
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         return new ItemMappingIterator(getBaseExpression().iterate(context), this);
     }
 
@@ -108,6 +110,7 @@ public class EmptyTextNodeRemover extends UnaryExpression
      */
 
     /*@Nullable*/
+    @Override
     public Item mapItem(Item item) throws XPathException {
         if (item instanceof NodeInfo &&
             ((NodeInfo) item).getNodeKind() == Type.TEXT &&

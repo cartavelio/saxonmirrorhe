@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -36,7 +36,8 @@ public class ResolveURI extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
      */
     /*@Nullable*/
-    public ZeroOrOne<AnyURIValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue arg0 = (AtomicValue) arguments[0].head();
         if (arg0 == null) {
             return ZeroOrOne.empty();
@@ -53,7 +54,7 @@ public class ResolveURI extends SystemFunction {
             }
         }
 
-        return new ZeroOrOne<>(resolve(base, relative, context));
+        return new ZeroOrOne(resolve(base, relative, context));
     }
 
     /*@NotNull*/

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.SignificantItemDetector;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
@@ -81,29 +82,13 @@ public class ConditionalBlock extends Instruction {
     }
 
 
+    @Override
     public String getExpressionName() {
         return "condSeq";
     }
 
-    /**
-     * Get the children of this instruction
-     *
-     * @return the children of this instruction, as an array of Expression objects. May return
-     *         a zero-length array if there are no children. Changes to the content of this array
-     *         have no effect
-     * @deprecated since 9.7 - use the operands() iterator instead
-     */
 
-    public Expression[] getChildren() {
-        Expression[] result = new Expression[size()];
-        int i=0;
-        for (Operand o : operands()) {
-            result[i++] = o.getChildExpression();
-        }
-        return result;
-    }
-
-
+    @Override
     public int computeSpecialProperties() {
         if (size() == 0) {
             // An empty sequence has all special properties except "has side effects".
@@ -125,7 +110,7 @@ public class ConditionalBlock extends Instruction {
                 allSubtreeAxis = false;
                 break;
             }
-            byte axis = ((AxisExpression) child).getAxis();
+            int axis = ((AxisExpression) child).getAxis();
             if (axis != AxisInfo.CHILD) {
                 allChildAxis = false;
             }
@@ -162,6 +147,7 @@ public class ConditionalBlock extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         Expression[] c2 = new Expression[size()];
         for (int c = 0; c < size(); c++) {
@@ -183,6 +169,7 @@ public class ConditionalBlock extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public final ItemType getItemType() {
         if (size() == 0) {
             return ErrorType.getInstance();
@@ -202,6 +189,7 @@ public class ConditionalBlock extends Instruction {
      * Determine the cardinality of the expression
      */
 
+    @Override
     public final int getCardinality() {
         if (size() == 0) {
             return StaticProperty.EMPTY;
@@ -222,12 +210,14 @@ public class ConditionalBlock extends Instruction {
      * returns true.
      */
 
+    @Override
     public final boolean mayCreateNewNodes() {
         return someOperandCreatesNewNodes();
     }
 
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
         if (Block.neverReturnsTypedNodes(this, visitor.getConfiguration().getTypeHierarchy())) {
@@ -238,6 +228,7 @@ public class ConditionalBlock extends Instruction {
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         Expression e = super.optimize(visitor, contextInfo);
         if (e != this) {
@@ -319,6 +310,7 @@ public class ConditionalBlock extends Instruction {
      * static validation can continue recursively.
      */
 
+    @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         for (Operand o : operands()) {
             Expression child = o.getChildExpression();
@@ -331,6 +323,7 @@ public class ConditionalBlock extends Instruction {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("condSeq", this);
         for (Operand o : operands()) {
@@ -347,20 +340,20 @@ public class ConditionalBlock extends Instruction {
 
 
 
+    @Override
     @SuppressWarnings("StatementWithEmptyBody")
-    public TailCall processLeavingTail(final XPathContext context) throws XPathException {
-        XPathContextMinor c2 = context.newMinorContext();
+    public TailCall processLeavingTail(Outputter output, final XPathContext context) throws XPathException {
 
-        final List<OnNonEmptyExpr> onNonEmptyPending = new ArrayList<OnNonEmptyExpr>();
+        final List<OnNonEmptyExpr> onNonEmptyPending = new ArrayList<>();
 
         Action action = () -> {
             for (Expression e : onNonEmptyPending) {
-                e.process(context);
+                e.process(output, context);
             }
         };
 
-        SignificantItemDetector significantItemDetector = new SignificantItemDetector(context.getReceiver(), action);
-        c2.setReceiver(significantItemDetector);
+        SignificantItemDetector significantItemDetector = new SignificantItemDetector(output, action);
+
         for (Operand o : operands()) {
             Expression child = o.getChildExpression();
             try {
@@ -370,10 +363,10 @@ public class ConditionalBlock extends Instruction {
                     if (significantItemDetector.isEmpty()) {
                         onNonEmptyPending.add((OnNonEmptyExpr)child);
                     } else {
-                        child.process(context);
+                        child.process(output, context);
                     }
                 } else {
-                    child.process(c2);
+                    child.process(significantItemDetector, context);
                 }
 
             } catch (XPathException e) {
@@ -382,12 +375,13 @@ public class ConditionalBlock extends Instruction {
                 throw e;
             }
         }
+
         // At the end, if the content produced until now is empty, process the on-empty instructions
         if (significantItemDetector.isEmpty()) {
             for (Operand o : operands()) {
                 Expression child = o.getChildExpression();
                 if (child instanceof OnEmptyExpr) {
-                    child.process(context);
+                    child.process(output, context);
                 }
             }
         }
@@ -400,6 +394,7 @@ public class ConditionalBlock extends Instruction {
      * process() methods natively.
      */
 
+    @Override
     public int getImplementationMethod() {
         return PROCESS_METHOD;
     }

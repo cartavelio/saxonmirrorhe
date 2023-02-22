@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -86,7 +86,7 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
             char c = cs0.charAt(i);
             int j = st1.indexOf(c);
             if (j < s2len) {
-                sb.append(j < 0 ? c : cs2.charAt(j));
+                sb.cat(j < 0 ? c : cs2.charAt(j));
             }
         }
         return sb;
@@ -151,6 +151,7 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
      * @return the result of the evaluation, in the form of a Sequence
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
      */
+    @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue sv0 = (StringValue) arguments[0].head();
         if (sv0 == null) {
@@ -165,6 +166,7 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
         }
     }
 
+    @Override
     public String getCompilerName() {
         return "TranslateCompiler";
     }

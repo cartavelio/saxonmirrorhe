@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,9 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.TailExpression;
 import net.sf.saxon.expr.TailIterator;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 
@@ -32,8 +30,9 @@ public class TailFn extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
-        return SequenceTool.toLazySequence(TailIterator.make((SequenceIterator<Item<?>>)arguments[0].iterate(), 2));
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        return SequenceTool.toLazySequence(TailIterator.make(arguments[0].iterate(), 2));
     }
 
     /**
@@ -48,4 +47,4 @@ public class TailFn extends SystemFunction {
     }
 }
 
-// Copyright (c) 2010-2015 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

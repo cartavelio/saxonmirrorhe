@@ -1,9 +1,9 @@
 package jaxptest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.xpath.XPathFactoryImpl;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -11,64 +11,55 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.TransformerException;
 import javax.xml.xpath.*;
 import java.io.StringReader;
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  *
  */
-public class XPathTest extends TestCase {
+public class XPathTest {
 
+    @Test
     public void testDummy() {
-        assertEquals(2,2);
+        assertEquals(2, 2);
     }
 
+    @Test
     public void testXOMXPath() {
         try {
             nu.xom.Element element = new nu.xom.Element("doc");
             nu.xom.Document doc = new nu.xom.Document(element);
             XPathFactory xpathFactory = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_XOM, "net.sf.saxon.xpath.XPathFactoryImpl", null);
             String s = xpathFactory.newXPath().evaluate("count(//*)", doc);
-            assertEquals(s, "1");
-        } catch (XPathFactoryConfigurationException e) {
-            e.printStackTrace();
-            fail();
-        } catch (XPathExpressionException e) {
+            assertEquals("1", s);
+        } catch (XPathFactoryConfigurationException | XPathExpressionException e) {
             e.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testXPathParseError() {
-        final List<TransformerException> errors = new ArrayList<TransformerException>();
         try {
             Configuration config = new Configuration();
-            config.setErrorListener(new ErrorListener() {
-                public void error(TransformerException exception) throws TransformerException {
-                    errors.add(exception);
-                }
-
-                public void warning(TransformerException exception) throws TransformerException {
-                    errors.add(exception);
-                }
-
-                public void fatalError(TransformerException exception) throws TransformerException {
-                    errors.add(exception);
-                }
-            });
             XPathFactory xpf = new XPathFactoryImpl(config);
             XPath xPath = xpf.newXPath();
             XPathExpression compiledExpression = xPath.compile("/*");
             compiledExpression.evaluate(new InputSource(new StringReader("This is invalid xml")));
             fail();
         } catch (Exception e) {
-            assertFalse(errors.isEmpty());
+            // OK;
         }
     }
 
+    @Test
     public void testBug2554() {
         try {
 
@@ -99,6 +90,7 @@ public class XPathTest extends TestCase {
     }
 
 
+    @Test
     public void testIssue6386() {
         // https://saxonica.plan.io/boards/3/topics/6386
         try {
@@ -136,6 +128,7 @@ public class XPathTest extends TestCase {
         }
     }
 
+    @Test
     public void testXPathQNameConstructor() {
         try {
 

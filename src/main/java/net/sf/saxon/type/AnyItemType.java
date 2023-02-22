@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,6 @@ package net.sf.saxon.type;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
 
@@ -56,6 +55,7 @@ public class AnyItemType implements ItemType.WithSequenceTypeCache {
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return UType.ANY;
     }
@@ -65,6 +65,7 @@ public class AnyItemType implements ItemType.WithSequenceTypeCache {
      *
      * @return true if this is ANY_ATOMIC_TYPE or a subtype thereof
      */
+    @Override
     public boolean isAtomicType() {
         return false;
     }
@@ -77,7 +78,7 @@ public class AnyItemType implements ItemType.WithSequenceTypeCache {
      * @return the alphacode for the nearest containing built-in type
      */
     @Override
-    public String getAlphaCode() {
+    public String getBasicAlphaCode() {
         return "";
     }
 
@@ -88,6 +89,7 @@ public class AnyItemType implements ItemType.WithSequenceTypeCache {
      * @return false: this type can match nodes or atomic values
      */
 
+    @Override
     public boolean isPlainType() {
         return false;
     }
@@ -101,6 +103,7 @@ public class AnyItemType implements ItemType.WithSequenceTypeCache {
      * @param th
      * @return true if the item is an instance of this type; false otherwise
      */
+    @Override
     public boolean matches(Item item, TypeHierarchy th) {
         return true;
     }
@@ -115,15 +118,18 @@ public class AnyItemType implements ItemType.WithSequenceTypeCache {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getPrimitiveItemType() {
         return this;
     }
 
+    @Override
     public int getPrimitiveType() {
         return Type.ITEM;
     }
 
     /*@NotNull*/
+    @Override
     public AtomicType getAtomizedItemType() {
         return BuiltInAtomicType.ANY_ATOMIC;
     }
@@ -136,10 +142,12 @@ public class AnyItemType implements ItemType.WithSequenceTypeCache {
      * @param th The type hierarchy cache
      */
 
+    @Override
     public boolean isAtomizable(TypeHierarchy th) {
         return true;
     }
 
+    @Override
     public double getDefaultPriority() {
         return -2;
     }
@@ -158,43 +166,13 @@ public class AnyItemType implements ItemType.WithSequenceTypeCache {
     }
 
     /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @throws XPathException if JS code cannot be generated for this item type, for example because
-     *                        the test is schema-aware.
-     * @param knownToBe
-     * @param targetVersion
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException {
-        return "return true;";
-    }
-
-    /**
-     * Generate Javascript code to convert a supplied Javascript value to this item type,
-     * if conversion is possible, or throw an error otherwise.
-     *
-     * @param errorCode the error to be thrown if conversion is not possible
-     * @param targetVersion
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns the result of conversion to this type, or throws
-     * an error if conversion is not possible. The variable "val" will hold the supplied Javascript
-     * value.
-     */
-    public String generateJavaScriptItemTypeAcceptor(String errorCode, int targetVersion) throws XPathException {
-        return "return val;";
-    }
-
-    /**
      * Get a sequence type representing exactly one instance of this atomic type
      *
      * @return a sequence type representing exactly one instance of this atomic type
      * @since 9.8.0.2
      */
 
+    @Override
     public SequenceType one() {
         if (_one == null) {
             _one = new SequenceType(this, StaticProperty.EXACTLY_ONE);
@@ -209,6 +187,7 @@ public class AnyItemType implements ItemType.WithSequenceTypeCache {
      * @since 9.8.0.2
      */
 
+    @Override
     public SequenceType zeroOrOne() {
         if (_zeroOrOne == null) {
             _zeroOrOne = new SequenceType(this, StaticProperty.ALLOWS_ZERO_OR_ONE);
@@ -223,6 +202,7 @@ public class AnyItemType implements ItemType.WithSequenceTypeCache {
      * @since 9.8.0.2
      */
 
+    @Override
     public SequenceType oneOrMore() {
         if (_oneOrMore == null) {
             _oneOrMore = new SequenceType(this, StaticProperty.ALLOWS_ONE_OR_MORE);
@@ -237,6 +217,7 @@ public class AnyItemType implements ItemType.WithSequenceTypeCache {
      * @since 9.8.0.2
      */
 
+    @Override
     public SequenceType zeroOrMore() {
         if (_zeroOrMore == null) {
             _zeroOrMore = new SequenceType(this, StaticProperty.ALLOWS_ZERO_OR_MORE);

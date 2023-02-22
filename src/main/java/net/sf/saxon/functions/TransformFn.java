@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,6 +9,7 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
+import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.StaticProperty;
@@ -31,11 +32,10 @@ import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.wrapper.RebasedDocument;
 import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.value.*;
 import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.*;
 import org.xml.sax.InputSource;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
@@ -121,7 +121,7 @@ public class TransformFn extends SystemFunction implements Callable {
      * options with recognized names and type-valid values.
      */
 
-    private void checkTransformOptions(Map<String, Sequence<?>> options, XPathContext context, boolean isXslt30Processor) throws XPathException {
+    private void checkTransformOptions(Map<String, Sequence> options, XPathContext context, boolean isXslt30Processor) throws XPathException {
         if (options.isEmpty()) {
             throw new XPathException("No transformation options supplied", "FOXT0002");
         }
@@ -133,11 +133,11 @@ public class TransformFn extends SystemFunction implements Callable {
         }
     }
 
-    private String checkStylesheetMutualExclusion(Map<String, Sequence<?>> map) throws XPathException {
+    private String checkStylesheetMutualExclusion(Map<String, Sequence> map) throws XPathException {
         return exactlyOneOf(map, "stylesheet-location", "stylesheet-node", "stylesheet-text");
     }
 
-    private String checkStylesheetMutualExclusion30(Map<String, Sequence<?>> map) throws XPathException {
+    private String checkStylesheetMutualExclusion30(Map<String, Sequence> map) throws XPathException {
         String styleOption = exactlyOneOf(map, "stylesheet-location", "stylesheet-node", "stylesheet-text",
                                           "package-name", "package-node", "package-location");
         if (styleOption.equals("package-location")) {
@@ -146,7 +146,7 @@ public class TransformFn extends SystemFunction implements Callable {
         return styleOption;
     }
 
-    private String checkInvocationMutualExclusion(Map<String, Sequence<?>> options) throws XPathException {
+    private String checkInvocationMutualExclusion(Map<String, Sequence> options) throws XPathException {
         return oneOf(options, "initial-mode", "initial-template");
     }
 
@@ -159,7 +159,7 @@ public class TransformFn extends SystemFunction implements Callable {
      * @throws XPathException if more than one of the keys is present
      */
 
-    private String oneOf(Map<String, Sequence<?>> map, String... keys) throws XPathException {
+    private String oneOf(Map<String, Sequence> map, String... keys) throws XPathException {
         String found = null;
         for (String s : keys) {
             if (map.get(s) != null) {
@@ -184,7 +184,7 @@ public class TransformFn extends SystemFunction implements Callable {
      * @throws XPathException if none of the keys is present or if more than one of the keys is present
      */
 
-    private String exactlyOneOf(Map<String, Sequence<?>> map, String... keys) throws XPathException {
+    private String exactlyOneOf(Map<String, Sequence> map, String... keys) throws XPathException {
         String found = oneOf(map, keys);
         if (found == null) {
             throw new XPathException("One of the following transform options must be present: " + enumerate(keys));
@@ -206,7 +206,7 @@ public class TransformFn extends SystemFunction implements Callable {
         return buffer.toString();
     }
 
-    private String checkInvocationMutualExclusion30(Map<String, Sequence<?>> map) throws XPathException {
+    private String checkInvocationMutualExclusion30(Map<String, Sequence> map) throws XPathException {
         return oneOf(map, "initial-mode", "initial-template", "initial-function");
     }
 
@@ -228,7 +228,7 @@ public class TransformFn extends SystemFunction implements Callable {
         throw new XPathException("Unrecognized boolean value " + value, "FOXT0002");
     }
 
-    private void setRequestedProperties(Map<String, Sequence<?>> options, Processor processor) throws XPathException {
+    private void setRequestedProperties(Map<String, Sequence> options, Processor processor) throws XPathException {
         MapItem requestedProps = (MapItem) options.get("requested-properties").head();
         AtomicIterator optionIterator = requestedProps.keys();
         while (true) {
@@ -305,20 +305,14 @@ public class TransformFn extends SystemFunction implements Callable {
                         }
                         case "supports-dynamic-evaluation": {
                             boolean b = asBoolean(value);
-                            if (b) {
-                                if (!processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-                                    unsuitable("supports-dynamic-evaluation", value.getStringValue());
-                                }
-                            } else {
-                                if (processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-                                    processor.setConfigurationProperty(Feature.DISABLE_XSL_EVALUATE, true);
-                                }
+                            if (!b) {
+                                processor.setConfigurationProperty(Feature.DISABLE_XSL_EVALUATE, true);
                             }
                             break;
                         }
                         case "supports-higher-order-functions": {
                             boolean b = asBoolean(value);
-                            if (b != processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+                            if (!b) {
                                 unsuitable("supports-higher-order-functions", value.getStringValue());
                             }
                             break;
@@ -353,7 +347,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
     }
 
-    private void setStaticParams(Map<String, Sequence<?>> options, XsltCompiler xsltCompiler, boolean allowTypedNodes) throws XPathException {
+    private void setStaticParams(Map<String, Sequence> options, XsltCompiler xsltCompiler, boolean allowTypedNodes) throws XPathException {
         MapItem staticParamsMap = (MapItem) options.get("static-params").head();
         AtomicIterator paramIterator = staticParamsMap.keys();
         while (true) {
@@ -375,10 +369,10 @@ public class TransformFn extends SystemFunction implements Callable {
         }
     }
 
-    private XsltExecutable getStylesheet(Map<String, Sequence<?>> options, XsltCompiler xsltCompiler, String styleOptionStr, XPathContext context) throws XPathException {
+    private XsltExecutable getStylesheet(Map<String, Sequence> options, XsltCompiler xsltCompiler, String styleOptionStr, XPathContext context) throws XPathException {
         Item styleOptionItem = options.get(styleOptionStr).head();
         URI stylesheetBaseUri = null;
-        Sequence<?> seq;
+        Sequence seq;
         if ((seq = options.get("stylesheet-base-uri")) != null) {
             StringValue styleBaseUri = (StringValue) seq.head();
             stylesheetBaseUri = URI.create(styleBaseUri.getStringValue());
@@ -387,26 +381,15 @@ public class TransformFn extends SystemFunction implements Callable {
                 stylesheetBaseUri = staticBase.resolve(styleBaseUri.getStringValue());
             }
         }
-        final List<TransformerException> compileErrors = new ArrayList<>();
-        final ErrorListener originalListener = xsltCompiler.getErrorListener();
-        xsltCompiler.setErrorListener(new ErrorListener() {
-            @Override
-            public void warning(TransformerException exception) throws TransformerException {
-                originalListener.warning(exception);
+        final List<XmlProcessingError> compileErrors = new ArrayList<>();
+        final ErrorReporter originalReporter = xsltCompiler.getErrorReporter();
+        xsltCompiler.setErrorReporter(error -> {
+            if (!error.isWarning()) {
+                compileErrors.add(error);
             }
-
-            @Override
-            public void error(TransformerException exception) throws TransformerException {
-                compileErrors.add(exception);
-                originalListener.error(exception);
-            }
-
-            @Override
-            public void fatalError(TransformerException exception) throws TransformerException {
-                compileErrors.add(exception);
-                originalListener.fatalError(exception);
-            }
+            originalReporter.report(error);
         });
+        
         boolean cacheable = options.get("static-params") == null;
         if (options.get("cache") != null) {
             cacheable &= ((BooleanValue) options.get("cache").head()).getBooleanValue();
@@ -527,15 +510,18 @@ public class TransformFn extends SystemFunction implements Callable {
         return executable;
     }
 
-    private XsltExecutable reportCompileError(SaxonApiException e, List<TransformerException> compileErrors) throws XPathException {
-        for (TransformerException te : compileErrors) {
+    private XsltExecutable reportCompileError(SaxonApiException e, List<XmlProcessingError> compileErrors) throws XPathException {
+        for (XmlProcessingError te : compileErrors) {
             // This is primarily so that the right error code is reported as required by the fn:transform spec
-            if (te instanceof XPathException) {
-                if (((XPathException) te).getErrorCodeLocalPart() == null) {
-                    ((XPathException) te).setErrorCode("FOXT0002");
-                }
-                throw (XPathException)te;
-            }
+//            if (te instanceof XPathException) {
+//                if (((XPathException) te).getErrorCodeLocalPart() == null) {
+//                    ((XPathException) te).setErrorCode("FOXT0002");
+//                }
+//                throw (XPathException)te;
+//            }
+            XPathException xe = XPathException.fromXmlProcessingError(te);
+            xe.maybeSetErrorCode("FOXT0002");
+            throw xe;
         }
         if (e.getCause() instanceof XPathException) {
             throw (XPathException) e.getCause();
@@ -545,10 +531,11 @@ public class TransformFn extends SystemFunction implements Callable {
     }
 
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Map<String, Sequence<?>> options = getDetails().optionDetails.processSuppliedOptions((MapItem) arguments[0].head(), context);
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        Map<String, Sequence> options = getDetails().optionDetails.processSuppliedOptions((MapItem) arguments[0].head(), context);
 
-        Sequence<?> vendorOptionsValue = options.get("vendor-options");
+        Sequence vendorOptionsValue = options.get("vendor-options");
         MapItem vendorOptions = vendorOptionsValue == null ? null : (MapItem) vendorOptionsValue.head();
 
         Configuration targetConfig = context.getConfiguration();
@@ -556,7 +543,7 @@ public class TransformFn extends SystemFunction implements Callable {
         int schemaValidation = Validation.DEFAULT;
         
         if (vendorOptions != null) {
-            Sequence<?> optionValue = vendorOptions.get(new QNameValue("", NamespaceConstant.SAXON, "configuration"));
+            Sequence optionValue = vendorOptions.get(new QNameValue("", NamespaceConstant.SAXON, "configuration"));
             if (optionValue != null) {
                 NodeInfo configFile = (NodeInfo) optionValue.head();
                 targetConfig = Configuration.readConfiguration(configFile, targetConfig);
@@ -648,7 +635,7 @@ public class TransformFn extends SystemFunction implements Callable {
         String principalResultKey = "output";
 
         for (String name : options.keySet()) {
-            Sequence<?> value = options.get(name);
+            Sequence value = options.get(name);
             Item head = value.head();
             switch (name) {
                 case "source-node":
@@ -693,12 +680,10 @@ public class TransformFn extends SystemFunction implements Callable {
                     break;
                 }
                 case "global-context-item":
-                    if (useXslt30Processor) {
-                        if (!allowTypedNodes && head instanceof NodeInfo && ((NodeInfo) head).getTreeInfo().isTyped()) {
-                            throw new XPathException("Schema-validated nodes cannot be passed to fn:transform() when it runs under a different Saxon Configuration", "FOXT0002");
-                        }
-                        globalContextItem = (XdmItem) XdmValue.wrap(head);
+                    if (!allowTypedNodes && head instanceof NodeInfo && ((NodeInfo) head).getTreeInfo().isTyped()) {
+                        throw new XPathException("Schema-validated nodes cannot be passed to fn:transform() when it runs under a different Saxon Configuration", "FOXT0002");
                     }
+                    globalContextItem = (XdmItem) XdmValue.wrap(head);
                     break;
                 case "template-params": {
                     MapItem params = (MapItem) head;
@@ -717,7 +702,7 @@ public class TransformFn extends SystemFunction implements Callable {
                     ArrayItem functionParamsArray = (ArrayItem) head;
                     functionParams = new XdmValue[functionParamsArray.arrayLength()];
                     for (int i = 0; i < functionParams.length; i++) {
-                        Sequence<?> argVal = functionParamsArray.get(i);
+                        Sequence argVal = functionParamsArray.get(i);
                         if (!allowTypedNodes) {
                             checkSequenceIsUntyped(argVal);
                         }
@@ -754,7 +739,7 @@ public class TransformFn extends SystemFunction implements Callable {
         controller.setResultDocumentResolver(deliverer);
 
         Destination destination = deliverer.getPrimaryDestination(serializationParamsMap);
-        Sequence<?> result;
+        Sequence result;
         try {
             transformer.setStylesheetParameters(stylesheetParams);
             transformer.setBaseOutputURI(baseOutputUri);
@@ -866,7 +851,7 @@ public class TransformFn extends SystemFunction implements Callable {
                     throw new XPathException("The names of parameters must be supplied as QNames", "FOXT0002");
                 }
                 QName paramName = new QName(((QNameValue) param).getStructuredQName());
-                Sequence<?> value = suppliedParams.get(param);
+                Sequence value = suppliedParams.get(param);
                 if (!allowTypedNodes) {
                     checkSequenceIsUntyped(value);
                 }
@@ -1001,7 +986,7 @@ public class TransformFn extends SystemFunction implements Callable {
                             } else if (val instanceof DecimalValue) {
                                 paramValue = val.getStringValue();
                             } else if (val instanceof QNameValue) {
-                                paramValue = ((QNameValue)val).getClarkName();
+                                paramValue = ((QNameValue)val).getStructuredQName().getEQName();
                             } else if (val instanceof MapItem && paramName.getClarkName().equals(SaxonOutputKeys.USE_CHARACTER_MAPS)) {
                                 CharacterMap charMap = Serialize.toCharacterMap((MapItem)val);
                                 CharacterMapIndex charMapIndex = new CharacterMapIndex();
@@ -1010,10 +995,10 @@ public class TransformFn extends SystemFunction implements Callable {
                                 String existing = serializer.getOutputProperty(Serializer.Property.USE_CHARACTER_MAPS);
                                 if (existing == null) {
                                     serializer.setOutputProperty(Serializer.Property.USE_CHARACTER_MAPS,
-                                                                 charMap.getName().getClarkName());
+                                                                 charMap.getName().getEQName());
                                 } else {
                                     serializer.setOutputProperty(Serializer.Property.USE_CHARACTER_MAPS,
-                                                                 existing + " " + charMap.getName().getClarkName());
+                                                                 existing + " " + charMap.getName().getEQName());
                                 }
                                 continue;
                             }
@@ -1025,7 +1010,7 @@ public class TransformFn extends SystemFunction implements Callable {
                             paramValue = "";
                             while ((it = iter.next()) != null) {
                                 if (it instanceof QNameValue) {
-                                    paramValue += " " + ((QNameValue)it).getClarkName();
+                                    paramValue += " " + ((QNameValue)it).getStructuredQName().getEQName();
                                 } else {
                                     throw new XPathException("Value of serialization parameter " + paramName.getEQName() + " not recognized", "XPTY0004");
                                 }
@@ -1057,13 +1042,13 @@ public class TransformFn extends SystemFunction implements Callable {
          * @return the primary result, or null if there is no primary result (after post-processing if any)
          */
 
-        public abstract Sequence<?> getPrimaryResult() throws XPathException;
+        public abstract Sequence getPrimaryResult() throws XPathException;
 
         /**
          * Post-process the result if required
          */
 
-        public GroundedValue<?> postProcess(String uri, Sequence<?> result) throws XPathException {
+        public GroundedValue postProcess(String uri, Sequence result) throws XPathException {
             if (postProcessor != null) {
                 result = postProcessor.call(context.newCleanContext(), new Sequence[]{new StringValue(uri), result});
             }
@@ -1088,7 +1073,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
 
         @Override
-        public Sequence<?> getPrimaryResult() throws XPathException {
+        public Sequence getPrimaryResult() throws XPathException {
             XdmNode node = destination.getXdmNode();
             return node == null ? null : postProcess(baseOutputUri, node.getUnderlyingNode());
         }
@@ -1102,9 +1087,11 @@ public class TransformFn extends SystemFunction implements Callable {
                 XdmNode root = destination.getXdmNode();
                 results.put(absolute.toASCIIString(), root.getUnderlyingValue().getTreeInfo());
             });
-            return destination.getReceiver(context.getReceiver().getPipelineConfiguration(), properties);
+            PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
+            return destination.getReceiver(pipe, properties);
         }
 
+        @Override
         public HashTrieMap populateResultMap(HashTrieMap resultMap) {
             for (Map.Entry<String, TreeInfo> entry : results.entrySet()) {
                 String uri = entry.getKey();
@@ -1136,7 +1123,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
 
         @Override
-        public Sequence<?> getPrimaryResult() throws XPathException {
+        public Sequence getPrimaryResult() throws XPathException {
             String str = primaryWriter.toString();
             if (str.isEmpty()) {
                 return null;
@@ -1156,7 +1143,8 @@ public class TransformFn extends SystemFunction implements Callable {
             serializer.setOutputWriter(writer);
             serializer.onClose(() -> results.put(absolute.toASCIIString(), writer.toString()));
             try {
-                Receiver out = serializer.getReceiver(context.getReceiver().getPipelineConfiguration(), properties);
+                PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
+                Receiver out = serializer.getReceiver(pipe, properties);
                 out.setSystemId(absolute.toASCIIString());
                 return out;
             } catch (SaxonApiException e) {
@@ -1187,8 +1175,8 @@ public class TransformFn extends SystemFunction implements Callable {
         }
 
         @Override
-        public Sequence<?> getPrimaryResult() throws XPathException {
-            Sequence<?> actualResult = primaryDestination.getXdmValue().getUnderlyingValue();
+        public Sequence getPrimaryResult() throws XPathException {
+            Sequence actualResult = primaryDestination.getXdmValue().getUnderlyingValue();
             return postProcess(baseOutputUri, actualResult);
         }
 
@@ -1197,7 +1185,8 @@ public class TransformFn extends SystemFunction implements Callable {
             URI absolute = getAbsoluteUri(href, baseUri);
             RawDestination destination = new RawDestination();
             destination.onClose(() -> results.put(absolute.toASCIIString(), destination.getXdmValue()));
-            return destination.getReceiver(context.getReceiver().getPipelineConfiguration(), properties);
+            PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
+            return destination.getReceiver(pipe, properties);
         }
 
         @Override

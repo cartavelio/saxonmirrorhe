@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,15 +10,20 @@ package net.sf.saxon.style;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.sxpath.AbstractStaticContext;
 import net.sf.saxon.trans.DecimalFormatManager;
+import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 
@@ -34,7 +39,7 @@ import java.util.Set;
  * is created for the purpose.
  */
 
-public class UseWhenStaticContext extends AbstractStaticContext implements XSLTStaticContext {
+public class UseWhenStaticContext extends AbstractStaticContext implements StaticContext {
 
     private NamespaceResolver namespaceContext;
     private FunctionLibrary functionLibrary;
@@ -72,6 +77,7 @@ public class UseWhenStaticContext extends AbstractStaticContext implements XSLTS
      * @return a RetainedStaticContext object: either a newly created one, or one that is
      * reused from a previous invocation.
      */
+    @Override
     public RetainedStaticContext makeRetainedStaticContext() {
         return new RetainedStaticContext(this);
     }
@@ -85,10 +91,10 @@ public class UseWhenStaticContext extends AbstractStaticContext implements XSLTS
      * Issue a compile-time warning
      */
 
+    @Override
     public void issueWarning(String s, Location locator) {
-        XPathException err = new XPathException(s);
-        err.setLocator(locator);
-        getConfiguration().getErrorListener().warning(err);
+        compilation.getCompilerInfo().getErrorReporter().report(
+                new XmlProcessingIncident(s, SaxonErrorCode.SXWN9000, locator).asWarning());
     }
 
     /**
@@ -97,6 +103,7 @@ public class UseWhenStaticContext extends AbstractStaticContext implements XSLTS
      * the base URI, which may be different.
      */
 
+    @Override
     public String getSystemId() {
         return getStaticBaseURI();
     }
@@ -111,8 +118,9 @@ public class UseWhenStaticContext extends AbstractStaticContext implements XSLTS
      *         the value of the variable is known statically, so the returned expression is a literal containing the variable's value.
      */
 
+    @Override
     public Expression bindVariable(StructuredQName qName) throws XPathException {
-        GroundedValue<?> val = compilation.getStaticVariable(qName);
+        GroundedValue val = compilation.getStaticVariable(qName);
         if (val != null) {
             return Literal.makeLiteral(val);
         } else {
@@ -130,6 +138,7 @@ public class UseWhenStaticContext extends AbstractStaticContext implements XSLTS
      * context
      */
 
+    @Override
     public FunctionLibrary getFunctionLibrary() {
         return functionLibrary;
     }
@@ -141,6 +150,7 @@ public class UseWhenStaticContext extends AbstractStaticContext implements XSLTS
      *         if no default collation has been defined
      */
 
+    @Override
     public String getDefaultCollationName() {
         return NamespaceConstant.CODEPOINT_COLLATION_URI;
     }
@@ -149,6 +159,7 @@ public class UseWhenStaticContext extends AbstractStaticContext implements XSLTS
      * Get the default function namespace
      */
 
+    @Override
     public String getDefaultFunctionNamespace() {
         return NamespaceConstant.FN;
     }
@@ -157,6 +168,7 @@ public class UseWhenStaticContext extends AbstractStaticContext implements XSLTS
      * Determine whether Backwards Compatible Mode is used
      */
 
+    @Override
     public boolean isInBackwardsCompatibleMode() {
         return false;
     }
@@ -170,6 +182,7 @@ public class UseWhenStaticContext extends AbstractStaticContext implements XSLTS
      * null namespace).
      */
 
+    @Override
     public boolean isImportedSchema(String namespace) {
         return false;
     }
@@ -180,6 +193,7 @@ public class UseWhenStaticContext extends AbstractStaticContext implements XSLTS
      * @return a Set, the set of URIs representing the names of imported schemas
      */
 
+    @Override
     public Set<String> getImportedSchemaNamespaces() {
         return Collections.emptySet();
     }
@@ -190,6 +204,7 @@ public class UseWhenStaticContext extends AbstractStaticContext implements XSLTS
      * @return a namespace resolver.
      */
 
+    @Override
     public NamespaceResolver getNamespaceResolver() {
         return namespaceContext;
     }
@@ -202,33 +217,9 @@ public class UseWhenStaticContext extends AbstractStaticContext implements XSLTS
      *         formats are not supported in this environment.
      */
 
+    @Override
     public DecimalFormatManager getDecimalFormatManager() {
         return null;
-    }
-
-    /**
-     * Determine if an extension element is available
-     *
-     * @throws net.sf.saxon.trans.XPathException
-     *          if the name is invalid or the prefix is not declared
-     */
-
-    public boolean isElementAvailable(String qname) throws XPathException {
-        try {
-            String[] parts = NameChecker.getQNameParts(qname);
-            String uri;
-            if (parts[0].isEmpty()) {
-                uri = getDefaultElementNamespace();
-            } else {
-                uri = namespaceContext.getURIForPrefix(parts[0], false);
-            }
-            StyleNodeFactory factory = getConfiguration().makeStyleNodeFactory(compilation);
-            return factory.isElementAvailable(uri, parts[1], true);
-        } catch (QNameException e) {
-            XPathException err = new XPathException("Invalid element name. " + e.getMessage());
-            err.setErrorCode("XTDE1440");
-            throw err;
-        }
     }
 
     public int getColumnNumber() {

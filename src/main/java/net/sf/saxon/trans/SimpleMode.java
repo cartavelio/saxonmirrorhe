@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,14 +7,11 @@
 
 package net.sf.saxon.trans;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.ComponentBinding;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.TemplateRule;
-import net.sf.saxon.expr.sort.GenericSorter;
-import net.sf.saxon.expr.sort.Sortable;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.style.StylesheetModule;
@@ -22,7 +19,10 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.rules.*;
 import net.sf.saxon.tree.util.Navigator;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.ErrorType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.Type;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntHashMap;
@@ -97,6 +97,7 @@ public class SimpleMode extends Mode {
      * been supplied
      */
 
+    @Override
     public BuiltInRuleSet getBuiltInRuleSet() {
         return this.builtInRuleSet;
     }
@@ -284,19 +285,20 @@ public class SimpleMode extends Mode {
 
     /**
      * Add a rule to the Mode.
-     * @param pattern      a Pattern
-     * @param action       the Object to return from getRule() when the supplied node matches this Pattern
-     * @param module       the stylesheet module containing the rule
-     * @param precedence   the import precedence of the rule
-     * @param priority     the priority of the rule
-     * @param position     the relative position of the rule in declaration order. If two rules have the same
-     *                     position in declaration order, this indicates that they were formed by splitting
-     *                     a single rule whose pattern is a union pattern
-     * @param part         the relative position of a rule within a family of rules created by splitting a
-     *                     single rule governed by a union pattern. This is used where the splitting of the
-     *                     rule was mandated by the XSLT specification, that is, where there is no explicit
-     *                     priority specified. In cases where Saxon splits a rule for optimization reasons,
-     *                     the subrules will all have the same subsequence number.
+     *
+     * @param pattern    a Pattern
+     * @param action     the Object to return from getRule() when the supplied node matches this Pattern
+     * @param module     the stylesheet module containing the rule
+     * @param precedence the import precedence of the rule
+     * @param priority   the priority of the rule
+     * @param position   the relative position of the rule in declaration order. If two rules have the same
+     *                   position in declaration order, this indicates that they were formed by splitting
+     *                   a single rule whose pattern is a union pattern
+     * @param part       the relative position of a rule within a family of rules created by splitting a
+     *                   single rule governed by a union pattern. This is used where the splitting of the
+     *                   rule was mandated by the XSLT specification, that is, where there is no explicit
+     *                   priority specified. In cases where Saxon splits a rule for optimization reasons,
+     *                   the subrules will all have the same subsequence number.
      */
 
     public void addRule(Pattern pattern, RuleTarget action,
@@ -364,7 +366,7 @@ public class SimpleMode extends Mode {
      * @return the newly created rule
      */
     public Rule makeRule(/*@NotNull*/ Pattern pattern, /*@NotNull*/ RuleTarget action,
-                         int precedence, int minImportPrecedence, double priority, int sequence, int part) {
+                                      int precedence, int minImportPrecedence, double priority, int sequence, int part) {
         return new Rule(pattern, action, precedence, minImportPrecedence, priority, sequence, part);
     }
 
@@ -660,7 +662,7 @@ public class SimpleMode extends Mode {
                 }
             } else if (ruleMatches(head, item, (XPathContextMajor) context, ruleSearchState)) {
                 bestRule = head;
-                if (getRecoveryPolicy() == Configuration.RECOVER_SILENTLY) {
+                if (getRecoveryPolicy() == RecoveryPolicy.RECOVER_SILENTLY) {
                     //ruleSearchState.count();
                     break;   // choose the first match; rules within a chain are in order of rank
                 }
@@ -850,7 +852,7 @@ public class SimpleMode extends Mode {
                     }
                 } else if (ruleMatches(head, item, (XPathContextMajor) context, ruleSearchState)) {
                     bestRule = head;
-                    if (getRecoveryPolicy() == Configuration.RECOVER_SILENTLY) {
+                    if (getRecoveryPolicy() == RecoveryPolicy.RECOVER_SILENTLY) {
                         break;   // choose the first match; rules within a chain are in order of rank
                     }
                 }
@@ -875,6 +877,11 @@ public class SimpleMode extends Mode {
 
     protected void reportAmbiguity(Item item, Rule r1, Rule r2, XPathContext c)
             throws XPathException {
+
+        // Save the effort of constructing the message if it's not going to be reported anyway
+        if (getRecoveryPolicy() == RecoveryPolicy.RECOVER_SILENTLY) {
+            return;
+        }
         // don't report an error if the conflict is between two branches of the same Union pattern
         if (r1.getAction() == r2.getAction() && r1.getSequence() == r2.getSequence()) {
             return;
@@ -905,11 +912,15 @@ public class SimpleMode extends Mode {
                     " of " + pat2.getLocation().getSystemId();
         }
 
-        XPathException err = new XPathException(message, errorCode);
-        if (getRecoveryPolicy() == Configuration.DO_NOT_RECOVER) {
-            throw err;
-        } else {
-            c.getController().recoverableError(err);
+        switch (getRecoveryPolicy()) {
+            case DO_NOT_RECOVER:
+                throw new XPathException(message, errorCode, getLocation());
+            case RECOVER_WITH_WARNINGS:
+                c.getController().warning(message, errorCode, getLocation());
+                break;
+            case RECOVER_SILENTLY:
+            default:
+                // no action
         }
     }
 
@@ -933,6 +944,7 @@ public class SimpleMode extends Mode {
      * @param pack the containing package
      */
 
+    @Override
     public void allocateAllBindingSlots(final StylesheetPackage pack) {
         if (getDeclaringComponent().getDeclaringPackage() == pack && !bindingSlotsAllocated) {
             forceAllocateAllBindingSlots(pack, this, getDeclaringComponent().getComponentBindings());
@@ -993,25 +1005,30 @@ public class SimpleMode extends Mode {
      * @param out used to display the expression tree
      */
 
+    @Override
     public void explainTemplateRules(final ExpressionPresenter out) throws XPathException {
         RuleAction action = r -> r.export(out, isDeclaredStreamable());
         RuleGroupAction group = new RuleGroupAction() {
             String type;
 
+            @Override
             public void start() {
                 out.startElement("ruleSet");
                 out.emitAttribute("type", type);
             }
 
+            @Override
             public void setString(String type) {
                 this.type = type;
             }
 
+            @Override
             public void start(int i) {
                 out.startElement("ruleChain");
                 out.emitAttribute("key", out.getNamePool().getClarkName(i));
             }
 
+            @Override
             public void end() {
                 out.endElement();
             }
@@ -1053,6 +1070,7 @@ public class SimpleMode extends Mode {
      * @param action an action that is to be applied to all the rules in this Mode
      * @throws XPathException if an error occurs processing any of the rules
      */
+    @Override
     public void processRules(RuleAction action) throws XPathException {
         processRules(action, null);
     }
@@ -1156,6 +1174,7 @@ public class SimpleMode extends Mode {
     public void optimizeRules() {
     }
 
+    @Override
     public int getMaxPrecedence() {
         try {
             MaxPrecedenceAction action = new MaxPrecedenceAction();
@@ -1169,6 +1188,7 @@ public class SimpleMode extends Mode {
     private static class MaxPrecedenceAction implements RuleAction {
         public int max = 0;
 
+        @Override
         public void processRule(Rule r) {
             if (r.getPrecedence() > max) {
                 max = r.getPrecedence();
@@ -1185,6 +1205,7 @@ public class SimpleMode extends Mode {
      * @throws XPathException if an error occurs processing the rules
      */
 
+    @Override
     public void computeRankings(int start) throws XPathException {
         // Now sort the rules into ranking order
         final RuleSorter sorter = new RuleSorter(start);
@@ -1195,6 +1216,7 @@ public class SimpleMode extends Mode {
         highestRank = start + sorter.getNumberOfRules();
     }
 
+    @Override
     public int getMaxRank() {
         return highestRank;
     }
@@ -1205,7 +1227,7 @@ public class SimpleMode extends Mode {
      * which has higher precedence/priority is a simple integer subtraction.
      */
 
-    private static class RuleSorter implements Sortable {
+    private static class RuleSorter {
         public ArrayList<Rule> rules = new ArrayList<>(100);
         private int start;
 
@@ -1217,18 +1239,19 @@ public class SimpleMode extends Mode {
             rules.add(rule);
         }
 
-        public int compare(int a, int b) {
-            return rules.get(a).compareComputedRank(rules.get(b));
-        }
-
-        public void swap(int a, int b) {
-            Rule temp = rules.get(a);
-            rules.set(a, rules.get(b));
-            rules.set(b, temp);
-        }
+//        public int compare(int a, int b) {
+//            return rules.get(a).compareComputedRank(rules.get(b));
+//        }
+//
+//        public void swap(int a, int b) {
+//            Rule temp = rules.get(a);
+//            rules.set(a, rules.get(b));
+//            rules.set(b, temp);
+//        }
 
         public void allocateRanks() {
-            GenericSorter.quickSort(0, rules.size(), this);
+            rules.sort(Rule::compareComputedRank);
+            //GenericSorter.quickSort(0, rules.size(), this);
             int rank = start;
             for (int i = 0; i < rules.size(); i++) {
                 if (i > 0 && rules.get(i - 1).compareComputedRank(rules.get(i)) != 0) {

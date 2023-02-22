@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,12 +7,8 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.functions.AccessorFn;
@@ -22,6 +18,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingleAtomicIterator;
+import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.*;
 
 import java.util.Iterator;
@@ -41,7 +38,7 @@ import java.util.Iterator;
  */
 
 public abstract class AtomicValue 
-        implements Item<AtomicValue>, AtomicSequence, ConversionResult, IdentityComparable {
+        implements Item, AtomicSequence, ConversionResult, IdentityComparable {
 
     protected AtomicType typeLabel;
 
@@ -53,6 +50,7 @@ public abstract class AtomicValue
      *          if atomization is not allowed for this kind of item
      */
 
+    @Override
     public AtomicSequence atomize() throws XPathException {
         return this;
     }
@@ -63,6 +61,7 @@ public abstract class AtomicValue
      * @return this item
      */
 
+    @Override
     public final AtomicValue head() {
         return this;
     }
@@ -73,20 +72,21 @@ public abstract class AtomicValue
      * @return the number of items in the sequence (always one)
      */
 
+    @Override
     public int getLength() {
         return 1;
     }
 
-    /**
-     * To implement {@link net.sf.saxon.om.Sequence}, this method returns a singleton iterator
-     * that delivers this item in the form of a sequence
-     *
-     * @return a singleton iterator that returns this item
-     */
-
-    public final SingleAtomicIterator iterate() {
-        return new SingleAtomicIterator(this);
-    }
+//    /**
+//     * To implement {@link net.sf.saxon.om.Sequence}, this method returns a singleton iterator
+//     * that delivers this item in the form of a sequence
+//     *
+//     * @return a singleton iterator that returns this item
+//     */
+//
+//    public final SingleAtomicIterator iterate() {
+//        return new SingleAtomicIterator(this);
+//    }
 
     /**
      * Set the type label on this atomic value. Note that this modifies the value, so it must only called
@@ -111,6 +111,7 @@ public abstract class AtomicValue
      * @return a Comparable that follows XML Schema comparison rules
      */
 
+    @Override
     public abstract Comparable getSchemaComparable();
 
     /**
@@ -197,6 +198,7 @@ public abstract class AtomicValue
      * @return true if the two values are identical, false otherwise
      */
 
+    @Override
     public boolean isIdentical(IdentityComparable other) {
         return other instanceof AtomicValue && isIdentical((AtomicValue) other);
     }
@@ -206,6 +208,7 @@ public abstract class AtomicValue
      *
      * @return a hashCode suitable for use when testing for identity.
      */
+    @Override
     public int identityHashCode() {
         // default implementation, which presumes that if two objects are identical then they are equal.
         return hashCode();
@@ -216,7 +219,8 @@ public abstract class AtomicValue
      * the version of the method that returns a String.
      */
 
-    public final CharSequence getStringValueCS() {
+    @Override
+    public CharSequence getStringValueCS() {
         CharSequence cs = getPrimitiveStringValue();
         try {
             return typeLabel.postprocess(cs);
@@ -233,21 +237,9 @@ public abstract class AtomicValue
      * @return the canonical lexical representation if defined in XML Schema; otherwise, the result
      *         of casting to string according to the XPath 2.0 rules
      */
+    @Override
     public CharSequence getCanonicalLexicalRepresentation() {
         return getStringValueCS();
-    }
-
-    /**
-     * Process the instruction, without returning any tail calls
-     *
-     * @param context The dynamic context, giving access to the current node,
-     *                the current variables, etc.
-     * @throws XPathException if the current receiver fails for any reason, for example
-     *                        with a serialization error due to invalid characters in the content
-     */
-
-    public void process(/*@NotNull*/ XPathContext context) throws XPathException {
-        context.getReceiver().append(this, ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.ALL_NAMESPACES);
     }
 
     /**
@@ -261,6 +253,7 @@ public abstract class AtomicValue
      */
 
     /*@Nullable*/
+    @Override
     public final AtomicValue itemAt(int n) {
         return n == 0 ? head() : null;
     }
@@ -336,6 +329,7 @@ public abstract class AtomicValue
      * so that it never throws an Exception.
      */
 
+    @Override
     public final String getStringValue() {
         return getStringValueCS().toString();
     }
@@ -358,6 +352,7 @@ public abstract class AtomicValue
      *         zero-length string
      * @throws XPathException if effective boolean value is not defined for this type (the default behaviour)
      */
+    @Override
     public boolean effectiveBooleanValue() throws XPathException {
         XPathException err = new XPathException("Effective boolean value is not defined for an atomic value of type " +
                 Type.displayTypeName(this));
@@ -445,6 +440,7 @@ public abstract class AtomicValue
      */
 
     /*@NotNull*/
+    @Override
     public AtomicValue asAtomic() {
         return this;
     }
@@ -460,11 +456,23 @@ public abstract class AtomicValue
     }
 
     /**
+     * Get an iterator over all the items in the sequence
+     *
+     * @return an iterator over all the items
+     */
+    @Override
+    public SingleAtomicIterator<? extends AtomicValue> iterate() {
+        return new SingleAtomicIterator<>(this);
+    }
+
+
+    /**
      * Returns a Java iterator over the atomic sequence.
      *
      * @return an Iterator.
      */
 
+    @Override
     public Iterator<AtomicValue> iterator() {
         return new MonoIterator<>(this);
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -32,17 +32,22 @@ import javax.xml.transform.sax.TransformerHandler;
  * SAX events representing an input document, and performs a transformation treating this
  * SAX stream as the source document of the transformation.
  *
- * @author Michael H. Kay
+ * <p>The {@code TransformerHandler} is written on the assumption that it is receiving events
+ * from a parser configured with {@code http://xml.org/sax/features/namespaces} set to true
+ * and {@code http://xml.org/sax/features/namespace-prefixes} set to false. The {@code TransformerHandler}
+ * has no control over the feature settings of the sender of the events (which is not even necessarily
+ * an {@code XMLReader}), and if the events do not follow this pattern then the class may
+ * fail in unpredictable ways.</p>
  */
 
 public class TransformerHandlerImpl extends ReceivingContentHandler implements TransformerHandler {
 
-    TransformerImpl transformer;
-    Builder builder;
-    Receiver receiver;
-    /*@Nullable*/ Result result;
-    String systemId;
-    boolean started = false;
+    private TransformerImpl transformer;
+    private Builder builder;
+    private Receiver receiver;
+    private Result result;
+    private String systemId;
+    private boolean started = false;
 
     /**
      * Create a TransformerHandlerImpl and initialise variables. The constructor is protected, because
@@ -86,6 +91,7 @@ public class TransformerHandlerImpl extends ReceivingContentHandler implements T
      *                                       startDocument() more than once.
      */
 
+    @Override
     public void startDocument() throws SAXException {
         if (started) {
             throw new UnsupportedOperationException(
@@ -99,6 +105,7 @@ public class TransformerHandlerImpl extends ReceivingContentHandler implements T
      * Get the Transformer used for this transformation
      */
 
+    @Override
     public Transformer getTransformer() {
         return transformer;
     }
@@ -112,6 +119,7 @@ public class TransformerHandlerImpl extends ReceivingContentHandler implements T
      * @param url the systemId of the source document
      */
 
+    @Override
     public void setSystemId(String url) {
         systemId = url;
         receiver.setSystemId(url);
@@ -123,6 +131,7 @@ public class TransformerHandlerImpl extends ReceivingContentHandler implements T
      * to the {@link #setSystemId(String)} method.
      */
 
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -137,6 +146,7 @@ public class TransformerHandlerImpl extends ReceivingContentHandler implements T
      * @throws IllegalArgumentException if result is invalid for some reason.
      */
 
+    @Override
     public void setResult(Result result) {
         if (result == null) {
             throw new IllegalArgumentException("Result must not be null");
@@ -159,6 +169,7 @@ public class TransformerHandlerImpl extends ReceivingContentHandler implements T
      * the transformation of the constructed document
      */
 
+    @Override
     public void endDocument() throws SAXException {
         super.endDocument();
         NodeInfo doc = builder.getCurrentRoot();

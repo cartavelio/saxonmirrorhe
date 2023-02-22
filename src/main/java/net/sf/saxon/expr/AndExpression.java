@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -66,6 +66,7 @@ public class AndExpression extends BooleanExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         Expression t = super.optimize(visitor, contextInfo);
@@ -100,10 +101,11 @@ public class AndExpression extends BooleanExpression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables that need to be rebound
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         AndExpression a2 = new AndExpression(getLhsExpression().copy(rebindings), getRhsExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, a2);
@@ -118,6 +120,7 @@ public class AndExpression extends BooleanExpression {
      * @return the negation of this expression
      */
 
+    @Override
     public Expression negate() {
         // Apply de Morgan's laws
         // not(A and B) ==> not(A) or not(B)
@@ -141,6 +144,7 @@ public class AndExpression extends BooleanExpression {
      * Evaluate as a boolean.
      */
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext c) throws XPathException {
         return getLhsExpression().effectiveBooleanValue(c) && getRhsExpression().effectiveBooleanValue(c);
     }

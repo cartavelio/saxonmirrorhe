@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -15,6 +15,7 @@ import net.sf.saxon.value.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
+import java.time.*;
 
 /**
  * The class XdmAtomicValue represents an item in an XPath 2.0 sequence that is an atomic value.
@@ -25,7 +26,7 @@ import java.net.URI;
  */
 public class XdmAtomicValue extends XdmItem {
 
-    private XdmAtomicValue(){};
+    private XdmAtomicValue(){}
 
     protected XdmAtomicValue(AtomicValue value, boolean flag) {
         setValue(value);
@@ -141,6 +142,68 @@ public class XdmAtomicValue extends XdmItem {
         this(new QNameValue(value.getStructuredQName(), BuiltInAtomicType.QNAME), true);
     }
 
+
+    /**
+     * Create an <tt>xs:dateTime</tt> atomic value from a {@link Instant}. The resulting value
+     * will always have a timezone component.
+     *
+     * @param value the <tt>xs:dateTime</tt> value in the form of a {@link Instant}
+     * @since 10.0
+     */
+
+    public XdmAtomicValue(Instant value) {
+        this(DateTimeValue.fromJavaInstant(value), true);
+    }
+
+    /**
+     * Create an <tt>xs:dateTime</tt> atomic value from a {@link ZonedDateTime}. The resulting value
+     * will always have a timezone component. Note that the timezone offset (e.g. -05:00) is retained,
+     * but the civil time zone identity (e.g. America/New_York) is lost.
+     *
+     * @param value the <tt>xs:dateTime</tt> value in the form of a {@link ZonedDateTime}
+     * @since 10.0
+     */
+
+    public XdmAtomicValue(ZonedDateTime value) {
+        this(DateTimeValue.fromZonedDateTime(value), true);
+    }
+
+    /**
+     * Create an <tt>xs:dateTime</tt> atomic value from a {@link OffsetDateTime}. The resulting value
+     * will always have a timezone component. The timezone offset (e.g. -05:00) is retained.
+     *
+     * @param value the <tt>xs:dateTime</tt> value in the form of a {@link OffsetDateTime}
+     * @since 10.0
+     */
+
+    public XdmAtomicValue(OffsetDateTime value) {
+        this(DateTimeValue.fromOffsetDateTime(value), true);
+    }
+
+    /**
+     * Create an <tt>xs:dateTime</tt> atomic value from a {@link LocalDateTime}. The resulting value
+     * will have no timezone component.
+     *
+     * @param value the <tt>xs:dateTime</tt> value in the form of a {@link LocalDateTime}
+     * @since 10.0
+     */
+
+    public XdmAtomicValue(LocalDateTime value) {
+        this(DateTimeValue.fromLocalDateTime(value), true);
+    }
+
+    /**
+     * Create an <tt>xs:date</tt> atomic value from a {@link LocalDate}. The resulting value
+     * will have no timezone component.
+     *
+     * @param value the <tt>xs:dateTime</tt> value in the form of a {@link LocalDate}
+     * @since 10.0
+     */
+
+    public XdmAtomicValue(LocalDate value) {
+        this(new DateValue(value), true);
+    }
+
     /**
      * Construct an atomic value given its lexical representation and the name of the required
      * built-in atomic type.
@@ -182,9 +245,11 @@ public class XdmAtomicValue extends XdmItem {
      * @param value the value to convert from. This must either be an instance of {@link AtomicValue}
      *              or {@link QName},
      *              or one of the basic Java types Boolean, Integer, Long, Short, Character, Byte,
-     *              String, Double, Float, BigDecimal, BigInteger, or URI
+     *              String, Double, Float, BigDecimal, BigInteger, URI, ZonedDateTime,
+     *              LocalDateTime, or LocalDate
      * @return the result of the conversion if successful
      * @throws IllegalArgumentException if conversion from this kind of Object is not supported
+     * @since 10.0 (extended in 10.0 to handle additional data types ZonedDateTime, LocalDateTime, LocalDate)
      */
 
     public static XdmAtomicValue makeAtomicValue(Object value) {
@@ -216,9 +281,15 @@ public class XdmAtomicValue extends XdmItem {
             return new XdmAtomicValue((URI) value);
         } else if (value instanceof QName) {
             return new XdmAtomicValue((QName) value);
-        } if(value instanceof XdmAtomicValue){
+        } else if (value instanceof ZonedDateTime) {
+            return new XdmAtomicValue((ZonedDateTime) value);
+        } else if (value instanceof LocalDateTime) {
+            return new XdmAtomicValue((LocalDateTime) value);
+        } else if (value instanceof LocalDate) {
+            return new XdmAtomicValue((LocalDate) value);
+        } else if (value instanceof XdmAtomicValue) {
             return (XdmAtomicValue)value;
-        }else {
+        } else {
             throw new IllegalArgumentException(value.toString());
         }
     }
@@ -285,11 +356,14 @@ public class XdmAtomicValue extends XdmItem {
      * <tr><td>xs:boolean</td>      <td>Boolean</td></tr>
      * <tr><td>xs:QName</td>        <td>QName</td></tr>
      * <tr><td>xs:anyURI</td>       <td>String</td></tr>
+     * <tr><td>xs:dateTime</td>     <td>ZonedDateTime or LocalDateTime (depending whether a timezone is present)</td></tr>
+     * <tr><td>xs:date</td>         <td>LocalDate (dropping any timezone)</td></tr>
      * <tr><td>xs:untypedAtomic</td><td>String</td></tr>
      * <tr><td>Other types</td>     <td>currently String, but this may change in the future</td></tr>
      * </table>
      *
      * @return the value, converted to a Java object of a suitable type
+     * @since 10.0 (added additional return types for xs:dateTime and xs:date)
      */
 
     @SuppressWarnings({"AutoBoxing"})
@@ -307,6 +381,14 @@ public class XdmAtomicValue extends XdmItem {
             return ((BooleanValue) av).getBooleanValue();
         } else if (av instanceof BigDecimalValue) {
             return ((BigDecimalValue) av).getDecimalValue();
+        } else if (av instanceof DateTimeValue) {
+            if (((DateTimeValue) av).hasTimezone()) {
+                return ((DateTimeValue) av).toZonedDateTime();
+            } else {
+                return ((DateTimeValue) av).toLocalDateTime();
+            }
+        } else if (av instanceof DateValue) {
+            return ((DateValue)av).toLocalDate();
         } else if (av instanceof QNameValue) {
             QNameValue q = (QNameValue) av;
             return new QName(q.getPrefix(), q.getNamespaceURI(), q.getLocalName());
@@ -424,6 +506,96 @@ public class XdmAtomicValue extends XdmItem {
         AtomicValue av = getUnderlyingValue();
         if (av instanceof QualifiedNameValue) {
             return new QName(((QualifiedNameValue)av).getStructuredQName());
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * For an XdmAtomicValue representing an xs:dateTime value including timezone,
+     * get the value as an instance of {@link Instant}
+     *
+     * @return the corresponding Instant if the value is an xs:dateTime including
+     * a timezone; otherwise null
+     * @since 10.0
+     */
+
+    public Instant getInstant() {
+        AtomicValue av = getUnderlyingValue();
+        if (av instanceof DateTimeValue && ((DateTimeValue)av).hasTimezone()) {
+            return ((DateTimeValue) av).toJavaInstant();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * For an XdmAtomicValue representing an xs:dateTime value including timezone,
+     * get the value as an instance of {@link ZonedDateTime}
+     *
+     * @return the corresponding ZonedDateTime if the value is an xs:dateTime including
+     * a timezone; otherwise null
+     * @since 10.0
+     */
+
+    public ZonedDateTime getZonedDateTime() {
+        AtomicValue av = getUnderlyingValue();
+        if (av instanceof DateTimeValue && ((DateTimeValue) av).hasTimezone()) {
+            return ((DateTimeValue) av).toZonedDateTime();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * For an XdmAtomicValue representing an xs:dateTime value including timezone,
+     * get the value as an instance of {@link OffsetDateTime}
+     *
+     * @return the corresponding OffsetDateTime if the value is an xs:dateTime including
+     * a timezone; otherwise null
+     * @since 10.0
+     */
+
+    public OffsetDateTime getOffsetDateTime() {
+        AtomicValue av = getUnderlyingValue();
+        if (av instanceof DateTimeValue && ((DateTimeValue) av).hasTimezone()) {
+            return ((DateTimeValue) av).toOffsetDateTime();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * For an XdmAtomicValue representing an xs:dateTime value,
+     * get the value as an instance of {@link LocalDateTime}. Any timezone
+     * information in the value is discarded
+     *
+     * @return the corresponding LocalDateTime if the value is an xs:dateTime; otherwise null
+     * @since 10.0
+     */
+
+    public LocalDateTime getLocalDateTime() {
+        AtomicValue av = getUnderlyingValue();
+        if (av instanceof DateTimeValue) {
+            return ((DateTimeValue) av).toLocalDateTime();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * For an XdmAtomicValue representing an xs:date value,
+     * get the value as an instance of {@link LocalDate}. Any timezone
+     * information in the value is discarded
+     *
+     * @return the corresponding LocalDate if the value is an xs:date; otherwise null
+     * @since 10.0
+     */
+
+    public LocalDate getLocalDate() {
+        AtomicValue av = getUnderlyingValue();
+        if (av instanceof DateValue) {
+            return ((DateValue) av).toLocalDate();
         } else {
             return null;
         }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,7 +12,10 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
 
@@ -32,7 +35,7 @@ public class DynamicQueryContext {
     /*@Nullable*/ private GlobalParameterSet parameters = new GlobalParameterSet();
     private Configuration config;
     private URIResolver uriResolver;
-    private ErrorListener errorListener;
+    private ErrorReporter errorReporter;
     /*@Nullable*/ private TraceListener traceListener;
     private UnparsedTextURIResolver unparsedTextURIResolver;
     private DateTimeValue currentDateTime;
@@ -50,11 +53,7 @@ public class DynamicQueryContext {
     public DynamicQueryContext(/*@NotNull*/ Configuration config) {
         this.config = config;
         uriResolver = config.getURIResolver();
-        errorListener = config.getErrorListener();
-        if (errorListener instanceof StandardErrorListener) {
-            errorListener = ((StandardErrorListener) errorListener).makeAnother(Configuration.XQUERY);
-            ((StandardErrorListener) errorListener).setRecoveryPolicy(Configuration.DO_NOT_RECOVER);
-        }
+        errorReporter = new StandardErrorReporter();
         traceFunctionDestination = config.getLogger();
     }
 
@@ -134,10 +133,6 @@ public class DynamicQueryContext {
         if (item == null) {
             throw new NullPointerException("Context item cannot be null");
         }
-        if (item instanceof DocumentInfo) {
-            // for legacy reasons
-            item = ((DocumentInfo)item).getUnderlyingNode();
-        }
         if (item instanceof NodeInfo) {
             if (!((NodeInfo) item).getConfiguration().isCompatible(config)) {
                 throw new IllegalArgumentException(
@@ -174,7 +169,7 @@ public class DynamicQueryContext {
      *        Changed in 9.9 to require the second argument to be a GroundedValue
      */
 
-    public void setParameter(StructuredQName expandedName, GroundedValue<?> value) {
+    public void setParameter(StructuredQName expandedName, GroundedValue value) {
         if (parameters == null) {
             parameters = new GlobalParameterSet();
         }
@@ -199,7 +194,7 @@ public class DynamicQueryContext {
      */
 
     /*@Nullable*/
-    public GroundedValue<?> getParameter(StructuredQName expandedName) {
+    public GroundedValue getParameter(StructuredQName expandedName) {
         if (parameters == null) {
             return null;
         }
@@ -280,10 +275,11 @@ public class DynamicQueryContext {
      *
      * @param listener the ErrorListener to be used
      * @since 8.4
+     * @deprecated since 10.0. Use {@link #setErrorReporter}
      */
 
     public void setErrorListener(ErrorListener listener) {
-        errorListener = listener;
+        errorReporter = new ErrorReporterToListener(listener);
     }
 
     /**
@@ -291,11 +287,38 @@ public class DynamicQueryContext {
      *
      * @return the ErrorListener in use
      * @since 8.4
+     * @deprecated since 10.0. Use {@link #setErrorReporter}
      */
 
     public ErrorListener getErrorListener() {
-        return errorListener;
+        ErrorReporter uel = getErrorReporter();
+        if (uel instanceof ErrorReporterToListener) {
+            return ((ErrorReporterToListener) uel).getErrorListener();
+        } else {
+            return null;
+        }
     }
+
+    /**
+     * Set a callback that will be used when reporting a dynamic error or warning
+     * @since 10.0
+     */
+
+    public void setErrorReporter(ErrorReporter reporter) {
+        errorReporter = reporter;
+    }
+
+    /**
+     * Get the callback that will be used when reporting a dynamic error or warning
+     *
+     * @since 10.0
+     */
+
+
+    public ErrorReporter getErrorReporter() {
+        return errorReporter;
+    }
+
 
     /**
      * Set the trace listener. The trace listener receives reports of all run-time
@@ -401,7 +424,7 @@ public class DynamicQueryContext {
 
     public void initializeController(/*@NotNull*/ Controller controller) throws XPathException {
         controller.setURIResolver(getURIResolver());
-        controller.setErrorListener(getErrorListener());
+        controller.setErrorReporter(getErrorReporter());
         controller.addTraceListener(getTraceListener());
         if (unparsedTextURIResolver != null) {
             controller.setUnparsedTextURIResolver(unparsedTextURIResolver);

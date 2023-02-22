@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,13 +18,13 @@ import java.util.ArrayList;
  * Represents the tuple stream delivered by an "order by" clause. This sorts the tuple stream supplied
  * as its input, and outputs the same tuples but in sorted order.
  */
-public class OrderByClausePull extends TuplePull implements Sortable {
+public class OrderByClausePull extends TuplePull {
 
     private TuplePull base;
     private OrderByClause orderByClause;
     private TupleExpression tupleExpr;
     private int currentPosition = -1;
-    protected AtomicComparer[] comparers;
+    private AtomicComparer[] comparers;
     private ArrayList<ItemToBeSorted> tupleArray = new ArrayList<ItemToBeSorted>(100);
 
     public OrderByClausePull(TuplePull base, TupleExpression tupleExpr, OrderByClause orderBy, XPathContext context) {
@@ -67,7 +67,25 @@ public class OrderByClausePull extends TuplePull implements Sortable {
             }
 
             try {
-                GenericSorter.quickSort(0, position, this);
+                tupleArray.sort((a, b) -> {
+                    try {
+                        for (int i = 0; i < comparers.length; i++) {
+                            int comp = comparers[i].compareAtomicValues(
+                                    a.sortKeyValues[i], b.sortKeyValues[i]);
+                            if (comp != 0) {
+                                // we have found a difference, so we can return
+                                return comp;
+                            }
+                        }
+                    } catch (NoDynamicContextException e) {
+                        throw new AssertionError("Sorting without dynamic context: " + e.getMessage());
+                    }
+
+                    // all sort keys equal: return the items in their original order
+                    // TODO: unnecessary, we are now using a stable sort routine
+                    return a.originalPosition - b.originalPosition;
+                });
+                //GenericSorter.quickSort(0, position, this);
             } catch (ClassCastException e) {
                 XPathException err = new XPathException("Non-comparable types found while sorting: " + e.getMessage());
                 err.setErrorCode("XPTY0004");
@@ -82,39 +100,6 @@ public class OrderByClausePull extends TuplePull implements Sortable {
             return false;
         }
 
-    }
-
-    /**
-     * Compare two objects within this Sortable, identified by their position.
-     *
-     * @return &lt;0 if obj[a]&lt;obj[b], 0 if obj[a]=obj[b], &gt;0 if obj[a]&gt;obj[b]
-     */
-    public int compare(int a, int b) {
-        try {
-            for (int i = 0; i < comparers.length; i++) {
-                int comp = comparers[i].compareAtomicValues(
-                        tupleArray.get(a).sortKeyValues[i], tupleArray.get(b).sortKeyValues[i]);
-                if (comp != 0) {
-                    // we have found a difference, so we can return
-                    return comp;
-                }
-            }
-        } catch (NoDynamicContextException e) {
-            throw new AssertionError("Sorting without dynamic context: " + e.getMessage());
-        }
-
-        // all sort keys equal: return the items in their original order
-
-        return tupleArray.get(a).originalPosition - tupleArray.get(b).originalPosition;
-    }
-
-    /**
-     * Swap two objects within this Sortable, identified by their position.
-     */
-    public void swap(int a, int b) {
-        ItemToBeSorted temp = tupleArray.get(a);
-        tupleArray.set(a, tupleArray.get(b));
-        tupleArray.set(b, temp);
     }
 
     /**

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,7 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.OutputKeys;
@@ -34,7 +34,7 @@ public class MessageEmitter extends XMLEmitter {
         super.setPipelineConfiguration(pipelineConfiguration);
         if (writer == null && outputStream == null) {
             try {
-                setOutputStream(getConfiguration().getStandardErrorOutput());
+                setWriter(getConfiguration().getLogger().asWriter());
             } catch (XPathException e) {
                 throw new AssertionError(e);
             }

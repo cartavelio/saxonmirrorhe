@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -16,6 +16,7 @@ import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntToIntHashMap;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -70,6 +71,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
      * @return the next item in the sequence
      */
 
+    @Override
     public StringValue next() {
         if (next == null && prevEnd >= 0) {
             // we've returned a match (or we're at the start), so find the next match
@@ -117,14 +119,15 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return LAST_POSITION_FINDER;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LAST_POSITION_FINDER);
     }
 
     /**
@@ -135,6 +138,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
      *         does not match
      */
 
+    @Override
     public boolean isMatching() {
         return next == null && prevEnd >= 0;
     }
@@ -147,6 +151,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
      *         within the regular expression
      */
 
+    @Override
     public String getRegexGroup(int number) {
         if (!isMatching()) return null;
         if (number > matcher.groupCount() || number < 0) return "";
@@ -158,6 +163,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
     /**
      * Get the number of captured groups
      */
+    @Override
     public int getNumberOfGroups() {
         return matcher.groupCount();
     }
@@ -171,6 +177,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
      * @param action  defines the processing to be performed at the start and end of a group
      */
 
+    @Override
     public void processMatchingSubstring(MatchHandler action) throws XPathException {
         int c = matcher.groupCount();
         if (c == 0) {
@@ -249,7 +256,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
                     }
                 }
                 if (i < current.length()) {
-                    buff.append(current.charAt(i));
+                    buff.cat(current.charAt(i));
                 }
             }
             if (buff.length() > 0) {

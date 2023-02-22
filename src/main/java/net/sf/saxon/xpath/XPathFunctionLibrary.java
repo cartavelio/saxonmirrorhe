@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -79,6 +79,7 @@ public class XPathFunctionLibrary implements FunctionLibrary {
      */
 
     /*@Nullable*/
+    @Override
     public Expression bind(/*@NotNull*/ SymbolicName.F functionName, /*@NotNull*/  Expression[] staticArgs, StaticContext env, List<String> reasons) {
         if (resolver == null) {
             return null;
@@ -94,8 +95,6 @@ public class XPathFunctionLibrary implements FunctionLibrary {
         return fc;
     }
 
-//#ifdefined HOF
-
     /**
      * Test whether a function with a given name and arity is available; if so, return a function
      * item that can be dynamically called.
@@ -110,6 +109,7 @@ public class XPathFunctionLibrary implements FunctionLibrary {
      *          in the event of certain errors, for example attempting to get a function
      *          that is private
      */
+    @Override
     public Function getFunctionItem(SymbolicName.F symbolicName, StaticContext staticContext) throws XPathException {
         if (resolver == null) {
             return null;
@@ -127,8 +127,6 @@ public class XPathFunctionLibrary implements FunctionLibrary {
         FunctionItemType functionType = new SpecificFunctionType(argTypes, SequenceType.ANY_SEQUENCE);
         return new CallableFunction(symbolicName, functionCall, functionType);
     }
-//#endif
-
 
     /**
      * Test whether a function with a given name and arity is available
@@ -137,6 +135,7 @@ public class XPathFunctionLibrary implements FunctionLibrary {
      * @param functionName the qualified name of the function being called
      * @return true if a function of this name and arity is available for calling
      */
+    @Override
     public boolean isAvailable(SymbolicName.F functionName) {
         return resolver != null &&
                 resolver.resolveFunction(
@@ -153,6 +152,7 @@ public class XPathFunctionLibrary implements FunctionLibrary {
      */
 
     /*@NotNull*/
+    @Override
     public FunctionLibrary copy() {
         XPathFunctionLibrary xfl = new XPathFunctionLibrary();
         xfl.resolver = resolver;

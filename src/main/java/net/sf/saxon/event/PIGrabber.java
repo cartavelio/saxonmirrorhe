@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,8 +8,10 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.StandardURIResolver;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.ProcInstParser;
@@ -85,7 +87,10 @@ public class PIGrabber extends ProxyReceiver {
      * Abort the parse when the first start element tag is found
      */
 
-    public void startElement(NodeName namecode, SchemaType typecode, Location location, int properties)
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
             throws XPathException {
         terminated = true;
         // abort the parse when the first start element tag is found
@@ -107,6 +112,7 @@ public class PIGrabber extends ProxyReceiver {
      * Handle xml-stylesheet PI
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
             throws XPathException {
         if (target.equals("xml-stylesheet")) {

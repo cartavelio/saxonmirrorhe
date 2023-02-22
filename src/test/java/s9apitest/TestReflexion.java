@@ -1,11 +1,10 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.sax.SAXSource;
@@ -15,8 +14,13 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestReflexion extends TestCase {
+
+public class TestReflexion {
 
     private final static boolean BYTECODE = false;
 
@@ -29,6 +33,7 @@ public class TestReflexion extends TestCase {
     }
 
 
+    @Test
     public void testConstructor0() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -42,6 +47,7 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testConstructor1() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -55,6 +61,7 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testVoidSetter1() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -68,6 +75,7 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testThisSetter1() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -102,6 +110,7 @@ public class TestReflexion extends TestCase {
             + "    </xsl:template>\n"
             + "</xsl:stylesheet>";
 
+    @Test
     public void testThisSetter2() {
         try {
             Processor proc = new Processor(true);
@@ -117,6 +126,7 @@ public class TestReflexion extends TestCase {
     }
 
 
+    @Test
     public void testStringVsByteXQuery() {
         // See http://stackoverflow.com/questions/11448305/
         try {
@@ -130,6 +140,7 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testStringVsByteXSLT() {
         // See http://stackoverflow.com/questions/11448305/
         try {
@@ -155,6 +166,7 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testEmptySequenceToNull() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -183,6 +195,7 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testByteArrayInAndOut() {
         // See bugs 3525, 3818
         try {
@@ -193,70 +206,100 @@ public class TestReflexion extends TestCase {
                     "let $y := this:toEvenByteArray($x) " +
                     "return (($y instance of xs:unsignedByte*), (count($y) eq 11), ($y[1] eq 10), ($y[2] eq 10), ($y[3] eq 12), ($y[4] eq 12))");
             XdmValue val = exec.load().evaluate();
-            assertEquals("type", "true", val.itemAt(0).getStringValue());
-            assertEquals("size", "true", val.itemAt(1).getStringValue());
-            assertEquals("item1", "true", val.itemAt(2).getStringValue());
-            assertEquals("item2", "true", val.itemAt(3).getStringValue());
-            assertEquals("item3", "true", val.itemAt(4).getStringValue());
-            assertEquals("item4", "true", val.itemAt(5).getStringValue());
+            assertEquals("true", val.itemAt(0).getStringValue(), "type");
+            assertEquals("true", val.itemAt(1).getStringValue(), "size");
+            assertEquals("true", val.itemAt(2).getStringValue(), "item1");
+            assertEquals("true", val.itemAt(3).getStringValue(), "item2");
+            assertEquals("true", val.itemAt(4).getStringValue(), "item3");
+            assertEquals("true", val.itemAt(5).getStringValue(), "item4");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
-    public void testSupplyMap() {
-        try {
-            XQueryCompiler c = makeCompiler();
-            XQueryExecutable exec = c.compile(
-                    "this:mapSize(this:makeMap())");
-            XdmValue val = exec.load().evaluate();
-            assertEquals("val", "2", val.itemAt(0).getStringValue());
-        } catch (SaxonApiException e) {
-            fail(e.getMessage());
-        }
-    }
+//    public void testSupplyMap() {
+//        try {
+//            XQueryCompiler c = makeCompiler();
+//            XQueryExecutable exec = c.compile(
+//                    "this:mapSize(map{'a':1, 'b':2})");
+//            XdmValue val = exec.load().evaluate();
+//            assertEquals("val", "true", val.itemAt(0).getStringValue());
+//        } catch (SaxonApiException e) {
+//            fail(e.getMessage());
+//        }
+//    }
 
+    @Test
     public void testSupplyDate() {
         try {
             XQueryCompiler c = makeCompiler();
             XQueryExecutable exec = c.compile(
                     "this:is2008d(xs:dateTime('2008-01-01T12:30:00Z'))");
             XdmValue val = exec.load().evaluate();
-            assertEquals("val", "true", val.itemAt(0).getStringValue());
+            assertEquals("true", val.itemAt(0).getStringValue(), "val");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testSupplyInstant() {
         try {
             XQueryCompiler c = makeCompiler();
             XQueryExecutable exec = c.compile(
                     "this:is2008i(xs:dateTime('2008-01-01T12:30:00Z'))");
             XdmValue val = exec.load().evaluate();
-            assertEquals("val", "true", val.itemAt(0).getStringValue());
+            assertEquals("true", val.itemAt(0).getStringValue(), "val");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testSupplyZonedDateTime() {
         try {
             XQueryCompiler c = makeCompiler();
             XQueryExecutable exec = c.compile(
                     "this:is2008z(xs:dateTime('2008-01-01T12:30:00Z'))");
             XdmValue val = exec.load().evaluate();
-            assertEquals("val", "true", val.itemAt(0).getStringValue());
+            assertEquals("true", val.itemAt(0).getStringValue(), "val");
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testSupplyLocalDateTime() {
+        try {
+            XQueryCompiler c = makeCompiler();
+            XQueryExecutable exec = c.compile(
+                    "this:is2008localDateTime(xs:dateTime('2008-01-01T12:30:00Z'))");
+            XdmValue val = exec.load().evaluate();
+            assertEquals("true", val.itemAt(0).getStringValue(), "val");
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testSupplyLocalDate() {
+        try {
+            XQueryCompiler c = makeCompiler();
+            XQueryExecutable exec = c.compile(
+                    "this:is2008localDate(xs:date('2008-01-01'))");
+            XdmValue val = exec.load().evaluate();
+            assertEquals("true", val.itemAt(0).getStringValue(), "val");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
 
+    @Test
     public void testEmptyList() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, BYTECODE);
+            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                     "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
@@ -279,10 +322,11 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testNonEmptyList() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, BYTECODE);
+            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                     "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
@@ -305,37 +349,11 @@ public class TestReflexion extends TestCase {
         }
     }
 
-    public void testListOfMaps() {
-        try {
-            Processor p = new Processor(true);
-            p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, BYTECODE);
-            XsltCompiler c = p.newXsltCompiler();
-            String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
-                    "    xmlns:jf=\"java:s9apitest.TestReflexionHelper\">\n" +
-                    "    <xsl:output method=\"text\" />\n" +
-                    "    <xsl:template name='main'>\n" +
-                    "        <xsl:variable name=\"theList\" select=\"jf:getListOfMaps('Weds', 'Wednesday')\" />\n" +
-                    "        <xsl:value-of select=\"count($theList)\" />\n" +
-                    "        <xsl:value-of select=\"Q{java:java.util.Map}get($theList[1], 'Weds')\" />\n" +
-                    "    </xsl:template>\n" +
-                    "</xsl:stylesheet>";
-            XsltTransformer t = c.compile(new StreamSource(new StringReader(s))).load();
-            StringWriter out = new StringWriter();
-            Serializer ser = p.newSerializer(out);
-            t.setDestination(ser);
-            t.setInitialTemplate(new QName("main"));
-            t.transform();
-            assertTrue(out.toString().equals("2Wednesday"));
-        } catch (SaxonApiException e1) {
-            fail(e1.getMessage());
-        }
-    }
-
+    @Test
     public void testStringSplit() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, BYTECODE);
+            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                     "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
@@ -356,10 +374,11 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testStaticInvalidRequiredExternalObjectType() {
         // Error should be detected at compile time
         Processor p = new Processor(true);
-        p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, BYTECODE);
+        p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
         XsltCompiler c = p.newXsltCompiler();
         String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
@@ -387,12 +406,13 @@ public class TestReflexion extends TestCase {
 
     }
 
+    @Test
     public void testDynamicInvalidRequiredExternalObjectType() {
         XsltTransformer t;
         try {
             // Error should be detected at run time
             Processor p = new Processor(true);
-            p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, BYTECODE);
+            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                     "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
@@ -420,6 +440,7 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testDecimals() {
         // Bug 2765
         try {
@@ -463,6 +484,7 @@ public class TestReflexion extends TestCase {
     }
 
 
+    @Test
     public void testConvertUntypedAtomic() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -490,6 +512,7 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testAtomization() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -517,13 +540,14 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testReturnNodes() {
         // Test that we detect when returned nodes have the wrong Configuration. See non-bug 1856.
         try {
             Processor p = new Processor(true);
             boolean[] options = {true, false};
             for (boolean option : options) {
-                p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, option);
+                p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, option);
                 XQueryCompiler c = p.newXQueryCompiler();
                 c.declareNamespace("this", "java:s9apitest.TestReflexionHelper");
                 XQueryExecutable exec;
@@ -559,10 +583,11 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testBridge0() {
         try {
             XQueryCompiler c = makeCompiler();
-            c.getProcessor().setConfigurationProperty(FeatureKeys.TRACE_EXTERNAL_FUNCTIONS, true);
+            c.getProcessor().setConfigurationProperty(Feature.TRACE_EXTERNAL_FUNCTIONS, true);
             XQueryExecutable exec = c.compile(
                     "let $n :=  Q{java:s9apitest.MyFoo}new() return Q{java:s9apitest.MyFoo}foo($n)");
             XdmValue val = exec.load().evaluate();
@@ -572,6 +597,7 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testPrajapati() {
         String xsl = "" +
                 "<?xml version='1.0'?>\n" +
@@ -621,8 +647,9 @@ public class TestReflexion extends TestCase {
         }
     }
 
+    @Test
     public void testAmbiguousConstructorExport() {
-        // Bug 3019      uousR
+        // Bug 3019
         String xsl = "<xsl:stylesheet exclude-result-prefixes=\"#all\" version=\"2.0\" xmlns:URL=\"java:java.net.URL\"\n" +
                 "\txmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
                 "\t<xsl:template name=\"main\">\n" +
@@ -667,6 +694,7 @@ public class TestReflexion extends TestCase {
         return obj;
     }
 
+    @Test
     public void testObjectValueAsMap() {
         String xsl = "<xsl:stylesheet exclude-result-prefixes=\"#all\" "
                 + "version=\"3.0\" "
@@ -702,15 +730,18 @@ public class TestReflexion extends TestCase {
 
     }
 
+
     /**
      * Test overriding of reflexive extension function using stylesheet functions in XSLT
      */
 
+    @Test
     public void testOverrideFunctionXsltOverriding() {
         testOverrideFunctionXslt(xslWithOverridingFunction1, true);
         testOverrideFunctionXslt(xslWithOverridingFunction2, true);
     }
 
+    @Test
     public void testOverrideFunctionXsltUnderriding() {
         testOverrideFunctionXslt(xslWithOverridingFunction1, false);
         testOverrideFunctionXslt(xslWithOverridingFunction2, false);
@@ -760,7 +791,7 @@ public class TestReflexion extends TestCase {
                 out.setOutputWriter(sw);
                 trans.setDestination(out);
                 trans.transform();
-                assertTrue("sqrt ", override == sw.toString().contains("local"));
+                assertTrue(override == sw.toString().contains("local"), "sqrt ");
             }
 
         } catch (Exception e) {
@@ -769,6 +800,8 @@ public class TestReflexion extends TestCase {
         }
     }
 
+
+    @Test
     public void testLookupNotationWithContext() {    // bug 4056
         try {
             Processor proc = new Processor(true);
@@ -776,13 +809,27 @@ public class TestReflexion extends TestCase {
             XPathExecutable exp = compiler.compile(
                     "let $e := Q{java:net.sf.saxon.expr.Literal}makeEmptySequence() return $e?effectiveBooleanValue()");
             XdmValue result = exp.load().evaluateSingle();
-            assertFalse(((XdmAtomicValue)result).getBooleanValue());
+            assertFalse(((XdmAtomicValue) result).getBooleanValue());
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
     }
 
+    @Test
+    public void testReturnJDOM2Document() {    // bug 4567
+        try {
+            Processor proc = new Processor(true);
+            XPathCompiler compiler = proc.newXPathCompiler();
+            XPathExecutable exp = compiler.compile(
+                    "let $e := Q{java:net.sf.saxon.expr.Literal}makeEmptySequence() return $e?effectiveBooleanValue()");
+            XdmValue result = exp.load().evaluateSingle();
+            assertFalse(((XdmAtomicValue) result).getBooleanValue());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
 
 }
 

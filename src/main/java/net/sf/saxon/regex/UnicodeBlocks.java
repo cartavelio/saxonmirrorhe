@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -63,15 +63,15 @@ public class UnicodeBlocks {
                     // no action
                     break;
                 default:
-                    fsb.append(c);
+                    fsb.cat(c);
             }
         }
         return fsb.toString();
     }
 
     private synchronized static void readBlocks(Configuration config) throws RESyntaxException {
-        blocks = new HashMap<String, IntSet>(250);
-        InputStream in = Configuration.locateResource("unicodeBlocks.xml", new ArrayList<String>(), new ArrayList<ClassLoader>());
+        blocks = new HashMap<>(250);
+        InputStream in = Configuration.locateResource("unicodeBlocks.xml", new ArrayList<>(), new ArrayList<ClassLoader>());
         if (in == null) {
             throw new RESyntaxException("Unable to read unicodeBlocks.xml file");
         }
@@ -95,12 +95,7 @@ public class UnicodeBlocks {
             }
             String blockName = normalizeBlockName(item.getAttributeValue("", "name"));
             IntSet range = null;
-            AxisIterator ranges = item.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
-            while (true) {
-                NodeInfo rangeElement = ranges.next();
-                if (rangeElement == null) {
-                    break;
-                }
+            for (NodeInfo rangeElement : item.children(NodeKindTest.ELEMENT)) {
                 int from = Integer.parseInt(rangeElement.getAttributeValue("", "from").substring(2), 16);
                 int to = Integer.parseInt(rangeElement.getAttributeValue("", "to").substring(2), 16);
                 IntSet cr = new IntBlockSet(from, to);

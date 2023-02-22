@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,7 +13,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
@@ -42,6 +41,7 @@ public abstract class StaticContextAccessor extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
+    @Override
     public AtomicValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return evaluate(getRetainedStaticContext());
     }
@@ -49,17 +49,6 @@ public abstract class StaticContextAccessor extends SystemFunction {
     @Override
     public Expression makeFunctionCall(Expression[] arguments) {
         return Literal.makeLiteral(evaluate(getRetainedStaticContext()));
-    }
-
-    /**
-     * Implement the XPath function static-base-uri()
-     */
-
-    public static class StaticBaseUri extends StaticContextAccessor {
-        @Override
-        public AtomicValue evaluate(RetainedStaticContext rsc) {
-            return new AnyURIValue(rsc.getStaticBaseUriString());
-        }
     }
 
     /**

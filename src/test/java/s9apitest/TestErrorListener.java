@@ -1,7 +1,6 @@
 package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SchemaManager;
 import net.sf.saxon.s9api.SchemaValidator;
@@ -10,8 +9,10 @@ import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestErrorListener extends TestCase {
+
+public class TestErrorListener {
 
     /**
      * Test that warnings from compiling a schema referenced by xsI:schemaLocation go to the right
@@ -21,7 +22,6 @@ public class TestErrorListener extends TestCase {
         try {
             EnterpriseConfiguration configuration = new EnterpriseConfiguration();
             MyErrorListener configListener = new MyErrorListener();
-            configuration.setErrorListener(configListener);
             Processor processor = new Processor(configuration);
 
             // http://www.saxonica.com/documentation/index.html#!javadoc/net.sf.saxon.s9api/SchemaManager
@@ -34,8 +34,8 @@ public class TestErrorListener extends TestCase {
             try {
                 schemaValidator.setErrorListener(new MyErrorListener());
                 schemaValidator.validate(new StreamSource("/Users/mike/bugs/2019/4099-abbink/SaxonTester.xml"));
-                assertEquals("warning-count1", listener.warnings, 2);
-                assertEquals("warning-count2", configListener.warnings, 0);
+                assertEquals(2, listener.warnings, "warning-count1");
+                assertEquals(0, configListener.warnings, "warning-count2");
             } catch (Exception e) {
             }
             System.out.println("=============");
@@ -49,7 +49,7 @@ public class TestErrorListener extends TestCase {
         int warnings = 0;
         int errors = 0;
         public void error(TransformerException e) throws TransformerException {
-            assertEquals("onlyOneError", 0, errors);
+            assertEquals(0, errors, "onlyOneError");
             errors++;
             System.out.println(String.format("error - %s", e.getMessage()));
             System.out.println("I WILL THROW TransformerException");

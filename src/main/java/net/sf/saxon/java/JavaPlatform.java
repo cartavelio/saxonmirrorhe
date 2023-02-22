@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -40,7 +40,9 @@ import javax.xml.transform.stream.StreamSource;
 import java.lang.reflect.Method;
 import java.text.CollationKey;
 import java.text.Collator;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Implementation of the Platform class containing methods specific to the Java platform
@@ -48,7 +50,7 @@ import java.util.*;
  */
 public class JavaPlatform implements Platform {
 
-    private static boolean tryJdk9 = true;
+    static boolean tryJdk9 = true;
 
     /**
      * The constructor is called during the static initialization of the Configuration
@@ -59,21 +61,22 @@ public class JavaPlatform implements Platform {
 
 
     /**
-     *  Checks if the supplied static context is an instance of the JAXP static context.
-     *  On Java we create namespace information from the JAXP XPath static context.
-     *  On the .NET platform we do nothing.
-     *  @param retainedStaticContext
-     *  @param sc
-     *  @return boolean
-     *  @since 9.7.0.5
+     * Checks if the supplied static context is an instance of the JAXP static context.
+     * On Java we create namespace information from the JAXP XPath static context.
+     * On the .NET platform we do nothing.
      *
+     * @param retainedStaticContext
+     * @param sc
+     * @return boolean
+     * @since 9.7.0.5
      */
 
-    public boolean JAXPStaticContextCheck(RetainedStaticContext retainedStaticContext, StaticContext sc){
-         if(sc instanceof JAXPXPathStaticContext && !(((JAXPXPathStaticContext) sc).getNamespaceContext() instanceof NamespaceResolver)){
-             setNamespacesFromJAXP(retainedStaticContext, (JAXPXPathStaticContext) sc);
-             return true;
-         }
+    @Override
+    public boolean JAXPStaticContextCheck(RetainedStaticContext retainedStaticContext, StaticContext sc) {
+        if (sc instanceof JAXPXPathStaticContext && !(((JAXPXPathStaticContext) sc).getNamespaceContext() instanceof NamespaceResolver)) {
+            setNamespacesFromJAXP(retainedStaticContext, (JAXPXPathStaticContext) sc);
+            return true;
+        }
         return false;
     }
 
@@ -83,56 +86,21 @@ public class JavaPlatform implements Platform {
      * using a NamespaceContext object, which (absurdly) offers no way to iterate over all the
      * contained namespaces.
      *
-     * @param retainedStaticContext
-     * @param sc JAXP static context
+     * @param retainedStaticContext the retained static context to be updated
+     * @param sc                    JAXP static context
      */
 
     private void setNamespacesFromJAXP(RetainedStaticContext retainedStaticContext, JAXPXPathStaticContext sc) {
         final NamespaceContext nc = sc.getNamespaceContext();
-        retainedStaticContext.setNamespaces(new Map<String, String>() {
-            public void clear() { }
+        retainedStaticContext.setNamespaces(new NamespaceResolver() {
 
-            public int size() {
-                throw new UnsupportedOperationException();
+            @Override
+            public String getURIForPrefix(String prefix, boolean useDefault) {
+                return nc.getNamespaceURI(prefix);
             }
 
-            public boolean isEmpty() {
-                throw new UnsupportedOperationException();
-            }
-
-            public boolean containsKey(Object key) {
-                return nc.getNamespaceURI(key.toString()) != null;
-            }
-
-            public boolean containsValue(Object value) {
-                throw new UnsupportedOperationException();
-            }
-
-            public String get(Object key) {
-                return nc.getNamespaceURI(key.toString());
-            }
-
-            public String put(String key, String value) {
-                throw new UnsupportedOperationException();
-            }
-
-            public String remove(Object key) {
-                throw new UnsupportedOperationException();
-            }
-
-            public void putAll(Map<? extends String, ? extends String> m) {
-                throw new UnsupportedOperationException();
-            }
-
-            public Set<String> keySet() {
-                throw new UnsupportedOperationException();
-            }
-
-            public Collection<String> values() {
-                throw new UnsupportedOperationException();
-            }
-
-            public Set<Entry<String, String>> entrySet() {
+            @Override
+            public Iterator<String> iteratePrefixes() {
                 throw new UnsupportedOperationException();
             }
         });
@@ -143,6 +111,7 @@ public class JavaPlatform implements Platform {
      * Perform platform-specific initialization of the configuration
      */
 
+    @Override
     public void initialize(Configuration config) {
         config.registerExternalObjectModel(DOMEnvelope.getInstance());
         config.registerExternalObjectModel(DOMObjectModel.getInstance());
@@ -153,6 +122,7 @@ public class JavaPlatform implements Platform {
      * Return true if this is the Java platform
      */
 
+    @Override
     public boolean isJava() {
         return true;
     }
@@ -161,6 +131,7 @@ public class JavaPlatform implements Platform {
      * Return true if this is the .NET platform
      */
 
+    @Override
     public boolean isDotNet() {
         return false;
     }
@@ -169,6 +140,7 @@ public class JavaPlatform implements Platform {
      * Get the platform version
      */
 
+    @Override
     public String getPlatformVersion() {
         return "Java version " + System.getProperty("java.version");
     }
@@ -177,6 +149,7 @@ public class JavaPlatform implements Platform {
      * Get a suffix letter to add to the Saxon version number to identify the platform
      */
 
+    @Override
     public String getPlatformSuffix() {
         return "J";
     }
@@ -188,13 +161,12 @@ public class JavaPlatform implements Platform {
      * @return the parser (XMLReader)
      */
 
+    @Override
     public XMLReader loadParser() {
         XMLReader parser;
         try {
             parser = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
-        } catch (ParserConfigurationException err) {
-            throw new TransformerFactoryConfigurationError(err);
-        } catch (SAXException err) {
+        } catch (ParserConfigurationException | SAXException err) {
             throw new TransformerFactoryConfigurationError(err);
         }
         return parser;
@@ -215,6 +187,7 @@ public class JavaPlatform implements Platform {
      *
      * @return the parser (XMLReader)
      */
+    @Override
     public XMLReader loadParserForXmlFragments() {
         SAXParserFactory factory = null;
         if (tryJdk9) {
@@ -223,7 +196,7 @@ public class JavaPlatform implements Platform {
                 @SuppressWarnings("JavaReflectionMemberAccess")
                 Method method = SAXParserFactory.class.getMethod("newDefaultInstance");
                 Object result = method.invoke(null);
-                factory = (SAXParserFactory) result;
+                factory = (SAXParserFactory)result;
             } catch (Exception e) {
                 tryJdk9 = false;
                 // keep trying
@@ -257,14 +230,14 @@ public class JavaPlatform implements Platform {
      * @param input         the supplied StreamSource
      * @param validation    indicates whether schema validation is required
      * @param dtdValidation indicates whether DTD validation is required
-     * @param stripspace    indicates whether whitespace text nodes should be stripped
      * @return the PullSource or SAXSource, initialized with a suitable parser, or the original
-     *         input Source, if now special handling is required or possible. This implementation
-     *         always returns the original input unchanged.
+     * input Source, if now special handling is required or possible. This implementation
+     * always returns the original input unchanged.
      */
 
+    @Override
     public Source getParserSource(PipelineConfiguration pipe, StreamSource input, int validation,
-                                  boolean dtdValidation, int stripspace) {
+                                  boolean dtdValidation) {
         return input;
     }
 
@@ -283,6 +256,7 @@ public class JavaPlatform implements Platform {
      */
 
     /*@Nullable*/
+    @Override
     public StringCollator makeCollation(Configuration config, Properties props, String uri) throws XPathException {
         return JavaCollationFactory.makeCollation(config, uri, props);
     }
@@ -297,6 +271,7 @@ public class JavaPlatform implements Platform {
      * @return true if this collation can supply collation keys
      */
 
+    @Override
     public boolean canReturnCollationKeys(StringCollator collation) {
         return !(collation instanceof SimpleCollation) ||
                 ((SimpleCollation) collation).getComparator() instanceof Collator;
@@ -311,6 +286,7 @@ public class JavaPlatform implements Platform {
      *                            collation keys (this should have been checked in advance)
      */
 
+    @Override
     public AtomicMatchKey getCollationKey(SimpleCollation namedCollation, String value) {
         CollationKey ck = ((Collator) namedCollation.getComparator()).getCollationKey(value);
         return new CollationMatchKey(ck);
@@ -320,10 +296,12 @@ public class JavaPlatform implements Platform {
      * No ICU features
      */
 
+    @Override
     public boolean hasICUCollator() {
         return false;
     }
 
+    @Override
     public boolean hasICUNumberer() {
         return false;
     }
@@ -337,6 +315,7 @@ public class JavaPlatform implements Platform {
      * @throws XPathException if the URI is malformed in some way
      */
 
+    @Override
     public StringCollator makeUcaCollator(String uri, Configuration config) throws XPathException {
         UcaCollatorUsingJava collator = new UcaCollatorUsingJava(uri);
         if ("yes".equals(collator.getProperties().getProperty("numeric"))) {
@@ -349,16 +328,15 @@ public class JavaPlatform implements Platform {
     /**
      * Compile a regular expression
      *
-     *
      * @param config       the Saxon configuration
      * @param regex        the regular expression as a string
      * @param flags        the value of the flags attribute
      * @param hostLanguage one of "XSD10", "XSD11", "XP20" or "XP30". Also allow combinations, e.g. "XP20/XSD11".
      * @param warnings     if supplied, may capture warnings from the regular expression compiler
      * @return the compiled regular expression
-     * @throws net.sf.saxon.trans.XPathException
-     *          if the regular expression or the flags are invalid
+     * @throws net.sf.saxon.trans.XPathException if the regular expression or the flags are invalid
      */
+    @Override
     public RegularExpression compileRegularExpression(Configuration config, CharSequence regex, String flags, String hostLanguage, List<String> warnings) throws XPathException {
         // recognize "!" as a flag to mean: use native Java regex syntax
         if (flags.contains("!")) {
@@ -398,6 +376,7 @@ public class JavaPlatform implements Platform {
         // do nothing
     }
 
+    @Override
     public ExternalObjectType getExternalObjectType(Configuration config, String uri, String localName) {
         throw new UnsupportedOperationException("getExternalObjectType for Java");
     }
@@ -410,6 +389,7 @@ public class JavaPlatform implements Platform {
      * @return the name of the directory in which Saxon is installed, if available, or null otherwise
      */
 
+    @Override
     public String getInstallationDirectory(String edition, Configuration config) {
         try {
             return System.getenv("SAXON_HOME");
@@ -425,6 +405,7 @@ public class JavaPlatform implements Platform {
      * @since 9.3
      */
 
+    @Override
     public void registerAllBuiltInObjectModels(Configuration config) {
         // No action for Saxon-HE
     }
@@ -437,23 +418,28 @@ public class JavaPlatform implements Platform {
      * @since 9.4
      */
 
+    @Override
     public void setDefaultSAXParserFactory(Configuration config) {
         // No action for Saxon on Java
     }
 
+    @Override
     public ModuleURIResolver makeStandardModuleURIResolver(Configuration config) {
         return new StandardModuleURIResolver(config);
     }
 
 
 //#if BYTECODE==true
+
     /**
      * Return the class loader required to load the bytecode generated classes
-     * @param config           The saxon configuration
-     * @param thisClass        The class object generated
+     *
+     * @param config    The saxon configuration
+     * @param thisClass The class object generated
      * @return the class loader object
      * @since 9.6.0.3
      */
+    @Override
     public ClassLoader makeGeneratedClassLoader(Configuration config, Class thisClass) {
         ClassLoader parentClassLoader = config.getDynamicLoader().getClassLoader();
         if (parentClassLoader == null) {

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,18 +8,17 @@
 package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.event.*;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Stack;
 
 
 /**
@@ -36,22 +35,14 @@ public class LinkedTreeBuilder extends Builder
 //    				new AttributeCollectionImpl((Configuration)null);
 
     /*@Nullable*/ private ParentNodeImpl currentNode;
-    private boolean contentStarted = false;     // provides a minimal check on correct sequence of calls
     private NodeFactory nodeFactory;
     /*@NotNull*/ private int[] size = new int[100];          // stack of number of children for each open node
     private int depth = 0;
-    private ArrayList<NodeImpl[]> arrays = new ArrayList<NodeImpl[]>(20);       // reusable arrays for creating nodes
-    private NodeName elementNodeName;
-    private SchemaType elementType;
-    private boolean isNilled;
-    private boolean isTopWithinEntity;
-    private Location pendingLocation;
-    /*@Nullable*/ private AttributeCollectionImpl attributes;
-    private NamespaceBinding[] namespaces;
-    private int namespacesUsed;
+    private ArrayList<NodeImpl[]> arrays = new ArrayList<>(20);       // reusable arrays for creating nodes
+    private Stack<NamespaceMap> namespaceStack = new Stack<>();
     private boolean allocateSequenceNumbers = true;
     private int nextNodeNumber = 1;
-    private static final NamespaceBinding[] EMPTY_NAMESPACE_LIST = new NamespaceBinding[0];
+    private boolean mutable;
 
     /**
      * Create a Builder and initialise variables
@@ -66,6 +57,21 @@ public class LinkedTreeBuilder extends Builder
     }
 
     /**
+     * Create a Builder and initialise variables
+     *
+     * @param pipe the pipeline configuration
+     * @param mutable set to true if the tree is to be mutable
+     */
+
+    public LinkedTreeBuilder(PipelineConfiguration pipe, boolean mutable) {
+        super(pipe);
+        this.mutable = mutable;
+        nodeFactory = DefaultNodeFactory.THE_INSTANCE;
+        // System.err.println("new TreeBuilder " + this);
+    }
+
+
+    /**
      * Get the current root node. This will normally be a document node, but if the root of the tree
      * is an element node, it can be an element.
      *
@@ -74,6 +80,7 @@ public class LinkedTreeBuilder extends Builder
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo getCurrentRoot() {
         NodeInfo physicalRoot = currentRoot;
         if (physicalRoot instanceof DocumentImpl && ((DocumentImpl) physicalRoot).isImaginary()) {
@@ -83,6 +90,7 @@ public class LinkedTreeBuilder extends Builder
         }
     }
 
+    @Override
     public void reset() {
         super.reset();
         currentNode = null;
@@ -119,6 +127,7 @@ public class LinkedTreeBuilder extends Builder
      * Open the stream of Receiver events
      */
 
+    @Override
     public void open() {
         started = true;
         depth = 0;
@@ -133,10 +142,13 @@ public class LinkedTreeBuilder extends Builder
     /**
      * Start of a document node.
      * This event is ignored: we simply add the contained elements to the current document
+     * @param properties properties of the document node
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         DocumentImpl doc = new DocumentImpl();
+        doc.setMutable(mutable);
         currentRoot = doc;
         doc.setSystemId(getSystemId());
         doc.setBaseURI(getBaseURI());
@@ -145,19 +157,19 @@ public class LinkedTreeBuilder extends Builder
         depth = 0;
         size[depth] = 0;
         if (arrays == null) {
-            arrays = new ArrayList<NodeImpl[]>(20);
+            arrays = new ArrayList<>(20);
         }
         doc.setRawSequenceNumber(0);
         if (lineNumbering) {
             doc.setLineNumbering();
         }
-        contentStarted = true;
     }
 
     /**
      * Notify the end of the document
      */
 
+    @Override
     public void endDocument() throws XPathException {
         //System.err.println("End document depth=" + depth);
         currentNode.compact(size[depth]);
@@ -167,6 +179,7 @@ public class LinkedTreeBuilder extends Builder
      * Close the stream of Receiver events
      */
 
+    @Override
     public void close() throws XPathException {
         // System.err.println("TreeBuilder: " + this + " End document");
         if (currentNode == null) {
@@ -187,78 +200,33 @@ public class LinkedTreeBuilder extends Builder
      * Notify the start of an element
      */
 
-    public void startElement(NodeName nodeName, SchemaType type, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap suppliedAttributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         //System.err.println("LinkedTreeBuilder: " + this + " Start element depth=" + depth);
         if (currentNode == null) {
-            startDocument(0);
+            startDocument(ReceiverOption.NONE);
             ((DocumentImpl) currentRoot).setImaginary(true);
         }
-        elementNodeName = nodeName;
-        elementType = type;
-        isNilled = (properties & ReceiverOptions.NILLED_ELEMENT) != 0;
-        pendingLocation = location;
-        namespacesUsed = 0;
-        attributes = null;
-        contentStarted = false;
-        isTopWithinEntity = location instanceof ReceivingContentHandler.LocalLocator &&
+        boolean isNilled = ReceiverOption.contains(properties, ReceiverOption.NILLED_ELEMENT);
+
+        namespaceStack.push(namespaces);
+
+        boolean isTopWithinEntity = location instanceof ReceivingContentHandler.LocalLocator &&
                 ((ReceivingContentHandler.LocalLocator) location).levelInEntity == 0;
-    }
 
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) {
-        if (contentStarted) {
-            throw new IllegalStateException("namespace() called after startContent()");
-        }
-        if (namespaces == null) {
-            namespaces = new NamespaceBinding[5];
-        }
-        for (NamespaceBinding ns : namespaceBindings) {
-            if (namespacesUsed == namespaces.length) {
-                namespaces = Arrays.copyOf(namespaces, namespaces.length * 2);
-            }
-            namespaces[namespacesUsed++] = ns;
-        }
-    }
-
-    public void attribute(NodeName attName, SimpleType typeCode, /*@NotNull*/ CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        properties &= ~ReceiverOptions.DISABLE_ESCAPING;
-        if (contentStarted) {
-            throw new IllegalStateException("attribute() called after startContent()");
-        }
-        if (attributes == null) {
-            attributes = new AttributeCollectionImpl(config);
-        }
-        if (attName.hasURI(NamespaceConstant.XML) && attName.getLocalPart().equals("id")) {
-            value = Whitespace.trim(value);
-        }
-        attributes.addAttribute(attName, typeCode, value.toString(), locationId, properties);
-    }
-
-    public void startContent() throws XPathException {
-        // System.err.println("TreeBuilder: " + this + " startContent()");
-        if (contentStarted) {
-            throw new IllegalStateException("startContent() called more than once");
-        }
-        contentStarted = true;
-        if (attributes == null) {
-            attributes = AttributeCollectionImpl.EMPTY_ATTRIBUTE_COLLECTION;
-        } else {
-            attributes.compact();
-        }
-
-        NamespaceBinding[] nslist = namespaces;
-        if (nslist == null || namespacesUsed == 0) {
-            nslist = EMPTY_NAMESPACE_LIST;
+        AttributeInfo xmlId = suppliedAttributes.get(NamespaceConstant.XML, "id");
+        if (xmlId != null && Whitespace.containsWhitespace(xmlId.getValue())) {
+            suppliedAttributes = suppliedAttributes.put(new AttributeInfo(
+                    xmlId.getNodeName(), xmlId.getType(), Whitespace.trim(xmlId.getValue()), xmlId.getLocation(), xmlId.getProperties()));
         }
 
         ElementImpl elem = nodeFactory.makeElementNode(
-                currentNode, elementNodeName, elementType, isNilled,
-                attributes, nslist, namespacesUsed,
+                currentNode, elemName, type, isNilled,
+                suppliedAttributes, namespaceStack.peek(),
                 pipe,
-                pendingLocation, allocateSequenceNumbers ? nextNodeNumber++ : -1);
-
-        namespacesUsed = 0;
-        attributes = null;
+                location, allocateSequenceNumbers ? nextNodeNumber++ : -1);
 
         // the initial array used for pointing to children will be discarded when the exact number
         // of children in known. Therefore, it can be reused. So we allocate an initial array from
@@ -274,7 +242,6 @@ public class LinkedTreeBuilder extends Builder
             size = Arrays.copyOf(size, size.length * 2);
         }
         size[++depth] = 0;
-        namespacesUsed = 0;
 
         if (currentNode instanceof TreeInfo) {
             ((DocumentImpl) currentNode).setDocumentElement(elem);
@@ -291,25 +258,22 @@ public class LinkedTreeBuilder extends Builder
      * Notify the end of an element
      */
 
+    @Override
     public void endElement() throws XPathException {
         //System.err.println("End element depth=" + depth);
-        if (!contentStarted) {
-            throw new IllegalStateException("missing call on startContent()");
-        }
         currentNode.compact(size[depth]);
         depth--;
         currentNode = (ParentNodeImpl) currentNode.getParent();
+        namespaceStack.pop();
     }
 
     /**
      * Notify a text node. Adjacent text nodes must have already been merged
      */
 
+    @Override
     public void characters(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
         // System.err.println("Characters: " + chars.toString() + " depth=" + depth);
-        if (!contentStarted) {
-            throw new IllegalStateException("missing call on startContent()");
-        }
         if (chars.length() > 0) {
             NodeInfo prev = currentNode.getNthChild(size[depth] - 1);
             if (prev instanceof TextImpl) {
@@ -326,10 +290,8 @@ public class LinkedTreeBuilder extends Builder
      * Notify a processing instruction
      */
 
+    @Override
     public void processingInstruction(String name, /*@NotNull*/ CharSequence remainder, Location locationId, int properties) {
-        if (!contentStarted) {
-            throw new IllegalStateException("missing call on startContent()");
-        }
         ProcInstImpl pi = new ProcInstImpl(name, remainder.toString());
         currentNode.addChild(pi, size[depth]++);
         pi.setLocation(locationId.getSystemId(), locationId.getLineNumber(), locationId.getColumnNumber());
@@ -339,10 +301,8 @@ public class LinkedTreeBuilder extends Builder
      * Notify a comment
      */
 
+    @Override
     public void comment(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
-        if (!contentStarted) {
-            throw new IllegalStateException("missing call on startContent()");
-        }
         CommentImpl comment = new CommentImpl(chars.toString());
         currentNode.addChild(comment, size[depth]++);
         comment.setLocation(locationId.getSystemId(), locationId.getLineNumber(), locationId.getColumnNumber());
@@ -390,6 +350,7 @@ public class LinkedTreeBuilder extends Builder
      * Set an unparsed entity URI for the document
      */
 
+    @Override
     public void setUnparsedEntity(String name, String uri, String publicId) {
         if (((DocumentImpl) currentRoot).getUnparsedEntity(name) == null) {
             // bug 2187
@@ -406,6 +367,7 @@ public class LinkedTreeBuilder extends Builder
      */
 
     /*@NotNull*/
+    @Override
     public BuilderMonitor getBuilderMonitor() {
         return new LinkedBuilderMonitor(this);
     }
@@ -420,29 +382,27 @@ public class LinkedTreeBuilder extends Builder
         public static DefaultNodeFactory THE_INSTANCE = new DefaultNodeFactory();
 
         /*@NotNull*/
+        @Override
         public ElementImpl makeElementNode(
                 /*@NotNull*/ NodeInfo parent,
                 /*@NotNull*/ NodeName nodeName,
-                SchemaType elementType,
-                boolean isNilled,
-                AttributeCollectionImpl attlist,
-                NamespaceBinding[] namespaces,
-                int namespacesUsed,
+                             SchemaType elementType,
+                             boolean isNilled,
+                             AttributeMap attlist,
+                             NamespaceMap namespaces,
                 /*@NotNull*/ PipelineConfiguration pipe,
-                Location locationId,
-                int sequenceNumber)
+                             Location locationId,
+                             int sequenceNumber)
 
         {
             ElementImpl e = new ElementImpl();
-            if (namespacesUsed > 0) {
-                e.setNamespaceDeclarations(namespaces, namespacesUsed);
-            }
+            e.setNamespaceMap(namespaces);
 
             e.initialise(nodeName, elementType, attlist, parent, sequenceNumber);
             if (isNilled) {
                 e.setNilled();
             }
-            if (locationId != ExplicitLocation.UNKNOWN_LOCATION && sequenceNumber >= 0) {
+            if (locationId != Loc.NONE && sequenceNumber >= 0) {
                 String baseURI = locationId.getSystemId();
                 int lineNumber = locationId.getLineNumber();
                 int columnNumber = locationId.getColumnNumber();
@@ -458,6 +418,7 @@ public class LinkedTreeBuilder extends Builder
          * @param content the content of the text node
          * @return the constructed text node
          */
+        @Override
         public TextImpl makeTextNode(NodeInfo parent, CharSequence content) {
             return new TextImpl(content.toString());
         }

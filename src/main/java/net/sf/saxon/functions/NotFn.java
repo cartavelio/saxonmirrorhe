@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -46,6 +46,7 @@ public class NotFn extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
+    @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return BooleanValue.get(!ExpressionTool.effectiveBooleanValue(arguments[0].iterate()));
     }
@@ -65,6 +66,7 @@ public class NotFn extends SystemFunction {
              * Evaluate the effective boolean value
              */
 
+            @Override
             public boolean effectiveBooleanValue(XPathContext c) throws XPathException {
                 try {
                     return !getArg(0).effectiveBooleanValue(c);
@@ -100,10 +102,12 @@ public class NotFn extends SystemFunction {
         return null;
     }
 
+    @Override
     public String getCompilerName() {
         return "NotFnCompiler";
     }
 
+    @Override
     public String getStreamerName() {
         return "NotFn";
     }

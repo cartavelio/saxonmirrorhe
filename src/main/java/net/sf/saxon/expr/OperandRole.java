@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -50,7 +50,7 @@ public class OperandRole {
             new OperandRole(0, OperandUsage.NAVIGATION,  SequenceType.ANY_SEQUENCE);
     public final static OperandRole REPEAT_NAVIGATE =
             new OperandRole(OperandRole.HIGHER_ORDER, OperandUsage.NAVIGATION, SequenceType.ANY_SEQUENCE);
-    public final static OperandRole REPEAT_NAVIGATE_CONSTRAINED =
+    public final static OperandRole FLWOR_TUPLE_CONSTRAINED =
             new OperandRole(OperandRole.HIGHER_ORDER | OperandRole.CONSTRAINED_CLASS,
                             OperandUsage.NAVIGATION,
                             SequenceType.ANY_SEQUENCE,
@@ -65,7 +65,8 @@ public class OperandRole {
             new OperandRole(OperandRole.USES_NEW_FOCUS | OperandRole.HIGHER_ORDER | OperandRole.CONSTRAINED_CLASS,
                             OperandUsage.ABSORPTION,
                             SequenceType.ATOMIC_SEQUENCE,
-                            expr -> expr instanceof Pattern);
+                            expr -> expr instanceof Pattern)
+    ;
 
     int properties;
     private OperandUsage usage;
@@ -90,8 +91,6 @@ public class OperandRole {
         this.constraint = constraint;
     }
 
-
-
     /**
      * Ask whether the child expression sets the focus for evaluation of other child expressions
      * @return true if the child expression is evaluated with the same focus as its parent expression
@@ -115,17 +114,23 @@ public class OperandRole {
     }
 
     /**
-     * Ask whether the operand is a higher-order operand, in the sense that the child expression
-     * is evaluated repeatedly during a single evaluation of the parent expression
+     * Ask whether the operand is a higher-order operand
+     *
      * @return true if the operand is higher-order
+     */
+
+    public boolean isHigherOrder() {
+        return (properties & HIGHER_ORDER) != 0;
+    }
+
+    /**
+     * Ask whether the operand is a evaluated repeatedly during a single evaluation of the
+     * parent expression
+     * @return true if the operand is evaluated repeatedly
      */
 
     public boolean isEvaluatedRepeatedly() {
         return ((properties & HIGHER_ORDER) != 0) && ((properties & SINGLETON) == 0);
-    }
-
-    public boolean isHigherOrder() {
-        return ((properties & HIGHER_ORDER) != 0);
     }
 
     /**
@@ -136,9 +141,22 @@ public class OperandRole {
 
      public boolean isConstrainedClass() { return (properties & CONSTRAINED_CLASS) != 0; }
 
-     public Predicate<Expression> getConstraint() {
-         return constraint;
-     }
+    /**
+     * Set a constraint on the expression that can be associated with this operand type
+     */
+
+    public void setConstraint(Predicate<Expression> constraint) {
+        this.constraint = constraint;
+    }
+
+    /**
+     * Get any constraint on the expression that can be associated with this operand type
+     * @return any constraint that has been registered, or null
+     */
+
+    public Predicate<Expression> getConstraint() {
+        return constraint;
+    }
 
     /**
      * Get the usage of the operand

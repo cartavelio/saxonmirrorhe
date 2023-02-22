@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -62,11 +62,11 @@ public abstract class TestDriver {
     protected String testSuiteDir;
     protected Processor driverProc = null;
     protected Serializer driverSerializer = null;
-    protected HashMap<String, XdmNode> exceptionsMap = new HashMap<String, XdmNode>();
-    protected HashMap<String, String> optimizationAssertions = new HashMap<String, String>();
-    protected Map<String, Environment> globalEnvironments = new HashMap<String, Environment>();
-    protected Map<String, Environment> localEnvironments = new HashMap<String, Environment>();
-    protected Map<String, File> queryModules = new HashMap<String, File>();
+    protected HashMap<String, XdmNode> exceptionsMap = new HashMap<>();
+    protected HashMap<String, String> optimizationAssertions = new HashMap<>();
+    protected Map<String, Environment> globalEnvironments = new HashMap<>();
+    protected Map<String, Environment> localEnvironments = new HashMap<>();
+    protected Map<String, File> queryModules = new HashMap<>();
     protected Spec spec;
     protected String lang;
     protected boolean useXslt30Transformer = true;  // Temporary for controlling test processor
@@ -74,6 +74,7 @@ public abstract class TestDriver {
     protected boolean isAltova = false;
     protected Map<String, Integer> failSummary = new TreeMap<>();
     protected boolean quiet = false;
+    protected boolean strict = false;
     protected String xxCompilerLocation;
     protected XsltExecutable xxCompiler;
 
@@ -91,6 +92,7 @@ public abstract class TestDriver {
 
     public void go(String[] args) throws Exception {
 
+        long startTime = System.nanoTime();
         if (driverProc == null) {
             driverProc = new Processor(false);
         }
@@ -130,6 +132,9 @@ public abstract class TestDriver {
             if (args[i].startsWith("-debug")) {
                 debug = true;
             }
+            if (args[i].startsWith("-strict")) {
+                strict = true;
+            }
             if (args[i].startsWith("-export") && !argValue.equals("off")) {
                 export = true;
             }
@@ -140,7 +145,7 @@ public abstract class TestDriver {
                 export = true;
                 runWithJS = true;
                 treeModel = DOMObjectModel.getInstance();
-                if (args[i].startsWith("-js:") || args[i].startsWith("-js2:")) {
+                if (args[i].startsWith("-js:")) {
                     jsBase = argValue;
                 }
             }
@@ -226,7 +231,6 @@ public abstract class TestDriver {
             // gives the location of the compiler stylesheet
             if (args[i].startsWith("-XX:")) {
                 xxCompilerLocation = argValue;
-                System.err.println("Using XX compiler at " + xxCompilerLocation);
             }
         }
         if (resultsDoc == null) {
@@ -251,6 +255,7 @@ public abstract class TestDriver {
         driverSerializer.setOutputProperty(Serializer.Property.INDENT, "yes");
         driverProc.setConfigurationProperty(Feature.STABLE_UNPARSED_TEXT, true);
         processCatalog(new File(catalog));
+        System.err.println("Finished in " + ((System.nanoTime() - startTime)/1_000_000_000L) + "s" );
         printResults(resultsDir + "/results" + Version.getProductVersion() + ".xml");
     }
 
@@ -307,12 +312,14 @@ public abstract class TestDriver {
         if (driverProc.getSaxonEdition().equals("EE")) {
             if (generateByteCode == 0 && !debugByteCode) {
                 driverProc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
+                driverProc.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, 0);
                 driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
             } else if (generateByteCode >0) {
                 driverProc.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, ""+generateByteCode);
                 driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
             } else if (generateByteCode == 0 && debugByteCode) {
                 driverProc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
+                driverProc.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, 0);
                 driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, true);
             } else {
                 driverProc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);

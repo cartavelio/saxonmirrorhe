@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,7 @@ package net.sf.saxon.trace;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.*;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
@@ -162,6 +162,7 @@ public abstract class ContextStackFrame {
      */
 
     public static class CallingApplication extends ContextStackFrame {
+        @Override
         public void print(Logger out) {
             //out.println("  (called from external application)");
         }
@@ -176,6 +177,7 @@ public abstract class ContextStackFrame {
         public BuiltInTemplateRule(XPathContext context) {
             this.context = context;
         }
+        @Override
         public void print(Logger out) {
             Item contextItem = context.getContextItem();
             String diag;
@@ -230,6 +232,7 @@ public abstract class ContextStackFrame {
          * @param out the output stream
          */
 
+        @Override
         public void print(Logger out) {
             out.error("  at " + (functionName == null ? "(anonymous)" : functionName.getDisplayName()) + "() " + showLocation());
         }
@@ -248,6 +251,7 @@ public abstract class ContextStackFrame {
          * @param out the output stream
          */
 
+        @Override
         public void print(Logger out) {
             out.error("  at xsl:apply-templates " + showLocation());
             Item node = getContextItem();
@@ -290,6 +294,7 @@ public abstract class ContextStackFrame {
          * @param out the output stream
          */
 
+        @Override
         public void print(Logger out) {
             String name = templateName == null ? "??" : templateName.getDisplayName();
             out.error("  at xsl:call-template name=\"" + name + "\" " + showLocation());
@@ -328,6 +333,7 @@ public abstract class ContextStackFrame {
          * @param out the output stream
          */
 
+        @Override
         public void print(Logger out) {
             out.error("  in " + displayContainer(getContainer()) + " " + showLocation());
         }
@@ -335,7 +341,7 @@ public abstract class ContextStackFrame {
 
     private static String displayContainer(/*@NotNull*/ Object container) {
         if (container instanceof Actor) {
-            StructuredQName name = ((Actor) container).getObjectName();
+            StructuredQName name = ((Actor) container).getComponentName();
             String objectName = name == null ? "" : name.getDisplayName();
             if (container instanceof NamedTemplate) {
                 return "template name=\"" + objectName + "\"";

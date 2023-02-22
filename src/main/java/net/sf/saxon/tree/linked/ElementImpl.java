@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,26 +9,25 @@ package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.event.CopyInformee;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
 import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.tree.util.NamespaceIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Whitespace;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * ElementImpl implements an element node in the Linked tree model. Subclasses of ElementImpl,
@@ -41,14 +40,15 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
     private NodeName nodeName;
     private SchemaType type = Untyped.getInstance();
-    private AttributeCollection attributeList;      // this excludes namespace attributes
-    private NamespaceBinding[] namespaceList = null;             // list of namespace codes
+    private AttributeMap attributeMap;      // this excludes namespace attributes
+    private NamespaceMap namespaceMap = NamespaceMap.emptyMap();
 
     /**
      * Construct an empty ElementImpl
      */
 
     public ElementImpl() {
+        this.attributeMap = EmptyAttributeMap.getInstance();
     }
 
     /**
@@ -57,18 +57,9 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * @param atts the list of attributes of this element (not including namespace attributes)
      */
 
-    public void setAttributeList(AttributeCollection atts) {
-        this.attributeList = atts;
-    }
-
-    /**
-     * Set the namespace list
-     *
-     * @param namespaces an integer array of namespace codes
-     */
-
-    public void setNamespaceList(NamespaceBinding[] namespaces) {
-        this.namespaceList = namespaces;
+    @Override
+    public void setAttributes(AttributeMap atts) {
+        this.attributeMap = atts;
     }
 
     /**
@@ -82,21 +73,20 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
     /**
      * Initialise a new ElementImpl with an element name
-     *
-     * @param elemName       Integer representing the element name, with namespaces resolved
+     *  @param elemName       Integer representing the element name, with namespaces resolved
      * @param elementType    the schema type of the element node
      * @param atts           The attribute list: always null
      * @param parent         The parent node
      * @param sequenceNumber Integer identifying this element within the document
      */
 
-    public void initialise(/*@NotNull*/ NodeName elemName, SchemaType elementType, AttributeCollectionImpl atts, /*@NotNull*/ NodeInfo parent,
-                           int sequenceNumber) {
+    public void initialise(/*@NotNull*/ NodeName elemName, SchemaType elementType, AttributeMap atts, /*@NotNull*/ NodeInfo parent,
+                                        int sequenceNumber) {
         this.nodeName = elemName;
         this.type = elementType;
         setRawParent((ParentNodeImpl) parent);
         setRawSequenceNumber(sequenceNumber);
-        attributeList = atts;
+        attributeMap = atts;
     }
 
     /**
@@ -129,6 +119,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * used directly as the Source of a transformation
      */
 
+    @Override
     public void setSystemId(String uri) {
         getPhysicalRoot().setSystemId(getRawSequenceNumber(), uri);
     }
@@ -137,6 +128,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * Get the root node
      */
 
+    @Override
     public NodeInfo getRoot() {
         ParentNodeImpl up = getRawParent();
         if (up == null || (up instanceof DocumentImpl && ((DocumentImpl) up).isImaginary())) {
@@ -151,6 +143,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      */
 
     /*@Nullable*/
+    @Override
     public final String getSystemId() {
         DocumentImpl root = getPhysicalRoot();
         return root == null ? null : root.getSystemId(getRawSequenceNumber());
@@ -161,21 +154,10 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * xml:base has been used.
      */
 
+    @Override
     public String getBaseURI() {
         return Navigator.getBaseURI(this, n -> getPhysicalRoot().isTopWithinEntity((ElementImpl)n));
     }
-
-    /**
-     * Get the attribute list. Note that if the attribute list is empty, it should not be modified, as it
-     * will be shared by other elements. Instead, set a new attribute list.
-     *
-     * @return the list of attributes of this element (not including namespace attributes)
-     */
-
-    public AttributeCollection gsetAttributeCollection() {
-        return this.attributeList;
-    }
-
 
     /**
      * Determine whether the node has the is-nilled property
@@ -183,6 +165,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * @return true if the node has the is-nilled property
      */
 
+    @Override
     public boolean isNilled() {
         return getPhysicalRoot().isNilledElement(this);
     }
@@ -195,6 +178,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * @param type the type annotation
      */
 
+    @Override
     public void setTypeAnnotation(SchemaType type) {
         this.type = type;
     }
@@ -222,6 +206,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * Get the line number of the node within its source document entity
      */
 
+    @Override
     public int getLineNumber() {
         DocumentImpl root = getPhysicalRoot();
         if (root == null) {
@@ -235,6 +220,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * Get the line number of the node within its source document entity
      */
 
+    @Override
     public int getColumnNumber() {
         DocumentImpl root = getPhysicalRoot();
         if (root == null) {
@@ -250,6 +236,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * @param buffer to contain the generated ID
      */
 
+    @Override
     public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
         int sequence = getRawSequenceNumber();
         if (sequence >= 0) {
@@ -269,8 +256,28 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * @return Type.ELEMENT
      */
 
+    @Override
     public final int getNodeKind() {
         return Type.ELEMENT;
+    }
+
+    /**
+     * Get the attributes of the element
+     * @return an attribute map containing the attributes of the element
+     */
+
+    @Override
+    public AttributeMap attributes() {
+        return attributeMap;
+    }
+
+    AxisIterator iterateAttributes(Predicate<? super NodeInfo> test) {
+        if (attributeMap instanceof AttributeMapWithIdentity) {
+            // this case needs special care because of the possibility of deleted attribute nodes
+            return new Navigator.AxisFilter(((AttributeMapWithIdentity)attributeMap).iterateAttributes(this), test);
+        } else {
+            return new AttributeAxisIterator(this, test);
+        }
     }
 
     /**
@@ -288,6 +295,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * @throws XPathException if any downstream error occurs
      */
 
+    @Override
     public void copy(Receiver out, int copyOptions, Location location) throws XPathException {
 
         SchemaType typeCode = CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS) ?
@@ -300,43 +308,22 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             }
         }
 
-        out.startElement(NameOfNode.makeName(this), typeCode, location, 0);
+        NamespaceMap ns = CopyOptions.includes(copyOptions, CopyOptions.ALL_NAMESPACES) ? getAllNamespaces() : NamespaceMap.emptyMap();
 
-        // output the namespaces
-
-        int childCopyOptions = copyOptions & ~CopyOptions.ALL_NAMESPACES;
-        if ((copyOptions & CopyOptions.LOCAL_NAMESPACES) != 0) {
-            NamespaceBinding[] localNamespaces = getDeclaredNamespaces(null);
-            for (NamespaceBinding ns : localNamespaces) {
-                if (ns == null) {
-                    break;
-                }
-                out.namespace(ns, 0);
-            }
-        } else if ((copyOptions & CopyOptions.ALL_NAMESPACES) != 0) {
-            NamespaceIterator.sendNamespaces(this, out);
-            childCopyOptions |= CopyOptions.LOCAL_NAMESPACES;
+        List<AttributeInfo> atts = new ArrayList<>(attributes().size());
+        for (AttributeInfo att : attributes()) {
+            atts.add(new AttributeInfo(att.getNodeName(), BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), att.getLocation(), 0));
         }
 
-        // output the attributes
-
-        if (attributeList != null) {
-            for (int i = 0; i < attributeList.getLength(); i++) {
-                NodeName nc = attributeList.getNodeName(i);
-                if (nc != null) {
-                    // if attribute hasn't been deleted
-                    out.attribute(nc, BuiltInAtomicType.UNTYPED_ATOMIC, attributeList.getValue(i), ExplicitLocation.UNKNOWN_LOCATION, 0);
-                }
-            }
-        }
-
-        out.startContent();
+        out.startElement(NameOfNode.makeName(this), typeCode, AttributeMap.fromList(atts),
+                         ns, location,
+                         ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY | ReceiverOption.NAMESPACE_OK);
 
         // output the children
 
         NodeImpl next = getFirstChild();
         while (next != null) {
-            next.copy(out, childCopyOptions, location);
+            next.copy(out, copyOptions, location);
             next = next.getNextSibling();
         }
 
@@ -347,6 +334,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * Delete this node (that is, detach it from its parent)
      */
 
+    @Override
     public void delete() {
         DocumentImpl root = getPhysicalRoot();
         super.delete();
@@ -354,10 +342,9 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             AxisIterator iter = iterateAxis(AxisInfo.DESCENDANT_OR_SELF, NodeKindTest.ELEMENT);
             while (true) {
                 ElementImpl n = (ElementImpl) iter.next();
-                int atts = attributeList.getLength();
-                for (int index = 0; index < atts; index++) {
-                    if (attributeList.isId(index)) {
-                        root.deregisterID(attributeList.getValue(index));
+                for (AttributeInfo att : attributeMap) {
+                    if (att.isId()) {
+                        root.deregisterID(att.getValue());
                     }
                 }
                 if (n == null) {
@@ -374,6 +361,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * @param newName the new name
      */
 
+    @Override
     public void rename(NodeName newName) {
         String prefix = newName.getPrefix();
         String uri = newName.getURI();
@@ -384,7 +372,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         }
         if (!uc.equals(uri)) {
             if (uc.isEmpty()) {
-                addNamespace(ns, false);
+                addNamespace(ns);
             } else {
                 throw new IllegalArgumentException(
                     "Namespace binding of new name conflicts with existing namespace binding");
@@ -396,51 +384,28 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
     /**
      * Add a namespace binding (that is, a namespace node) to this element. This call has no effect if applied
      * to a node other than an element.
-     *
-     * @param nscode  The namespace code representing the (prefix, uri) pair of the namespace binding to be
+     * @param binding  The namespace binding to be
      *                added. If the target element already has a namespace binding with this (prefix, uri) pair, the call has
      *                no effect. If the target element currently has a namespace binding with this prefix and a different URI, an
      *                exception is raised.
-     * @param unused
-     * @throws IllegalArgumentException if the target element already has a namespace binding for this prefix,
-     *                                  or if the namespace code represents a namespace undeclaration
+     *
      */
 
-    public void addNamespace(/*@NotNull*/ NamespaceBinding nscode, boolean unused) {
-        if (nscode.getURI().isEmpty()) {
+    @Override
+    public void addNamespace(/*@NotNull*/ NamespaceBinding binding) {
+        if (binding.getURI().isEmpty()) {
             throw new IllegalArgumentException("Cannot add a namespace undeclaration");
         }
-        addNamespaceInternal(nscode, true);
-    }
-
-    private void addNamespaceInternal(/*@NotNull*/ NamespaceBinding nscode, boolean externalCall) {
-        if (namespaceList == null) {
-            namespaceList = new NamespaceBinding[]{nscode};
-        } else {
-            NamespaceBinding[] nsList = namespaceList;
-            for (int i = 0; i < nsList.length; i++) {
-                if (nsList[i].equals(nscode)) {
-                    return;
-                }
-                if (nsList[i].getPrefix().equals(nscode.getPrefix())) {
-                    if (nsList[i].getURI().isEmpty()) {
-                        // this is an undeclaration; replace it with the new declaration
-                        nsList[i] = nscode;
-                        return;
-                    } else if (externalCall) {
-                        throw new IllegalArgumentException("New namespace conflicts with existing namespace binding");
-                    } else {
-                        return;
-                    }
-                }
+        String existing = namespaceMap.getURI(binding.getPrefix());
+        if (existing != null) {
+            if (!existing.equals(binding.getURI())) {
+                throw new IllegalArgumentException("New namespace conflicts with existing namespace binding");
             }
-            int len = nsList.length;
-            NamespaceBinding[] ns2 = new NamespaceBinding[len + 1];
-            System.arraycopy(nsList, 0, ns2, 0, len);
-            ns2[len] = nscode;
-            namespaceList = ns2;
+        } else {
+            namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getURI());
         }
     }
+
 
 
     /**
@@ -449,6 +414,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * @param stringValue the new string value
      */
 
+    @Override
     public void replaceStringValue(/*@NotNull*/ CharSequence stringValue) {
         if (stringValue.length() == 0) {
             setChildren(null);
@@ -456,6 +422,28 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             TextImpl text = new TextImpl(stringValue.toString());
             text.setRawParent(this);
             setChildren(text);
+        }
+    }
+
+    /**
+     * Change details of an attribute of this element
+     * @param index the index position of the attribute to be changed
+     * @param attInfo new details of the attribute
+     */
+
+    public void setAttributeInfo(int index, AttributeInfo attInfo) {
+        AttributeMapWithIdentity attMap = prepareAttributesForUpdate();
+        attMap = attMap.set(index, attInfo);
+        setAttributes(attMap);
+    }
+
+    private AttributeMapWithIdentity prepareAttributesForUpdate() {
+        if (attributes() instanceof AttributeMapWithIdentity) {
+            return (AttributeMapWithIdentity)attributes();
+        } else {
+            AttributeMapWithIdentity newAtts = new AttributeMapWithIdentity(attributes().asList());
+            setAttributes(newAtts);
+            return newAtts;
         }
     }
 
@@ -468,39 +456,32 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * to ensure that any namespace prefix used in the name of the attribute (or in its value
      * if it has a namespace-sensitive type) is declared on this element.</p>
      *
-     * @param nameCode   the name of the new attribute
+     * @param nodeName   the name of the new attribute
      * @param attType    the type annotation of the new attribute
      * @param value      the string value of the new attribute
      * @param properties properties including IS_ID and IS_IDREF properties
      * @throws IllegalStateException if the element already has an attribute with the given name.
      */
 
-    public void addAttribute(/*@NotNull*/ NodeName nameCode, SimpleType attType, /*@NotNull*/ CharSequence value, int properties) {
-        if (attributeList == null || attributeList.getLength() == 0) {
-            attributeList = new AttributeCollectionImpl(getConfiguration());
-        }
-        AttributeCollectionImpl atts = (AttributeCollectionImpl) attributeList;
-        int index = atts.findByNodeName(nameCode);
-        if (index == -1) {
-            atts.addAttribute(nameCode, attType, value.toString(), ExplicitLocation.UNKNOWN_LOCATION, 0);
-        } else {
-            throw new IllegalStateException(
-                    "Cannot add an attribute to an element as it already has an attribute with the specified name");
-        }
-        if (!nameCode.hasURI("")) {
+    @Override
+    public void addAttribute(/*@NotNull*/ NodeName nodeName, SimpleType attType, /*@NotNull*/ CharSequence value, int properties) {
+        AttributeMapWithIdentity atts = prepareAttributesForUpdate();
+        atts = atts.add(new AttributeInfo(nodeName, attType, value.toString(), Loc.NONE, ReceiverOption.NONE));
+        setAttributes(atts);
+        if (!nodeName.hasURI("")) {
             // The new attribute name is in a namespace
-            NamespaceBinding binding = nameCode.getNamespaceBinding();
+            NamespaceBinding binding = nodeName.getNamespaceBinding();
             String prefix = binding.getPrefix();
             String uc = getURIForPrefix(prefix, false);
             if (uc == null) {
                 // The namespace is not already declared on the element
-                addNamespace(binding, false);
+                addNamespace(binding);
             } else if (!uc.equals(binding.getURI())) {
                 throw new IllegalStateException(
                         "Namespace binding of new name conflicts with existing namespace binding");
             }
         }
-        if ((properties & ReceiverOptions.IS_ID) != 0) {
+        if (ReceiverOption.contains(properties , ReceiverOption.IS_ID)) {
             DocumentImpl root = getPhysicalRoot();
             if (root != null) {
                 root.registerID(this, Whitespace.trim(value));
@@ -518,26 +499,72 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * @param attribute the attribute node to be removed
      */
 
+    @Override
     public void removeAttribute(/*@NotNull*/ NodeInfo attribute) {
         if (!(attribute instanceof AttributeImpl)) {
             return; // no action
         }
-        AttributeCollectionImpl atts = (AttributeCollectionImpl) getAttributeList();
         int index = ((AttributeImpl) attribute).getSiblingPosition();
-        if (index >= 0 && atts.isId(index)) {
+        AttributeInfo info = attributes().itemAt(index);
+        AttributeMapWithIdentity atts = prepareAttributesForUpdate();
+        atts = atts.remove(index);
+        setAttributes(atts);
+
+        if (index >= 0 && info.isId()) {
             DocumentImpl root = getPhysicalRoot();
-            root.deregisterID(atts.getValue(index));
+            root.deregisterID(info.getValue());
         }
-        atts.removeAttribute(index);
+
         ((AttributeImpl) attribute).setRawParent(null);
     }
 
+    /**
+     * Remove a namespace node from this node. The namespaces of its descendant nodes are unaffected.
+     * The method has no effect on non-element nodes, nor on elements if there is no in-scope namespace
+     * with the required prefix, nor if the element name or one of its attributes uses this namespace
+     * prefix
+     *
+     * @param prefix the namespace prefix.
+     */
+    @Override
+    public void removeNamespace(String prefix) {
+        Objects.requireNonNull(prefix);
+        if (prefix.equals(getPrefix())) {
+            throw new IllegalStateException("Cannot remove binding of namespace prefix used on the element name");
+        }
+        for (AttributeInfo att : attributeMap) {
+            if (att.getNodeName().getPrefix().equals(prefix)) {
+                throw new IllegalStateException("Cannot remove binding of namespace prefix used on an existing attribute name");
+            }
+        }
+        namespaceMap = namespaceMap.remove(prefix);
+    }
+
+    /**
+     * Add a namespace node from this node. The namespaces of its descendant nodes are unaffected.
+     * The method has no effect on non-element nodes. If there is an existing namespace using this
+     * prefix, the method throws an exception.
+     *
+     * @param prefix the namespace prefix. Empty string for the default namespace.
+     * @param uri The namespace URI.
+     */
+    @Override
+    public void addNamespace(String prefix, String uri) {
+        String existingURI = namespaceMap.getURI(prefix);
+        if (existingURI == null) {
+            namespaceMap = namespaceMap.put(prefix, uri);
+        } else if (!existingURI.equals(uri)) {
+            throw new IllegalStateException(
+                    "New namespace binding conflicts with existing namespace binding");
+        }
+    }
 
     /**
      * Remove type information from this node (and its ancestors, recursively).
      * This method implements the upd:removeType() primitive defined in the XQuery Update specification
      */
 
+    @Override
     public void removeTypeAnnotation() {
         if (getSchemaType() != Untyped.getInstance()) {
             type = AnyType.getInstance();
@@ -545,16 +572,8 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         }
     }
 
-    /**
-     * Set the namespace declarations for the element
-     *
-     * @param namespaces     the list of namespace codes
-     * @param namespacesUsed the number of entries in the list that are used
-     */
-
-    public void setNamespaceDeclarations(NamespaceBinding[] namespaces, int namespacesUsed) {
-        namespaceList = new NamespaceBinding[namespacesUsed];
-        System.arraycopy(namespaces, 0, namespaceList, 0, namespacesUsed);
+    public void setNamespaceMap(NamespaceMap map) {
+        namespaceMap = map;
     }
 
     /**
@@ -571,27 +590,17 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      */
 
     /*@Nullable*/
+    @Override
     public String getURIForPrefix(/*@NotNull*/ String prefix, boolean useDefault) {
-        if (prefix.equals("xml")) {
-            return NamespaceConstant.XML;
-        }
-        if (prefix.isEmpty() && !useDefault) {
-            return NamespaceConstant.NULL;
-        }
 
-        if (namespaceList != null) {
-            for (NamespaceBinding aNamespaceList : namespaceList) {
-                if (aNamespaceList.getPrefix().equals(prefix)) {
-                    String uri = aNamespaceList.getURI();
-                    return uri.isEmpty() && !prefix.isEmpty() ? null : uri;
-                }
+        if (prefix.isEmpty()) {
+            if (useDefault) {
+                return namespaceMap.getDefaultNamespace();
+            } else {
+                return NamespaceConstant.NULL;
             }
-        }
-        NodeInfo next = getRawParent();
-        if (next.getNodeKind() == Type.DOCUMENT) {
-            return prefix.isEmpty() ? NamespaceConstant.NULL : null;
         } else {
-            return ((ElementImpl) next).getURIForPrefix(prefix, useDefault);
+            return namespaceMap.getURI(prefix);
         }
     }
 
@@ -601,28 +610,9 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      */
 
     /*@Nullable*/
+    @Override
     public Iterator<String> iteratePrefixes() {
-        return new Iterator<String>() {
-            /*@Nullable*/ private NamePool pool = null;
-            private Iterator<NamespaceBinding> iter = NamespaceIterator.iterateNamespaces(ElementImpl.this);
-
-            public boolean hasNext() {
-                return pool == null || iter.hasNext();
-            }
-
-            public String next() {
-                if (pool == null) {
-                    pool = getNamePool();
-                    return "xml";
-                } else {
-                    return iter.next().getPrefix();
-                }
-            }
-
-            public void remove() {
-                throw new UnsupportedOperationException("remove");
-            }
-        };
+        return namespaceMap.iteratePrefixes();
     }
 
     /**
@@ -634,10 +624,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
     /*@Nullable*/
     public boolean isInScopeNamespace(/*@NotNull*/ String uri) {
-        if (uri.equals(NamespaceConstant.XML)) {
-            return true;
-        }
-        for (NamespaceBinding b : namespaceList) {
+        for (NamespaceBinding b : namespaceMap) {
             if (b.getURI().equals(uri)) {
                 return true;
             }
@@ -657,8 +644,13 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      *         <p>For a node other than an element, the method returns null.</p>
      */
 
+    @Override
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
-        return namespaceList == null ? NamespaceBinding.EMPTY_ARRAY : namespaceList;
+        List<NamespaceBinding> bindings = new ArrayList<>();
+        for (NamespaceBinding nb : namespaceMap) {
+            bindings.add(nb);
+        }
+        return bindings.toArray(NamespaceBinding.EMPTY_ARRAY);
     }
 
     /**
@@ -675,85 +667,65 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             return;
         }
 
-        Set<NamespaceBinding> childNamespaces = new HashSet<>();
-        if (namespaceList != null) {
-            childNamespaces.addAll(Arrays.asList(namespaceList));
-        }
+        ElementImpl parent = (ElementImpl)getRawParent();
 
-        NamespaceResolver inscope = new InscopeNamespaceResolver(getRawParent());
-
-        // If the child is in the null namespace but the parent has a default namespace, xmlns="" should be added.
-
-        if (getURI().isEmpty() && !inscope.getURIForPrefix("", true).isEmpty()) {
-            childNamespaces.add(NamespaceBinding.DEFAULT_UNDECLARATION);
-        }
+        NamespaceMap parentNamespaces = parent.namespaceMap;
 
         // Namespaces present on the parent but not on the child should be undeclared (if requested)
 
-        if (!inherit) {
-            Iterator it = inscope.iteratePrefixes();
-            while (it.hasNext()) {
-                String prefix = (String) it.next();
-                if (!prefix.equals("xml")) {
-                    boolean found = false;
-                    if (namespaceList != null) {
-                        for (NamespaceBinding aNamespaceList : namespaceList) {
-                            if (aNamespaceList.getPrefix().equals(prefix)) {
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!found) {
-                        childNamespaces.add(new NamespaceBinding(prefix, ""));
-                    }
-                }
-            }
+        if (inherit) {
+            deepAddNamespaces(parentNamespaces);
+        } else {
+//            Iterator it = inscope.iteratePrefixes();
+//            while (it.hasNext()) {
+//                String prefix = (String) it.next();
+//                if (!prefix.equals("xml")) {
+//                    boolean found = false;
+//                    if (namespaceList != null) {
+//                        for (NamespaceBinding aNamespaceList : namespaceList) {
+//                            if (aNamespaceList.getPrefix().equals(prefix)) {
+//                                found = true;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                    if (!found) {
+//                        childNamespaces.add(new NamespaceBinding(prefix, ""));
+//                    }
+//                }
+//            }
         }
 
-        // Redundant namespaces should be removed
-
-        if (namespaceList != null) {
-            for (NamespaceBinding nscode : namespaceList) {
-                String prefix = nscode.getPrefix();
-                String uri = nscode.getURI();
-                String parentUri = inscope.getURIForPrefix(prefix, true);
-                if (parentUri != null && parentUri.equals(uri)) {
-                    // the namespace declaration is redundant
-                    childNamespaces.remove(nscode);
-                }
-            }
-        }
-        NamespaceBinding[] n2 = new NamespaceBinding[childNamespaces.size()];
-        int j = 0;
-        for (NamespaceBinding childNamespace : childNamespaces) {
-            n2[j++] = childNamespace;
-        }
-        namespaceList = n2;
     }
 
-    /**
-     * Get the attribute list for this element.
-     *
-     * @return The attribute list. This will not include any
-     *         namespace attributes. The attribute names will be in expanded form, with prefixes
-     *         replaced by URIs
-     */
-
-    public AttributeCollection getAttributeList() {
-        return attributeList == null ? AttributeCollectionImpl.EMPTY_ATTRIBUTE_COLLECTION : attributeList;
+    private void deepAddNamespaces(NamespaceMap inheritedNamespaces) {
+        NamespaceMap childNamespaces = namespaceMap;
+        for (NamespaceBinding binding : inheritedNamespaces) {
+            if (childNamespaces.getURI(binding.getPrefix()) == null) {
+                childNamespaces = childNamespaces.put(binding.getPrefix(), binding.getURI());
+            } else {
+                inheritedNamespaces = inheritedNamespaces.remove(binding.getPrefix());
+            }
+        }
+        namespaceMap = childNamespaces;
+        for (NodeInfo child : children(ElementImpl.class::isInstance)) {
+            ((ElementImpl)child).deepAddNamespaces(inheritedNamespaces);
+        }
     }
-
+    
     /**
      * Get the namespace list for this element.
      *
-     * @return The raw namespace list, as an array of name codes
+     * @return The full set of in-scope namespaces
      */
 
     /*@Nullable*/
-    public NamespaceBinding[] getNamespaceList() {
-        return namespaceList;
+    @Override
+    public NamespaceMap getAllNamespaces() {
+        return namespaceMap;
     }
+
+
 
     /**
      * Get the value of a given attribute of this node
@@ -764,8 +736,9 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      */
 
     /*@Nullable*/
+    @Override
     public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String localName) {
-        return attributeList == null ? null : attributeList.getValue(uri, localName);
+        return attributeMap == null ? null : attributeMap.getValue(uri, localName);
     }
 
     /**
@@ -774,6 +747,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * @return true if the node is an ID
      */
 
+    @Override
     public boolean isId() {
         // This is an approximation. For a union type, we check that the actual value is a valid NCName,
         // but we don't check that it was validated against the member type of the union that is an ID type.
@@ -786,6 +760,13 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         }
     }
 
+    /**
+     * Ask whether this node has the is-idref property
+     *
+     * @return true if the node is an IDREF or IDREFS element.
+     */
+
+    @Override
     public boolean isIdref() {
         return isIdRefNode(this);
     }
@@ -812,7 +793,6 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         }
         return false;
     }
-
 
 }
 

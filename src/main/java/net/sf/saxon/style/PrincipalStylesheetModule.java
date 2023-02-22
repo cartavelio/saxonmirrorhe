@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -14,7 +14,9 @@ import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.expr.parser.Optimizer;
+import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.ExecutableFunctionLibrary;
 import net.sf.saxon.lib.SaxonOutputKeys;
@@ -25,6 +27,7 @@ import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
+import net.sf.saxon.trans.Timer;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -93,7 +96,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
     // cache of stylesheet documents. Note that multiple imports of the same URI
     // lead to the stylesheet tree being reused
-    private HashMap<DocumentURI, XSLModuleRoot> moduleCache = new HashMap<>(4);
+    private HashMap<DocumentKey, XSLModuleRoot> moduleCache = new HashMap<>(4);
 
     private TypeAliasManager typeAliasManager;
 
@@ -287,7 +290,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * @param module the stylesheet document tree corresponding to this absolute URI
      */
 
-    public void putStylesheetDocument(DocumentURI key, XSLStylesheet module) {
+    public void putStylesheetDocument(DocumentKey key, XSLStylesheet module) {
         moduleCache.put(key, module);
     }
 
@@ -298,7 +301,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * @return the stylesheet document tree corresponding to this absolute URI
      */
 
-    public XSLModuleRoot getStylesheetDocument(DocumentURI key) {
+    public XSLModuleRoot getStylesheetDocument(DocumentKey key) {
         XSLModuleRoot sheet = moduleCache.get(key);
         if (sheet != null) {
             XPathException warning = new XPathException(
@@ -318,13 +321,9 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * @throws net.sf.saxon.trans.XPathException if errors are found in the stylesheet
      */
 
-    public void preprocess() throws XPathException {
+    public void preprocess(Compilation compilation) throws XPathException {
 
-
-        net.sf.saxon.trans.Timer timer;
-        if (Compilation.TIMING) {
-            timer = new net.sf.saxon.trans.Timer();
-        }
+        Timer timer = compilation.timer;
 
         // process any xsl:use-package, xsl:include and xsl:import elements
 
@@ -407,7 +406,6 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
         if (Compilation.TIMING) {
             timer.report("validate");
-            timer.reportCumulative("total preprocess");
         }
 
         // Gather the output properties
@@ -443,6 +441,10 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             }
         }
 
+        if (Compilation.TIMING) {
+            timer.report("Register output formats");
+        }
+
         // Index the character maps
 
         for (ComponentDeclaration d : topLevel) {
@@ -454,6 +456,10 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 xcm.assemble(map);
                 characterMapIndex.putCharacterMap(xcm.getCharacterMapName(), new CharacterMap(qn, map));
             }
+        }
+
+        if (Compilation.TIMING) {
+            timer.report("Index character maps");
         }
 
     }
@@ -507,18 +513,18 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
 
     private static void gatherUsePackageDeclarations(Compilation compilation, StyleElement wrapper, List<XSLUsePackage> declarations) throws XPathException {
-        wrapper.iterateAxis(AxisInfo.CHILD).forEachOrFail(use -> {
+        for (NodeInfo use : wrapper.children()) {
             if (use instanceof XSLUsePackage) {
                 declarations.add((XSLUsePackage) use);
             } else if (use instanceof XSLInclude) {
                 String href = Whitespace.trim(use.getAttributeValue("", "href"));
                 URIResolver resolver = compilation.getCompilerInfo().getURIResolver();
-                DocumentURI key = DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), resolver, false);
+                DocumentKey key = DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), resolver, false);
                 TreeInfo includedTree = compilation.getStylesheetModules().get(key);
                 StyleElement incWrapper = (StyleElement) ((DocumentImpl) includedTree.getRootNode()).getDocumentElement();
                 gatherUsePackageDeclarations(compilation, incWrapper, declarations);
             }
-        });
+        }
     }
 
     private void gatherOverridingDeclarations(XSLUsePackage use, Compilation compilation, Set<SymbolicName> overrides) throws XPathException {
@@ -1173,10 +1179,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
         try {
 
-            net.sf.saxon.trans.Timer timer;
-            if (Compilation.TIMING) {
-                timer = new net.sf.saxon.trans.Timer();
-            }
+            Timer timer = compilation.timer;
 
             //PreparedStylesheet pss = getPreparedStylesheet();
             Configuration config = getConfiguration();
@@ -1221,8 +1224,12 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             }
 
             // Adjust the visibility of components based on xsl:expose declarations
-            
+
             adjustExposedVisibility();
+
+            if (Compilation.TIMING) {
+                timer.report("adjust exposed visibility");
+            }
 
             // Call compile method for each top-level object in the stylesheet
             // Note, some declarations (templates) need to be compiled repeatedly if the module
@@ -1237,7 +1244,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             }
 
             if (Compilation.TIMING) {
-                timer.report("compile top-level objects");
+                timer.report("compile top-level objects (" + topLevel.size() + ")");
             }
 
             // Call type-check method for each user-defined function in the stylesheet. This is no longer
@@ -1254,7 +1261,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             }
 
             if (Compilation.TIMING) {
-                timer.report("typeCheck functions");
+                timer.report("typeCheck functions (" + functionIndex.size() + ")");
             }
 
             if (compilation.getErrorCount() > 0) {
@@ -1266,6 +1273,9 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
             optimizeTopLevel();
 
+            if (Compilation.TIMING) {
+                timer.report("optimize top level");
+            }
 
             // optimize functions that aren't overridden
 
@@ -1278,22 +1288,28 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             }
 
             if (Compilation.TIMING) {
-                timer.report("optimize");
-            }
-
-            if (Compilation.TIMING) {
-                timer.report("miscellanea");
+                timer.report("optimize functions");
             }
 
             // Check consistency of decimal formats
 
             getDecimalFormatManager().checkConsistency();
 
+            if (Compilation.TIMING) {
+                timer.report("check decimal formats");
+            }
+
             // Check consistency of modes
 
-            getRuleManager().checkConsistency();
-            getRuleManager().computeRankings();
-
+            RuleManager ruleManager = getRuleManager();
+            ruleManager.checkConsistency();
+            ruleManager.computeRankings();
+            if (!compilation.isFallbackToNonStreaming()) {
+                ruleManager.invertStreamableTemplates();
+            }
+            if (config.obtainOptimizer().isOptionSet(OptimizerOptions.RULE_SET)) {
+                ruleManager.optimizeRules();
+            }
 
             if (Compilation.TIMING) {
                 timer.report("build template rule tables");
@@ -1325,7 +1341,6 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
             if (Compilation.TIMING) {
                 timer.report("build runtime function tables");
-                timer.reportCumulative("total compile phase");
             }
 
             // Allocate binding slots to named templates
@@ -1340,6 +1355,10 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 }
             }
 
+            if (Compilation.TIMING) {
+                timer.report("allocate binding slots to named templates");
+            }
+
             // Allocate binding slots to component reference expressions
 
             HashMap<SymbolicName, Component> componentIndex = stylesheetPackage.getComponentIndex();
@@ -1348,6 +1367,10 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 if (proc != null) {
                     proc.allocateAllBindingSlots(stylesheetPackage);
                 }
+            }
+
+            if (Compilation.TIMING) {
+                timer.report("allocate binding slots to component references");
             }
 
             // Allocate binding slots in key definitions
@@ -1360,6 +1383,10 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 }
             }
 
+            if (Compilation.TIMING) {
+                timer.report("allocate binding slots to key definitions");
+            }
+
             // Allocate binding slots in accumulators
 
             AccumulatorRegistry accMan = getAccumulatorManager();
@@ -1369,12 +1396,16 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 }
             }
 
+            if (Compilation.TIMING) {
+                timer.report("allocate binding slots to accumulators");
+            }
+
             // Generate byte code where appropriate
 
             if (compilation.getCompilerInfo().isGenerateByteCode() &&
-                    !config.isDeferredByteCode(Configuration.XSLT)) {
+                    !config.isDeferredByteCode(HostLanguage.XSLT)) {
                 if (Compilation.TIMING) {
-                    config.getStandardErrorOutput().println("Generating byte code...");
+                    config.getLogger().info("Generating byte code...");
                 }
 
                 Optimizer opt = config.obtainOptimizer();
@@ -1384,6 +1415,11 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                         ((StylesheetComponent) inst).generateByteCode(opt);
                     }
                 }
+            }
+
+            if (Compilation.TIMING) {
+                timer.report("inject byte code candidates");
+                timer.reportCumulative("total compile time");
             }
 
         } catch (RuntimeException err) {
@@ -1404,22 +1440,18 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 String[] tokens = Whitespace.trim(modeAtt).split("[ \t\n\r]+");
                 for (String s : tokens) {
                     if (!s.startsWith("#")) {
-                        try {
-                            StructuredQName modeName = element.makeQName(s);
-                            SymbolicName sName = new SymbolicName(StandardNames.XSL_MODE, modeName);
-                            HashMap<SymbolicName, Component> componentIndex = getStylesheetPackage().getComponentIndex();
-                            Component existing = componentIndex.get(sName);
-                            if (existing != null && existing.getDeclaringPackage() != getStylesheetPackage()) {
-                                if (element instanceof XSLTemplate && !(element.getParent() instanceof XSLOverride)) {
-                                    element.compileError("A template rule cannot be added to a mode declared in a used package " +
-                                                                 "unless the xsl:template declaration appears within an xsl:override child of the appropriate xsl:use-package element",
-                                                         "XTSE3050");
-                                }
-                            } else {
-                                manager.obtainMode(modeName, true);
+                        StructuredQName modeName = element.makeQName(s, null, "mode");
+                        SymbolicName sName = new SymbolicName(StandardNames.XSL_MODE, modeName);
+                        HashMap<SymbolicName, Component> componentIndex = getStylesheetPackage().getComponentIndex();
+                        Component existing = componentIndex.get(sName);
+                        if (existing != null && existing.getDeclaringPackage() != getStylesheetPackage()) {
+                            if (element instanceof XSLTemplate && !(element.getParent() instanceof XSLOverride)) {
+                                element.compileError("A template rule cannot be added to a mode declared in a used package " +
+                                                             "unless the xsl:template declaration appears within an xsl:override child of the appropriate xsl:use-package element",
+                                                     "XTSE3050");
                             }
-                        } catch (XPathException e) {
-                            // skip invalid names
+                        } else {
+                            manager.obtainMode(modeName, true);
                         }
                     }
                 }
@@ -1511,70 +1543,57 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         NamePool pool = getConfiguration().getNamePool();
         Map<SymbolicName, Component> componentIndex = stylesheetPackage.getComponentIndex();
         for (Component component : componentIndex.values()) {
-//        for (ComponentDeclaration decl : topLevel) {
-//            StyleElement e = decl.getSourceElement();
-//            int fp = e.getFingerprint();
-//            if (fp == StandardNames.XSL_VARIABLE ||
-//                    fp == StandardNames.XSL_ATTRIBUTE_SET ||
-//                    fp == StandardNames.XSL_FUNCTION ||
-//                    fp == StandardNames.XSL_MODE ||
-//                    (fp == StandardNames.XSL_TEMPLATE && ((XSLTemplate) e).getTemplateName() != null)) {
-//                Component component;
-//                if (fp == StandardNames.XSL_MODE) {
-//                    component = getRuleManager().obtainMode(e.getObjectName(), false).getDeclaringComponent();
-//                } else {
-//                    component = ((StylesheetComponent) e).getActor().getDeclaringComponent();
-//                }
             int fp = component.getComponentKind();
-                ComponentTest exactNameTest =
+            ComponentTest exactNameTest =
+                    new ComponentTest(fp,
+                                      new NameTest(Type.ELEMENT, new FingerprintedQName(component.getActor().getComponentName(), pool), pool), -1);
+            ComponentTest exactFunctionTest = null;
+            if (fp == StandardNames.XSL_FUNCTION) {
+                Function fn = (Function) component.getActor();
+                exactFunctionTest =
                         new ComponentTest(fp,
-                                          new NameTest(Type.ELEMENT, new FingerprintedQName(component.getActor().getObjectName(), pool), pool), -1);
-                ComponentTest exactFunctionTest = null;
-                if (fp == StandardNames.XSL_FUNCTION) {
-                    Function fn = (Function)component.getActor();
-                    exactFunctionTest =
-                            new ComponentTest(fp,
-                                              new NameTest(Type.ELEMENT,
-                                                           new FingerprintedQName(fn.getFunctionName(), pool), pool), fn.getArity());
+                                          new NameTest(Type.ELEMENT,
+                                                       new FingerprintedQName(fn.getFunctionName(), pool), pool), fn.getArity());
+            }
+            boolean matched = false;
+            for (XSLExpose exposure : exposeDeclarations) {
+                Set<ComponentTest> explicitComponentTests = exposure.getExplicitComponentTests();
+                if (explicitComponentTests.contains(exactNameTest) ||
+                        (exactFunctionTest != null && explicitComponentTests.contains(exactFunctionTest))) {
+                    component.setVisibility(exposure.getVisibility(), VisibilityProvenance.EXPOSED);
+                    matched = true;
+                    break;
                 }
-                boolean matched = false;
+            }
+            if (!matched && component.getVisibilityProvenance() == VisibilityProvenance.DEFAULTED) {
+                // Look for a matching wildcard
+                partialWildcardSearch:
                 for (XSLExpose exposure : exposeDeclarations) {
-                    Set<ComponentTest> explicitComponentTests = exposure.getExplicitComponentTests();
-                    if (explicitComponentTests.contains(exactNameTest) ||
-                            (exactFunctionTest != null && explicitComponentTests.contains(exactFunctionTest))) {
-                        component.setVisibility(exposure.getVisibility(), VisibilityProvenance.EXPOSED);
-                        matched = true;
-                        break;
+                    for (ComponentTest test : exposure.getWildcardComponentTests()) {
+                        if (test.isPartialWildcard() && test.matches(component.getActor())) {
+                            component.setVisibility(exposure.getVisibility(), VisibilityProvenance.EXPOSED);
+                            matched = true;
+                            break partialWildcardSearch;
+                        }
                     }
                 }
-                if (!matched && component.getVisibilityProvenance() == VisibilityProvenance.DEFAULTED) { 
-                    // Look for a matching wildcard
-                    partialWildcardSearch:
+                if (!matched) {
+                    anyWildcardSearch:
                     for (XSLExpose exposure : exposeDeclarations) {
                         for (ComponentTest test : exposure.getWildcardComponentTests()) {
-                            if (test.isPartialWildcard() && test.matches(component.getActor())) {
+                            if (test.matches(component.getActor())) {
                                 component.setVisibility(exposure.getVisibility(), VisibilityProvenance.EXPOSED);
-                                matched = true;
-                                break partialWildcardSearch;
+                                break anyWildcardSearch;
                             }
                         }
                     }
-                    if (!matched) {
-                        anyWildcardSearch:
-                        for (XSLExpose exposure : exposeDeclarations) {
-                            for (ComponentTest test : exposure.getWildcardComponentTests()) {
-                                if (test.matches(component.getActor())) {
-                                    component.setVisibility(exposure.getVisibility(), VisibilityProvenance.EXPOSED);
-                                    break anyWildcardSearch;
-                                }
-                            }
-                        }
-                    }
-
                 }
-            
+
+            }
+
         }
     }
+
 
     /**
      * Compile time error, specifying an error code

@@ -1,23 +1,29 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
-import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Test the use of schemas with the saxon:param extension from a s9api Validator
  */
-public class TestSaxonParam extends TestCase {
+public class TestSaxonParam {
 
+    @Test
     public void testSimpleTypeAssertionOK() {
         try {
             Processor proc = new Processor(true);
-            proc.setConfigurationProperty(FeatureKeys.XSD_VERSION, "1.1");
+            proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
             SchemaManager manager = proc.getSchemaManager();
             manager.load(new StreamSource(new File(ConfigTest.DATA_DIR + "schema-with-param.xsd")));
             SchemaValidator val = manager.newSchemaValidator();
@@ -50,10 +56,11 @@ public class TestSaxonParam extends TestCase {
         }
     }
 
+    @Test
     public void testSimpleTypeAssertionBadParam() {
         try {
             Processor proc = new Processor(true);
-            proc.setConfigurationProperty(FeatureKeys.XSD_VERSION, "1.1");
+            proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
             SchemaManager manager = proc.getSchemaManager();
             manager.load(new StreamSource(new File(ConfigTest.DATA_DIR + "schema-with-param.xsd")));
             SchemaValidator val = manager.newSchemaValidator();
@@ -72,10 +79,11 @@ public class TestSaxonParam extends TestCase {
         }
     }
 
+    @Test
     public void testValidateDocFn() {
         try {
             Processor proc = new Processor(true);
-            proc.setConfigurationProperty(FeatureKeys.XSD_VERSION, "1.1");
+            proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
             SchemaManager manager = proc.getSchemaManager();
             manager.load(new StreamSource(new File(ConfigTest.DATA_DIR + "schema-with-param.xsd")));
             DocumentBuilder b = proc.newDocumentBuilder();
@@ -89,7 +97,7 @@ public class TestSaxonParam extends TestCase {
             assertFalse(((XdmAtomicValue)ev.evaluate()).getBooleanValue());
             ev = c.compile("saxon:validate(., map{}, map{'baseLine':xs:date('1900-01-01')})('errors')!.('message')").load();
             ev.setContextItem(doc);
-            assertEquals(ev.evaluate().size(), 1);
+            assertEquals(1, ev.evaluate().size());
         } catch (SaxonApiException err) {
             err.printStackTrace();
             fail();

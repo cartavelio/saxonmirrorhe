@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,11 +7,10 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 
 /**
  * This class is a filter that passes all Receiver events through unchanged,
@@ -36,7 +35,7 @@ public class NamePoolConverter extends ProxyReceiver {
      *
      * @param next    the next receiver in the pipeline
      * @param oldPool the old namepool
-     * @param newPool th new namepool
+     * @param newPool typeHierarchy new namepool
      */
 
     public NamePoolConverter(Receiver next, NamePool oldPool, NamePool newPool) {
@@ -49,22 +48,23 @@ public class NamePoolConverter extends ProxyReceiver {
      * Output element start tag
      */
 
-    public void startElement(NodeName name, SchemaType type, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         checkType(type);
-        int fp = newPool.allocateFingerprint(name.getURI(), name.getLocalPart());
-        nextReceiver.startElement(new CodedName(fp, name.getPrefix(), newPool), type, location, properties);
+        int fp = newPool.allocateFingerprint(elemName.getURI(), elemName.getLocalPart());
+        final CodedName newElemName = new CodedName(fp, elemName.getPrefix(), newPool);
+        AttributeMap newAtts = EmptyAttributeMap.getInstance();
+        for (AttributeInfo att : attributes) {
+            checkType(att.getType());
+            int afp = newPool.allocateFingerprint(att.getNodeName().getURI(), att.getNodeName().getLocalPart());
+            NodeName newAttName = new CodedName(afp, att.getNodeName().getPrefix(), newPool);
+            newAtts = newAtts.put(new AttributeInfo(newAttName, att.getType(), att.getValue(), att.getLocation(), att.getProperties()));
+        }
+        nextReceiver.startElement(newElemName, type, newAtts, namespaces, location, properties);
     }
 
-    /**
-     * Handle an attribute
-     */
-
-    public void attribute(NodeName name, SimpleType type, CharSequence value, Location location, int properties)
-            throws XPathException {
-        checkType(type);
-        int fp = newPool.allocateFingerprint(name.getURI(), name.getLocalPart());
-        nextReceiver.attribute(new CodedName(fp, name.getPrefix(), newPool), type, value, location, properties);
-    }
 
     /**
      * Check that the schema type of a node is a built-in type

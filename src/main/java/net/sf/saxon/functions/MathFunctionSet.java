@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -38,7 +38,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
     }
 
     private void reg1(String name, Class<? extends SystemFunction> implementation) {
-        register(name, 1, implementation, BuiltInAtomicType.DOUBLE, OPT, 0, CARD0)
+        register(name, 1, implementation, BuiltInAtomicType.DOUBLE, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.DOUBLE, OPT, EMPTY);
     }
 
@@ -47,7 +47,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
         // Arity 0 functions
 
-        register("pi", 0, PiFn.class, BuiltInAtomicType.DOUBLE, ONE, 0, 0);
+        register("pi", 0, PiFn.class, BuiltInAtomicType.DOUBLE, ONE, 0);
 
         // Arity 1 functions
 
@@ -65,11 +65,11 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
         // Arity 2 functions
 
-        register("pow", 2, PowFn.class, BuiltInAtomicType.DOUBLE, OPT, 0, CARD0)
+        register("pow", 2, PowFn.class, BuiltInAtomicType.DOUBLE, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.DOUBLE, OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.DOUBLE, ONE, null);
 
-        register("atan2", 2, Atan2Fn.class, BuiltInAtomicType.DOUBLE, ONE, 0, 0)
+        register("atan2", 2, Atan2Fn.class, BuiltInAtomicType.DOUBLE, ONE, 0)
                 .arg(0, BuiltInAtomicType.DOUBLE, ONE, null)
                 .arg(1, BuiltInAtomicType.DOUBLE, ONE, null);
 
@@ -95,6 +95,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
             return Literal.makeLiteral(new DoubleValue(Math.PI));
         }
 
+        @Override
         public DoubleValue call(XPathContext context, Sequence[] arguments) throws XPathException {
             return new DoubleValue(Math.PI);
         }
@@ -108,7 +109,8 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
         protected abstract double compute(double input);
 
-        public ZeroOrOne<DoubleValue> call(XPathContext context, Sequence[] args) throws XPathException {
+        @Override
+        public ZeroOrOne call(XPathContext context, Sequence[] args) throws XPathException {
             DoubleValue in = (DoubleValue) args[0].head();
             if (in == null) {
                 return ZeroOrOne.empty();
@@ -124,6 +126,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
     public static class SinFn extends TrigFn1 {
 
+        @Override
         protected double compute(double input) {
             return Math.sin(input);
         }
@@ -135,6 +138,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
     public static class CosFn extends TrigFn1 {
 
+        @Override
         protected double compute(double input) {
             return Math.cos(input);
         }
@@ -146,6 +150,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
     public static class TanFn extends TrigFn1 {
 
+        @Override
         protected double compute(double input) {
             return Math.tan(input);
         }
@@ -157,6 +162,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
     public static class AsinFn extends TrigFn1 {
 
+        @Override
         protected double compute(double input) {
             return Math.asin(input);
         }
@@ -168,6 +174,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
     public static class AcosFn extends TrigFn1 {
 
+        @Override
         protected double compute(double input) {
             return Math.acos(input);
         }
@@ -179,6 +186,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
     public static class AtanFn extends TrigFn1 {
 
+        @Override
         protected double compute(double input) {
             return Math.atan(input);
         }
@@ -190,6 +198,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
     public static class SqrtFn extends TrigFn1 {
 
+        @Override
         protected double compute(double input) {
             return Math.sqrt(input);
         }
@@ -201,6 +210,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
     public static class LogFn extends TrigFn1 {
 
+        @Override
         protected double compute(double input) {
             return Math.log(input);
         }
@@ -212,6 +222,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
     public static class Log10Fn extends TrigFn1 {
 
+        @Override
         protected double compute(double input) {
             return Math.log10(input);
         }
@@ -223,6 +234,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
     public static class ExpFn extends TrigFn1 {
 
+        @Override
         protected double compute(double input) {
             return Math.exp(input);
         }
@@ -234,6 +246,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
     public static class Exp10Fn extends TrigFn1 {
 
+        @Override
         protected double compute(double input) {
             return Math.pow(10, input);
         }
@@ -253,7 +266,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
          * @throws XPathException if a dynamic error occurs within the function
          */
         @Override
-        public ZeroOrOne<DoubleValue> call(XPathContext context, Sequence[] args) throws XPathException {
+        public ZeroOrOne call(XPathContext context, Sequence[] args) throws XPathException {
             DoubleValue x = (DoubleValue) args[0].head();
             DoubleValue result;
             if (x == null) {
@@ -273,7 +286,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
                     }
                 }
             }
-            return new ZeroOrOne<>(result);
+            return new ZeroOrOne(result);
         }
     }
 
@@ -282,6 +295,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
      */
 
     public static class Atan2Fn extends SystemFunction {
+        @Override
         public DoubleValue call(XPathContext context, Sequence[] arguments) throws XPathException {
             DoubleValue y = (DoubleValue) arguments[0].head();
             assert y != null;
@@ -295,4 +309,4 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

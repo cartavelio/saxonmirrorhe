@@ -1,19 +1,23 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * test BuildingStreamWriter in s9api
  */
-public class TestBuildingContentHandler extends TestCase {
+public class TestBuildingContentHandler {
 
+    @Test
     public void testSimple() {
         try {
             Processor proc = new Processor(false);
@@ -37,13 +41,12 @@ public class TestBuildingContentHandler extends TestCase {
             assertEquals("<out data=\"3\"><br/><br style=\"bold\"/></out>",
                          sr.serializeNodeToString(bch.getDocumentNode())
                                             );
-        } catch (SaxonApiException e) {
-            fail(e.toString());
-        } catch (SAXException e) {
+        } catch (SaxonApiException | SAXException e) {
             fail(e.toString());
         }
     }
 
+    @Test
     public void testWithPrefixes() {
         try {
             Processor proc = new Processor(false);
@@ -78,6 +81,7 @@ public class TestBuildingContentHandler extends TestCase {
         }
     }
 
+    @Test
     public void testBaseUri() {
         try {
             Processor proc = new Processor(false);
@@ -90,7 +94,7 @@ public class TestBuildingContentHandler extends TestCase {
             bch.startElement("", "out", "out", ai);
             bch.endElement("", "out", "out");
             bch.endDocument();
-            assertEquals(bch.getDocumentNode().getBaseURI().toString(), "file:///test.xml/");
+            assertEquals("file:///test.xml/", bch.getDocumentNode().getBaseURI().toString());
             Serializer sr = proc.newSerializer();
             sr.setOutputProperty(Serializer.Property.INDENT, "no");
             sr.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
@@ -109,26 +113,4 @@ public class TestBuildingContentHandler extends TestCase {
 
 
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
 

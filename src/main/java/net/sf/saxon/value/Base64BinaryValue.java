@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -64,6 +64,7 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Co
      */
 
     /*@NotNull*/
+    @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
         Base64BinaryValue v = new Base64BinaryValue(binaryValue);
         v.typeLabel = typeLabel;
@@ -81,6 +82,7 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Co
     }
 
     /*@NotNull*/
+    @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.BASE64_BINARY;
     }
@@ -92,6 +94,7 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Co
      */
 
     /*@NotNull*/
+    @Override
     public String getPrimitiveStringValue() {
         return encode(binaryValue).toString();
     }
@@ -111,6 +114,7 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Co
      */
 
     /*@NotNull*/
+    @Override
     public Comparable getSchemaComparable() {
         return new Base64BinaryComparable();
     }
@@ -126,6 +130,7 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Co
             return Base64BinaryValue.this;
         }
 
+        @Override
         public int compareTo(/*@NotNull*/ Object o) {
             if (o instanceof Base64BinaryComparable &&
                     Arrays.equals(getBase64BinaryValue().binaryValue,
@@ -164,6 +169,7 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Co
      */
 
     /*@Nullable*/
+    @Override
     public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
         return this;
     }
@@ -221,10 +227,10 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Co
         for (int i = 0; i < whole; i += 3) {
             // 3 bytes = 24 bits = 4 characters
             int val = ((((int) value[i]) & 0xff) << 16) + ((((int) value[i + 1]) & 0xff) << 8) + ((((int) value[i + 2]) & 0xff));
-            buff.append((char) encoding[(val >> 18) & 0x3f]);
-            buff.append((char) encoding[(val >> 12) & 0x3f]);
-            buff.append((char) encoding[(val >> 6) & 0x3f]);
-            buff.append((char) encoding[val & 0x3f]);
+            buff.cat((char) encoding[(val >> 18) & 0x3f]);
+            buff.cat((char) encoding[(val >> 12) & 0x3f]);
+            buff.cat((char) encoding[(val >> 6) & 0x3f]);
+            buff.cat((char) encoding[val & 0x3f]);
         }
         int remainder = (value.length % 3);
         switch (remainder) {
@@ -235,17 +241,17 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Co
             case 1: {
                 // pad the final 8 bits to 12 (2 groups of 6)
                 int val = ((((int) value[whole]) & 0xff) << 4);
-                buff.append((char) encoding[(val >> 6) & 0x3f]);
-                buff.append((char) encoding[val & 0x3f]);
+                buff.cat((char) encoding[(val >> 6) & 0x3f]);
+                buff.cat((char) encoding[val & 0x3f]);
                 buff.append("==");
                 break;
             }
             case 2: {
                 // pad the final 16 bits to 18 (3 groups of 6)
                 int val = ((((int) value[whole]) & 0xff) << 10) + ((((int) value[whole + 1]) & 0xff) << 2);
-                buff.append((char) encoding[(val >> 12) & 0x3f]);
-                buff.append((char) encoding[(val >> 6) & 0x3f]);
-                buff.append((char) encoding[val & 0x3f]);
+                buff.cat((char) encoding[(val >> 12) & 0x3f]);
+                buff.cat((char) encoding[(val >> 6) & 0x3f]);
+                buff.cat((char) encoding[val & 0x3f]);
                 buff.append("=");
                 break;
             }
@@ -357,6 +363,7 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Co
         return d;
     }
 
+    @Override
     public int compareTo(Object o) {
         byte[] other = ((Base64BinaryValue)o).binaryValue;
         int len0 = binaryValue.length;

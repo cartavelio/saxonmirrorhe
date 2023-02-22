@@ -6,7 +6,7 @@ import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.event.*;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.*;
 import net.sf.saxon.option.axiom.AxiomObjectModel;
@@ -17,12 +17,16 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Untyped;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class TreeModelPerformance extends PerformanceTestCase {
-    
+
     private static final String INPUT = ConfigTest.XMARK_DIR + "xmark10.xml";
     //private static final String INPUT = "/Users/mike/Desktop/temp/testdata.xml";
 
@@ -44,8 +48,8 @@ public class TreeModelPerformance extends PerformanceTestCase {
             }
 
             @Override
-            public int expectedTimeMilliseconds() {
-                return expected;
+            public int expectedTimeMicroseconds() {
+                return expected*1000;
             }
 
             @Override
@@ -56,42 +60,59 @@ public class TreeModelPerformance extends PerformanceTestCase {
         measure(task);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeBuild10Mb() {
         build(TreeModel.TINY_TREE, INPUT, 100);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeCondensedBuild10Mb() {
         build(TreeModel.TINY_TREE_CONDENSED, INPUT, 130);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeLinkedBuild10Mb() {
         build(TreeModel.LINKED_TREE, INPUT, 130);
     }
 
+    @Test
+    @Tag("performance")
     public void testDomBuild10Mb() {
         build(DOMObjectModel.getInstance(), INPUT, 140);
     }
 
+    @Test
+    @Tag("performance")
     public void testDominoBuild10Mb() {
         build(DominoTreeModel.getInstance(), INPUT, 180);
     }
 
+    @Test
+    @Tag("performance")
     public void testXOMBuild10Mb() {
         build(XOMObjectModel.getInstance(), INPUT, 180);
     }
 
+    @Test
+    @Tag("performance")
     public void testJDOM2Build10Mb() {
         build(JDOM2ObjectModel.getInstance(), INPUT, 130);
     }
 
+    @Test
+    @Tag("performance")
     public void testDOM4JBuild10Mb() {
         build(DOM4JObjectModel.getInstance(), INPUT, 130);
     }
 
+    @Test
+    @Tag("performance")
     public void testAxiomBuild10Mb() {
         build(AxiomObjectModel.getInstance(), INPUT, 130);
     }
-
 
     private void sink(final TreeModel model, final String fileName, final int expected) {
         final Configuration config = new EnterpriseConfiguration();
@@ -112,7 +133,7 @@ public class TreeModelPerformance extends PerformanceTestCase {
             public void run() {
                 PipelineConfiguration pipe = config.makePipelineConfiguration();
                 try {
-                    finalTree.getRootNode().copy(new Sink(pipe), CopyOptions.ALL_NAMESPACES, ExplicitLocation.UNKNOWN_LOCATION);
+                    finalTree.getRootNode().copy(new Sink(pipe), CopyOptions.ALL_NAMESPACES, Loc.NONE);
                 } catch (XPathException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -120,8 +141,8 @@ public class TreeModelPerformance extends PerformanceTestCase {
             }
 
             @Override
-            public int expectedTimeMilliseconds() {
-                return expected;
+            public int expectedTimeMicroseconds() {
+                return expected*1000;
             }
 
             @Override
@@ -132,38 +153,56 @@ public class TreeModelPerformance extends PerformanceTestCase {
         measure(task);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeSink10Mb() {
         sink(TreeModel.TINY_TREE, INPUT, 5);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeCondensedSink10Mb() {
         sink(TreeModel.TINY_TREE_CONDENSED, INPUT, 5);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeLinkedSink10Mb() {
         sink(TreeModel.LINKED_TREE, INPUT, 18);
     }
 
+    @Test
+    @Tag("performance")
     public void testDOMSink10Mb() {
         sink(DOMObjectModel.getInstance(), INPUT, 120);
     }
 
+    @Test
+    @Tag("performance")
     public void testDominoSink10Mb() {
         sink(DominoTreeModel.getInstance(), INPUT, 42);
     }
 
+    @Test
+    @Tag("performance")
     public void testXOMSink10Mb() {
         sink(XOMObjectModel.getInstance(), INPUT, 42);
     }
 
+    @Test
+    @Tag("performance")
     public void testJDOM2Sink10Mb() {
         sink(JDOM2ObjectModel.getInstance(), INPUT, 42);
     }
 
+    @Test
+    @Tag("performance")
     public void testDOM4JSink10Mb() {
         sink(DOM4JObjectModel.getInstance(), INPUT, 42);
     }
 
+    @Test
+    @Tag("performance")
     public void testAxiomSink10Mb() {
         sink(AxiomObjectModel.getInstance(), INPUT, 42);
     }
@@ -194,10 +233,10 @@ public class TreeModelPerformance extends PerformanceTestCase {
                     NamespaceReducer reducer = new NamespaceReducer(builder);
                     ComplexContentOutputter cco = new ComplexContentOutputter(reducer);
                     cco.open();
-                    cco.startDocument(0);
-                    cco.startElement(new NoNamespaceName("wrapper"), Untyped.getInstance(), ExplicitLocation.UNKNOWN_LOCATION, 0);
+                    cco.startDocument(ReceiverOption.NONE);
+                    cco.startElement(new NoNamespaceName("wrapper"), Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
 
-                    finalDocumentElement.copy(cco, CopyOptions.ALL_NAMESPACES, ExplicitLocation.UNKNOWN_LOCATION);
+                    finalDocumentElement.copy(cco, CopyOptions.ALL_NAMESPACES, Loc.NONE);
 
                     cco.endElement();
                     cco.endDocument();
@@ -210,8 +249,8 @@ public class TreeModelPerformance extends PerformanceTestCase {
             }
 
             @Override
-            public int expectedTimeMilliseconds() {
-                return expected;
+            public int expectedTimeMicroseconds() {
+                return expected*1000;
             }
 
             @Override
@@ -222,38 +261,56 @@ public class TreeModelPerformance extends PerformanceTestCase {
         measure(task);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeGraft10Mb() {
         graft(TreeModel.TINY_TREE, INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeCondensedGraft10Mb() {
         graft(TreeModel.TINY_TREE_CONDENSED, INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testLinkedGraft10Mb() {
         graft(TreeModel.LINKED_TREE, INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testDOMGraft10Mb() {
         graft(DOMObjectModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testDominoGraft10Mb() {
         graft(DominoTreeModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testXOMGraft10Mb() {
         graft(XOMObjectModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testJDOM2Graft10Mb() {
         graft(JDOM2ObjectModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testDOM4JGraft10Mb() {
         graft(DOM4JObjectModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testAxiomGraft10Mb() {
         graft(AxiomObjectModel.getInstance(), INPUT, 500);
     }
@@ -282,10 +339,10 @@ public class TreeModelPerformance extends PerformanceTestCase {
             NamespaceReducer reducer = new NamespaceReducer(builder);
             ComplexContentOutputter cco = new ComplexContentOutputter(reducer);
             cco.open();
-            cco.startDocument(0);
-            cco.startElement(new NoNamespaceName("wrapper"), Untyped.getInstance(), ExplicitLocation.UNKNOWN_LOCATION, 0);
+            cco.startDocument(ReceiverOption.NONE);
+            cco.startElement(new NoNamespaceName("wrapper"), Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
 
-            finalDocumentElement.copy(cco, CopyOptions.ALL_NAMESPACES, ExplicitLocation.UNKNOWN_LOCATION);
+            finalDocumentElement.copy(cco, CopyOptions.ALL_NAMESPACES, Loc.NONE);
 
             cco.endElement();
             cco.endDocument();
@@ -302,7 +359,7 @@ public class TreeModelPerformance extends PerformanceTestCase {
             public void run() {
                 PipelineConfiguration pipe = config.makePipelineConfiguration();
                 try {
-                    finalAfterGraft.copy(new Sink(pipe), CopyOptions.ALL_NAMESPACES, ExplicitLocation.UNKNOWN_LOCATION);
+                    finalAfterGraft.copy(new Sink(pipe), CopyOptions.ALL_NAMESPACES, Loc.NONE);
                 } catch (XPathException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -310,8 +367,8 @@ public class TreeModelPerformance extends PerformanceTestCase {
             }
 
             @Override
-            public int expectedTimeMilliseconds() {
-                return expected;
+            public int expectedTimeMicroseconds() {
+                return expected*1000;
             }
 
             @Override
@@ -322,38 +379,56 @@ public class TreeModelPerformance extends PerformanceTestCase {
         measure(task);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeGraftScan10Mb() {
         graftThenScan(TreeModel.TINY_TREE, INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeCondensedGraftScan10Mb() {
         graftThenScan(TreeModel.TINY_TREE_CONDENSED, INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testLinkedGraftScan10Mb() {
         graftThenScan(TreeModel.LINKED_TREE, INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testDOMGraftScan10Mb() {
         graftThenScan(DOMObjectModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testDominoGraftScan10Mb() {
         graftThenScan(DominoTreeModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testXOMGraftScan10Mb() {
         graftThenScan(XOMObjectModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testJDOM2GraftScan10Mb() {
         graftThenScan(JDOM2ObjectModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testDOM4JGraftScan10Mb() {
         graftThenScan(DOM4JObjectModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testAxiomGraftScan10Mb() {
         graftThenScan(AxiomObjectModel.getInstance(), INPUT, 500);
     }
@@ -383,10 +458,10 @@ public class TreeModelPerformance extends PerformanceTestCase {
             NamespaceReducer reducer = new NamespaceReducer(builder);
             ComplexContentOutputter cco = new ComplexContentOutputter(reducer);
             cco.open();
-            cco.startDocument(0);
-            cco.startElement(new NoNamespaceName("wrapper"), Untyped.getInstance(), ExplicitLocation.UNKNOWN_LOCATION, 0);
+            cco.startDocument(ReceiverOption.NONE);
+            cco.startElement(new NoNamespaceName("wrapper"), Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
 
-            finalDocumentElement.copy(cco, CopyOptions.ALL_NAMESPACES, ExplicitLocation.UNKNOWN_LOCATION);
+            finalDocumentElement.copy(cco, CopyOptions.ALL_NAMESPACES, Loc.NONE);
 
             cco.endElement();
             cco.endDocument();
@@ -428,8 +503,8 @@ public class TreeModelPerformance extends PerformanceTestCase {
             }
 
             @Override
-            public int expectedTimeMilliseconds() {
-                return expected;
+            public int expectedTimeMicroseconds() {
+                return expected*1000;
             }
 
             @Override
@@ -440,38 +515,56 @@ public class TreeModelPerformance extends PerformanceTestCase {
         measure(task);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeGraftSearch10Mb() {
         graftThenSearch(TreeModel.TINY_TREE, INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeCondensedGraftSearch10Mb() {
         graftThenSearch(TreeModel.TINY_TREE_CONDENSED, INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testLinkedGraftSearch10Mb() {
         graftThenSearch(TreeModel.LINKED_TREE, INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testDOMGraftSearch10Mb() {
         graftThenSearch(DOMObjectModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testDominoGraftSearch10Mb() {
         graftThenSearch(DominoTreeModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testXOMGraftSearch10Mb() {
         graftThenSearch(XOMObjectModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testJDOM2GraftSearch10Mb() {
         graftThenSearch(JDOM2ObjectModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testDOM4JGraftSearch10Mb() {
         graftThenSearch(DOM4JObjectModel.getInstance(), INPUT, 500);
     }
 
+    @Test
+    @Tag("performance")
     public void testAxiomGraftSearch10Mb() {
         graftThenSearch(AxiomObjectModel.getInstance(), INPUT, 500);
     }

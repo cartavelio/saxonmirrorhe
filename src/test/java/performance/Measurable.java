@@ -4,7 +4,7 @@ public interface Measurable {
 
     void run();
 
-    int expectedTimeMilliseconds();
+    int expectedTimeMicroseconds();
 
     String name();
 }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -44,9 +44,11 @@ public class AbsolutePath {
      */
 
     public void appendAttributeName(NodeName attributeName) {
-        PathElement last = path.get(path.size()-1);
-        if (last.getNodeKind() == Type.ATTRIBUTE) {
-            path.remove(path.size()-1);
+        if (!path.isEmpty()) {
+            PathElement last = path.get(path.size()-1);
+            if (last.getNodeKind() == Type.ATTRIBUTE) {
+                path.remove(path.size()-1);
+            }
         }
         PathElement att = new PathElement(Type.ATTRIBUTE, attributeName, 1);
         path.add(att);
@@ -76,7 +78,7 @@ public class AbsolutePath {
     public String getPathUsingPrefixes() {
         FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
         for (AbsolutePath.PathElement pe : path) {
-            fsb.append('/');
+            fsb.cat('/');
             pe.toString(fsb, 'p');
         }
         return fsb.toString();
@@ -91,7 +93,7 @@ public class AbsolutePath {
     public String getPathUsingUris() {
         FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
         for (AbsolutePath.PathElement pe : path) {
-            fsb.append('/');
+            fsb.cat('/');
             pe.toString(fsb, 'u');
         }
         return fsb.toString();
@@ -106,7 +108,7 @@ public class AbsolutePath {
     public String getPathUsingAbbreviatedUris() {
         FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
         for (AbsolutePath.PathElement pe : path) {
-            fsb.append('/');
+            fsb.cat('/');
             pe.toString(fsb, 's');
         }
         return fsb.toString();
@@ -203,7 +205,7 @@ public class AbsolutePath {
                     fsb.append("(/)");
                     break;
                 case Type.ATTRIBUTE:
-                    fsb.append('@');
+                    fsb.cat('@');
                     if (!name.getURI().isEmpty()) {
                         if (option == 'u') {
                             fsb.append("Q{");
@@ -213,7 +215,7 @@ public class AbsolutePath {
                             String prefix = name.getPrefix();
                             if (!prefix.isEmpty()) {
                                 fsb.append(prefix);
-                                fsb.append(':');
+                                fsb.cat(':');
                             }
                         } else if (option == 's') {
                             fsb.append("Q{");
@@ -232,7 +234,7 @@ public class AbsolutePath {
                         String prefix = name.getPrefix();
                         if (!prefix.isEmpty()) {
                             fsb.append(prefix);
-                            fsb.append(':');
+                            fsb.cat(':');
                         }
                     } else if (option == 's') {
                         if (!name.getURI().isEmpty()) {
@@ -272,9 +274,9 @@ public class AbsolutePath {
         private void appendPredicate(FastStringBuffer fsb) {
             int index = getIndex();
             if (index != -1) {
-                fsb.append('[');
+                fsb.cat('[');
                 fsb.append(getIndex() + "");
-                fsb.append(']');
+                fsb.cat(']');
             }
         }
     }

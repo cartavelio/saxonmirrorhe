@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,6 +11,8 @@ import com.saxonica.functions.sql.SQLFunctionSet;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SimpleExpression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
@@ -40,29 +42,34 @@ public class SQLExecute extends ExtensionInstruction {
     Expression statement;
 
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
         // Attributes for SQL-statement
-        String statementAtt = getAttributeValue("", "statement");
+        AttributeMap atts = attributes();
+        AttributeInfo statementAtt = atts.get("", "statement");
         if (statementAtt == null) {
             reportAbsence("statement");
+        } else {
+            statement = makeAttributeValueTemplate(statementAtt.getValue(), statementAtt);
         }
-        statement = makeAttributeValueTemplate(statementAtt, getAttributeList().getIndex("", "statement"));
 
-        String connectAtt = getAttributeValue("", "connection");
+        AttributeInfo connectAtt = atts.get("", "connection");
         if (connectAtt == null) {
             reportAbsence("connection");
         } else {
-            connection = makeExpression(connectAtt, getAttributeList().getIndex("", "connection"));
+            connection = makeExpression(connectAtt.getValue(), connectAtt);
         }
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);
         statement = typeCheck("statement", statement);
         connection = typeCheck("connection", connection);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return new SqlStatementInstruction(connection, statement);
     }
@@ -83,16 +90,19 @@ public class SQLExecute extends ExtensionInstruction {
          * This method indicates which of the three is provided.
          */
 
+        @Override
         public int getImplementationMethod() {
             return Expression.PROCESS_METHOD;
         }
 
         /*@NotNull*/
+        @Override
         public String getExpressionType() {
             return "sql:statement";
         }
 
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             Connection connection = SQLFunctionSet.expectConnection(arguments[CONNECTION], context);
             String statementText = arguments[STATEMENT].head().getStringValue();
 

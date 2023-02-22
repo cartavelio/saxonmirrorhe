@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,10 +8,8 @@
 package net.sf.saxon.jaxp;
 
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceivingContentHandler;
-import net.sf.saxon.event.TreeReceiver;
+import net.sf.saxon.event.*;
+import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
@@ -35,7 +33,7 @@ import java.util.Map;
 public class StreamingTransformerImpl extends AbstractTransformerImpl {
 
     private Xslt30Transformer xsltTransformer;
-    private Map<QName, XdmValue> convertedParameters = new HashMap<QName, XdmValue>();
+    private Map<QName, XdmValue> convertedParameters = new HashMap<>();
 
     protected StreamingTransformerImpl(XsltExecutable e, Xslt30Transformer t) {
         super(e);
@@ -57,7 +55,7 @@ public class StreamingTransformerImpl extends AbstractTransformerImpl {
      * @param xmlSource    The XML input to transform.
      * @param outputTarget The <code>Result</code> of transforming the
      *                     <code>xmlSource</code>.
-     * @throws javax.xml.transform.TransformerException
+     * @throws XPathException
      *          If an unrecoverable error occurs
      *          during the course of the transformation.
      */
@@ -71,7 +69,9 @@ public class StreamingTransformerImpl extends AbstractTransformerImpl {
             Destination destination = makeDestination(outputTarget);
             if (destination == null) {
                 SerializerFactory sf = getConfiguration().getSerializerFactory();
-                Receiver r = sf.getReceiver(outputTarget, getConfiguration().makePipelineConfiguration(), getLocalOutputProperties());
+                Receiver r = sf.getReceiver(outputTarget,
+                                            new SerializationProperties(getLocalOutputProperties()),
+                                            getConfiguration().makePipelineConfiguration());
                 transform(xmlSource, r);
                 return;
             }
@@ -154,6 +154,7 @@ public class StreamingTransformerImpl extends AbstractTransformerImpl {
      * @return the underlying Saxon Controller instance
      */
 
+    @Override
     public Controller getUnderlyingController() {
         return xsltTransformer.getUnderlyingController();
     }
@@ -164,6 +165,7 @@ public class StreamingTransformerImpl extends AbstractTransformerImpl {
      * @return the transformation in the form of an XMLFilter
      */
 
+    @Override
     public XMLFilter newXMLFilter() {
         return new StreamingFilterImpl(xsltTransformer);
     }
@@ -195,9 +197,11 @@ public class StreamingTransformerImpl extends AbstractTransformerImpl {
             try {
                 PipelineConfiguration pipe = controller.makePipelineConfiguration();
                 setPipelineConfiguration(pipe);
+                controller.initializeController(new GlobalParameterSet());
                 Receiver out = controller.getConfiguration().getSerializerFactory().getReceiver(
                         result, new SerializationProperties(), pipe);
-                Receiver in = controller.getStreamingReceiver(controller.getInitialMode(), new TreeReceiver(out));
+                Receiver in = controller.getStreamingReceiver(controller.getInitialMode(),
+                                                              new TreeReceiver(out));
                 setReceiver(in);
             } catch (XPathException e) {
                 throw new IllegalArgumentException(e);

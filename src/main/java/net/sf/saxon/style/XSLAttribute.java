@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -35,9 +35,8 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
     private int validationAction = Validation.PRESERVE;
     private SimpleType schemaType;
 
-    public void prepareAttributes() throws XPathException {
-
-        AttributeCollection atts = getAttributeList();
+    @Override
+    public void prepareAttributes() {
 
         String nameAtt = null;
         String namespaceAtt = null;
@@ -46,26 +45,36 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
         String validationAtt = null;
         String typeAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
-            if (f.equals("name")) {
-                nameAtt = Whitespace.trim(atts.getValue(a));
-                attributeName = makeAttributeValueTemplate(nameAtt, a);
-            } else if (f.equals("namespace")) {
-                namespaceAtt = Whitespace.trim(atts.getValue(a));
-                namespace = makeAttributeValueTemplate(namespaceAtt, a);
-            } else if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
-            } else if (f.equals("separator")) {
-                separatorAtt = atts.getValue(a);
-                separator = makeAttributeValueTemplate(separatorAtt, a);
-            } else if (f.equals("validation")) {
-                validationAtt = Whitespace.trim(atts.getValue(a));
-            } else if (f.equals("type")) {
-                typeAtt = Whitespace.trim(atts.getValue(a));
-            } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            String f = attName.getDisplayName();
+            switch (f) {
+                case "name":
+                    nameAtt = Whitespace.trim(value);
+                    attributeName = makeAttributeValueTemplate(nameAtt, att);
+                    break;
+                case "namespace":
+                    namespaceAtt = Whitespace.trim(value);
+                    namespace = makeAttributeValueTemplate(namespaceAtt, att);
+                    break;
+                case "select":
+                    selectAtt = value;
+                    select = makeExpression(selectAtt, att);
+                    break;
+                case "separator":
+                    separatorAtt = value;
+                    separator = makeAttributeValueTemplate(separatorAtt, att);
+                    break;
+                case "validation":
+                    validationAtt = Whitespace.trim(value);
+                    break;
+                case "type":
+                    typeAtt = Whitespace.trim(value);
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
 
@@ -143,13 +152,14 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
         }
     }
 
-    private void invalidAttributeName(String message) throws XPathException {
+    private void invalidAttributeName(String message) {
         compileErrorInAttribute(message, "XTDE0850", "name");
         // prevent a duplicate error message...
         attributeName = new StringLiteral("saxon-error-attribute");
 //        }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         if (schemaType != null) {
             if (schemaType.isNamespaceSensitive()) {
@@ -172,10 +182,12 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
      * @return the error code defined for this condition, for this particular instruction
      */
 
+    @Override
     protected String getErrorCodeForSelectPlusContent() {
         return "XTSE0840";
     }
 
+    @Override
     public Instruction compile(Compilation compilation, ComponentDeclaration decl) throws XPathException {
         NamespaceResolver nsContext = null;
 
@@ -250,7 +262,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
             // prefix, we need to save the namespace context of the instruction
 
             if (namespace == null) {
-                nsContext = makeNamespaceContext();
+                nsContext = getAllNamespaces();
             }
         }
 

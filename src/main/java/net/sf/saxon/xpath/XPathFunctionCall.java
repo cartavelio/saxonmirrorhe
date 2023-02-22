@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -71,6 +71,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public Expression preEvaluate(ExpressionVisitor visitor) {
         return this;
     }
@@ -81,6 +82,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
      * dependencies on it.
      */
 
+    @Override
     public int getIntrinsicDependencies() {
         return 0;
     }
@@ -94,6 +96,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         return new XPathFunctionCall(name, function);
     }
@@ -120,6 +123,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(/*@NotNull*/ PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         return addExternalFunctionCallToPathMap(pathMap, pathMapNodeSet);
     }
@@ -133,7 +137,8 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(/*@NotNull*/ XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(/*@NotNull*/ XPathContext context) throws XPathException {
         Sequence[] argValues = new Sequence[getArity()];
         for (int i = 0; i < argValues.length; i++) {
             argValues[i] = SequenceTool.toLazySequence(getArg(i).iterate(context));
@@ -152,13 +157,14 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
      */
 
     /*@Nullable*/
-    public Sequence<?> call(/*@NotNull*/ XPathContext context, Sequence[] argValues /*@NotNull*/) throws XPathException {
+    @Override
+    public Sequence call(/*@NotNull*/ XPathContext context, Sequence[] argValues /*@NotNull*/) throws XPathException {
         // An argument is supplied to the extension function as a List, unless it is a singleton.
         // The items within the list are converted to the "natural Java representation", for example
         // a double is passed as a Double, a string as a String.
         List<Object> convertedArgs = new ArrayList<>(argValues.length);
         Configuration config = context.getConfiguration();
-        for (Sequence<?> argValue : argValues) {
+        for (Sequence argValue : argValues) {
             List<Object> target = new ArrayList<>();
             argValue.iterate().forEachOrFail(item -> {
                 PJConverter converter = PJConverter.allocate(
@@ -196,6 +202,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return Type.ITEM_TYPE;
     }
@@ -205,6 +212,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
      *
      * @return ZERO_OR_MORE (we don't know)
      */
+    @Override
     public int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }

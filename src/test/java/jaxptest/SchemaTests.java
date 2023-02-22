@@ -2,7 +2,6 @@ package jaxptest;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.s9api.Processor;
@@ -11,12 +10,14 @@ import net.sf.saxon.s9api.SchemaManager;
 import net.sf.saxon.s9api.SchemaValidator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlCatalogResolver;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
@@ -29,11 +30,15 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Tests for JAXP schema validation interface
  */
-public class SchemaTests extends TestCase {
+public class SchemaTests {
 
+    @Test
     public void testStreamNotClosed() {
         try {
             InputStream inStream = new BufferedInputStream(new FileInputStream(new
@@ -60,15 +65,13 @@ public class SchemaTests extends TestCase {
             inStream.reset();
 
             System.out.println(inStream.read());
-        } catch (SAXException e) {
-            e.printStackTrace();
-            fail();
-        } catch (IOException e) {
+        } catch (SAXException | IOException e) {
             e.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testSupplyElementNode() {    // bug 2217
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -97,6 +100,7 @@ public class SchemaTests extends TestCase {
         }
     }
 
+    @Test
     public void testSupplyDocumentNode() {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -124,6 +128,7 @@ public class SchemaTests extends TestCase {
         }
     }
 
+    @Test
     public void testErrorHandler() {
         final List<String> reports = new ArrayList<String>();
         try {
@@ -156,11 +161,12 @@ public class SchemaTests extends TestCase {
             fail("Unexpected success");
 
         } catch (SAXException e) {
-            assertTrue(reports.size() == 1);
-            assertTrue(reports.get(0).startsWith("W:"));
+            assertTrue(reports.size() == 1, "size");
+            assertTrue(reports.get(0).startsWith("E:"), "E:");
         }
     }
 
+    @Test
     public void testErrorHandlerIllFormed() {
         final List<String> reports = new ArrayList<String>();
         try {
@@ -198,6 +204,7 @@ public class SchemaTests extends TestCase {
         }
     }
 
+    @Test
     public void testOverrideUsingURN() {
 
         try {
@@ -261,6 +268,7 @@ public class SchemaTests extends TestCase {
      * saying that the schema contained unresolved external references.
      */
 
+    @Test
     public void testOverrideUsingURNinDITA() {
 
         try {
@@ -289,6 +297,32 @@ public class SchemaTests extends TestCase {
             fail();
         }
 
+    }
+
+    // Use ACCESS_EXTERNAL_SCHEMA to disallow "file" protocol
+
+    @Test
+    public void testValidatorFeatures01() {    // bug 4234
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            docFactory.setNamespaceAware(true);
+            Document doc = docFactory.newDocumentBuilder().parse(new File(ConfigTest.DATA_DIR + "books-wrapper.xsd"));
+            Element top = doc.getDocumentElement();
+            DOMSource source = new DOMSource(top);
+
+            EnterpriseConfiguration config = new EnterpriseConfiguration();
+            SchemaFactory schemaFactory = new com.saxonica.ee.jaxp.SchemaFactoryImpl(config);
+            schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "http https");
+            Schema schemaGrammar = schemaFactory.newSchema(source);
+
+            Validator schemaValidator = schemaGrammar.newValidator();
+
+            schemaValidator.validate(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml")));
+            fail("undetected failure");
+        } catch (SAXException | IOException | ParserConfigurationException e) {
+            // failed as expected
+            assertTrue(e instanceof SAXParseException);
+        }
     }
 }
 

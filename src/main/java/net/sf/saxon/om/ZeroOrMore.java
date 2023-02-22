@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,12 +10,12 @@ package net.sf.saxon.om;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -24,7 +24,7 @@ import java.util.List;
  * checking in the same way as for a native XSLT/XQuery function declaring the type as xs:integer*.
  */
 
-public class ZeroOrMore<T extends Item<?>> implements GroundedValue<T> {
+public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
 
     private List<T> content;
 
@@ -42,17 +42,24 @@ public class ZeroOrMore<T extends Item<?>> implements GroundedValue<T> {
         this.content = content;
     }
 
-    public ZeroOrMore(SequenceIterator<? extends T> iter) throws XPathException {
-        content = new ArrayList<T>();
-        iter.forEachOrFail(content::add);
+    public ZeroOrMore(SequenceIterator iter) throws XPathException {
+        content = new ArrayList<>();
+        iter.forEachOrFail(item -> content.add((T)item));
     }
 
+    @Override
     public T head() {
         return content.isEmpty() ? null : content.get(0);
     }
 
-    public UnfailingIterator<T> iterate() {
+    @Override
+    public ListIterator<T> iterate() {
         return new ListIterator<>(content);
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return content.iterator();
     }
 
     /**
@@ -61,6 +68,7 @@ public class ZeroOrMore<T extends Item<?>> implements GroundedValue<T> {
      * @param n the index of the required item, with 0 representing the first item in the sequence
      * @return the n'th item if it exists, or null otherwise
      */
+    @Override
     public T itemAt(int n) {
         if (n >= 0 && n < content.size()) {
             return content.get(n);
@@ -81,14 +89,15 @@ public class ZeroOrMore<T extends Item<?>> implements GroundedValue<T> {
      *               of the sequence
      * @return the required subsequence.
      */
-    public GroundedValue<T> subsequence(int start, int length) {
+    @Override
+    public ZeroOrMore<T> subsequence(int start, int length) {
         if (start < 0) {
             start = 0;
         }
         if (start + length > content.size()) {
             length = content.size() - start;
         }
-        return new ZeroOrMore<T>(content.subList(start, start+ length));
+        return new ZeroOrMore<>(content.subList(start, start+ length));
     }
 
     /**
@@ -96,6 +105,7 @@ public class ZeroOrMore<T extends Item<?>> implements GroundedValue<T> {
      *
      * @return the number of items in the sequence
      */
+    @Override
     public int getLength() {
         return content.size();
     }
@@ -107,6 +117,7 @@ public class ZeroOrMore<T extends Item<?>> implements GroundedValue<T> {
      * @throws net.sf.saxon.trans.XPathException
      *          if the sequence has no effective boolean value (for example a sequence of two integers)
      */
+    @Override
     public boolean effectiveBooleanValue() throws XPathException {
         return ExpressionTool.effectiveBooleanValue(iterate());
     }
@@ -120,6 +131,7 @@ public class ZeroOrMore<T extends Item<?>> implements GroundedValue<T> {
      * @throws net.sf.saxon.trans.XPathException
      *          if the sequence contains items that have no string value (for example, function items)
      */
+    @Override
     public String getStringValue() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
@@ -133,6 +145,7 @@ public class ZeroOrMore<T extends Item<?>> implements GroundedValue<T> {
      * @throws net.sf.saxon.trans.XPathException
      *          if the sequence contains items that have no string value (for example, function items)
      */
+    @Override
     public CharSequence getStringValueCS() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
@@ -145,15 +158,16 @@ public class ZeroOrMore<T extends Item<?>> implements GroundedValue<T> {
      *
      * @return the simplified sequence
      */
-    public GroundedValue<T> reduce() {
+    @Override
+    public GroundedValue reduce() {
         if (content.isEmpty()) {
             return EmptySequence.getInstance();
         } else if (content.size() == 1) {
             T first = content.get(0);
             if (first instanceof AtomicValue) {
-                return (GroundedValue<T>)first;
+                return first;
             } else {
-                return new One<T>(head());
+                return new One<>(head());
             }
         }
         return this;

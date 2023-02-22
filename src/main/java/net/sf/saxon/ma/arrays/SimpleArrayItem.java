@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,13 +8,14 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.OperandRole;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.ExternalObject;
-import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
@@ -32,9 +33,8 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
     public static final SimpleArrayItem EMPTY_ARRAY =
             new SimpleArrayItem(new ArrayList<>());
 
-    private List<GroundedValue<?>> members;
+    private final List<GroundedValue> members;
     private boolean knownToBeGrounded = false;
-    private SequenceType memberType = null; // computed on demand
 
     /**
      * Construct an array whose members are arbitrary sequences
@@ -42,7 +42,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      *                The values must be repeatable sequences (not LazySequences); this is not checked.
      */
 
-    public SimpleArrayItem(List<GroundedValue<?>> members) {
+    public SimpleArrayItem(List<GroundedValue> members) {
         this.members = members;
     }
 
@@ -53,11 +53,11 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      * @throws XPathException if evaluating the SequenceIterator fails
      */
 
-    public static SimpleArrayItem makeSimpleArrayItem(SequenceIterator<?> input) throws XPathException {
-        List<GroundedValue<?>> members = new ArrayList<>();
+    public static SimpleArrayItem makeSimpleArrayItem(SequenceIterator input) throws XPathException {
+        List<GroundedValue> members = new ArrayList<>();
         input.forEachOrFail(item -> {
             if (item.getClass().getName().equals("com.saxonica.functions.extfn.ArrayMemberValue")) {
-                members.add((GroundedValue<?>) ((ExternalObject) item).getObject());
+                members.add((GroundedValue) ((ExternalObject) item).getObject());
             } else {
                 members.add(item);
             }
@@ -72,6 +72,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      *
      * @return an array of OperandRole objects, one for each argument
      */
+    @Override
     public OperandRole[] getOperandRoles() {
         return new OperandRole[]{OperandRole.SINGLE_ATOMIC};
     }
@@ -86,7 +87,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
         if (!knownToBeGrounded) {
             synchronized(this) {
                 for (int i=0; i<members.size(); i++) {
-                    members.set(i, ((Sequence<?>) members.get(i)).materialize());
+                    members.set(i, ((Sequence) members.get(i)).materialize());
                 }
                 knownToBeGrounded = true;
             }
@@ -99,6 +100,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      *
      * @return true (it is an array)
      */
+    @Override
     public boolean isArray() {
         return true;
     }
@@ -108,6 +110,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      *
      * @return false (it is not a map)
      */
+    @Override
     public boolean isMap() {
         return false;
     }
@@ -129,14 +132,12 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      *
      * @param index the position of the member to retrieve (zero-based)
      * @return the value at the given position.
-     * @throws XPathException if the index is out of range
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
 
 
-    public GroundedValue<?> get(int index) throws XPathException {
-        if (index < 0 || index >= members.size()) {
-            throw new XPathException("Array index (" + (index+1) + ") out of range (1 to " + members.size() + ")", "FOAY0001");
-        }
+    @Override
+    public GroundedValue get(int index) {
         return members.get(index);
     }
 
@@ -146,10 +147,10 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      * @param index    the position of the member to replace (zero-based)
      * @param newValue the replacement value
      * @return the value at the given position.
-     * @throws XPathException if the index is out of range
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     @Override
-    public ArrayItem put(int index, GroundedValue newValue) throws XPathException {
+    public ArrayItem put(int index, GroundedValue newValue) {
         ImmutableArrayItem a2 = new ImmutableArrayItem(this);
         return a2.put(index, newValue);
     }
@@ -160,6 +161,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      * @return the number of members in this array
      */
 
+    @Override
     public int arrayLength() {
         return members.size();
     }
@@ -170,6 +172,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      * @return true if and only if the size of the array is zero
      */
 
+    @Override
     public boolean isEmpty() {
         return members.isEmpty();
     }
@@ -180,7 +183,8 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      * @return an iterator over the members of the array
      */
 
-    public Iterable<GroundedValue<?>> members() {
+    @Override
+    public Iterable<GroundedValue> members() {
         return members;
     }
 
@@ -192,21 +196,10 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      * @return a new array in which the requested member has been removed
      */
 
+    @Override
     public ArrayItem removeSeveral(IntSet positions) {
         ImmutableArrayItem a2 = new ImmutableArrayItem(this);
         return a2.removeSeveral(positions);
-//        List<Sequence> newList = new ArrayList<Sequence>(members.size() - 1);
-//        for (int i = 0; i < members.size(); i++) {
-//            if (!positions.contains(i)) {
-//                newList.add(members.get(i));
-//            }
-//        }
-//        SimpleArrayItem result = new SimpleArrayItem(newList);
-//        if (knownToBeGrounded) {
-//            result.knownToBeGrounded = true;
-//        }
-//        result.memberType = memberType;
-//        return result;
     }
 
     /**
@@ -217,18 +210,10 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      * @return a new array in which the requested member has been removed
      */
 
+    @Override
     public ArrayItem remove(int pos) {
         ImmutableArrayItem a2 = new ImmutableArrayItem(this);
         return a2.remove(pos);
-//        List<Sequence> newList = new ArrayList<Sequence>(members.size() - 1);
-//        newList.addAll(members.subList(0, pos));
-//        newList.addAll(members.subList(pos + 1, members.size()));
-//        SimpleArrayItem result = new SimpleArrayItem(newList);
-//        if (knownToBeGrounded) {
-//            result.knownToBeGrounded = true;
-//        }
-//        result.memberType = memberType;
-//        return result;
     }
 
     /**
@@ -253,7 +238,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      * @throws IndexOutOfBoundsException if position is out of range
      */
     @Override
-    public ArrayItem insert(int position, GroundedValue<?> member) {
+    public ArrayItem insert(int position, GroundedValue member) {
         ImmutableArrayItem a2 = new ImmutableArrayItem(this);
         return a2.insert(position, member);
     }
@@ -266,24 +251,10 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      *         containing first the members of this array, and then the members of the other array
      */
 
+    @Override
     public ArrayItem concat(ArrayItem other) {
         ImmutableArrayItem a2 = new ImmutableArrayItem(this);
         return a2.concat(other);
-//        List<Sequence> newList = new ArrayList<Sequence>(members.size() + other.arrayLength());
-//        newList.addAll(members);
-//        for (Sequence s : other) {
-//            newList.add(s);
-//        }
-//        SimpleArrayItem result = new SimpleArrayItem(newList);
-//        if (other instanceof SimpleArrayItem) {
-//            if (knownToBeGrounded && ((SimpleArrayItem) other).knownToBeGrounded) {
-//                result.knownToBeGrounded = true;
-//            }
-//            if (memberType != null && memberType.equals(((SimpleArrayItem) other).memberType)) {
-//                result.memberType = memberType;
-//            }
-//        }
-//        return result;
     }
 
 
@@ -296,7 +267,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
      * has finished.
      */
 
-    public List<GroundedValue<?>> getMembers() {
+    public List<GroundedValue> getMembers() {
         return members;
     }
 
@@ -316,7 +287,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
         } else {
             FastStringBuffer buff = new FastStringBuffer(256);
             buff.append("[");
-            for (GroundedValue<?> entry : members()) {
+            for (GroundedValue entry : members()) {
                 buff.append(Err.depictSequence(entry).toString().trim());
                 buff.append(", ");
             }

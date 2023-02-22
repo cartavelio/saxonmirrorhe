@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -41,6 +41,7 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
         adoptChildExpression(getPredicate());
     }
 
+    @Override
     public Expression getPredicate() {
         return predicateOp.getChildExpression();
     }
@@ -70,6 +71,7 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
      * treated as the anchor node
      */
 
+    @Override
     public boolean matchesCurrentGroup() {
         return getBasePattern().matchesCurrentGroup();
     }
@@ -96,6 +98,7 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
      * @param nextFree    the next slot that is free to be allocated @return the next slot that is free to be allocated
      */
 
+    @Override
     public int allocateSlots(SlotManager slotManager, int nextFree) {
         int n = ExpressionTool.allocateSlots(getPredicate(), nextFree, slotManager);
         return getBasePattern().allocateSlots(slotManager, n);
@@ -110,16 +113,16 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
      * @return true if the node matches the Pattern, false otherwise
      */
     @Override
-    public boolean matches(Item<?> item, XPathContext context) throws XPathException {
+    public boolean matches(Item item, XPathContext context) throws XPathException {
         if (!getBasePattern().matches(item, context)) {
             return false;
         }
         return matchesPredicate(item, context);
     }
 
-    private boolean matchesPredicate(Item<?> item, XPathContext context) throws XPathException {
+    private boolean matchesPredicate(Item item, XPathContext context) throws XPathException {
         XPathContext c2 = context.newMinorContext();
-        ManualIterator<Item<?>> si = new ManualIterator<>(item);
+        ManualIterator si = new ManualIterator(item);
         c2.setCurrentIterator(si);
         c2.setCurrentOutputUri(null);
         try {
@@ -259,7 +262,8 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
      * Display the pattern for diagnostics
      */
 
-    public String toString() {
+    @Override
+    public String reconstruct() {
         return getBasePattern() + "[" + getPredicate() + "]";
     }
 
@@ -277,10 +281,12 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
      */
 
     /*@NotNull*/
+    @Override
     public Pattern copy(RebindingMap rebindings) {
         BasePatternWithPredicate n = new BasePatternWithPredicate(
                 getBasePattern().copy(rebindings), getPredicate().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, n);
+        n.setOriginalText(getOriginalText());
         return n;
     }
 
@@ -296,6 +302,7 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
         return getBasePattern().hashCode() ^ getPredicate().hashCode();
     }
 
+    @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.withPredicate");
         getBasePattern().export(presenter);

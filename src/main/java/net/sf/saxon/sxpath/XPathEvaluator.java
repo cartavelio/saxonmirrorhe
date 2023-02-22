@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,18 +17,17 @@ import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 
 /**
- * This class provides a native Saxon API for free-standing evaluation of XPath expressions. Unlike the
- * JAXP API offered by {@link net.sf.saxon.xpath.XPathEvaluator} it exposes Saxon classes and interfaces
- * and thus provides a more strongly-typed interface with greater control over the detailed behaviour.
- * <p>However, the preferred API for user applications calling XPath is the s9api {@link net.sf.saxon.s9api.XPathCompiler}
+ * This class provides a native Saxon API for free-standing evaluation of XPath expressions. This is the
+ * primitive XPath interface used internally within Saxon.
+ * <p>The preferred API for user applications calling XPath is the s9api {@link net.sf.saxon.s9api.XPathCompiler}
  * interface.</p>
- *
- * @author Michael H. Kay
+
  * @since 8.4
  */
 
@@ -37,22 +36,11 @@ public class XPathEvaluator {
     private XPathStaticContext staticContext;
 
     /**
-     * Default constructor. Creates an XPathEvaluator with a default configuration and name pool.
-     * Note that any source documents used by an XPath expression under this XPathEvaluator must
-     * be built using the {@link Configuration} that is implicitly created by this constructor,
-     * which is accessible using the {@link #getConfiguration} method.
-     */
-
-    public XPathEvaluator() {
-        this(new Configuration());
-    }
-
-    /**
      * Construct an XPathEvaluator with a specified configuration.
      *
      * @param config the configuration to be used. If the XPathEvaluator is
      *               to be used to run schema-aware XPath expressions this must be an instance
-     *               of {@link com.saxonica.config.EnterpriseConfiguration}
+     *               of {@code EnterpriseConfiguration}
      */
     public XPathEvaluator(Configuration config) {
         staticContext = new IndependentContext(config);
@@ -110,10 +98,9 @@ public class XPathEvaluator {
         Configuration config = getConfiguration();
         Executable exec = new Executable(config);
 
-        boolean allowXPath30 = staticContext.getXPathVersion() >= 30;
         exec.setTopLevelPackage(staticContext.getPackageData());
         exec.setSchemaAware(staticContext.getPackageData().isSchemaAware());
-        exec.setHostLanguage(Configuration.XPATH);
+        exec.setHostLanguage(HostLanguage.XPATH);
 
         // Make the function library that's available at run-time (e.g. for saxon:evaluate() and function-lookup()).
         // This includes all user-defined functions regardless of which module they are in
@@ -137,6 +124,7 @@ public class XPathEvaluator {
         ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
         ItemType contextItemType = staticContext.getRequiredContextItemType();
         ContextItemStaticInfo cit = config.makeContextItemStaticInfo(contextItemType, true);
+        cit.setParentless(staticContext.isContextItemParentless());
         exp = exp.typeCheck(visitor, cit);
         if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
             exp = exp.optimize(visitor, cit);

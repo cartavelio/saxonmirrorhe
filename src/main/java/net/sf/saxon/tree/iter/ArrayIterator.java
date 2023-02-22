@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -15,6 +15,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -25,8 +26,8 @@ import java.util.List;
  */
 
 
-public class ArrayIterator<T extends Item<?>> implements UnfailingIterator<T>,
-        LastPositionFinder, LookaheadIterator<T>, GroundedIterator<T> {
+public class ArrayIterator<T extends Item> implements UnfailingIterator,
+        LastPositionFinder, LookaheadIterator, GroundedIterator {
 
     protected T[] items;
     private int index;          // position in array of current item, zero-based
@@ -80,7 +81,7 @@ public class ArrayIterator<T extends Item<?>> implements UnfailingIterator<T>,
      * @return an iterator over the items between the min and max positions
      */
 
-    public SequenceIterator<T> makeSliceIterator(int min, int max) {
+    public SequenceIterator makeSliceIterator(int min, int max) {
         T[] items = getArray();
         int currentStart = getStartPosition();
         int currentEnd = getEndPosition();
@@ -107,6 +108,7 @@ public class ArrayIterator<T extends Item<?>> implements UnfailingIterator<T>,
      * @return true if there are more items
      */
 
+    @Override
     public boolean hasNext() {
         return index < end;
     }
@@ -118,6 +120,7 @@ public class ArrayIterator<T extends Item<?>> implements UnfailingIterator<T>,
      */
 
     /*@Nullable*/
+    @Override
     public T next() {
         if (index >= end) {
             index = end + 1;
@@ -132,6 +135,7 @@ public class ArrayIterator<T extends Item<?>> implements UnfailingIterator<T>,
      * @return the number of items; equivalently, the position of the last
      *         item
      */
+    @Override
     public int getLength() {
         return end - start;
     }
@@ -175,25 +179,26 @@ public class ArrayIterator<T extends Item<?>> implements UnfailingIterator<T>,
      */
 
     /*@NotNull*/
-    public GroundedValue<T> materialize() {
-        SequenceExtent<T> seq;
+    @Override
+    public GroundedValue materialize() {
+        SequenceExtent seq;
         if (start == 0 && end == items.length) {
-            seq =  new SequenceExtent<>(items);
+            seq =  new SequenceExtent(items);
         } else {
             List<T> sublist = Arrays.asList(items).subList(start, end);
-            seq = new SequenceExtent<>(sublist);
+            seq = new SequenceExtent(sublist);
         }
         return seq.reduce();
     }
 
     @Override
-    public GroundedValue<T> getResidue() {
-        SequenceExtent<T> seq;
+    public GroundedValue getResidue() {
+        SequenceExtent seq;
         if (start == 0 && index ==0 && end == items.length) {
-            seq = new SequenceExtent<>(items);
+            seq = new SequenceExtent(items);
         } else {
             List<T> sublist = Arrays.asList(items).subList(start + index, end);
-            seq = new SequenceExtent<>(sublist);
+            seq = new SequenceExtent(sublist);
         }
         return seq.reduce();
     }
@@ -202,14 +207,15 @@ public class ArrayIterator<T extends Item<?>> implements UnfailingIterator<T>,
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return GROUNDED | LAST_POSITION_FINDER | LOOKAHEAD;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.GROUNDED, Property.LAST_POSITION_FINDER, Property.LOOKAHEAD);
     }
 
     /**

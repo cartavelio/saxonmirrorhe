@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,153 +7,125 @@
 
 package net.sf.saxon.s9api;
 
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.Navigator;
 
-import javax.xml.transform.TransformerException;
+import net.sf.saxon.lib.ErrorReporter;
+
+import java.util.List;
 
 /**
- * The <b>StaticError</b> class contains information about a static error detected during compilation
- * of a stylesheet, query, or XPath expression.
+ * The <b>StaticError</b> interface is retained in Saxon 10.0 as a marker interface so that
+ * the methods {@link XsltCompiler#setErrorList(List)} and {@link XQueryCompiler#setErrorList(List)}
+ * continue to function.
+ *
+ * <p>The name is misleading, because all errors including dynamic errors implement this interface.</p>
  */
-public class StaticError {
 
-    XPathException exception;
-    Location locator = null;
-    boolean isWarning = false;
+public interface StaticError {
 
-
-    public StaticError(TransformerException err, boolean isWarning){
-        exception = XPathException.makeXPathException(err);
-        locator = exception.getLocator();
-        this.isWarning = isWarning;
-    }
-
-     public StaticError(TransformerException err){
-        exception = XPathException.makeXPathException(err);
-        locator = exception.getLocator();
-
-    }
-
-    public void setWarning(boolean warning) {
-        isWarning = warning;
-    }
 
     /**
      * The error code, as a QName. May be null if no error code has been assigned
      *
      * @return QName
      */
-    public QName getErrorCode(){
-        return new QName(exception.getErrorCodeQName());
-    }
-
-
+    QName getErrorCode();
     /**
      * Return the error message  associated with this error
-     * @return String
-     */
-    public String getMessage(){
-        return exception.getMessage();
-    }
-
-    /**
-     *  The URI of the query or stylesheet module in which the error was detected (as a string)
-     *  May be null if the location of the error is unknown, or if the error is not localized
-     *  to a specific module, or if the module in question has no known URI (for example, if
-     *  it was supplied as an anonymous Stream)
      *
      * @return String
      */
-    public String getModuleUri(){
-        return exception.getLocator().getSystemId();
-    }
-
+    String getMessage();
 
     /**
-     *  The coloumn number locating the error within a query or stylesheet module
+     * Get the location information associated with the error
+     *
+     * @return the location of the error. The result is never null, though it may
+     * be a location with little useful information.
+     */
+
+    Location getLocation();
+
+    /**
+     * The URI of the query or stylesheet module in which the error was detected (as a string)
+     * May be null if the location of the error is unknown, or if the error is not localized
+     * to a specific module, or if the module in question has no known URI (for example, if
+     * it was supplied as an anonymous Stream)
+     *
+     * @return String
+     */
+    default String getModuleUri() {
+        return getLocation().getSystemId();
+    }
+    /**
+     * The coloumn number locating the error within a query or stylesheet module
      *
      * @return int
      */
-    public int getColumnNumber() {
-        Location locator = exception.getLocator();
-        if (locator != null) {
-            return locator.getColumnNumber();
-        }
-        return -1;
+    default int getColumnNumber() {
+        return getLocation().getColumnNumber();
     }
 
     /**
-     *  The line number locating the error within a query or stylesheet module
+     * The line number locating the error within a query or stylesheet module
      *
      * @return int
      */
-    public int getLineNumber(){
-        Location locator = exception.getLocator();
-        if (locator != null){
-            return locator.getLineNumber();
-        }
-        return -1;
+    default int getLineNumber() {
+        return getLocation().getLineNumber();
     }
-
 
     /**
      * Get a name identifying the kind of instruction, in terms meaningful to a user. This method
      * is not used in the case where the instruction name code is a standard name (&lt;1024).
      *
      * @return a name identifying the kind of instruction, in terms meaningful to a user.
-     *         The name will always be in the form of a lexical XML QName, and should match the name used
-     *         in explain() output displaying the instruction.
+     * The name will always be in the form of a lexical XML QName, and should match the name used
+     * in explain() output displaying the instruction.
      */
-    public String getInstructionName(){
-        return ((NodeInfo)locator).getDisplayName();
+    default String getInstructionName() {
+        return null;
     }
-
-
     /**
      * Indicate whether this error is being reported as a warning condition.
      * If so, applications may ignore the condition, though the results may not be as intended.
+     *
      * @return boolean
      */
-    public boolean isWarning(){
-        return isWarning;
-    }
-
+    boolean isWarning();
 
     /**
      * Indicate whether this condition is a type error.
+     *
      * @return boolean
      */
-    public boolean isTypeError(){
-        return exception.isTypeError();
-    }
-
-
+    boolean isTypeError();
     /**
      * Get the absolute XPath expression that identifies the node within its document
-     *  where the error occurred, if available
+     * where the error occurred, if available
      *
      * @return String - a path expression
      */
-    public String getPath(){
-        NodeInfo node = null;
-
-        if (locator instanceof NodeInfo) {
-            node = (NodeInfo) locator;
-            return Navigator.getPath(node);
-        }
+    default String getPath() {
         return null;
     }
 
     /**
-     * Return the underlying exception. This method may not be stable across Saxon releases.
-     *
-     * @return XPathException the underlying exception
+     * Indicate that this error is to be treated as fatal; that is, execution will be abandoned
+     * after reporting this error. This method may be called by an {@link ErrorReporter}, for example
+     * if the error is considered so severe that further processing is not worthwhile, or if
+     * too many errors have been signalled. There is no absolute guarantee that setting this
+     * property will cause execution to be abandoned. If a dynamic error is marked as fatal, it
+     * will generally not be caught by any try/catch mechanism within the stylesheet or query.
      */
-    public XPathException getUnderlyingException(){
-        return exception;
-    }
+
+    void setFatal(String message);
+
+    /**
+     * Ask whether this error is to be treated as fatal, and if so, return the relevant messsage
+     * @return a non-null message if the error has been marked as a fatal error.
+     */
+
+    String getFatalErrorMessage();
 
 }
+

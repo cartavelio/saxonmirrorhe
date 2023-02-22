@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -69,7 +69,8 @@ public final class LargeStringBuffer implements AppendableCharSequence {
      * @param s the data to be appended
      */
 
-    public void append(CharSequence s) {
+    @Override
+    public LargeStringBuffer cat(CharSequence s) {
         // Although we provide variants of this method for different subtypes, Java decides which to use based
         // on the static type of the operand. We want to use the right method based on the dynamic type, to avoid
         // creating objects and copying strings unnecessarily. So we do a dynamic dispatch. (This is only necessary
@@ -78,8 +79,7 @@ public final class LargeStringBuffer implements AppendableCharSequence {
         if (s instanceof CompressedWhitespace) {
             FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
             ((CompressedWhitespace)s).uncompress(fsb);
-            append(fsb);
-            return;
+            return cat(fsb);
         }
 
         final int len = s.length();
@@ -158,6 +158,12 @@ public final class LargeStringBuffer implements AppendableCharSequence {
             length += len;
 
         }
+        return this;
+    }
+
+    @Override
+    public LargeStringBuffer cat(char c) {
+        return cat("" + c);
     }
 
     /**
@@ -166,6 +172,7 @@ public final class LargeStringBuffer implements AppendableCharSequence {
      *
      * @return the number of characters in this sequence
      */
+    @Override
     public int length() {
         return length;
     }
@@ -178,6 +185,7 @@ public final class LargeStringBuffer implements AppendableCharSequence {
      * @param length the new length
      */
 
+    @Override
     public void setLength(int length) {
         if (length < this.length) {
             int usedInLastSegment = length & MASK;
@@ -197,6 +205,7 @@ public final class LargeStringBuffer implements AppendableCharSequence {
      * @throws IndexOutOfBoundsException if the <tt>index</tt> argument is negative or not less than
      *                                   <tt>length()</tt>
      */
+    @Override
     public char charAt(int index) {
         if (index < 0 || index >= length) {
             throw new IndexOutOfBoundsException(index + "");
@@ -219,6 +228,7 @@ public final class LargeStringBuffer implements AppendableCharSequence {
      *                                   or if <tt>start</tt> is greater than <tt>end</tt>
      */
     /*@NotNull*/
+    @Override
     public CharSequence subSequence(int start, int end) {
         int firstSeg = start >> BITS;
         int lastSeg = (end - 1) >> BITS;

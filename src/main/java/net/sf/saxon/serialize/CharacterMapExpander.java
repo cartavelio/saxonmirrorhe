@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,11 +9,14 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.SimpleType;
+import net.sf.saxon.type.SchemaType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * CharacterMapExpander: This ProxyReceiver expands characters occurring in a character map,
@@ -63,36 +66,58 @@ public class CharacterMapExpander extends ProxyReceiver {
     }
 
     /**
-     * Output an attribute
+     * Notify the start of an element
+     *
+     * @param elemName   the name of the element.
+     * @param type       the type annotation of the element.
+     * @param attributes the attributes of this element
+     * @param namespaces the in-scope namespaces of this element: generally this is all the in-scope
+     *                   namespaces, without relying on inheriting namespaces from parent elements
+     * @param location   an object providing information about the module, line, and column where the node originated
+     * @param properties bit-significant properties of the element node. If there are no relevant
+     *                   properties, zero is supplied. The definitions of the bits are in class {@link ReceiverOption}
+     * @throws XPathException if an error occurs
      */
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        if ((properties & ReceiverOptions.DISABLE_CHARACTER_MAPS) == 0) {
-            CharSequence mapped = charMap.map(value, useNullMarkers);
-            if (mapped == value) {
-                // no mapping was done
-                nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
+    @Override
+    public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
+        List<AttributeInfo> atts2 = new ArrayList<>(attributes.size());
+        for (AttributeInfo att : attributes) {
+            String oldValue = att.getValue();
+            if (!ReceiverOption.contains(att.getProperties(), ReceiverOption.DISABLE_CHARACTER_MAPS)) {
+                CharSequence mapped = charMap.map(oldValue, useNullMarkers);
+                if (mapped != oldValue) {
+                    // mapping was done
+                    int p2 = (att.getProperties() | ReceiverOption.USE_NULL_MARKERS)
+                            & ~ReceiverOption.NO_SPECIAL_CHARS;
+                    atts2.add(new AttributeInfo(
+                            att.getNodeName(),
+                            att.getType(),
+                            mapped.toString(),
+                            att.getLocation(),
+                            p2));
+                } else {
+                    atts2.add(att);
+                }
             } else {
-                nextReceiver.attribute(nameCode, typeCode, mapped,
-                        locationId,
-                        (properties | ReceiverOptions.USE_NULL_MARKERS) & ~ReceiverOptions.NO_SPECIAL_CHARS);
+                atts2.add(att);
             }
-        } else {
-            nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
+
         }
+        nextReceiver.startElement(elemName, type, AttributeMap.fromList(atts2), namespaces, location, properties);
     }
 
     /**
      * Output character data
      */
 
+    @Override
     public void characters(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
 
-        if ((properties & ReceiverOptions.DISABLE_CHARACTER_MAPS) == 0) {
+        if (!ReceiverOption.contains(properties, ReceiverOption.DISABLE_CHARACTER_MAPS)) {
             CharSequence mapped = charMap.map(chars, useNullMarkers);
             if (mapped != chars) {
-                properties = (properties | ReceiverOptions.USE_NULL_MARKERS) & ~ReceiverOptions.NO_SPECIAL_CHARS;
+                properties = (properties | ReceiverOption.USE_NULL_MARKERS)
+                         &~ ReceiverOption.NO_SPECIAL_CHARS;
             }
             nextReceiver.characters(mapped, locationId, properties);
         } else {

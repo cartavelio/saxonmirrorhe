@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -67,7 +67,24 @@ public interface TreeInfo extends Source {
      * node).
      */
 
-    boolean isTyped();
+    default boolean isTyped() {
+        return false;
+    }
+
+    /**
+     * Ask whether the tree is mutable. A mutable tree can be modified (without changes to node
+     * identity) using XQuery Update primitives, or equivalents in other languages (such as Saxon
+     * XSLT extensions). "Mutable" here means mutable using XSLT/XQuery mechanisms, not using
+     * subversive lower-level mechanisms such as external DOM updates. To be mutable, it is
+     * necessary that its nodes implement the {@link MutableNodeInfo} interface; but this is
+     * not sufficient, because some tree implementations that support mutability interfaces may
+     * have optimizations for the case of non-mutability.
+     * @return true if the tree is mutable
+     */
+
+    default boolean isMutable() {
+        return false;
+    }
 
     /**
      * Get the element with a given ID, if any

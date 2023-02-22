@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -34,7 +34,8 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<StringValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue hrefVal = (StringValue) arguments[0].head();
         String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
         try {
@@ -47,9 +48,9 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
         }
     }
 
-    private SequenceIterator<StringValue> evalUnparsedTextLines(StringValue hrefVal, String encoding, XPathContext context) throws XPathException {
+    private SequenceIterator evalUnparsedTextLines(StringValue hrefVal, String encoding, XPathContext context) throws XPathException {
         if (hrefVal == null) {
-            return EmptyIterator.emptyIterator();
+            return EmptyIterator.ofAtomic();
         }
         String href = hrefVal.getStringValue();
         boolean stable = context.getConfiguration().getBooleanProperty(Feature.STABLE_UNPARSED_TEXT);
@@ -69,4 +70,4 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
 
 }
 
-// Copyright (c) 2012-2018 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

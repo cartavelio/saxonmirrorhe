@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
-// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+// Copyright (c) 2018-2020 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -8,31 +8,27 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.instruct.TemplateRule;
 import net.sf.saxon.functions.AccessorFn;
-import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.option.jdom.JDOMNodeWrapper;
-import net.sf.saxon.option.jdom.JDOMObjectModel;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.option.xom.XOMDocumentWrapper;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.resource.BinaryResource;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trace.InstructionInfo;
+import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ComplexType;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.QNameValue;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -42,30 +38,29 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
  * JUnit tests for the s9api Xslt30Transformer
  *
- * @author Michael Kay
- * @date March 2015
  */
-public class TestXslt30Transformer extends TestCase {
+public class TestXslt30Transformer {
 
     /**
      * Simple test
      */
 
+    @Test
     public void testSimple() {
         // Create a Processor instance.
         try {
             Processor processor = new Processor(false);
-            processor.setConfigurationProperty("http://saxon.sf.net/feature/timing", "true");
+            processor.setConfigurationProperty(Feature.TIMING, true);
 
             // Create a transformer for the stylesheet.
             Xslt30Transformer transformer = processor.newXsltCompiler().compile(
@@ -97,6 +92,7 @@ public class TestXslt30Transformer extends TestCase {
      * Simple test using the transform() method
      */
 
+    @Test
     public void testTransformMethod() {
         // Create a Processor instance.
         try {
@@ -132,6 +128,7 @@ public class TestXslt30Transformer extends TestCase {
      * Test for the case where the context item is not the root
      */
 
+    @Test
     public void testContextNotRoot() {
         try {
             Processor proc = new Processor(false);
@@ -157,54 +154,11 @@ public class TestXslt30Transformer extends TestCase {
             trans.applyTemplates(e, serializer);
 
             String result = os.toString();
-            assertFalse("matched root", result.contains("errorA"));
-            assertTrue("matched e", result.contains("[]"));
+            assertFalse(result.contains("errorA"), "matched root");
+            assertTrue(result.contains("[]"), "matched e");
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
-        }
-    }
-
-
-    public void testResolveUri() {
-
-        try {
-            Processor proc = new Processor(false);
-            XsltCompiler xqcomp = proc.newXsltCompiler();
-            StringReader sr = new StringReader("<xsl:stylesheet version=\"3.0\"\n" +
-                                                       "  xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
-                                                       "  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
-                                                       "  xmlns:err=\"http://www.w3.org/2005/xqt-errors\">\n" +
-                                                       "\n" +
-                                                       "  <xsl:template name=\"go\">\n" +
-                                                       "    <xsl:try>\n" +
-                                                       "      <xsl:variable name=\"uri\" as=\"xs:anyURI\" select=\"\n" +
-                                                       "        resolve-uri('notice trailing space /out.xml')\"/>\n" +
-                                                       "\n" +
-                                                       "      <xsl:message select=\"$uri\"/>\n" +
-                                                       "\n" +
-                                                       "      <xsl:result-document href=\"{$uri}\">\n" +
-                                                       "        <out/>\n" +
-                                                       "      </xsl:result-document>\n" +
-                                                       "\n" +
-                                                       "      <xsl:catch>\n" +
-                                                       "        <xsl:sequence select=\"'$err:code: ' || $err:code  || ', $err:description: ' || $err:description\"/>\n" +
-                                                       "      </xsl:catch>\n" +
-                                                       "    </xsl:try>\n" +
-                                                       "  </xsl:template>\n" +
-                                                       "\n" +
-                                                       "</xsl:stylesheet>");
-
-            SAXSource style = new SAXSource(new InputSource(sr));
-            Xslt30Transformer trans = xqcomp.compile(style).load30();
-
-            XdmValue value = trans.callTemplate(new QName("go"));
-            String result = value.toString();
-            assertTrue("matched e", result.contains("code"));
-
-        } catch (SaxonApiException ex) {
-            fail(ex.getMessage());
-
         }
     }
 
@@ -213,11 +167,12 @@ public class TestXslt30Transformer extends TestCase {
      * Test location information for run-time errors when stylesheet built as an XdmNode
      */
 
+    @Test
     public void testErrorLocationFromXdm() {
         try {
             // Norm Walsh reported getting line numbers > 2^20. Can't reproduce.
             Processor proc = new Processor(false);
-            proc.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, false);
+            proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
             StringReader sr = new StringReader("<doc><e>text</e></doc>");
             SAXSource source = new SAXSource(new InputSource(sr));
             DocumentBuilder builder = proc.newDocumentBuilder();
@@ -249,6 +204,7 @@ public class TestXslt30Transformer extends TestCase {
             final XdmNode style1 = builder.build(new StreamSource(sr, "http://imported/"));
 
             xqcomp.setURIResolver(new URIResolver() {
+                @Override
                 public Source resolve(String href, String base) throws TransformerException {
                     if (href.startsWith("http:")) {
                         return style1.asSource();
@@ -270,7 +226,7 @@ public class TestXslt30Transformer extends TestCase {
 
         } catch (SaxonApiException e) {
             int line = ((XPathException) e.getCause()).getLocator().getLineNumber();
-            assertTrue("lineNumber", line >= 2 && line <= 6);
+            assertTrue(line >= 2 && line <= 6, "lineNumber");
         }
     }
 
@@ -278,20 +234,24 @@ public class TestXslt30Transformer extends TestCase {
      * Test created ErrorListener picks up errors in imported stylesheet
      */
 
+    @Test
     public void testErrorInImportedStylesheet() {
         final List<TransformerException> warnings = new ArrayList<TransformerException>(4);
         final List<TransformerException> errors = new ArrayList<TransformerException>(4);
         final List<TransformerException> fatals = new ArrayList<TransformerException>(4);
         ErrorListener listener = new ErrorListener() {
 
+            @Override
             public void warning(TransformerException exception) throws TransformerException {
                 warnings.add(exception);
             }
 
+            @Override
             public void error(TransformerException exception) throws TransformerException {
                 errors.add(exception);
             }
 
+            @Override
             public void fatalError(TransformerException exception) throws TransformerException {
                 fatals.add(exception);
             }
@@ -316,81 +276,10 @@ public class TestXslt30Transformer extends TestCase {
             fail("Transformation should fail");
 
         } catch (SaxonApiException e) {
-            assertTrue("warnings", warnings.isEmpty());
-            assertTrue("errors", errors.isEmpty());
-            assertTrue("fatals", fatals.size() > 0);
+            assertTrue(warnings.isEmpty(), "warnings");
+            assertTrue(errors.isEmpty(), "errors");
+            assertTrue(fatals.size() > 0, "fatals");
             //e.printStackTrace();
-        }
-    }
-
-    public void testEmbeddedStylesheet() {
-
-        try {
-            // Create a Processor instance.
-            Processor processor = new Processor(false);
-            XsltExecutable exec;
-
-            // Load the source document
-            XdmNode input = processor.newDocumentBuilder().build(new File(ConfigTest.DATA_DIR, "../../../samples/data/books.xml"));
-            //Console.WriteLine("=============== source document ===============");
-            //Console.WriteLine(input.OuterXml);
-            //Console.WriteLine("=========== end of source document ============");
-
-            // Navigate to the xml-stylesheet processing instruction having the pseudo-attribute type=text/xsl;
-            // then extract the value of the href pseudo-attribute if present
-
-            String path = "/processing-instruction(xml-stylesheet)[matches(.,'type\\s*=\\s*[''\"\"]text/xsl[''\" \"]')]" +
-                    "/replace(., '.*?href\\s*=\\s*[''\" \"](.*?)[''\" \"].*', '$1')";
-
-            XPathSelector eval = processor.newXPathCompiler().compile(path).load();
-            eval.setContextItem(input);
-            XdmAtomicValue hrefval = (XdmAtomicValue) eval.evaluateSingle();
-            String href = (hrefval == null ? null : hrefval.toString());
-
-            if (href == null || href == "") {
-                System.err.println("No suitable xml-stylesheet processing instruction found");
-                return;
-
-            } else if (href.charAt(0) == '#') {
-
-                // The stylesheet is embedded in the source document and identified by a URI of the form "#id"
-
-                System.err.println("Locating embedded stylesheet with href = " + href);
-                String idpath = "id('" + href.substring(1) + "')";
-                eval = processor.newXPathCompiler().compile(idpath).load();
-                eval.setContextItem(input);
-                XdmNode node = (XdmNode) eval.evaluateSingle();
-                if (node == null) {
-                    System.err.println("No element found with ID " + href.substring(1));
-                    return;
-                }
-                exec = processor.newXsltCompiler().compile(node.asSource());
-
-            } else {
-
-                // The stylesheet is in an external document
-                URI uri = ResolveURI.makeAbsolute(href, input.getBaseURI().toASCIIString());
-                System.err.println("Locating stylesheet at uri = " + uri.toASCIIString());
-
-
-                // Fetch and compile the referenced stylesheet
-                exec = processor.newXsltCompiler().compile(new StreamSource((new File(uri))));
-            }
-
-            // Create a transformer
-            XsltTransformer transformer = exec.load();
-
-            // Run it
-            transformer.setInitialContextNode(input);
-            XdmDestination results = new XdmDestination();
-            transformer.setDestination(results);
-            transformer.transform();
-            System.err.println(results.getXdmNode());
-
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            fail();
         }
     }
 
@@ -399,6 +288,7 @@ public class TestXslt30Transformer extends TestCase {
      * Test for the case where the context item is not the root, when starting at a named template
      */
 
+    @Test
     public void testContextNotRootNamedTemplate() {
         try {
             Processor proc = new Processor(false);
@@ -423,14 +313,15 @@ public class TestXslt30Transformer extends TestCase {
             trans.callTemplate(new QName("main"), serializer);
 
             String result = os.toString();
-            assertFalse("matched root", result.contains("errorA"));
-            assertTrue("matched e", result.contains("[]"));
+            assertFalse(result.contains("errorA"), "matched root");
+            assertTrue(result.contains("[]"), "matched e");
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testUseAssociated() {
 
         try {
@@ -463,6 +354,7 @@ public class TestXslt30Transformer extends TestCase {
      * Build a document from a non-root element of a DOMSource
      */
 
+    @Test
     public void testNonRootDomSource() {
         try {
             Processor proc = new Processor(false);
@@ -486,7 +378,7 @@ public class TestXslt30Transformer extends TestCase {
             StringWriter writer = new StringWriter();
             Serializer out = proc.newSerializer(writer);
             xsl.applyTemplates(new DOMSource(ele), out);
-            assertFalse("started at element node", writer.toString().contains("///"));
+            assertFalse(writer.toString().contains("///"), "started at element node");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -494,96 +386,11 @@ public class TestXslt30Transformer extends TestCase {
 
     }
 
-
-    public void testResultDocHandlerFunction() {
-
-        Processor processor = new Processor(true);
-
-        XsltCompiler xsltCompiler = processor.newXsltCompiler();
-
-        StringReader sr = new StringReader("<?xml version='1.0' encoding='UTF-8'?>" +
-                                                   "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                                                   "   xmlns:xs='http://www.w3.org/2001/XMLSchema' exclude-result-prefixes='#all' version='3.0'> " +
-                                                   "<xsl:output method='html' indent='yes' html-version='5'/>" +
-                                                   "<xsl:template match='/' name='xsl:initial-template'>" +
-                                                   "   <html><head>" +
-                                                   " <title>Test</title></head>" +
-                                                   "<body> " +
-                                                   "   <h1>Test</h1>" +
-                                                   "</body>" +
-                                                   "</html>" +
-                                                   "<xsl:result-document href='result-1.json' method='json' indent='yes'>" +
-                                                   "   <xsl:sequence select=\"map { 'name' : 'foo', 'values' : [ 'a', 'b', 'c' ]}\"/>" +
-                                                   "</xsl:result-document>" +
-                                                   " </xsl:template></xsl:stylesheet>");
-
-        try {
-            String base = new File(ConfigTest.DATA_DIR + "/sandpit").toURI().toASCIIString();
-
-            Processor proc = new Processor(false);
-            proc.setConfigurationProperty(Feature.TIMING, true);
-            SAXSource style = new SAXSource(new InputSource(sr));
-            XsltTransformer transformer = proc.newXsltCompiler().compile(style).load();
-
-            transformer.setInitialTemplate(new QName("http://www.w3.org/1999/XSL/Transform", "initial-template"));
-            transformer.setDestination(proc.newSerializer(System.err));
-            transformer.setBaseOutputURI(base);
-            transformer.transform();
-
-            System.err.println();
-
-            MyResultDocumentHandler resDocHandler = new MyResultDocumentHandler(proc, base);
-            transformer.setBaseOutputURI(base);
-
-            transformer.setResultDocumentHandler(resDocHandler);
-
-            transformer.setDestination(proc.newSerializer(System.err));
-            transformer.transform();
-
-            for (Serializer ser : resDocHandler.Serializers) {
-                //  Console.WriteLine("{0}:\n{1}", ser.Href, ser.Result);
-                System.err.println("test");
-            }
-            assertTrue("output", true);
-
-        } catch (Exception ex) {
-            //e.printStackTrace();
-
-            fail(ex.getMessage());
-        }
-    }
-
-    class MyResultDocumentHandler implements java.util.function.Function<URI, Destination> {
-        private Processor proc;
-
-        public List<Serializer> Serializers;
-        private String baseUri;
-
-        public MyResultDocumentHandler(Processor proc, String baseUri) {
-            this.proc = proc;
-            Serializers = new ArrayList<Serializer>();
-            this.baseUri = baseUri;
-        }
-
-        @Override
-        public Destination apply(URI uri) {
-            Serializer ser = proc.newSerializer();
-            try {
-                ser.setDestinationBaseURI(new URI(baseUri));
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
-            ser.setOutputFile(new File(uri));
-            Serializers.add(ser);
-            return ser;
-        }
-    }
-
-
     /**
      * Send output to an XdmDestination
      */
 
+    @Test
     public void testXdmDestination() {
         try {
             Processor proc = new Processor(false);
@@ -596,7 +403,7 @@ public class TestXslt30Transformer extends TestCase {
             XdmDestination out = new XdmDestination();
             xsl.callTemplate(new QName("go"), out);
             XdmNode root = out.getXdmNode();
-            assertTrue("result is document node", root.getNodeKind() == XdmNodeKind.DOCUMENT);
+            assertTrue(root.getNodeKind() == XdmNodeKind.DOCUMENT, "result is document node");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -608,6 +415,7 @@ public class TestXslt30Transformer extends TestCase {
      * Send output to an XdmDestination with item separators
      */
 
+    @Test
     public void testXdmDestinationWithItemSeparator() {
         try {
             Processor proc = new Processor(false);
@@ -623,7 +431,7 @@ public class TestXslt30Transformer extends TestCase {
             xsl.callTemplate(new QName("go"), out);
             XdmNode root = out.getXdmNode();
             assertEquals("<!--A-->§<out/>§<!--Z-->", root.toString());
-            assertTrue("result is document node", root.getNodeKind() == XdmNodeKind.DOCUMENT);
+            assertTrue(root.getNodeKind() == XdmNodeKind.DOCUMENT, "result is document node");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -636,6 +444,7 @@ public class TestXslt30Transformer extends TestCase {
      * Send output to a XOM tree
      */
 
+    @Test
     public void testXOMDestination() {
         try {
             Processor proc = new Processor(false);
@@ -649,7 +458,7 @@ public class TestXslt30Transformer extends TestCase {
             out.setTreeModel(XOMObjectModel.getInstance());
             xsl.callTemplate(new QName("go"), out);
             XdmNode root = out.getXdmNode();
-            assertTrue("result is XOM document node", root.getUnderlyingNode() instanceof XOMDocumentWrapper);
+            assertTrue(root.getUnderlyingNode() instanceof XOMDocumentWrapper, "result is XOM document node");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -657,35 +466,12 @@ public class TestXslt30Transformer extends TestCase {
 
     }
 
-    /**
-     * Send output to a JDOM tree
-     */
-
-    public void testJDOMDestination() {
-        try {
-            Processor proc = new Processor(false);
-            XsltCompiler comp = proc.newXsltCompiler();
-            StringReader sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
-                                                       "<xsl:template name='go'><a/></xsl:template>" +
-                                                       "</xsl:stylesheet>");
-            XsltExecutable exec = comp.compile(new StreamSource(sr));
-            Xslt30Transformer xsl = exec.load30();
-            XdmDestination out = new XdmDestination();
-            out.setTreeModel(JDOMObjectModel.getInstance());
-            xsl.callTemplate(new QName("go"), out);
-            XdmNode root = out.getXdmNode();
-            assertTrue("result is JDOM document node", root.getUnderlyingNode() instanceof JDOMNodeWrapper);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-
-    }
 
     /**
      * Send output to a JDOM2 tree
      */
 
+    @Test
     public void testJDOM2Destination() {
         try {
             Processor proc = new Processor(false);
@@ -699,7 +485,7 @@ public class TestXslt30Transformer extends TestCase {
             out.setTreeModel(JDOM2ObjectModel.getInstance());
             xsl.callTemplate(new QName("go"), out);
             XdmNode root = out.getXdmNode();
-            assertTrue("result is JDOM2 document node", root.getUnderlyingNode() instanceof net.sf.saxon.option.jdom2.JDOM2NodeWrapper);
+            assertTrue(root.getUnderlyingNode() instanceof net.sf.saxon.option.jdom2.JDOM2NodeWrapper, "result is JDOM2 document node");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -707,11 +493,12 @@ public class TestXslt30Transformer extends TestCase {
 
     }
 
+    @Test
     public void testExtensionWithSchemaAccess() {
         // Create a Processor instance.
         try {
             Processor proc = new Processor(true);
-            proc.setConfigurationProperty("http://saxon.sf.net/feature/timing", "true");
+            proc.setConfigurationProperty(Feature.TIMING, true);
             XsltCompiler comp = proc.newXsltCompiler();
             comp.setSchemaAware(true);
             StringReader sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:my='java:s9apitest.TestXslt30Transformer' exclude-result-prefixes='my'>" +
@@ -751,9 +538,9 @@ public class TestXslt30Transformer extends TestCase {
     public static boolean isOptional(NodeInfo parent, QNameValue childName) throws Exception {
         Configuration config = parent.getConfiguration();
         SchemaType parentType = parent.getSchemaType();
-        StructuredQName qn = new StructuredQName("", childName.getComponent(AccessorFn.Component.NAMESPACE).getStringValue(),
-                                                 childName.getComponent(AccessorFn.Component.LOCALNAME).getStringValue());
-        int cardinality = ((ComplexType) parentType).getElementParticleCardinality(qn, true);
+        int fp = config.getNamePool().allocateFingerprint(childName.getComponent(AccessorFn.Component.NAMESPACE).getStringValue(),
+                                                          childName.getComponent(AccessorFn.Component.LOCALNAME).getStringValue());
+        int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, true);
         return Cardinality.allowsZero(cardinality);
     }
 
@@ -761,6 +548,7 @@ public class TestXslt30Transformer extends TestCase {
      * s9api transformation pipeline
      */
 
+    @Test
     public void testPipeline() {
         try {
             Processor proc = new Processor(false);
@@ -787,7 +575,7 @@ public class TestXslt30Transformer extends TestCase {
             StringWriter sw = new StringWriter();
             Serializer out = proc.newSerializer(sw);
             stage5.applyTemplates(d4.getXdmNode(), out);
-            assertTrue("output", sw.toString().contains("<a><a><a><a><a><z/></a></a></a></a></a>"));
+            assertTrue(sw.toString().contains("<a><a><a><a><a><z/></a></a></a></a></a>"), "output");
 
         } catch (SaxonApiException err) {
             err.printStackTrace();
@@ -799,6 +587,7 @@ public class TestXslt30Transformer extends TestCase {
      * s9api streaming transformation pipeline
      */
 
+    @Test
     public void testPipeline2() {
         try {
             Processor proc = new Processor(true);
@@ -821,7 +610,7 @@ public class TestXslt30Transformer extends TestCase {
                                                   stage4.asDocumentDestination(
                                                           stage5.asDocumentDestination(out)))));
             System.err.println(sw.toString());
-            assertTrue("output", sw.toString().contains("<a><a><a><a><a><z/></a></a></a></a></a>"));
+            assertTrue(sw.toString().contains("<a><a><a><a><a><z/></a></a></a></a></a>"), "output");
 
         } catch (SaxonApiException err) {
             err.printStackTrace();
@@ -829,6 +618,7 @@ public class TestXslt30Transformer extends TestCase {
         }
     }
 
+    @Test
     public void testPipelineShort() {
         try {
             Processor proc = new Processor(true);
@@ -846,7 +636,7 @@ public class TestXslt30Transformer extends TestCase {
             stage1.applyTemplates(new StreamSource(new StringReader(xml)),
                                   stage2.asDocumentDestination(out));
             System.err.println(sw);
-            assertTrue("output", sw.toString().contains("<a><a><z/></a></a>"));
+            assertTrue(sw.toString().contains("<a><a><z/></a></a>"), "output");
 
         } catch (SaxonApiException err) {
             err.printStackTrace();
@@ -858,20 +648,24 @@ public class TestXslt30Transformer extends TestCase {
      * Test location information for run-time errors when stylesheet built as an XdmNode
      */
 
+    @Test
     public void testErrorNotificationFromSaxonParse() {
-        final List<TransformerException> warnings = new ArrayList<TransformerException>(4);
-        final List<TransformerException> errors = new ArrayList<TransformerException>(4);
-        final List<TransformerException> fatals = new ArrayList<TransformerException>(4);
+        final List<TransformerException> warnings = new ArrayList<>(4);
+        final List<TransformerException> errors = new ArrayList<>(4);
+        final List<TransformerException> fatals = new ArrayList<>(4);
         ErrorListener listener = new ErrorListener() {
 
+            @Override
             public void warning(TransformerException exception) throws TransformerException {
                 warnings.add(exception);
             }
 
+            @Override
             public void error(TransformerException exception) throws TransformerException {
                 errors.add(exception);
             }
 
+            @Override
             public void fatalError(TransformerException exception) throws TransformerException {
                 fatals.add(exception);
             }
@@ -881,9 +675,9 @@ public class TestXslt30Transformer extends TestCase {
             // Norm Walsh reported saxon:parse errors not notified to the ErrorListener. Can't reproduce.
 
             Processor proc = new Processor(true);
-            proc.getUnderlyingConfiguration().setErrorListener(listener);
 
             XsltCompiler xqcomp = proc.newXsltCompiler();
+            xqcomp.setErrorListener(listener);
 
             StringReader sr = new StringReader("<xsl:stylesheet version='2.0' " +
                                                        "xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:saxon='http://saxon.sf.net/'>\n" +
@@ -894,6 +688,7 @@ public class TestXslt30Transformer extends TestCase {
 
 
             Xslt30Transformer trans = xqcomp.compile(new StreamSource(sr)).load30();
+            trans.setErrorListener(listener);
 
             Serializer serializer = proc.newSerializer();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -904,19 +699,20 @@ public class TestXslt30Transformer extends TestCase {
             fail("Transformation should fail");
 
         } catch (SaxonApiException e) {
-            assertTrue("warnings", warnings.isEmpty());
-            assertTrue("errors", errors.isEmpty());
-            assertTrue("fatals", fatals.size() == 1);
+            assertTrue(warnings.isEmpty(), "warnings");
+            assertTrue(errors.isEmpty(), "errors");
+            assertTrue(fatals.size() == 1, "fatals");
             //e.printStackTrace();
         }
     }
 
+    @Test
     public void testSchemaAware11() {
         // Create a Processor instance.
         try {
             Processor proc = new Processor(true);
-            proc.setConfigurationProperty(FeatureKeys.TIMING, "true");
-            proc.setConfigurationProperty(FeatureKeys.XSD_VERSION, "1.1");
+            proc.setConfigurationProperty(Feature.TIMING, true);
+            proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
             XsltCompiler comp = proc.newXsltCompiler();
             comp.setSchemaAware(true);
             StringReader sr = new StringReader(
@@ -946,10 +742,11 @@ public class TestXslt30Transformer extends TestCase {
      * Test option to treat validation failures as non-fatal
      */
 
+    @Test
     public void testValidationWarnings() {
         try {
             Processor processor = new Processor(true);
-            processor.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, Boolean.TRUE);
+            processor.setConfigurationProperty(Feature.VALIDATION_WARNINGS, true);
             processor.getUnderlyingConfiguration().addSchemaSource(
                     new StreamSource(ConfigTest.DATA_DIR + "books.xsd"));
 
@@ -987,10 +784,60 @@ public class TestXslt30Transformer extends TestCase {
         }
     }
 
+
+    /**
+     * Test that the message from the SAX Parser is concatenated to the the error message reported by the compiler
+     */
+    @Test
+    public void testXmlProcessingError() {
+
+        String message = "";
+        Processor processor = new Processor(false);
+
+        XsltCompiler xsltCompiler = processor.newXsltCompiler();
+        final List<StaticError> errors = new ArrayList<>(4);
+
+        xsltCompiler.setErrorList(errors);
+
+        String xslt = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0</xsl:stylesheet>";
+
+        XsltExecutable xsltExecutable;
+
+        StringReader xsltReader = new StringReader(xslt);
+
+        try {
+            xsltExecutable = xsltCompiler.compile(new StreamSource(xsltReader));
+        } catch (Exception ex) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Stylesheet compilation failed with {0} error(s):");
+
+            int errCount = 0;
+            ErrorReporter reporter = xsltCompiler.getErrorReporter();
+
+            for (StaticError error : errors) {
+                errCount++;
+
+                try {
+                    message = error.getMessage();
+                } catch (Exception ex1) {
+                    message = ex1.getMessage();
+                }
+
+            }
+            assertTrue(message.contains("must not contain the '<' character"));
+            return;
+        }
+
+        fail();
+
+
+    }
+
     /**
      * Test that the base URI of the result document is the base output URI
      */
 
+    @Test
     public void testOutputBaseUri() throws SaxonApiException {
         try {
             Processor processor = new Processor(false);
@@ -1015,7 +862,7 @@ public class TestXslt30Transformer extends TestCase {
             transformer.applyTemplates(document, result);
 
             XdmNode xformed = result.getXdmNode();
-            assertEquals("output base uri", "file://tmp/out.xml", xformed.getBaseURI().toString());
+            assertEquals("file://tmp/out.xml", xformed.getBaseURI().toString(), "output base uri");
         } catch (SaxonApiException e) {
             System.err.println(e.getMessage());
             fail();
@@ -1028,6 +875,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException
      */
 
+    @Test
     public void testGlobalParameters() throws SaxonApiException, UnsupportedEncodingException {
         Configuration configuration = Configuration.newConfiguration();
         Processor processor = new Processor(configuration);
@@ -1063,6 +911,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws UnsupportedEncodingException
      */
 
+    @Test
     public void testGlobalParameterTypes() throws SaxonApiException, UnsupportedEncodingException {
         Configuration configuration = Configuration.newConfiguration();
         Processor processor = new Processor(configuration);
@@ -1084,21 +933,21 @@ public class TestXslt30Transformer extends TestCase {
         XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8"))));
         Map<QName, XsltExecutable.ParameterDetails> params = xsltExecutable.getGlobalParameters();
         ItemType t1 = params.get(new QName("surname")).getDeclaredItemType();
-        assertTrue("t1", t1.toString().equals("Q{" + NamespaceConstant.SCHEMA + "}string"));
+        assertTrue(t1.toString().equals("Q{" + NamespaceConstant.SCHEMA + "}string"), "t1");
         OccurrenceIndicator c1 = params.get(new QName("surname")).getDeclaredCardinality();
-        assertTrue("c1", c1.toString().equals(""));
+        assertTrue(c1.toString().equals(""), "c1");
         ItemType t2 = params.get(new QName("age")).getDeclaredItemType();
-        assertTrue("t2", t2.toString().equals("Q{" + NamespaceConstant.SCHEMA + "}integer"));
+        assertTrue(t2.toString().equals("Q{" + NamespaceConstant.SCHEMA + "}integer"), "t2");
         OccurrenceIndicator c2 = params.get(new QName("age")).getDeclaredCardinality();
-        assertTrue("c2", c2.toString().equals("?"));
+        assertTrue(c2.toString().equals("?"), "c2");
         ItemType t3 = params.get(new QName("doc")).getDeclaredItemType();
-        assertTrue("t3", t3.toString().equals("document-node()"));
+        assertTrue(t3.toString().equals("document-node()"), "t3");
         OccurrenceIndicator c3 = params.get(new QName("doc")).getDeclaredCardinality();
-        assertTrue("c3", c3.toString().equals(""));
+        assertTrue(c3.toString().equals(""), "c3");
         ItemType t4 = params.get(new QName("ele")).getDeclaredItemType();
-        assertEquals("t4", "element(Q{http://pre/}a, Q{" + NamespaceConstant.SCHEMA + "}date)", t4.toString());
+        assertEquals("element(Q{http://pre/}a, Q{" + NamespaceConstant.SCHEMA + "}date)", t4.toString(), "t4");
         OccurrenceIndicator c4 = params.get(new QName("ele")).getDeclaredCardinality();
-        assertTrue("c4", c4.toString().equals("+"));
+        assertTrue(c4.toString().equals("+"), "c4");
     }
 
     /**
@@ -1107,6 +956,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testCallFunction() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -1127,7 +977,7 @@ public class TestXslt30Transformer extends TestCase {
             XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
             Xslt30Transformer t = xsltExecutable.load30();
             XdmValue v = t.callFunction(new QName("http://localhost/", "f:add"), new XdmValue[]{new XdmAtomicValue(2), new XdmAtomicValue(3)});
-            assertEquals(((XdmAtomicValue) v).getLongValue(), 5);
+            assertEquals(5, ((XdmAtomicValue) v).getLongValue());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             fail();
@@ -1140,6 +990,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testCallFunctionArgConversion() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -1163,7 +1014,7 @@ public class TestXslt30Transformer extends TestCase {
             Xslt30Transformer t = xsltExecutable.load30();
             XdmValue v = t.callFunction(new QName("http://localhost/", "f:add"), new XdmValue[]{new XdmAtomicValue(2), new XdmAtomicValue(3)});
             assertEquals(((XdmAtomicValue) v).getDoubleValue(), 5.0e0);
-            assertEquals(((XdmAtomicValue) v).getPrimitiveTypeName().getLocalName(), "double");
+            assertEquals("double", ((XdmAtomicValue) v).getPrimitiveTypeName().getLocalName());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             fail();
@@ -1177,10 +1028,11 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testCallFunctionWrapResults() throws SaxonApiException {
         try {
             Processor processor = new Processor(true);
-            processor.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, "false");
+            processor.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
             XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
             String source = "<?xml version='1.0'?>" +
@@ -1223,6 +1075,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testCallFunctionArgInvalid() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -1261,6 +1114,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testCallNamedTemplateWithParams() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -1290,7 +1144,7 @@ public class TestXslt30Transformer extends TestCase {
             Serializer se = processor.newSerializer(sw);
             se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
             t.callTemplate(new QName("t"), se);
-            assertEquals("output", "17", sw.toString());
+            assertEquals("17", sw.toString(), "output");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             fail();
@@ -1303,6 +1157,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testCallNamedTemplateWithParamsRequired() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -1333,7 +1188,7 @@ public class TestXslt30Transformer extends TestCase {
             t.callTemplate(new QName("t"), se);
             fail("failed to detect error");
         } catch (SaxonApiException e) {
-            assertTrue("message", e.getMessage().contains("required parameter $b"));
+            assertTrue(e.getMessage().contains("required parameter $b"), "message");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             fail();
@@ -1346,6 +1201,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testCallNamedTemplateWithTunnelParams() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -1378,7 +1234,7 @@ public class TestXslt30Transformer extends TestCase {
             Serializer se = processor.newSerializer(sw);
             se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
             t.callTemplate(new QName("t"), se);
-            assertEquals(sw.toString(), "17");
+            assertEquals("17", sw.toString());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             fail();
@@ -1391,6 +1247,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testCallTemplateRuleWithParams() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -1420,7 +1277,7 @@ public class TestXslt30Transformer extends TestCase {
             Serializer se = processor.newSerializer(sw);
             se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
             t.applyTemplates(new StreamSource(new StringReader("<e/>")), se);
-            assertEquals(sw.toString(), "e 17");
+            assertEquals("e 17", sw.toString());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             fail();
@@ -1431,6 +1288,7 @@ public class TestXslt30Transformer extends TestCase {
      * Test calling a stylesheet with an initial template rule with parameters
      */
 
+    @Test
     public void testCallTemplateWithResultValidation() {
         try {
             Processor processor = new Processor(true);
@@ -1456,13 +1314,14 @@ public class TestXslt30Transformer extends TestCase {
             Serializer se = processor.newSerializer(sw);
             se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
             t.callTemplate(new QName("main"), se);
-            assertEquals("output", "<x>3</x>", sw.toString());
+            assertEquals("<x>3</x>", sw.toString(), "output");
         } catch (UnsupportedEncodingException | SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testCallTemplateWithResultValidationFailure() {
         try {
             Processor processor = new Processor(true);
@@ -1497,6 +1356,7 @@ public class TestXslt30Transformer extends TestCase {
         }
     }
 
+    @Test
     public void testCallTemplateWithResultValidationAndItemSeparator() throws SaxonApiException {
         // The presence of the item separator in the output makes the document invalid
         try {
@@ -1533,6 +1393,7 @@ public class TestXslt30Transformer extends TestCase {
         }
     }
 
+    @Test
     public void testCallTemplateWithSecondaryResultValidationAndItemSeparator() throws SaxonApiException {
         // The presence of the item separator in the output makes the document invalid
         try {
@@ -1573,6 +1434,7 @@ public class TestXslt30Transformer extends TestCase {
      * Raw output from named template
      */
 
+    @Test
     public void testCallTemplateNoParamsRaw() {
         try {
             Processor proc = new Processor(false);
@@ -1583,8 +1445,8 @@ public class TestXslt30Transformer extends TestCase {
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             Xslt30Transformer xsl = exec.load30();
             XdmValue result = xsl.callTemplate(null);
-            assertTrue("result is atomic value", result instanceof XdmAtomicValue);
-            assertEquals("result is 42", 42, ((XdmAtomicValue) result).getLongValue());
+            assertTrue(result instanceof XdmAtomicValue, "result is atomic value");
+            assertEquals(42, ((XdmAtomicValue) result).getLongValue(), "result is 42");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -1599,6 +1461,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testCallNamedTemplateWithParamsRaw() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -1640,6 +1503,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testCallNamedTemplateWithParamsRawDestination() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -1684,6 +1548,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testApplyTemplatesRaw() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -1709,13 +1574,13 @@ public class TestXslt30Transformer extends TestCase {
             params.put(new QName("b"), new XdmAtomicValue(5));
             t.setInitialTemplateParameters(params, false);
             XdmValue result = t.applyTemplates(new StreamSource(new StringReader("<e/>")));
-            assertEquals("size", 2, result.size());
+            assertEquals(2, result.size(), "size");
             XdmItem first = result.itemAt(0);
-            assertTrue("t1", first instanceof XdmNode);
-            assertEquals("v1", ((XdmNode) first).getNodeName().getLocalName(), "e");
+            assertTrue(first instanceof XdmNode, "t1");
+            assertEquals("e", ((XdmNode) first).getNodeName().getLocalName(), "v1");
             XdmItem second = result.itemAt(1);
-            assertTrue("t2", second instanceof XdmAtomicValue);
-            assertEquals("v2", ((XdmAtomicValue) second).getDoubleValue(), 17e0);
+            assertTrue(second instanceof XdmAtomicValue, "t2");
+            assertEquals(17e0, ((XdmAtomicValue) second).getDoubleValue(), "v2");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             fail();
@@ -1729,6 +1594,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testApplyTemplatesToSerializer() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -1772,6 +1638,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testApplyTemplatesToXdm() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -1800,13 +1667,13 @@ public class TestXslt30Transformer extends TestCase {
             Serializer se = processor.newSerializer(sw);
             se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
             XdmValue result = t.applyTemplates(new StreamSource(new StringReader("<e/>")));
-            assertEquals("size", 2, result.size());
+            assertEquals(2, result.size(), "size");
             XdmItem first = result.itemAt(0);
-            assertTrue("t1", first instanceof XdmNode);
-            assertEquals("v1", ((XdmNode) first).getNodeName().getLocalName(), "e");
+            assertTrue(first instanceof XdmNode, "t1");
+            assertEquals("e", ((XdmNode) first).getNodeName().getLocalName(), "v1");
             XdmItem second = result.itemAt(1);
-            assertTrue("t2", second instanceof XdmAtomicValue);
-            assertEquals("v2", ((XdmAtomicValue) second).getDoubleValue(), 17e0);
+            assertTrue(second instanceof XdmAtomicValue, "t2");
+            assertEquals(17e0, ((XdmAtomicValue) second).getDoubleValue(), "v2");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             fail();
@@ -1818,6 +1685,7 @@ public class TestXslt30Transformer extends TestCase {
      * Test Strip-type-annotations with ApplyTemplates
      */
 
+    @Test
     public void testStripTypeAnnotations() {
         try {
             Processor proc = new Processor(true);
@@ -1860,7 +1728,7 @@ public class TestXslt30Transformer extends TestCase {
             StringWriter writer = new StringWriter();
             Serializer out = proc.newSerializer(writer);
             xsl.applyTemplates(doc, out);
-            assertTrue("strip-type-annotations not working", writer.toString().contains("false"));
+            assertTrue(writer.toString().contains("false"), "strip-type-annotations not working");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -1872,6 +1740,7 @@ public class TestXslt30Transformer extends TestCase {
      * Test Strip-space with ApplyTemplates
      */
 
+    @Test
     public void testStripSpace() {
         try {
             Processor proc = new Processor(true);
@@ -1897,10 +1766,10 @@ public class TestXslt30Transformer extends TestCase {
             StringWriter writer = new StringWriter();
             Serializer out = proc.newSerializer(writer);
             xsl.applyTemplates(doc, out);
-            assertTrue("strip-space not working", writer.toString().contains("<foo/>"));
-            assertTrue("strip-space not working", writer.toString().contains("<my:foo/>"));
-            assertFalse("strip-space not working", writer.toString().contains("<bar/>"));
-            assertFalse("strip-space not working", writer.toString().contains("<my:bar/>"));
+            assertTrue(writer.toString().contains("<foo/>"), "strip-space not working");
+            assertTrue(writer.toString().contains("<my:foo/>"), "strip-space not working");
+            assertFalse(writer.toString().contains("<bar/>"), "strip-space not working");
+            assertFalse(writer.toString().contains("<my:bar/>"), "strip-space not working");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -1908,41 +1777,7 @@ public class TestXslt30Transformer extends TestCase {
 
     }
 
-    public void testFernandesPerf() {
-        try {
-            Processor proc = new Processor(false);
-            XsltCompiler comp = proc.newXsltCompiler();
-            XsltExecutable t1 = comp.compile(new StreamSource(new File(ConfigTest.DATA_DIR + "fernandes/t1.xsl")));
-            XsltExecutable t2 = comp.compile(new StreamSource(new File(ConfigTest.DATA_DIR + "fernandes/t2.xsl")));
-            XdmNode xml = proc.newDocumentBuilder().build(new File(ConfigTest.DATA_DIR + "fernandes/test.xml"));
-            for (int i = 0; i < 100; i++) {
-                XdmDestination dest1 = new XdmDestination();
-                t1.load30().applyTemplates(xml, dest1);
-                XdmDestination dest2 = new XdmDestination();
-                t2.load30().applyTemplates(dest1.getXdmNode(), dest2);
-                xml = dest2.getXdmNode();
-            }
-            System.err.println("Starting...");
-            long start = System.nanoTime();
-            for (int i = 0; i < 1000; i++) {
-                XdmDestination dest1 = new XdmDestination();
-                t1.load30().applyTemplates(xml, dest1);
-                XdmDestination dest2 = new XdmDestination();
-                t2.load30().applyTemplates(dest1.getXdmNode(), dest2);
-                xml = dest2.getXdmNode();
-            }
-            long actual = (System.nanoTime() - start) / 1000000;
-            assertTrue("Actual: " + actual, actual < 6000);
-            System.err.println("Total time: " + actual + "ms");
-            if (actual > 4000) {
-                System.err.println("**** Possible performance regression - run further checks ****");
-            }
-        } catch (Exception err) {
-            err.printStackTrace();
-            fail();
-        }
-    }
-
+    @Test
     public void testResultDocument() {
         // bug 2771
         try {
@@ -1965,7 +1800,7 @@ public class TestXslt30Transformer extends TestCase {
             Xslt30Transformer transformer = compiler.compile(new StreamSource(new StringReader(xsl))).load30();
             StreamSource source = new StreamSource(new StringReader("<a>b</a>"));
             XdmValue xdmValue = transformer.applyTemplates(source);
-            assertEquals("size", 1, xdmValue.size());
+            assertEquals(1, xdmValue.size(), "size");
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
@@ -1976,11 +1811,12 @@ public class TestXslt30Transformer extends TestCase {
      * Test saxon:next-in-chain
      */
 
+    @Test
     public void testNextInChain() {
         // Create a Processor instance.
         try {
             Processor processor = new Processor(true);
-            processor.setConfigurationProperty("http://saxon.sf.net/feature/timing", "true");
+            processor.setConfigurationProperty(Feature.TIMING, true);
 
             processor.getUnderlyingConfiguration().setOutputURIResolver(new StandardOutputResolver() {
                 StringWriter writer;
@@ -2021,6 +1857,67 @@ public class TestXslt30Transformer extends TestCase {
 
     }
 
+    /**
+     * Test relative URI resolver - bug 4643
+     */
+
+    @Test
+    public void testRelativeURIResolver() {
+        // Create a Processor instance.
+        try {
+            String xsl = "<xsl:package name='myPack' package-version='1.0.0' version=\"3.0\" \n" +
+                    "  xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
+                    "  <xsl:mode/>\n" +
+                    "  <xsl:template match='/'>\n" +
+                    "    <c><xsl:if test=\"doc-available('test.xml')\"><xsl:copy-of select=\"doc('test.xml')\"/></xsl:if></c>\n" +
+                    "  </xsl:template>\n" +
+                    "</xsl:package>";
+
+            Processor processor = new Processor(true);
+            processor.setConfigurationProperty(Feature.TIMING, true);
+
+            // Create a transformer for the stylesheet.
+            Xslt30Transformer transformer = processor.newXsltCompiler().compile(
+                    new StreamSource(new StringReader(xsl))).load30();
+
+            // Add a relative URI resolver
+            transformer.setURIResolver(new RelativeURIResolver() {
+                @Override
+                public String makeAbsolute(String href, String base) throws TransformerException {
+                    return href;
+                }
+
+                @Override
+                public Source dereference(String uri) throws TransformerException {
+                    return uri.equals("test.xml") ? new StreamSource(new StringReader("<widget/>"), "http://dummy/") : null;
+                }
+
+                @Override
+                public Source resolve(String href, String base) throws TransformerException {
+                    return dereference(makeAbsolute(href, base));
+                }
+            });
+            // Create a destination
+            Serializer out = processor.newSerializer();
+            StringWriter sw = new StringWriter();
+            out.setOutputWriter(sw);
+
+            // Load the source document
+            XdmNode input = processor.newDocumentBuilder().build(
+                    new File(ConfigTest.DATA_DIR + "next-in-chain/test.xml"));
+            // Set the root node of the source document to be the initial context node
+            transformer.applyTemplates(input, out);
+            assertTrue(sw.toString().contains("<c><widget/></c>"));
+
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+
+    }
+
+
+    @Test
     public void testTraceListenerTemplates() {
         // Bug 3472
         try {
@@ -2033,35 +1930,42 @@ public class TestXslt30Transformer extends TestCase {
                             "<xsl:template match='b'/></xsl:stylesheet>");
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             Xslt30Transformer transformer = exec.load30();
-            List<String> log = new ArrayList<String>();
+            List<String> log = new ArrayList<>();
             transformer.setTraceListener(new TraceListener() {
+                @Override
                 public void setOutputDestination(Logger stream) {
 
                 }
 
+                @Override
                 public void open(Controller controller) {
                     log.add("open");
                 }
 
+                @Override
                 public void close() {
                     log.add("close");
                 }
 
-                public void enter(InstructionInfo instruction, XPathContext context) {
-                    log.add("enter " + instruction.getConstructType());
-                    if (instruction.getConstructType() == StandardNames.XSL_TEMPLATE) {
-                        log.add("matching " + instruction.getProperty("match"));
+                @Override
+                public void enter(Traceable instruction, Map<String, Object> properties, XPathContext context) {
+                    log.add("enter " + instruction.getClass());
+                    if (instruction instanceof TemplateRule) {
+                        log.add("matching " + properties.get("match"));
                     }
                 }
 
-                public void leave(InstructionInfo instruction) {
-                    log.add("leave " + instruction.getConstructType());
+                @Override
+                public void leave(Traceable instruction) {
+                    log.add("leave " + instruction.getClass());
                 }
 
+                @Override
                 public void startCurrentItem(Item currentItem) {
                     log.add("start " + (currentItem instanceof NodeInfo ? ((NodeInfo) currentItem).getLocalPart() : currentItem.getStringValue()));
                 }
 
+                @Override
                 public void endCurrentItem(Item currentItem) {
                     log.add("end " + (currentItem instanceof NodeInfo ? ((NodeInfo) currentItem).getLocalPart() : currentItem.getStringValue()));
                 }
@@ -2086,6 +1990,7 @@ public class TestXslt30Transformer extends TestCase {
      * Test result document handler
      */
 
+    @Test
     public void testResultDocHandler() throws SaxonApiException {
         Processor processor = new Processor(false);
 
@@ -2123,13 +2028,14 @@ public class TestXslt30Transformer extends TestCase {
         assertNotNull(results.get("out1.xml"));
         System.err.println(results.get("out1.xml").getXdmNode().toString());
         assertTrue(results.get("out1.xml").getXdmNode().toString().contains("<out nr=\"5\"/>"));
-        assertEquals("base-uri", "http://base.output.com/out1.xml", results.get("out1.xml").getXdmNode().getBaseURI().toString());
+        assertEquals("http://base.output.com/out1.xml", results.get("out1.xml").getXdmNode().getBaseURI().toString(), "base-uri");
     }
 
     /**
      * Test result document handler with raw destination
      */
 
+    @Test
     public void testResultDocHandlerRaw() throws SaxonApiException {
         Processor processor = new Processor(false);
 
@@ -2165,14 +2071,15 @@ public class TestXslt30Transformer extends TestCase {
         assertEquals(6, results.size());
         assertNotNull(results.get("out1.xml"));
         System.err.println(results.get("out1.xml").getXdmValue().toString());
-        assertEquals("size", 11, results.get("out1.xml").getXdmValue().size());
-        assertEquals("value", 5, ((XdmAtomicValue) results.get("out1.xml").getXdmValue().itemAt(0)).getLongValue());
+        assertEquals(11, results.get("out1.xml").getXdmValue().size(), "size");
+        assertEquals(5, ((XdmAtomicValue) results.get("out1.xml").getXdmValue().itemAt(0)).getLongValue(), "value");
     }
 
     /**
      * Send output to an XdmDestination
      */
 
+    @Test
     public void testItemSeparatorToSerializer() {
         try {
             Processor proc = new Processor(false);
@@ -2202,6 +2109,7 @@ public class TestXslt30Transformer extends TestCase {
 
     }
 
+    @Test
     public void testTransformReturningFunction() {
         try {
             Processor proc = new Processor(true);
@@ -2225,6 +2133,7 @@ public class TestXslt30Transformer extends TestCase {
 
     }
 
+    @Test
     public void testJarFileInput() {
         String xsl = "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
                 + "   <xsl:template match=\"/\">\n"
@@ -2286,6 +2195,7 @@ public class TestXslt30Transformer extends TestCase {
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
 
+    @Test
     public void testSequenceResult() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -2317,12 +2227,13 @@ public class TestXslt30Transformer extends TestCase {
      * Load and run a SEF file that specifies relocatable="yes" and calls the doc() function
      */
 
+    @Test
     public void testRelocatableExport() {
         try {
             Processor processor = new Processor(true);
             XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            XsltExecutable executable = xsltCompiler.compile(new StreamSource(new File(ConfigTest.DATA_DIR + "booksWithMain.sef")));
+            XsltExecutable executable = xsltCompiler.compile(new StreamSource(new File(ConfigTest.DATA_DIR + "booksWithMain10.sef")));
 
             Xslt30Transformer transformer = executable.load30();
 
@@ -2340,6 +2251,61 @@ public class TestXslt30Transformer extends TestCase {
 
     }
 
+    @Test
+    public void testDiagnosticsOnAtomizationFailureSansExport() {
+        testDiagnosticsOnAtomizationFailure(false);
+    }
+
+    @Test
+    public void testDiagnosticsOnAtomizationFailureWithExport() {
+        testDiagnosticsOnAtomizationFailure(true);
+    }
+
+    private void testDiagnosticsOnAtomizationFailure(boolean export) {
+        // Bug 4086
+
+        String xsl = "<?xml version='1.0'?>" +
+                "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
+                "                xmlns:f = 'http://functions/' " +
+                "                version='3.0'>" +
+                "                <xsl:param name='p' select='map{2:5}'/>" +
+                "                <xsl:template name='main' as='xs:integer+'>" +
+                "                     <xsl:sequence select=\"f:do($p)\" />        " +
+                "                </xsl:template>" +
+                "                <xsl:function name='f:do' as='xs:integer+'>" +
+                "                     <xsl:param name='x' as='xs:integer'/>" +
+                "                     <xsl:sequence select='$x+3' />        " +
+                "                </xsl:function>" +
+                "                </xsl:stylesheet>";
+
+        try {
+            Processor p = new Processor(true);
+            XsltCompiler c = p.newXsltCompiler();
+            XsltExecutable exec = c.compile(new StreamSource(new StringReader(xsl)));
+            if (export) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                exec.export(baos);
+                try {
+                    baos.close();
+                } catch (IOException e) {
+                    fail();
+                }
+                ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+                Processor p2 = new Processor(true);
+                XsltCompiler c2 = p2.newXsltCompiler();
+                exec = c2.loadLibraryPackage(new StreamSource(bais)).link();
+            }
+            XdmValue val = exec.load30().callTemplate(new QName("main"));
+            fail();
+        } catch (SaxonApiException e) {
+            assertTrue(e.getMessage().contains("Found while atomizing the first argument of f:do()"));
+            System.err.println(e);
+        }
+    }
+
+
+    @Test
     public void test4301() {
         try {
             String s = "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema'>"
@@ -2347,7 +2313,7 @@ public class TestXslt30Transformer extends TestCase {
                     + "           <xsl:param name='code' as='xs:string'/> "
                     + "           <xsl:sequence select=\"if ($code = ('test')) then $code else error(QName('http://www.ctk.cz/error-code/', 'NotExists'))\"/>"
                     + "        </xsl:template>"
-                    + "        </xsl:transform>";
+                    + " </xsl:transform>";
             Processor processor = new Processor(true);
             XsltCompiler comp = processor.newXsltCompiler();
             Xslt30Transformer transformer = comp.compile(new StreamSource(new StringReader(s))).load30();
@@ -2357,9 +2323,8 @@ public class TestXslt30Transformer extends TestCase {
             XdmDestination dest = new XdmDestination();
             transformer.callTemplate(null, dest);
         } catch (SaxonApiException err) {
-
             if (err.getErrorCode().getNamespaceURI().equals("http://www.ctk.cz/error-code/")) {
-                return;
+                //return;
             } else {
                 err.printStackTrace();
                 fail();
@@ -2367,6 +2332,7 @@ public class TestXslt30Transformer extends TestCase {
         }
     }
 
+    @Test
     public void test3929inlineSchema() {
         try {
             Processor processor = new Processor(true);
@@ -2397,6 +2363,7 @@ public class TestXslt30Transformer extends TestCase {
     }
 
 
+    @Test
     public void test3929externalSchema() {
         try {
             Processor processor = new Processor(true);

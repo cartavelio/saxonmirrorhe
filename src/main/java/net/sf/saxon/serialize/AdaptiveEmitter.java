@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -38,7 +38,6 @@ import java.util.Properties;
 public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutputProperties {
 
     private Writer writer;
-    private Normalizer normalizer;
     private CharacterMap characterMap;
     private Properties outputProperties;
     private String itemSeparator = "\n";
@@ -57,10 +56,6 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         }
     }
 
-    public Properties getOutputProperties() {
-        return outputProperties;
-    }
-
     /**
      * Set the Unicode normalizer to be used for normalizing strings.
      *
@@ -68,7 +63,6 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
      */
 
     public void setNormalizer(Normalizer normalizer) {
-        this.normalizer = normalizer;
     }
 
     /**
@@ -81,6 +75,11 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         this.characterMap = map;
     }
 
+
+    @Override
+    public Properties getOutputProperties() {
+        return outputProperties;
+    }
 
     private void emit(CharSequence s) throws XPathException {
         try {
@@ -102,7 +101,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
             emit(itemSeparator);
         } else {
             if (writer == null) {
-                // TODO: ????
+
             }
             started = true;
         }
@@ -133,7 +132,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
                     s = s.replace("\"", "\"\"");
                 }
                 if (characterMap != null) {
-                    s = characterMap.map(s,false).toString();
+                    s = characterMap.map(s, false).toString();
                 }
                 return "\"" + s + "\"";
             }
@@ -212,7 +211,9 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
                 Properties props = new Properties(outputProperties);
                 props.setProperty("method", "xml");
                 props.setProperty("indent", "no");
-                props.setProperty("omit-xml-declaration", "yes");
+                if (props.getProperty("omit-xml-declaration") == null) {
+                    props.setProperty("omit-xml-declaration", "no");
+                }
                 props.setProperty(SaxonOutputKeys.UNFAILING, "yes");
                 CharacterMapIndex cmi = null;
                 if (characterMap != null) {
@@ -228,7 +229,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
     private void serializeArray(ArrayItem array) throws XPathException {
         emit("[");
         boolean first = true;
-        for (Sequence<?> seq: array.members()) {
+        for (Sequence seq: array.members()) {
             if (first) {
                 first = false;
             } else {
@@ -250,7 +251,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
             }
             serializeItem(pair.key);
             emit(":");
-            Sequence<?> value = pair.value;
+            Sequence value = pair.value;
             outputInternalSequence(value);
         }
         emit("}");
