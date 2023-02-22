@@ -692,7 +692,7 @@ cdef class PySaxonProcessor:
     @property
     def error_message(self):
        """
-       get_error_message(self)
+       error_message(self)
        The PySaxonProcessor may have a number of errors reported against it. Get the error message if there are any errors
 
        Returns:
@@ -1254,7 +1254,7 @@ cdef class PyXslt30Processor:
      @property
      def error_message(self):
         """
-        get_error_message(self)
+        error_message(self)
         A transformation may have a number of errors reported against it. This property returns an error message if there are any errors
 
         Returns:
@@ -1267,7 +1267,7 @@ cdef class PyXslt30Processor:
      @property
      def error_code(self):
         """
-        get_error_code(self)
+        error_code(self)
         A transformation may have a number of errors reported against it. This property returns the error code if there are any errors
 
         Returns:
@@ -2334,7 +2334,7 @@ cdef class PyXsltExecutable:
      @property
      def error_message(self):
         """
-        get_error_message(self)
+        error_message(self)
         A transformation may have a number of errors reported against it. Get the error message if there are any errors
 
         Returns:
@@ -2344,9 +2344,9 @@ cdef class PyXsltExecutable:
         ustring = make_py_str(c_string)
         return ustring
 
-        """def get_error_code(self):  """
+        """def error_code(self):  """
         """                        
-        get_error_code(self, index)
+        error_code(self, index)
         A transformation may have a number of errors reported against it. Get the i'th error code if there are any errors
         Args:
             index (int): The i'th exception
@@ -3290,7 +3290,7 @@ cdef class PySchemaValidator:
 
      def get_error_message(self, index):
         """
-        get_error_message(self)
+        error_message(self)
         A transformation may have a number of errors reported against it. Get the ith error message if there are any errors
 
         Args:

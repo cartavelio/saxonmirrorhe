@@ -964,10 +964,10 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName, const c
     if(ctmID == nullptr) {
         ctmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
                                                                         "callTemplateReturningFile",
-                                                                        "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)V");
+                                                                        "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)V");
     }
     if (!ctmID) {
-        std::cerr << "Error: " << getDllname() << "callTemplateReturningFile" << " not found\n"
+        std::cerr << "Error: " << getDllname() << ".callTemplateReturningFile" << " not found\n"
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
