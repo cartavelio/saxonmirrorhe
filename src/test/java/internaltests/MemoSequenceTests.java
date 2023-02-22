@@ -1,6 +1,6 @@
 package internaltests;
 
-import net.sf.saxon.expr.RangeIterator;
+import net.sf.saxon.expr.AscendingRangeIterator;
 import net.sf.saxon.om.MemoSequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
@@ -16,7 +16,7 @@ public class MemoSequenceTests {
     @Test
     public void testItemAt() {
         try {
-            SequenceIterator iter = new RangeIterator(10, 20);
+            SequenceIterator iter = new AscendingRangeIterator(10, 1, 20);
             MemoSequence ms = new MemoSequence(iter);
             assertEquals("15", ms.itemAt(5).getStringValue(), "itemAtA");
             SequenceIterator prog = ms.iterate();
@@ -33,7 +33,7 @@ public class MemoSequenceTests {
     @Test
     public void testMaterialize() {
         try {
-            SequenceIterator iter = new RangeIterator(10, 20);
+            SequenceIterator iter = new AscendingRangeIterator(10, 1, 20);
             MemoSequence ms = new MemoSequence(iter);
             SequenceIterator prog = ms.iterate();
 
@@ -62,7 +62,7 @@ public class MemoSequenceTests {
     @Test
     public void testMaterialize2() {
         try {
-            SequenceIterator iter = new RangeIterator(10, 20);
+            SequenceIterator iter = new AscendingRangeIterator(10, 1, 20);
             MemoSequence ms = new MemoSequence(iter);
             SequenceIterator prog = ms.iterate();
 
@@ -90,7 +90,7 @@ public class MemoSequenceTests {
     @Test
     public void testResidue() {
         try {
-            SequenceIterator iter = new RangeIterator(10, 20);
+            SequenceIterator iter = new AscendingRangeIterator(10, 1, 20);
             MemoSequence ms = new MemoSequence(iter);
             SequenceIterator prog = ms.iterate();
 
@@ -119,7 +119,7 @@ public class MemoSequenceTests {
     @Test
     public void testResidue2() {
         try {
-            SequenceIterator iter = new RangeIterator(10, 20);
+            SequenceIterator iter = new AscendingRangeIterator(10, 1, 20);
             MemoSequence ms = new MemoSequence(iter);
             SequenceIterator prog = ms.iterate();
 

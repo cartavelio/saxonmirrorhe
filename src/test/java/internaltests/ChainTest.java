@@ -9,7 +9,7 @@ package internaltests;
 
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.RangeIterator;
+import net.sf.saxon.expr.AscendingRangeIterator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.NumericComparer;
@@ -25,9 +25,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ChainTest {
 
@@ -35,9 +33,9 @@ public class ChainTest {
     public void testAppend() {
         try {
             List<GroundedValue> initial = new ArrayList<>();
-            initial.add(new IntegerRange(1, 20));
-            initial.add(new IntegerRange(21, 40));
-            initial.add(new IntegerRange(41, 60));
+            initial.add(new IntegerRange(1, 1, 20));
+            initial.add(new IntegerRange(21, 1, 40));
+            initial.add(new IntegerRange(41, 1, 60));
             Chain chain = new Chain(initial);
             for (int i=61; i<=100; i++) {
                 chain.append(new Int64Value(i));
@@ -53,9 +51,9 @@ public class ChainTest {
     public void testIterate() {
         try {
             List<GroundedValue> initial = new ArrayList<>();
-            initial.add(new IntegerRange(1, 20));
-            initial.add(new IntegerRange(21, 40));
-            initial.add(new IntegerRange(41, 60));
+            initial.add(new IntegerRange(1, 1, 20));
+            initial.add(new IntegerRange(21, 1, 40));
+            initial.add(new IntegerRange(41, 1, 60));
             Chain chain = new Chain(initial);
             for (int i=61; i<=100; i++) {
                 chain.append(new Int64Value(i));
@@ -63,7 +61,7 @@ public class ChainTest {
             AtomicComparer comparer = NumericComparer.getInstance();
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
-            assertTrue(DeepEqual.deepEqual(chain.iterate(), new RangeIterator(1, 100), comparer, context, 0));
+            assertTrue(DeepEqual.deepEqual(chain.iterate(), new AscendingRangeIterator(1, 1, 100), comparer, context, 0));
             assertEquals(51, ((IntegerValue)chain.itemAt(50)).longValue());
         } catch (XPathException e) {
             fail();
@@ -74,9 +72,9 @@ public class ChainTest {
     public void testRecursive() {
         try {
             List<GroundedValue> initial = new ArrayList<>();
-            initial.add(new IntegerRange(1, 20));
-            initial.add(new IntegerRange(21, 40));
-            initial.add(new IntegerRange(41, 60));
+            initial.add(new IntegerRange(1, 1, 20));
+            initial.add(new IntegerRange(21, 1, 40));
+            initial.add(new IntegerRange(41, 1, 60));
             Chain chain = new Chain(initial);
 
             List<GroundedValue> l2 = new ArrayList<>();
@@ -91,7 +89,7 @@ public class ChainTest {
             AtomicComparer comparer = NumericComparer.getInstance();
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
-            assertTrue(DeepEqual.deepEqual(chain3.iterate(), new RangeIterator(1, 100), comparer, context, 0));
+            assertTrue(DeepEqual.deepEqual(chain3.iterate(), new AscendingRangeIterator(1, 1, 100), comparer, context, 0));
             assertEquals(51, ((IntegerValue)chain3.itemAt(50)).longValue());
         } catch (XPathException e) {
             fail();
@@ -102,9 +100,9 @@ public class ChainTest {
     public void testSubsequence() {
         try {
             List<GroundedValue> initial = new ArrayList<>();
-            initial.add(new IntegerRange(1, 20));
-            initial.add(new IntegerRange(21, 40));
-            initial.add(new IntegerRange(41, 60));
+            initial.add(new IntegerRange(1, 1, 20));
+            initial.add(new IntegerRange(21, 1, 40));
+            initial.add(new IntegerRange(41, 1, 60));
             Chain chain = new Chain(initial);
 
             List<GroundedValue> l2 = new ArrayList<>();
@@ -121,7 +119,7 @@ public class ChainTest {
             AtomicComparer comparer = NumericComparer.getInstance();
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
-            assertTrue(DeepEqual.deepEqual(sub.iterate(), new RangeIterator(41, 60), comparer, context, 0));
+            assertTrue(DeepEqual.deepEqual(sub.iterate(), new AscendingRangeIterator(41, 1, 60), comparer, context, 0));
         } catch (XPathException e) {
             fail();
         }

@@ -1,4 +1,5 @@
 package ee;
+
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.EnterpriseTransformerFactory;
 import net.sf.saxon.Configuration;
@@ -6,6 +7,7 @@ import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.Sink;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.StandardErrorReporter;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.query.DynamicQueryContext;
@@ -122,7 +124,7 @@ public class XMarkBenchmark {
             if (satests) {
                 config.setSchemaValidationMode(Validation.STRICT);
                 config.addSchemaSource(new StreamSource(new File(dir + "schema.xsd")),
-                        config.getErrorListener());
+                        new StandardErrorReporter());
                 config.setConfigurationProperty(Feature.USE_TYPED_VALUE_CACHE, false);
             }
             if (val) {
