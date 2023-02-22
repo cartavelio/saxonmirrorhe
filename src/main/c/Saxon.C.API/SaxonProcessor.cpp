@@ -712,8 +712,7 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator 
 
     int64_t xdmNodeRef = parseXmlStringWithValidator(sxn_environ->thread, (void*)procRef, (validator != nullptr ? (void *)validator->getUnderlyingValidator() : (void *)nullptr), (char *)source);
     if (xdmNodeRef >= 0) {
-        XdmNode *value = nullptr;
-        value = new XdmNode(xdmNodeRef);
+        XdmNode *value = new XdmNode(xdmNodeRef);
 
         return value;
     } else if (xdmNodeRef == -2) {

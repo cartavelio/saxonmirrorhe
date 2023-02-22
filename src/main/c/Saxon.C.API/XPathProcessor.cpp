@@ -110,49 +110,51 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
 	setProperty("resources", proc->getResourcesDirectory());
     allocFn fn = operator new;
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties,0);
-    std::cerr<<"evaluate ======"<<std::endl;
-    long long * results = j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    int64_t results = j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
 
-	if(results != nullptr) {
-	    XdmValue * value = new XdmValue();
-	    int size = results[0];
-        std::cerr<<"size="<<size<<std::endl;
-    for(int i = 1; i<size; i++){
-        if(results[i]=='\0') {
-            break;
-        }
-        std::cerr<<"i"<<i<<" result"<<results[i]<<std::endl;
-        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results[i]);
+	if(results >0) {
+	    XdmValue * value = nullptr;
+
+        std::cerr<<" result"<<results<<std::endl;
+        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results);
         XdmItem * xdmItem = nullptr;
-        std::cerr<<"i"<<i<<" Type="<<typeRef<<std::endl;
-
+        std::cerr<<" Type="<<typeRef<<std::endl;
+        if(typeRef == -2) {
+            exception = new SaxonApiException();
+            return nullptr;
+        }
         if(typeRef == 1) {
-            xdmItem = new XdmAtomicValue(results[i]);
+            value = new XdmValue();
+            xdmItem = new XdmAtomicValue(results);
             value->addXdmItem(xdmItem);
 
         } else if(typeRef == 2) {
-            xdmItem = new XdmNode(results[i]);
+            value = new XdmValue();
+            xdmItem = new XdmNode(results);
             value->addXdmItem(xdmItem);
 
         }  else if (typeRef == 4) {
-            xdmItem =  new XdmMap(results[i]);
+            value = new XdmValue();
+            xdmItem =  new XdmMap(results);
             value->addXdmItem(xdmItem);
 
         } else if (typeRef == 3) {
-            xdmItem =  new XdmArray(results[i]);
+            value = new XdmValue();
+            xdmItem =  new XdmArray(results);
             value->addXdmItem(xdmItem);
 
         } else if (typeRef == 5) {
-            xdmItem =  new XdmFunctionItem(results[i]);
+            value = new XdmValue();
+            xdmItem =  new XdmFunctionItem(results);
             value->addXdmItem(xdmItem);
         } else {
-            xdmItem = new XdmItem(results[i]);
-            value->addXdmItem(xdmItem);
+            value = new XdmValue(results, true);
+
         }
 
-    }
+
 		return value;
-	} else if(results == nullptr){
+	} else if(results == -2){
 	    exception = new SaxonApiException();
 	}
 

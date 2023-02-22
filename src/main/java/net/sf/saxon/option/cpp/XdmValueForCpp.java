@@ -20,7 +20,9 @@ import net.sf.saxon.value.StringValue;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.word.WordFactory;
 
 import java.math.BigInteger;
 
@@ -86,6 +88,32 @@ public class XdmValueForCpp {
         }
         ProcessorDataAccumulator dataAccumulator = new ProcessorDataAccumulator(items);
         return dataAccumulator;
+
+    }
+
+    @CEntryPoint(name = "makeArrayFromXdmValue2")
+    public static CLongPointer makeArrayFromXdmValue2(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle valueRef) {
+        if(valueRef == WordFactory.nullPointer()) {
+            return WordFactory.nullPointer();
+        }
+        XdmValue value = SaxonCAPI.objectHandles.get(valueRef);
+        int size = value.size();
+        if(size >0) {
+            size+=1;
+        }
+        long[] valueRefs = new long[size];
+        if(size>0) {
+            valueRefs[0] = value.size();
+        }
+        int i = 1;
+        for (XdmItem item : value) {
+            ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(item);
+            valueRefs[i] = objectHandle.rawValue();
+            i++;
+        }
+
+        CLongPointer addr = SaxonCAPI.longArrayToNative(alloc, valueRefs);
+        return addr;
 
     }
 

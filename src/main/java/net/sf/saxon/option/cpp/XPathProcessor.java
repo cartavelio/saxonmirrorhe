@@ -245,8 +245,8 @@ public class XPathProcessor extends SaxonCAPI {
      * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
-    @CEntryPoint(name = "j_evaluate", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
-    public static CLongPointer evaluate(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_evaluate", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long evaluate(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
@@ -268,23 +268,9 @@ public class XPathProcessor extends SaxonCAPI {
         /*if (contextItem != null) {
             selector.setContextItem(contextItem);
         } */
-        XdmValue value = selector.evaluate();//compiler.evaluate(xpathStr, contextItem);
-        int size = value.size();
-        if(size >0) {
-            size+=1;
-        }
-        long[] valueRefs = new long[size];
-        if(size>0) {
-            valueRefs[0] = value.size();
-        }
-        int i = 1;
-        for (XdmItem item : value) {
-            ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(item);
-            valueRefs[i] = objectHandle.rawValue();
-            i++;
-        }
-        CLongPointer addr = SaxonCAPI.longArrayToNative(alloc, valueRefs);
-        return addr;
+        XdmValue value = selector.evaluate();
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+        return handle.rawValue();
 
     }
 

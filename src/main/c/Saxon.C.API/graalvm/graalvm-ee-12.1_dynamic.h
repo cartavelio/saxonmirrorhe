@@ -124,7 +124,7 @@ typedef void (*j_xp_setBackwardsCompatible_fn_t)(graal_isolatethread_t*, void *,
 
 typedef void (*j_xp_setBaseURI_fn_t)(graal_isolatethread_t*, void *, char*);
 
-typedef long long* (*j_evaluate_fn_t)(graal_isolatethread_t*, void *, void *, char*, char*, void *);
+typedef long long int (*j_evaluate_fn_t)(graal_isolatethread_t*, void *, void *, char*, char*, void *);
 
 typedef long long int (*j_evaluateSingle_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
 
@@ -203,6 +203,8 @@ typedef long long int (*j_makeLongValue_fn_t)(graal_isolatethread_t*, long long 
 typedef long long int (*j_makeBooleanValue_fn_t)(graal_isolatethread_t*, int);
 
 typedef long long int (*j_makeQNameValue_fn_t)(graal_isolatethread_t*, char*);
+
+typedef long long* (*makeArrayFromXdmValue2_fn_t)(graal_isolatethread_t*, void *, void *);
 
 typedef long long int (*j_getTypedValue_fn_t)(graal_isolatethread_t*, void *);
 

@@ -411,6 +411,9 @@ public class XdmUtils {
      *
      */
     public static String getEQName(QName qname) {
+        if(qname == null) {
+            return null;
+        }
         String uri = qname.getNamespaceUri().toString();
         if (uri.length() == 0) {
             return qname.getLocalName();
@@ -443,9 +446,9 @@ public class XdmUtils {
     public static CCharPointer getNodeName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle nodeRef) {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         QName qname = node.getNodeName();
-        /*if (qname == null) {
-            return null;
-        }   */
+        if (qname == null) {
+            return WordFactory.nullPointer();
+        }
         return SaxonCAPI.stringToNative2(alloc, XdmUtils.getEQName(qname));
 
     }

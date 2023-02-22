@@ -65,70 +65,59 @@ XdmValue::XdmValue(int64_t valRef) {
 	valueType = nullptr;
 }
 
-//TODO handle the construction of arrays
+
 XdmValue::XdmValue(int64_t val, bool arr){
 	xdmSize = 0;
-	values.resize(0);
+	//values.resize(0);
 	jValues = -1;
 	valueType = nullptr;
-	/*jclass xdmValueForcppClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmValueForCpp");
-	jmethodID xvfMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmValueForcppClass, "makeArrayFromXdmValue", "(Lnet/sf/saxon/s9api/XdmValue;)[Lnet/sf/saxon/s9api/XdmItem;");
+    allocFn fn = operator new;
+    long long * results = makeArrayFromXdmValue2(SaxonProcessor::sxn_environ->thread,(void *)fn, (void *)val);
+    if(results == nullptr) {
+        std::cerr<<"DEBUG C++ - results is null"<<std::endl;
+        return;
+    }
 
-	if(!xvfMID){
+    xdmSize = results[0];
+    std::cerr<<"xdmSize="<<xdmSize<<std::endl;
+    int  typeRef = 0;
 
-		std::cerr << "Error: SaxonDll." << "makeArrayFromXdmValue"
-				<< " not found\n" << std::endl;
-			return ;
-	}
-	
-	jobjectArray results = (jobjectArray) SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmValueForcppClass, xvfMID, val);
-	if(results){
-	int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
-	if (sizex>0) {
-		jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
-		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
-		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
-        jclass mapItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                           "net/sf/saxon/s9api/XdmMap");
-        jclass arrayItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                             "net/sf/saxon/s9api/XdmArray");
+    for (int p=1; p <= xdmSize; ++p){
+        std::cerr<<"results-x["<<p<<"]:="<<results[p]<<std::endl;
+    }
+    for (int p=1; p <= xdmSize; ++p){
+        std::cerr<<"results["<<p<<"]:="<<results[p]<<std::endl;
+        typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results[p]);
+         if(typeRef == -2) {
+             std::cerr<<"Exception thrown while creating XdmValue from array"<<std::endl;
+            return;
+        }
+    std::cerr<<"DEBUG C++ - after j_getXdmObjectType typeRef="<<typeRef<<std::endl;
+        if(typeRef == 1) {
 
-		//XdmValue * value = new XdmValue();
-		//value->setProcessor(proc);
-		XdmItem * xdmItem = nullptr;
-		for (int p=0; p < sizex; ++p) 
-		{
-			jobject resulti = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(results, p);
-			//value->addUnderlyingValue(resulti);
-
-			if(SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, atomicValueClass)           == JNI_TRUE) {
-				xdmItem = new XdmAtomicValue(SaxonProcessor::sxn_environ->env->NewGlobalRef(resulti));
-				
-
-			} else if(SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, nodeClass)           == JNI_TRUE) {
-				xdmItem = new XdmNode(SaxonProcessor::sxn_environ->env->NewGlobalRef(resulti));
+            addXdmItem(new XdmAtomicValue(results[p]));
 
 
-			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, functionItemClass)           == JNI_TRUE) {
+        } else if(typeRef == 2) {
 
-				xdmItem = new XdmFunctionItem(SaxonProcessor::sxn_environ->env->NewGlobalRef(resulti));
+            addXdmItem(new XdmAtomicValue(results[p]));
 
-			}  else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, mapItemClass)           == JNI_TRUE) {
+        }  else if (typeRef == 4) {
+            addXdmItem(new XdmAtomicValue(results[p]));
+        } else if (typeRef == 3) {
+            addXdmItem(new XdmAtomicValue(results[p]));
 
-                xdmItem = new XdmMap(SaxonProcessor::sxn_environ->env->NewGlobalRef(resulti));
+        } else if (typeRef == 5) {
+            addXdmItem(new XdmAtomicValue(results[p]));
+        } else {
+            std::cerr<<"Error creating XdmValue from array"<<std::endl;
 
-            }  else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, arrayItemClass)           == JNI_TRUE) {
+        }
 
-                xdmItem = new XdmArray(SaxonProcessor::sxn_environ->env->NewGlobalRef(resulti));
 
-            }
+    }
+    //delete results;
 
-			addXdmItem(xdmItem);
-			SaxonProcessor::sxn_environ->env->DeleteLocalRef(resulti);
-		}
-	}
-		SaxonProcessor::sxn_environ->env->DeleteLocalRef(results);
-	}	*/
 }
 
 
