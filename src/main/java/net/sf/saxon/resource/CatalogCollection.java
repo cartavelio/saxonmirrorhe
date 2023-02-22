@@ -89,7 +89,8 @@ public class CatalogCollection extends AbstractResourceCollection {
         Iterator<String> resourceURIs = getResourceURIs(context);
 
         return new MappingJavaIterator<String, Resource>(resourceURIs, input -> {
-            String uri = input; // type information needed by transpiler
+            @SuppressWarnings("UnnecessaryLocalVariable")    // type information needed by transpiler
+            String uri = input;
             try {
                 if (uri.startsWith("data:")) {
                     try {
@@ -106,7 +107,10 @@ public class CatalogCollection extends AbstractResourceCollection {
                     return makeResource(context.getConfiguration(), id);
                 }
             } catch (XPathException e) {
-                Optional<Integer> onError = params == null ? Optional.of(URIQueryParameters.ON_ERROR_FAIL) : params.getOnError();
+                Optional<Integer> onError = Optional.of(URIQueryParameters.ON_ERROR_FAIL);
+                if (params != null) {
+                    onError = params.getOnError();
+                }
                 if (onError.isPresent() && onError.get() == URIQueryParameters.ON_ERROR_FAIL) {
                     return new FailedResource(uri, e);
                 } else if (onError.isPresent() && onError.get() == URIQueryParameters.ON_ERROR_WARNING) {
