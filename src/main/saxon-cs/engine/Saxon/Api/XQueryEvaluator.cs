@@ -8,7 +8,6 @@ using Saxon.Hej.lib;
 using Saxon.Hej.query;
 using Saxon.Callbacks;
 using Saxon.Ejavax.xml.transform.stream;
-using Action = System.Action;
 
 namespace Saxon.Api {
     /// <summary inherits="IEnumerable">
@@ -27,7 +26,7 @@ namespace Saxon.Api {
         private Saxon.Hej.s9api.XQueryEvaluator evaluator;
         private StandardLogger traceFunctionDestination;
         private TextResolver textResolver;
-        private Action closeAction;
+        private System.Action closeAction;
 
 
         // internal constructor

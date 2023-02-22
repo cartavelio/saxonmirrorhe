@@ -8,6 +8,7 @@ using Saxon.Hej;
 using Saxon.Hej.@event;
 using Saxon.Hej.lib;
 using Saxon.Hej.s9api;
+using JDestination = Saxon.Hej.s9api.Destination;
 using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
@@ -277,7 +278,7 @@ namespace Saxon.Api {
             transformer.setParameter(name, value);
         }
 
-        public Destination GetUnderlyingDestination() {
+        public JDestination GetUnderlyingDestination() {
             return transformer;
         }
 

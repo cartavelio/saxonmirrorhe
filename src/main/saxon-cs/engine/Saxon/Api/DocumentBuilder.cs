@@ -13,7 +13,6 @@ using Saxon.Hej.s9api;
 using Saxon.Hej.trans;
 using Saxon.Callbacks;
 using Saxon.Impl.Dom;
-using Exception = System.Exception;
 
 namespace Saxon.Api {
     /// <summary>

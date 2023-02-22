@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Saxon.Ejava.util;
 using Saxon.Hej;
-using Saxon.Hej.s9api;
+using JDestination = Saxon.Hej.s9api.Destination;
 using Saxon.Hej.serialize;
 using Saxon.Hej.z;
 using SysCollGen = System.Collections.Generic;
@@ -472,7 +472,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <returns>returns the underlying Destination object</returns>
-        public Destination GetUnderlyingDestination()
+        public JDestination GetUnderlyingDestination()
         {
             return jSerializer;
         }

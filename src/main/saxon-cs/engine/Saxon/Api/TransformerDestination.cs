@@ -1,5 +1,5 @@
-using Saxon.Hej.s9api;
-using Action = System.Action;
+using System;
+using JDestination = Saxon.Hej.s9api.Destination;
 
 namespace Saxon.Api {
     
@@ -9,20 +9,20 @@ namespace Saxon.Api {
     /// </summary>
     internal class TransformerDestination : IDestination
     {
-        private readonly Saxon.Hej.s9api.Destination wrappedDestination;
+		private readonly JDestination wrappedDestination;
 
         internal TransformerDestination(Xslt30Transformer xslt30Transformer, IDestination finalDestination) {
             wrappedDestination = xslt30Transformer.GetUnderlyingXslt30Transformer.asDocumentDestination(
                 finalDestination.GetUnderlyingDestination());
         }
 
-        Destination IDestination.GetUnderlyingDestination() {
+		JDestination IDestination.GetUnderlyingDestination() {
             return wrappedDestination;
         }
         
         
 
-        public void OnClose(Action action) {
+        public void OnClose(System.Action action) {
             wrappedDestination.onClose(action.Invoke);
         }
     }
