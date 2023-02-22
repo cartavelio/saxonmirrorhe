@@ -156,6 +156,11 @@
     
     <category name="command-line">
         
+        <p>In the <code>Validate</code> command, there are changes to the separator used for lists of names
+        supplied in the <code>-s</code> and <code>-xsd</code> options. The separator is now consistently
+        semicolon on Windows, colon on MacOS and Linux; except when the <code>-u</code> option is specified,
+        in which case URIs are separated by whitespace.</p>
+        
        
         
     </category>
