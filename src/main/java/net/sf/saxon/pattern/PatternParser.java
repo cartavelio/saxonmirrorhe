@@ -58,7 +58,7 @@ public class PatternParser extends XPathParser {
             int start = t.currentTokenStartOffset;
             trimmed = trimmed.substring(start);
         }
-        allowSaxonExtensions = env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
+        allowXPath40Syntax = env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || env.getXPathVersion() == 40;
         if (isSelectionPattern(trimmed)) {
             Expression e = parse(pattern, 0, Token.EOF, env);
             if (e instanceof Pattern) {
@@ -124,9 +124,9 @@ public class PatternParser extends XPathParser {
             language = ParsedLanguage.XSLT_PATTERN;
             t = new Tokenizer();
             t.languageLevel = env.getXPathVersion();
-            allowSaxonExtensions =
+            allowXPath40Syntax =
                     t.allowSaxonExtensions =
-                            env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
+                            env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || t.languageLevel == 40;
             try {
                 t.tokenize(pattern, 0, -1);
             } catch (XPathException err) {
@@ -172,7 +172,7 @@ public class PatternParser extends XPathParser {
             }
 
             if (exp instanceof FilterExpression && ((FilterExpression)exp).getBase() instanceof ContextItemExpression) {
-                if (allowSaxonExtensions && (pattern.startsWith("tuple") || pattern.startsWith("map") || pattern.startsWith("array") || pattern.startsWith("union"))) {
+                if (allowXPath40Syntax && (pattern.startsWith("tuple") || pattern.startsWith("map") || pattern.startsWith("array") || pattern.startsWith("union"))) {
                     // no action, this is OK
                 } else {
                     grumble("A predicatePattern can appear only at the outermost level (parentheses not allowed)");
@@ -236,7 +236,7 @@ public class PatternParser extends XPathParser {
         Tokenizer t = getTokenizer();
         if (inPredicate > 0) {
             return super.parseExpression();
-        } else if (allowSaxonExtensions && t.currentToken == Token.NODEKIND &&
+        } else if (allowXPath40Syntax && t.currentToken == Token.NODEKIND &&
                 (t.currentTokenValue.equals("record")  || t.currentTokenValue.equals("type") || t.currentTokenValue.equals("map") || t.currentTokenValue.equals("array"))) {
             //ItemType type = parserExtension.parseExtendedItemType(this);
             ItemType type = parseItemType();
@@ -250,7 +250,7 @@ public class PatternParser extends XPathParser {
                 expr = parsePredicate(expr).toPattern(env.getConfiguration());
             }
             return expr;
-        } else if (allowSaxonExtensions && t.currentToken == Token.NODEKIND &&
+        } else if (allowXPath40Syntax && t.currentToken == Token.NODEKIND &&
                 (t.currentTokenValue.equals("atomic"))) {
             nextToken();
             expect(Token.NAME);

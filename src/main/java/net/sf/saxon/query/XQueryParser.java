@@ -363,9 +363,9 @@ public class XQueryParser extends XPathParser {
             grumble(err.getMessage());
         }
         parseVersionDeclaration();
-        allowSaxonExtensions =
+        allowXPath40Syntax =
                 t.allowSaxonExtensions =
-                        env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
+                        allowXPath40Syntax || env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
 
         QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
             .withAcceptEQName(true)
@@ -441,6 +441,10 @@ public class XQueryParser extends XPathParser {
             grumble(err.getMessage());
         }
         parseVersionDeclaration();
+        allowXPath40Syntax =
+                t.allowSaxonExtensions =
+                        allowXPath40Syntax || env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
+
         //t.setAllowExpandedQNameSyntax("3.0".equals(queryVersion));
         parseModuleDeclaration();
         parseProlog();
@@ -477,10 +481,13 @@ public class XQueryParser extends XPathParser {
             nextToken();
             expect(Token.STRING_LITERAL);
             String queryVersion = unescape(t.currentTokenValue).toString();
-            String[] allowedVersions = new String[]{"1.0", "3.0", "3.1"};
+            String[] allowedVersions = new String[]{"1.0", "3.0", "3.1", "4.0"};
             if (Arrays.binarySearch(allowedVersions, queryVersion) < 0) {
 //            if (!queryVersion.trim().matches("[0-9]+\\.[0-9]+")) {
                 grumble("Invalid XQuery version " + queryVersion, "XQST0031");
+            }
+            if (queryVersion.equals("4.0")) {
+                allowXPath40Syntax = true;
             }
 //            if (XQUERY10.equals(queryVersion)) {
 //                // no action

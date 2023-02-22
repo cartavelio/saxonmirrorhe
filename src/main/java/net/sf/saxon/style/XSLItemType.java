@@ -13,7 +13,7 @@ import net.sf.saxon.value.SequenceType;
 
 
 /**
- * The class implements a saxon:item-type declaration in a stylesheet. This
+ * The class implements a xsl:item-type declaration in a stylesheet. This
  * declaration associates a name with an item type, allowing the name (say N)
  * to be used in an itemType with the syntax <code>type(N)</code>.
  */
