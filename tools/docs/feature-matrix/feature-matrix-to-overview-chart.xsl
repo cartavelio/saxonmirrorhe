@@ -31,7 +31,7 @@
                 <p>
                     <i>For features in older versions of the products, see the relevant Feature Matrix:<br />
                         <xsl:for-each select="(10, 9.9, 9.8, 9.7, 9.6)[number($version) ge .]">
-                            <a class="bodylink" href="feature-matrix-{string(.)}.xml">Saxon <xsl:value-of select="string(.)"/></a>
+                            <a class="bodylink" href="feature-matrix-{replace(string(.), '\.', '-')}.xml">Saxon <xsl:value-of select="string(.)"/></a>
                             <xsl:if test="not(position()=last())">
                                 <xsl:text>, </xsl:text>
                             </xsl:if>
