@@ -330,7 +330,7 @@ public class StringValue extends AtomicValue {
     public String toShortString() {
         String s = content.toString();
         if (s.length() > 40) {
-            s = s.substring(0,35) + "...";
+            s = s.substring(0,20) + " ... " + s.substring(s.length()-20);
         }
         s = "\"" + s + '\"';
         if (typeLabel == BuiltInAtomicType.UNTYPED_ATOMIC) {
