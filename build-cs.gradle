@@ -635,6 +635,27 @@ task dotnetPublish(
 */
 }
 
+task dotnetMakeApp(
+  dependsOn: ['dotnetPublish'],
+) {
+  doLast {
+    exec {
+      workingDir "${buildDir}/cs"
+      commandLine dotnetex, 'msbuild', '-t:BundleApp', '-p:Configuration=Release', 'SaxonCS.csproj'
+    }
+  }
+
+  doLast {
+    exec {
+      workingDir "${buildDir}/cs"
+      commandLine 'codesign', '--force', '--options', 'runtime',
+        '--entitlements', "${projectDir}/tools/saxon-cs/entitlements.plist",
+        '--deep', '--sign', 'Developer ID Application: Saxonica Limited',
+        '--timestamp', "bin/Release/net6.0/${csrid}/publish/SaxonCS.app"
+    }
+  }
+}
+
 task dotnetPublishZip(
   dependsOn: ['dotnetPublish'],
   type: Zip
