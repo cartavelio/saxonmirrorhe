@@ -18,10 +18,12 @@ namespace SaxonCS3.Saxon.Cmd {
                     net.sf.saxon.Query.main(tail);
                 } else if (subCommand == "transform") {
                     net.sf.saxon.Transform.main(tail);
+                } else if (subCommand == "validate") {
+                    com.saxonica.Validate.main(tail);
                 } else if (subCommand == "version") {
                     net.sf.saxon.Version.main(tail);
                 } else if (subCommand == "help") {
-                    Console.Error.WriteLine("saxon (query|transform|version) -?");
+                    Console.Error.WriteLine("saxon (query|transform|validate|version) -?");
                 // } else if (subCommand == "verify") {
                 //     Verifier.main(args);
                 }

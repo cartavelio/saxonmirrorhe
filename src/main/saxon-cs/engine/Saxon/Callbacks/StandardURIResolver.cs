@@ -118,7 +118,8 @@ namespace Saxon.Callbacks {
                         }
                         else {
                             if ((obj == null)) {
-                                return null;
+                                throw new net.sf.saxon.trans.XPathException( "XmlResolver returned null");
+
                             }
                             else {
                                 throw new net.sf.saxon.trans.XPathException(
@@ -129,7 +130,7 @@ namespace Saxon.Callbacks {
                 }
             }
             catch (net.sf.saxon.trans.XPathException e) {
-                throw e;
+                throw;
             }
             catch (System.Exception e) {
                 throw new net.sf.saxon.trans.XPathException(e.Message, e);

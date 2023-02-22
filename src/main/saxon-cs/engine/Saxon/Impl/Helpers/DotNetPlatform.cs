@@ -319,7 +319,7 @@ namespace Saxon.Impl.Helpers {
             //     Console.WriteLine("Resource: " + name);
             // }
             // TODO: project name hard-coded here, but will change?
-            return ass.GetManifestResourceStream(@"SaxonCS3.resources.net.sf.saxon.data." + filename);
+            return ass.GetManifestResourceStream(@"SaxonCS3.resources.net.sf.saxon.data." + filename.Replace('/', '.'));
         }
 
         public ActiveSource resolveSource(Source source, Configuration config) {
