@@ -51,8 +51,8 @@ $pass = 0;
 $fail = 0;
 $error =0;
 $notrun = 0;
-$run_test = "result-document";
-$run_test_case = "result-document-0206";
+$run_test = null;//"result-document";
+$run_test_case = null;//"result-document-0206";
 $run_assertion = null; //"serialization-matches";
 $total_tests = 0;
 
@@ -388,7 +388,16 @@ function test_case($test_set)
             }
             return;
         }
-        $test_set_name = $xml->getChildNode(0)->getAttributeValue("name");
+
+        $child0 = $xml->getChildNode(0);
+        if($child0 == null) {
+                echo "Cannot find child node of test " . $test_set . "\n";
+                if ($proc->exceptionOccurred() && $proc->getErrorMessage() != null) {
+                        echo " error: " . $proc->getErrorMessage();
+                }
+               return;
+        }
+        $test_set_name = $child0->getAttributeValue("name");
         if($run_test != null && $test_set_name != $run_test) {
             return;
         }
@@ -595,7 +604,7 @@ function collapseWhitespace(string $in) {
 
 
 
-    function testAssertion($baseUri, $assert, $result, $errorCode) {
+    function testAssertion($baseUri, $assert, $result, $resultDocMap, $errorCode) {
     //global $xpathProcForAssertions;
 
     global $proc;
@@ -824,8 +833,16 @@ function collapseWhitespace(string $in) {
             error_log("**** Invalid output uri ". $uri );
             return false;
         }
-        $resultDoc = $proc->parseXmlFromFile($uri);
-        $ok = testAssertion($baseUri, $subAssertion, $resultDoc, $errorCode);
+        $resultDoc = $resultDocMap->get($uri); //$proc->parseXmlFromFile($uri);
+        if($resultDoc == null) {
+            error_log("**** Could not find document ". $uri );
+            error_log("**** Keys= ". $resultDocMap->keys() );
+                    return false;
+
+        } else {
+            error_log("**** Result document: ". $resultDoc);
+        }
+        $ok = testAssertion($baseUri, $subAssertion, $resultDoc, $resultDocMap, $errorCode);
 
         if(!$ok) {
           error_log("**** Assertion failed for result-document " . $uri);
@@ -968,7 +985,7 @@ function collapseWhitespace(string $in) {
         //$jNode = $jasserts->itemAt(0)->getNodeValue();
         $jSize = $jasserts->size();
         for ($j = 0; $j < $jSize; $j++) {
-            if (!testAssertion($baseUri, $jasserts->itemAt($j)->getNodeValue(), $result, $errorCode)) {
+            if (!testAssertion($baseUri, $jasserts->itemAt($j)->getNodeValue(), $result, $resultDocMap, $errorCode)) {
                 return false;
 
             }
@@ -982,7 +999,7 @@ function collapseWhitespace(string $in) {
             //$jNode = $jasserts->itemAt(0)->getNodeValue();
             $jSize = $jasserts->size();
             for ($j = 0; $j < $jSize; $j++) {
-                if (testAssertion($baseUri, $jasserts->itemAt($j)->getNodeValue(), $result, $errorCode)) {
+                if (testAssertion($baseUri, $jasserts->itemAt($j)->getNodeValue(), $result, $resultDocMap, $errorCode)) {
                     return true;
 
                 }
@@ -1050,6 +1067,7 @@ function run_test_case($testcase, $env, $path)
     $errorCode  = null;
     $foundStylesheet = false;
     $xsltproc->clearParameters();
+    $reultDocMap = null;
     
     $errorTest = FALSE;
     $t_env = getNodeFromXPath($testcase, "./environment");
@@ -1082,7 +1100,7 @@ function run_test_case($testcase, $env, $path)
 
             $asserts = getNodeFromXPath($testcase, "./result/child::*");
 
-            $assertsSerial = effectiveBoolean($asserts, "exists(//descendant-or-self::*[assert-serialization or assert-serialization-error or serialization-matches])");
+            $assertsSerial = effectiveBooleanValue($asserts, "exists(//descendant-or-self::*[assert-serialization or assert-serialization-error or serialization-matches])");
 
             //exists(/assert[s or x or p]) or  exists(//assert/child::*/s)
 
@@ -1289,6 +1307,7 @@ function run_test_case($testcase, $env, $path)
                                         }
 
                                         $result = $executable->callTemplateReturningValue($init_name);
+                                        $resultDocMap = $executable->getResultDocuments();
                                     } elseif ($init_mode != null) {
 
                                         $initialModeName = $init_mode->getNodeValue()->getAttributeValue("name");
@@ -1300,7 +1319,7 @@ function run_test_case($testcase, $env, $path)
                                         }
 
                                         $result = $executable->transformToValue();
-
+                                        $resultDocMap = $executable->getResultDocuments();
 
                                     }else {
 
@@ -1313,7 +1332,7 @@ function run_test_case($testcase, $env, $path)
                                             return FAIL;
                                         } */
                                         $result = $executable->applyTemplatesReturningValue();
-
+                                        $resultDocMap = $executable->getResultDocuments();
                                     }
                                 }
 
@@ -1355,7 +1374,7 @@ function run_test_case($testcase, $env, $path)
                                     return "Not Run";
 
                                 }
-                                $outcome = testAssertion($path, $asserts->itemAt(0)->getNodeValue(), $result, $errorCode);
+                                $outcome = testAssertion($path, $asserts->itemAt(0)->getNodeValue(), $result, $resultDocMap, $errorCode);
 
 
                                 if (!$outcome) {
@@ -1448,7 +1467,7 @@ function run_test_case($testcase, $env, $path)
                             return "Not Run";
 
                         }
-                        $outcome = testAssertion($path, $asserts->itemAt(0)->getNodeValue(), $result, $errorCode);
+                        $outcome = testAssertion($path, $asserts->itemAt(0)->getNodeValue(), $result, $resultDocMap, $errorCode);
                         if (!$outcome) {
                             $fail++;
                             return "Fail - error: " . $ex->getMessage();
