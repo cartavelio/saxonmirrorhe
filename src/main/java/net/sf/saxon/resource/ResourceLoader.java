@@ -7,13 +7,18 @@
 
 package net.sf.saxon.resource;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.zip.GZIPInputStream;
+
+import static net.sf.saxon.resource.EncodingDetector.inferStreamEncoding;
 
 /**
  * The class provides a static method for loading resources from a URL.
@@ -94,5 +99,124 @@ public class ResourceLoader {
             inputStream = new GZIPInputStream(inputStream);
         }
         return inputStream;
+    }
+
+    /**
+     * Open a reader to retrieve the content identified by the URI. This handles HTTP
+     * redirects in the same way as {@link #urlStream(URL)}, but then it also wraps
+     * the stream in a Reader, using the logic prescribed for the {@code fn:unparsed-text}
+     * function.
+     *
+     * @param url The URL to retrieve.
+     * @param requestedEncoding The requested encoding. This is used only as a fallback, following
+     *                 the rules of the {@code fn:unparsed-text} specification
+     * @return A Reader for the resource content.
+     * @throws IOException If more than MAX_REDIRECTS are occur or if a loop is detected.
+     */
+    public static Reader urlReader(URL url, String requestedEncoding) throws IOException {
+        URLConnection conn = ResourceLoader.urlConnection(url);
+        InputStream inputStream = conn.getInputStream();
+        String contentEncoding = conn.getContentEncoding();
+        String resourceEncoding = null;
+        if ("gzip".equals(contentEncoding)) {
+            inputStream = new GZIPInputStream(inputStream);
+        }
+        if (!inputStream.markSupported()) {
+            inputStream = new BufferedInputStream(inputStream);
+        }
+        // Get any external (HTTP) requestedEncoding label.
+        boolean isXmlMediaType = false;
+
+        // The file:// URL scheme gives no useful information...
+        if (!"file".equals(url.getProtocol())) {
+
+            // Use the contentType from the HTTP header if available, and parse it
+            String contentType = conn.getContentType();
+            if (contentType != null) {
+                ParsedContentType parsedContentType = new ParsedContentType(contentType);
+
+                isXmlMediaType = parsedContentType.isXmlMediaType;
+                resourceEncoding = parsedContentType.encoding;
+            }
+        }
+
+
+        try {
+            if (requestedEncoding == null) {
+                requestedEncoding = "UTF-8";
+            }
+            if (resourceEncoding == null || isXmlMediaType) {
+                resourceEncoding = inferStreamEncoding(inputStream, requestedEncoding, null);
+            }
+        } catch (IOException e) {
+            resourceEncoding = "UTF-8";
+        }
+
+        assert resourceEncoding != null;
+
+        return getReaderFromStream(inputStream, resourceEncoding);
+
+    }
+
+    /**
+     * Get a reader corresponding to a binary input stream and an encoding. The mapping is such that
+     * any encoding errors that are detected lead to a fatal error, rather than being repaired or ignored
+     * @param inputStream the input stream. Non-null.
+     * @param resourceEncoding the encoding. Non-null
+     * @return a corresponding reader.
+     */
+
+    public static BufferedReader getReaderFromStream(InputStream inputStream, String resourceEncoding) {
+        Objects.requireNonNull(inputStream);
+        Objects.requireNonNull(resourceEncoding);
+        Charset charset2 = Charset.forName(resourceEncoding);
+        // ensure that encoding errors are not recovered
+        CharsetDecoder decoder = charset2.newDecoder()
+                .onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT);
+        return new BufferedReader(new InputStreamReader(inputStream, decoder));
+    }
+
+
+    public static class ParsedContentType {
+
+        public boolean isXmlMediaType;
+        public String encoding;
+
+        public ParsedContentType(String contentType) {
+            String mediaType;
+            int pos = contentType.indexOf(';');
+            if (pos >= 0) {
+                mediaType = contentType.substring(0, pos);
+            } else {
+                mediaType = contentType;
+            }
+            mediaType = mediaType.trim();
+            isXmlMediaType = (mediaType.startsWith("application/") || mediaType.startsWith("text/")) &&
+                    (mediaType.endsWith("/xml") || mediaType.endsWith("+xml"));
+
+            String charset = "";
+            pos = contentType.toLowerCase().indexOf("charset");
+            if (pos >= 0) {
+                pos = contentType.indexOf('=', pos + 7);
+                if (pos >= 0) {
+                    charset = contentType.substring(pos + 1);
+                }
+                if ((pos = charset.indexOf(';')) > 0) {
+                    charset = charset.substring(0, pos);
+                }
+
+                // attributes can have comment fields (RFC 822)
+                if ((pos = charset.indexOf('(')) > 0) {
+                    charset = charset.substring(0, pos);
+                }
+                // ... and values may be quoted
+                if ((pos = charset.indexOf('"')) > 0) {
+                    charset = charset.substring(pos + 1,
+                                                charset.indexOf('"', pos + 2));
+                }
+                encoding = charset.trim();
+            }
+        }
     }
 }

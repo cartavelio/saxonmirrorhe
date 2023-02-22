@@ -487,7 +487,7 @@ public class StandardErrorReporter
                         StringWriter sw = new StringWriter();
                         appendStackTrace(e, sw);
                         sb.append('\n').append(sw);
-                    } else {
+                    } else if (!message.contains(e.getMessage())) {
                         sb.append(". Caused by ").append(e.getClass().getName());
                     }
                 } 
