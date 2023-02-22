@@ -8,6 +8,10 @@
 package net.sf.saxon.option.cpp;
 
 import net.sf.saxon.s9api.*;
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CTypeConversion;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,6 +34,13 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
 
     public SaxonCResultDocumentHandler(boolean r) {
         rawResultsFlag = r;
+    }
+
+    @CEntryPoint(name = "createSaxonCResultDocumentHandler")
+    public static long createSaxonCResultDocumentHandler(IsolateThread thread, int flagInt) {
+        SaxonCResultDocumentHandler resultDocumentHandler = new SaxonCResultDocumentHandler(CTypeConversion.toBoolean(flagInt));
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(resultDocumentHandler);
+        return handle.rawValue();
     }
 
 

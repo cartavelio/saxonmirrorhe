@@ -37,6 +37,20 @@ public class XdmUtils {
 
     }
 
+    private enum XdmType {
+        XDM_VALUE(0), XDM_ATOMIC_VALUE(1), XDM_NODE(2),  XDM_ARRAY_VALUE(3), XDM_MAP_VALUE(4), XDM_FUNCTION_ITEM(5);
+
+        private final int value;
+
+        XdmType(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
+
     public static QName getTypeName(String typeStr) {
 
         int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
@@ -531,6 +545,23 @@ public class XdmUtils {
        // return children.toArray(new XdmNode[0]);
         CLongPointer addr = SaxonCAPI.longArrayToNative(alloc, childRefs);
         return addr;
+    }
+
+    @CEntryPoint(name = "j_getXdmObjectType")
+    public  static int getXdmObjectType(IsolateThread thread, ObjectHandle valueRef){
+        Object value = SaxonCAPI.objectHandles.get(valueRef);
+        if(value instanceof XdmAtomicValue) {
+            return XdmType.XDM_ATOMIC_VALUE.value;
+        } else if (value instanceof XdmNode) {
+            return XdmType.XDM_NODE.value;
+        } else if(value instanceof XdmMap) {
+            return XdmType.XDM_MAP_VALUE.value;
+        } else if(value instanceof XdmArray) {
+          return XdmType.XDM_ARRAY_VALUE.value;
+        } else if (value instanceof  XdmFunctionItem) {
+          return XdmType.XDM_FUNCTION_ITEM.value;
+        }
+        return XdmType.XDM_VALUE.value;
     }
 
 
