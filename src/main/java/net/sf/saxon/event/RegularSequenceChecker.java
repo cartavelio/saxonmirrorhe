@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Stack;
 
 /**
- * A <tt>RegularSequenceChecker</tt> is a filter that can be inserted into a Receiver pipeline
+ * A <code>RegularSequenceChecker</code> is a filter that can be inserted into a Receiver pipeline
  * to check that the sequence of events passed in is a <b>regular event sequence</b>. Many
  * (though not all) implementations of {@link Outputter} require the sequence of events to
  * be regular according to this definition.

@@ -31,7 +31,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * The <tt>PIGrabber</tt> class is a {@link ProxyReceiver} that looks for {@code xml-stylesheet} processing
+ * The <code>PIGrabber</code> class is a {@link ProxyReceiver} that looks for {@code xml-stylesheet} processing
  * instructions and tests whether they match specified criteria; for those that do, it creates
  * a {@link Source} object referring to the relevant stylesheet
  */

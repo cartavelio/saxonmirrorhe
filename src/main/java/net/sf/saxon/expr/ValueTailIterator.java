@@ -14,7 +14,7 @@ import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
 /**
- * <tt>ValueTailIterator</tt> iterates over a base sequence starting at an element other than the first.
+ * <code>ValueTailIterator</code> iterates over a base sequence starting at an element other than the first.
  * It is used in the case where the base sequence is "grounded", that is, it exists in memory and
  * supports efficient direct addressing.
  */

@@ -117,10 +117,10 @@ public class XPathExecutable {
 
     /**
      * Get an iterator over the names of all the external variables. This includes both variables that have
-     * been explicitly declared using a call to <tt>declareVariable()</tt>, and variables that are implicitly
-     * declared by reference in the case where the <tt>allowUndeclaredVariables</tt> option is set. It does
-     * not include range variables bound in a <tt>for</tt>, <tt>some</tt>, or <tt>every</tt> expression.
-     * <p>If the <tt>allowUndeclaredVariables</tt> option is set, this method allows discovery of the variable
+     * been explicitly declared using a call to <code>declareVariable()</code>, and variables that are implicitly
+     * declared by reference in the case where the <code>allowUndeclaredVariables</code> option is set. It does
+     * not include range variables bound in a <code>for</code>, <code>some</code>, or <code>every</code> expression.
+     * <p>If the <code>allowUndeclaredVariables</code> option is set, this method allows discovery of the variable
      * references that appear in the compiled expression.</p>
      *
      * @return an iterator over the names of the external variables defined in the XPath expression
@@ -143,7 +143,7 @@ public class XPathExecutable {
      *         <p>If the variable was explicitly declared, this will be the item type that was set when the
      *         variable was declared. If no item type was set, it will be {@link ItemType#ANY_ITEM}.</p>
      *         <p>If the variable was implicitly declared by reference (which can happen only when the
-     *         <tt>allowUndeclaredVariables</tt> option is set), the returned type will be {@link ItemType#ANY_ITEM}.</p>
+     *         <code>allowUndeclaredVariables</code> option is set), the returned type will be {@link ItemType#ANY_ITEM}.</p>
      *         <p>If no variable with the specified QName has been declared either explicitly or implicitly,
      *         the method returns null.</p>
      * @since 9.2
@@ -167,7 +167,7 @@ public class XPathExecutable {
      *         <p>If the variable was explicitly declared, this will be the occurrence indicator that was set when the
      *         variable was declared. If no item type was set, it will be {@link OccurrenceIndicator#ZERO_OR_MORE}.</p>
      *         <p>If the variable was implicitly declared by reference (which can happen only when the
-     *         <tt>allowUndeclaredVariables</tt> option is set), the returned type will be
+     *         <code>allowUndeclaredVariables</code> option is set), the returned type will be
      *         {@link OccurrenceIndicator#ZERO_OR_MORE}.</p>
      *         <p>If no variable with the specified QName has been declared either explicitly or implicitly,
      *         the method returns null.</p>

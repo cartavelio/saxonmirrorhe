@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
 
 
 /**
- * The <tt>ResultDocumentResolver</tt> interface may be implemented by a user application;
+ * The <code>ResultDocumentResolver</code> interface may be implemented by a user application;
  * it is a callback that is called whenever an xsl:result-document instruction
  * is executed.
  * <p>There is a single method: {@link #resolve(XPathContext, String, String, SerializationProperties)}.

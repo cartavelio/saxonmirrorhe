@@ -59,11 +59,11 @@ public class XdmSequenceIterator<T extends XdmItem> implements Iterator<T> {
     }
 
     /**
-     * Returns <tt>true</tt> if the iteration has more elements. (In other
-     * words, returns <tt>true</tt> if <tt>next</tt> would return an element
+     * Returns <code>true</code> if the iteration has more elements. (In other
+     * words, returns <code>true</code> if <code>next</code> would return an element
      * rather than throwing an exception.)
      *
-     * @return <tt>true</tt> if the iterator has more elements.
+     * @return <code>true</code> if the iterator has more elements.
      */
     @Override
     public boolean hasNext() {

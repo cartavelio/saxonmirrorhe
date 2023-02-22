@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The <tt>OnDemandFunctionSet</tt> represents a function library where the implementation classes
+ * The <code>OnDemandFunctionSet</code> represents a function library where the implementation classes
  * are loaded dynamically on demand. The idea is that no failure should occur if implementations
  * are not available unless the functions are actually required. The class contains the name of
  * a real FunctionLibrary containing the function implementations; that FunctionLibrary is dynamically
