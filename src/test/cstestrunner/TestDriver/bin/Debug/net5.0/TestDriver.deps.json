@@ -152,23 +152,23 @@
           }
         }
       },
-      "Singulink.Numerics.BigDecimal/1.0.2": {
+      "Singulink.Numerics.BigDecimal/2.0.0": {
         "dependencies": {
-          "Singulink.Numerics.BigIntegerExtensions": "1.1.0",
+          "Singulink.Numerics.BigIntegerExtensions": "2.0.1",
           "System.Runtime.CompilerServices.Unsafe": "5.0.0"
         },
         "runtime": {
           "lib/netstandard2.1/Singulink.Numerics.BigDecimal.dll": {
-            "assemblyVersion": "1.0.2.0",
-            "fileVersion": "1.0.2.0"
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
           }
         }
       },
-      "Singulink.Numerics.BigIntegerExtensions/1.1.0": {
+      "Singulink.Numerics.BigIntegerExtensions/2.0.1": {
         "runtime": {
-          "lib/netstandard2.0/Singulink.Numerics.BigIntegerExtensions.dll": {
-            "assemblyVersion": "1.1.0.0",
-            "fileVersion": "1.1.0.0"
+          "lib/net5.0/Singulink.Numerics.BigIntegerExtensions.dll": {
+            "assemblyVersion": "2.0.1.0",
+            "fileVersion": "2.0.1.0"
           }
         }
       },
@@ -183,8 +183,8 @@
           "ICU4N.LanguageData": "60.1.0-alpha.354",
           "ICU4N.RegionData": "60.1.0-alpha.354",
           "ICU4N.Transliterator": "60.1.0-alpha.354",
-          "Singulink.Numerics.BigDecimal": "1.0.2",
-          "Singulink.Numerics.BigIntegerExtensions": "1.1.0",
+          "Singulink.Numerics.BigDecimal": "2.0.0",
+          "Singulink.Numerics.BigIntegerExtensions": "2.0.1",
           "System.Collections.Immutable": "5.0.0"
         },
         "runtime": {
@@ -290,19 +290,19 @@
       "path": "microsoft.extensions.primitives/2.0.0",
       "hashPath": "microsoft.extensions.primitives.2.0.0.nupkg.sha512"
     },
-    "Singulink.Numerics.BigDecimal/1.0.2": {
+    "Singulink.Numerics.BigDecimal/2.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ryrW8KiWyIwbixo7zL9IvcyeHqv2LE2qZcl7UhBohHaVvee0Y/mY4YkpbIzHE/g7j110yiaq5q8uFRlyOgG+3Q==",
-      "path": "singulink.numerics.bigdecimal/1.0.2",
-      "hashPath": "singulink.numerics.bigdecimal.1.0.2.nupkg.sha512"
+      "sha512": "sha512-UdvBIp1zlkeb4Ptg8tmkRYPSamikWR3MJtoVlSS6s2yUVt43tUwZ3jCE0+0BB9ESGelCcwq9tWriIa22xjII/w==",
+      "path": "singulink.numerics.bigdecimal/2.0.0",
+      "hashPath": "singulink.numerics.bigdecimal.2.0.0.nupkg.sha512"
     },
-    "Singulink.Numerics.BigIntegerExtensions/1.1.0": {
+    "Singulink.Numerics.BigIntegerExtensions/2.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-Lx6hqyI481nt//LvuGwtwtt+qJ7lTr45lsYFYo1bH6AfrxGkIVsqyqSbphnAuIF0G20SEKb+vyNncsd+q5IVwg==",
-      "path": "singulink.numerics.bigintegerextensions/1.1.0",
-      "hashPath": "singulink.numerics.bigintegerextensions.1.1.0.nupkg.sha512"
+      "sha512": "sha512-cJNZmie8+9ohOowHx7T9axSS6M7N5+tb+Xy+z2qNGesnVShnrfdyRZXmnKi3/7drQcxUcVDYxV84ruFI82pQpA==",
+      "path": "singulink.numerics.bigintegerextensions/2.0.1",
+      "hashPath": "singulink.numerics.bigintegerextensions.2.0.1.nupkg.sha512"
     },
     "System.Collections.Immutable/5.0.0": {
       "type": "package",

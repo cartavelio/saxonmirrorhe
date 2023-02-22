@@ -55,7 +55,7 @@ public class TransformTests {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 // Capture System.out
                 System.setOut(new PrintStream(baos));
-                super.doTransform(args, "transform");
+                super.doTransform(args);
                 // Revert change to System.out
                 System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
                 return baos.toString("utf-8");
