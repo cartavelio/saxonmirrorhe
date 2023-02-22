@@ -27,6 +27,7 @@ import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationParamsHandler;
 import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -208,9 +209,9 @@ public class Serialize extends SystemFunction implements Callable {
                     result = result.addEntry(key, converted.materialize());
                 }
             } else if (key instanceof QNameValue) {
-                if (key.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue().equals("")) {
+                if (key.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue().isEmpty()) {
                     throw new XPathException("A serialization parameter supplied with a QName key must have non-absent namespace", "SEPM0017");
-                } else if (key.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue().equals("http://saxon.sf.net/")) {
+                } else if (key.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue().equals(StringView.of("http://saxon.sf.net/"))) {
                     // Capture Saxon serialization parameters
                     String keyName = ((QNameValue) key).getLocalName();
                     if (isParamNameSaxon(keyName)) {
@@ -267,7 +268,7 @@ public class Serialize extends SystemFunction implements Callable {
                         .append(qNameValue.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue())
                         .append('}')
                         .append(qNameValue.getComponent(AccessorFn.Component.LOCALNAME).getUnicodeStringValue());
-            } else if (allowStar && item instanceof StringItem && item.getUnicodeStringValue().equals("*")) {
+            } else if (allowStar && item instanceof StringItem && item.getStringValue().equals("*")) {
                 stringVal.append(" *");
             } else {
                 throw new XPathException("Invalid serialization parameter value: expected sequence of QNames "
@@ -340,7 +341,7 @@ public class Serialize extends SystemFunction implements Callable {
         AtomicValue charKey;
         IntHashMap<String> intHashMap = new IntHashMap<>();
         while ((charKey = iterator.next()) != null) {
-            UnicodeString ch = ((StringItem)charKey).getUnicodeStringValue();
+            UnicodeString ch = charKey.getUnicodeStringValue();
             String str = charMap.get(charKey).head().getStringValue();
             if (ch.length() != 1) {
                 throw new XPathException("In the serialization parameter for the character map, each character to be mapped " +

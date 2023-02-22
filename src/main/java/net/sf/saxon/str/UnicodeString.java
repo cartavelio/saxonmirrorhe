@@ -16,10 +16,6 @@ import java.util.function.IntPredicate;
  */
 public abstract class UnicodeString extends CodePoints implements AtomicMatchKey {
 
-    public static final UnicodeString SINGLE_SPACE = BMPString.of(" ");
-    public static final UnicodeString TRUE = BMPString.of("true");
-    public static final UnicodeString FALSE = BMPString.of("false");
-
     /**
      * Ensure that the implementation is capable of counting codepoints in the string. For an
      * implementation of {@code UnicodeString}, this is normally a null operation.
@@ -29,7 +25,7 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
     @Override
     public UnicodeString tidy() {
         return this;
-    };
+    }
 
     /**
      * Get the length of the string
@@ -207,8 +203,9 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
      */
 
     public UnicodeString concat(UnicodeString other) {
-        UnicodeBuilder ub = new UnicodeBuilder();
-        return ub.append(this).append(other).toUnicodeString();
+        return Rope.makeRope(this, other);
+//        UnicodeBuilder ub = new UnicodeBuilder();
+//        return ub.append(this).append(other).toUnicodeString();
     }
 
     @Override

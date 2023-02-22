@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.StringItem;
 
@@ -38,13 +39,13 @@ public class StringLiteral extends Literal {
     }
 
     /**
-     * Create a StringLiteral that wraps any CharSequence (including, of course, a String)
+     * Create a StringLiteral that wraps a String
      *
-     * @param value the CharSequence to be wrapped
+     * @param value the String to be wrapped
      */
 
     public StringLiteral(String value) {
-        this(new StringItem(value));
+        this(new StringItem(StringTool.fromCharSequence(value)));
     }
 
     /**
@@ -64,7 +65,7 @@ public class StringLiteral extends Literal {
      */
 
     public UnicodeString getString() {
-        return ((StringItem) getGroundedValue()).getUnicodeStringValue();
+        return getGroundedValue().getUnicodeStringValue();
     }
 
     /**
@@ -74,7 +75,7 @@ public class StringLiteral extends Literal {
      */
 
     public String stringify() {
-        return ((StringItem) getGroundedValue()).getStringValue();
+        return getGroundedValue().getStringValue();
     }
 
     /*@NotNull*/

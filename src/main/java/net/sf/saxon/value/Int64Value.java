@@ -10,7 +10,7 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.Calculator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
@@ -416,10 +416,113 @@ public final class Int64Value extends IntegerValue {
 
     @Override
     public UnicodeString getPrimitiveStringValue() {
-        return BMPString.of(Long.toString(value));
+        // Copied from Long.toString(), but generating single-byte characters
+        if (value == Long.MIN_VALUE) {
+            return new Twine8(new byte[]{'-','9','2','2','3','3','7','2','0','3','6','8','5','4','7','7','5','8','0','8'});
+        }
+        int size = (value < 0) ? stringSize(-value) + 1 : stringSize(value);
+        byte[] buf = new byte[size];
+        getDigits(value, size, buf);
+        return new Twine8(buf);
+        //return BMPString.of(Long.toString(value));
     }
 
-    /**
+    private static void getDigits(long i, int index, byte[] buf) {
+        // Derived from Long.getChars()
+        long q;
+        int r;
+        int charPos = index;
+        byte sign = 0;
+
+        if (i < 0) {
+            sign = '-';
+            i = -i;
+        }
+
+        // Get 2 digits/iteration using longs until quotient fits into an int
+        while (i > Integer.MAX_VALUE) {
+            q = i / 100;
+            // really: r = i - (q * 100);
+            r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
+            i = q;
+            buf[--charPos] = DigitOnes[r];
+            buf[--charPos] = DigitTens[r];
+        }
+
+        // Get 2 digits/iteration using ints
+        int q2;
+        int i2 = (int) i;
+        while (i2 >= 65536) {
+            q2 = i2 / 100;
+            // really: r = i2 - (q * 100);
+            r = i2 - ((q2 << 6) + (q2 << 5) + (q2 << 2));
+            i2 = q2;
+            buf[--charPos] = DigitOnes[r];
+            buf[--charPos] = DigitTens[r];
+        }
+
+        // Fall thru to fast mode for smaller numbers
+        // assert(i2 <= 65536, i2);
+        do {
+            q2 = (i2 * 52429) >>> (16 + 3);
+            r = i2 - ((q2 << 3) + (q2 << 1));  // r = i2-(q2*10) ...
+            buf[--charPos] = digits[r];
+            i2 = q2;
+        } while (i2 != 0);
+
+        if (sign != 0) {
+            buf[--charPos] = sign;
+        }
+    }
+
+    private final static byte[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+
+    private final static byte[] DigitTens = {
+            '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+            '1', '1', '1', '1', '1', '1', '1', '1', '1', '1',
+            '2', '2', '2', '2', '2', '2', '2', '2', '2', '2',
+            '3', '3', '3', '3', '3', '3', '3', '3', '3', '3',
+            '4', '4', '4', '4', '4', '4', '4', '4', '4', '4',
+            '5', '5', '5', '5', '5', '5', '5', '5', '5', '5',
+            '6', '6', '6', '6', '6', '6', '6', '6', '6', '6',
+            '7', '7', '7', '7', '7', '7', '7', '7', '7', '7',
+            '8', '8', '8', '8', '8', '8', '8', '8', '8', '8',
+            '9', '9', '9', '9', '9', '9', '9', '9', '9', '9',
+    };
+
+    private final static byte[] DigitOnes = {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    };
+
+
+    // Requires positive x
+    private static int stringSize(long x) {
+        for (int w=0; w<18; w++) {
+            if (x < powersOfTen[w]) {
+                return w+1;
+            }
+        }
+        return 19;
+    }
+    
+    private static final long[] powersOfTen = new long[] {
+                10L, 100L, 1000L, 
+                10000L, 100000L, 1_000_000L, 
+                10_000_000L, 100_000_000L, 1_000_000_000L, 
+                10_000_000_000L, 100_000_000_000L, 1_000_000_000_000L, 
+                10_000_000_000_000L, 100_000_000_000_000L, 1_000_000_000_000_000L,
+                10_000_000_000_000_000L, 100_000_000_000_000_000L, 1_000_000_000_000_000_000L};
+
+/**
      * Get the numeric value as a double
      *
      * @return A double representing this numeric value; NaN if it cannot be
