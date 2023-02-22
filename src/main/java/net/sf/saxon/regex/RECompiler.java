@@ -34,7 +34,6 @@ import net.sf.saxon.regex.charclass.*;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.*;
 
@@ -867,7 +866,7 @@ public class RECompiler {
                         break;
                     }
                     // else fall through ($ is not a metacharacter in XSD)
-                    CSharp.emitCode("goto default");
+                    //C#//goto default;
 
                 default:
 
@@ -1025,7 +1024,7 @@ public class RECompiler {
                 idx++;
 
                 // Drop through
-                CSharp.emitCode("goto case '{';");
+                //C#//goto case '{';
                 
             case '{':
 
