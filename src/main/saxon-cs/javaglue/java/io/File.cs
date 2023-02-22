@@ -7,7 +7,7 @@ using SysIO = System.IO;
 using SysIOFile = System.IO.File;
 using SysIODirectory = System.IO.Directory;
 using SysIOPath = System.IO.Path;
-using System = java.lang.System;
+using JLSystem = java.lang.System;
 
 namespace java.io {
     public class File {
@@ -92,8 +92,19 @@ namespace java.io {
             return false;
         }
 
+        /**
+         * @return A long value representing the time the file was last modified, measured in milliseconds since the epoch (00:00:00 GMT, January 1, 1970),
+         * or 0L if the file does not exist or if an I/O error occurs
+         */
         public long lastModified() {
-            return new SysIO.FileInfo(fileName).LastWriteTime.ToFileTimeUtc();
+            if (!exists()) {
+                return 0L;
+            }
+
+            DateTime dt = new SysIO.FileInfo(fileName).LastWriteTime;
+            DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            TimeSpan diff = dt.ToUniversalTime() - origin;
+            return (long) diff.TotalMilliseconds;
         }
 
         public long length() {
@@ -113,7 +124,7 @@ namespace java.io {
         }
         
         public bool isFile() {
-            return !isDirectory();
+            return exists() && !isDirectory();
         }
         
         public bool isAbsolute() {
@@ -130,8 +141,15 @@ namespace java.io {
 
         public bool delete() {
             try {
-                SysIOFile.SetAttributes(fullPath, SysIO.FileAttributes.Normal);
-                SysIOFile.Delete(fullPath);
+                if (isDirectory()) {
+                    SysIODirectory.Delete(fullPath);
+                }
+                else {
+                    SysIOFile.SetAttributes(fullPath, SysIO.FileAttributes.Normal);
+                    SysIOFile.Delete(fullPath);
+                }
+                
+
                 return true;
             }
             catch (Exception) {
@@ -158,15 +176,33 @@ namespace java.io {
         }
 
         public static File createTempFile(string prefix, string suffix) {
-            throw new NotImplementedException();
+            return createTempFile(prefix, suffix, null);
         }
         
         public static File createTempFile(string prefix, string suffix, File dir) {
-            throw new NotImplementedException();
+            if (suffix == null) {
+                suffix = ".tmp";
+            }
+
+            if (dir == null) {
+                dir = new File(JLSystem.getProperty("java.io.tmpdir"));
+            }
+
+            String mid = "_" + new Random().Next();
+            File file = new File(dir, prefix + mid + suffix);
+            file.createNewFile();
+            return file;
         }
 
         public bool renameTo(File file) {
-            return false;
+            if (file.isDirectory()) {
+                SysIO.Directory.Move(fullPath, file.fullPath);
+            }
+            else {
+                SysIO.File.Move(fullPath, file.fullPath);
+            }
+
+            return true;
         }
 
         public string[] list() {
@@ -217,9 +253,10 @@ namespace java.io {
             return new(fileName, SysIO.FileMode.Append, SysIO.FileAccess.Write);
         }
 
-        public SysIO.TextReader getInputStreamReader(string encoding) {
+        public SysIO.TextReader getInputStreamReader(string encodingName) {
             SysIO.Stream stream = SysIO.File.OpenRead(fileName);
-            return new SysIO.StreamReader(stream, Encoding.GetEncoding(encoding));
+            Encoding encoding = Encoding.GetEncoding(encodingName, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+            return new SysIO.StreamReader(stream, encoding);
         }
 
         public java.io.File toPath() {

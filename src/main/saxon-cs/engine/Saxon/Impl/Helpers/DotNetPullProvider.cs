@@ -1,7 +1,10 @@
 using System;
+using System.Threading;
 using SysCollGen = System.Collections.Generic;
 using System.Xml;
 using System.Xml.Schema;
+using System.Xml.XPath;
+using net.sf.saxon.str;
 
 namespace System.Impl.Helpers {
     public class DotNetPullProvider : net.sf.saxon.pull.PullProvider, net.sf.saxon.s9api.Location {
@@ -95,7 +98,12 @@ namespace System.Impl.Helpers {
             }
         }
         public net.sf.saxon.str.CodePoints getStringValue() {
-            return net.sf.saxon.str.StringView.of(parser.Value);
+            try {
+                return StringView.of(parser.Value);
+            }
+            catch (System.Xml.XmlException e) {
+                throw new net.sf.saxon.trans.XPathException(e); // TODO: similar exception code throughout
+            }
         }
         public net.sf.saxon.type.SchemaType getSchemaType() {
             return net.sf.saxon.type.Untyped.getInstance();

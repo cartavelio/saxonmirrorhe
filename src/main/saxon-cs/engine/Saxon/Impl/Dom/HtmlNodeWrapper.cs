@@ -150,11 +150,11 @@ namespace Saxon.Impl.Dom {
 
         protected internal override AxisIterator iterateAttributes(net.sf.saxon.pattern.NodeTest nodeTest) {
             List<NodeInfo> attList = new List<NodeInfo>();
-            int index = 0;
+            int indexPosition = 0;
             foreach (HtmlAttribute att in node.Attributes) {
-                HtmlAttributeWrapper wrapper = HtmlAttributeWrapper.makeWrapper(att, this, index++);
+                HtmlAttributeWrapper wrapper = HtmlAttributeWrapper.makeWrapper(att, this, indexPosition++);
                 if (nodeTest.test(wrapper)) {
-                    attList.Add(HtmlAttributeWrapper.makeWrapper(att, this, index++));
+                    attList.Add(HtmlAttributeWrapper.makeWrapper(att, this, indexPosition++));
                 }
             }
             return new NodeListIterator(attList);
@@ -165,9 +165,9 @@ namespace Saxon.Impl.Dom {
                 return EmptyIterator.ofNodes();
             }
             List<NodeInfo> childList = new List<NodeInfo>();
-            int index = 0;
+            int indexPosition = 0;
             foreach (HtmlNode child in node.ChildNodes) {
-                HtmlNodeWrapper wrapper = makeWrapper(child, docWrapper, this, index++);
+                HtmlNodeWrapper wrapper = makeWrapper(child, docWrapper, this, indexPosition++);
                 if (nodeTest.test(wrapper)) {
                     childList.Add(wrapper);
                 }
@@ -207,7 +207,7 @@ namespace Saxon.Impl.Dom {
             Navigator.appendSequentialKey(this, buffer, true);
         }
 
-        public void copy(net.sf.saxon.@event.Receiver @out, int copyOptions, net.sf.saxon.s9api.Location locationId) {
+        public override void copy(net.sf.saxon.@event.Receiver @out, int copyOptions, net.sf.saxon.s9api.Location locationId) {
             net.sf.saxon.@event.Receiver r = new net.sf.saxon.@event.NamespaceReducer(@out);
             Navigator.copy(this, r, copyOptions, locationId);
         }

@@ -61,7 +61,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public string getPlatformVersion() {
-            return ".NET " + Environment.Version.ToString() + " on " + Environment.OSVersion.ToString();
+            return ".NET " + Environment.Version + " on " + Environment.OSVersion;
         }
 
         public string getPlatformSuffix() {
@@ -101,22 +101,37 @@ namespace Saxon.Impl.Helpers {
 
         private javax.xml.transform.Source getParserSourceInternal(net.sf.saxon.@event.PipelineConfiguration pipe,
             javax.xml.transform.stream.StreamSource input, int validation, bool dtdValidation, int depth) {
-            if (depth > 2) return input;
-            var config = pipe.getConfiguration();
-            var @is = input.getInputStream();
-            if (@is != null) {
-                XmlReader parser = new XmlTextReader(input.getSystemId(), @is);
+            if (depth > 2) {
+                return input;
+            }
+
+            XmlReaderSettings settings = new() {
+                ConformanceLevel = ConformanceLevel.Document, 
+                DtdProcessing = DtdProcessing.Parse
+            };
+            if (pipe.getURIResolver() is StandardURIResolver) {
+                settings.XmlResolver = ((StandardURIResolver) pipe.getURIResolver()).getXmlResolver();
+            }
+            settings.ValidationType = dtdValidation ? ValidationType.DTD : ValidationType.None;
+
+            Stream inputStream = input.getInputStream();
+            if (inputStream != null) {
+                
+
+                XmlReader parser = XmlReader.Create(inputStream, settings);
+                
+                //XmlReader parser = new XmlTextReader(input.getSystemId(), inputStream);
                 ((XmlTextReader) parser).EntityHandling = EntityHandling.ExpandEntities;
                 ((XmlTextReader) parser).WhitespaceHandling = WhitespaceHandling.All;
                 ((XmlTextReader) parser).Normalization = true;
-                if (pipe.getURIResolver() is StandardURIResolver)
-                    ((XmlTextReader) parser).XmlResolver =
-                        ((StandardURIResolver) pipe.getURIResolver()).getXmlResolver();
-                parser = new XmlValidatingReader(parser);
-                if (dtdValidation)
-                    ((XmlValidatingReader) parser).ValidationType = ValidationType.DTD;
-                else
-                    ((XmlValidatingReader) parser).ValidationType = ValidationType.None;
+                // if (pipe.getURIResolver() is StandardURIResolver)
+                //     ((XmlTextReader) parser).XmlResolver =
+                //         ((StandardURIResolver) pipe.getURIResolver()).getXmlResolver();
+                // parser = new XmlValidatingReader(parser);
+                // if (dtdValidation)
+                //     ((XmlValidatingReader) parser).ValidationType = ValidationType.DTD;
+                // else
+                //     ((XmlValidatingReader) parser).ValidationType = ValidationType.None;
                 net.sf.saxon.pull.PullProvider provider = new DotNetPullProvider(parser);
                 var ps = new net.sf.saxon.pull.PullSource(provider);
                 ps.setSystemId(input.getSystemId());
@@ -129,22 +144,24 @@ namespace Saxon.Impl.Helpers {
                 }
             }
 
-            var reader = input.getReader();
+            TextReader reader = input.getReader();
             if (reader != null) {
-                XmlReader parser = new XmlTextReader(input.getSystemId(), reader);
+                XmlReader parser = XmlReader.Create(reader, settings);
+                
+                //XmlReader parser = new XmlTextReader(input.getSystemId(), reader);
                 ((XmlTextReader) parser).EntityHandling = EntityHandling.ExpandEntities;
                 ((XmlTextReader) parser).WhitespaceHandling = WhitespaceHandling.All;
                 ((XmlTextReader) parser).Normalization = true;
-                if (pipe.getURIResolver() is StandardURIResolver)
-                    ((XmlTextReader) parser).XmlResolver =
-                        ((StandardURIResolver) pipe.getURIResolver()).getXmlResolver();
-                parser = new XmlValidatingReader(parser);
-                if (dtdValidation)
-                    ((XmlValidatingReader) parser).ValidationType = ValidationType.DTD;
-                else
-                    ((XmlValidatingReader) parser).ValidationType = ValidationType.None;
+                // if (pipe.getURIResolver() is StandardURIResolver)
+                //     ((XmlTextReader) parser).XmlResolver =
+                //         ((StandardURIResolver) pipe.getURIResolver()).getXmlResolver();
+                // parser = new XmlValidatingReader(parser);
+                // if (dtdValidation)
+                //     ((XmlValidatingReader) parser).ValidationType = ValidationType.DTD;
+                // else
+                //     ((XmlValidatingReader) parser).ValidationType = ValidationType.None;
                 net.sf.saxon.pull.PullProvider provider = new DotNetPullProvider(parser);
-                var ps = new net.sf.saxon.pull.PullSource(provider);
+                PullSource ps = new (provider);
                 ps.setSystemId(input.getSystemId());
                 if (validation == net.sf.saxon.lib.Validation.DEFAULT) {
                     return ps;
@@ -163,21 +180,21 @@ namespace Saxon.Impl.Helpers {
                         return input;
                     }
                     else {
-                        if (r is net.sf.saxon.lib.AugmentedSource) {
-                            var r2 = ((net.sf.saxon.lib.AugmentedSource) r).getContainedSource();
-                            if (r2 is javax.xml.transform.stream.StreamSource) {
-                                r2 = getParserSourceInternal(pipe, (javax.xml.transform.stream.StreamSource) r2,
+                        if (r is net.sf.saxon.lib.AugmentedSource augmentedSource) {
+                            Source r2 = augmentedSource.getContainedSource();
+                            if (r2 is javax.xml.transform.stream.StreamSource streamSource) {
+                                r2 = getParserSourceInternal(pipe, streamSource,
                                     validation, dtdValidation, depth + 1);
                                 return r2;
                             } else {
                                 return r2;
                             }
                         } else {
-                            if (r is javax.xml.transform.stream.StreamSource) {
-                                if (isSame(r, input)) return input;
-                                var r2 = getParserSourceInternal(pipe, (javax.xml.transform.stream.StreamSource) r,
+                            if (r is javax.xml.transform.stream.StreamSource streamSource) {
+                                if (isSame(streamSource, input)) return input;
+                                Source r2 = getParserSourceInternal(pipe, streamSource,
                                     validation, dtdValidation, depth + 1);
-                                var @as = net.sf.saxon.lib.AugmentedSource.makeAugmentedSource(r2);
+                                AugmentedSource @as = net.sf.saxon.lib.AugmentedSource.makeAugmentedSource(r2);
                                 @as.setPleaseCloseAfterUse(true);
                                 return @as;
                             }
@@ -187,7 +204,7 @@ namespace Saxon.Impl.Helpers {
                         }
                     }
                 }
-                catch (javax.xml.transform.TransformerException err) {
+                catch (javax.xml.transform.TransformerException) {
                     return input;
                 }
 
@@ -425,13 +442,13 @@ namespace Saxon.Impl.Helpers {
         public TracingXmlResolver(Uri baseURI) {
             this.baseUri = baseURI;
         }
-        public override object GetEntity(Uri absoluteUri, string role, Type? ofObjectToReturn) {
-            Console.Error.WriteLine("GetEntity " + absoluteUri);
+        public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn) {
+            //Console.Error.WriteLine("GetEntity " + absoluteUri);
             return base.GetEntity(absoluteUri, role, ofObjectToReturn);
         }
 
         public override Uri ResolveUri(Uri baseUri, string relativeUri) {
-            Console.Error.WriteLine("Resolve " + baseUri + " .. " + relativeUri);
+            //Console.Error.WriteLine("Resolve " + baseUri + " .. " + relativeUri);
             if (relativeUri.StartsWith("-//")) {
                 // Looks like a Public ID: this isn't documented, but the parser calls us with a public ID!
                 return null;

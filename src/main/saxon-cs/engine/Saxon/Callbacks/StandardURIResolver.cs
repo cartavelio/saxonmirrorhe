@@ -2,9 +2,13 @@ using System;
 using System.Xml;
 using System.IO;
 using System.Net.Http;
+using System.Xml.XPath;
+using java.lang;
+using javax.xml.transform.sax;
 using javax.xml.transform.stream;
 using net.sf.saxon;
 using net.sf.saxon.lib;
+using net.sf.saxon.resource;
 
 namespace Saxon.Callbacks {
     public class StandardURIResolver : net.sf.saxon.lib.RelativeURIResolver {
@@ -98,30 +102,55 @@ namespace Saxon.Callbacks {
                 }
 
                 Uri abs = new Uri(uri);
-                System.Object obj = resolver.GetEntity(abs, null, Type.GetType("System.IO.Stream"));
-                if ((obj is Stream stream)) {
-                    javax.xml.transform.stream.StreamSource source = new(stream);
-                    source.setSystemId(abs.ToString());
-                    net.sf.saxon.lib.AugmentedSource @as = net.sf.saxon.lib.AugmentedSource.makeAugmentedSource(source);
-                    @as.setPleaseCloseAfterUse(true);
-                    return @as;
-                }
-                else if ((obj is TextReader reader)) {
-                    javax.xml.transform.stream.StreamSource source = new(reader);
-                    source.setSystemId(abs.ToString());
-                    return source;
-                }
-                else if ((obj is javax.xml.transform.Source)) {
-                    return ((javax.xml.transform.Source) obj);
-                }
-                else if ((obj == null)) {
-                    throw new net.sf.saxon.trans.XPathException("XmlResolver returned null");
+
+                // Handle a URI using the data: URI scheme
+                if (abs.Scheme == "data") {
+                    Resource resource;
+                    try {
+                        resource = DataURIScheme.decode(abs);
+                    }
+                    catch (IllegalArgumentException e) {
+                        throw new XPathException("Invalid URI using 'data' scheme: " + e.getMessage());
+                    }
+
+                    if (resource is BinaryResource binaryResource) {
+                        byte[] contents = binaryResource.getData();
+                        return new StreamSource(new MemoryStream(contents), abs.OriginalString);
+                    }
+                    else {
+                        //resource is UnparsedTextResource;
+                        TextReader reader = new StringReader(((UnparsedTextResource) resource).getContent());
+                        return new StreamSource(reader, abs.OriginalString);
+                    }
                 }
                 else {
-                    throw new net.sf.saxon.trans.XPathException(
-                        ("Unrecognized object returned by XmlResolver (type " + obj.GetType().Name));
+
+                    System.Object obj = resolver.GetEntity(abs, null, Type.GetType("System.IO.Stream"));
+                    if ((obj is Stream stream)) {
+                        javax.xml.transform.stream.StreamSource source = new(stream);
+                        source.setSystemId(abs.ToString());
+                        net.sf.saxon.lib.AugmentedSource @as =
+                            net.sf.saxon.lib.AugmentedSource.makeAugmentedSource(source);
+                        @as.setPleaseCloseAfterUse(true);
+                        return @as;
+                    }
+                    else if ((obj is TextReader reader)) {
+                        javax.xml.transform.stream.StreamSource source = new(reader);
+                        source.setSystemId(abs.ToString());
+                        return source;
+                    }
+                    else if ((obj is javax.xml.transform.Source)) {
+                        return ((javax.xml.transform.Source) obj);
+                    }
+                    else if ((obj == null)) {
+                        throw new net.sf.saxon.trans.XPathException("XmlResolver returned null");
+                    }
+                    else {
+                        throw new net.sf.saxon.trans.XPathException(
+                            ("Unrecognized object returned by XmlResolver (type " + obj.GetType().Name));
+                    }
                 }
-            }
+            } 
             catch (net.sf.saxon.trans.XPathException e) {
                 throw;
             }

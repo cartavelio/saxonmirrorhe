@@ -21,7 +21,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="message">The error message</param>
 
-        public DynamicError(String message)
+        public DynamicError(string message)
         {
             exception = new XPathException(message);
         }
@@ -77,13 +77,7 @@ namespace Saxon.Api {
         /// Return the message associated with this error.
         /// </summary>
 
-        public override String Message
-        {
-            get
-            {
-                return exception.getMessage();
-            }
-        }
+        public override string Message => exception.getMessage();
 
         /// <summary>
         /// The URI of the query or stylesheet module in which the error was detected
@@ -95,17 +89,7 @@ namespace Saxon.Api {
         /// (for example, if it was supplied as an anonymous <c>Stream</c>).
         /// </remarks>
 
-        public String ModuleUri
-        {
-            get
-            {
-                if (exception.getLocator() == null)
-                {
-                    return null;
-                }
-                return exception.getLocator().getSystemId();
-            }
-        }
+        public string ModuleUri => exception.getLocator() == null ? null : exception.getLocator().getSystemId();
 
         /// <summary>
         /// The line number locating the error within a query or stylesheet module.
@@ -142,51 +126,27 @@ namespace Saxon.Api {
 
         public bool IsWarning
         {
-            get
-            {
-                return isWarning;
-            }
-            set
-            {
-                isWarning = value;
-            }
+            get => isWarning;
+            set => isWarning = value;
         }
 
         /// <summary>
         /// Indicate whether this condition is a type error.
         /// </summary>
 
-        public bool IsTypeError
-        {
-            get
-            {
-                return exception.isTypeError();
-            }
-        }
+        public bool IsTypeError => exception.isTypeError();
 
         /// <summary>
         /// Return the error message.
         /// </summary>
 
-        public override String ToString()
-        {
-            return exception.getMessage();
-        }
+        public override string ToString() => exception.getMessage();
 
         /// <summary>
         /// Return the underlying exception. This is unstable as this is an internal object.
         /// </summary>
         /// <returns>The underlying <c>XPathException</c></returns>
         
-        public XPathException UnderlyingException
-        {
-            get
-            {
-                return exception;
-            }
-        }
-
-
-
+        public XPathException UnderlyingException => exception;
     }
 }

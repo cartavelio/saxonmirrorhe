@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace javax.xml.transform.stream {
     public class StreamResult : Result {
         private System.IO.Stream _stream;
@@ -15,7 +17,17 @@ namespace javax.xml.transform.stream {
         }
 
         public StreamResult(java.io.File file) {
-            
+            java.io.File dir = new java.io.File(file.getParent());
+            if (dir.isFile()) {
+                throw new java.io.IOException("Cannot create output file: parent " + dir +
+                                              " exists but is not a directory");
+            }
+
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            this._stream = new FileStream(file.getPath(), FileMode.Create);
+            this.sysId = file.toUri().ToString();
         }
 
         public StreamResult(string sysId) {

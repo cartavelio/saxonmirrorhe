@@ -1,6 +1,6 @@
 using System.Xml;
-using net.sf.saxon.dotnet;
 using net.sf.saxon.s9api;
+using Saxon.Impl.Dom;
 
 namespace Saxon.Api {
     /// <summary>
@@ -16,8 +16,8 @@ namespace Saxon.Api {
     public class DomDestination : XmlDestination
     {
 
-        internal DotNetDomBuilder builder;
-        internal net.sf.saxon.dotnet.DotNetDomDestination destination;
+        internal DomBuilder builder;
+        internal DomDestinationImpl destination;
 
         /// <summary>Construct a <c>DomDestination</c>.</summary>
         /// <remarks>With this constructor, the system will create a new DOM Document
@@ -26,8 +26,8 @@ namespace Saxon.Api {
 
         public DomDestination()
         {
-            builder = new DotNetDomBuilder();
-            destination = new net.sf.saxon.dotnet.DotNetDomDestination(builder);
+            builder = new DomBuilder();
+            destination = new DomDestinationImpl(builder);
         }
 
         /// <summary>Construct a <c>DomDestination</c> based on an existing document node.</summary>
@@ -38,7 +38,7 @@ namespace Saxon.Api {
 
         public DomDestination(XmlDocument attachmentPoint)
         {
-            builder = new DotNetDomBuilder();
+            builder = new DomBuilder();
             builder.setAttachmentPoint(attachmentPoint);
         }
 
@@ -49,7 +49,7 @@ namespace Saxon.Api {
 
         public DomDestination(XmlDocumentFragment attachmentPoint)
         {
-            builder = new DotNetDomBuilder();
+            builder = new DomBuilder();
             builder.setAttachmentPoint(attachmentPoint);
         }
 
@@ -60,7 +60,7 @@ namespace Saxon.Api {
 
         public DomDestination(XmlElement attachmentPoint)
         {
-            builder = new DotNetDomBuilder();
+            builder = new DomBuilder();
             builder.setAttachmentPoint(attachmentPoint);
         }
 
