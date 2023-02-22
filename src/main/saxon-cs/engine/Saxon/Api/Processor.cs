@@ -52,7 +52,7 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Create a new Saxon-CS <c>Processor</c>. This <c>Processor</c> will have capabilities that depend on the version
+        /// Create a new SaxonCS <c>Processor</c>. This <c>Processor</c> will have capabilities that depend on the version
         /// of the software that has been loaded, and on the features that have been licensed.
         /// </summary>
         public Processor() {
@@ -542,7 +542,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <remarks>
         /// <para>This property provides access to internal methods in the Saxon engine that are
-        /// not specifically exposed in the Saxon-CS API. In general these methods should be
+        /// not specifically exposed in the SaxonCS API. In general these methods should be
         /// considered to be less stable than the classes in the Saxon.Api namespace.</para> 
         /// <para>The internal methods follow
         /// Java naming conventions rather than .NET conventions.</para>

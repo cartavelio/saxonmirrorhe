@@ -39,6 +39,12 @@ public class Empty extends Aggregate {
             return Literal.makeLiteral(BooleanValue.TRUE, arguments[0]);
         }
 
+        // Don't sort the argument
+        Expression unorderedArg0 = arguments[0].unordered(false, visitor.isOptimizeForStreaming());
+        if (unorderedArg0 != arguments[0]) {
+            return makeFunctionCall(unorderedArg0);
+        }
+
         // Rewrite
         //    empty(A|B) => empty(A) and empty(B)
         if (arguments[0] instanceof VennExpression && !visitor.isOptimizeForStreaming()) {
