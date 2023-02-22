@@ -9,6 +9,7 @@ using NUnit.Framework;
 using System.Xml;
 using System.Diagnostics;
 using System.Collections.Concurrent;
+using Saxon.Hej;
 
 namespace SaxonCS_NUnit
 {
@@ -139,8 +140,8 @@ namespace SaxonCS_NUnit
 
         public void RunTransformCommand(string sourcePath, string stylesheetPath, string outputPath)
         {
-            net.sf.saxon.Transform transform = new net.sf.saxon.Transform();
-            transform.doTransform(new[] { "-s:" + stylesheetPath, "-xsl:" + stylesheetPath, "-o:" + outputPath }, "transform");
+            Transform transform = new ();
+            transform.doTransform(new[] { "-s:" + stylesheetPath, "-xsl:" + stylesheetPath, "-o:" + outputPath });
         }
 
         static void Main1(string[] args)

@@ -5,286 +5,262 @@ using Saxon.Api;
 using NUnit.Framework;
 using System.Diagnostics;
 
-namespace SaxonCS_NUnit
-{
-    class TestCollection
-    {
+namespace SaxonCS_NUnit {
+    class TestCollection {
         [Test]
-    public void TestDirectoryNoRecurse()
-        {
-            try
-            {
+        public void TestDirectoryNoRecurse() {
+            try {
                 Processor p = new Processor(true);
                 XPathCompiler c = p.NewXPathCompiler();
-                XPathExecutable exec = c.Compile("collection(.)!document-uri(.)");
+                XPathExecutable exec = c.Compile("collection(.)");
                 XPathSelector eval = exec.Load();
-                eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml"));
+                Uri collectionUri = new Uri(ConfigTest.DataDirUri, "trax/xml/?select=*.xml;recurse=no");
+                eval.ContextItem = new XdmAtomicValue(collectionUri);
                 XdmValue val = eval.Evaluate();
                 Assert.AreEqual(5, val.Count);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Assert.Fail(e.Message);
             }
         }
 
         [Test]
-    public void TestDirectoryMatch()
-        {
-            try
-            {
+        public void TestDirectoryMatch() {
+            try {
                 Processor p = new Processor(true);
                 XPathCompiler c = p.NewXPathCompiler();
                 c.XPathLanguageVersion = "3.1";
                 c.DeclareVariable(new QName("a"));
                 c.DeclareVariable(new QName("b"));
-                XPathExecutable exec = c.Compile("collection($a||'trax/xml/?match='||encode-for-uri($b))!document-uri(.)");
+                XPathExecutable exec =
+                    c.Compile("collection($a||'trax/xml/?match='||encode-for-uri($b))");
                 XPathSelector eval = exec.Load();
-                eval.SetVariable(new QName("a"), new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR));
+                eval.SetVariable(new QName("a"), new XdmAtomicValue(ConfigTest.DataDirUri));
                 eval.SetVariable(new QName("b"), new XdmAtomicValue("[A-Za-z]+\\.xml"));
                 XdmValue val = eval.Evaluate();
                 Assert.AreEqual(5, val.Count);
-            } catch (Exception e)
-            {
+            }
+            catch (Exception e) {
                 Assert.Fail(e.Message);
             }
         }
 
         [Test]
-    public void TestDirectoryNoRecurse30()
-        {
-            try
-            {
+        public void TestDirectoryNoRecurse30() {
+            try {
                 Processor p = new Processor(true);
+                p.SetProperty(Feature<bool>.ALLOW_MULTITHREADING, false);
                 XPathCompiler c = p.NewXPathCompiler();
                 c.XPathLanguageVersion = ("3.0");
-                XPathExecutable exec = c.Compile("collection(.)!document-uri(.)");
+                XPathExecutable exec = c.Compile("collection(.)!base-uri(.)");
                 XPathSelector eval = exec.Load();
-                eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml"));
+                Uri collectionUri = new Uri(ConfigTest.DataDirUri, "trax/xml/?select=*.xml");
+                eval.ContextItem = (new XdmAtomicValue(collectionUri));
                 XdmValue val = eval.Evaluate();
                 Assert.AreEqual(5, val.Count);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Assert.Fail(e.Message);
             }
         }
 
         [Test]
-    public void TestDirectoryRecurse()
-        {
-            try
-            {
+        public void TestDirectoryRecurse() {
+            try {
                 Processor p = new Processor(true);
                 XPathCompiler c = p.NewXPathCompiler();
-                XPathExecutable exec = c.Compile("collection(.)!document-uri(.)");
+                XPathExecutable exec = c.Compile("collection(.)!base-uri(.)");
                 XPathSelector eval = exec.Load();
-                eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml;recurse=yes"));
+                Uri collectionUri = new Uri(ConfigTest.DataDirUri, "trax/xml/?select=*.xml;recurse=yes");
+                eval.ContextItem = new XdmAtomicValue(collectionUri);
                 XdmValue val = eval.Evaluate();
                 Assert.AreEqual(7, val.Count, "found7");
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Assert.Fail(e.Message);
             }
         }
 
         [Test]
-    public void TestDirectoryWithContentType()
-        {
-            try
-            {
+        public void TestDirectoryWithContentType() {
+            try {
                 Processor p = new Processor(true);
                 XPathCompiler c = p.NewXPathCompiler();
                 XPathExecutable exec = c.Compile("collection(.)");
                 XPathSelector eval = exec.Load();
-                eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "trax/xml/?select=*.xml;recurse=yes;content-type=text/plain"));
+                Uri collectionUri = new Uri(ConfigTest.DataDirUri,
+                    "trax/xml?select=*.xml;recurse=yes;content-type=text/plain");
+                eval.ContextItem = new XdmAtomicValue(collectionUri);
                 XdmValue val = eval.Evaluate();
                 Assert.AreEqual(7, val.Count, "found7");
-                Assert.True(val.ItemAt(0) is XdmAtomicValue, "isString");
+                Assert.True(val[0] is XdmAtomicValue, "isString");
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Assert.Fail(e.Message);
             }
         }
 
         [Test]
-    public void TestDirectoryUriNoRecurse()
-        {
-            try
-            {
+        public void TestDirectoryUriNoRecurse() {
+            try {
                 Processor p = new Processor(true);
                 XPathCompiler c = p.NewXPathCompiler();
                 XPathExecutable exec = c.Compile("uri-collection(.)");
                 XPathSelector eval = exec.Load();
-                eval.ContextItem = (new XdmAtomicValue(ConfigTest.DATA_DIR2 + "trax/xml/?select=*.xml"));
+                eval.ContextItem = (new XdmAtomicValue(new Uri(ConfigTest.DataDirUri, "trax/xml/?select=*.xml")));
                 XdmValue val = eval.Evaluate();
                 Assert.AreEqual(5, val.Count);
             }
-            catch (Exception e)
-            {
-                Assert.Fail(e.Message);
+            catch (Exception e) {
+                Assert.Fail(e.ToString());
             }
         }
 
         [Test]
-    public void TestDirectoryUriRecurse()
-        {
-            try
-            {
-                Processor p = new Processor(true);
+        public void TestDirectoryUriRecurse() {
+            try {
+                Processor p = new ();
                 XPathCompiler c = p.NewXPathCompiler();
                 XPathExecutable exec = c.Compile("uri-collection(.)");
                 XPathSelector eval = exec.Load();
-                eval.ContextItem = (new XdmAtomicValue(ConfigTest.DATA_DIR2 + "trax/xml/?select=*.xml;recurse=yes"));
+                eval.ContextItem = (new XdmAtomicValue(new Uri(ConfigTest.DataDirUri, "trax/xml/?select=*.xml;recurse=yes")));
                 XdmValue val = eval.Evaluate();
                 Assert.AreEqual(7, val.Count);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Assert.Fail(e.Message);
             }
         }
 
         [Test]
-    public void TestParallelSpeed()
-        {
-            try
-            {
-                for (int i = 0; i < 5; i++)
-                {
+        public void TestParallelSpeed() {
+            try {
+                for (int i = 0; i < 5; i++) {
                     speedTest(true);
                     speedTest(false);
                 }
+
                 TimeSpan serial = speedTest(false);
-                Console.WriteLine("Serial processing (HE): " + serial.Milliseconds + "ms");
+                Console.WriteLine("Serial processing: " + serial.Milliseconds + "ms");
                 TimeSpan parallel = speedTest(true);
-                Console.WriteLine("Parallel processing (EE): " + parallel.Milliseconds + "ms");
+                Console.WriteLine("Parallel processing: " + parallel.Milliseconds + "ms");
                 Assert.True(parallel < serial, "not faster!");
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Assert.Fail(e.Message);
             }
         }
 
-        private TimeSpan speedTest(bool parallel)
-        {
-            Processor p = new Processor(parallel);
+        private TimeSpan speedTest(bool parallel) {
+            Processor p = new ();
+            if (!parallel) {
+                p.SetProperty(Feature<bool>.ALLOW_MULTITHREADING, false);
+            }
             Stopwatch stopwatch = Stopwatch.StartNew();
             TimeSpan startTime = stopwatch.Elapsed;
 
             XPathCompiler c = p.NewXPathCompiler();
             XPathExecutable exec = c.Compile("sum(collection(.)!count(//*))");
             XPathSelector eval = exec.Load();
-            eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "collection/?select=*.xml;recurse=yes"));
+            Uri collectionUri = new Uri(ConfigTest.DataDirUri, "collection/?select=*.xml;recurse=yes");
+            eval.ContextItem =
+                (new XdmAtomicValue(collectionUri));
             XdmValue val = eval.Evaluate();
             stopwatch.Stop();
             TimeSpan apiTime = stopwatch.Elapsed;
             Console.WriteLine("Found " + val + " nodes");
             return apiTime;
-    }
+        }
 
-    [Test]
-    public void TestStable()
-    {
-        try
-        {
-            Processor p = new Processor(true);
-            XPathCompiler c = p.NewXPathCompiler();
-            XPathExecutable exec = c.Compile("count(collection(.)//* | collection(.)//*)");
-            XPathSelector eval = exec.Load();
-            eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "collection/?select=*.xml;recurse=yes;stable=yes"));
-            XdmValue val = eval.Evaluate();
-            Assert.AreEqual(10680, ((XdmAtomicValue)val).GetLongValue());
+        [Test]
+        public void TestStability() {
+            // Also tests on-error=ignore
+            try {
+                Processor p = new ();
+                XPathCompiler c = p.NewXPathCompiler();
+                XPathExecutable exec = c.Compile("count(collection(.)//* | collection(.)//*)");
+                XPathSelector eval = exec.Load();
+                
+                Uri collectionUri = new Uri(ConfigTest.DataDirUri, "?select=*.xml;recurse=yes;on-error=ignore;stable=yes");
+                eval.ContextItem = new XdmAtomicValue(collectionUri);
+                long stableDocs = ((XdmAtomicValue)eval.Evaluate()).GetLongValue();
+                
+                collectionUri = new Uri(ConfigTest.DataDirUri, "?select=*.xml;recurse=yes;on-error=ignore;stable=no");
+                eval.ContextItem = new XdmAtomicValue(collectionUri);
+                long unstableDocs = ((XdmAtomicValue)eval.Evaluate()).GetLongValue();
+                
+                Console.Error.WriteLine("Stable: " + stableDocs + " Unstable: " + unstableDocs);
+                
+                // When the collection is stable, the two calls on collection() return the same documents
+                // (duplicates are eliminated). With an unstable collection, the second call returns new
+                // documents, which aren't detected as duplicates. So there are twice as many nodes
+                // in the result.
+                Assert.AreEqual(unstableDocs, stableDocs*2);
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
         }
-        catch (Exception e)
-        {
-            Assert.Fail(e.Message);
-        }
-    }
 
-    [Test]
-    public void TestUnstable()
-    {
-        try
-        {
-            Processor p = new Processor(true);
-            XPathCompiler c = p.NewXPathCompiler();
-            XPathExecutable exec = c.Compile("count(collection(.)//* | collection(.)//*)");
-            XPathSelector eval = exec.Load();
-            eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "collection/?select=*.xml;recurse=yes;stable=no"));
-            XdmValue val = eval.Evaluate();
-            Assert.AreEqual(21360, ((XdmAtomicValue)val).GetLongValue());
-        }
-        catch (Exception e)
-        {
-            Assert.Fail(e.Message);
-        }
-    }
+     
 
-    [Test]
-    public void TestStrictValidation()
-    {
-        try
-        {
-            Processor p = new Processor(true);
-            XPathCompiler c = p.NewXPathCompiler();
-            XPathExecutable exec = c.Compile("collection(.)/* instance of element(*, xs:untyped)");
-            XPathSelector eval = exec.Load();
-            eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "?select=books.xml;recurse=no;validation=strict"));
-            XdmValue val = eval.Evaluate();
-            Assert.AreEqual(false, ((XdmAtomicValue)val).GetBooleanValue());
+        [Test]
+        public void TestStrictValidation() {
+            try {
+                Processor p = new Processor(true);
+                XPathCompiler c = p.NewXPathCompiler();
+                XPathExecutable exec = c.Compile("collection(.)/* instance of element(*, xs:untyped)");
+                XPathSelector eval = exec.Load();
+                Uri collectionUri = new Uri(ConfigTest.DataDirUri, "?select=books.xml;recurse=no;validation=strict");
+                eval.ContextItem = new XdmAtomicValue(collectionUri);
+                XdmValue val = eval.Evaluate();
+                Assert.AreEqual(false, ((XdmAtomicValue) val).GetBooleanValue());
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
         }
-        catch (Exception e)
-        {
-            Assert.Fail(e.Message);
-        }
-    }
 
-    [Test]
-    public void TestNoValidation()
-    {
-        try
-        {
-            Processor p = new Processor(true);
-            XPathCompiler c = p.NewXPathCompiler();
-            XPathExecutable exec = c.Compile("collection(.)/* instance of element(*, xs:untyped)");
-            XPathSelector eval = exec.Load();
-            eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "?select=books.xml;recurse=no;validation=skip"));
-            XdmValue val = eval.Evaluate();
-            Assert.AreEqual(true, ((XdmAtomicValue)val).GetBooleanValue());
+        [Test]
+        public void TestNoValidation() {
+            try {
+                Processor p = new Processor(true);
+                XPathCompiler c = p.NewXPathCompiler();
+                XPathExecutable exec = c.Compile("collection(.)/* instance of element(*, xs:untyped)");
+                XPathSelector eval = exec.Load();
+                eval.ContextItem = (new XdmAtomicValue(new Uri(ConfigTest.DataDirUri, 
+                                                       "?select=books.xml;recurse=no;validation=skip")));
+                XdmValue val = eval.Evaluate();
+                Assert.AreEqual(true, ((XdmAtomicValue) val).GetBooleanValue());
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
         }
-        catch (Exception e)
-        {
-            Assert.Fail(e.Message);
-        }
-    }
 
-    [Test]
-    public void TestJSONCollection()
-    {
-        try
-        {
-            Processor p = new Processor(true);
-            p.SetProperty(Feature<bool>.ALLOW_MULTITHREADING,false);
-            XPathCompiler c = p.NewXPathCompiler();
-            c.XPathLanguageVersion = "3.1";
-            XPathExecutable exec = c.Compile("for $X in (collection(.))" +
-                "return (if ($X instance of node()) then name($X/*) else $X('id'))");
-            XPathSelector eval = exec.Load();
-            eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "collection.xml"));
-            XdmValue val = eval.Evaluate();
-            Assert.AreEqual("1.0e0\n\"BOOKLIST\"", val.ToString());
+        [Test]
+        public void TestJSONCollection() {
+            try {
+                Processor p = new Processor(true);
+                p.SetProperty(Feature<bool>.ALLOW_MULTITHREADING, false);
+                XPathCompiler c = p.NewXPathCompiler();
+                c.XPathLanguageVersion = "3.1";
+                XPathExecutable exec = c.Compile("for $X in (collection(.))" +
+                                                 "return (if ($X instance of node()) then name($X/*) else $X('id'))");
+                XPathSelector eval = exec.Load();
+                Uri collectionUri = new Uri(ConfigTest.DataDirUri, "collection.xml");
+                eval.ContextItem = (new XdmAtomicValue(collectionUri));
+                XdmValue val = eval.Evaluate();
+                Assert.AreEqual(2, val.Count);
+                Assert.AreEqual(1, ((XdmAtomicValue)val[0]).GetDoubleValue());
+                Assert.AreEqual("BOOKLIST", ((XdmAtomicValue)val[1]).GetStringValue());
+            }
+            catch (Exception e) {
+                Console.Error.WriteLine(e.Message + "\n" + e.StackTrace);
+                Assert.Fail(e.Message);
+            }
         }
-        catch (Exception e)
-        {
-           
-            Assert.Fail(e.Message);
-        }
-    }
-       
+
         /*
     [Test]
     public void TestCustomMediaType()
@@ -776,6 +752,5 @@ namespace SaxonCS_NUnit
     {
         Assert.Fail(e.Message);
     }*/
-}
-
+    }
 }

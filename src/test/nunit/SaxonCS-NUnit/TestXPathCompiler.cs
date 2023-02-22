@@ -6,7 +6,14 @@ using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
 using System.Text;
-
+using DocumentBuilder = Saxon.Api.DocumentBuilder;
+using Processor = Saxon.Api.Processor;
+using SchemaManager = Saxon.Api.SchemaManager;
+using SchemaValidator = Saxon.Api.SchemaValidator;
+using XdmDestination = Saxon.Api.XdmDestination;
+using XPathCompiler = Saxon.Api.XPathCompiler;
+using XPathExecutable = Saxon.Api.XPathExecutable;
+using XPathSelector = Saxon.Api.XPathSelector;
 
 
 namespace SaxonCS_NUnit {
@@ -125,7 +132,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestWithDeclaredVariables() {
             try {
-                Processor p = new Processor(false);
+                Processor p = new ();
                 XPathCompiler c = p.NewXPathCompiler();
                 c.DeclareVariable(new QName("a"));
                 c.DeclareVariable(new QName("b"));
@@ -146,7 +153,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestWithUndeclaredVariables() {
             try {
-                Processor p = new Processor(false);
+                Processor p = new ();
                 XPathCompiler c = p.NewXPathCompiler();
                 c.AllowUndeclaredVariables = (true);
                 XPathExecutable e = c.Compile("$a + $b");
@@ -193,7 +200,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestStaticallyKnownSaxonCollation() {
             try {
-                Processor p = new Processor(false);
+                Processor p = new ();
                 XPathCompiler c = p.NewXPathCompiler();
                 XPathExecutable e = c.Compile("compare('A', 'a', 'http://saxon.sf.net/collation?ignore-case=yes')");
                 Assert.AreEqual(0, ((XdmAtomicValue) e.Load().EvaluateSingle()).GetLongValue());
@@ -204,18 +211,20 @@ namespace SaxonCS_NUnit {
         }
 
         /**
-         * Test with dynamicall-computed collation
+         * Test with dynamically-computed collation URI
          */
         [Test]
         public void TestDynamicallyKnownSaxonCollation() {
             try {
-                Processor p = new Processor(false);
+                Processor p = new();
                 XPathCompiler c = p.NewXPathCompiler();
                 XPathExecutable e = c.Compile("compare('A', 'a',  " +
                                               "if (string(current-date()) eq '1900-01-01') then 'rubbish' else 'http://saxon.sf.net/collation?ignore-case=yes')");
-                Assert.AreEqual(0, ((XdmAtomicValue) e.Load().EvaluateSingle()).GetLongValue());
+                XdmAtomicValue result = ((XdmAtomicValue) e.Load().EvaluateSingle());
+                Assert.AreEqual(0, result.GetLongValue());
             }
             catch (Exception e) {
+                Console.Error.WriteLine(e.Message + '\n' + e.StackTrace);
                 Assert.Fail(e.Message);
             }
         }
@@ -353,7 +362,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestOkNotToBindUnusedButDeclaredVariable() {
             try {
-                Processor p = new Processor(false);
+                Processor p = new ();
                 XPathCompiler c = p.NewXPathCompiler();
                 c.DeclareVariable(new QName("vvv"));
                 XPathExecutable e = c.Compile("2+2");
@@ -391,9 +400,9 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestContextItemTypeOk() {
             try {
-                Processor p = new Processor(false);
+                Processor p = new ();
                 XPathCompiler c = p.NewXPathCompiler();
-                c.ContextItemType = (XdmAtomicType.INTEGER);
+                c.ContextItemType = XdmAtomicType.Integer;
                 XPathExecutable e = c.Compile(".+3");
                 XPathSelector s = e.Load();
                 s.ContextItem = new XdmAtomicValue(2);
@@ -409,7 +418,7 @@ namespace SaxonCS_NUnit {
             try {
                 Processor p = new Processor(false);
                 XPathCompiler c = p.NewXPathCompiler();
-                c.ContextItemType = XdmAtomicType.STRING;
+                c.ContextItemType = XdmAtomicType.String;
                 XPathExecutable e = c.Compile("number(.)+3");
                 XPathSelector s = e.Load();
                 s.ContextItem = (new XdmAtomicValue(2));
@@ -426,7 +435,7 @@ namespace SaxonCS_NUnit {
             try {
                 Processor p = new Processor(false);
                 XPathCompiler c = p.NewXPathCompiler();
-                c.ContextItemType = (XdmAtomicType.DOUBLE);
+                c.ContextItemType = XdmAtomicType.Double;
                 XPathExecutable e = c.Compile("number(.)+3");
                 XPathSelector s = e.Load();
                 s.ContextItem = new XdmAtomicValue(2);
@@ -443,7 +452,7 @@ namespace SaxonCS_NUnit {
             try {
                 Processor p = new Processor(false);
                 XPathCompiler c = p.NewXPathCompiler();
-                c.ContextItemType = (XdmAtomicType.INTEGER);
+                c.ContextItemType = XdmAtomicType.Integer;
                 XPathExecutable e = c.Compile("substring(., 2, 5)");
                 Assert.Fail("Context item is wrong type - not detected");
             }
@@ -507,26 +516,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail();
             }
         }
-
-        [Test]
-        public void TestReflexiveExtension() {
-            try {
-                Processor proc = new Processor(true);
-                XPathCompiler comp = proc.NewXPathCompiler();
-                comp.DeclareNamespace("eg", "java:java.lang.Double");
-                comp.DeclareVariable(new QName("arg"));
-                XPathExecutable exp = comp.Compile("eg:toString($arg)");
-                XPathSelector ev = exp.Load();
-                ev.SetVariable(new QName("arg"), new XdmAtomicValue(1.0));
-                XdmValue val = ev.Evaluate();
-                String result = val.ToString();
-                Assert.True(true);
-            }
-            catch (Exception err) {
-                Assert.Fail(err.Message);
-            }
-        }
-
+        
 
         [Test]
         public void TestSchemaAwareEqualityGood() {
@@ -577,7 +567,7 @@ namespace SaxonCS_NUnit {
             SchemaValidator sv = sm.NewSchemaValidator();
             XdmDestination xdmDest = new XdmDestination();
             sv.SetDestination(xdmDest);
-            String xml = "<comparables xmlns=\"http://www.xpathtest.com/test\">\n" +
+            string xml = "<comparables xmlns=\"http://www.xpathtest.com/test\">\n" +
                          "  <comparable>\n" +
                          "    <string>hello</string>\n" +
                          "    <int>1</int>\n" +
@@ -587,9 +577,8 @@ namespace SaxonCS_NUnit {
                          "    <int>1</int>\n" +
                          "  </comparable>\n" +
                          "</comparables>";
-            sv.SetSource(new MemoryStream(Encoding.UTF8.GetBytes(xml)), new Uri("http://www.example.com"));
-            sv.Run();
-            String xpathExpr = "//test:comparable[1]/test:int eq //test:comparable[2]/test:int";
+            sv.Validate(new StringReader(xml), new Uri("http://www.example.com"));
+            string xpathExpr = "//test:comparable[1]/test:int eq //test:comparable[2]/test:int";
             XPathCompiler comp = processor.NewXPathCompiler();
             if (isSchemaAware) {
                 comp.SchemaAware = true;
@@ -603,14 +592,12 @@ namespace SaxonCS_NUnit {
         }
 
 
-        [Test]
+        [Test, Explicit]  // Expect failure when the Crayfish server isn't available!
         public void TestExPathUNCPaths() {
             try {
-                // new DotNetQuery().Run();
-
                 Processor p = new Processor(true);
                 XPathCompiler c = p.NewXPathCompiler();
-                c.XPathLanguageVersion = ("3.1");
+                c.XPathLanguageVersion = "3.1";
                 c.DeclareNamespace("file", "http://expath.org/ns/file");
                 XPathExecutable e = c.Compile("file:exists('//crayfish/team/xmark/results8-8.xml')");
                 XPathSelector s = e.Load();
@@ -618,34 +605,17 @@ namespace SaxonCS_NUnit {
                 Assert.True(result);
             }
             catch (Exception e) {
+                //Console.WriteLine(e + "\n" + e.StackTrace);
                 Assert.Fail(e.Message);
             }
-            /*
-            try
-            {
-                Processor p = new Processor(true);
-                XQueryCompiler c = p.NewXQueryCompiler();
-               // c.XPathLanguageVersion = ("3.1");
-                c.DeclareNamespace("file", "http://expath.org/ns/file");
-                c.BaseUri = "file://crayfish/team/xmark";
-                XQueryExecutable e = c.Compile("doc('file://crayfish/team/xmark/result8-8.xml')");
-                //XPathExecutable e = c.Compile("file:read-text('https://www.saxonica.com/welcome/welcome.xml')");
-                XQueryEvaluator s = e.Load();
-                XdmItem result = s.EvaluateSingle();
-                Assert.True(((XdmAtomicValue)result).GetBooleanValue());
-            }
-            catch (Exception e)
-            {
-                Assert.Fail(e.Message);
-            }
-            */
+ 
         }
 
 
         [Test]
         public void TestDecimalFormat() {
             try {
-                Processor p = new Processor(false);
+                Processor p = new ();
                 XPathCompiler c = p.NewXPathCompiler();
                 c.XPathLanguageVersion = ("3.1");
                 c.SetDecimalFormatProperty(new QName("deci"), "decimal-separator", "~");
@@ -679,9 +649,9 @@ namespace SaxonCS_NUnit {
                 Processor processor = new Processor(true);
 
                 DocumentBuilder docBuilder = processor.NewDocumentBuilder();
-                FileStream inputFile = new FileStream(ConfigTest.DATA_DIR + "xbrlInstance.xml", FileMode.Open);
-                docBuilder.BaseUri = new Uri(ConfigTest.DATA_DIR + "xbrlInstance.xml");
-                XdmItem contextItem = docBuilder.Build(inputFile);
+                // FileStream inputFile = new FileStream(ConfigTest.DATA_DIR + "xbrlInstance.xml", FileMode.Open);
+                // docBuilder.BaseUri = new Uri(ConfigTest.DATA_DIR + "xbrlInstance.xml");
+                XdmItem contextItem = docBuilder.Build(new Uri(ConfigTest.DATA_DIR + "xbrlInstance.xml"));
 
                 XPathCompiler xpathCompiler = processor.NewXPathCompiler();
                 xpathCompiler.DeclareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
@@ -692,7 +662,7 @@ namespace SaxonCS_NUnit {
 
                 XdmValue result = xpathCompiler.Evaluate(xpathString, contextItem);
                 Assert.True(result is XdmNode);
-                Assert.AreEqual(((XdmNode) result).NodeKind, XmlNodeType.Element);
+                Assert.AreEqual(((XdmNode) result).NodeKind, XdmNodeKind.Element);
                 Assert.True("context".Equals(((XdmNode) result).NodeName.LocalName));
             }
             catch (Exception e) {
@@ -706,14 +676,14 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestAbsent30Function() {
             try {
-                Processor p = new Processor(false);
+                Processor p = new ();
                 XPathCompiler c = p.NewXPathCompiler();
                 c.XPathLanguageVersion = ("2.0");
                 XPathExecutable e = c.Compile("round(1.234, 2)");
                 XdmItem result = e.Load().EvaluateSingle();
                 Assert.Fail("unexpected success");
             }
-            catch (StaticError e) {
+            catch (Saxon.Api.SaxonApiException e) {
                 Assert.AreEqual("XPST0017", e.ErrorCode.LocalName);
             }
         }

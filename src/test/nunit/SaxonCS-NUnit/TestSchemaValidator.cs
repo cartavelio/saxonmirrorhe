@@ -7,11 +7,16 @@ using System.Text;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
-using net.sf.saxon.tree.wrapper;
+using Saxon.Hej.trace;
+using Processor = Saxon.Api.Processor;
+using SchemaManager = Saxon.Api.SchemaManager;
+using SchemaValidator = Saxon.Api.SchemaValidator;
+using XdmDestination = Saxon.Api.XdmDestination;
+using XmlProcessingError = Saxon.Api.XmlProcessingError;
 
 namespace SaxonCS_NUnit
 {
-    class TestSchemaValidator
+    internal class TestSchemaValidator
     {
 
         [Test]
@@ -27,7 +32,8 @@ namespace SaxonCS_NUnit
             //saxon.SetProperty("http://saxon.sf.net/feature/streamability", "standard");
 
             SchemaManager manager = saxon.SchemaManager;
-            manager.ErrorList = new List<StaticError>();
+            List<XmlProcessingError> errors = new();
+            manager.ErrorReporter = errors.Add;
           
             manager.XsdVersion = "1.1";
 
@@ -39,10 +45,10 @@ namespace SaxonCS_NUnit
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Schema compilation failed with " + manager.ErrorList.Count + " errors");
-                foreach (StaticError error in manager.ErrorList)
+                Console.WriteLine("Schema compilation failed with " + errors.Count + " errors");
+                foreach (XmlProcessingError error in errors)
                 {
-                    Console.WriteLine("At line " + error.LineNumber + ": " + error.Message);
+                    Console.WriteLine("At line " + error.Location.LineNumber + ": " + error.Message);
                 }
                 return;
             }
@@ -56,26 +62,25 @@ namespace SaxonCS_NUnit
             //300 megas
             //Stream fs = File.OpenRead("SAFT-PT (500086826) (20160412 172334).xml");
 
-            validator.SetSource(fs, baseUri);
-            validator.ErrorList = new List<ValidationFailure>();
+            List<ValidationFailure> ErrorList = new ();
+            validator.InvalidityListener = ErrorList.Add;
 
             Console.WriteLine("\nFile Validating file.. ");
 
             try
             {
-                validator.Run();
+                validator.Validate(fs, baseUri);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.StackTrace);
 
-                Console.WriteLine("\nInstance validation failed with " + validator.ErrorList.Count + " errors");
+                Console.WriteLine("\nInstance validation failed with " + ErrorList.Count + " errors");
                 using (StreamWriter writetext = new StreamWriter(@"C:\work\tests\validate.txt"))
                 {
-                    foreach (ValidationFailure error in validator.ErrorList)
+                    foreach (ValidationFailure error in ErrorList)
                     {
-                        //Console.WriteLine("At line " + error.LineNumber + ": " + error.Message);
-                        writetext.WriteLine("At line " + error.GetLineNumber() + ": " + error.GetMessage());
+                        writetext.WriteLine("At line " + error.LineNumber + ": " + error.Message);
                     }
 
                     Console.WriteLine("\n\nException: {0}", ex.Message);
@@ -116,7 +121,8 @@ namespace SaxonCS_NUnit
 
 
             SchemaManager manager = saxon.SchemaManager;
-            manager.ErrorList = new List<StaticError>();
+            List<XmlProcessingError> errors = new();
+            manager.ErrorReporter = errors.Add;
             manager.XsdVersion = "1.1";
 
 
@@ -126,36 +132,31 @@ namespace SaxonCS_NUnit
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Schema compilation failed with " + manager.ErrorList.Count + " errors");
-                foreach (StaticError error in manager.ErrorList)
+                Console.WriteLine("Schema compilation failed with " + errors.Count + " errors");
+                foreach (XmlProcessingError error in errors)
                 {
-                    Console.WriteLine("At line " + error.LineNumber + ": " + error.Message);
+                    Console.WriteLine("At line " + error.Location.LineNumber + ": " + error.Message);
                 }
                 return;
             }
 
             SchemaValidator validator = manager.NewSchemaValidator();
-            validator.SetInvalidityHandler(new MyInvalidaityHandler());
+            validator.InvalidityHandler = new MyInvalidityHandler();
 
-            
-
-            validator.SetSource(source_xml);
-//            validator.ErrorList = new ArrayList();
-
-            Console.WriteLine("\nFile Validating file.. ");
+            Console.WriteLine("Validating file.. ");
 
             try
             {
-                validator.Run();
+                validator.Validate(source_xml);
             }
-            catch (StaticError ex)
+            catch (SaxonApiException ex)
             {
                 Console.WriteLine(ex.StackTrace);
                
             }
         }
 
-        public class MyInvalidaityHandler : IInvalidityHandler
+        public class MyInvalidityHandler : IInvalidityHandler
         {
             public XdmValue endReporting()
             {
@@ -164,7 +165,7 @@ namespace SaxonCS_NUnit
 
             public void reportInvalidity(ValidationFailure i)
             {
-                Console.WriteLine(i.GetMessage());
+                Console.WriteLine(i.Message);
             }
 
             public void startReporting(string systemId)
@@ -175,15 +176,16 @@ namespace SaxonCS_NUnit
 
         //throws out of memory exception
         [Test]
-        public void SchemaValdiatorPerf() {
+        public void SchemaValidatorPerf() {
             // Load a schema
 
             Processor processor = new Processor(true);
-        processor.SetProperty("http://saxon.sf.net/feature/timing", "true");
+            processor.SetProperty("http://saxon.sf.net/feature/timing", "true");
             processor.SetProperty("http://saxon.sf.net/feature/validation-warnings", "false"); //Set to true to suppress the exception
             SchemaManager manager = processor.SchemaManager;
-        manager.XsdVersion = "1.1";
-            manager.ErrorList = new List<StaticError>();
+            manager.XsdVersion = "1.1";
+            List<XmlProcessingError> errors = new();
+            manager.ErrorReporter = errors.Add;
 
             UriBuilder ub = new UriBuilder();
             ub.Scheme = "file";
@@ -201,10 +203,10 @@ namespace SaxonCS_NUnit
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                Console.WriteLine("Schema compilation failed with " + manager.ErrorList.Count + " errors");
-                foreach (StaticError error in manager.ErrorList)
+                Console.WriteLine("Schema compilation failed with " + errors.Count + " errors");
+                foreach (XmlProcessingError error in errors)
                 {
-                    Console.WriteLine("At line " + error.LineNumber + ": " + error.Message);
+                    Console.WriteLine("At line " + error.Location.LineNumber + ": " + error.Message);
                 }
                 Assert.Fail();
             }
@@ -218,25 +220,25 @@ namespace SaxonCS_NUnit
             settings.DtdProcessing = DtdProcessing.Ignore;
             String inputFileName = new Uri(baseUri, "Providers-H-20200403 MASKED.xml").ToString();
             XmlReader xmlReader = XmlReader.Create(inputFileName, settings);
-            validator.SetSource(xmlReader);
             Console.WriteLine("Validating input file " + inputFileName);
-            validator.ErrorList = new List<ValidationFailure>();
+            List<ValidationFailure> ErrorList = new ();
+            validator.InvalidityListener = ErrorList.Add;
             XdmDestination psvi = new XdmDestination();
             validator.SetDestination(psvi);
 
             try
             {
-                validator.Run();
-                net.sf.saxon.trace.Instrumentation.report();
+                validator.Validate(xmlReader);
+                Instrumentation.report();
             }
             catch (Exception e)
             {
-                net.sf.saxon.trace.Instrumentation.report();
+                Instrumentation.report();
                 Console.WriteLine(e);
-                Console.WriteLine("Instance validation failed with " + validator.ErrorList.Count + " errors");
-                foreach (ValidationFailure error in validator.ErrorList)
+                Console.WriteLine("Instance validation failed with " + ErrorList.Count + " errors");
+                foreach (ValidationFailure error in ErrorList)
                 {
-                    Console.WriteLine("At line " + error.GetLineNumber() + ": " + error.GetMessage());
+                    Console.WriteLine("At line " + error.LineNumber + ": " + error.Message);
                 }
                 Assert.Fail();
             }
