@@ -4,7 +4,7 @@
     
     <category name="installation">
         
-        <p class="javaonly">SaxonJ 12 requires Java 11 or later.</p>
+        <p class="javaonly">SaxonJ 12 is built and tested using Java 11, but should still be usable with Java 8 or later.</p>
         
         
         
