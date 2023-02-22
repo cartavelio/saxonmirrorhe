@@ -72,9 +72,19 @@ public final class ValueComparison extends BinaryExpression implements Compariso
     public AtomicComparer getAtomicComparer() {
         // TODO: this is scaffolding. ValueComparison no longer uses an AtomicComparer, but this method
         // is retained for paths that require one, e.g. EqualityPatternOptimizer
+        ItemType t0 = getLhsExpression().getItemType().getPrimitiveItemType();
+        if (!(t0 instanceof BuiltInAtomicType)) {
+            // This can happen after loading from a SEF file; the static type information is not always available
+            t0 = BuiltInAtomicType.ANY_ATOMIC;
+        }
+        ItemType t1 = getRhsExpression().getItemType().getPrimitiveItemType();
+        if (!(t1 instanceof BuiltInAtomicType)) {
+            // This can happen after loading from a SEF file; the static type information is not always available
+            t1 = BuiltInAtomicType.ANY_ATOMIC;
+        }
         return GenericAtomicComparer.makeAtomicComparer(
-                (BuiltInAtomicType)getLhsExpression().getItemType().getPrimitiveItemType(),
-                (BuiltInAtomicType)getRhsExpression().getItemType().getPrimitiveItemType(),
+                (BuiltInAtomicType)t0,
+                (BuiltInAtomicType)t1,
                 getStringCollator(),
                 getConfiguration().getConversionContext());
 
@@ -487,6 +497,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         if (resultWhenEmpty != null) {
             out.emitAttribute("onEmpty", resultWhenEmpty.getBooleanValue() ? "1" : "0");
         }
+
         //out.emitAttribute("comp", comparer.save());
     }
 
