@@ -170,6 +170,12 @@ public class SimpleMode extends Mode {
                         case "fail":
                             base = FailRuleSet.getInstance();
                             break;
+                        case "shallow-copy-all":
+                            base = ShallowCopyAllRuleSet.getInstance();
+                            break;
+                        case "shallow-skip-all":
+                            base = ShallowSkipAllRuleSet.getInstance();
+                            break;
                         default:
                             // already validated
                             break;

@@ -38,7 +38,7 @@ public class ShallowSkipRuleSet implements BuiltInRuleSet {
         return THE_INSTANCE;
     }
 
-    private ShallowSkipRuleSet() {
+    protected ShallowSkipRuleSet() {
     }
 
     /**
