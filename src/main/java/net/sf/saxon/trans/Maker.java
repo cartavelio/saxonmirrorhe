@@ -21,4 +21,4 @@ public interface Maker<T> {
 
 }
 
-// Copyright (c) 2015-2020 Saxonica Limited
+// Copyright (c) 2015-2022 Saxonica Limited
