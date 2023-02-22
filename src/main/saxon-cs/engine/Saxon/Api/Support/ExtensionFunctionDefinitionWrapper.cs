@@ -14,6 +14,14 @@ namespace Saxon.Api.Support {
         public override StructuredQName getFunctionQName() {
             return apiFunction.FunctionName.GetStructuredQName();
         }
+        
+        public override int getMinimumNumberOfArguments() {
+            return apiFunction.MinimumNumberOfArguments;
+        }
+        
+        public override int getMaximumNumberOfArguments() {
+            return apiFunction.MaximumNumberOfArguments;
+        }
 
         public override SequenceType[] getArgumentTypes() {
             SequenceType[] result = new SequenceType[apiFunction.ArgumentTypes.Length];

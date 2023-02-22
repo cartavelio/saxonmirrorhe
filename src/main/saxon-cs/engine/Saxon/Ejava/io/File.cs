@@ -176,8 +176,8 @@ namespace Saxon.Ejava.io {
             stream.Close();
         }
         
-        public void mkdir() {
-            mkdirs();
+        public bool mkdir() {
+            return mkdirs();
         }
 
         public bool mkdirs() {
