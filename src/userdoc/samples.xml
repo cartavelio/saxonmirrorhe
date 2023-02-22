@@ -35,7 +35,7 @@
             <a class="bodylink" href="jdom2">JDOM2 Example</a>
         </li>
         <li>
-            <a class="bodylink" href="dotnetsamples">Example applications for Saxon-CS</a>
+            <a class="bodylink" href="dotnetsamples">Saxon-CS API Examples for .NET</a>
         </li>
         <li>
             <a class="bodylink" href="servlet">Saxon Servlet</a>
@@ -183,7 +183,7 @@
         <kbd> dotnet SaxonCS transform -it:main -xsl:samples/styles/tour.xsl -o:tour.html start=e5 </kbd>
 
         <p>or</p>
-        <kbd> Query -q:samples/query/tour.xq -o:tour.html start=e5 </kbd>
+        <kbd> dotnet SaxonCS query -q:samples/query/tour.xq -o:tour.html start=e5 </kbd>
         </div>
         
         <p>When you display the resulting HTML file in your browser it should look something like
@@ -316,8 +316,8 @@
         <h2 class="subtitle">Shakespeare XPath Sample Application</h2>
         
         <p>An example application called <code>XPathExample</code> is provided,  for
-            Java only (<code>samples/java/he/XPathExample.java</code>. This is designed to illustrate
-            the use of Saxon's implementation of the JAXP 1.3 XPath API from a Java or C#
+            Java only (<code>samples/java/he/XPathExample.java</code>). This is designed to illustrate
+            the use of Saxon's implementation of the JAXP 1.3 XPath API from a Java
             application. It searches a Shakespeare play for all occurrences of a word entered from
             the console, displaying the lines containing that word, and the context where they
             appear.</p>

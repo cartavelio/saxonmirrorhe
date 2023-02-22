@@ -9723,9 +9723,9 @@ return saxon:serialize($x, <xsl:output method="xml"
         </proto>
       </signatures>
       <status>
-        <p>First available in Saxon 11</p>
+        <p>Available since Saxon 11.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition>PE/EE 11</saxon-edition>
       <details>
         <div>
           <p>For each integer <code>$i</code> in the value of <code>$positions</code>, the function returns:</p>
@@ -9741,11 +9741,11 @@ return saxon:serialize($x, <xsl:output method="xml"
             <li><code>saxon:slice(10 to 20, 5 to 6)</code> returns <code>(14, 15)</code></li>
             <li><code>saxon:slice(10 to 20, (5, 3, 1))</code> returns <code>(14, 12, 10)</code></li>
             <li><code>saxon:slice(10 to 20, -1)</code> returns <code>20</code></li>
-            <li><code>saxon:slice(10 to 20, -3 to -1)</code> returns <code>18, 19, 20</code></li>
-            <li><code>saxon:slice(10 to 20, 1 by 3 to 7)</code> returns <code>10, 13, 16</code></li>
-            <li><code>saxon:slice(10 to 20, -1 by -1 to -4)</code> returns <code>20, 19, 18, 17</code></li>
+            <li><code>saxon:slice(10 to 20, -3 to -1)</code> returns <code>(18, 19, 20)</code></li>
+            <li><code>saxon:slice(10 to 20, 1 by 3 to 7)</code> returns <code>(10, 13, 16)</code></li>
+            <li><code>saxon:slice(10 to 20, -1 by -1 to -4)</code> returns <code>(20, 19, 18, 17)</code></li>
             <li><code>saxon:slice(10 to 20, 0)</code> returns <code>()</code></li>
-            <li><code>saxon:slice(10 to 20, -2 to +2)</code> returns <code>19, 20, 10, 11</code></li>
+            <li><code>saxon:slice(10 to 20, -2 to +2)</code> returns <code>(19, 20, 10, 11)</code></li>
           </ul>
         </div>
       </details>
