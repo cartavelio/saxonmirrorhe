@@ -507,9 +507,9 @@
     
     <category name="xquery-update">
         
-       <p class="csonly">Code supporting XQuery Update is included in SaxonCS, but it is largely untested. (The same was true,
-           but not acknowledged, in the old .NET product). Any user feedback indicating whether or not XQuery Update is required,
-           and whether or not it works, will be appreciated.</p>
+       <p class="csonly">In the first (11.0) release of SaxonCS, XQuery Update was present but largely untested. This was corrected
+       post-release, and the XQuery Update test suite was found to run without problems. The tests are now integrated into the
+       standard build process for subsequent maintenance releases.</p>
   
     </category>
     
