@@ -349,8 +349,8 @@ public class XdmNode extends XdmItem {
                 break;
         }
         NodeInfo node = getUnderlyingNode();
-        NameTest test = new NameTest(kind, name.getNamespaceURI(), name.getLocalName(),
-            node.getConfiguration().getNamePool());
+        NameTest test = new NameTest(kind, name.getNamespaceUri(), name.getLocalName(),
+                                     node.getConfiguration().getNamePool());
         AxisIterator base = node.iterateAxis(axis.getAxisNumber(), test);
         return XdmSequenceIterator.ofNodes(base);
     }

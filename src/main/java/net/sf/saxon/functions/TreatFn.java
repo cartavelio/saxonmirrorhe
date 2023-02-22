@@ -41,7 +41,8 @@ public abstract class TreatFn extends SystemFunction implements Callable {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         SequenceIterator iterator = arguments[0].iterate();
         int card = getRequiredCardinality();
-        iterator = new CardinalityCheckingIterator(iterator, card, this::makeRoleDiagnostic, null);
+        //noinspection Convert2MethodRef
+        iterator = new CardinalityCheckingIterator(iterator, card, () -> makeRoleDiagnostic(), null);
         return new LazySequence(iterator);
     }
 

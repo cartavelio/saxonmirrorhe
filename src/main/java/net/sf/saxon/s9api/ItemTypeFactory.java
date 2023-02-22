@@ -311,11 +311,11 @@ public class ItemTypeFactory {
     public ItemType getItemType(XdmNodeKind kind, QName name) {
         int k = kind.getNumber();
         if (k == Type.ELEMENT || k == Type.ATTRIBUTE || k == Type.PROCESSING_INSTRUCTION) {
-            if (k == Type.PROCESSING_INSTRUCTION && name.getNamespaceURI().isEmpty()) {
+            if (k == Type.PROCESSING_INSTRUCTION && name.getNamespaceUri().isEmpty()) {
                 throw new IllegalArgumentException("The name of a processing instruction must not be in a namespace");
             }
             NameTest type = new NameTest(k,
-                    name.getNamespaceURI(), name.getLocalName(), config.getNamePool());
+                                         name.getNamespaceUri(), name.getLocalName(), config.getNamePool());
             return new ConstructedItemType(type, config);
         } else {
             throw new IllegalArgumentException("Node kind must be element, attribute, or processing-instruction");
@@ -369,12 +369,12 @@ public class ItemTypeFactory {
         NameTest nameTest = null;
         ContentTypeTest contentTest = null;
         if (name != null) {
-            int elementFP = config.getNamePool().allocateFingerprint(name.getNamespaceURI(), name.getLocalName());
+            int elementFP = config.getNamePool().allocateFingerprint(name.getNamespaceUri(), name.getLocalName());
             nameTest = new NameTest(Type.ELEMENT, elementFP, config.getNamePool());
         }
         if (schemaType != null) {
             SchemaType type = config.getSchemaType(
-                new StructuredQName("", schemaType.getNamespaceURI(), schemaType.getLocalName()));
+                new StructuredQName("", schemaType.getNamespaceUri(), schemaType.getLocalName()));
             if (type == null) {
                 throw new SaxonApiException("Unknown schema type " + schemaType.getClarkName());
             }
@@ -413,7 +413,7 @@ public class ItemTypeFactory {
      */
 
     public ItemType getSchemaAttributeTest(QName name) throws SaxonApiException {
-        StructuredQName nn = new StructuredQName("", name.getNamespaceURI(), name.getLocalName());
+        StructuredQName nn = new StructuredQName("", name.getNamespaceUri(), name.getLocalName());
         SchemaDeclaration decl = config.getAttributeDeclaration(nn);
         if (decl == null) {
             throw new SaxonApiException("No global declaration found for attribute " + name.getClarkName());
@@ -445,12 +445,12 @@ public class ItemTypeFactory {
         NameTest nameTest = null;
         ContentTypeTest contentTest = null;
         if (name != null) {
-            int attributeFP = config.getNamePool().allocateFingerprint(name.getNamespaceURI(), name.getLocalName());
+            int attributeFP = config.getNamePool().allocateFingerprint(name.getNamespaceUri(), name.getLocalName());
             nameTest = new NameTest(Type.ATTRIBUTE, attributeFP, config.getNamePool());
         }
         if (schemaType != null) {
             SchemaType type = config.getSchemaType(
-                new StructuredQName("", schemaType.getNamespaceURI(), schemaType.getLocalName()));
+                new StructuredQName("", schemaType.getNamespaceUri(), schemaType.getLocalName()));
             if (type == null) {
                 throw new SaxonApiException("Unknown schema type " + schemaType.getClarkName());
             }

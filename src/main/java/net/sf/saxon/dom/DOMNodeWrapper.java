@@ -26,6 +26,7 @@ import org.w3c.dom.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 
 /**
@@ -36,7 +37,6 @@ import java.util.Arrays;
  * on the Document object.</p>
  */
 
-@SuppressWarnings({"SynchronizeOnNonFinalField"})
 public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCountingNode, SteppingNode {
 
     protected Node node;
@@ -117,9 +117,6 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                 wrapper.nodeKind = Type.ATTRIBUTE;
                 break;
             case Node.TEXT_NODE:
-                wrapper = new DOMNodeWrapper(node, docWrapper, parent, index);
-                wrapper.nodeKind = Type.TEXT;
-                break;
             case Node.CDATA_SECTION_NODE:
                 wrapper = new DOMNodeWrapper(node, docWrapper, parent, index);
                 wrapper.nodeKind = Type.TEXT;
@@ -193,7 +190,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     private boolean equalOrNull(String a, String b) {
-        return a==null ? b==null : a.equals(b);
+        return Objects.equals(a, b);
     }
 
     /**
@@ -303,7 +300,6 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                     break;
                 case Node.COMMENT_NODE:
                 case Node.PROCESSING_INSTRUCTION_NODE:
-                    break;
                 case Node.DOCUMENT_TYPE_NODE:
                     break;
                 default:
@@ -511,17 +507,15 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     public DOMNodeWrapper getParent() {
         if (parent == null) {
             synchronized (docWrapper.docNode) {
-                switch (getNodeKind()) {
-                    case Type.ATTRIBUTE:
-                        parent = makeWrapper(((Attr) node).getOwnerElement(), docWrapper);
-                        break;
-                    default:
-                        Node p = node.getParentNode();
-                        if (p == null) {
-                            return null;
-                        } else {
-                            parent = makeWrapper(p, docWrapper);
-                        }
+                if (getNodeKind() == Type.ATTRIBUTE) {
+                    parent = makeWrapper(((Attr) node).getOwnerElement(), docWrapper);
+                } else {
+                    Node p = node.getParentNode();
+                    if (p == null) {
+                        return null;
+                    } else {
+                        parent = makeWrapper(p, docWrapper);
+                    }
                 }
             }
         }
@@ -904,6 +898,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
 
     @Override
     public SteppingNode getSuccessorElement(SteppingNode anchor, NamespaceUri uri, String local) {
+        String uriStr = uri==null? null : uri.toString();
         synchronized (docWrapper.docNode) {
             Node stop = anchor == null ? null : ((DOMNodeWrapper)anchor).node;
             Node next = node;
@@ -912,7 +907,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
             } while (next != null &&
                     !(next.getNodeType() == Node.ELEMENT_NODE &&
                             (local == null || local.equals(getLocalName(next))) &&
-                            (uri == null || uri.equals(getElementURI((Element) next)))));
+                              (uri == null || uriStr.equals(getElementURI((Element) next)))));
             if (next == null) {
                 return null;
             } else {
@@ -952,9 +947,8 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     private final class AttributeEnumeration implements AxisIterator, LookaheadIterator {
 
         private final ArrayList<Node> attList = new ArrayList<>(10);
-        private int ix = 0;
+        private int ix;
         private final DOMNodeWrapper start;
-        private DOMNodeWrapper current;
 
         public  AttributeEnumeration(DOMNodeWrapper start) {
             synchronized (start.docWrapper.docNode) {
@@ -989,7 +983,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
             if (ix >= attList.size()) {
                 return null;
             }
-            current = makeWrapper(attList.get(ix), docWrapper, start, ix);
+            DOMNodeWrapper current = makeWrapper(attList.get(ix), docWrapper, start, ix);
             ix++;
             return current;
         }
@@ -1008,7 +1002,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
 
         private final DOMNodeWrapper start;
         private final DOMNodeWrapper commonParent;
-        private final boolean downwards;  // iterate children of start node (not siblings)
+        // iterate children of start node (not siblings)
         private final boolean forwards;   // iterate in document order (not reverse order)
         private final boolean elementsOnly;
         NodeList childNodes;
@@ -1031,7 +1025,6 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                                 boolean downwards, boolean forwards, boolean elementsOnly) {
             synchronized (start.docWrapper.docNode) {
                 this.start = start;
-                this.downwards = downwards;
                 this.forwards = forwards;
                 this.elementsOnly = elementsOnly;
                 currentSpan = 1;
@@ -1089,8 +1082,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         private int skipFollowingTextNodes() {
             int count = 0;
             int pos = ix;
-            final int len = childNodesLength;
-            while (pos < len) {
+            while (pos < childNodesLength) {
                 Node node = childNodes.item(pos);
                 short kind = node.getNodeType();
                 if (kind == Node.TEXT_NODE || kind == Node.CDATA_SECTION_NODE) {

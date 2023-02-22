@@ -9,6 +9,7 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +25,9 @@ public class NamespaceUri {
 
     private final static ConcurrentHashMap<String, NamespaceUri> stringToNamespaceUri = new ConcurrentHashMap<>(20);
 
+    @CSharpReplaceBody(code="content ??= \"\";\n"
+            + "return Saxon.Impl.Helpers.MapUtils.ComputeIfAbsent(stringToNamespaceUri, Saxon.Hej.value.Whitespace.trim(content), str => new Saxon.Hej.om.NamespaceUri(str));\n"
+            )
     public static NamespaceUri of(String content) {
         if (content == null) {
             content = "";

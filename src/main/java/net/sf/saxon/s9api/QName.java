@@ -238,13 +238,28 @@ public class QName {
     }
 
     /**
-     * The namespace URI of the QName. Returns the zero-length string if the
+     * The namespace URI of the QName, as a string. Returns the zero-length string if the
      * QName is not in a namespace.
      *
      * @return the namespace part of the QName, or "" for a name in no namespace
      */
 
-    public String getURI() {
+    public String getNamespace() {
+        return sqName.getNamespaceUri().toString();
+    }
+
+    /**
+     * The namespace URI of the QName, as a string. Returns the zero-length string if the
+     * QName is not in a namespace.
+     *
+     * <p>Retained for backwards compatibility; deprecated.</p>
+     *
+     * @return the namespace part of the QName, or "" for a name in no namespace
+     * @deprecated since 12.0 - use {@link #getNamespaceUri()} or {@link #getNamespace()}
+     */
+
+    @Deprecated
+    public String getNamespaceURI() {
         return sqName.getNamespaceUri().toString();
     }
 
@@ -252,10 +267,10 @@ public class QName {
      * The namespace URI of the QName. Returns {@link NamespaceUri#NULL} (the zero-length string) if the
      * QName is not in a namespace.
      *
-     * @return the namespace part of the QName, or "" for a name in no namespace
+     * @return the namespace part of the QName, or NamespaceUri#NULL for a name in no namespace
      */
 
-    public NamespaceUri getNamespaceURI() {
+    public NamespaceUri getNamespaceUri() {
         return sqName.getNamespaceUri();
     }
 
@@ -280,7 +295,7 @@ public class QName {
      */
 
     public String getClarkName() {
-        NamespaceUri uri = getNamespaceURI();
+        NamespaceUri uri = getNamespaceUri();
         if (uri.isEmpty()) {
             return getLocalName();
         } else {
@@ -296,7 +311,7 @@ public class QName {
    *
    */
     public String getEQName() {
-        NamespaceUri uri = getNamespaceURI();
+        NamespaceUri uri = getNamespaceUri();
         if (uri.isEmpty()) {
             return getLocalName();
         } else {

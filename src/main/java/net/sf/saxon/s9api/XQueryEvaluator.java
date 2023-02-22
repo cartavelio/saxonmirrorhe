@@ -715,7 +715,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
 
     public XdmValue callFunction(QName function, XdmValue... arguments) throws SaxonApiException {
         final UserFunction fn = expression.getMainModule().getUserDefinedFunction(
-                function.getNamespaceURI(), function.getLocalName(), arguments.length);
+                function.getNamespaceUri(), function.getLocalName(), arguments.length);
         if (fn == null) {
             throw new SaxonApiException("No function with name " + function.getEQName() +
                     " and arity " + arguments.length + " has been declared in the query");

@@ -182,7 +182,7 @@ public class XdmUtils {
      *
      */
     public static String getEQName(QName qname) {
-        String uri = qname.getNamespaceURI().toString();
+        String uri = qname.getNamespaceUri().toString();
         if (uri.length() == 0) {
             return qname.getLocalName();
         } else {

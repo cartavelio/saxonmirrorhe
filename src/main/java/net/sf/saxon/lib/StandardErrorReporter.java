@@ -531,7 +531,7 @@ public class StandardErrorReporter
         if (outputErrorCodes) {
             QName qCode = err.getErrorCode();
             if (qCode != null) {
-                if (qCode.getNamespaceURI().equals(NamespaceUri.ERR)) {
+                if (qCode.getNamespaceUri().equals(NamespaceUri.ERR)) {
                     return qCode.getLocalName() + " ";
                 } else {
                     return qCode.toString() + " ";
