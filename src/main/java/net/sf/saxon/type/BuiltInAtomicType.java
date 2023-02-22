@@ -1143,7 +1143,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
                     if (((DecimalValue)primValue).isWholeNumber()) {
                         return null;
                     } else {
-                        return new ValidationFailure("xs:decimal value " + primValue.toShortString() + " cannot be down-cast to xs:integer");
+                        return new ValidationFailure("xs:decimal value " + primValue.toShortString() + " cannot be used where xs:integer is required");
                     }
                 } else {
                     return null;
