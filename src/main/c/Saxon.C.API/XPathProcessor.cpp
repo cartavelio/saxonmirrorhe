@@ -269,7 +269,7 @@ if (!mID) {
             xdmItem =  new XdmArray(result);
         } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
 		    xdmItem = new XdmFunctionItem(result);
-			return xdmItem;
+
 		}
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
 		return xdmItem;
