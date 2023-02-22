@@ -93,6 +93,34 @@ public class TestXdmFunction {
         }
     }
 
+
+    @Test
+    public void testCallSystemFunctionWithContextDependency() {
+        try {
+            Processor proc = new Processor(false);
+            XdmFunctionItem fi = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceConstant.FN, "local-name"), 0);
+            assertNotNull(fi);
+            XdmValue result = fi.call(proc);
+            fail("Unexpected success");
+        } catch (SaxonApiException e) {
+            assertEquals("XPDY0002", e.getErrorCode().getLocalName());
+        }
+    }
+
+    @Test
+    public void testCallPositionFunction() {
+        try {
+            Processor proc = new Processor(false);
+            XdmFunctionItem fi = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceConstant.FN, "position"), 0);
+            assertNotNull(fi);
+            XdmValue result = fi.call(proc);
+            fail("Unexpected success");
+        } catch (SaxonApiException e) {
+            assertEquals("XPDY0002", e.getErrorCode().getLocalName());
+        }
+    }
+
+
     @Test
     public void testCallSystemFunctionFailIfUnlicensed() {
         try {
