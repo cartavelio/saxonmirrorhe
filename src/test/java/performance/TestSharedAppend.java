@@ -8,7 +8,6 @@
 package performance;
 
 import net.sf.saxon.s9api.*;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestSharedAppend {
 
     @Test
-    @Tag("performance")
+    //@Tag("performance")
     public void testAppend() {
         try {
             Processor p = new Processor(false);
@@ -55,6 +54,7 @@ public class TestSharedAppend {
             assertTrue(last < 1200, "performance");
             // Saxon 9.6 with new Chain implementation takes 968ms for n=1000000
             // Saxon 9.7 - 520ms
+            // Saxon 11.2 with new ZenoSequence - 225ms
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
@@ -92,6 +92,20 @@ public class TestSharedAppend {
             assertTrue(last < 1500, "performance");
             // Saxon 9.6 with new Chain implementation takes 968ms for n=1000000
             // Saxon 9.7: 699ms
+            // Saxon 10.6 results:
+            //    Prepend: 1000 time: 1 ms
+            //    Prepend: 10000 time: 8 ms
+            //    Prepend: 100000 time: 67 ms
+            //    Prepend: 200000 time: 110 ms
+            //    Prepend: 300000 time: 165 ms
+            //    Prepend: 1000000 time: 424 ms
+            // Saxon 11.2 results:
+            //    Prepend: 1000 time: 1 ms
+            //    Prepend: 10000 time: 19 ms
+            //    Prepend: 100000 time: 64 ms
+            //    Prepend: 200000 time: 81 ms
+            //    Prepend: 300000 time: 115 ms
+            //    Prepend: 1000000 time: 411 ms
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
