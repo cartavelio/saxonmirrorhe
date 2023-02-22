@@ -7,8 +7,8 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.compat.ArithmeticExpression10;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.compat.ArithmeticExpression10;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StandardNames;
@@ -198,7 +198,7 @@ public class ArithmeticExpression extends BinaryExpression {
 
         // If the calculator is going to promote arguments to xs:double, then promote any literal arguments now.
         // (Could generalize this, but this is the common case)
-        if (calculator.code().matches("d.d")) {
+        if (calculator instanceof Calculator.DoubleOpDouble) {
             if (getLhsExpression() instanceof Literal && !type0.equals(BuiltInAtomicType.DOUBLE)) {
                 GroundedValue value = ((Literal) getLhsExpression()).getGroundedValue();
                 if (value instanceof NumericValue) {
