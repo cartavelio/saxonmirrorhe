@@ -179,6 +179,24 @@
        
     </category>
     
+    <category name="performance">
+        
+        <p>The strategy for lazy evaluation of variables has changed. In the past, Saxon made a compile-time decision whether to evaluate
+        variables eagerly or lazily. The problem with this is that it's hard to get the decision right: lazy evaluation imposes
+        a significant overhead (it has to save a copy of the evaluation context) which is not always justified. So Saxon 12 now
+        uses a dynamic learning approach: if lazy evaluation of a variable, after the first few dozen attempts, looks as if it
+        is giving no benefit, future evaluations of the same variable will be done eagerly. This can make significant differences
+        to the execution time of a query or stylesheet, and also to its allocation of heap memory and hence garbage collection
+        costs.</p>
+        
+        <p>TODO: currently implemented only for LetExpression and LetClause. We should do the same thing for function parameters.
+        Note, we're also collecting data on the size of the sequence, which we could potentially use for space allocation,
+        at the moment the data is unused.</p>
+        
+        
+        
+    </category>
+    
    
 
 
