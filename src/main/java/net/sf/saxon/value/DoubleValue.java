@@ -260,6 +260,7 @@ public final class DoubleValue extends NumericValue {
      */
 
     @Override
+    @CSharpReplaceBody(code="return new net.sf.saxon.value.DoubleValue(Saxon.Impl.Helpers.Utils.roundDouble(value, scale));")
     public NumericValue round(int scale) {
         if (Double.isNaN(value)) {
             return this;

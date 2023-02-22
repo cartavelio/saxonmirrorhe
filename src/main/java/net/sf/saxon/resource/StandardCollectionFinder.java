@@ -22,8 +22,6 @@ import net.sf.saxon.trans.XPathException;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Default implementation of the CollectionFinder interface. The standard CollectionFinder recognizes four
@@ -41,19 +39,11 @@ import java.util.Map;
  * </ol>
  */
 
-public class StandardCollectionFinder implements CollectionFinder {
-
-    private final Map<String, ResourceCollection> registeredCollections = new HashMap<>(2);
-
-    /**
-     * Register a specific URI and bind it to a specific ResourceCollection
-     * @param collectionURI the collection URI to be registered. Must not be null.
-     * @param collection the ResourceCollection to be associated with this URI. Must not be null.
-     */
-
-    public void registerCollection(String collectionURI, ResourceCollection collection) {
-        registeredCollections.put(collectionURI, collection);
-    }
+public class StandardCollectionFinder
+        //#if CSHARP==false
+        implements CollectionFinder
+        //#endif
+{
 
     /**
      * Locate the collection of resources corresponding to a collection URI.
@@ -69,12 +59,7 @@ public class StandardCollectionFinder implements CollectionFinder {
 
     @Override
     public ResourceCollection findCollection(XPathContext context, String collectionURI) throws XPathException {
-        checkNotNull(collectionURI, context);
-
-        ResourceCollection registeredCollection = registeredCollections.get(collectionURI);
-        if (registeredCollection != null) {
-            return registeredCollection;
-        }
+        AbstractResourceCollection.checkNotNull(collectionURI, context);
 
         URIQueryParameters params = null;
         String query = null;
@@ -115,6 +100,7 @@ public class StandardCollectionFinder implements CollectionFinder {
             }
         }
 
+        //#if CSHARP==false
         // check if file is a zip file
 
         String regex = context.getConfiguration().getConfigurationProperty(Feature.ZIP_URI_PATTERN);
@@ -124,26 +110,11 @@ public class StandardCollectionFinder implements CollectionFinder {
         if (isJarFileURI(collectionURI) || ARegularExpression.compile(regex, "").containsMatch(StringView.of(collectionURI).tidy())) {
             return new JarCollection(context, collectionURI, params);
         }
+        //#endif
 
         // otherwise assume the URI identifies a collection catalog
 
         return new CatalogCollection(context.getConfiguration(), collectionURI);
-    }
-
-    /**
-     * If the collectionURI is null, report that no default collection exists
-     * @param collectionURI the collection URI to be tested
-     * @param context XPath evaluation context
-     * @throws XPathException if the collectionURI is null
-     */
-
-    public static void checkNotNull(String collectionURI, XPathContext context) throws XPathException {
-        if (collectionURI == null) {
-            XPathException err = new XPathException("No default collection has been defined");
-            err.setErrorCode("FODC0002");
-            err.setXPathContext(context);
-            throw err;
-        }
     }
 
     /**

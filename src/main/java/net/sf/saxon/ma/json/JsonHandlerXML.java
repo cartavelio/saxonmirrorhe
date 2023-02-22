@@ -8,6 +8,7 @@
 package net.sf.saxon.ma.json;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Version;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.Outputter;
@@ -15,19 +16,15 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.StandardEntityResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.transform.sax.SAXSource;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Stack;
+import javax.xml.transform.stream.StreamSource;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * Handler to generate an XML representation of JSON from a series of events
@@ -147,20 +144,12 @@ public class JsonHandlerXML extends JsonHandler {
             // Currently this means we aren't detecting duplicate keys, which would cause validation to fail.
             // The spec needs clarification in this area.
 
-            //#if CSHARP==false
-            // TODO: reinstate for C#?
             try {
                 Configuration config = context.getConfiguration();
                 //noinspection SynchronizationOnLocalVariableOrMethodParameter
                 synchronized (config) {
                     config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "validation", -1);
-                    if (!config.isSchemaAvailable(JSON_NS)) {
-                        InputSource is = new StandardEntityResolver(config).resolveEntity(null, SCHEMA_URI);
-                        if (config.isTiming()) {
-                            config.getLogger().info("Loading a schema from resources for: " + JSON_NS);
-                        }
-                        config.addSchemaSource(new SAXSource(is));
-                    }
+                    loadSchema(config);
                 }
                 String[] typeNames = {"mapType", "arrayType", "stringType", "numberType", "booleanType", "nullType",
                     "mapWithinMapType", "arrayWithinMapType", "stringWithinMapType",
@@ -168,10 +157,20 @@ public class JsonHandlerXML extends JsonHandler {
                 for (String t : typeNames) {
                     setType(t, config.getSchemaType(new StructuredQName(PREFIX, JSON_NS, t)));
                 }
-            } catch (SchemaException | SAXException e) {
+            } catch (SchemaException e) {
                 throw new XPathException(e);
             }
-            //#endif
+        }
+    }
+
+    private void loadSchema(Configuration config) throws SchemaException {
+        if (!config.isSchemaAvailable(JSON_NS)) {
+            List<String> messages = new ArrayList<>();
+            InputStream stream = Version.platform.locateResource("xpath-functions.scm", messages);
+            if (config.isTiming()) {
+                config.getLogger().info("Loading schema for: " + JSON_NS);
+            }
+            config.addSchemaSource(new StreamSource(stream, "classpath:xpath-functions.xsd"));
         }
     }
 

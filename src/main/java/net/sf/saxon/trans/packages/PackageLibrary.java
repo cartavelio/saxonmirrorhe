@@ -209,7 +209,13 @@ public class PackageLibrary {
         if (candidates.isEmpty()) {
             return null;
         } else if (candidates.size() == 1) {
-            return candidates.iterator().next();
+            Iterator<PackageDetails> iter = candidates.iterator();
+            if (iter.hasNext()) {
+                // written this way for C# conversion
+                return iter.next();
+            } else {
+                return null;
+            }
         } else {
             // more than one candidate
             Set<PackageVersion> shortList = new HashSet<>();

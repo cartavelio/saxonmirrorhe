@@ -344,7 +344,7 @@ public abstract class AbstractXsltTransformer {
     protected void applyTemplatesToSource(Source source, Receiver out) throws XPathException {
         Objects.requireNonNull(source);
         Objects.requireNonNull(out);
-        if (controller.getInitialMode().isDeclaredStreamable() && isStreamableSource(source)) {
+        if (controller.getInitialMode().isDeclaredStreamable()) {
             controller.applyStreamingTemplates(source, out);
         } else {
             NodeInfo node;
@@ -411,16 +411,19 @@ public abstract class AbstractXsltTransformer {
      *                 mode defined in the stylesheet header as the default mode.
      *                 The value null also indicates the default mode (which defaults to the unnamed
      *                 mode, but can be set differently in an XSLT 3.0 stylesheet).
-     * @throws IllegalArgumentException if the requested mode is not defined in the stylesheet
-     * @since changed in 9.6 to throw an exception if the mode is not defined in the stylesheet.
-     * Chaned in 9.7 so that null means the default mode, not necessarily the unnamed mode.
+     * @throws SaxonApiException if the requested mode is not defined in the stylesheet, or if
+     * it is defined with visibility="private".
+     * @since Changed in 9.6 to throw an exception if the mode is not defined in the stylesheet.
+     * Changed in 9.7 so that null means the default mode, not necessarily the unnamed mode.
+     * Changed in 11 to throw SaxonApiException rather than IllegalArgumentException, to
+     * prevent the error code being lost.
      */
 
-    public void setInitialMode(QName modeName) throws IllegalArgumentException {
+    public void setInitialMode(QName modeName) throws SaxonApiException {
         try {
             controller.setInitialMode(modeName == null ? null : modeName.getStructuredQName());
         } catch (XPathException e) {
-            throw new IllegalArgumentException(e);
+            throw new SaxonApiException(e);
         }
     }
 

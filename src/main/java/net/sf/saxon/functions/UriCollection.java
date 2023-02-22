@@ -8,18 +8,13 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.lib.CollectionFinder;
 import net.sf.saxon.lib.ResourceCollection;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpInnerClass;
-import net.sf.saxon.transpile.CSharpModifiers;
-import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.transpile.CSharpSuppressWarnings;
+import net.sf.saxon.tree.jiter.MappingJavaIterator;
 import net.sf.saxon.value.AnyURIValue;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
@@ -31,45 +26,34 @@ import java.util.Iterator;
  */
 
 public class UriCollection extends SystemFunction {
-//#if CSHARP==false
-    @CSharpInnerClass(outer=false, extra={"java.util.Iterator<string> sources"})
-    private SequenceIterator getUris(final String href, final XPathContext context) throws XPathException {
-        ResourceCollection rCollection = context.getConfiguration().getCollectionFinder().findCollection(context, href);
-        if (rCollection == null) {
+
+    //@CSharpInnerClass(outer=false, extra={"java.util.Iterator<string> sources"})
+    private SequenceIterator getUris(final String absoluteURI, final XPathContext context) throws XPathException {
+
+        // Use a collection registered with the configuration if there is one
+
+        ResourceCollection collection = context.getConfiguration().getRegisteredCollection(absoluteURI);
+
+        // Call the user-supplied CollectionFinder to get the ResourceCollection
+
+        if (collection == null) {
+            CollectionFinder collectionFinder = context.getController().getCollectionFinder();
+            if (collectionFinder != null) {
+                collection = collectionFinder.findCollection(context, absoluteURI);
+            }
+        }
+
+        if (collection == null) {
             // Should not happen, we're calling user code so we check for it.
-            XPathException err = new XPathException("No collection has been defined for href: " + (href == null ? "" : href));
+            XPathException err = new XPathException("No collection has been defined for href: " + (absoluteURI == null ? "" : absoluteURI));
             err.setErrorCode("FODC0002");
             err.setXPathContext(context);
             throw err;
 
         }
-        final Iterator<String> sources = rCollection.getResourceURIs(context);
-        return new SequenceIterator() {
-
-            @Override
-            @CSharpModifiers(code={"public", "override"})
-            @CSharpSuppressWarnings("UnsafeIteratorConversion")
-            public AnyURIValue next() {
-                if (sources.hasNext()) {
-                    return new AnyURIValue(sources.next());
-                } else {
-                    return null;
-                }
-            }
-
-            @Override
-            @CSharpModifiers(code = {"public", "override"})
-            public void close() {
-                if (sources instanceof Closeable) {
-                    try {
-                        ((Closeable) sources).close();
-                    } catch (IOException e) {
-                        throw new UncheckedXPathException(new XPathException(e));
-                    }
-                }
-            }
-
-        };
+        final Iterator<String> sources = collection.getResourceURIs(context);
+        final Iterator<AnyURIValue> uris = new MappingJavaIterator<String, AnyURIValue>(sources, s -> new AnyURIValue(s));
+        return new IteratorWrapper(uris);
     }
 
     private Sequence getDefaultUriCollection(XPathContext context) throws XPathException {
@@ -81,7 +65,7 @@ public class UriCollection extends SystemFunction {
         }
     }
 
-//#endif
+
     /**
      * Evaluate the expression
      *
@@ -92,7 +76,7 @@ public class UriCollection extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    @CSharpReplaceBody(code="throw new NotImplementedException();")
+    //@CSharpReplaceBody(code="throw new NotImplementedException();")
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         if (arguments.length == 0) {
             return getDefaultUriCollection(context);

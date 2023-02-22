@@ -19,7 +19,6 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.wrapper.SpaceStrippedDocument;
 import net.sf.saxon.type.Type;
@@ -83,10 +82,6 @@ public class CollectionFn extends SystemFunction implements Callable {
             return true;
         }
 
-        @Override
-        public boolean stripWhitespace(SpaceStrippingRule rules) {
-            return false;
-        }
     }
 
     @Override
@@ -96,7 +91,6 @@ public class CollectionFn extends SystemFunction implements Callable {
         return (super.getSpecialProperties(arguments) & ~StaticProperty.NO_NODES_NEWLY_CREATED) | StaticProperty.PEER_NODESET;
     }
 
-    //#if CSHARP==false
     private String getAbsoluteCollectionURI(String href, XPathContext context) throws XPathException {
         String absoluteURI;
         if (href == null) {
@@ -148,7 +142,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         return new CollectionIterator(sources);
     }
 
-    private static class CollectionIterator implements SequenceIterator, Closeable {
+    private static class CollectionIterator implements SequenceIterator {
 
         private final Iterator<? extends Resource> sources;
 
@@ -157,7 +151,6 @@ public class CollectionFn extends SystemFunction implements Callable {
         }
 
         @Override
-        @CSharpModifiers(code = {"public", "override"})
         public Item next() {
             if (sources.hasNext()) {
                 return new ObjectValue<Resource>(sources.next());
@@ -167,7 +160,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         }
 
         @Override
-        @CSharpModifiers(code = {"public", "override"})
+        @CSharpReplaceBody(code="sources.Dispose();")
         public void close() {
             if (sources instanceof Closeable) {
                 try {
@@ -179,8 +172,6 @@ public class CollectionFn extends SystemFunction implements Callable {
         }
     }
 
-    //#endif
-
     /**
      * Dynamic call on collection() function
      *
@@ -191,7 +182,7 @@ public class CollectionFn extends SystemFunction implements Callable {
      */
 
     @Override
-    @CSharpReplaceBody(code="throw new NotImplementedException();")
+    //@CSharpReplaceBody(code="throw new NotImplementedException();")
     public Sequence call(final XPathContext context, Sequence[] arguments) throws XPathException {
         String href;
         if (getArity() == 0) {
@@ -232,10 +223,19 @@ public class CollectionFn extends SystemFunction implements Callable {
             return cachedCollection;
         }
 
+        // Use a collection registered with the configuration if there is one
+
+        ResourceCollection collection = context.getConfiguration().getRegisteredCollection(absoluteURI);
+
         // Call the user-supplied CollectionFinder to get the ResourceCollection
 
-        CollectionFinder collectionFinder = context.getController().getCollectionFinder();
-        ResourceCollection collection = collectionFinder.findCollection(context, absoluteURI);
+        if (collection == null) {
+            CollectionFinder collectionFinder = context.getController().getCollectionFinder();
+            if (collectionFinder != null) {
+                collection = collectionFinder.findCollection(context, absoluteURI);
+            }
+        }
+
         if (collection == null) {
             collection = new EmptyCollection(EMPTY_COLLECTION_URI);
         }
@@ -244,7 +244,7 @@ public class CollectionFn extends SystemFunction implements Callable {
 
         if (packageData instanceof StylesheetPackage && whitespaceRule != NoElementsSpaceStrippingRule.getInstance()) {
             if (collection instanceof AbstractResourceCollection) {
-                boolean alreadyStripped = collection.stripWhitespace(whitespaceRule);
+                boolean alreadyStripped = ((AbstractResourceCollection)collection).stripWhitespace(whitespaceRule);
                 if (alreadyStripped) {
                     whitespaceRule = null;
                 }

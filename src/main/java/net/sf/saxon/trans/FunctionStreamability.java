@@ -37,7 +37,6 @@ public enum FunctionStreamability {
     public static FunctionStreamability of(String v) {
         switch (v) {
             case "unclassified":
-            default:
                 return UNCLASSIFIED;
             case "absorbing":
                 return ABSORBING;
@@ -51,6 +50,8 @@ public enum FunctionStreamability {
                 return DEEP_DESCENT;
             case "ascent":
                 return ASCENT;
+            default:
+                throw new IllegalArgumentException();
         }
     }
 

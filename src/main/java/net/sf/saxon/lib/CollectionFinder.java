@@ -19,7 +19,7 @@ import net.sf.saxon.transpile.CSharpDelegate;
  * called to get a {@link ResourceCollection} object representing the collection of resources identified by
  * the supplied collection URI.
  *
- * @since 9.7: Supersedes URICollectionResolver.
+ * @since 9.7: Supersedes CollectionURIResolver.
  * The interface was changed to return Resource objects, to allow streamed
  * processing of the documents in a collection; and to pass a properties object that
  * can be used to indicate whether the collection is stable (that is, repeated requests
