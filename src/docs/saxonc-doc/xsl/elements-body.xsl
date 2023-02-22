@@ -8,7 +8,7 @@
     exclude-result-prefixes="xs el"
     version="3.0"> 
     
-    <!-- For Saxon-JS documentation: Used to produce ixsl-extension instructions pages (in browser),
+    <!-- For SaxonJS documentation: Used to produce ixsl-extension instructions pages (in browser),
             from doc/saxonc-extension.xml (contains el:saxon-element elements) -->
 
     <!-- variable "implement-doc" is defined in jstree.xsl 

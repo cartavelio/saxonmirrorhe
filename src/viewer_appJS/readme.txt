@@ -1,5 +1,5 @@
 The viewer_appJS directory is the container for all the resource files used for rendering the Saxon documentation
-using Saxon-JS. 
+using SaxonJS. 
 
 This directory is designed to be maintained under source-control, but also to be used as a localhost web-server
 virtual directory to view the documentation in a browser.
@@ -36,13 +36,13 @@ Container for the images used by the viewer application - such as icon images, l
 --------------
 Java API documentation content XML files, generated from code.
 
-7. Saxon-JS
+7. SaxonJS
 -----------
-Contains the Saxon-JS release to be used (currently SaxonJS2.rt.js as specified in index.html).
+Contains the SaxonJS release to be used (currently SaxonJS2.rt.js as specified in index.html).
 
 8. xsl
 ------
-Holds the source XSLT files, and the Saxon-EE generated SEF (stylesheet export file) used by Saxon-JS to render the web
+Holds the source XSLT files, and the Saxon-EE generated SEF (stylesheet export file) used by SaxonJS to render the web
 pages dynamically. The main stylesheet is viewer_app.xsl.
 
 
@@ -51,7 +51,7 @@ Top-level Files
 
 1. index.html
 -------------
-The entry-point for the website - this is modified by Saxon-JS using catalog.xml as the starting point.
+The entry-point for the website - this is modified by SaxonJS using catalog.xml as the starting point.
 
 2. saxon-base.css
 -------------
@@ -63,7 +63,7 @@ Style definitions controlling both page layout and content rendering.
 
 4. viewer_app.js
 -------------
-Contains javascript functions used by the Saxon-JS viewer_app XSLT.
+Contains javascript functions used by the SaxonJS viewer_app XSLT.
 
 
 Other Dependencies

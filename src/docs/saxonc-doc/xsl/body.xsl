@@ -74,7 +74,7 @@
                 </a>
             </xsl:when>
             <xsl:when test="substring-after(@href, '.') = ('zip','pdf','txt','xsl','xsd','xml')">
-                <!-- Unused in Saxon-JS documentation.
+                <!-- Unused in SaxonJS documentation.
                     - I think only used in main documentation in example of link to internal
                     resource /docimg/web-changes.pdf in help-system -->
                 <xsl:variable name="href"

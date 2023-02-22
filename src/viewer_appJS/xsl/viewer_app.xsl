@@ -51,7 +51,7 @@
         <xsl:variable name="catDocName" select="concat($location, '/catalog.xml')"/>
         
         <xsl:if test="$showStatusMessage">
-            <xsl:message expand-text="yes">{$SEFbuildDate} {$product} documentation app running with Saxon-JS {ixsl:eval('SaxonJS.getProcessorInfo()["productVersion"]')}</xsl:message>
+            <xsl:message expand-text="yes">{$SEFbuildDate} {$product} documentation app running with SaxonJS {ixsl:eval('SaxonJS.getProcessorInfo()["productVersion"]')}</xsl:message>
         </xsl:if>
         <ixsl:schedule-action document="{$catDocName}">
             <xsl:call-template name="list">
@@ -976,7 +976,7 @@
         </xsl:for-each>
     </xsl:template>
 
-    <!-- Saxon-JS documentation version changes to make this work for ixsl-extension/functions too: 
+    <!-- SaxonJS documentation version changes to make this work for ixsl-extension/functions too: 
             see if test="exists($section/fnd:function)" branch 
         - But we don't include the full list of functions in the main Saxon documentation app
             - see unused "add-list-fn" template below -->

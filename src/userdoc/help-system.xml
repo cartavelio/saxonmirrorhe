@@ -173,7 +173,7 @@
                             above.)</p></td>
                     </tr>
                     <tr>
-                        <td><p>Saxon-JS/*.*</p></td>
+                        <td><p>SaxonJS/*.*</p></td>
                         <td><p>SaxonJS processor.</p></td>
                     </tr>
                     <!-- The following are now "external" -->

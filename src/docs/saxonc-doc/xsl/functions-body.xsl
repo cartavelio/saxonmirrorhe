@@ -8,7 +8,7 @@
     extension-element-prefixes="ixsl"
     version="3.0">
     
-    <!-- For Saxon-JS documentation: 
+    <!-- For SaxonJS documentation: 
         - used to produce ixsl-extension functions pages (in browser),
             from doc/saxonc-extension.xml (contains fnd:functions elements) -->
     
@@ -33,7 +33,7 @@
         <xsl:variable name="default.saxon"
             select="$implement/implement/default[@id = $namespace]/@saxon"/>
         
-        <ixsl:set-property name="document.title" select="concat('Saxon-JS ', f:fn-name(.))"/>
+        <ixsl:set-property name="document.title" select="concat('SaxonJS ', f:fn-name(.))"/>
         
         <h1>
             <xsl:value-of select="f:fn-name(.)"/>
@@ -152,7 +152,7 @@
     <!-- Namespace main page. -->
     <xsl:template match="section" mode="function-list">
         <xsl:variable name="namespace" select="fnd:function[1]/fnd:name/@namespace"/>
-        <ixsl:set-property name="document.title" select="concat('Saxon-JS ', @title)"/>
+        <ixsl:set-property name="document.title" select="concat('SaxonJS ', @title)"/>
         
         <!-- Default content of hover box. -->
         <div id="fn-desc">
