@@ -137,9 +137,7 @@
                   SaxonJ-HE which you can download:</p>
                  <ul>
                     <li>From <a href="https://mvnrepository.com/artifact/net.sf.saxon/Saxon-HE" class="bodylink">Maven</a></li>
-                    <li>From <a
-                       href="http://sourceforge.net/project/showfiles.php?group_id=29872"
-                       class="bodylink">SourceForge</a></li>
+                    <li>From <a href="https://github.com/Saxonica/Saxon-HE/" class="bodylink">GitHub</a></li>
                  </ul>
                <p>Alternatively, the commercial versions of the
                   product (SaxonJ-PE and SaxonJ-EE) can be downloaded from <a
@@ -188,7 +186,7 @@
                <p>As a first-time user, you may find it useful to install the sample applications.
                   These are packaged together with a copy of this documentation in the file
                   <code>saxon-resources-12.zip</code>. This can be downloaded from
-                  either the SourceForge or Saxonica sites (it is the same file in both cases).
+                  either the GitHub Saxon-HE repository or Saxonica sites (it is the same file in both cases).
                   Unzip the contents of this file into the same directory as the Saxon software.
                   When you run a program that uses Saxon, this program as well as Saxon itself will
                   need to be on the classpath. For more details of the classpath, see <a
@@ -559,9 +557,9 @@
          <h1>Installing the software</h1>
 
 
-         <p>An index of all currently available open-source versions of Saxon is on <a
-               href="http://sourceforge.net/project/showfiles.php?group_id=29872" class="bodylink"
-               >the download page at SourceForge</a>. It is also possible to install using Maven
+         <p>All current open-source versions of Saxon can be downloaded from the <a
+            href="https://github.com/Saxonica/Saxon-HE/" class="bodylink"
+               >Saxonica Saxon-HE GitHub repository</a>. It is also possible to install using Maven
          using the artifact id <code>Saxon-HE</code> (please avoid other artefacts using the Saxon name
          which were created at various times by third parties and are not maintained by Saxonica).</p>
 
@@ -1349,9 +1347,9 @@ any version number.</p>
       <p>Source code, sample files, and documentation are not included in the same download file as
          the executable code. Instead, the samples and documentation are available in a separate
          resources file <code>saxon-resources-12.zip</code>, which can be downloaded from either the
-         <a href="https://sourceforge.net/projects/saxon/files/" class="bodylink">SourceForge Saxon
-            project</a> or the <a href="https://www.saxonica.com/"
-               class="bodylink">www.saxonica.com</a> sites. The documentation is also available
+         <a href="https://github.com/Saxonica/Saxon-HE/" class="bodylink">GitHub Saxon-HE
+            repository</a> or the <a href="https://www.saxonica.com/"
+               class="bodylink">www.saxonica.com</a> site. The documentation is also available
          online.</p>
       
       
@@ -1376,8 +1374,8 @@ any version number.</p>
                class="bodylink">a GIT repository</a>. This also includes gradle build scripts, which
                you may need to customize to remove unwanted dependencies.</li>
          <li>The preprocessed source code, suitable for dropping into your IDE, is available
-            as a download on <a href="https://sourceforge.net/projects/saxon/files/Saxon-HE/"
-         class="bodylink">SourceForge</a>.</li>
+            as a download in the <a href="https://github.com/Saxonica/Saxon-HE/"
+         class="bodylink">Saxonica Saxon-HE GitHub repository</a>.</li>
       </ul>
 
       <p>The modules included in the original source code of SaxonJ-HE are also used, 
@@ -1394,12 +1392,9 @@ any version number.</p>
       <h2 class="subtitle">User documentation</h2>
 
       <p>User documentation (this documentation, together with API specifications for the Java and
-         C# products) is also available for download from the SourceForge site. The resources
+         C# products) is also available for download from the Saxonica Saxon-HE GitHub repository. The resources
          download contains exactly the same information as the documentation section of the Saxonica
-         website. It also contains this documentation in its original XHTML form, together with the
-         schemas and stylesheets used to publish it. Note that online documentation is available
-         only for a few recent Saxon versions; older versions can be downloaded from
-         SourceForge.</p>
+         website. It also contains the SaxonC documentation.</p>
 
       <h2 class="subtitle">Sample applications</h2>
 
