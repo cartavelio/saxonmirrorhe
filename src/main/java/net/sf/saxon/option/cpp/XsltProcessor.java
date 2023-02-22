@@ -114,11 +114,11 @@ public class XsltProcessor extends SaxonCAPI {
         return null;//xslMessages.toArray(new XdmNode[xslMessages.size()]);
     }
 
-    public MessageListener newMessageListener(String cwd, String mode)  throws SaxonApiException {
+    public MessageListener2 newMessageListener(String cwd, String mode)  throws SaxonApiException {
         return new MyMessageListener(cwd, mode);
     }
 
-    public class MyMessageListener implements MessageListener {
+    public class MyMessageListener implements MessageListener2 {
 
         int mode = 0;
         String messageFilename = null;
@@ -145,7 +145,8 @@ public class XsltProcessor extends SaxonCAPI {
             }
         }
 
-        public void message(XdmNode content, boolean terminate, SourceLocator locator) {
+        @Override
+        public void message(XdmNode content, QName errorCode, boolean terminate, SourceLocator locator) {
             if(mode == 1) {
                 System.err.println(content.getStringValue());
             }  else if( mode == 2) {
