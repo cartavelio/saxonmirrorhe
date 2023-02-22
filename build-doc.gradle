@@ -24,29 +24,43 @@ task documentation(
 // ============================================================
 
 task filter_sources_for_javadoc(
-  type: Copy,
   description: "Copy the Java source files for making JavaDoc (excludes some classes)"
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/main/java")
   outputs.files fileTree(dir: "${buildDir}/javadoc_src")
-  
-  // N.B. these exclusions are also applied in the tasks below.
-  into "${buildDir}/javadoc_src"
-  from ("${projectDir}/src/main/java") {
-    include "net/**"
-    include "com/**"
-    include "javax/**"
-    exclude "**/dotnet/**"
-    exclude "net/sf/saxon/option/cpp/**"
-    exclude "net/sf/saxon/testdriver/**"
-    exclude "com/saxonica/functions/extfn/cpp/**"
-    exclude "com/saxonica/js/**"
-    exclude "com/saxonica/testdriver/**"
-    exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
-    exclude "com/saxonica/config/DotNetExtensionLibrary.java"
-    exclude "com/saxonica/config/DotNetPlatformPE.java"
-    exclude "com/saxonica/config/JavaPlatformC.java"
-    exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+
+  doLast {
+    copy {
+      into "${buildDir}/javadoc_src"
+      from ("${projectDir}/src/main/java") {
+        include "net/**"
+        include "com/**"
+        include "javax/**"
+        exclude "**/dotnet/**"
+        exclude "net/sf/saxon/option/cpp/**"
+        exclude "net/sf/saxon/testdriver/**"
+        exclude "com/saxonica/functions/extfn/cpp/**"
+        exclude "com/saxonica/js/**"
+        exclude "com/saxonica/testdriver/**"
+        exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
+        exclude "com/saxonica/config/DotNetExtensionLibrary.java"
+        exclude "com/saxonica/config/DotNetPlatformPE.java"
+        exclude "com/saxonica/config/JavaPlatformC.java"
+        exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+      }
+    }
+  }
+
+  doLast {
+    // Whoops, we want NativePlatform even though the rest of option/cpp is excluded.
+    // (If you don't include this, there's at least one broken reference to it. But
+    // maybe that reference should be excluded instead? TBD.)
+    copy {
+      into "${buildDir}/javadoc_src"
+      from ("${projectDir}/src/main/java") {
+        include "net/sf/saxon/option/cpp/NativePlatform.java"
+      }
+    }
   }
 }
 
@@ -219,12 +233,28 @@ task product_jeljavadoc(
                "-doclet", "com.jeldoclet.JELDoclet",
                "-docletpath", cp,
                "-source", "1.8"] + packages.keySet()
+
+    command = ["echo", "FIXME: the .NET javadoc is not being built"]
   }
     
   doLast {
     exec {
       commandLine command
     }
+  }
+
+  doLast {
+    // FIXME: the .NET javadoc is not being built
+    def output = new FileWriter(new File("${buildDir}/jeljavadoc/jeldoclet-out.xml"))
+    output.write("<jel></jel>\n")
+    output.close()
+  }
+
+  doLast {
+    // FIXME: the .NET javadoc is not being built
+    def output = new FileWriter(new File("${buildDir}/jeljavadoc/p-jeldoclet-out.xml"))
+    output.write("<package-comments></package-comments>\n")
+    output.close()
   }
 }
 
@@ -259,7 +289,7 @@ task javadoc_linkchecker(
     "-o:${buildDir}/javadoc-tag-check.xml"
 }
 
-task dotnet_doc_parsecs(
+task FIXME_dotnet_doc_parsecs(
   type: JavaExec,
   dependsOn: ["een_csharpApi"],
   description: "Parse dotnet cs files for docs"
@@ -276,13 +306,28 @@ task dotnet_doc_parsecs(
     "inputdir=${buildDir}/n/csharp/api/Saxon.Api"
 }
 
+task dotnet_doc_parsecs(
+  description: "Parse dotnet cs files for docs"
+) {
+  doFirst {
+    mkdir "${buildDir}/dotnetdoc"
+  }
+
+  doLast {
+    // FIXME: the .NET javadoc is not being built
+    def output = new FileWriter(new File("${buildDir}/dotnetdoc/names.xml"))
+    output.write("<package></package>\n")
+    output.close()
+  }
+}
+
 task dotnet_doc_merge(
   type: JavaExec,
   dependsOn: ["dotnet_doc_parsecs"],
   description: "Merge API docs for dotnet"
 ) {
   inputs.file "${buildDir}/dotnetdoc/names.xml"
-  inputs.file "${buildDir}/n/saxon-ee-api-${saxonVersion}.xml"
+  // FIXME: inputs.file "${buildDir}/n/saxon-ee-api-${saxonVersion}.xml"
   inputs.file "${projectDir}/tools/docs/dotnet/merge.xsl"
   outputs.file "${buildDir}/dotnetdoc/merged.xml"
   classpath = configurations.documentation
