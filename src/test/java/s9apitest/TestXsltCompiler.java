@@ -1073,6 +1073,99 @@ public class TestXsltCompiler {
         }
     }
 
+    @Test
+    public void testBug5556() {
+        // This concerns the result of element-available('xsl:import-schema') under different conditions
+        try {
+            Processor proc = new Processor(true);
+
+
+            String xsl = "<xsl:stylesheet exclude-result-prefixes=\"#all\" version=\"3.0\"\n"
+                    + "  xmlns:test=\"http://www.example.com/test\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n"
+                    + "  xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+                    + "<xsl:param name='import-a-schema' select='false()' static='true'/>"
+                    + "<xsl:variable name='use-when-result' as='xs:boolean' select='true()' use-when='element-available(\"xsl:import-schema\")'/> "
+                    + "<xsl:variable name='use-when-result' as='xs:boolean' select='false()' use-when='not(element-available(\"xsl:import-schema\"))'/> "
+                    + "<xsl:import-schema use-when='$import-a-schema'><xs:schema/></xsl:import-schema>"
+                    + "<xsl:template name=\"xsl:initial-template\">\n"
+                    + "  <out a='{$use-when-result}' b='{element-available(\"xsl:import-schema\")}' c='{element-available(\"xsl:import-schema\"||$zls)}'/> "
+                    + "</xsl:template>"
+                    + "<xsl:param name='zls' select='\"\"'/>"
+                    + "</xsl:stylesheet>";
+
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setSchemaAware(true);
+            XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
+            Xslt30Transformer trans = exec.load30();
+            XdmNode result = (XdmNode) trans.callTemplate(null);
+            assertEquals("true", result.attribute("a"));
+            assertEquals("true", result.attribute("b"));
+            assertEquals("true", result.attribute("c"));
+
+            comp.setSchemaAware(false);
+            XsltExecutable exec2 = comp.compile(new StreamSource(new StringReader(xsl)));
+            Xslt30Transformer trans2 = exec2.load30();
+            XdmNode result2 = (XdmNode) trans2.callTemplate(null);
+            assertEquals("true", result2.attribute("a"));
+            assertEquals("true", result2.attribute("b"));
+            assertEquals("true", result2.attribute("c"));
+
+            XsltCompiler comp3 = proc.newXsltCompiler();
+            comp3.setParameter(new QName("import-a-schema"), new XdmAtomicValue(false));
+            XsltExecutable exec3 = comp3.compile(new StreamSource(new StringReader(xsl)));
+            Xslt30Transformer trans3 = exec3.load30();
+            XdmNode result3 = (XdmNode) trans3.callTemplate(null);
+            assertEquals("true", result3.attribute("a"));
+            assertEquals("true", result3.attribute("b"));
+            assertEquals("true", result3.attribute("c"));
+
+            comp3.setParameter(new QName("import-a-schema"), new XdmAtomicValue(true));
+            XsltExecutable exec4 = comp3.compile(new StreamSource(new StringReader(xsl)));
+            Xslt30Transformer trans4 = exec4.load30();
+            XdmNode result4 = (XdmNode) trans4.callTemplate(null);
+            assertEquals("true", result4.attribute("a"));
+            assertEquals("true", result4.attribute("b"));
+            assertEquals("true", result4.attribute("c"));
+
+            XsltCompiler comp5 = proc.newXsltCompiler();
+            comp5.setParameter(new QName("import-a-schema"), new XdmAtomicValue(false));
+            comp5.setTargetEdition("JS");
+            XsltExecutable exec5 = comp5.compile(new StreamSource(new StringReader(xsl)));
+            Xslt30Transformer trans5 = exec5.load30();
+            XdmNode result5 = (XdmNode) trans5.callTemplate(null);
+            assertEquals("false", result5.attribute("a"));
+            assertEquals("false", result5.attribute("b"));
+            assertEquals("false", result5.attribute("c"));
+
+            comp5.setTargetEdition("HE");
+            exec5 = comp5.compile(new StreamSource(new StringReader(xsl)));
+            trans5 = exec5.load30();
+            result5 = (XdmNode) trans5.callTemplate(null);
+            assertEquals("false", result5.attribute("a"));
+            assertEquals("false", result5.attribute("b"));
+            assertEquals("false", result5.attribute("c"));
+
+            comp5.setTargetEdition("PE");
+            exec5 = comp5.compile(new StreamSource(new StringReader(xsl)));
+            trans5 = exec5.load30();
+            result5 = (XdmNode) trans5.callTemplate(null);
+            assertEquals("false", result5.attribute("a"));
+            assertEquals("false", result5.attribute("b"));
+            assertEquals("false", result5.attribute("c"));
+
+            comp5.setTargetEdition("EE");
+            exec5 = comp5.compile(new StreamSource(new StringReader(xsl)));
+            trans5 = exec5.load30();
+            result5 = (XdmNode) trans5.callTemplate(null);
+            assertEquals("true", result5.attribute("a"));
+            assertEquals("true", result5.attribute("b"));
+            assertEquals("true", result5.attribute("c"));
+
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
 }
 
