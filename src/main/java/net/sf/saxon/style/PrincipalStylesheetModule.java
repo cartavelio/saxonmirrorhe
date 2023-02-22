@@ -1210,6 +1210,8 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 }
             }
 
+            getRuleManager().checkConsistency();
+
             // Register template rules with the rule manager
 
             for (ComponentDeclaration decl : topLevel) {
@@ -1302,7 +1304,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             // Check consistency of modes
 
             RuleManager ruleManager = getRuleManager();
-            ruleManager.checkConsistency();
+            //ruleManager.checkConsistency();   Now done earlier
             ruleManager.computeRankings();
             if (!compilation.isFallbackToNonStreaming()) {
                 ruleManager.invertStreamableTemplates();
