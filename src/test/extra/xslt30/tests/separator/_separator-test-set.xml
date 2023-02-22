@@ -9,11 +9,14 @@
          xmlns:saxon="http://saxon.sf.net/"/>
    </environment>
    
+   <dependencies>
+      <spec value="XSLT40+"/>
+   </dependencies>
+   
    <test-case name="for-each-separator-001">
       <description>Empty sequence</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -32,7 +35,6 @@
       <description>Singleton</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -51,7 +53,6 @@
       <description>Doubleton</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -70,7 +71,6 @@
       <description>Longer input sequence</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -89,7 +89,6 @@
       <description>Separator as AVT</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -109,7 +108,6 @@
       <description>Separator as AVT, zero length string</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -129,7 +127,6 @@
       <description>Separator between empty items</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -149,7 +146,6 @@
       <description>Separator as AVT, in a sequence of nodes</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -168,7 +164,6 @@
       <description>Separator as AVT: multiple output nodes per input node</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -187,7 +182,6 @@
       <description>Execute for-each/@separator in pull mode</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -206,7 +200,6 @@
       <description>xsl:for-each/@separator="" inhibits space separation</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -224,7 +217,6 @@
       <description>Empty sequence</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -243,7 +235,6 @@
       <description>Singleton</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -262,7 +253,6 @@
       <description>Doubleton</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -281,7 +271,6 @@
       <description>Longer input sequence</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -300,7 +289,6 @@
       <description>Separator as AVT</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -320,7 +308,6 @@
       <description>Separator as AVT, zero length string</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -340,7 +327,6 @@
       <description>Separator between empty items</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -360,7 +346,6 @@
       <description>Separator as AVT, in a sequence of nodes</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -379,7 +364,6 @@
       <description>Separator as AVT: multiple output nodes per input node</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -398,7 +382,6 @@
       <description>Execute apply-templates/@separator in pull mode</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>
@@ -417,7 +400,6 @@
       <description>xsl:apply-templates/@separator="" inhibits space separation</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
-         <spec value="XSLT30+"/>
          <feature value="Saxon-PE"/>
       </dependencies>
       <environment ref="sep-A"/>

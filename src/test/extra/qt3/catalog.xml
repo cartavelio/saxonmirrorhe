@@ -23,6 +23,7 @@
   <!-- SAXON EXTENSION FUNCTIONS -->
   
   <test-set name="saxon-characters" file="saxonfn/characters.xml"/>
+  <test-set name="saxon-decimal-divide" file="saxonfn/decimal-divide.xml"/>
   <test-set name="saxon-doc" file="saxonfn/doc.xml"/>
   <test-set name="saxon-EQName" file="saxonfn/EQName.xml"/>
   <test-set name="saxon-escape-NCName" file="saxonfn/escape-NCName.xml"/>
