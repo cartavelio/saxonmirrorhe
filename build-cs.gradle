@@ -377,6 +377,10 @@ task eecs_project_files (
   from "src/main/saxon-cs/csproj"
   into "${buildDir}/cs"
   include "*.csproj"
+  filter { line ->
+    line.replaceAll("@@optimize@@", csoptimize)
+    .replaceAll("@@csrid@@", csrid)
+  }
 }
 
 task eecs_dll(
@@ -402,7 +406,7 @@ task eecs_dll(
 task dotnetTestDrivers(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/Release/net6.0/SaxonCS.dll"
+  inputs.file "${buildDir}/cs/bin/Release/net6.0/${csrid}/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/test/cstestrunner")
   outputs.file "${buildDir}/testdrivers/bin/Release/TestDrivers.${csver}.nupkg"
 
@@ -444,7 +448,7 @@ task dotnetTestDrivers(
 task dotnetExamples(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/Release/net6.0/SaxonCS.dll"
+  inputs.file "${buildDir}/cs/bin/Release/net6.0/${csrid}/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/samples/cs/Examples.cs")
   outputs.file "${buildDir}/examples/bin/Release/Examples.${csver}.nupkg"
 
@@ -488,17 +492,18 @@ task dotnetRelease(
 ) {
   inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
   inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
-  outputs.file "${buildDir}/cs/bin/Release/net6.0/SaxonCS.dll"
+  outputs.file "${buildDir}/cs/bin/Release/net6.0/${csrid}/SaxonCS.dll"
   outputs.file "${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg"
 
   doFirst {
     // Delete them if they exist so that they always get rewritten
     // so that the subsequent attempt to sign them doesn't fail.
-    delete "${buildDir}/cs/bin/Release/net6.0/SaxonCS.dll"
+    delete "${buildDir}/cs/bin/Release/net6.0/${csrid}/SaxonCS.dll"
     delete "${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg"
   }
 
   doLast {
+    println("DOING THE REPLACE")
     copy {
       // Copy the csproj and sln files, renaming them so that the release
       // build uses the names we want the packages to have
@@ -506,6 +511,10 @@ task dotnetRelease(
       into "${buildDir}/cs"
       rename { String filename ->
         filename.replace("engine", "SaxonCS")
+      }
+      filter { line ->
+        line.replaceAll("@@optimize@@", csoptimize)
+        .replaceAll("@@csrid@@", csrid)
       }
     }
   }
@@ -529,12 +538,13 @@ task dotnetRelease(
       workingDir = "${buildDir}/cs"
       commandLine dotnetex, 'build', 'SaxonCS.sln', '--verbosity', 'Normal',
         '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
+        '-p:SelfContained=true', '-p:PublishSingleFile=true',
         "-p:Version=${csver}", "-p:PackageVersion=${csver}"
     }
   }
 
   doLast {
-    signExe("${buildDir}/cs/bin/Release/net6.0/SaxonCS.dll")
+    signExe("${buildDir}/cs/bin/Release/net6.0/${csrid}/SaxonCS.dll")
     if (systemOs.isWindows()) {
       signNuget("${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg")
     } else {
@@ -596,7 +606,7 @@ task pushNuGetPackage(
 task dotnetPublish(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/Release/net6.0/SaxonCS.dll"
+  inputs.file "${buildDir}/cs/bin/Release/net6.0/${csrid}/SaxonCS.dll"
   outputs.files fileTree(dir: "${buildDir}/cs/bin/Release/net6.0/${csrid}/publish")
 
   def singleFile="true"
