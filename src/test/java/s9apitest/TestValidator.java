@@ -1057,7 +1057,8 @@ public class TestValidator {
         assertEquals(0, errorHandler.fatals, "fatals");
     }
 
-    @Disabled
+    @Test
+    @Tag("missingfiles")
     // Documents are not in the repository
     public void testMillicomErrorListener() {
         String[] args = {
@@ -1350,6 +1351,7 @@ public class TestValidator {
     }
 
     @Test
+    @Tag("bytecode")
     public void testByteCodeJaxpOff() {
         testByteCodeJaxp(false);
     }

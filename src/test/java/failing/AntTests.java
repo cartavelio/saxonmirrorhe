@@ -7,6 +7,7 @@ import org.apache.tools.ant.ProjectHelper;
 
  */
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -42,7 +43,7 @@ public class AntTests {
     }
 
     @Test
-    @Disabled("Will only pass for Mike")
+    @Tag("mikeonly")
     public void testWalmsleyBug() {
         runAnt("/Users/mike/bugs/2015/Walmsley/saxonbug/build.xml");
     }
