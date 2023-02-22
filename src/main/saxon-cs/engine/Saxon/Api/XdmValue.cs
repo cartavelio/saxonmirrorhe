@@ -330,7 +330,7 @@ namespace Saxon.Api {
                     NodeInfo node => new XdmNode(node),
                     MapItem map => new XdmMap(map),
                     ArrayItem array => new XdmArray(array),
-                    Function fn => new XdmFunctionItem(fn),
+                    FunctionItem fn => new XdmFunctionItem(fn),
                     _ => new XdmValue(first)
                 };
             }
@@ -350,7 +350,7 @@ namespace Saxon.Api {
                         Genre.ATOMIC => new XdmAtomicValue((AtomicValue)first),
                         Genre.MAP => new XdmMap((MapItem)first),
                         Genre.ARRAY => new XdmArray((ArrayItem)first),
-                        Genre.FUNCTION => new XdmFunctionItem((Function)first),
+                        Genre.FUNCTION => new XdmFunctionItem((FunctionItem)first),
                         Genre.EXTERNAL => new XdmExternalObject(((Saxon.Hej.value.AnyExternalObject)first)
                             .getWrappedObject()),
                         _ => throw new IllegalArgumentException()
