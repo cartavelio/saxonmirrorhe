@@ -598,6 +598,7 @@ task "eej_preprocess"(
 
   allInputs += hej_featureKeys.outputs.files
 
+  inputs.files allInputs
   outputs.files allInputs.collect { source ->
     String rootfn = source.getAbsolutePath().substring(baselen)
     "${buildDir}/src/eej/${rootfn}"
