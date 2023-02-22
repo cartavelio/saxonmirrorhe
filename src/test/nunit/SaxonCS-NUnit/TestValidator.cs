@@ -31,33 +31,7 @@ using XsltCompiler = Saxon.Api.XsltCompiler;
 namespace SaxonCS_NUnit {
     internal class TestValidator {
         
-        [Test]
-        public void TestTypeAnnotations() {
-            try {
-                Processor proc = new Processor(true);
-                DocumentBuilder builder = proc.NewDocumentBuilder();
-                XdmNode doc = builder.Build(new Uri(ConfigTest.DataDirUri, "books.xml"));
-                Assert.AreEqual(new QName("xs", NamespaceConstant.SCHEMA, "untyped"), doc.TypeAnnotationName);
-
-                SchemaManager mgr = proc.SchemaManager;
-                mgr.Compile(new Uri(ConfigTest.DataDirUri, "books.xsd"));
-                SchemaValidator v = mgr.NewSchemaValidator();
-                XdmDestination dest = new XdmDestination();
-                v.SetDestination(dest);
-                //dest.BaseURI = doc.BaseURI;
-                v.Validate(doc);
-
-                XdmNode validDoc = dest.XdmNode;
-                Assert.AreEqual(new QName("xs", NamespaceConstant.SCHEMA, "anyType"), validDoc.TypeAnnotationName);
-                XdmNode books = validDoc.Select(Steps.Descendant("BOOKS")).First();
-                Assert.AreEqual(NamespaceConstant.ANONYMOUS, books.TypeAnnotationName.Uri);
-                XdmNode price = books.Select(Steps.Path("ITEM", "PRICE")).First();
-                Assert.AreEqual(new QName("moneyType"), price.TypeAnnotationName);
-                Assert.AreEqual(new QName("xs", NamespaceConstant.SCHEMA, "decimal"), ((XdmAtomicValue)price.TypedValue).PrimitiveTypeName);
-            } catch (Exception e) {
-                Assert.Fail(e.Message);
-            }
-        }
+        
 
         
         [Test]

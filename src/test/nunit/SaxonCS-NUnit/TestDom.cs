@@ -1371,6 +1371,7 @@ namespace SaxonCS_NUnit {
                 Assert.That(sw.ToString().Contains("<out>5</out>"));
             }
             catch (Exception e) {
+                Console.WriteLine(e.StackTrace);
                 Assert.Fail(e.Message);
             }
         }

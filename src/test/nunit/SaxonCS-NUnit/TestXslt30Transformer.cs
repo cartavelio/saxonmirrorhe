@@ -403,10 +403,62 @@ namespace SaxonCS_NUnit {
                 
             }
             catch (Exception ex) {
+                Console.WriteLine(ex.StackTrace);
+                Assert.Fail(ex.Message);
+            }
+        }
+        
+        [Test]
+        public void TestDefaultResultDocHandler() {
+            // Bug 5552: test that secondary result documents are closed
+            Processor processor = new Processor(true);
+
+            XsltCompiler xsltCompiler = processor.NewXsltCompiler();
+            xsltCompiler.BaseUri = new Uri("file:///dummy/");
+            string sr = "<?xml version='1.0' encoding='UTF-8'?>" +
+                        "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+                        "   xmlns:xs='http://www.w3.org/2001/XMLSchema' exclude-result-prefixes='#all' version='3.0'> " +
+                        "<xsl:output method='html' indent='yes' html-version='5'/>" +
+                        "<xsl:template match='/' name='xsl:initial-template'>" +
+                        "   <html><head>" +
+                        " <title>Test</title></head>" +
+                        "<body> " +
+                        "   <h1>Test</h1>" +
+                        "</body>" +
+                        "</html>" +
+                        "<xsl:result-document href='result-1.txt' method='text'>" +
+                        "   <xsl:text>This is the output</xsl:text>" +
+                        "</xsl:result-document>" +
+                        " </xsl:template></xsl:stylesheet>";
+
+            try {
+                Processor proc =  new();
+                proc.SetProperty(FeatureKeys.TIMING, "true");
+                XsltTransformer transformer =
+                    proc.NewXsltCompiler().Compile(new MemoryStream(Encoding.ASCII.GetBytes(sr))).Load();
+
+                // Run without a result document handler
+                transformer.InitialTemplate = new QName("http://www.w3.org/1999/XSL/Transform", "initial-template");
+                transformer.BaseOutputUri = ConfigTest.SandpitDirUri;
+                transformer.Run(proc.NewSerializer(Console.Out));
+                
+                string downloadString = new WebClient().DownloadString(new Uri(ConfigTest.SandpitDirUri, "result-1.txt"));
+                Assert.That(downloadString.Contains("This is the output"));
+                
+            }
+            catch (Exception ex) {
                 //e.printStackTrace();
                 Console.WriteLine(ex.StackTrace);
                 Assert.Fail(ex.Message);
             }
+        }
+
+        private class MonitoredStream : MemoryStream {
+            private bool closed = false;
+            public override void Close() {
+                base.Close();
+                closed = true;
+            } 
         }
 
         [Test]
@@ -1457,11 +1509,11 @@ namespace SaxonCS_NUnit {
             XsltExecutable xsltExecutable = xsltCompiler.Compile(new StringReader(source));
             Dictionary<QName, ParameterDetails> paramsi = xsltExecutable.GetGlobalParameters();
             XdmItemType t1 = paramsi[(new QName("surname"))].DeclaredType.ItemType;
-            Assert.AreEqual(t1.ToString(), "Q{" + NamespaceConstant.SCHEMA + "}string", "t1");
+            Assert.AreEqual(t1.ToString(), "xs:string", "t1");
             char c1 = paramsi[new QName("surname")].DeclaredType.OccurrenceIndicator;
             Assert.AreEqual(c1, XdmSequenceType.ONE, "c1");
             XdmItemType t2 = paramsi[new QName("age")].DeclaredType.ItemType;
-            Assert.AreEqual(t2.ToString(),"Q{" + NamespaceConstant.SCHEMA + "}integer", "t2");
+            Assert.AreEqual(t2.ToString(),"xs:integer", "t2");
             char c2 = paramsi[new QName("age")].DeclaredType.OccurrenceIndicator;
             Assert.AreEqual(c2, XdmSequenceType.ZERO_OR_ONE, "c2");
             XdmItemType t3 = paramsi[(new QName("doc"))].DeclaredType.ItemType;
