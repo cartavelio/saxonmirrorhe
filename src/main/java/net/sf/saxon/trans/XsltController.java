@@ -54,7 +54,6 @@ public class XsltController extends Controller {
     private ResultDocumentResolver resultDocumentResolver;
     private HashSet<DocumentKey> allOutputDestinations;
     private Component.M initialMode = null;
-    private final Function initialFunction = null;
     private Map<StructuredQName, Sequence> initialTemplateParams;
     private Map<StructuredQName, Sequence> initialTemplateTunnelParams;
     private final Map<Long, Stack<AttributeSet>> attributeSetEvaluationStacks = new HashMap<>();
