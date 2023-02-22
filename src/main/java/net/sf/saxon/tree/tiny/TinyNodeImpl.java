@@ -21,8 +21,6 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
 
-import java.util.function.Predicate;
-
 
 /**
  * A node in a TinyTree representing an XML element, character content, or attribute.
@@ -377,133 +375,128 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * Return an iterator over the nodes reached by the given axis from this node
      *
      * @param axisNumber Identifies the required axis, eg. Axis.CHILD or Axis.PARENT
-     * @param predicate   A condition to be matched by the returned nodes.
+     * @param nodeTest   A condition to be matched by the returned nodes.
      * @return a AxisIteratorImpl that scans the nodes reached by the axis in turn.
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
-        if (predicate instanceof NodeTest) {
-            NodeTest nodeTest = (NodeTest) predicate;
+    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
 
-            int type = getNodeKind();
-            switch (axisNumber) {
-                case AxisInfo.ANCESTOR:
-                    return new AncestorIterator(this, nodeTest);
+        int type = getNodeKind();
+        switch (axisNumber) {
+            case AxisInfo.ANCESTOR:
+                return new AncestorIterator(this, nodeTest);
 
-                case AxisInfo.ANCESTOR_OR_SELF:
-                    AxisIterator ancestors = new AncestorIterator(this, nodeTest);
-                    if (nodeTest.test(this)) {
-                        return new PrependAxisIterator(this, ancestors);
+            case AxisInfo.ANCESTOR_OR_SELF:
+                AxisIterator ancestors = new AncestorIterator(this, nodeTest);
+                if (nodeTest.test(this)) {
+                    return new PrependAxisIterator(this, ancestors);
+                } else {
+                    return ancestors;
+                }
+
+            case AxisInfo.ATTRIBUTE:
+                if (type != Type.ELEMENT) {
+                    return EmptyIterator.ofNodes();
+                }
+                if (tree.alpha[nodeNr] < 0) {
+                    return EmptyIterator.ofNodes();
+                }
+                return new AttributeIterator(tree, nodeNr, nodeTest);
+
+            case AxisInfo.CHILD:
+                if (hasChildNodes()) {
+                    if (nodeTest instanceof NameTest && ((NameTest) nodeTest).getNodeKind() == Type.ELEMENT) {
+                        // fast path for common case
+                        return new NamedChildIterator(tree, this, nodeTest.getFingerprint());
                     } else {
-                        return ancestors;
+                        return new SiblingIterator(tree, this, nodeTest, true);
                     }
+                } else {
+                    return EmptyIterator.ofNodes();
+                }
 
-                case AxisInfo.ATTRIBUTE:
-                    if (type != Type.ELEMENT) {
-                        return EmptyIterator.ofNodes();
-                    }
-                    if (tree.alpha[nodeNr] < 0) {
-                        return EmptyIterator.ofNodes();
-                    }
-                    return new AttributeIterator(tree, nodeNr, nodeTest);
-
-                case AxisInfo.CHILD:
-                    if (hasChildNodes()) {
-                        if (nodeTest instanceof NameTest && ((NameTest) nodeTest).getNodeKind() == Type.ELEMENT) {
-                            // fast path for common case
-                            return new NamedChildIterator(tree, this, nodeTest.getFingerprint());
-                        } else {
-                            return new SiblingIterator(tree, this, nodeTest, true);
-                        }
+            case AxisInfo.DESCENDANT:
+                if (type == Type.DOCUMENT &&
+                        nodeTest instanceof NameTest &&
+                        nodeTest.getPrimitiveType() == Type.ELEMENT) {
+                    return ((TinyDocumentImpl) this).getAllElements(nodeTest.getFingerprint());
+                } else if (hasChildNodes()) {
+                    if (nodeTest.getUType().overlaps(UType.TEXT)) {
+                        return new DescendantIterator(tree, this, nodeTest);
                     } else {
-                        return EmptyIterator.ofNodes();
+                        return new DescendantIteratorSansText(tree, this, nodeTest);
                     }
+                } else {
+                    return EmptyIterator.ofNodes();
+                }
 
-                case AxisInfo.DESCENDANT:
-                    if (type == Type.DOCUMENT &&
-                            nodeTest instanceof NameTest &&
-                            nodeTest.getPrimitiveType() == Type.ELEMENT) {
-                        return ((TinyDocumentImpl) this).getAllElements(nodeTest.getFingerprint());
-                    } else if (hasChildNodes()) {
-                        if (nodeTest.getUType().overlaps(UType.TEXT)) {
-                            return new DescendantIterator(tree, this, nodeTest);
-                        } else {
-                            return new DescendantIteratorSansText(tree, this, nodeTest);
-                        }
-                    } else {
-                        return EmptyIterator.ofNodes();
-                    }
+            case AxisInfo.DESCENDANT_OR_SELF:
+                AxisIterator descendants = iterateAxis(AxisInfo.DESCENDANT, nodeTest);
+                if (nodeTest.test(this)) {
+                    return new PrependAxisIterator(this, descendants);
+                } else {
+                    return descendants;
+                }
 
-                case AxisInfo.DESCENDANT_OR_SELF:
-                    AxisIterator descendants = iterateAxis(AxisInfo.DESCENDANT, nodeTest);
-                    if (nodeTest.test(this)) {
-                        return new PrependAxisIterator(this, descendants);
-                    } else {
-                        return descendants;
-                    }
+            case AxisInfo.FOLLOWING:
+                if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
+                    return new FollowingIterator(tree, getParent(), nodeTest, true);
+                } else if (tree.depth[nodeNr] == 0) {
+                    return EmptyIterator.ofNodes();
+                } else {
+                    return new FollowingIterator(tree, this, nodeTest, false);
+                }
 
-                case AxisInfo.FOLLOWING:
-                    if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
-                        return new FollowingIterator(tree, getParent(), nodeTest, true);
-                    } else if (tree.depth[nodeNr] == 0) {
-                        return EmptyIterator.ofNodes();
-                    } else {
-                        return new FollowingIterator(tree, this, nodeTest, false);
-                    }
+            case AxisInfo.FOLLOWING_SIBLING:
+                if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
+                    return EmptyIterator.ofNodes();
+                } else {
+                    return new SiblingIterator(tree, this, nodeTest, false);
+                }
 
-                case AxisInfo.FOLLOWING_SIBLING:
-                    if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
-                        return EmptyIterator.ofNodes();
-                    } else {
-                        return new SiblingIterator(tree, this, nodeTest, false);
-                    }
+            case AxisInfo.NAMESPACE:
+                if (type != Type.ELEMENT) {
+                    return EmptyIterator.ofNodes();
+                }
+                return NamespaceNode.makeIterator(this, nodeTest);
 
-                case AxisInfo.NAMESPACE:
-                    if (type != Type.ELEMENT) {
-                        return EmptyIterator.ofNodes();
-                    }
-                    return NamespaceNode.makeIterator(this, nodeTest);
+            case AxisInfo.PARENT:
+                NodeInfo parent = getParent();
+                return Navigator.filteredSingleton(parent, nodeTest);
 
-                case AxisInfo.PARENT:
-                    NodeInfo parent = getParent();
-                    return Navigator.filteredSingleton(parent, nodeTest);
+            case AxisInfo.PRECEDING:
+                if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
+                    return getParent().iterateAxis(axisNumber, nodeTest);
+                } else if (tree.depth[nodeNr] == 0) {
+                    return EmptyIterator.ofNodes();
+                } else {
+                    return new PrecedingIterator(tree, this, nodeTest, false);
+                }
 
-                case AxisInfo.PRECEDING:
-                    if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
-                        return getParent().iterateAxis(axisNumber, predicate);
-                    } else if (tree.depth[nodeNr] == 0) {
-                        return EmptyIterator.ofNodes();
-                    } else {
-                        return new PrecedingIterator(tree, this, nodeTest, false);
-                    }
+            case AxisInfo.PRECEDING_SIBLING:
+                if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
+                    return EmptyIterator.ofNodes();
+                } else {
+                    return new PrecedingSiblingIterator(tree, this, nodeTest);
+                }
 
-                case AxisInfo.PRECEDING_SIBLING:
-                    if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
-                        return EmptyIterator.ofNodes();
-                    } else {
-                        return new PrecedingSiblingIterator(tree, this, nodeTest);
-                    }
+            case AxisInfo.SELF:
+                return Navigator.filteredSingleton(this, nodeTest);
 
-                case AxisInfo.SELF:
-                    return Navigator.filteredSingleton(this, nodeTest);
+            case AxisInfo.PRECEDING_OR_ANCESTOR:
+                if (type == Type.DOCUMENT) {
+                    return EmptyIterator.ofNodes();
+                } else if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
+                    // See test numb32.
+                    TinyNodeImpl el = getParent();
+                    return new PrependAxisIterator(el, new PrecedingIterator(tree, el, nodeTest, true));
+                } else {
+                    return new PrecedingIterator(tree, this, nodeTest, true);
+                }
 
-                case AxisInfo.PRECEDING_OR_ANCESTOR:
-                    if (type == Type.DOCUMENT) {
-                        return EmptyIterator.ofNodes();
-                    } else if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
-                        // See test numb32.
-                        TinyNodeImpl el = getParent();
-                        return new PrependAxisIterator(el, new PrecedingIterator(tree, el, nodeTest, true));
-                    } else {
-                        return new PrecedingIterator(tree, this, nodeTest, true);
-                    }
-
-                default:
-                    throw new IllegalArgumentException("Unknown axis number " + axisNumber);
-            }
-        } else {
-            return new Navigator.AxisFilter(iterateAxis(axisNumber, AnyNodeTest.getInstance()), predicate);
+            default:
+                throw new IllegalArgumentException("Unknown axis number " + axisNumber);
         }
     }
 

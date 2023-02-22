@@ -10,11 +10,11 @@ package net.sf.saxon.option.xom;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
 import net.sf.saxon.tree.util.SteppingNode;
@@ -27,7 +27,6 @@ import nu.xom.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * A node in the XML parse tree representing an XML element, character content,
@@ -624,14 +623,14 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateAttributes(Predicate<? super NodeInfo> nodeTest) {
+    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
         return new Navigator.AxisFilter(
                 new AttributeAxisIterator(this, nodeTest),
                 nodeTest);
     }
 
     @Override
-    protected AxisIterator iterateChildren(Predicate<? super NodeInfo> nodeTest) {
+    protected AxisIterator iterateChildren(NodeTest nodeTest) {
         if (hasChildNodes()) {
             return new Navigator.AxisFilter(
                     new ChildAxisIterator(this, true, true, nodeTest),
@@ -642,14 +641,14 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateSiblings(Predicate<? super NodeInfo> nodeTest, boolean forwards) {
+    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         return new Navigator.AxisFilter(
                 new ChildAxisIterator(this, false, forwards, nodeTest),
                 nodeTest);
     }
 
     @Override
-    protected AxisIterator iterateDescendants(Predicate<? super NodeInfo> nodeTest, boolean includeSelf) {
+    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         if (includeSelf) {
             return new SteppingNavigator.DescendantAxisIterator<>(
                     this, true, nodeTest);
@@ -840,9 +839,9 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
 
         private int cursor;
 
-        private final Predicate<? super NodeInfo> nodeTest;
+        private final NodeTest nodeTest;
 
-        AttributeAxisIterator(XOMNodeWrapper start, Predicate<? super NodeInfo> test) {
+        AttributeAxisIterator(XOMNodeWrapper start, NodeTest test) {
             // use lazy instead of eager materialization (performance)
             this.start = start;
             if (test == AnyNodeTest.getInstance()) {
@@ -891,9 +890,9 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         private final ParentNode par;
         private int cursor;
 
-        private final Predicate<? super NodeInfo> nodeTest;
+        private final NodeTest nodeTest;
 
-        private ChildAxisIterator(XOMNodeWrapper start, boolean downwards, boolean forwards, Predicate<? super NodeInfo> test) {
+        private ChildAxisIterator(XOMNodeWrapper start, boolean downwards, boolean forwards, NodeTest test) {
             this.forwards = forwards;
 
             if (test == AnyNodeTest.getInstance()) {

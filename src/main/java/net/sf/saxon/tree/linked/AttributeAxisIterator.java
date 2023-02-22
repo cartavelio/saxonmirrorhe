@@ -9,12 +9,12 @@ package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.EnumSet;
-import java.util.function.Predicate;
 
 /**
  * AttributeAxisIterator is an enumeration of all the attribute nodes of an Element.
@@ -23,7 +23,7 @@ import java.util.function.Predicate;
 final class AttributeAxisIterator implements AxisIterator, LookaheadIterator {
 
     private final ElementImpl element;
-    private final Predicate<? super NodeInfo> nodeTest;
+    private final NodeTest nodeTest;
     /*@Nullable*/ private NodeInfo nextNode;
     private int index;
     private final int length;
@@ -36,7 +36,7 @@ final class AttributeAxisIterator implements AxisIterator, LookaheadIterator {
      * @param nodeTest: condition to be applied to the names of the attributes selected
      */
 
-    AttributeAxisIterator(ElementImpl node, Predicate<? super NodeInfo> nodeTest) {
+    AttributeAxisIterator(ElementImpl node, NodeTest nodeTest) {
         this.element = node;
         this.nodeTest = nodeTest;
 

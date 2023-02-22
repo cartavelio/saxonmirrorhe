@@ -1132,7 +1132,7 @@ public final class Navigator {
      */
 
     /*@NotNull*/
-    public static AxisIterator filteredSingleton(NodeInfo node, Predicate<? super NodeInfo> nodeTest) {
+    public static AxisIterator filteredSingleton(NodeInfo node, NodeTest nodeTest) {
         if (node != null && nodeTest.test(node)) {
             return SingleNodeIterator.makeIterator(node);
         } else {
@@ -1172,7 +1172,7 @@ public final class Navigator {
 
     public static class AxisFilter implements AxisIterator {
         private final AxisIterator base;
-        private final Predicate<? super NodeInfo> nodeTest;
+        private final NodeTest nodeTest;
 
         /**
          * Construct a AxisFilter
@@ -1184,7 +1184,7 @@ public final class Navigator {
          *             returned by the AxisFilter
          */
 
-        public AxisFilter(AxisIterator base, Predicate<? super NodeInfo> test) {
+        public AxisFilter(AxisIterator base, NodeTest test) {
             this.base = base;
             nodeTest = test;
         }

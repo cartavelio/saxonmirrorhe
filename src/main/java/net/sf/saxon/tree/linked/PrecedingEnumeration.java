@@ -7,15 +7,13 @@
 
 package net.sf.saxon.tree.linked;
 
-import net.sf.saxon.om.NodeInfo;
-
-import java.util.function.Predicate;
+import net.sf.saxon.pattern.NodeTest;
 
 final class PrecedingEnumeration extends TreeEnumeration {
 
     /*@Nullable*/ NodeImpl nextAncestor;
 
-    public PrecedingEnumeration(/*@NotNull*/ NodeImpl node, Predicate<? super NodeInfo> nodeTest) {
+    public PrecedingEnumeration(/*@NotNull*/ NodeImpl node, NodeTest nodeTest) {
         super(node, nodeTest);
 
         // we need to avoid returning ancestors of the starting node

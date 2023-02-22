@@ -11,11 +11,13 @@ package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.str.EmptyUniString;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.om.CopyOptions;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -24,11 +26,9 @@ import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.str.UnicodeBuilder;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.function.Predicate;
 
 /**
  * ParentNodeImpl is an implementation of a non-leaf node (specifically, an Element node
@@ -133,7 +133,7 @@ public abstract class ParentNodeImpl extends NodeImpl {
      * @return an iterator over the _children of this node
      */
 
-    protected final AxisIterator iterateChildren(Predicate<? super NodeInfo> test) {
+    protected final AxisIterator iterateChildren(NodeTest test) {
         if (_children == null) {
             return EmptyIterator.ofNodes();
         } else if (_children instanceof NodeImpl) {

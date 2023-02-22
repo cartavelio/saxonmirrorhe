@@ -8,14 +8,16 @@
 package net.sf.saxon.dom;
 
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.NamespaceBinding;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.*;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
@@ -29,7 +31,6 @@ import org.w3c.dom.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.function.Predicate;
 
 
 /**
@@ -596,7 +597,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateAttributes(Predicate<? super NodeInfo> nodeTest) {
+    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
         AxisIterator iter = new AttributeEnumeration(this);
         if (nodeTest != AnyNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
@@ -604,12 +605,12 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         return iter;
     }
 
-    private boolean isElementOnly(Predicate<? super NodeInfo> nodeTest) {
-        return nodeTest instanceof NodeTest && ((NodeTest) nodeTest).getUType() == UType.ELEMENT;
+    private boolean isElementOnly(NodeTest nodeTest) {
+        return nodeTest.getUType() == UType.ELEMENT;
     }
 
     @Override
-    protected AxisIterator iterateChildren(Predicate<? super NodeInfo> nodeTest) {
+    protected AxisIterator iterateChildren(NodeTest nodeTest) {
         boolean elementOnly = isElementOnly(nodeTest);
         AxisIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, true, true, elementOnly));
@@ -620,7 +621,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateSiblings(Predicate<? super NodeInfo> nodeTest, boolean forwards) {
+    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         boolean elementOnly = isElementOnly(nodeTest);
         AxisIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, false, forwards, elementOnly));
@@ -631,7 +632,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateDescendants(Predicate<? super NodeInfo> nodeTest, boolean includeSelf) {
+    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
     }
 

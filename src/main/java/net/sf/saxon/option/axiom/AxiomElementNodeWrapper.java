@@ -13,6 +13,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -28,7 +29,6 @@ import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * A node in the XDM tree; specifically, a node that wraps an Axiom element node.
@@ -201,7 +201,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
 
 
     @Override
-    protected AxisIterator iterateAttributes(Predicate<? super NodeInfo> nodeTest) {
+    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
         if (!((OMElement) node).getAllAttributes().hasNext()) {
             return EmptyIterator.ofNodes();
         } else if (nodeTest instanceof NameTest) {
@@ -219,7 +219,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
     }
 
     @Override
-    protected AxisIterator iterateSiblings(Predicate<? super NodeInfo> nodeTest, boolean forwards) {
+    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         if (forwards) {
             if (nodeTest instanceof AnyNodeTest) {
                 return new AxiomDocument.FollowingSiblingIterator((OMElement) node, parent, docWrapper);
@@ -343,9 +343,9 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
         private NodeInfo current;
         private int index;
 
-        private final Predicate<? super NodeInfo> nodeTest;
+        private final NodeTest nodeTest;
 
-        public AttributeAxisIterator(AxiomElementNodeWrapper element, Predicate<? super NodeInfo> test) {
+        public AttributeAxisIterator(AxiomElementNodeWrapper element, NodeTest test) {
             this.element = element;
             if (test == AnyNodeTest.getInstance() || test == NodeKindTest.ATTRIBUTE) {
                 test = null;

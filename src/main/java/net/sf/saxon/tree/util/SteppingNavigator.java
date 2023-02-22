@@ -7,12 +7,9 @@
 
 package net.sf.saxon.tree.util;
 
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
-
-import java.util.function.Predicate;
 
 
 /**
@@ -105,7 +102,7 @@ public abstract class SteppingNavigator {
     private static class FollowingFilteredNodeStepper<N extends SteppingNode<N>> implements Stepper<N> {
 
         N anchor;
-        Predicate<? super NodeInfo> test;
+        NodeTest test;
 
         /**
          * Create a stepper to step successively through selected nodes in a subtree
@@ -114,7 +111,7 @@ public abstract class SteppingNavigator {
          * @param test   the test that returned nodes must satisfy
          */
 
-        FollowingFilteredNodeStepper(N anchor, Predicate<? super NodeInfo> test) {
+        FollowingFilteredNodeStepper(N anchor, NodeTest test) {
             this.anchor = anchor;
             this.test = test;
         }
@@ -213,7 +210,7 @@ public abstract class SteppingNavigator {
          * @param test        the node-test that selected nodes must satisfy
          */
 
-        public DescendantAxisIterator(N start, boolean includeSelf, Predicate<? super NodeInfo> test) {
+        public DescendantAxisIterator(N start, boolean includeSelf, NodeTest test) {
             this.start = start;
 
             if (!(includeSelf && test.test(start))) {

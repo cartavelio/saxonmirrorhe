@@ -10,6 +10,7 @@ package net.sf.saxon.tree.wrapper;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
@@ -19,8 +20,6 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.UntypedAtomicValue;
-
-import java.util.function.Predicate;
 
 /**
  * A node in the XML parse tree representing an XML element, character content, or attribute.
@@ -270,7 +269,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
         int nodeKind = getNodeKind();
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
@@ -377,7 +376,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      *         although arbitrary, must be consistent with document order.
      */
 
-    protected abstract AxisIterator iterateAttributes(Predicate<? super NodeInfo> nodeTest);
+    protected abstract AxisIterator iterateAttributes(NodeTest nodeTest);
 
     /**
      * Return an iterator over the children of this node.
@@ -387,7 +386,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      * @return an iterator over the child nodes, in document order.
      */
 
-    protected abstract AxisIterator iterateChildren(Predicate<? super NodeInfo> nodeTest);
+    protected abstract AxisIterator iterateChildren(NodeTest nodeTest);
 
     /**
      * Return an iterator over the siblings of this node.
@@ -398,7 +397,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      * @return an iterator over the sibling nodes, in axis order.
      */
 
-    protected abstract AxisIterator iterateSiblings(Predicate<? super NodeInfo> nodeTest, boolean forwards);
+    protected abstract AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards);
 
     /**
      * Return an iterator over the descendants of this node.
@@ -409,7 +408,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      * @return an iterator over the sibling nodes, in axis order.
      */
 
-    protected AxisIterator iterateDescendants(Predicate<? super NodeInfo> nodeTest, boolean includeSelf) {
+    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         AxisIterator iter = new Navigator.DescendantEnumeration(this, includeSelf, true);
         if (!(nodeTest instanceof AnyNodeTest)) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
