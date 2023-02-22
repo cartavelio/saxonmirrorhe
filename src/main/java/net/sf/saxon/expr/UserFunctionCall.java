@@ -596,16 +596,10 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         }
         for (int i = 0; i < numArgs; i++) {
             SequenceEvaluator eval = argumentEvaluators[i];
-//            if (eval == null || eval == Evaluator.StreamingArgument.INSTANCE && !streamed) {
-//                eval = Evaluator.EagerSequence.INSTANCE;
-//            }
+            if (eval == null || (eval instanceof StreamingArgumentEvaluator && !streamed)) {
+                eval = getArguments()[0].makeElaborator().eagerly();
+            }
             actualArgs[i] = eval.evaluate(c);
-//            if (actualArgs[i] == null) {
-//                actualArgs[i] = EmptySequence.getInstance();
-//            }
-//            if (eval instanceof Evaluator.MemoClosureEvaluator && actualArgs[i] instanceof MemoClosure) {
-//                ((MemoClosure)actualArgs[i]).setBindingExpression(((Evaluator.MemoClosureEvaluator)eval).statisticsGatherer);
-//            }
         }
         return actualArgs;
     }
