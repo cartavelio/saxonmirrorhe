@@ -7,19 +7,11 @@
 
 package net.sf.saxon.expr;
 
-import com.saxonica.ee.elab.eval.ItemEvaluator;
-import com.saxonica.ee.elab.eval.PullEvaluator;
-import com.saxonica.ee.elab.eval.PushEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
-import net.sf.saxon.event.Outputter;
+import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -40,6 +32,7 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
     private final Expression parentExpression;
     private Expression childExpression;
     private OperandRole role;
+    private OperandEvaluator operandEvaluator;
 
     /**
      * Create an operand object
@@ -282,48 +275,13 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
         }
     }
 
-    //#if EE=true
-    PushEvaluator pushEvaluator = null;
-    PullEvaluator pullEvaluator = null;
-    ItemEvaluator itemEvaluator = null;
-    //#endif
-
-    public void process(Outputter outputter, XPathContext context) throws XPathException {
-        //#HE-ONLY// childExpression.process(outputter, context);
-        //#if EE=true
-        if (pushEvaluator == null) {
-            pushEvaluator = Elaborator.makeElaborator(childExpression).elaborateForPush();
+    public synchronized OperandEvaluator getOperandEvaluator(XPathContext context) {
+        if (operandEvaluator == null) {
+            operandEvaluator = context.getConfiguration().obtainOperandEvaluator(getChildExpression());
         }
-        pushEvaluator.process(outputter, context);
-        //#endif
+        return operandEvaluator;
     }
 
-    public SequenceIterator iterate(XPathContext context) throws XPathException {
-        //#HE-ONLY// return childExpression.iterate(context);
-        //#if EE=true
-        if (pullEvaluator == null) {
-            pullEvaluator = Elaborator.makeElaborator(childExpression).elaborateForPull();
-        }
-        return pullEvaluator.eval(context);
-        //#endif
-    }
 
-    public Item evaluateItem(XPathContext context) throws XPathException {
-        //#HE-ONLY// return childExpression.evaluateItem(context);
-        //#if EE=true
-        if (itemEvaluator == null) {
-            itemEvaluator = Elaborator.makeElaborator(childExpression).elaborateForItem();
-        }
-        return itemEvaluator.eval(context);
-        //#endif
-    }
-
-    public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
-        //#HE-ONLY// return childExpression.evaluateAsString(context);
-        //#if EE=true
-        Item it = evaluateItem(context);
-        return it == null ? EmptyUnicodeString.getInstance() : it.getUnicodeStringValue();
-        //#endif
-    }
 }
 

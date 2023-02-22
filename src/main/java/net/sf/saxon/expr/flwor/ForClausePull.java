@@ -70,7 +70,7 @@ public class ForClausePull extends TuplePull {
      * @throws XPathException if evaluation fails
      */
     protected SequenceIterator getIterator(XPathContext context) throws XPathException {
-        return forClause.getSequence().iterate(context);
+        return forClause.getSequenceOp().getOperandEvaluator(context).iterate(context);
     }
 
     /**

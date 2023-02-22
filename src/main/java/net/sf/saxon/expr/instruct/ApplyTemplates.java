@@ -290,11 +290,6 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
     }
 
     @Override
-    public void process(Outputter output, XPathContext context) throws XPathException {
-        apply(output, context, false);
-    }
-
-    @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         return apply(output, context, _useTailRecursion);
     }

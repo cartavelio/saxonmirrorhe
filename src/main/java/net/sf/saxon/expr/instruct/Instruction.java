@@ -133,16 +133,17 @@ public abstract class Instruction extends Expression implements TailCallReturner
      * Process the instruction, without returning any tail calls
      *
      * @param output the destination for the result
-     * @param context The dynamic context, giving access to the current node,
+     * @param context The dynamic context, giving access to the current node
+     * @return either a tail call, or nothing. If the method returns a tail call, then the
+     * caller is responsible for either processing the tail call (on its own stack frame),
+     * or returning it to its own caller.
      */
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
         try {
             TailCall tc = processLeavingTail(output, context);
-            while (tc != null) {
-                tc = tc.processLeavingTail();
-            }
+            dispatchTailCall(tc);
         } catch (XPathException err) {
             err.maybeSetFailingExpression(this);
             err.maybeSetContext(context);

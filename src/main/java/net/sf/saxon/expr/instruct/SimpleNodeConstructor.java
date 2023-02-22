@@ -65,6 +65,11 @@ public abstract class SimpleNodeConstructor extends Instruction {
         return selectOp.getChildExpression();
     }
 
+    /**
+     * Get the select operand, that is the operand that wraps the select expression
+     * @return the select operand
+     */
+
     public Operand getSelectOp() {
         return selectOp;
     }
@@ -227,7 +232,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        UnicodeString value = getSelectOp().evaluateAsString(context); // getSelect().evaluateAsString(context);
+        UnicodeString value = getSelectOp().getOperandEvaluator(context).evaluateAsString(context);
         try {
             processValue(value, output, context);
         } catch (XPathException e) {
@@ -255,7 +260,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        Item contentItem = getSelectOp().evaluateItem(context); // getSelect().evaluateItem(context);
+        Item contentItem = getSelectOp().getOperandEvaluator(context).evaluateItem(context);
         UnicodeString content;
         if (contentItem == null) {
             content = EmptyUnicodeString.getInstance();
