@@ -616,8 +616,17 @@ task graal_eec_jar(
   def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
   def pypiDir = "${buildDir}/${edition}c_pypi"
 
+  def lastLinePatch = ''
+  if (systemOsName == 'linux') {
+    lastLinePatch = ('[tool.cibuildwheel]\n'
+                     + 'build = "*"\n'
+                     + 'skip = ["cp36*", "cp37*", "pp37*", "cp*musl*"]\n'
+                     + 'archs = ["x86_64"]\n'
+                     + 'environment.LD_LIBRARY_PATH = "/project/libs/nix"\n')
+  }
+
   task "setup_${edition}c_pypi"(
-    dependsOn: [graalEdition, "${edition}c_graalImage"]
+    dependsOn: [graalEdition]
   ) {
     inputs.files fileTree(dir: "${projectDir}/src/main/c/pypi")
     inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
@@ -631,16 +640,16 @@ task graal_eec_jar(
           line.replaceAll('@@VERSION@@', saxonVersion)
             .replace('@@edition@@', edition)
             .replace('@@EDITION@@', edition.toUpperCase())
+            .replace('[LAST-LINE-BUILD-PATCH]', lastLinePatch)
         }
       }
     }
     
-    def SAXONC_HOME = null
-    if (systemOs.isMacOsX()) {
-      SAXONC_HOME = "${pypiDir}/libs/darwin"
-    } else if (systemOs.isLinux()) {
-      SAXONC_HOME = "${pypiDir}/libs/nix"
-    }
+    def SAXONC_HOME = (systemOs.isMacOsX()
+                       ? "${pypiDir}/libs/darwin"
+                       : (systemOs.isLinux()
+                          ? "${pypiDir}/libs/nix"
+                          : null))
 
     doLast {
       if (SAXONC_HOME == null) {
@@ -748,5 +757,55 @@ task graal_eec_jar(
         commandLine "python3", "setup.py", "bdist_wheel"
       }
     }
+  }
+
+  task "saxon_${edition}c_stage_wheel"(
+    dependsOn: [graalEdition, "${edition}c_graalImage", "setup_${edition}c_pypi"]
+  ) {
+    doLast {
+      def libdir = (systemOs.isMacOsX()
+                    ? "libs/darwin"
+                    : (systemOs.isLinux()
+                       ? "libs/nix"
+                       : null))
+      if (libdir == null) {
+        throw GradleException("Don't know how to create Python wheels on this OS.");
+      }
+     
+      copy {
+        into "${buildDir}/wheels/${systemOsName}/${edition}c_pypi/${libdir}"
+        from "${buildDir}/c"
+        include "graal*.h"
+        include "libsaxon-${edition}c-${saxonVersion}.*"
+      }
+    }
+
+    doLast {
+      copy {
+        into "${buildDir}/wheels/${systemOsName}/${edition}c_pypi"
+        from "${buildDir}/${edition}c_pypi"
+      }
+    }
+  }
+}
+
+task saxonc_stage_wheels(
+  type: Tar,
+  dependsOn: ['saxon_eec_stage_wheel', 'saxon_pec_stage_wheel', 'saxon_hec_stage_wheel']
+
+) {
+  inputs.files fileTree(dir: "${buildDir}/wheels/${systemOsName}")
+  outputs.file "${buildDir}/distributions/${systemOsName}.wheels.tar.gz"
+
+  archiveFileName = "${systemOsName}.wheels.tar.gz"
+  from "${buildDir}/wheels"
+  include "${systemOsName}/**"
+  exclude "${systemOsName}/*/build/**"
+  exclude "${systemOsName}/*/*.egg-info/**"
+  exclude "${systemOsName}/*/src/saxonc_home"
+  compression = Compression.GZIP
+
+  doLast {
+    delete "${buildDir}/wheels/${systemOsName}"
   }
 }

@@ -73,6 +73,13 @@ sourceSets {
 
 ext {
   systemOs = OperatingSystem.current()
+  systemOsName = (systemOs.isMacOsX()
+                  ? "mac"
+                  : (systemOs.isLinux()
+                     ? "linux"
+                     : (systemOs.isWindows()
+                        ? "windows"
+                        : "unknown")))
   icu4jJar = null
   tagsoupJar = null
   mailJar = null
