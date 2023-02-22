@@ -19,9 +19,9 @@ public final class Version {
 
     private static final int MAJOR_VERSION = 11;
     private static final int MINOR_VERSION = 0;
-    private static final int BUILD = 92809; //mmddhh  BEWARE: a leading 0 means octal.
-    private static final String MAJOR_RELEASE_DATE = "2021-09-30";
-    private static final String MINOR_RELEASE_DATE = "2021-09-30";
+    private static final int BUILD = 100512; //mmddhh  BEWARE: a leading 0 means octal.
+    private static final String MAJOR_RELEASE_DATE = "2021-10-05";
+    private static final String MINOR_RELEASE_DATE = "2021-10-05";
 
     private Version() {
         // class is never instantiated
