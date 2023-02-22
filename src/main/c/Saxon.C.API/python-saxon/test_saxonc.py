@@ -701,7 +701,7 @@ def testResultDocumentAsMap(saxonproc):
     assert  keysList[1].endswith('out2.xml')
     assert isinstance(rdocs_map[keysList[0]].head, PyXdmNode)
     assert  'hello' in rdocs_map[keysList[1]].head.string_value
-
+                                                                               
 
 def testResultDocumentWitJson(saxonproc):
     inputDoc = saxonproc.parse_xml(xml_text="<a>b</a>")
@@ -914,6 +914,16 @@ def test_xpath_proc(saxonproc, data_dir):
     xp.set_context(file_name=xmlFile)
     assert xp.effective_boolean_value('count(//person) = 3')
     assert not xp.effective_boolean_value("/out/person/text() = 'text'")
+
+def test_xpath_proc_http(saxonproc, data_dir):
+    sp = saxonproc
+    xp = saxonproc.new_xpath_processor()
+    xmlFile = data_dir+"cat.xml"
+    assert isfile(xmlFile)
+    xp.set_context(file_name=xmlFile)
+    result = xp.evaluate_single("doc('https://www.w3schools.com/xml/note.xml')")
+    assert 'Jani' in result.string_value
+
 def test_atomic_values():
     sp = PySaxonProcessor()
     value = sp.make_double_value(3.5)
