@@ -11,13 +11,14 @@ import net.sf.saxon.dom.DOMWriter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 /**
  * This class represents a Destination (for example, the destination of the output of a transformation)
  * in which the results are written to a newly constructed DOM tree in memory. The caller must supply
  * a Document node, which will be used as the root of the constructed tree
  */
-
+@CSharpModifiers(code = {"internal"})
 public class DOMDestination extends AbstractDestination {
 
     private final DOMWriter domWriter;

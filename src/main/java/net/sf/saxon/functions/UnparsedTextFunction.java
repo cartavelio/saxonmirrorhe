@@ -163,7 +163,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      * @throws XPathException if the file contains illegal characters
      */
 
-    @CSharpInnerClass(outer=false, extra="net.sf.saxon.str.UnicodeBuilder buffer")
+    @CSharpInnerClass(outer=false, extra="Saxon.Hej.str.UnicodeBuilder buffer")
     public static UnicodeString readFile(IntPredicateProxy checker, Reader reader) throws IOException, XPathException {
         UnicodeBuilder buffer = new UnicodeBuilder();
         readFile(checker, reader, new AbstractUniStringConsumer() {

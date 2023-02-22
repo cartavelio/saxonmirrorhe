@@ -12,6 +12,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 /**
  * An XQueryExecutable represents the compiled form of a query.
@@ -24,6 +25,7 @@ import net.sf.saxon.trans.XPathException;
  *
  * @since 9.0
  */
+@CSharpModifiers(code = {"internal"})
 public class XQueryExecutable {
 
     Processor processor;

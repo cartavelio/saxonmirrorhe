@@ -65,7 +65,7 @@ public class Doc extends SystemFunction implements Callable {
         return expr == null ? super.makeFunctionCall(arguments) : expr;
     }
 
-    @CSharpInnerClass(outer=false, extra={"net.sf.saxon.functions.SystemFunction sf"})
+    @CSharpInnerClass(outer=false, extra={"Saxon.Hej.functions.SystemFunction sf"})
     public static Expression maybePreEvaluate(final SystemFunction sf, final Expression[] arguments) {
         if (arguments.length > 1 ||
                 !sf.getRetainedStaticContext().getConfiguration().getBooleanProperty(Feature.PRE_EVALUATE_DOC_FUNCTION)) {

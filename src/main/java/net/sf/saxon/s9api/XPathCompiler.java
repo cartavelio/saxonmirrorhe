@@ -19,6 +19,7 @@ import net.sf.saxon.sxpath.XPathEvaluator;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.SequenceType;
 
 import java.net.URI;
@@ -49,6 +50,7 @@ import java.util.Objects;
  * @since 9.0
  */
 
+@CSharpModifiers(code = {"internal"})
 public class XPathCompiler {
 
     private final Processor processor;

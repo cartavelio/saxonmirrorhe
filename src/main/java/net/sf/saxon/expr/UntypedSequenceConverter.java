@@ -112,7 +112,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
         }
     }
 
-    @CSharpInnerClass(outer=false, extra={"net.sf.saxon.type.PlainType requiredItemType", "net.sf.saxon.expr.Expression operand"})
+    @CSharpInnerClass(outer=false, extra={"Saxon.Hej.type.PlainType requiredItemType", "Saxon.Hej.expr.Expression operand"})
     public static UntypedSequenceConverter makeUntypedSequenceRejector(Configuration config, final Expression operand, final PlainType requiredItemType) {
         UntypedSequenceConverter atomicSeqConverter = new UntypedSequenceConverter(operand, requiredItemType);
         final ConversionRules rules = config.getConversionRules();

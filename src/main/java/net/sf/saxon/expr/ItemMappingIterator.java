@@ -31,10 +31,10 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
  */
 
 @CSharpInjectMembers(code={
-        "public ItemMappingIterator(net.sf.saxon.om.SequenceIterator first, net.sf.saxon.expr.ItemMapper.Lambda action) : this(first, net.sf.saxon.expr.ItemMapper.of(action)) {}",
-        "public ItemMappingIterator(net.sf.saxon.om.SequenceIterator first, net.sf.saxon.expr.ItemMapper.Lambda action, bool oneToOne) : this(first, net.sf.saxon.expr.ItemMapper.of(action), oneToOne) {}"
+        "public ItemMappingIterator(Saxon.Hej.om.SequenceIterator first, Saxon.Hej.expr.ItemMapper.Lambda action) : this(first, Saxon.Hej.expr.ItemMapper.of(action)) {}",
+        "public ItemMappingIterator(Saxon.Hej.om.SequenceIterator first, Saxon.Hej.expr.ItemMapper.Lambda action, bool oneToOne) : this(first, Saxon.Hej.expr.ItemMapper.of(action), oneToOne) {}"
 })
-
+                
 public class ItemMappingIterator
         implements SequenceIterator, LookaheadIterator, LastPositionFinder {
 

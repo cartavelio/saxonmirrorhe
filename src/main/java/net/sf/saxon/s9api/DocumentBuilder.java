@@ -17,6 +17,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.Whitespace;
 
 import javax.xml.transform.Source;
@@ -38,7 +39,7 @@ import java.net.URI;
  *
  * @since 9.0
  */
-
+@CSharpModifiers(code = {"internal"})
 public class DocumentBuilder {
 
     private final Configuration config;

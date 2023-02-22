@@ -25,6 +25,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.DateTimeValue;
 import org.xml.sax.InputSource;
@@ -57,12 +58,12 @@ import java.util.*;
 
 public class Transform {
 
-    protected Processor processor;
-    protected XsltCompiler compiler;
+    private Processor processor;
+    private XsltCompiler compiler;
     protected boolean useURLs = false;
     protected boolean showTime = false;
     protected int repeat = 1;
-    /*@Nullable*/ protected String sourceParserName = null;
+    protected String sourceParserName = null;
     protected boolean schemaAware = false;
     protected boolean allowExit = true;
     protected boolean run = true;
@@ -92,6 +93,7 @@ public class Transform {
      * @param options the CommandLineOptions in which the recognized options are to be registered.
      */
 
+    @CSharpModifiers(code = {"internal"})
     public void setPermittedOptions(CommandLineOptions options) {
         //#if CSHARP==false
         options.addRecognizedOption("a", CommandLineOptions.TYPE_BOOLEAN,
@@ -280,7 +282,6 @@ public class Transform {
      * that support the same command line interface
      *
      * @param args    the command-line arguments
-     * @param command the form of the command as written by the user. Not used, retained for backwards compatibility
      */
 
     public void doTransform(String[] args) {
@@ -980,6 +981,7 @@ public class Transform {
      * @param config  the Saxon Configuration
      */
 
+    @CSharpModifiers(code = {"internal"})
     protected void applyLocalOptions(CommandLineOptions options, Configuration config) {
         // no action: provided for subclasses to override
     }
@@ -1159,6 +1161,7 @@ public class Transform {
      * @throws SaxonApiException if any error occurs
      */
 
+    @CSharpModifiers(code={"internal"})
     protected Xslt30Transformer newTransformer(
             XsltExecutable sheet, CommandLineOptions options) throws SaxonApiException {
         Configuration config = getConfiguration();
@@ -1257,6 +1260,7 @@ public class Transform {
      * @throws SaxonApiException If the transformation fails
      */
 
+    @CSharpModifiers(code={"internal"})
     protected void processFile(Source source, XsltExecutable sheet, File outputFile, CommandLineOptions options)
             throws SaxonApiException {
 

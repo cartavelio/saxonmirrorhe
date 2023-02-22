@@ -503,7 +503,7 @@ public class MergeInstr extends Instruction {
      * @return a function capable of computing the number of merge groups
      */
 
-    @CSharpInnerClass(outer=true, extra="net.sf.saxon.expr.XPathContext context")
+    @CSharpInnerClass(outer=true, extra="Saxon.Hej.expr.XPathContext context")
     private LastPositionFinder getLastPositionFinder(final XPathContext context) {
         return new LastPositionFinder() {
             private int last  = -1;
@@ -747,7 +747,7 @@ public class MergeInstr extends Instruction {
         return mergeSources[0].mergeKeyDefinitions.getSortKeyDefinition(0).getSortKey();
     }
 
-    @CSharpInnerClass(outer=false, extra={"net.sf.saxon.expr.sort.SortKeyDefinitionList sKeys", "net.sf.saxon.expr.sort.AtomicComparer[] comps"})
+    @CSharpInnerClass(outer=false, extra={"Saxon.Hej.expr.sort.SortKeyDefinitionList sKeys", "Saxon.Hej.expr.sort.AtomicComparer[] comps"})
     public Comparator<ObjectValue<ItemWithMergeKeys>> getComparer(final SortKeyDefinitionList sKeys, final AtomicComparer[] comps) {
         //noinspection Convert2Lambda
         return new Comparator<ObjectValue<ItemWithMergeKeys>>() {

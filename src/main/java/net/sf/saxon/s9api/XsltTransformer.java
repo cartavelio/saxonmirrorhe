@@ -21,6 +21,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.linked.DocumentImpl;
 
 import javax.xml.transform.Source;
@@ -53,6 +54,7 @@ import java.net.URI;
  *
  * @since 9.0
  */
+@CSharpModifiers(code = {"internal"})
 public class XsltTransformer extends AbstractXsltTransformer implements Destination {
 
     private QName initialTemplateName;

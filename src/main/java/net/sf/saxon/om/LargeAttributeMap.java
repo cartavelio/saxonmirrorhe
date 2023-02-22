@@ -69,7 +69,7 @@ public class LargeAttributeMap implements AttributeMap {
         this.last = last;
     }
 
-    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary.Create<net.sf.saxon.om.NodeName,net.sf.saxon.om.LargeAttributeMap.AttributeInfoLink>();")
+    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary.Create<Saxon.Hej.om.NodeName,Saxon.Hej.om.LargeAttributeMap.AttributeInfoLink>();")
     private ImmutableHashTrieMap<NodeName, AttributeInfoLink> emptyMap() {
         return ImmutableHashTrieMap.empty();
     }

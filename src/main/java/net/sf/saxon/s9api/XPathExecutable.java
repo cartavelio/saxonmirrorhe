@@ -13,6 +13,7 @@ import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -27,6 +28,7 @@ import java.util.stream.Stream;
  * on the {@link XPathCompiler} class.</p>
  */
 
+@CSharpModifiers(code = {"internal"})
 public class XPathExecutable {
 
     private final XPathExpression exp;

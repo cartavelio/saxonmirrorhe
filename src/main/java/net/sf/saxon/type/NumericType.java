@@ -53,7 +53,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
         }
     }
 
-    @CSharpReplaceMethod(code="private NumericType() : base (java.util.Arrays.asList<net.sf.saxon.type.AtomicType>(net.sf.saxon.type.BuiltInAtomicType.DOUBLE, net.sf.saxon.type.BuiltInAtomicType.FLOAT, net.sf.saxon.type.BuiltInAtomicType.DECIMAL)) {}")
+    @CSharpReplaceMethod(code="private NumericType() : base (Saxon.Ejava.util.Arrays.asList<Saxon.Hej.type.AtomicType>(Saxon.Hej.type.BuiltInAtomicType.DOUBLE, Saxon.Hej.type.BuiltInAtomicType.FLOAT, Saxon.Hej.type.BuiltInAtomicType.DECIMAL)) {}")
     private NumericType() {
         super(Arrays.asList(BuiltInAtomicType.DOUBLE, BuiltInAtomicType.FLOAT, BuiltInAtomicType.DECIMAL));
    }
@@ -102,7 +102,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * @return the atomic types and plain union types in the transitive membership of the union type.
      */
     @Override
-    @CSharpReplaceBody(code = "return new System.Collections.Generic.List<net.sf.saxon.type.PlainType>(getMemberTypes());")
+    @CSharpReplaceBody(code = "return new System.Collections.Generic.List<Saxon.Hej.type.PlainType>(getMemberTypes());")
     public List<? extends PlainType> getPlainMemberTypes() {
         return getMemberTypes();
     }

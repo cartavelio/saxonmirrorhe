@@ -214,7 +214,7 @@ public abstract class Operation {
         }
 
         @Override
-        @CSharpInnerClass(outer=true, extra={"net.sf.saxon.regex.REMatcher matcher", "int position"})
+        @CSharpInnerClass(outer=true, extra={"Saxon.Hej.regex.REMatcher matcher", "int position"})
         @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public IntIterator iterateMatches(final REMatcher matcher, final int position) {
             return new IntIterator() {
@@ -431,10 +431,10 @@ public abstract class Operation {
 
         @Override
         @CSharpInnerClass(outer = true, extra = {
-                "net.sf.saxon.regex.REMatcher matcher",
-                "System.Collections.Generic.Stack<net.sf.saxon.z.IntIterator> iterators",
+                "Saxon.Hej.regex.REMatcher matcher",
+                "System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators",
                 "int backtrackingLimit",
-                "net.sf.saxon.regex.REMatcher.State savedState",
+                "Saxon.Hej.regex.REMatcher.State savedState",
                 "int position"})
         public IntIterator iterateMatches(final REMatcher matcher, final int position) {
 
@@ -867,8 +867,8 @@ public abstract class Operation {
 
         @Override
         @CSharpInnerClass(outer = true, extra = {
-                "net.sf.saxon.regex.REMatcher matcher",
-                "System.Collections.Generic.Stack<net.sf.saxon.z.IntIterator> iterators",
+                "Saxon.Hej.regex.REMatcher matcher",
+                "System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators",
                 "System.Collections.Generic.Stack<System.Int32> positions",
                 "int bound",
                 "int position"})
@@ -1044,7 +1044,7 @@ public abstract class Operation {
 
         @Override
         @CSharpInnerClass(outer = true, extra = {
-                "net.sf.saxon.regex.REMatcher matcher",
+                "Saxon.Hej.regex.REMatcher matcher",
                 "int position"})
         public IntIterator iterateMatches(final REMatcher matcher, final int position) {
             return new IntIterator() {
@@ -1262,9 +1262,9 @@ public abstract class Operation {
 
         @Override
         @CSharpInnerClass(outer = true, extra = {
-                "net.sf.saxon.regex.REMatcher matcher",
+                "Saxon.Hej.regex.REMatcher matcher",
                 "int position",
-                "net.sf.saxon.z.IntIterator basis"
+                "Saxon.Hej.z.IntIterator basis"
         })
         public IntIterator iterateMatches(final REMatcher matcher, final int position) {
             if ((matcher.program.optimizationFlags & REProgram.OPT_HASBACKREFS) != 0) {
@@ -1444,7 +1444,7 @@ public abstract class Operation {
         @Override
         @CSharpInnerClass(outer=true,
                           extra={
-                            "net.sf.saxon.z.IntIterator baseIter",
+                            "Saxon.Hej.z.IntIterator baseIter",
                             "int iterNr"
                           })
         public IntIterator iterateMatches(REMatcher matcher, int position) {

@@ -234,7 +234,7 @@ public class LoopLifter {
         let.setSequence(child);
         let.setNeedsLazyEvaluation(true);
         let.setEvaluator(Cardinality.allowsMany(child.getCardinality())
-                                 ? Evaluator.MemoClosure.INSTANCE
+                                 ? Evaluator.MemoClosureEvaluator.INSTANCE
                                  : Evaluator.SingletonClosure.INSTANCE);
         let.setAction(newAction);
         let.adoptChildExpression(newAction);

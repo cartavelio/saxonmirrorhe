@@ -54,8 +54,8 @@ import java.util.*;
 
 // Enable the C# code to accept a lambda expression in calls to children()
 @CSharpInjectMembers(code = {""
-        + "    protected System.Collections.Generic.IEnumerable<net.sf.saxon.om.NodeInfo> children(System.Predicate<net.sf.saxon.om.NodeInfo> filter) {"
-        + "        return new net.sf.saxon.tree.util.Navigator.ChildrenAsIterable(this, net.sf.saxon.pattern.NodeSelector.of(filter));"
+        + "    protected System.Collections.Generic.IEnumerable<Saxon.Hej.om.NodeInfo> children(System.Predicate<Saxon.Hej.om.NodeInfo> filter) {"
+        + "        return new Saxon.Hej.tree.util.Navigator.ChildrenAsIterable(this, Saxon.Hej.pattern.NodeSelector.of(filter));"
         + "    }"})
 
 public abstract class StyleElement extends ElementImpl {

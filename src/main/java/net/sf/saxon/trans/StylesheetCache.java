@@ -9,6 +9,7 @@ package net.sf.saxon.trans;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.XsltExecutable;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * A cache of the stylesheets (as XsltExecutables) used in calls to the fn:transform function, in a stylesheet or query.
  */
 
+@CSharpModifiers(code = {"internal"})
 public class StylesheetCache {
 
     private final Map<String, XsltExecutable> cacheByText = new ConcurrentHashMap<String, XsltExecutable>();

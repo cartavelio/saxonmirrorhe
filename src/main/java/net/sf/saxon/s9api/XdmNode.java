@@ -16,6 +16,7 @@ import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.Type;
@@ -42,6 +43,7 @@ import java.util.stream.Stream;
  *
  * @since 9.0
  */
+@CSharpModifiers(code = {"internal"})
 public class XdmNode extends XdmItem {
 
     private XdmNode() {}

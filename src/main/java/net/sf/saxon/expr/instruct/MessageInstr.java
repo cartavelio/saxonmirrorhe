@@ -286,7 +286,7 @@ public class MessageInstr extends Instruction {
         return new Message((XdmNode) XdmNode.wrap(content), new QName(errorCode), abort, getLocation());
     }
 
-    @CSharpReplaceBody(code="return new javax.xml.transform.stream.StreamResult(System.Console.Error);")
+    @CSharpReplaceBody(code="return new Saxon.Ejavax.xml.transform.stream.StreamResult(System.Console.Error);")
     private static Result standardErrorResult() {
         return new StreamResult(System.err);
     }

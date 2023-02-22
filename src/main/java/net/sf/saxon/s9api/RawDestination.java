@@ -10,6 +10,7 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.event.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 /**
  * An <code>RawDestination</code> is a {@link Destination} that accepts a sequence output
@@ -18,6 +19,7 @@ import net.sf.saxon.trans.XPathException;
  * option <code>build-tree="no"</code>
  */
 
+@CSharpModifiers(code = {"internal"})
 public class RawDestination extends AbstractDestination {
 
     private SequenceCollector sequenceOutputter;

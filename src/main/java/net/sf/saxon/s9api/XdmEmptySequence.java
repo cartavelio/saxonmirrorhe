@@ -7,6 +7,8 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.transpile.CSharpModifiers;
+
 import java.util.ArrayList;
 
 /**
@@ -20,6 +22,7 @@ import java.util.ArrayList;
  * Java null value.</p>
  */
 
+@CSharpModifiers(code = {"internal"})
 public class XdmEmptySequence extends XdmValue {
 
     private static final XdmEmptySequence THE_INSTANCE = new XdmEmptySequence();

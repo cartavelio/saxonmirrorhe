@@ -16,6 +16,7 @@ import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingAbort;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import javax.xml.transform.ErrorListener;
 import java.io.*;
@@ -42,6 +43,7 @@ import java.util.List;
 //                + "    }"
 //})
 
+@CSharpModifiers(code = {"internal"})
 public class XQueryCompiler {
 
     private final Processor processor;

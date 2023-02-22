@@ -92,6 +92,15 @@ public class CharacterMap {
     }
 
     /**
+     * Get the contents of the character map
+     * @return the character map, as a map from integer codepoints to strings
+     */
+
+    public IntHashMap<String> getMap() {
+        return charMap;
+    }
+
+    /**
      * Expand all the characters in a string using this character mapping
      *
      * @param in          the input string to be mapped

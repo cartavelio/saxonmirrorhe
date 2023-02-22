@@ -276,8 +276,8 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
             if (getArity() <= details.resultIfEmpty.length) {
                 // the condition eliminates concat, which is a special case.
                 for (int i = 0; i < getArity(); i++) {
-                    if (net.sf.saxon.expr.Literal.isEmptySequence(getArg(i)) && details.resultIfEmpty[i] != null) {
-                        return net.sf.saxon.expr.Literal.makeLiteral(details.resultIfEmpty[i].materialize(), this);
+                    if (Literal.isEmptySequence(getArg(i)) && details.resultIfEmpty[i] != null) {
+                        return Literal.makeLiteral(details.resultIfEmpty[i].materialize(), this);
                     }
                 }
             }
