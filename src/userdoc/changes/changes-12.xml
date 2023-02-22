@@ -25,13 +25,35 @@
     
     <category name="s9api" class="javaonly">
         
-        <p>Added the method <code>ItemTypeFactory.parseItemType(String)</code> as a convenient way of constructing an item type
+        <p>A number of changes have been made to simplify the use of item types and sequence types (particularly useful
+        when defining extension functions):</p>
+        
+        <ul>
+            <li><p>Added the method <code>ItemTypeFactory.parseItemType(String)</code> as a convenient way of constructing an item type
             such as <code>map(xs:string, node()*)</code> from its XPath textual representation.</p>
+            </li>
+            <li><p>Added methods to <code>ItemType</code> to construct a <code>SequenceType</code> by adding
+                an occurrence indicator: <code>one()</code>, <code>zeroOrOne()</code>, <code>zeroOrMore()</code>,
+                <code>oneOrMore()</code>. For example <code>ItemType.STRING.zeroOrMore()</code> represents the type
+                <code>xs:string*</code>.</p>
+            </li>
+            <li><p>Added the method <code>SequenceType.matches(XdmValue)</code> to test whether a value matches a sequence type.</p>
+            </li>
+            <li><p>The method <code>ItemTypeFactory.getItemType(item)</code>, when applied to a function item, now returns an item type
+        that retains the full function signature, rather than simply returning <code>function(*)</code>. This provides a convenient
+        way to create a function item type by copying the signature of an existing function item.</p>
+            </li>
+            <li><p>The results of <code>ItemType.toString()</code> have been tidied up and are better documented.</p></li>
+            <li><p>The class <code>ItemType</code> now implements <code>Predicate&lt;XdmItem></code>, so an item type
+            can be used wherever a predicate is expected (such as in a call to <code>Step.where()</code>).</p></li>
+            <li><p>A new method <code>XdmValue.where()</code> is provided to filter an <code>XdmValue</code> on any
+            predicate — including an <code>ItemType</code>. For example, <code>value.where(ItemType.INTEGER)</code>
+            selects those items that are instances of <code>xs:integer</code>.</p></li>
+        </ul>
         
-        <p>Added the method <code>ItemType.with(OccurrenceIndicator)</code> as a convenient way of constructing a sequence type
-        from an <code>ItemType</code> and an <code>OccurrenceIndicator</code>.</p>
         
-        <p>Added the method <code>SequenceType.matches(XdmValue)</code> to test whether a value matches a sequence type.</p>
+        
+        
         
   
     </category>
@@ -51,13 +73,31 @@
         <p>With this feature, it becomes possible to run XPath 3.1 queries against LINQ documents, returning nodes in the original LINQ 
             tree.</p>
         
-        <p>Added the method <code>XdmItemType.Occurs(char occurrenceIndicator)</code> as a convenient way of constructing a sequence type
-            from an <code>ItemType</code> and an occurrence indicator.</p>
+        <p>A number of changes have been made to simplify the use of item types and sequence types (particularly useful
+            when defining extension functions):</p>
         
-        <p>Added the method <code>XdmSequenceType.matches(XdmValue)</code> to test whether a value matches a sequence type.</p>
+        <ul>
+            <li><p>Added the properties <code>XdmItemType.One</code>, <code>XdmItemType.OneOrMore</code>, 
+                <code>XdmItemType.ZeroOrMore</code>, and <code>XdmItemType.ZeroOrOne</code> as a convenient way of constructing a sequence type
+                from an <code>ItemType</code> and an occurrence indicator.</p>
+            </li>
+            <li><p>Added the method <code>XdmSequenceType.Matches(XdmValue)</code> to test whether a value matches a sequence type.</p>
+            </li>
+            <li><p>Added <code>Equals()</code> and <code>GetHashCode()</code> methods to <code>XdmItemType</code> and <code>XdmSequenceType</code>
+                so equivalent types
+                compare equal.</p>
+            </li>
+            <li><p>Cleaned up and documented the behavior of <code>ToString()</code> applied to item types and sequence types.</p>
+            </li>
+            <li>Added a static method <code>XdmItemType.ForItem()</code> to get the item type of an item (see the documentation for exactly
+            what this means).</li>
+            <li></li>
+            <li></li>
+        </ul>
         
-        <p>Added <code>Equals()</code> and <code>GetHashCode()</code> methods to <code>XdmItemType</code> so equivalent types
-        compare equal.</p>
+        
+        
+        
         
         
         
