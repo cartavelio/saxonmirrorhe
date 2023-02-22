@@ -284,7 +284,6 @@ public class DeepEqual extends CollatingFunctionFixed {
                         return false;
                     }
                     if (!deepEquals(att1, att2, comparer, context, flags)) {
-                        deepEquals(att1, att2, comparer, context, flags);
                         explain(reporter, "elements have different values for the attribute " +
                             NameOfNode.makeName(att1).getStructuredQName().getEQName(), flags, n1, n2);
                         return false;
