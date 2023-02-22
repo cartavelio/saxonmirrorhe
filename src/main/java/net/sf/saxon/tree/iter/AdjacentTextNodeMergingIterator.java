@@ -12,6 +12,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
@@ -32,8 +33,12 @@ public class AdjacentTextNodeMergingIterator implements LookaheadIterator, Close
     private Item _next;
 
     public AdjacentTextNodeMergingIterator(SequenceIterator base) throws XPathException {
-        this.base = base;
-        _next = base.next();
+        try {
+            this.base = base;
+            _next = base.next();
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 
     @Override
