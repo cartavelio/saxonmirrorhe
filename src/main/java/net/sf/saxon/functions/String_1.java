@@ -20,6 +20,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -37,8 +38,8 @@ public class String_1 extends ScalarSystemFunction {
     public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
         try {
             return new StringValue(arg.getUnicodeStringValue());
-        } catch (UnsupportedOperationException err) {
-            throw new XPathException(err.getMessage(), "FOTY0014");
+        } catch (UncheckedXPathException err) {
+            throw err.getXPathException();
         }
     }
 
@@ -100,8 +101,8 @@ public class String_1 extends ScalarSystemFunction {
             return context -> {
                 try {
                     return argEval.eval(context);
-                } catch (UnsupportedOperationException err) {
-                    throw new XPathException(err.getMessage(), "FOTY0014");
+                } catch (UncheckedXPathException err) {
+                    throw err.getXPathException();
                 }
             };
         }
@@ -113,8 +114,8 @@ public class String_1 extends ScalarSystemFunction {
             return context -> {
                 try {
                     return argEval.eval(context);
-                } catch (UnsupportedOperationException err) {
-                    throw new XPathException(err.getMessage(), "FOTY0014");
+                } catch (UncheckedXPathException err) {
+                    throw err.getXPathException();
                 }
             };
         }

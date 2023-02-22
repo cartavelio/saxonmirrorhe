@@ -14,6 +14,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -200,7 +201,7 @@ public abstract class AbstractArrayItem extends ArrayItem {
      * so an exception is thrown.
      *
      * @return the string value of the item
-     * @throws UnsupportedOperationException if the item is an array (an unchecked exception
+     * @throws UncheckedXPathException if the item is an array (an unchecked exception
      *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
      *                                       needed)
      * @since 8.4
@@ -208,7 +209,7 @@ public abstract class AbstractArrayItem extends ArrayItem {
 
     @Override
     public UnicodeString getUnicodeStringValue() {
-        throw new UnsupportedOperationException("An array does not have a string value");
+        throw new UncheckedXPathException(new XPathException("An array has no string value", "FOTY0014"));
     }
 
     /**

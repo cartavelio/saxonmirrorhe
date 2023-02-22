@@ -55,15 +55,6 @@ public class PackageData {
     }
 
     /**
-     * Create a PackageData object as a copy of an existing PackageData
-     * @param p the existing PackageData object
-     */
-
-    public PackageData(PackageData p) {
-
-    }
-
-    /**
      * Get the Configuration to which this package belongs
      * @return the Saxon configuration
      */

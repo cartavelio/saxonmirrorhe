@@ -7,14 +7,10 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.StringEvaluator;
-import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.StringElaborator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.EmptyUnicodeString;
@@ -80,17 +76,14 @@ public class NormalizeSpace_1 extends ScalarSystemFunction {
 
     public static class NormalizeSpaceFnElaborator extends StringElaborator {
 
+        public boolean returnZeroLengthWhenAbsent() {
+            return true;
+        }
+
         public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-            Expression arg = fnc.getArg(0);
-            UnicodeStringEvaluator argEval = makeElaborator(arg).elaborateForUnicodeString(zeroLengthWhenAbsent);
-            return context -> {
-                UnicodeString in = argEval.eval(context);
-                if (in == null || in.isEmpty()) {
-                    return handleNullUnicodeString(zeroLengthWhenAbsent);
-                }
-                return Whitespace.collapseWhitespace(in);
-            };
+            UnicodeStringEvaluator argEval = makeElaborator(fnc.getArg(0)).elaborateForUnicodeString(true);
+            return context -> Whitespace.collapseWhitespace(argEval.eval(context));
         }
 
         public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {

@@ -9,7 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyAttributeImpl;
@@ -47,7 +47,7 @@ public class MemoFunction extends UserFunction {
 
     @Override
     public void computeEvaluationMode() {
-        evaluator = ExpressionTool.eagerEvaluator(getBody());
+        bodyEvaluator = Elaborator.makeElaborator(getBody()).eagerly();
     }
 
     /**

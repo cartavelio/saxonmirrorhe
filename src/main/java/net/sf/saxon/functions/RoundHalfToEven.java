@@ -7,12 +7,13 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Cardinality;
@@ -85,29 +86,58 @@ public final class RoundHalfToEven extends SystemFunction {
 
         public ItemEvaluator elaborateForItem() {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-            final ItemEvaluator argEval = makeElaborator(fnc.getArg(0)).elaborateForItem();
+            final ItemEvaluator arg0eval = makeElaborator(fnc.getArg(0)).elaborateForItem();
             final boolean nullable = Cardinality.allowsZero(fnc.getArg(0).getCardinality());
 
             if (fnc.getArity() == 1) {
                 if (nullable) {
                     return context -> {
-                        NumericValue result = (NumericValue) argEval.eval(context);
+                        NumericValue result = (NumericValue) arg0eval.eval(context);
                         if (result == null) {
                             return null;
                         }
                         return result.roundHalfToEven(0);
                     };
                 } else {
-                    return context -> ((NumericValue) argEval.eval(context)).round(0);
+                    return context -> ((NumericValue) arg0eval.eval(context)).roundHalfToEven(0);
                 }
-            } else {
+            } else if (fnc.getArg(1) instanceof Literal && ((Literal)fnc.getArg(1)).getGroundedValue() instanceof NumericValue) {
+                final NumericValue scaleVal = (NumericValue) ((Literal) fnc.getArg(1)).getGroundedValue();
+                if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
+                    return arg0eval;
+                } else {
+                    try {
+                        int scale = scaleVal.compareTo(Integer.MIN_VALUE) < 0 ? Integer.MIN_VALUE: (int) scaleVal.longValue();
+                        return context -> {
+                            NumericValue result = (NumericValue) arg0eval.eval(context);
+                            if (result == null) {
+                                return null;
+                            }
+                            return result.roundHalfToEven(scale);
+                        };
+                    } catch (XPathException e) {
+                        return context -> {
+                            throw e;
+                        };
+                    }
+
+                }
+        } else {
                 final ItemEvaluator scaleArg = makeElaborator(fnc.getArg(1)).elaborateForItem();
                 return context -> {
-                    NumericValue result = (NumericValue) argEval.eval(context);
+                    NumericValue result = (NumericValue) arg0eval.eval(context);
                     if (result == null) {
                         return null;
                     }
-                    int scale = (int) ((NumericValue) scaleArg.eval(context)).longValue();
+                    NumericValue scaleVal = (NumericValue) scaleArg.eval(context);
+                    int scale;
+                    if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
+                        return result;
+                    } else if (scaleVal.compareTo(Integer.MIN_VALUE) < 0) {
+                        scale = Integer.MIN_VALUE;
+                    } else {
+                        scale = (int) scaleVal.longValue();
+                    }
                     return result.roundHalfToEven(scale);
                 };
             }

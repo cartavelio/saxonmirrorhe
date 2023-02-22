@@ -11,6 +11,8 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.om.Item;
@@ -40,6 +42,7 @@ public class XPathExpression {
     private SlotManager stackFrameMap;
     private final Executable executable;
     private int numberOfExternalVariables;
+    private final PullEvaluator pullEvaluator;
 
     /**
      * The constructor is protected, to ensure that instances can only be
@@ -54,6 +57,7 @@ public class XPathExpression {
         expression = exp;
         this.env = env;
         this.executable = exec;
+        this.pullEvaluator = Elaborator.makeElaborator(exp).elaborateForPull();
     }
 
     /**
@@ -173,7 +177,7 @@ public class XPathExpression {
 
     public SequenceIterator iterate(XPathDynamicContext context) throws XPathException {
         context.checkExternalVariables(stackFrameMap, numberOfExternalVariables);
-        return expression.iterate(context.getXPathContextObject());
+        return pullEvaluator.iterate(context.getXPathContextObject());
     }
 
     /**

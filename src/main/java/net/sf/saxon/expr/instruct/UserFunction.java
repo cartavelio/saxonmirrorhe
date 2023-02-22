@@ -12,6 +12,8 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.om.*;
@@ -56,7 +58,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
     private UserFunctionParameter[] parameterDefinitions;
     private SequenceType resultType;
     private SequenceType declaredResultType;
-    protected Evaluator evaluator = null;
+    protected SequenceEvaluator bodyEvaluator = null;
     private boolean updating = false;
     private int inlineable = -1; // 0:no 1:yes -1:don't know
     private int inliningCount = 0;
@@ -291,13 +293,13 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
      */
 
     public void computeEvaluationMode() {
-        if (tailRecursive) {
+        if (tailRecursive || declaredStreamability != FunctionStreamability.UNCLASSIFIED) {
             // If this function contains tail calls, we evaluate it eagerly, because
             // the caller needs to know whether a tail call was returned or not: if we
             // return a Closure, the tail call escapes into the wild and can reappear anywhere...
-            evaluator = ExpressionTool.eagerEvaluator(getBody());
+            bodyEvaluator = Elaborator.makeElaborator(getBody()).eagerly();
         } else {
-            evaluator = ExpressionTool.lazyEvaluator(getBody(), true);
+            bodyEvaluator = Elaborator.makeElaborator(getBody()).lazily(true);
         }
     }
 
@@ -525,11 +527,11 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
      * @return the computed evaluation mode
      */
 
-    public Evaluator getEvaluator() {
-        if (evaluator == null) {
+    public SequenceEvaluator getBodyEvaluator() {
+        if (bodyEvaluator == null) {
             computeEvaluationMode();
         }
-        return evaluator;
+        return bodyEvaluator;
     }
 
     /**
@@ -538,8 +540,8 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
      * @param mode the evaluation mode
      */
 
-    public void setEvaluator(Evaluator mode) {
-        evaluator = mode;
+    public void setBodyEvaluator(SequenceEvaluator mode) {
+        bodyEvaluator = mode;
     }
 
     /**
@@ -633,8 +635,8 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
     @Override
     public Sequence call(XPathContext context, Sequence[] actualArgs)
             throws XPathException {
-        if (evaluator == null) {
-            // should have been done at compile time
+        if (bodyEvaluator == null) {
+            // first time through
             computeEvaluationMode();
         }
 
@@ -642,7 +644,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
         c2.setStackFrame(getStackFrameMap(), actualArgs);
         Sequence result;
         try {
-            result = evaluator.evaluate(getBody(), c2);
+            result = bodyEvaluator.evaluate(c2);
         } catch (XPathException err) {
             err.maybeSetLocation(getLocation());
             err.maybeSetContext(c2);
@@ -740,7 +742,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
             presenter.emitAttribute("name", getFunctionName());
             presenter.emitAttribute("line", getLineNumber() + "");
             presenter.emitAttribute("module", getSystemId());
-            presenter.emitAttribute("eval", getEvaluator().getCode() + "");
+            //presenter.emitAttribute("eval", getEvaluator().getCode() + "");
         }
         String flags = "";
         if (determinism == Determinism.PROACTIVE) {

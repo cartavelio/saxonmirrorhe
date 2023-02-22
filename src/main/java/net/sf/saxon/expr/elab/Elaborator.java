@@ -1,13 +1,20 @@
 package net.sf.saxon.expr.elab;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Controller;
+import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.om.*;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.UncheckedXPathException;
+import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.MemoClosure;
 
 /**
  * This class is at the heart of the mechanism for elaborating expressions.
@@ -79,7 +86,75 @@ public abstract class Elaborator {
      * @return an evaluator for the expression that returns a {@link GroundedValue}
      */
 
-    public abstract EagerEvaluator eagerly();
+    public EagerEvaluator eagerly() {
+        Expression expr = getExpression();
+        int m = expr.getImplementationMethod();
+        if ((m & Expression.EVALUATE_METHOD) != 0 && !Cardinality.allowsMany(expr.getCardinality())) {
+            if (Cardinality.allowsZero(expr.getCardinality())) {
+                ItemEvaluator itemEvaluator = elaborateForItem();
+                return context -> {
+                    Item item = itemEvaluator.eval(context);
+                    return item == null ? EmptySequence.getInstance() : item;
+                };
+            } else {
+                ItemEvaluator itemEvaluator = makeElaborator(expr).elaborateForItem();
+                return CSharp.methodRef(itemEvaluator::eval);
+            }
+
+        } else if ((m & Expression.ITERATE_METHOD) != 0) {
+            PullEvaluator pullEvaluator = elaborateForPull();
+            return context -> {
+                try {
+                    SequenceIterator iter = pullEvaluator.iterate(context);
+                    return SequenceTool.toGroundedValue(iter);
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
+            };
+        } else {
+            PushEvaluator pushEvaluator = elaborateForPush();
+            return context -> {
+                Controller controller = context.getController();
+                SequenceCollector seq = controller.allocateSequenceOutputter();
+                ComplexContentOutputter out = new ComplexContentOutputter(seq);
+                out.open();
+                pushEvaluator.process(out, context);
+                out.close();
+                GroundedValue val = seq.getSequence();
+                seq.reset();
+                return val;
+            };
+        }
+    }
+
+    /**
+     * Get a function that evaluates the underlying expression lazily
+     * @param repeatable true if the resulting {@link Sequence} must be usable repeatedly; false
+     *                   if it only needs to be used once
+     * @return an evaluator for the expression that returns a {@link Sequence} (which may be a lazy sequence)
+     */
+
+    public SequenceEvaluator lazily(boolean repeatable) {
+        Expression expr = getExpression();
+        if (!Cardinality.allowsMany(expr.getCardinality())
+                || (expr.getDependencies() &
+                     (StaticProperty.DEPENDS_ON_POSITION |
+                              StaticProperty.DEPENDS_ON_LAST |
+                              StaticProperty.DEPENDS_ON_CURRENT_ITEM |
+                              StaticProperty.DEPENDS_ON_CURRENT_GROUP |
+                              StaticProperty.DEPENDS_ON_REGEX_GROUP)) != 0) {
+            // we can't save these values in the closure, so we evaluate
+            // the expression now if they are needed
+            EagerEvaluator eagerEvaluator = eagerly();
+            return CSharp.methodRef(eagerEvaluator::evaluate);
+        } else if (repeatable) {
+            // TODO: supply a PullEvaluator to the MemoClosure, not the original expression
+            return context -> new MemoClosure(expr, context);
+        } else {
+            PullEvaluator pullEvaluator = elaborateForPull();
+            return context -> new LazySequence(pullEvaluator.iterate(context));
+        }
+    }
 
     /**
      * Get a function that evaluates the underlying expression in the form of
@@ -126,7 +201,9 @@ public abstract class Elaborator {
      * @param zeroLengthWhenAbsent if true, then when the result of the expression
      *                             is an empty sequence, the result of the StringEvaluator
      *                             should be a zero-length string. If false, the return value
-     *                             should be null.
+     *                             should be null. For an expression or function that never
+     *                             returns an empty sequence (for example, a call on string() or
+     *                             normalize-space()), the argument has no effect.
      * @return an evaluator for the expression that returns a string.
      */
 

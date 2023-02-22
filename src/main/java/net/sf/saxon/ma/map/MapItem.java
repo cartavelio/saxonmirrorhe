@@ -392,14 +392,14 @@ public abstract class MapItem implements Function {
      * For atomic values, the method returns the result of casting the atomic value to a string.
      *
      * @return the string value of the item
-     * @throws UnsupportedOperationException if the item is a function item (an unchecked exception
+     * @throws UncheckedXPathException if the item is a function item (an unchecked exception
      *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
      *                                       needed)
      * @since 8.4
      */
     @Override
     public UnicodeString getUnicodeStringValue() {
-        throw new UnsupportedOperationException("A map has no string value");
+        throw new UncheckedXPathException(new XPathException("A map has no string value", "FOTY0014"));
     }
 
     /**

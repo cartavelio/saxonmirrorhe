@@ -309,8 +309,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
         public ItemEvaluator elaborateForItem() {
             final AtomicSequenceConverter expr = (AtomicSequenceConverter) getExpression();
             final ItemEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForItem();
-            final UntypedConverter converter =
-                    (UntypedConverter) expr.getConverter();
+            final Converter converter = expr.getConverter();
             assert converter != null;
             final boolean nullable = Cardinality.allowsZero(expr.getBaseExpression().getCardinality());
             return context -> {

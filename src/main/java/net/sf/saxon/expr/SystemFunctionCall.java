@@ -7,21 +7,19 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.AnalyzeString;
 import net.sf.saxon.expr.instruct.Block;
-import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.map.MapFunctionSet;
-import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
@@ -34,20 +32,14 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.IntegerValue;
 
-import java.util.Arrays;
-
 /**
  * A call to a system-defined function (specifically, a function implemented as an instance
  * of {@link net.sf.saxon.functions.SystemFunction})
  */
 public class SystemFunctionCall extends StaticFunctionCall implements Negatable {
 
-    public Evaluator[] argumentEvaluators;
-
     public SystemFunctionCall(SystemFunction target, Expression[] arguments) {
         super(target, arguments);
-        argumentEvaluators = new Evaluator[arguments.length];
-        Arrays.fill(argumentEvaluators, Evaluator.LazySequence.INSTANCE);
     }
 
     /**
@@ -99,28 +91,17 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         if ((getTargetFunction().getDetails().properties & BuiltInFunctionSet.LATE) == 0) {
             return preEvaluateIfConstant(visitor);
         }
-        allocateArgumentEvaluators(getArguments());
+        //allocateArgumentEvaluators(getArguments());
         return this;
     }
 
-    public void allocateArgumentEvaluators(Expression[] arguments) {
-        int lastExplicitArg = Math.min(arguments.length, getTargetFunction().getDetails().argumentTypes.length)-1;
-        for (int i = 0; i < arguments.length; i++) {
-            Expression arg = arguments[i];
-            int cardinality = getTargetFunction().getDetails().argumentTypes[Math.min(i, lastExplicitArg)].getCardinality();
-            if (arg instanceof Literal) {
-                argumentEvaluators[i] = Evaluator.Literal.INSTANCE;
-            } else if (arg instanceof VariableReference) {
-                argumentEvaluators[i] = Evaluator.Variable.INSTANCE;
-            } else if (cardinality == StaticProperty.EXACTLY_ONE || arg.getCardinality() == StaticProperty.EXACTLY_ONE) {
-                argumentEvaluators[i] = Evaluator.SingleItem.INSTANCE;
-            } else if (cardinality == StaticProperty.ALLOWS_ZERO_OR_ONE || arg.getCardinality() == StaticProperty.ALLOWS_ZERO_OR_ONE) {
-                argumentEvaluators[i] = Evaluator.OptionalItem.INSTANCE;
-            } else {
-                argumentEvaluators[i] = Evaluator.LazySequence.INSTANCE;
-            }
-        }
-    }
+//    public void allocateArgumentEvaluators(Expression[] arguments) {
+//        int lastExplicitArg = Math.min(arguments.length, getTargetFunction().getDetails().argumentTypes.length)-1;
+//        for (int i = 0; i < arguments.length; i++) {
+//            Expression arg = arguments[i];
+//            argumentEvaluators[i] = Elaborator.makeElaborator(arg).lazily(false);
+//        }
+//    }
 
     @Override
     public SystemFunction getTargetFunction() {
@@ -250,9 +231,9 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
             if (sfo != null) {
                 sfo.setParentExpression(getParentExpression());
                 ExpressionTool.copyLocationInfo(this, sfo);
-                if (sfo instanceof SystemFunctionCall) {
-                    ((SystemFunctionCall) sfo).allocateArgumentEvaluators(((SystemFunctionCall) sfo).getArguments());
-                }
+//                if (sfo instanceof SystemFunctionCall) {
+//                    ((SystemFunctionCall) sfo).allocateArgumentEvaluators(((SystemFunctionCall) sfo).getArguments());
+//                }
                 return sfo;
             }
         }
@@ -265,9 +246,9 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
             if (sfo != null) {
                 sfo.setParentExpression(getParentExpression());
                 ExpressionTool.copyLocationInfo(this, sfo);
-                if (sfo instanceof SystemFunctionCall) {
-                    ((SystemFunctionCall) sfo).allocateArgumentEvaluators(((SystemFunctionCall) sfo).getArguments());
-                }
+//                if (sfo instanceof SystemFunctionCall) {
+//                    ((SystemFunctionCall) sfo).allocateArgumentEvaluators(((SystemFunctionCall) sfo).getArguments());
+//                }
                 return sfo;
             }
         }
@@ -287,7 +268,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                     }
                 }
             }
-            ((SystemFunctionCall) sf).allocateArgumentEvaluators(((SystemFunctionCall) sf).getArguments());
+            //((SystemFunctionCall) sf).allocateArgumentEvaluators(((SystemFunctionCall) sf).getArguments());
         }
         return sf;
     }
@@ -463,42 +444,28 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         return super.toPattern(config);
     }
 
-    @Override
-    public Sequence[] evaluateArguments(XPathContext context) throws XPathException {
-        OperandArray operanda = getOperanda();
-        int numArgs = operanda.getNumberOfOperands();
-        Sequence[] actualArgs = new Sequence[numArgs];
-        for (int i = 0; i < numArgs; i++) {
-            Expression exp = operanda.getOperandExpression(i);
-            actualArgs[i] = argumentEvaluators[i].evaluate(exp, context);
-        }
-        return actualArgs;
-    }
+//    @Override
+//    public Sequence[] evaluateArguments(XPathContext context) throws XPathException {
+//        OperandArray operanda = getOperanda();
+//        int numArgs = operanda.getNumberOfOperands();
+//        Sequence[] actualArgs = new Sequence[numArgs];
+//        for (int i = 0; i < numArgs; i++) {
+//            actualArgs[i] = argumentEvaluators[i].evaluate(context);
+//        }
+//        return actualArgs;
+//    }
 
-    @Override
-    public void resetLocalStaticProperties() {
-        super.resetLocalStaticProperties();
-        if (argumentEvaluators != null) {
-            allocateArgumentEvaluators(getArguments());
-        } 
-    }
+//    @Override
+//    public void resetLocalStaticProperties() {
+//        super.resetLocalStaticProperties();
+//        if (argumentEvaluators != null) {
+//            allocateArgumentEvaluators(getArguments());
+//        }
+//    }
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        Function target = getTargetFunction();
-        if (target instanceof PushableFunction) {
-            Sequence[] actualArgs = evaluateArguments(context);
-            try {
-                ((PushableFunction)target).process(output, context, actualArgs);
-            } catch (XPathException e) {
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                e.maybeSetFailingExpression(this);
-                throw e;
-            }
-        } else {
-            super.process(output, context);
-        }
+        Elaborator.makeElaborator(this).elaborateForPush().process(output, context);
     }
 
     @Override
@@ -593,6 +560,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
     public Elaborator getElaborator() {
         SystemFunction fn = getTargetFunction();
         Elaborator fnElaborator = fn.getElaborator();
+        //noinspection ReplaceNullCheck
         if (fnElaborator != null) {
             return fnElaborator;
         } else {
@@ -604,25 +572,109 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
      * Elaborator for a system function call, used in cases where the specific function call has no custom support
      */
 
-    public static class SystemFunctionCallElaborator extends PullElaborator {
+    public static class SystemFunctionCallElaborator extends FunctionCallElaborator {
+
+        @Override
+        public void setExpression(Expression expr) {
+            super.setExpression(expr);
+            allocateArgumentEvaluators((FunctionCall) expr, false);
+        }
 
         public PullEvaluator elaborateForPull() {
             final SystemFunctionCall expr = (SystemFunctionCall) getExpression();
-            return context -> {
-                Sequence[] arguments = expr.evaluateArguments(context);
-                Sequence result = expr.call(context, arguments);
-                return result.iterate();
-            };
+            final SystemFunction fn = expr.getTargetFunction();
+            switch (argumentEvaluators.length) {
+                case 0:
+                    return context -> {
+                        try {
+                            return fn.call(context, StackFrame.EMPTY_ARRAY_OF_SEQUENCE).iterate();
+                        } catch (XPathException err) {
+                            err.maybeSetContext(context);
+                            err.maybeSetLocation(expr.getLocation());
+                            throw err;
+                        }
+                    };
+                case 1:
+                    return context -> {
+                        try {
+                            return fn.call(context, new Sequence[]{argumentEvaluators[0].evaluate(context)}).iterate();
+                        } catch (XPathException err) {
+                            err.maybeSetContext(context);
+                            err.maybeSetLocation(expr.getLocation());
+                            throw err;
+                        }
+                    };
+                case 2:
+                    return context -> {
+                        try {
+                            return fn.call(context,
+                                           new Sequence[]{
+                                                   argumentEvaluators[0].evaluate(context),
+                                                   argumentEvaluators[1].evaluate(context)
+                                           }).iterate();
+                        } catch (XPathException err) {
+                            err.maybeSetContext(context);
+                            err.maybeSetLocation(expr.getLocation());
+                            throw err;
+                        }
+                    };
+                default:
+                    return context -> {
+                        try {
+                            return fn.call(context, evaluateArguments(context)).iterate();
+                        } catch (XPathException err) {
+                            err.maybeSetContext(context);
+                            err.maybeSetLocation(expr.getLocation());
+                            throw err;
+                        }
+                    };
+            }
         }
 
         @Override
         public ItemEvaluator elaborateForItem() {
             final SystemFunctionCall expr = (SystemFunctionCall) getExpression();
-            return context -> {
-                Sequence[] arguments = expr.evaluateArguments(context);
-                Sequence result = expr.call(context, arguments);
-                return result.head();
-            };
+            final SystemFunction fn = expr.getTargetFunction();
+            switch (argumentEvaluators.length) {
+                case 0:
+                    return context -> fn.call(context,
+                                              StackFrame.EMPTY_ARRAY_OF_SEQUENCE).head();
+                case 1:
+                    return context -> fn.call(context,
+                                              new Sequence[]{
+                                                      argumentEvaluators[0].evaluate(context)
+                                              }).head();
+                case 2:
+                    return context -> fn.call(context,
+                                              new Sequence[]{
+                                                      argumentEvaluators[0].evaluate(context),
+                                                      argumentEvaluators[1].evaluate(context)
+                                              }).head();
+                default:
+                    return context -> fn.call(context, evaluateArguments(context)).head();
+            }
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            final SystemFunctionCall expr = (SystemFunctionCall) getExpression();
+            final SystemFunction fn = expr.getTargetFunction();
+            if (fn instanceof PushableFunction) {
+                return (output, context) -> {
+                    Sequence[] actualArgs = evaluateArguments(context);
+                    try {
+                        ((PushableFunction) fn).process(output, context, actualArgs);
+                    } catch (XPathException e) {
+                        e.maybeSetLocation(expr.getLocation());
+                        e.maybeSetContext(context);
+                        e.maybeSetFailingExpression(expr);
+                        throw e;
+                    }
+                    return null;
+                };
+            } else {
+                return super.elaborateForPush();
+            }
         }
     }
 }

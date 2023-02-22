@@ -1127,7 +1127,7 @@ public class ExpressionTool {
         //#endif
         opt.prepareForStreaming(body);
 
-        computeEvaluationModesForUserFunctionCalls(body);
+        //computeEvaluationModesForUserFunctionCalls(body);
         body.restoreParentPointers();
         return body;
     }

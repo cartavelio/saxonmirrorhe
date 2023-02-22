@@ -29,8 +29,7 @@ public abstract class PullElaborator extends Elaborator {
         return (out, context) -> {
             try {
                 SequenceIterator iter = pull.iterate(context);
-                Item it;
-                while ((it = iter.next()) != null) {
+                for (Item it; (it = iter.next()) != null; ) {
                     out.append(it);
                 }
                 return null;

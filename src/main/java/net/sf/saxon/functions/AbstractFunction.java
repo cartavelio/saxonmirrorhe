@@ -16,9 +16,10 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Function;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.query.AnnotationList;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.Arrays;
@@ -75,13 +76,14 @@ public abstract class AbstractFunction implements Function {
     /**
      * Get the string value of the function
      *
-     * @throws UnsupportedOperationException (the string value of a function is not defined)
+     * @throws UncheckedXPathException (the string value of a function is not defined)
      * @return nothing; this method always throws an exception
      */
 
     @Override
     public UnicodeString getUnicodeStringValue() {
-        throw new UnsupportedOperationException("The string value of a function is not defined");
+        throw new UncheckedXPathException(
+                new XPathException("The string value of a function is not defined", "FOTY0014"));
     }
 
     @Override

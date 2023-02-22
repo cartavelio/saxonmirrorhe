@@ -82,7 +82,7 @@ public class SubstringBefore extends CollatingFunctionFixed {
                     UnicodeString s0 = arg0Eval.eval(context);
                     UnicodeString s1 = arg1Eval.eval(context);
                     if (s1.isEmpty()) {
-                        return s0;
+                        return s1;
                     }
                     if (s0.isEmpty()) {
                         return EmptyUnicodeString.getInstance();

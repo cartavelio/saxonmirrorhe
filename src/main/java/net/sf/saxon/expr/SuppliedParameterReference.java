@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -243,5 +244,55 @@ public class SuppliedParameterReference extends Expression {
 
     public String toString() {
         return "suppliedParam(" + slotNumber + ")";
+    }
+
+    @Override
+    public Elaborator getElaborator() {
+        return new SuppliedParameterReferenceElaborator();
+    }
+
+    public static class SuppliedParameterReferenceElaborator extends PullElaborator {
+        @Override
+        public EagerEvaluator eagerly() {
+            SuppliedParameterReference varRef = (SuppliedParameterReference) getExpression();
+            int slot = varRef.getSlotNumber();
+            return context -> context.evaluateLocalVariable(slot).materialize();
+        }
+
+        @Override
+        public SequenceEvaluator lazily(boolean repeatable) {
+            SuppliedParameterReference varRef = (SuppliedParameterReference) getExpression();
+            int slot = varRef.getSlotNumber();
+            return context -> context.evaluateLocalVariable(slot);
+        }
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            SuppliedParameterReference varRef = (SuppliedParameterReference) getExpression();
+            int slot = varRef.getSlotNumber();
+            return context -> context.evaluateLocalVariable(slot).iterate();
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            SuppliedParameterReference varRef = (SuppliedParameterReference) getExpression();
+            int slot = varRef.getSlotNumber();
+            return (out, context) -> {
+                SequenceIterator value = context.evaluateLocalVariable(slot).iterate();
+                Item it;
+                while ((it = value.next()) != null) {
+                    out.append(it);
+                }
+                return null;
+            };
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            SuppliedParameterReference varRef = (SuppliedParameterReference) getExpression();
+            int slot = varRef.getSlotNumber();
+            return context -> context.evaluateLocalVariable(slot).head();
+        }
+
     }
 }

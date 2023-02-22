@@ -7,7 +7,12 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Operand;
+import net.sf.saxon.expr.OperandRole;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StandardNames;
@@ -32,7 +37,7 @@ public class WithParam  {
     private int slotNumber = -1;
     private SequenceType requiredType;
     private StructuredQName variableQName;
-    private Evaluator evaluator = null;
+    private SequenceEvaluator evaluator = null;
 
     public WithParam() {
     }
@@ -190,7 +195,7 @@ public class WithParam  {
         if (params != null) {
             for (WithParam param : params) {
                 param.selectOp.optimize(visitor, contextItemType);
-                param.computeEvaluator();
+                //param.computeEvaluator();
             }
         }
     }
@@ -201,7 +206,7 @@ public class WithParam  {
      * @return the evaluator object
      */
 
-    public Evaluator getEvaluationMode() {
+    public SequenceEvaluator getEvaluationMode() {
         if (evaluator == null) {
             computeEvaluator();
         }
@@ -211,7 +216,7 @@ public class WithParam  {
 
 
     private void computeEvaluator() {
-        evaluator = ExpressionTool.lazyEvaluator(selectOp.getChildExpression(), true);
+        evaluator = Elaborator.makeElaborator(selectOp.getChildExpression()).lazily(true);
     }
 
 
@@ -314,7 +319,7 @@ public class WithParam  {
         }
         int savedOutputState = context.getTemporaryOutputState();
         context.setTemporaryOutputState(StandardNames.XSL_WITH_PARAM);
-        Sequence result = evaluator.evaluate(selectOp.getChildExpression(), context);
+        Sequence result = evaluator.evaluate(context);
         context.setTemporaryOutputState(savedOutputState);
         return result;
     }

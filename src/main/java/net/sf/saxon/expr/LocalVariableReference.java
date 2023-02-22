@@ -179,10 +179,25 @@ public class LocalVariableReference extends VariableReference {
     public static class LocalVariableReferenceElaborator extends PullElaborator {
 
         @Override
+        public void setExpression(Expression expr) {
+            super.setExpression(expr);
+            if (((LocalVariableReference)expr).getSlotNumber() < 0) {
+                throw new IllegalStateException("Can't elaborate a local variable reference before slot numbers have been allocated");
+            }
+        }
+
+        @Override
         public EagerEvaluator eagerly() {
             LocalVariableReference varRef = (LocalVariableReference) getExpression();
             int slot = varRef.getSlotNumber();
             return context -> context.evaluateLocalVariable(slot).materialize();
+        }
+
+        @Override
+        public SequenceEvaluator lazily(boolean repeatable) {
+            LocalVariableReference varRef = (LocalVariableReference) getExpression();
+            int slot = varRef.getSlotNumber();
+            return context -> context.evaluateLocalVariable(slot);
         }
 
         @Override

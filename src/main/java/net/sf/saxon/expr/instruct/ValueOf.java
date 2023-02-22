@@ -491,7 +491,7 @@ public final class ValueOf extends SimpleNodeConstructor {
 
     /**
      * An Outputter that streams the text node incrementally to the destination, rather than evaluating
-     * it first as an in-memort string.
+     * it first as an in-memory string.
      */
 
     private static class TextNodeOutputStreamer extends ProxyOutputter {

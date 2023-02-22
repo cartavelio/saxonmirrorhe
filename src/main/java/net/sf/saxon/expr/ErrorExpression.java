@@ -7,6 +7,8 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.FallbackElaborator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -232,6 +234,10 @@ public class ErrorExpression extends Expression {
         destination.emitAttribute("code", exception.getErrorCode().getLocalName());
         destination.emitAttribute("isTypeErr", exception.isTypeError()?"0":"1");
         destination.endElement();
+    }
+
+    public Elaborator getElaborator() {
+        return new FallbackElaborator();
     }
     
 }
