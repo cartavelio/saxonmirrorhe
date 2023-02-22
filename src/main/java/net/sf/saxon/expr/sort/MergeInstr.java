@@ -154,12 +154,6 @@ public class MergeInstr extends Instruction {
             return forEachItemOp == null ? null : forEachItemOp.getChildExpression();
         }
 
-        public void setForEachItem(Expression forEachItem) {
-            if (forEachItem != null) {
-                forEachItemOp.setChildExpression(forEachItem);
-            }
-        }
-
         public Expression getForEachSource() {
             return forEachStreamOp == null ? null : forEachStreamOp.getChildExpression();
         }
@@ -375,6 +369,7 @@ public class MergeInstr extends Instruction {
         fixupGroupReferences(this, this, false);
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     private static void fixupGroupReferences(Expression exp, MergeInstr instr, boolean isInLoop) {
         if (exp == null) {
             // no action
@@ -585,7 +580,7 @@ public class MergeInstr extends Instruction {
         SequenceIterator inputIterator = EmptyIterator.getInstance();
         for (final MergeSource ms : mergeSources) {
 
-            SequenceIterator anchorsIter = null;
+            SequenceIterator anchorsIter;
 
             if (ms.streamable && ms.getForEachSource() != null) {
 //#ifdefined STREAM
@@ -616,7 +611,7 @@ public class MergeInstr extends Instruction {
                 FocusIterator anchorsIterFocus = c2.trackFocus(anchorsIter);
                 while (anchorsIterFocus.next() != null) {
                     XPathContext c4 = c2.newMinorContext();
-                    FocusIterator rowIntr = c4.trackFocus(ms.getRowSelect().iterate(c2));
+                    c4.trackFocus(ms.getRowSelect().iterate(c2));
                     MergeKeyMappingFunction addMergeKeys = new MergeKeyMappingFunction(c4, ms);
                     ContextMappingIterator contextMapKeysItr =
                             new ContextMappingIterator(addMergeKeys::map, c4);
@@ -641,7 +636,7 @@ public class MergeInstr extends Instruction {
     private SequenceIterator getInputIterator(AtomicComparer[] comps, SequenceIterator inputIterator, MergeSource ms, XPathContext c2) throws XPathException {
         XPathContext c4 = c2.newMinorContext();
         c4.setTemporaryOutputState(StandardNames.XSL_MERGE_KEY);
-        FocusIterator rowIntr = c4.trackFocus(ms.getRowSelect().iterate(c2));
+        c4.trackFocus(ms.getRowSelect().iterate(c2));
         MergeKeyMappingFunction addMergeKeys = new MergeKeyMappingFunction(c4, ms);
         ContextMappingIterator contextMapKeysItr =
                 new ContextMappingIterator(addMergeKeys::map, c4);
@@ -749,7 +744,7 @@ public class MergeInstr extends Instruction {
         return mergeSources[0].mergeKeyDefinitions.getSortKeyDefinition(0).getSortKey();
     }
 
-    @CSharpInnerClass(outer=false, extra={"Saxon.Hej.expr.sort.SortKeyDefinitionList sKeys", "Saxon.Hej.expr.sort.AtomicComparer[] comps"})
+    @CSharpInnerClass(extra={"Saxon.Hej.expr.sort.SortKeyDefinitionList sKeys", "Saxon.Hej.expr.sort.AtomicComparer[] comps"})
     public Comparator<ObjectValue<ItemWithMergeKeys>> getComparer(final SortKeyDefinitionList sKeys, final AtomicComparer[] comps) {
         //noinspection Convert2Lambda
         return new Comparator<ObjectValue<ItemWithMergeKeys>>() {
@@ -885,12 +880,10 @@ public class MergeInstr extends Instruction {
 
     public static class MergeKeyMappingFunction {
         private final MergeSource ms;
-        private final XPathContext baseContext;
         private final XPathContext keyContext;
         private final ManualIterator manualIterator;
 
         public MergeKeyMappingFunction(XPathContext baseContext, MergeSource ms) {
-            this.baseContext = baseContext;
             this.ms = ms;
             keyContext = baseContext.newMinorContext();
             keyContext.setTemporaryOutputState(StandardNames.XSL_MERGE_KEY);

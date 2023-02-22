@@ -142,6 +142,7 @@ public class Predicates {
      */
 
     public static <T extends XdmItem> Predicate<XdmItem> empty(Step<T> step) {
+        //noinspection SimplifyOptionalCallChains
         return item -> !step.apply(item).findFirst().isPresent();
     }
 
