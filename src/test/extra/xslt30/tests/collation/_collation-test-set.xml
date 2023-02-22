@@ -48,7 +48,7 @@
          <stylesheet file="collation-002.xsl"/>
       </test>
       <result>
-         <all-of>
+         <all-of> 
             <assert>/out/c1="Jaeger,JAEGER,Jæger,JÆGER"</assert>
             <assert>/out/c2="Jaeger,JAEGER,Jæger,JÆGER"</assert>
             <assert>/out/c3="Jaeger,JAEGER,Jæger,JÆGER"</assert>

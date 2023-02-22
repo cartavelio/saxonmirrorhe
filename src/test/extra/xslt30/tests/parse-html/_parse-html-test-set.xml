@@ -16,7 +16,12 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <assert-xml file="parse-html-001.out"/>
+         <all-of>
+            <assert>namespace-uri(/out/*:html) = "http://www.w3.org/1999/xhtml"</assert>
+            <assert>exists(/out/Q{http://www.w3.org/1999/xhtml}html/Q{http://www.w3.org/1999/xhtml}body/Q{http://www.w3.org/1999/xhtml}p)</assert>
+            <assert>string(//*:p) eq "Some text second line"</assert>
+            <assert>//*:p/node()[2][self::Q{http://www.w3.org/1999/xhtml}br]</assert>
+         </all-of>
       </result>
    </test-case>
    
