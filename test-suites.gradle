@@ -121,15 +121,7 @@ def testSuiteMatrix = [
       "_exceptions": "${projectDir}/src/test/exceptions/qt3.xml",
       "_depends": ["cloneQT3TestSuite"],
 
-      "XP30": [
-        "": [:],
-        "bc": ["bytecode": "on"]
-      ],
       "XP31": [
-        "": [:],
-        "bc": ["bytecode": "on"]
-      ],
-      "XQ10": [
         "": [:],
         "bc": ["bytecode": "on"]
       ],
@@ -143,15 +135,7 @@ def testSuiteMatrix = [
       "_class": "com.saxonica.testdriver.QT3TestDriverEE",
       "_exceptions": "${projectDir}/src/test/exceptions/qt3extra.xml",
 
-      "XP30": [
-        "": [:],
-        "bc": ["bytecode": "on"]
-      ],
       "XP31": [
-        "": [:],
-        "bc": ["bytecode": "on"]
-      ],
-      "XQ10": [
         "": [:],
         "bc": ["bytecode": "on"]
       ],

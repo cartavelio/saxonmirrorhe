@@ -22,10 +22,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TraceableComponent;
-import net.sf.saxon.trans.FunctionStreamability;
-import net.sf.saxon.trans.SymbolicName;
-import net.sf.saxon.trans.Visibility;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
@@ -647,6 +644,11 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
         try {
             result = evaluator.evaluate(getBody(), c2);
         } catch (XPathException err) {
+            err.maybeSetLocation(getLocation());
+            err.maybeSetContext(c2);
+            throw err;
+        } catch (UncheckedXPathException uxe) {
+            XPathException err = uxe.getXPathException();
             err.maybeSetLocation(getLocation());
             err.maybeSetContext(c2);
             throw err;
