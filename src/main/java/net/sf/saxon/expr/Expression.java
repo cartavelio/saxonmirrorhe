@@ -942,7 +942,6 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
 
         boolean hasEvaluateMethod = (m & EVALUATE_METHOD) != 0;
         boolean hasIterateMethod = (m & ITERATE_METHOD) != 0;
-
         try {
             if (hasEvaluateMethod && (!hasIterateMethod || !Cardinality.allowsMany(getCardinality()))) {
                 Item item = evaluateItem(context);

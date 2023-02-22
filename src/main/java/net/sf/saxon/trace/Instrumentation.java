@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class Instrumentation {
 
-    public static final boolean ACTIVE = false;
+    public static final boolean ACTIVE = true;
 
     public static HashMap<String, Long> counters = new HashMap<>();
 
@@ -35,6 +35,13 @@ public class Instrumentation {
         } else {
             counters.put(counter, increment);
         }
+    }
+
+    public static String callStack() {
+        StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
+        return stacktrace[3].getClassName() + "." + stacktrace[3].getMethodName() +
+                                      " from " + stacktrace[4].getClassName() + "." + stacktrace[4].getMethodName() +
+                                      " from " + stacktrace[5].getClassName() + "." + stacktrace[5].getMethodName();
     }
 
     public static void report() {

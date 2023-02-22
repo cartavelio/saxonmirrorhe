@@ -15,6 +15,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Steps;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.UncheckedXPathException;
 import org.w3c.dom.Document;
 
@@ -267,6 +268,8 @@ public abstract class TestDriver {
         processCatalog(new File(catalog));
         System.err.println("Finished in " + ((System.nanoTime() - startTime)/1_000_000_000L) + "s" );
         printResults(resultsDir + "/results" + Version.getProductVersion() + ".xml");
+
+        Instrumentation.report();
 
         Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
         System.err.println("Wrapping up. Looking for dangling threads.");

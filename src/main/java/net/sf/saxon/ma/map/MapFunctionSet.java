@@ -332,6 +332,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             AtomicValue key = (AtomicValue) arguments[0].head();
             assert key != null;
+            if (arguments[1] instanceof Item) {
+                return new SingleEntryMap(key, (Item)arguments[1]);
+            }
             GroundedValue value = SequenceTool.toGroundedValue(arguments[1].iterate());
             return new SingleEntryMap(key, value);
         }

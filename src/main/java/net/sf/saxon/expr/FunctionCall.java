@@ -368,7 +368,7 @@ public abstract class FunctionCall extends Expression {
      */
     @Override
     public int getImplementationMethod() {
-        return ITERATE_METHOD;
+        return ITERATE_METHOD | EVALUATE_METHOD;
     }
 
     /**
@@ -560,6 +560,20 @@ public abstract class FunctionCall extends Expression {
         Sequence[] actualArgs = evaluateArguments(context);
         try {
             return target.call(context, actualArgs).iterate();
+        } catch (XPathException e) {
+            e.maybeSetLocation(getLocation());
+            e.maybeSetContext(context);
+            e.maybeSetFailingExpression(this);
+            throw e;
+        }
+    }
+
+    @Override
+    public Item evaluateItem(XPathContext context) throws XPathException {
+        Function target = getTargetFunction(context);
+        Sequence[] actualArgs = evaluateArguments(context);
+        try {
+            return target.call(context, actualArgs).head();
         } catch (XPathException e) {
             e.maybeSetLocation(getLocation());
             e.maybeSetContext(context);
