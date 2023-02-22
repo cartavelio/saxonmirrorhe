@@ -98,6 +98,30 @@
               "target": "Package",
               "version": "[1.11.33, )"
             },
+            "ICU4N": {
+              "target": "Package",
+              "version": "[60.1.0-alpha.354, )"
+            },
+            "ICU4N.Collation": {
+              "target": "Package",
+              "version": "[60.1.0-alpha.354, )"
+            },
+            "ICU4N.CurrencyData": {
+              "target": "Package",
+              "version": "[60.1.0-alpha.354, )"
+            },
+            "ICU4N.LanguageData": {
+              "target": "Package",
+              "version": "[60.1.0-alpha.354, )"
+            },
+            "ICU4N.RegionData": {
+              "target": "Package",
+              "version": "[60.1.0-alpha.354, )"
+            },
+            "ICU4N.Transliterator": {
+              "target": "Package",
+              "version": "[60.1.0-alpha.354, )"
+            },
             "Singulink.Numerics.BigDecimal": {
               "target": "Package",
               "version": "[1.0.2, )"

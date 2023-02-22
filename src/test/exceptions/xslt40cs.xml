@@ -1,0 +1,84 @@
+<exceptions>
+  
+  <!-- Exceptions file for Saxon-CS -->
+  
+  <exception test-case="avt-0901" run="false" report="not-implemented">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Collations</reason>
+  </exception>
+  
+  <exception test-case="choose-0107" run="false" report="not-implemented">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Collations</reason>
+  </exception>
+  
+  <exception test-case="id-001
+    id-015
+    id-016
+    id-018
+    id-019
+    id-034
+    id-037" run="false" report="not-implemented">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Relies on DTD-defined ID attributes</reason>
+  </exception>
+  
+  <exception test-case="id-043" run="false" report="test-driver">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Test driver limitation: source/select</reason>
+  </exception>
+  
+  
+  <exception test-case="include-0102" run="false" report="not-implemented">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Relies on DTD-defined ID attributes</reason>
+  </exception>
+  
+  <exception test-case="include-0103" run="false" report="not-implemented">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Relies on imported embedded stylesheets</reason>
+  </exception>
+  
+  <exception test-case="package-017" run="false" report="disputed">
+    <created by="Michael Kay" on="2015-11-02"/>
+    <reason>Bug 29233</reason>
+  </exception>
+  
+  <exception test-case="package-018" run="false" report="disputed">
+    <created by="Michael Kay" on="2015-11-02"/>
+    <reason>Bug 29233</reason>
+  </exception>
+  
+  <exception test-case="package-908" run="false" report="disputed">
+    <created by="Michael Kay" on="2015-11-02"/>
+    <reason>Bug 29234</reason>
+  </exception>
+
+  <exception test-case="regex-syntax-0986" run="false" report="tooBig">
+    <created by="Michael Kay" on="2012-11-05"/>
+    <reason>Slow running</reason>
+  </exception>
+  
+  <exception test-case="regex-syntax-0987" run="false" report="tooBig">
+    <created by="Michael Kay" on="2012-11-05"/>
+    <reason>Slow running</reason>
+  </exception>
+  
+  <!--<exception test-case="streamable-066" run="false" report="not-implemented">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Multithreading</reason>
+  </exception>
+  -->
+ 
+  <exception test-case="override-f-029" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2016-02-14"/>
+    <reason>Saxon bug 2781</reason>
+  </exception>
+  
+  <exception test-case="si-group-064" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2020-09-09"/>
+    <reason>The streaming spec allows calling last() on a grounding consuming sequence but we don't know how to implement this.</reason>
+  </exception>
+
+
+</exceptions>
