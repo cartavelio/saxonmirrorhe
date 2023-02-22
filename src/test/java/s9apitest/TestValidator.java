@@ -1662,5 +1662,72 @@ public class TestValidator {
         }
     }
 
+    @Test
+    public void testMakeWarningFatal() {
+
+        // Attempt to promote the warning on an unresolved xsl:include to a fatal error. Bug 5478.
+
+        String xsd = "<xsd:schema\n"
+                + "elementFormDefault='qualified'\n"
+                + "xmlns:xsd='http://www.w3.org/2001/XMLSchema'>\n"
+                + "<xsd:include schemaLocation='nonexistentA.xsd'/>\n"
+                + "<xsd:include schemaLocation='nonexistentB.xsd'/>\n"
+                + "</xsd:schema>";
+        final List<XmlProcessingError> errorList = new ArrayList<>();
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            StreamSource source_xsd = new StreamSource(new StringReader(xsd));
+            sm.setErrorReporter(err -> {
+                err.setTerminationMessage("Far too many errors");
+                errorList.add(err);
+            });
+
+            sm.load(source_xsd);
+            fail("Validation errors not detected");
+
+        } catch (SaxonApiException sapie) {
+            assertEquals(1, errorList.size());
+            assertTrue(sapie.getMessage().contains("Far too many errors"));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testMakeDuplicateErrorFatal() {
+
+        // Attempt to promote the error on a duplicate declaration to a fatal error. Bug 5478.
+
+        String xsd = "<xsd:schema\n"
+                + "elementFormDefault='qualified'\n"
+                + "xmlns:xsd='http://www.w3.org/2001/XMLSchema'>\n"
+                + "<xsd:element name='AAA'/>\n"
+                + "<xsd:element name='AAA'/>\n"
+                + "<xsd:element name='BBB'/>\n"
+                + "<xsd:element name='BBB'/>\n"
+                + "</xsd:schema>";
+        final List<XmlProcessingError> errorList = new ArrayList<>();
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            StreamSource source_xsd = new StreamSource(new StringReader(xsd));
+            sm.setErrorReporter(err -> {
+                err.setTerminationMessage("Far too many errors");
+                errorList.add(err);
+            });
+
+            sm.load(source_xsd);
+            fail("Validation errors not detected");
+
+        } catch (SaxonApiException sapie) {
+            assertEquals(1, errorList.size());
+            assertTrue(sapie.getMessage().contains("Far too many errors"));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+
 }
 
