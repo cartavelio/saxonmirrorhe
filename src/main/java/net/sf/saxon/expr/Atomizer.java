@@ -648,8 +648,22 @@ public final class Atomizer extends UnaryExpression {
             final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
             final boolean oneToOne = expr.isUntyped() && expr.getBaseExpression().getItemType() instanceof NodeTest;
             return context -> {
-                SequenceIterator base = baseEval.iterate(context);
-                return getAtomizingIterator(base, oneToOne);
+                try {
+                    SequenceIterator base = baseEval.iterate(context);
+                    return getAtomizingIterator(base, oneToOne);
+                } catch (TerminationException | Error.UserDefinedXPathException e) {
+                    throw e;
+                } catch (XPathException e) {
+                    if (expr.roleSupplier == null) {
+                        throw e;
+                    } else {
+                        String message = expr.expandMessage(e.getMessage());
+                        XPathException e2 = new XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
+                        e2.setXPathContext(context);
+                        e2.maybeSetLocation(expr.getLocation());
+                        throw e2;
+                    }
+                }
             };
         }
 
