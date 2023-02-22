@@ -689,8 +689,12 @@ public class TestXQueryEvaluator {
                 @Override
                 public void enter(Traceable instruction, Map<String, Object> properties, XPathContext context) {
 
+                    // Note that this expected output assumes the function call will be evaluated in push mode.
+                    // With pull mode, there is an extra "pull" on the LET clause - a second call on next() that always
+                    // returns null, because the function always returns a singleton.
+
                     System.err.println(i + ": @" + instruction.getLocation().getLineNumber() + " " +
-                                               (instruction instanceof ClauseInfo ? ((ClauseInfo) instruction).getClause().getClauseKey() : instruction.getClass()));
+                                               (instruction instanceof ClauseInfo ? ((ClauseInfo) instruction).getClause().getClauseKey() + " " + properties.get("var") : instruction.getClass()));
                     switch (i++) {
                         case 0:
                             assertTrue(instruction instanceof XQueryExpression, "isXQueryExpression");

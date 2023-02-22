@@ -6,7 +6,6 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 
-
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
@@ -36,7 +35,7 @@ public class ThreadCountTest {
                     return new StreamSource(strawberryFieldsForever());
                 }
             });
-            XdmSequenceIterator xdmSequenceIterator = xqueryEvaluator.iterator();
+            XdmSequenceIterator<?> xdmSequenceIterator = xqueryEvaluator.iterator();
             xdmSequenceIterator.next();
             xdmSequenceIterator.close();
             xqueryEvaluator.close();
