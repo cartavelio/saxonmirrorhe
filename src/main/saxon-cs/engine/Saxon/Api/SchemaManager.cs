@@ -205,7 +205,7 @@ namespace Saxon.Api {
         /// whenever a schema is required. Most Saxon APIs that accept a source XSD schema will also
         /// accept a lexical SCM file in its place.
         /// </remarks>
-        /// <return>The XML representation of the SCM.</return>
+        /// <returns>The XML representation of the SCM.</returns>
         public XdmNode ExportComponents() {
             XdmDestination destination = new XdmDestination();
             s9schemaManager.exportComponents(destination.GetUnderlyingDestination());
