@@ -99,7 +99,7 @@ public class Environment implements ResourceResolver {
         environment.xpathCompiler = environment.processor.newXPathCompiler();
         environment.xpathCompiler.setBaseURI(baseURI);
         environment.xqueryCompiler = environment.processor.newXQueryCompiler();
-        if (spec == Spec.XQ40) {
+        if (spec == Spec.XQ40 || spec == Spec.XP40) {
             environment.xqueryCompiler.setLanguageVersion("4.0");
             environment.xpathCompiler.setLanguageVersion("4.0");
         }

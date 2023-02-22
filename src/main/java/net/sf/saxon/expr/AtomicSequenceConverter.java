@@ -7,11 +7,11 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.GroundedValue;
@@ -19,6 +19,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
@@ -185,8 +186,12 @@ public class AtomicSequenceConverter extends UnaryExpression {
                 allocateConverterStatically(config, true);
             }
             if (converter != null) {
-                GroundedValue val = SequenceTool.toGroundedValue(iterate(new EarlyEvaluationContext(config)));
-                return Literal.makeLiteral(val, operand);
+                try {
+                    GroundedValue val = SequenceTool.toGroundedValue(iterate(new EarlyEvaluationContext(config)));
+                    return Literal.makeLiteral(val, operand);
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
         }
         return this;
