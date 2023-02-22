@@ -91,6 +91,33 @@ namespace SaxonCS_NUnit
             Console.ReadLine();
         }
 
+        [Ignore("Taking ages to fetch the schema?")]
+        public void testSchemaForXslt30() {
+            // This should use the resolver mechanism to load the schema locally
+            try {
+                Processor proc = new();
+                SchemaManager schemaManager = proc.SchemaManager;
+                //schemaManager.Compile(new Uri("https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd"));
+                
+                // DocumentBuilder builder = proc.NewDocumentBuilder();
+                // XdmNode schema = builder.Build(new Uri("https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd"));
+                // schemaManager.Compile(schema);
+
+                XQueryCompiler compiler = proc.NewXQueryCompiler();
+                XQueryEvaluator eval = compiler.Compile("doc('https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd')").Load();
+                XdmNode schema = (XdmNode)eval.Evaluate();
+                
+                schemaManager.Compile(schema);
+                SchemaValidator validator = schemaManager.NewSchemaValidator();
+                validator.InvalidityListener = failure => Assert.Fail();
+                validator.Validate(new Uri(ConfigTest.DataDirUri, "caffo/Transform2.xslt"));
+            }
+            catch (Exception e) {
+                Console.WriteLine(e.Message);
+                Assert.Fail();
+            }
+        }
+
         [Test]
         public void TestInvalidityHandler()
         {
