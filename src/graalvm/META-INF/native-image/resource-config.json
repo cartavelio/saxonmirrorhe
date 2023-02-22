@@ -39,7 +39,47 @@
     }, 
     {
       "pattern":"\\Qnet/sf/saxon/data/categories.xml\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/casevariants.xml\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/chameleon.xsl\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/override.xsl\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/profile-json.xsl\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/profile.xsl\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/xml-to-json-indent.xsl\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/xml-to-json-pkg.xsl\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/xml-to-json.xsl\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/xpath-functions.scm\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/xpath-functions.xsd\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/json.xsd\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/analyze-string.xsd\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/sef/function-library.sef.xml\\E"
     }
+
   ]},
   "bundles":[]
 }

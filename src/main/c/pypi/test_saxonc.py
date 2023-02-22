@@ -374,6 +374,29 @@ def testNamedTemplateDefault(saxonproc, files_dir, data_dir):
     assert "Item 3" in result
 
 
+def testCaseVariantFileLoads(saxonproc, files_dir, data_dir):
+    trans = saxonproc.new_xslt30_processor()
+    input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
+    executable = trans.compile_stylesheet(stylesheet_text = '''
+     <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" expand-text="yes" 
+         xmlns:p="urn:pentecom" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+         exclude-result-prefixes="p xs">
+         <xsl:output indent="yes"/>
+         <xsl:strip-space elements="*"/>
+         
+         <xsl:mode on-no-match="shallow-copy"/>
+         
+         <!--only compiles with ;j (java flavor) added to flag-->
+         <xsl:template match="text()[matches(.,'f?ool','i')]"/>
+         
+     </xsl:stylesheet>''')
+    if executable is None and trans.exception_occurred:
+        print(trans.error_message)
+    assert not trans.exception_occurred
+    assert executable is not None
+
+
+
 def testNamedTemplateToFileDefault(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     trans.set_cwd(os.getcwd())
