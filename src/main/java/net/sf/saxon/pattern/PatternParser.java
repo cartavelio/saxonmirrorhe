@@ -17,6 +17,7 @@ import net.sf.saxon.functions.SuperId;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.QNameParser;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -113,11 +114,35 @@ public class PatternParser extends XPathParser {
             grumble("Pattern starting with '.' must be followed by a sequence of predicates");
             return null;
         } else if (isTypePattern(pattern)) {
-            SequenceType seqType = parseSequenceType(pattern, env);
-            if (seqType.getCardinality() != StaticProperty.EXACTLY_ONE) {
-                grumble("Unexpected occurrence indicator in pattern");
+            this.env = env;
+            if (qNameParser == null) {
+                qNameParser = new QNameParser(env.getNamespaceResolver());
+                if (languageVersion >= 30) {
+                    qNameParser = qNameParser.withAcceptEQName(true);
+                }
             }
-            return new ItemTypePattern(seqType.getPrimaryType());
+            language = ParsedLanguage.XSLT_PATTERN;
+            t = new Tokenizer();
+            t.languageLevel = env.getXPathVersion();
+            allowSaxonExtensions =
+                    t.allowSaxonExtensions =
+                            env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
+            try {
+                t.tokenize(pattern, 0, -1);
+            } catch (XPathException err) {
+                grumble(err.getMessage());
+            }
+            ItemType req = parseItemType();
+            Pattern result = new ItemTypePattern(req);
+            while (t.currentToken == Token.LSQB) {
+                nextToken();
+                Expression predicate = parsePredicate();
+                expect(Token.RSQB);
+                nextToken();
+                result = new BasePatternWithPredicate(result, predicate);
+            }
+            expect(Token.EOF);
+            return result;
         } else {
             Expression exp = parse(pattern, 0, Token.EOF, env);
             exp.setRetainedStaticContext(env.makeRetainedStaticContext());

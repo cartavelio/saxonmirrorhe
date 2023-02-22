@@ -70,13 +70,14 @@ public abstract class StandardNames {
     public static final int XSL_IMPORT = XSL + 33;
     public static final int XSL_IMPORT_SCHEMA = XSL + 34;
     public static final int XSL_INCLUDE = XSL + 35;
-    public static final int XSL_ITERATE = XSL + 36;
-    public static final int XSL_KEY = XSL + 37;
-    public static final int XSL_MAP = XSL + 38;
-    public static final int XSL_MAP_ENTRY = XSL + 39;
-    public static final int XSL_MATCH = XSL + 40;
+    public static final int XSL_ITEM_TYPE = XSL + 36;
+    public static final int XSL_ITERATE = XSL + 37;
+    public static final int XSL_KEY = XSL + 38;
+    public static final int XSL_MAP = XSL + 39;
+    public static final int XSL_MAP_ENTRY = XSL + 40;
+    public static final int XSL_MATCH = XSL + 41;
     public static final int XSL_MATCHING_SUBSTRING = XSL + 43;
-    public static final int XSL_MERGE = XSL + 441;
+    public static final int XSL_MERGE = XSL + 44;
     public static final int XSL_MERGE_ACTION = XSL + 45;
     public static final int XSL_MERGE_KEY = XSL + 46;
     public static final int XSL_MERGE_SOURCE = XSL + 47;
@@ -366,6 +367,7 @@ public abstract class StandardNames {
         bindXSLTName(XSL_IMPORT, "import");
         bindXSLTName(XSL_IMPORT_SCHEMA, "import-schema");
         bindXSLTName(XSL_INCLUDE, "include");
+        bindXSLTName(XSL_ITEM_TYPE, "item-type");
         bindXSLTName(XSL_ITERATE, "iterate");
         bindXSLTName(XSL_KEY, "key");
         bindXSLTName(XSL_MAP, "map");
