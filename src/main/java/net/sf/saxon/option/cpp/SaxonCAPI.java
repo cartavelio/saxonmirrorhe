@@ -1117,12 +1117,33 @@ public class SaxonCAPI {
     public static Source resolveFileToSource(Processor processor, String cwd, String filename, String nature) throws SaxonApiException {
 
         Source source = null;
+        String ccwd = null;
+        String ffilename = filename;
+
+
+        if(cwd != null) {
+            ccwd = new File(cwd).toURI().toString();
+        }
+
+        char separatorChar = '/';
+        if (File.separatorChar != '/') {
+            filename.replace(File.separatorChar, separatorChar);
+            File file = new File(filename);
+            if(file.isAbsolute()) {
+                ffilename = file.toURI().toString();
+            }
+        }
+
+        if(debug) {
+            System.err.println("ccwd = " + ccwd);
+            System.err.println("filename = " + filename);
+        }
 
         Configuration configuration = processor.getUnderlyingConfiguration();
         ResourceResolver resolver = configuration.getResourceResolver();
         ResourceRequest request = new ResourceRequest();
-        request.baseUri = cwd;
-        request.uri = filename;
+        request.baseUri = ccwd;
+        request.uri = ffilename;
         request.nature = nature;
 
         try {
