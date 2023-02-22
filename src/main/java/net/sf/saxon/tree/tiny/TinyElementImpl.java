@@ -25,7 +25,6 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.z.IntHashMap;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -481,51 +480,51 @@ public class TinyElementImpl extends TinyParentNodeImpl {
     // can study the performance. It's currently not handling all edge cases, for example
     // detection of the disallowNamespaceSensitiveContent condition.
 
-    public void copy_12(Receiver receiver, int copyOptions, Location location) throws XPathException {
-
-        String prefix = getPrefix();
-        NamePool pool = tree.getNamePool();
-        NodeName elemName = new CodedName(tree.nameCode[nodeNr] & 0xfffff, prefix, pool);
-        boolean typed = tree.isTyped() && CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS);
-        SchemaType type = typed ? getSchemaType() : Untyped.getInstance();
-        AttributeMap atts = tree.alpha[nodeNr] < 0 ? EmptyAttributeMap.getInstance() : new LocalAttributeMap(typed);
-
-        // decide on namespaces
-        NamespaceMap namespaces = NamespaceMap.emptyMap();
-        if (tree.usesNamespaces) {
-            if ((copyOptions & CopyOptions.ALL_NAMESPACES) != 0) {
-                // copy all the namespaces
-                namespaces = getAllNamespaces();
-            } else {
-                // copy only the namespace bindings actually used in the element and attribute names
-                NamespaceUri uri = getNamespaceUri();
-                if (!uri.isEmpty()) {
-                    namespaces = NamespaceMap.of(prefix, uri);
-                }
-                int att = tree.alpha[nodeNr];
-                if (att >= 0) {
-                    while (att < tree.numberOfAttributes && tree.attParent[att] == nodeNr) {
-                        int attCode = tree.attCode[att++];
-                        if (NamePool.isPrefixed(attCode)) {
-                            String attPrefix = tree.prefixPool.getPrefix(attCode >> 20);
-                            namespaces = namespaces.put(attPrefix, pool.getURI(attCode));
-                        }
-                    }
-                }
-            }
-        }
-
-
-        receiver.startElement(elemName, type, atts, namespaces, location, 0);
-
-        // output the children
-
-        for (NodeInfo child : children()) {
-            child.copy(receiver, copyOptions, location);
-        }
-
-        receiver.endElement();
-    }
+//    public void copy_12(Receiver receiver, int copyOptions, Location location) throws XPathException {
+//
+//        String prefix = getPrefix();
+//        NamePool pool = tree.getNamePool();
+//        NodeName elemName = new CodedName(tree.nameCode[nodeNr] & 0xfffff, prefix, pool);
+//        boolean typed = tree.isTyped() && CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS);
+//        SchemaType type = typed ? getSchemaType() : Untyped.getInstance();
+//        AttributeMap atts = tree.alpha[nodeNr] < 0 ? EmptyAttributeMap.getInstance() : new LocalAttributeMap(typed);
+//
+//        // decide on namespaces
+//        NamespaceMap namespaces = NamespaceMap.emptyMap();
+//        if (tree.usesNamespaces) {
+//            if ((copyOptions & CopyOptions.ALL_NAMESPACES) != 0) {
+//                // copy all the namespaces
+//                namespaces = getAllNamespaces();
+//            } else {
+//                // copy only the namespace bindings actually used in the element and attribute names
+//                NamespaceUri uri = getNamespaceUri();
+//                if (!uri.isEmpty()) {
+//                    namespaces = NamespaceMap.of(prefix, uri);
+//                }
+//                int att = tree.alpha[nodeNr];
+//                if (att >= 0) {
+//                    while (att < tree.numberOfAttributes && tree.attParent[att] == nodeNr) {
+//                        int attCode = tree.attCode[att++];
+//                        if (NamePool.isPrefixed(attCode)) {
+//                            String attPrefix = tree.prefixPool.getPrefix(attCode >> 20);
+//                            namespaces = namespaces.put(attPrefix, pool.getURI(attCode));
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//
+//        receiver.startElement(elemName, type, atts, namespaces, location, 0);
+//
+//        // output the children
+//
+//        for (NodeInfo child : children()) {
+//            child.copy(receiver, copyOptions, location);
+//        }
+//
+//        receiver.endElement();
+//    }
 
 
     /**
@@ -638,72 +637,72 @@ public class TinyElementImpl extends TinyParentNodeImpl {
         return false;
     }
 
-    private class LocalAttributeMap implements AttributeMap {
-
-        private final boolean typed;
-
-        public LocalAttributeMap(boolean typed) {
-            this.typed = typed;
-        }
-
-        /**
-         * Return the number of attributes in the map.
-         *
-         * @return The number of attributes in the map.
-         */
-        @Override
-        public int size() {
-            int count = 0;
-            int att = tree.alpha[nodeNr];
-            if (att >= 0) {
-                while (att < tree.numberOfAttributes && tree.attParent[att] == nodeNr) {
-                    count++;
-                    att++;
-                }
-            }
-            return count;
-        }
-
-        /**
-         * Returns an iterator over elements of type {@code T}.
-         *
-         * @return an Iterator.
-         */
-        @Override
-        public Iterator<AttributeInfo> iterator() {
-            return new AttributeInfoIterator(typed);
-        }
-    }
-
-    private class AttributeInfoIterator implements Iterator<AttributeInfo> {
-        private int att = tree.alpha[nodeNr];
-        private final NamePool pool = tree.getNamePool();
-        private final boolean typed;
-        private final Location location = TinyElementImpl.this;
-
-        public AttributeInfoIterator(boolean typed) {
-            this.typed = typed && tree.attType != null;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return att < tree.numberOfAttributes && tree.attParent[att] == nodeNr;
-        }
-
-        @Override
-        public AttributeInfo next() {
-            int code = tree.attCode[att];
-            String prefix = NamePool.isPrefixed(code) ? tree.prefixPool.getPrefix(code >> 20) : "";
-            AttributeInfo info = new AttributeInfo(
-                    new CodedName(code & 0xfffff, prefix, pool),
-                    typed ? tree.attType[att] : BuiltInAtomicType.UNTYPED_ATOMIC,
-                    tree.attValue[att],
-                    location,
-                    0);
-            att++;
-            return info;
-        }
-    }
+//    private class LocalAttributeMap implements AttributeMap {
+//
+//        private final boolean typed;
+//
+//        public LocalAttributeMap(boolean typed) {
+//            this.typed = typed;
+//        }
+//
+//        /**
+//         * Return the number of attributes in the map.
+//         *
+//         * @return The number of attributes in the map.
+//         */
+//        @Override
+//        public int size() {
+//            int count = 0;
+//            int att = tree.alpha[nodeNr];
+//            if (att >= 0) {
+//                while (att < tree.numberOfAttributes && tree.attParent[att] == nodeNr) {
+//                    count++;
+//                    att++;
+//                }
+//            }
+//            return count;
+//        }
+//
+//        /**
+//         * Returns an iterator over elements of type {@code T}.
+//         *
+//         * @return an Iterator.
+//         */
+//        @Override
+//        public Iterator<AttributeInfo> iterator() {
+//            return new AttributeInfoIterator(typed);
+//        }
+//    }
+//
+//    private class AttributeInfoIterator implements Iterator<AttributeInfo> {
+//        private int att = tree.alpha[nodeNr];
+//        private final NamePool pool = tree.getNamePool();
+//        private final boolean typed;
+//        private final Location location = TinyElementImpl.this;
+//
+//        public AttributeInfoIterator(boolean typed) {
+//            this.typed = typed && tree.attType != null;
+//        }
+//
+//        @Override
+//        public boolean hasNext() {
+//            return att < tree.numberOfAttributes && tree.attParent[att] == nodeNr;
+//        }
+//
+//        @Override
+//        public AttributeInfo next() {
+//            int code = tree.attCode[att];
+//            String prefix = NamePool.isPrefixed(code) ? tree.prefixPool.getPrefix(code >> 20) : "";
+//            AttributeInfo info = new AttributeInfo(
+//                    new CodedName(code & 0xfffff, prefix, pool),
+//                    typed ? tree.attType[att] : BuiltInAtomicType.UNTYPED_ATOMIC,
+//                    tree.attValue[att],
+//                    location,
+//                    0);
+//            att++;
+//            return info;
+//        }
+//    }
 
 
 }

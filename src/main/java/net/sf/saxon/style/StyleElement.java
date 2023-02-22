@@ -1016,10 +1016,10 @@ public abstract class StyleElement extends ElementImpl {
                 if (version < 20 && version != 10) {
                     // XSLT 2.0 says use backwards compatible mode. XSLT 3.0 says we can raise an error.
                     // Both allow a warning
-                    issueWarning("Unrecognized version " + val + ": treated as 1.0", this);
+                    issueWarning("Unrecognized version " + val + ": treated as 1.0", SaxonErrorCode.SXWN9020, this);
                     version = 10;
                 } else if (version > 20 && version < 30) {
-                    issueWarning("Unrecognized version " + val + ": treated as 2.0", this);
+                    issueWarning("Unrecognized version " + val + ": treated as 2.0", SaxonErrorCode.SXWN9020, this);
                     version = 20;
                 }
             }
@@ -1079,7 +1079,8 @@ public abstract class StyleElement extends ElementImpl {
         if (getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
             return true;
         } else {
-            issueWarning("The option " + getDisplayName() + "/@" + attribute + " is ignored because it requires a Saxon-PE license", this);
+            issueWarning("The option " + getDisplayName() + "/@" + attribute +
+                                 " is ignored because it requires a Saxon-PE license", SaxonErrorCode.SXWN9021, this);
             return false;
         }
     }
@@ -2516,6 +2517,16 @@ public abstract class StyleElement extends ElementImpl {
 
     protected void issueWarning(String message, SourceLocator locator) {
         XPathException tce = new XPathException(message);
+        if (locator == null) {
+            tce.setLocator(this);
+        } else {
+            tce.setLocator(locator);
+        }
+        issueWarning(tce);
+    }
+
+    protected void issueWarning(String message, String errorCode, SourceLocator locator) {
+        XPathException tce = new XPathException(message, errorCode);
         if (locator == null) {
             tce.setLocator(this);
         } else {
