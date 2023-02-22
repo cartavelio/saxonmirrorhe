@@ -447,6 +447,10 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       
       <p>For example, <code>fn:characters("red")</code> returns <code>("r", "e", "d")</code>.</p>
       
+      <h2>fn:foot($input as item()*) as item()?</h2>
+      
+      <p>Returns the last item in a sequence.</p>
+      
       <h2>fn:highest($sequence as item()*) as item()*</h2>
       
       <p>Equivalent to <code>fn:highest($sequence, default-collation())</code>.</p>
@@ -490,11 +494,11 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       
       <p>Returns the items in the input sequence that precede the first one that satisfies the supplied predicate.</p>
       
-      <h2>fn:items-from($sequence as item()*, $predicate as function(item()) as xs:boolean) as item()*</h2>
+      <h2>fn:items-starting-with($sequence as item()*, $predicate as function(item()) as xs:boolean) as item()*</h2>
       
       <p>Returns the items in the input sequence starting with the first one that satisfies the supplied predicate.</p>
       
-      <h2>fn:items-until($sequence as item()*, $predicate as function(item()) as xs:boolean) as item()*</h2>
+      <h2>fn:items-ending-with($sequence as item()*, $predicate as function(item()) as xs:boolean) as item()*</h2>
       
       <p>Returns the items in the input sequence up to and including the first one that satisfies the supplied predicate.</p>
            
@@ -546,6 +550,10 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       
       <p>Returns true if at least one item in <code>$sequence</code> satisfies the predicate.</p>
       
+      <h2>fn:trunk($input as item()*) as item()*</h2>
+      
+      <p>Returns all items in a sequence except the last.</p>
+      
       <h2>fn:unparcel($parcel as record(value, *)) as item()*</h2>
       
       <p>Reverses the effect of the <code>fn:parcel()</code> function. (Equivalent to <code>$parcel?value</code>.)</p>
@@ -555,10 +563,18 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>Accepts an array as input, and turns it into a sequence of parcels: the inverse of the <code>array:of()</code>
          function.</p>
       
+      <h2>array:foot(array(*)) as item()*</h2>
+      
+      <p>Returns the last member of an array</p>
+      
       <h2>array:of(record(value, *)*) as array(*)</h2>
       
       <p>Accepts a sequence of parcels (as produced by the <code>fn:parcel()</code> function), and returns an array
       whose members are the sequences obtained by applying <code>fn:unparcel()</code> to each parcel in turn.</p>
+      
+      <h2>array:trunk(array(*)) as array(*)</h2>
+      
+      <p>Returns an array containing all members of the input array except the last.</p>     
       
       <h2>map:entries(map(*)) as record(key as xs:anyAtomicType, value as item()*)*</h2>
       
@@ -577,7 +593,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <h1>New syntax for declaring and calling functions</h1>
 
          <p>The proposals for XPath 4.0 include some new syntax and semantics for declaring and calling functions. This section
-         describes what is experimentally implemented in Saxon 11.</p>
+         describes what is experimentally implemented in Saxon 12.</p>
 
          
          <nav>
@@ -630,23 +646,9 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
             <h2>Underscore functions</h2>
 
-            <aside>This feature seems likely to be dropped, but it remains available in Saxon 11.</aside>
+            <aside>This feature has been dropped in Saxon 12.</aside>
 
-            <p>For functions taking more than one argument, or an argument that is not confined to a single
-      item, an abbreviated syntax ("underscore functions") is provided. For example,
-      the expression <code>_{$1 + $2}</code> is a function that takes two arguments and returns their sum.
-      It is equivalent to the expression:</p>
-            <samp>function($a1 as item()*, $a2 as item()*) as item()* {$a1 + $a2}</samp>
-
-            <p>The arity of an underscore function is determined by the highest-numbered parameter reference
-      appearing within the function. For example, <code>_{$2}</code> is a function that takes two arguments
-      and returns the value of the second argument.</p>
-
-            <p>This syntax can also be used to define a zero-arity function, 
-        for example the following is a function that returns tomorrow's date:</p>
-            <samp>_{current-date() + xs:dayTimeDuration('P1D')}</samp>
-
-
+  
          </section>
          <section id="sequence-variadic-functions" title="Variadic functions">
             <h1>Variadic functions</h1>
