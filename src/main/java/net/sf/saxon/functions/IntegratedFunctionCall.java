@@ -235,10 +235,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        ExtensionFunctionCall newCall = function.getDefinition().makeCallExpression();
-        newCall.setDefinition(function.getDefinition());
-        function.copyLocalData(newCall);
-        IntegratedFunctionCall copy = new IntegratedFunctionCall(getFunctionName(), newCall);
+        IntegratedFunctionCall copy = new IntegratedFunctionCall(getFunctionName(), function);
         Expression[] args = new Expression[getArity()];
         for (int i = 0; i < args.length; i++) {
             args[i] = getArg(i).copy(rebindings);
