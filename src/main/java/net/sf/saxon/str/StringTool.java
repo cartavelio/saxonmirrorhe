@@ -249,19 +249,41 @@ public class StringTool {
         boolean allWhite = compressWS;
         int surrogates = 0;
         // Find the maximum code value, and test whether all-white or surrogate
-        for (int i=offset; i < end; i++) {
-            int c = in[i];
-            max |= c;
-            if (allWhite && !Whitespace.isWhite(c)) {
-                allWhite = false;
+        int k = offset;
+        if (compressWS) {
+            while (k < end) {
+                int c = in[k];
+                if (!Whitespace.isWhite(c)) {
+                    allWhite = false;
+                    break;
+                }
+                k++;
             }
+            if (allWhite) {
+                return CompressedWhitespace.compressWS(in, offset, end);
+            }
+        }
+        while (k < end) {
+            int c = in[k++];
+            max |= c;
             if (UTF16CharacterSet.isSurrogate(c)) {
                 surrogates++;
             }
         }
-        if (allWhite) {
-            return CompressedWhitespace.compressWS(in, offset, end);
-        }
+
+//        for (int i=offset; i < end; i++) {
+//            int c = in[i];
+//            max |= c;
+//            if (allWhite && !Whitespace.isWhite(c)) {
+//                allWhite = false;
+//            }
+//            if (UTF16CharacterSet.isSurrogate(c)) {
+//                surrogates++;
+//            }
+//        }
+//        if (allWhite) {
+//            return CompressedWhitespace.compressWS(in, offset, end);
+//        }
         if (max < 256) {
             byte[] array = new byte[len];
             for (int i = offset, j=0; i < end;) {
