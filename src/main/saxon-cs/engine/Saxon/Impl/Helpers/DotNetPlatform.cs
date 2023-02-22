@@ -35,6 +35,7 @@ namespace Saxon.Impl.Helpers {
             config.setURIResolver(new StandardURIResolver(config, new StandardXmlResolver(config)));
             config.setCollectionFinder((cxt, uri) => 
                 new Saxon.Hej.resource.StandardCollectionFinder().findCollection(cxt, uri));
+            config.setUnparsedTextURIResolver(new StandardUnparsedTextResolver().resolve);
         }
         
 

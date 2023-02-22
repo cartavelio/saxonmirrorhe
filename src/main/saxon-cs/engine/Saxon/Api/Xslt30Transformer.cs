@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml;
 using Saxon.Ejava.util.function;
 using Saxon.Ejavax.xml.transform.stream;
@@ -72,6 +73,7 @@ namespace Saxon.Api {
         private StandardLogger traceFunctionDestination;
         private Saxon.Hej.s9api.Xslt30Transformer s9Transformer;
         private readonly StandardMessageHandler _standardMessageHandler;
+        private TextResolver textResolver;
 
         // internal constructor
 
@@ -248,13 +250,42 @@ namespace Saxon.Api {
         /// supplied to the <c>doc()</c> and <c>document()</c> functions.
         /// </summary>
 
-        public XmlResolver InputXmlResolver {
+        public XmlResolver XmlResolver {
             get => ((StandardURIResolver) s9Transformer.getURIResolver()).getXmlResolver();
             set => s9Transformer.setURIResolver(
                 new StandardURIResolver(
                     s9Transformer.getUnderlyingController().getConfiguration(), 
                     value));
         }
+        
+        /// <summary>
+        /// The <code>TextResolver</code> to be used at run-time to resolve and dereference URIs
+        /// supplied to the <c>unparsed-text()</c>, <c>unparsed-text-lines()</c>,
+        /// <c>unparsed-text-available()</c>, and <c>json-doc()</c> functions.
+        /// </summary>
+
+        public TextResolver TextResolver {
+            get => textResolver;
+            set {
+                textResolver = value;
+                s9Transformer.setUnparsedTextResolver((uri, encoding, config) => {
+                    Encoding enc;
+                    if (encoding == null) {
+                        enc = null;
+                    }
+                    else {
+                        try {
+                            enc = Encoding.GetEncoding(encoding);
+                        }
+                        catch (System.ArgumentException e) {
+                            throw new SaxonApiException(new Saxon.Hej.trans.XPathException("Unparsed-text encoding problem: " + e.Message, "FOUT1190"));
+                        }
+                    }
+                    return value(uri, enc);
+                });
+            }
+        }
+
 
         /// <summary>
         /// Ask whether assertions (<c>xsl:assert</c> instructions) have been enabled at run time. 

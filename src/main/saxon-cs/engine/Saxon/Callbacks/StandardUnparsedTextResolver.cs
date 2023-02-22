@@ -13,10 +13,15 @@ using Saxon.Api;
 using Exception = System.Exception;
 
 namespace Saxon.Callbacks {
-    public class StandardUnparsedTextResolver : Saxon.Hej.lib.UnparsedTextURIResolver {
+    public class StandardUnparsedTextResolver {
         private XmlResolver resolver;
-
+        
         public StandardUnparsedTextResolver() {
+            this.resolver = null;
+        }
+
+        public StandardUnparsedTextResolver(XmlResolver xmlResolver) {
+            this.resolver = xmlResolver;
         }
 
         public TextReader resolve(Uri absoluteURI, string encoding, Configuration config) {
@@ -44,10 +49,9 @@ namespace Saxon.Callbacks {
                 // TODO: this should also work for file: and ftp: - but then need to
                 // supply the encoding
                 try {
-                    using (WebClient client = new WebClient()) {
-                        string s = client.DownloadString(absoluteURI);
-                        return new StringReader(s);
-                    }
+                    using WebClient client = new ();
+                    string s = client.DownloadString(absoluteURI);
+                    return new StringReader(s);
                 }
                 catch (System.Net.WebException e) {
                     throw new Saxon.Hej.trans.XPathException("Failed to read unparsed text at " + absoluteURI, e);
