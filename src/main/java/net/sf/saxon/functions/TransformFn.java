@@ -38,7 +38,6 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
-import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
@@ -634,8 +633,6 @@ public class TransformFn extends SystemFunction implements Callable {
         String baseOutputUri = null;
         Map<QName, XdmValue> stylesheetParams = new HashMap<>();
         MapItem serializationParamsMap = null;
-        StringWriter serializedResult = null;
-        File serializedResultFile = null;
         XdmItem globalContextItem = null;
         Map<QName, XdmValue> templateParams = new HashMap<>();
         Map<QName, XdmValue> tunnelParams = new HashMap<>();

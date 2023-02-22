@@ -44,11 +44,11 @@ public final class LocalParam extends Instruction implements LocalBinding {
 
     private int properties = 0;
     private Operand selectOp = null;
-    protected StructuredQName variableQName;
+    private StructuredQName variableQName;
     private SequenceType requiredType;
-    protected int slotNumber = -999;
-    protected int referenceCount = 10;
-    protected Evaluator evaluator = null;
+    private int slotNumber = -999;
+    private int referenceCount = 10;
+    private Evaluator evaluator = null;
 
 
 

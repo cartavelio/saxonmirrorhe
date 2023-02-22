@@ -29,6 +29,7 @@ public abstract class SteppingNavigator {
      * or null if no such node is found
      */
 
+    @SuppressWarnings("RedundantCast")
     static SteppingNode getFollowingNode(SteppingNode start, SteppingNode anchor) {
         SteppingNode nodei = start.getFirstChild();
         if (nodei != null) {
@@ -38,7 +39,7 @@ public abstract class SteppingNavigator {
             return null;
         }
         nodei = start;
-        SteppingNode parenti = start.getParent();
+        SteppingNode parenti = (SteppingNode)start.getParent();
         do {
             nodei = nodei.getNextSibling();
             if (nodei != null) {
@@ -47,7 +48,7 @@ public abstract class SteppingNavigator {
                 return null;
             }
             nodei = parenti;
-            parenti = parenti.getParent();
+            parenti = (SteppingNode)parenti.getParent();
         } while (parenti != null);
 
         return null;

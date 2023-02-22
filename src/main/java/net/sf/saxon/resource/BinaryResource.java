@@ -69,7 +69,7 @@ public class BinaryResource implements Resource {
         this.data = content;
     }
 
-    @CSharpReplaceBody(code = "return System.Text.Encoding.GetEncoding(encoding).GetBytes(s);")
+    @CSharpReplaceBody(code = "return Saxon.Impl.Helpers.StringUtils.encode(s, encoding);")
     public static byte[] encode(String s, String encoding) throws XPathException {
         CharsetEncoder encoder;
         try {
@@ -99,7 +99,7 @@ public class BinaryResource implements Resource {
         return decode(value, 0, value.length, encoding);
     }
 
-    @CSharpReplaceBody(code = "return new String(System.Text.Encoding.GetEncoding(encoding).GetChars(value, offset, len));")
+    @CSharpReplaceBody(code = "return Saxon.Impl.Helpers.StringUtils.decode(value, offset, len, encoding);")
     public static String decode(byte[] value, int offset, int len, String encoding) throws XPathException {
         CharsetDecoder decoder;
         try {

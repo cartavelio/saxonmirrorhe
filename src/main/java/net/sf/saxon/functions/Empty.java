@@ -14,6 +14,7 @@ import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.value.BooleanValue;
 
@@ -130,6 +131,7 @@ public class Empty extends Aggregate {
              */
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public BooleanValue evaluateItem(XPathContext context) throws XPathException {
                 return BooleanValue.get(effectiveBooleanValue(context));
             }
@@ -139,6 +141,7 @@ public class Empty extends Aggregate {
              */
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public boolean effectiveBooleanValue(XPathContext c) throws XPathException {
                 SequenceIterator iter = getArg(0).iterate(c);
                 boolean result;

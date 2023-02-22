@@ -8,7 +8,10 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
@@ -49,16 +52,6 @@ public interface Receiver extends Result {
 
     /*@NotNull*/
     PipelineConfiguration getPipelineConfiguration();
-
-    /**
-     * Set the System ID of the tree represented by this event stream
-     *
-     * @param systemId the system ID (which is used as the base URI of the nodes
-     *                 if there is no xml:base attribute)
-     */
-
-    @Override
-    void setSystemId(String systemId);
 
     /**
      * Notify the start of the event stream

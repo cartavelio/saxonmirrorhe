@@ -15,6 +15,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -64,6 +65,7 @@ public class MapType extends AnyFunctionType {
      * @return the Genre to which this type belongs, specifically {@link Genre#MAP}
      */
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public Genre getGenre() {
         return Genre.MAP;
     }
@@ -238,6 +240,7 @@ public class MapType extends AnyFunctionType {
      * @return the string representation as an instance of the XPath SequenceType construct
      */
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public String toExportString() {
         if (this == ANY_MAP_TYPE) {
             return "map(*)";
@@ -342,6 +345,7 @@ public class MapType extends AnyFunctionType {
      * @return optionally, a message explaining why the item does not match the type
      */
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         if (item instanceof MapItem) {
             for (KeyValuePair kvp : ((MapItem)item).keyValuePairs()) {

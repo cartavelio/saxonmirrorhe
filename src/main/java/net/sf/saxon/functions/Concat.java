@@ -20,6 +20,7 @@ import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -75,6 +76,7 @@ public class Concat extends SystemFunction implements PushableFunction {
         }
         return new SystemFunctionCall.Optimized(this, arguments) {
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
                 UnicodeBuilder buffer = new UnicodeBuilder();
                 for (Operand o: operands()) {
@@ -88,6 +90,7 @@ public class Concat extends SystemFunction implements PushableFunction {
             }
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public Item evaluateItem(XPathContext context) throws XPathException {
                 return new StringValue(evaluateAsString(context));
             }

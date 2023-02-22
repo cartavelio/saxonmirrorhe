@@ -15,6 +15,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
@@ -46,6 +47,7 @@ public class NormalizeSpace_1 extends ScalarSystemFunction {
     public Expression makeFunctionCall(Expression[] arguments) {
         return new SystemFunctionCall(this, arguments) {
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public boolean effectiveBooleanValue(XPathContext c) throws XPathException {
                 AtomicValue sv = (AtomicValue) this.getArg(0).evaluateItem(c);
                 if (sv == null) {
