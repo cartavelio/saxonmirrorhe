@@ -21,6 +21,7 @@ import net.sf.saxon.str.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
@@ -306,6 +307,7 @@ public final class ValueOf extends SimpleNodeConstructor {
 
     /*@Nullable*/
     @Override
+    @CSharpInnerClass(outer = true, extra = {"Saxon.Hej.s9api.Location instructionLoc"})
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         if (noNodeIfEmpty) {
             Item value = getSelect().evaluateItem(context);
