@@ -1596,9 +1596,25 @@ namespace TestDriver {
 
         public Saxon.Ejavax.xml.transform.stream.StreamSource[] resolve(string moduleURI, string baseURI, string[] locations) {
             Uri absoluteUri = (new XmlUrlResolver()).ResolveUri(testCase.BaseUri, moduleURI);
-            FileStream stream = new (driver.queryModules[absoluteUri], FileMode.Open, FileAccess.Read);
-            StreamSource ss = new (stream, absoluteUri.ToString());
-            return new[] {ss};
+            if (driver.queryModules.ContainsKey(absoluteUri)) {
+                FileStream stream = new(driver.queryModules[absoluteUri], FileMode.Open, FileAccess.Read);
+                StreamSource ss = new(stream, absoluteUri.ToString());
+                return new[] { ss };
+            }
+            else {
+                // ReSharper disable once LoopCanBeConvertedToQuery
+                foreach (XdmNode m in testCase.Children("module")) {
+                    if (absoluteUri.ToString().Equals(m.GetAttributeValue("uri"))) {
+                        string fileName = m.GetAttributeValue("file");
+                        Uri pfileUri = (new XmlUrlResolver()).ResolveUri(testCase.BaseUri, fileName);
+                        Stream stream = new FileStream(pfileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
+                        StreamSource ss = new(stream, absoluteUri.ToString());
+                        return new[] { ss };
+                    }
+                }
+
+                return null;
+            }
         }
 
     }
