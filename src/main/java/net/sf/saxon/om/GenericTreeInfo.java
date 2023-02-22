@@ -10,6 +10,7 @@ package net.sf.saxon.om;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
 
+import javax.xml.transform.Source;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,8 +22,11 @@ import java.util.Map;
  * implementation
  */
 
-public class GenericTreeInfo implements TreeInfo {
-
+public class GenericTreeInfo implements TreeInfo
+    //#if CSHARP==false
+    , Source
+    //#endif
+{
     private Configuration config;
     protected NodeInfo root;
     private String systemId;
