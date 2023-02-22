@@ -251,6 +251,21 @@
         method. (A consequence is that the same class can now implement several closely-related functions, such as <code>fn:true</code>
             and <code>fn:false</code>, or <code>fn:exists</code> and <code>fn:empty</code>).</p>
         
+        <p>There are two significant changes in the implementation of XDM arrays:</p>
+        
+        <ul>
+            <li>Saxon uses two main implementations of arrays: <code>SimpleArrayItem</code> is a wrapper over a Java list of
+            <code>GroundedValue</code> objects representing its members, and <code>ImmutableArrayItem</code> is a structure
+            that allows efficient modification (operations such as put, remove, and append do not require copying all the
+            existing data).</li>
+            <li>The <code>ImmutableArrayItem</code> implementation has been rewritten to use Saxon's <code>ZenoChain</code>
+            internally: this is a completely different data structure. (This change was actually made in 11.4 to fix bugs.)</li>
+            <li>The choice between the two structures is now in many cases made dynamically, based on accumulated experience.
+            Specifically, if an expression or function delivers arrays which tend to be frequently modified by addition or removal
+            of members, then Saxon will learn to use an <code>ImmutableArrayItem</code> for future evaluation of the same
+            expression or function.</li>
+        </ul>
+        
         
         
     </category>
