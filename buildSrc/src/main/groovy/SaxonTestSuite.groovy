@@ -10,7 +10,7 @@ import java.nio.file.StandardCopyOption
 import java.nio.charset.StandardCharsets
 import groovy.util.slurpersupport.GPathResult
 
-class TestSuite {
+class SaxonTestSuite {
   static String fileSeparator = System.getProperty("file.separator")
   private def optionMap = [:]
   private def directoryMap = [:]
@@ -24,7 +24,7 @@ class TestSuite {
   def ignoreFailures = false
   def accumulateFailures = null
 
-  TestSuite(Project project) {
+  SaxonTestSuite(Project project) {
     this.project = project
 
     project.properties.keySet().each { key ->
@@ -213,7 +213,7 @@ class TestSuite {
         }
       }
 
-      main = options['class']
+      mainClass = options['class']
       args testargs
       ignoreExitValue = true
     }
@@ -355,7 +355,7 @@ class TestSuite {
         }
       }
 
-      main = options['class']
+      mainClass = options['class']
       args testargs
       ignoreExitValue true
     }

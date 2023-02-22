@@ -257,7 +257,7 @@ task product_xsljavadoc(
   inputs.file "${projectDir}/tools/docs/javadoc/chunk-javadoc.xsl"
   outputs.files fileTree(dir: "${buildDir}/javadoc-xml")
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-s:${buildDir}/jeljavadoc/jeldoclet-out.xml",
     "-xsl:${projectDir}/tools/docs/javadoc/chunk-javadoc.xsl",
     "-o:${buildDir}/javadoc-xml/out",
@@ -273,7 +273,7 @@ task javadoc_linkchecker(
   inputs.file "${projectDir}/tools/docs/javadoc/check-tag-links.xsl"
   outputs.file "${buildDir}/javadoc-tag-check.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-s:${buildDir}/javadoc-xml/javadoc-types.xml",
     "-xsl:${projectDir}/tools/docs/javadoc/check-tag-links.xsl",
     "-o:${buildDir}/javadoc-tag-check.xml",
@@ -290,7 +290,7 @@ task dotnet_doc_parsecs(
   inputs.file "${projectDir}/tools/docs/dotnet/parsecs.xsl"
   outputs.file "${buildDir}/dotnetdoc/names.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-it:main",
     "-s:${projectDir}/tools/docs/dotnet/parsecs.xsl",
     "-xsl:${projectDir}/tools/docs/dotnet/parsecs.xsl",
@@ -308,7 +308,7 @@ task dotnet_doc_merge(
   inputs.file "${projectDir}/tools/docs/dotnet/merge.xsl"
   outputs.file "${buildDir}/dotnetdoc/merged.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-it:main",
     "-s:${buildDir}/dotnetdoc/names.xml",
     "-xsl:${projectDir}/tools/docs/dotnet/merge.xsl",
@@ -334,7 +334,7 @@ task dotnet_doc_html(
   inputs.file "${projectDir}/tools/docs/dotnet/tohtml.xsl"
   outputs.file "${buildDir}/dotnetdoc-html/index.html"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-s:${buildDir}/dotnetdoc/merged.xml",
     "-xsl:${projectDir}/tools/docs/dotnet/tohtml.xsl",
     "-o:${buildDir}/dotnetdoc-html/index.html"
@@ -349,7 +349,7 @@ task dotnet_doc_jel(
   inputs.file "${projectDir}/tools/docs/dotnet/convert-to-jel-package.xsl"
   outputs.file "${buildDir}/dotnetdoc-xml/packages/Saxon.Api.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-s:${buildDir}/dotnetdoc/merged.xml",
     "-xsl:${projectDir}/tools/docs/dotnet/convert-to-jel-package.xsl",
     "-o:${buildDir}/dotnetdoc-xml/packages/Saxon.Api.xml"
@@ -414,7 +414,7 @@ task doc_FeatureKeysDoc(
   inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
   outputs.file "${buildDir}/userdoc/src/featureKeys/FeatureKeysDoc.xml"
   classpath = configurations.preprocessor
-  main = "net.sf.saxon.Transform"
+  mainClass = "net.sf.saxon.Transform"
   args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
     "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToDoc.xsl",
     "-o:${buildDir}/userdoc/src/featureKeys/FeatureKeysDoc.xml"
@@ -428,7 +428,7 @@ task doc_ConfigFileDoc(
   inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
   outputs.files fileTree(dir: "${buildDir}/userdoc/src/featureKeys")
   classpath = configurations.preprocessor
-  main = "net.sf.saxon.Transform"
+  mainClass = "net.sf.saxon.Transform"
   args "${projectDir}/tools/featureKeys/AdditionalFeatures.xml",
     "-xsl:${projectDir}/tools/featureKeys/ToConfigFileDoc.xsl",
     "-o:${buildDir}/userdoc/src/featureKeys/ConfigFileDoc.xml"
@@ -443,7 +443,7 @@ task gen_doc_icu_uca(
   inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
   outputs.files fileTree(dir: "${buildDir}/userdoc/src/extensibility")
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-it:go",
     "-s:${projectDir}/src/userdoc/catalog.xml",
     "-xsl:${projectDir}/tools/docs/userdoc/document-ICU.xsl",
@@ -459,7 +459,7 @@ task gen_xslt_element_reference_preprocess(
   inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
   outputs.file "${buildDir}/userdoc/tmp/xsl-elements-expanded.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-s:${projectDir}/src/userdoc/elements/xsl-elements.xml",
     "-o:${buildDir}/userdoc/tmp/xsl-elements-expanded.xml",
     "-xsl:${projectDir}/tools/docs/userdoc/genElementDoc.xsl"
@@ -474,7 +474,7 @@ task gen_xslt_element_reference(
   inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
   outputs.file "${buildDir}/userdoc/src/xsl-elements.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-s:${buildDir}/userdoc/tmp/xsl-elements-expanded.xml",
     "-xsl:${projectDir}/tools/docs/userdoc/elements-body.xsl",
     "-o:${buildDir}/userdoc/src/xsl-elements.xml"
@@ -493,7 +493,7 @@ task element_doc() {
     inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
     outputs.file file("${buildDir}/userdoc/src/extensions/${target}.xml")
     classpath = configurations.documentation
-    main = "com.saxonica.Transform"
+    mainClass = "com.saxonica.Transform"
     args "-s:${projectDir}/src/userdoc/extensions/${target}.xml",
       "-xsl:${projectDir}/tools/docs/userdoc/elements-body.xsl",
       "-o:${buildDir}/userdoc/src/extensions/${target}.xml"
@@ -511,7 +511,7 @@ task element_doc() {
     inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
     outputs.file "${buildDir}/userdoc/src/${target}.xml"
     classpath = configurations.documentation
-    main = "com.saxonica.Transform"
+    mainClass = "com.saxonica.Transform"
     args "-s:${projectDir}/src/userdoc/extensions/${target}.xml",
       "-xsl:${projectDir}/tools/docs/userdoc/elements-body.xsl",
       "-o:${buildDir}/userdoc/src/${target}.xml"
@@ -532,7 +532,7 @@ task expath_doc() {
     inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
     outputs.file "${buildDir}/userdoc/src/functions/EXPath/functions-${target}.xml"
     classpath = configurations.documentation
-    main = "com.saxonica.Transform"
+    mainClass = "com.saxonica.Transform"
     args "-xi:on",
       "-s:${projectDir}/src/userdoc/functions/EXPath/functions-${target}.xml",
       "-xsl:${projectDir}/tools/docs/userdoc/genFunctionDoc.xsl",
@@ -552,7 +552,7 @@ task expand_userdoc_sections(
   inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
   outputs.file "${buildDir}/userdoc/expanded/catalog.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-xi:on",
     "-s:${buildDir}/userdoc/src/catalog.xml",
     "-xsl:${projectDir}/tools/docs/userdoc/doc-include.xsl",
@@ -569,7 +569,7 @@ task userdoc_changes(
   inputs.files fileTree(dir: "${projectDir}/tools/docs/to-static")
   outputs.file "${buildDir}/userdoc/expanded/changes-article.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-s:${buildDir}/userdoc/expanded/changes.xml",
     "-xsl:${projectDir}/tools/docs/to-static/c-changes.xsl",
     "-o:${buildDir}/userdoc/expanded/changes-article.xml"
@@ -584,7 +584,7 @@ task userdoc_functions(
   inputs.files fileTree(dir: "${projectDir}/tools/docs/to-static")
   outputs.file "${buildDir}/userdoc/expanded/functions-article.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-s:${buildDir}/userdoc/expanded/functions.xml",
     "-xsl:${projectDir}/tools/docs/to-static/c-functions.xsl",
     "-o:${buildDir}/userdoc/expanded/functions-article.xml"
@@ -599,7 +599,7 @@ task viewer_app_sef(
   inputs.files fileTree(dir: "${projectDir}/src/viewer_appJS/xsl")
   outputs.file "${buildDir}/userdoc/viewer_appJS/xsl/viewer_app.sef.json"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-xsl:${projectDir}/src/viewer_appJS/xsl/viewer_app.xsl",
     "-export:${buildDir}/userdoc/viewer_appJS/xsl/viewer_app.sef.json",
     "-target:JS", "-nogo", "-relocate:on", "-ns:##html5",
@@ -626,7 +626,7 @@ task userdoc_articles(
   inputs.files fileTree(dir: "${projectDir}/tools/docs/to-static")
   outputs.files fileTree(dir: "${buildDir}/userdoc/html")
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-s:${buildDir}/userdoc/expanded/catalog.xml",
     "-xsl:${projectDir}/tools/docs/to-static/s-viewer_app.xsl",
     "-o:${buildDir}/userdoc/html/dummy.xml",
@@ -750,7 +750,7 @@ task gen_contents_ref(
   inputs.file "${projectDir}/tools/docs/userdoc/contents-builder.xsl"
   outputs.file "${buildDir}/website/documentation${saxonMajorVersion}/contents.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "${buildDir}/website/documentation${saxonMajorVersion}/doc/catalog.xml",
     "-xsl:${projectDir}/tools/docs/userdoc/contents-builder.xsl",
     "-o:${buildDir}/website/documentation${saxonMajorVersion}/contents.xml",
@@ -765,7 +765,7 @@ task gen_feature_matrix(
   inputs.file "${projectDir}/tools/docs/feature-matrix/feature-matrix-to-overview-chart.xsl"
   outputs.file "${buildDir}/website/products/feature-matrix-${saxonMajorVersion}.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "${projectDir}/tools/docs/feature-matrix/feature-matrix.xml",
           "-xsl:${projectDir}/tools/docs/feature-matrix/feature-matrix-to-overview-chart.xsl",
           "-o:${buildDir}/website/products/feature-matrix-${saxonMajorVersion}.xml"
@@ -786,7 +786,7 @@ task gen_prod_desc_xml(
   inputs.file "${projectDir}/tools/docs/feature-matrix/feature-matrix-to-prod-desc.xsl"
   outputs.file "${buildDir}/proddesc/prod-desc.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "${projectDir}/tools/docs/feature-matrix/feature-matrix.xml",
           "-xsl:${projectDir}/tools/docs/feature-matrix/feature-matrix-to-prod-desc.xsl",
           "-o:${buildDir}/proddesc/prod-desc.xml"
@@ -801,7 +801,7 @@ task gen_prod_desc_fo(
   inputs.file "${projectDir}/tools/docs/feature-matrix/PD/prod-desc-to-fo.xsl"
   outputs.file "${buildDir}/proddesc/PD/dummy.xml"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "${buildDir}/proddesc/prod-desc.xml",
           "-xsl:${projectDir}/tools/docs/feature-matrix/PD/prod-desc-to-fo.xsl",
           "-o:${buildDir}/proddesc/PD/dummy.xml"
@@ -840,7 +840,7 @@ variants.each { ds ->
     inputs.file "${buildDir}/proddesc/PD/fo/${ds}.fo"
     outputs.file "${buildDir}/proddesc/PD/pdf/Saxon${ds}.pdf"
     classpath = configurations.documentation
-    main = "org.apache.fop.cli.Main"
+    mainClass = "org.apache.fop.cli.Main"
     args "-q", "${buildDir}/proddesc/PD/fo/${ds}.fo", "-pdf", "${buildDir}/proddesc/PD/pdf/Saxon${ds}.pdf"
   }
   gen_prod_desc_pdf.dependsOn t
@@ -899,7 +899,7 @@ task saxonc_doc_sef(
   inputs.files fileTree(dir: "${projectDir}/src/docs/saxonc-doc/xsl")
   outputs.file "${buildDir}/saxonc-doc/documentation11/xsl/jstree.sef.json"
   classpath = configurations.documentation
-  main = "com.saxonica.Transform"
+  mainClass = "com.saxonica.Transform"
   args "-xsl:${projectDir}/src/docs/saxonc-doc/xsl/jstree.xsl",
           "-export:${buildDir}/saxonc-doc/documentation11/xsl/jstree.sef.json",
           "-target:JS", "-nogo", "-relocate:on", "-ns:##html5",

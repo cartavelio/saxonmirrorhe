@@ -28,7 +28,7 @@ task eecs_featureKeys(
   outputs.file "${projectDir}/src/main/saxon-cs/engine/Saxon/Api/Feature.cs"
   outputs.file "${projectDir}/src/main/saxon-cs/engine/Saxon/Api/FeatureKeys.cs"
   classpath = configurations.preprocessor
-  main = "net.sf.saxon.Transform"
+  mainClass = "net.sf.saxon.Transform"
   args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
     "-xsl:${projectDir}/tools/featureKeys/FeatureKeysForSaxonCS.xsl",
     "-o:${projectDir}/src/main/saxon-cs/engine/Saxon/Api/establish-an-output-base-uri"
@@ -234,7 +234,7 @@ task eecs_preprocess(
   inputs.files fileTree(dir: "${buildDir}/filtered/eecs")
   outputs.files fileTree(dir: "${buildDir}/preprocess/eecs")
   classpath = configurations.preprocessor
-  main = "com.igormaznitsa.jcp.JcpPreprocessor"
+  mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
   args "/c",
     "/i:${buildDir}/filtered/eecs", "/o:${buildDir}/preprocess/eecs",
     "/p:EE=true", "/p:PE=false",
@@ -300,7 +300,7 @@ task eecs_transpile_to_xml(
   inputs.files fileTree(dir: "${buildDir}/src/eecs")
   outputs.files fileTree(dir: "${buildDir}/ee_xmlout")
   classpath = configurations.transpiler
-  main = "ToXml"
+  mainClass = "ToXml"
   args "-j:${buildDir}/src/eecs",
     "-repo:${projectDir}",
     "-xml:${buildDir}/ee_xmlout",
@@ -323,7 +323,7 @@ task eecs_xml_digest(
   inputs.file "${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl"
   outputs.files "${buildDir}/ee_digest.xml"
   classpath = configurations.preprocessor
-  main = "net.sf.saxon.Transform"
+  mainClass = "net.sf.saxon.Transform"
   args "-it",
     "-xsl:${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl",
     "-o:${buildDir}/ee_digest.xml",
@@ -339,7 +339,7 @@ task eecs_refine_digest(
   inputs.file "${projectDir}/tools/transpiler/xslt/refine-digest.xsl"
   outputs.files "${buildDir}/ee_refined-digest.xml"
   classpath = configurations.preprocessor
-  main = "net.sf.saxon.Transform"
+  mainClass = "net.sf.saxon.Transform"
   args "-xsl:${projectDir}/tools/transpiler/xslt/refine-digest.xsl",
     "-s:${buildDir}/ee_digest.xml",
     "-o:${buildDir}/ee_refined-digest.xml",
@@ -356,7 +356,7 @@ task eecs_generateCSharp(
   inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
   outputs.files fileTree(dir: "${buildDir}/cs")
   classpath = configurations.transpiler
-  main = "ToXml"
+  mainClass = "ToXml"
   args "-cs:${buildDir}/cs",
     "-repo:${projectDir}",
     "-xml:${buildDir}/ee_xmlout",

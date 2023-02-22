@@ -224,7 +224,7 @@ task gen_config_schema(
     inputs.files "${projectDir}/src/samples/config/config-raw.xsd"
     outputs.file "${buildDir}/saxon-resources/samples/config/config.xsd"
     classpath = configurations.preprocessor
-    main = "net.sf.saxon.Transform"
+    mainClass = "net.sf.saxon.Transform"
     args "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToSchema.xsl",
             "-o:${buildDir}/saxon-resources/samples/config/config.xsd",
             "-it:main",
@@ -265,7 +265,7 @@ task gen_readme(
     inputs.file "${projectDir}/src/docs/resources/readme.xsl"
     outputs.file "${buildDir}/saxon-resources/readme.txt"
     classpath = configurations.documentation
-    main = "com.saxonica.Transform"
+    mainClass = "com.saxonica.Transform"
     args "-xsl:${projectDir}/src/docs/resources/readme.xsl",
             "-it:main",
             "-o:${buildDir}/saxon-resources/readme.txt"
