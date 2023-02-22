@@ -220,7 +220,7 @@ public abstract class StandardNames {
     public static final int XS_ANY_TYPE = XS + 60;
     public static final int XS_ANY_SIMPLE_TYPE = XS + 61;
 
-    public static final int XS_INVALID_NAME = XS + 62;
+    //public static final int XS_INVALID_NAME = XS + 62;
     public static final int XS_ERROR = XS + 63;
 
 
@@ -505,7 +505,7 @@ public abstract class StandardNames {
 
         bindXSName(XS_ANY_TYPE, "anyType");
         bindXSName(XS_ANY_SIMPLE_TYPE, "anySimpleType");
-        bindXSName(XS_INVALID_NAME, "invalidName");
+        //bindXSName(XS_INVALID_NAME, "invalidName");
         bindXSName(XS_ERROR, "error");
 
         bindXSName(XS_ALL, "all");
@@ -720,7 +720,9 @@ public abstract class StandardNames {
      * A commonly-used name held in static:
      */
 
-    public final static StructuredQName SQ_XS_INVALID_NAME = getStructuredQName(XS_INVALID_NAME);
+    public final static StructuredQName SQ_XS_INVALID_NAME =
+            new StructuredQName("xs", NamespaceConstant.SCHEMA, "invalid-name");
+            //getStructuredQName(XS_INVALID_NAME);
 
 }
 

@@ -18,13 +18,11 @@ namespace java.util {
             this.defaults = defaults;
         }
         public string getProperty(string key) {
-            string value;
-            if (dict.TryGetValue(key, out value)) {
+            Console.WriteLine("getProperty " + key);
+            if (dict.TryGetValue(key, out var value)) {
                 return value;
-            } else if (defaults != null) {
-                return defaults.getProperty(key);
             } else {
-                return null;
+                return defaults?.getProperty(key);
             }
         }
 
@@ -32,6 +30,7 @@ namespace java.util {
             return getProperty(key) ?? defaultValue;
         }
         public void setProperty(string key, string value) {
+            Console.WriteLine("setProperty " + key + "=" + value);
             dict.Add(key, value);
         }
 
@@ -43,8 +42,8 @@ namespace java.util {
         //     throw new UnsupportedOperationException("not yet implemented");
         // }
         
-        public java.util.Set<string> stringPropertyNames() {
-            throw new UnsupportedOperationException("not yet implemented");
+        public IEnumerable<string> stringPropertyNames() {
+            return dict.Keys;
         }
 
         public bool isEmpty() {
