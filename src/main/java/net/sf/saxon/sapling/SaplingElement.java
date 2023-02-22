@@ -90,10 +90,13 @@ public class SaplingElement extends SaplingNode {
         Objects.requireNonNull(name);
         reversedChildren = emptyNodeList();
         nodeName = name.getStructuredQName();
-        if (!nodeName.getPrefix().isEmpty() && nodeName.hasURI(NamespaceUri.NULL)) {
-            throw new IllegalArgumentException("No namespace URI for prefixed element name: " + name);
+        if (nodeName.hasURI(NamespaceUri.NULL)) {
+            if (!nodeName.getPrefix().isEmpty()) {
+                throw new IllegalArgumentException("No namespace URI for prefixed element name: " + name);
+            }
+        } else {
+            namespaces = NamespaceMap.of(nodeName.getPrefix(), nodeName.getNamespaceUri());
         }
-        namespaces = NamespaceMap.of(nodeName.getPrefix(), nodeName.getNamespaceUri());
     }
 
     private SaplingElement(StructuredQName name) {
