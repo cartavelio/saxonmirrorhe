@@ -8,6 +8,7 @@ using net.sf.saxon.lib;
 using net.sf.saxon.s9api;
 using net.sf.saxon.trans;
 using Saxon.Api.Support;
+using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
 
 namespace Saxon.Api {
