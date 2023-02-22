@@ -11,6 +11,7 @@ package net.sf.saxon.option.cpp;
 import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.Configuration;
 
+import net.sf.saxon.Gizmo;
 import net.sf.saxon.Query;
 import net.sf.saxon.Transform;
 import net.sf.saxon.lib.ConversionRules;
@@ -149,6 +150,26 @@ public class SaxonCAPI {
         }
 
         new Transform().doTransform(args);
+
+
+        return STATUS_OK;
+    }
+
+
+    @CEntryPoint(name = "j_run_gizmo")
+    public static long run_gizmo(IsolateThread thread, ObjectHandle processorDataRef) {
+
+        String[] args;
+
+
+        if (processorDataRef == WordFactory.nullPointer()) {
+            return STATUS_FAIL;
+        } else {
+            ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
+            args = processorDataAccumulator.getParameterNames();
+        }
+
+        new Gizmo(args);
 
 
         return STATUS_OK;

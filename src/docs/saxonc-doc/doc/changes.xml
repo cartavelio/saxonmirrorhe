@@ -39,6 +39,7 @@
                using <a target="_blank" href="https://pypi.org/user/saxonica/">PyPI</a> for a number of
                platforms and flavors including MacOS, Linux and Windows. Python 3.8+ is supported.</p></li>
             <li><p>SaxonC now works with PHP 8 and has removed support for PHP 7 since it is no longer supported.</p></li>
+            <li>SaxonC (from 12.1) provides the Gizmo command line utility, which can be used interactively or in batch mode, to perform simple operations.</li>
             <li><p>In SaxonC 12.0, a few features from SaxonC 11.x have not yet been bridged to GraalVM,
             in particular:</p>
             <ul>
