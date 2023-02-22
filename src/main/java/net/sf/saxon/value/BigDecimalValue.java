@@ -365,7 +365,7 @@ public final class BigDecimalValue extends DecimalValue {
      * @return the supplied StringBuilder, suitably populated
      */
 
-    @CSharpReplaceBody(code="return fsb.append(value.ToString()); /*maybe imprecise?*/")
+    @CSharpReplaceBody(code="return fsb.append(value.ToString(\"G\", System.Globalization.CultureInfo.InvariantCulture));")
     public static StringBuilder decimalToString(BigDecimal value, StringBuilder fsb) {
         // Can't use BigDecimal#toString() under JDK 1.5 because this produces values like "1E-5".
         // Can't use BigDecimal#toPlainString() because it retains trailing zeroes to represent the scale
