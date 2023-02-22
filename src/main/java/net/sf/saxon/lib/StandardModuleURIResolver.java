@@ -94,11 +94,10 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
 
     @Override
     public StreamSource[] resolve(String moduleURI, String baseURI, String[] locations) throws XPathException {
-
         if (config == null) {
             throw new NullPointerException("No Configuration available in StandardModuleResolver");
         }
-        StreamSource source = resolveModuleURI(moduleURI, baseURI);
+        StreamSource source = (moduleURI != null || baseURI != null) ? resolveModuleURI(moduleURI, baseURI) : null;
         if (source != null) {
             return new StreamSource[]{source};
         }
