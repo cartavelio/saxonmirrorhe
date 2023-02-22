@@ -1,4 +1,13 @@
-<featureMatrix version="11" release="Sep 2021">
+<featureMatrix version="11" release="Oct 2021" Cversion="1.2" Crelease="Oct 2019" JSversion="2" JSrelease="Jun 2020">
+  
+  <packages>
+    <package edition="HE" platforms="J C JS"/>
+    <package edition="PE" platforms="J C"/>
+    <package edition="EE" platforms="J CS C"/>
+    <package edition="EET" platforms="J CS C"/>
+    <package edition="EEQ" platforms="J CS C"/>
+    <package edition="EEV" platforms="J CS C"/>
+  </packages>
   
   <feature class="heading">
     <shortName>XSLT Features</shortName>
@@ -15,12 +24,7 @@
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-        <js editions="JS2"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV JS2 CS" J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
   </feature>
   
@@ -35,11 +39,7 @@
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="EE EE-T CS">
-        <java editions="EE-T"/>
-        <cs editions="EE-T"/>
-        <c editions="EE-T"/>
-      </product>
+      <product editions="EE EET CS" J="EET" CS="EET" C="EET"/>
     </products>
   </feature>
   
@@ -55,12 +55,7 @@
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-        <js editions="JS2"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV JS2 CS" J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
   </feature>
   
@@ -75,12 +70,7 @@
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-        <js editions="JS2"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV JS2 CS" J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
   </feature>
   
@@ -94,11 +84,7 @@
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="EE EE-T CS">
-        <java editions="EE-T"/>
-        <cs editions="EE-T"/>
-        <c editions="EE-T"/>
-      </product>
+      <product editions="EE EET CS" J="EET" CS="EET" C="EET"/>
     </products>
   </feature>
   
@@ -112,12 +98,7 @@
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-        <js editions="JS2"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV JS2 CS" J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
   </feature>
   
@@ -132,12 +113,7 @@
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-        <js editions="JS2"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV JS2 CS" J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
   </feature>
   
@@ -152,12 +128,7 @@
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="PE"/>
-        <js editions="JS2"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV JS2 CS" J="HE" CS="HE" C="PE" JS="HE"/>
     </products>
   </feature>
   
@@ -176,12 +147,7 @@
       link="https://www.w3.org/TR/xpath-31/"/>
     <details link="conformance/xpath31" name="XPath 3.1 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-        <js editions="JS2"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV JS2 CS" J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
   </feature>
   
@@ -196,11 +162,7 @@
       link="https://www.w3.org/TR/xpath-31/"/>
     <details link="conformance/xpath31" name="XPath 3.1 conformance"/>
     <products>
-      <product editions="EE EE-T EE-Q EE-V CS">
-        <java editions="EE-V"/>
-        <cs editions="EE-V"/>
-        <c editions="EE-V"/>
-      </product>
+      <product editions="EE EET EEQ EEV CS" J="EEV" CS="EEV" C="EEV"/>
     </products>
   </feature>
   
@@ -215,12 +177,7 @@
       link="https://www.w3.org/TR/xpath-31/"/>
     <details link="conformance/xpath31" name="XPath 3.1 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="PE"/>
-        <js editions="JS2"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV JS2 CS" J="HE" CS="HE" C="PE" JS="HE"/>
     </products>
   </feature>
   
@@ -238,11 +195,7 @@
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV CS" J="HE" CS="HE" C="HE"/>
     </products>
   </feature>
   
@@ -256,11 +209,7 @@
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product editions="EE EE-Q CS">
-        <java editions="EE-Q"/>
-        <cs editions="EE-Q"/>
-        <c editions="EE-Q"/>
-      </product>
+      <product editions="EE EEQ CS" J="EEQ" CS="EEQ" C="EEQ"/>
     </products>
   </feature>
   
@@ -274,11 +223,7 @@
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product editions="EE EE-Q CS">
-        <java editions="EE-Q"/>
-        <cs editions="EE-Q"/>
-        <c editions="EE-Q"/>
-      </product>
+      <product editions="EE EEQ CS" J="EEQ" CS="EEQ" C="EEQ"/>
     </products>
   </feature>
   
@@ -308,11 +253,7 @@
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV CS" J="HE" CS="HE" C="HE"/>
     </products>
   </feature>
   
@@ -327,11 +268,7 @@
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV CS" J="HE" CS="HE" C="HE"/>
     </products>
   </feature>
   
@@ -346,11 +283,7 @@
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="PE"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV CS" J="HE" CS="HE" C="PE"/>
     </products>
   </feature>
 
@@ -365,11 +298,7 @@
     <spec level="Recommendation" date="17 March 2011" link="http://www.w3.org/TR/xquery-update-10/"/>
     <details link="conformance/update" name="XQuery Update 1.0 conformance"/>
     <products>
-      <product editions="EE EE-Q CS">
-        <java editions="EE-Q"/>
-        <cs editions="EE-Q"/>
-        <c editions="EE-Q"/>
-      </product>
+      <product editions="EE EEQ CS" J="EEQ" CS="EEQ" C="EEQ"/>
     </products>
   </feature>
   
@@ -394,11 +323,7 @@
       name="XML Schema 1.0"/>
     <details link="conformance/schema" name="XML Schema 1.0 conformance"/>
     <products>
-      <product editions="EE EE-T EE-Q EE-V CS">
-        <java editions="EE-V"/>
-        <cs editions="EE-V"/>
-        <c editions="EE-V"/>
-      </product>
+      <product editions="EE EET EEQ EEV CS" J="EEV" CS="EEV" C="EEV"/>
     </products>
   </feature>
 
@@ -415,11 +340,7 @@
       name="XML Schema 1.1"/>
     <details link="conformance/schema11" name="XML Schema 1.1 conformance"/>
     <products>
-      <product editions="EE EE-T EE-Q EE-V CS">
-        <java editions="EE-V"/>
-        <cs editions="EE-V"/>
-        <c editions="EE-V"/>
-      </product>
+      <product editions="EE EET EEQ EEV CS" J="EEV" CS="EEV" C="EEV"/>
     </products>
   </feature>
 
@@ -436,10 +357,7 @@
     <details link="using-xsl/compiling" name="Compiling a Stylesheet"/>
     <details link="using-xquery/querycompilation" name="Compiling Queries"/>
     <products>
-      <product editions="EE EE-T EE-Q EE-V">
-        <java editions="EE-V"/>
-        <c editions="EE-V"/>
-      </product>
+      <product editions="EE EET EEQ EEV" J="EEV" C="EEV"/>
     </products>
   </feature>
 
@@ -452,11 +370,7 @@
     </description>
     <details link="sourcedocs/projection" name="Document projection"/>
     <products>
-      <product editions="EE EE-Q CS">
-        <java editions="EE-Q"/>
-        <cs editions="EE-Q"/>
-        <c editions="EE-Q"/>
-      </product>
+      <product editions="EE EEQ CS" J="EEQ" CS="EEQ" C="EEQ"/>
     </products>
   </feature>
   
@@ -471,12 +385,7 @@
     </description>
     <details link="using-xsl/compiling" name="Compiling a Stylesheet"/>
     <products>
-      <product editions="EE EE-T JS2 CS">
-        <java editions="EE-T"/>
-        <cs editions="EE-T"/>
-        <c editions="EE-T"/>
-        <js editions="JS2"/>
-      </product>
+      <product editions="EE EET JS2 CS" J="EET" CS="EET" C="EET" JS="HE"/>
     </products>
   </feature>
   
@@ -484,23 +393,18 @@
     <!-- For different descriptions in the Product Descriptions, but not the feature matrix table,
       use description/@editions and alt-description elements -->
     <shortName>Import stylesheet packages</shortName>
-    <description editions="EE EE-T">
+    <description editions="EE EET" J="EET" CS="EET" C="EET">
       <p>Allows the importing of stylesheet packages in compiled form. Possible with all editions
         provided the package only uses features available in that edition. </p>
     </description>
-    <alt-description editions="HE PE EE-Q EE-V JS2">
+    <alt-description editions="HE PE EEQ EEV JS2" J="HE" CS="HE" C="HE" JS="HE">
       <p>Allows the importing of stylesheet packages in compiled form. Possible with all editions
         provided the package only uses features available in that edition. Note that this edition
         does not provide the ability to create compiled stylesheet packages.</p>
     </alt-description>
     <details link="using-xsl/compiling" name="Compiling a Stylesheet"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-        <js editions="JS2"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV JS2 CS" J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
   </feature>
 
@@ -511,11 +415,7 @@
           <code>collection()</code> function.</p>
     </description>
     <products>
-      <product editions="EE EE-T EE-Q EE-V CS">
-        <java editions="EE-V"/>
-        <cs editions="EE-V"/>
-        <c editions="EE-V"/>
-      </product>
+      <product editions="EE EET EEQ EEV CS" J="EEV" CS="EEV" C="EEV"/>
     </products>
   </feature>
   
@@ -528,11 +428,7 @@
         instructions under the control of the stylesheet author.</p>
     </description>
     <products>
-      <product editions="EE EE-T CS">
-        <java editions="EE-T"/>
-        <cs editions="EE-T"/>
-        <c editions="EE-T"/>
-      </product>
+      <product editions="EE EET CS" J="EET" CS="EET" C="EET"/>
     </products>
   </feature>
 
@@ -546,25 +442,18 @@
         feasible.</p>
     </description>
     <products>
-      <product level="Basic" editions="HE PE EE-V JS2">
+      <product level="Basic" editions="HE PE EEV JS2" J="HE" CS="HE" C="HE" JS="HE">
         <description><p>The <i>Basic</i> optimizer provided with all Saxon editions provides a wide range of
           static and dynamic optimizations including full pipelining of list operations, lazy
           evaluation of variables, elimination of redundant sorting operations, etc.</p></description>
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-        <js editions="JS2"/>
       </product>
-      <product level="Basic Adv" editions="EE EE-T EE-Q CS">
+      <product level="Basic Adv" editions="EE EET EEQ CS" J="EET EEQ" CS="EET EEQ" C="EET EEQ">
         <description><p>The <i>Advanced</i> optimizer provides the wide range of static and dynamic optimizations
           featured in the <i>Basic</i> optimizer - including full pipelining of list operations,
           lazy evaluation of variables, elimination of redundant sorting operations, etc. - and
           additionally provides join optimization, inlining of variables and functions, just-in-time
           compilation of template rules, and optimized searching of large sets of template rules, where
           feasible.</p></description>
-        <java editions="EE-T EE-Q"/>
-        <cs editions="EE-T EE-Q"/>
-        <c editions="EE-T EE-Q"/>
       </product>
     </products>
   </feature>
@@ -578,11 +467,7 @@
         satisfying the request using the local copy.</p>
     </description>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV CS" J="HE" CS="HE" C="HE"/>
     </products>
   </feature>
 
@@ -594,11 +479,7 @@
     </description>
     <details link="sourcedocs/streaming" name="Streaming of Large Documents" subpages="has-subpages"/>
     <products>
-      <product editions="EE EE-Q EE-T EE-V CS">
-        <java editions="EE-V"/>
-        <cs editions="EE-V"/>
-        <c editions="EE-V"/>
-      </product>
+      <product editions="EE EEQ EET EEV CS" J="EEV" CS="EEV" C="EEV"/>
     </products>
   </feature>
   
@@ -610,11 +491,7 @@
     </description>
     <details link="sourcedocs/streaming" name="Streaming of Large Documents" subpages="has-subpages"/>
     <products>
-      <product editions="EE EE-T CS">
-        <java editions="EE-T"/>
-        <cs editions="EE-T"/>
-        <c editions="EE-T"/>
-      </product>
+      <product editions="EE EET CS" J="EET" CS="EET" C="EET"/>
     </products>
   </feature>
 
@@ -633,11 +510,7 @@
     <!-- TODO split into levels - CS "limited" -->
     <details link="extensions/functions/exslt" name="EXSLT extensions"/>
     <products>
-      <product editions="PE EE EE-T EE-Q EE-V">
-        <java editions="PE"/>
-        <cs editions="PE"/>
-        <c editions="PE"/>
-      </product>
+      <product editions="PE EE EET EEQ EEV" J="PE" CS="PE" C="PE"/>
     </products>
   </feature>
 
@@ -649,11 +522,7 @@
     </description>
     <details link="extensions/functions/expath" name="EXPath extensions"/>
     <products>
-      <product editions="PE EE EE-T EE-Q EE-V CS">
-        <java editions="PE"/>
-        <cs editions="PE"/>
-        <c editions="PE"/>
-      </product>
+      <product editions="PE EE EET EEQ EEV CS" J="PE" CS="PE" C="PE"/>
     </products>
   </feature>
 
@@ -666,11 +535,7 @@
     </description>
     <details link="extensibility" name="Extensibility" subpages="has-subpages"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV CS" J="HE" CS="HE" C="HE"/>
     </products>
   </feature>
 
@@ -683,9 +548,7 @@
     </description>
     <details link="extensibility" name="Extensibility" subpages="has-subpages"/>
     <products>
-      <product editions="PE EE EE-T EE-Q EE-V">
-        <java editions="PE"/>
-      </product>
+      <product editions="PE EE EET EEQ EEV" J="PE"/>
     </products>
   </feature>
   
@@ -696,9 +559,7 @@
     </description>
     <!--<details link="extensibility" name="Extensibility" subpages="has-subpages"/>--><!-- TODO -->
     <products>
-      <product editions="JS2">
-        <js editions="JS2"/>
-      </product>
+      <product editions="JS2" JS="HE"/>
     </products>
   </feature>
   
@@ -709,9 +570,7 @@
     </description>
     <!--<details link="extensibility" name="Extensibility" subpages="has-subpages"/>--><!-- TODO -->
     <products>
-      <product editions="JS2">
-        <js editions="JS2"/>
-      </product>
+      <product editions="JS2" JS="HE"/>
     </products>
   </feature>
 
@@ -727,22 +586,16 @@
     </description>
     <details link="extensions/functions/saxon-extension-functions" name="Saxon extension functions"/>
     <products>
-      <product level="Basic" editions="PE">
+      <product level="Basic" editions="PE" J="PE" CS="PE" C="PE">
         <description><p>Extension functions, as listed in the documentation, in the Saxon namespace. The
             <i>Basic</i> level excludes extension functions that depend on streaming or
           schema-awareness.</p></description>
-        <java editions="PE"/>
-        <cs editions="PE"/>
-        <c editions="PE"/>
       </product>
-      <product level="Basic Adv" editions="EE EE-T EE-Q EE-V CS">
+      <product level="Basic Adv" editions="EE EET EEQ EEV CS" J="EEV" CS="EEV" C="EEV">
         <description><p>Extension functions, as listed in the documentation, in the Saxon namespace. The
           <i>Advanced</i> level includes those that depend on streaming or schema-awareness:
           <code>saxon:schema()</code>, <code>saxon:stream()</code>, and
           <code>saxon:validate()</code>.</p></description>
-        <java editions="EE-V"/>
-        <cs editions="EE-V"/>
-        <c editions="EE-V"/>
       </product>
     </products>
   </feature>
@@ -755,10 +608,7 @@
     </description>
     <details link="sql-extension" name="Saxon SQL extension" subpages="has-subpages"/>
     <products>
-      <product editions="PE EE EE-T EE-Q EE-V">
-        <java editions="PE"/>
-        <c editions="PE"/>
-      </product>
+      <product editions="PE EE EET EEQ EEV" J="PE" C="PE"/>
     </products>
   </feature>
 
@@ -770,10 +620,7 @@
     </description>
     <details link="extensibility/instructions" name="Writing XSLT extension instructions"/>
     <products>
-      <product editions="PE EE EE-T EE-Q EE-V">
-        <java editions="PE"/>
-        <c editions="PE"/>
-      </product>
+      <product editions="PE EE EET EEQ EEV" J="PE" C="PE"/>
     </products>
   </feature>
 
@@ -794,19 +641,15 @@
     <details link="extensibility/config-extend/localizing" name="Localizing numbers and dates"
       subpages="has-subpages"/>
     <products>
-      <product level="Basic" editions="HE">
+      <product level="Basic" editions="HE" J="HE" C="HE">
         <description><p>Run-time localization support for formatting of dates and numbers, and sorting and
           comparison of strings, building on the capabilities of the Java Virtual Machine.</p></description>
-        <java editions="HE"/>
-        <c editions="HE"/>
       </product>
-      <product level="Basic Adv" editions="PE EE EE-T EE-Q EE-V">
+      <product level="Basic Adv" editions="PE EE EET EEQ EEV" J="PE" C="PE">
         <description><p>Run-time localization support for formatting of dates and numbers, and sorting and
           comparison of strings, building on the capabilities of the <a
             href="http://site.icu-project.org/" class="bodylink">ICU-J library</a>. The
           <i>Advanced</i> level also includes APIs which allow additional languages to be supported.</p></description>
-        <java editions="PE"/>
-        <c editions="PE"/>
       </product>
     </products>
   </feature>
@@ -823,10 +666,7 @@
     </description>
     <details link="conformance/jaxp" name="JAXP API conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V">
-        <java editions="HE"/>
-        <c editions="HE"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV" J="HE" C="HE"/>
     </products>
   </feature>
 
@@ -837,11 +677,7 @@
         slightly different forms on the Java and .NET platforms.</p>
     </description>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV CS" J="HE" CS="HE" C="HE"/>
     </products>
   </feature>
 
@@ -853,12 +689,7 @@
     </description>
     <details link="sourcedocs/thirdparty" name="Object models"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS">
-        <java editions="HE"/>
-        <cs editions="HE"/>
-        <c editions="HE"/>
-        <js editions="JS2"/>
-      </product>
+      <product editions="HE PE EE EET EEQ EEV JS2 CS" J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
   </feature>
   
@@ -869,10 +700,7 @@
     </description>
     <details link="sourcedocs/domino" name="Domino Tree Model"/>
     <products>
-      <product editions="EE EE-T EE-Q EE-V">
-        <java editions="EE-V"/>
-        <c editions="EE-V"/>
-      </product>
+      <product editions="EE EET EEQ EEV" J="EEV" C="EEV"/>
     </products>
   </feature>
 
@@ -886,18 +714,13 @@
     </description>
     <details link="sourcedocs/thirdparty" name="Object models"/>
     <products>
-      <product level="Open" editions="HE">
+      <product level="Open" editions="HE" J="HE" C="HE">
         <description><p>Although the code for these interfaces does not come packaged with the Saxon-HE download,
           it is open source and can be compiled to work with Saxon-HE. This provides the ability to
           use a JDOM2, AXIOM, DOM4J, and XOM for the input or output of transformations and
           queries. Applies to the Java platform only.</p></description>
-        <java editions="HE"/>
-        <c editions="HE"/>
       </product>
-      <product level="Inc" editions="PE EE EE-T EE-Q EE-V">
-        <java editions="PE"/>
-        <c editions="PE"/>
-      </product>
+      <product level="Inc" editions="PE EE EET EEQ EEV" J="PE" C="PE"/>
     </products>
   </feature>
 
@@ -911,17 +734,12 @@
     </description>
     <details link="conformance/xqj" name="XQJ API conformance"/>
     <products>
-      <product level="Open" editions="HE">
+      <product level="Open" editions="HE" J="HE" C="HE">
         <description><p>Implementations of the standard XQJ interfaces for XQuery processing have been removed
           from the Saxon-HE download because the Oracle specification license is not open source,
           but they are available on request. Applies to the Java platform only.</p></description>
-        <java editions="HE"/>
-        <c editions="HE"/>
       </product>
-      <product level="Inc" editions="PE EE EE-T EE-Q EE-V">
-        <java editions="PE"/>
-        <c editions="PE"/>
-      </product>
+      <product level="Inc" editions="PE EE EET EEQ EEV" J="PE" C="PE"/>
     </products>
   </feature>
 
