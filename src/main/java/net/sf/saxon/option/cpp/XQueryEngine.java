@@ -220,6 +220,14 @@ public class XQueryEngine extends SaxonCAPI {
         XQueryExecutable executable = null;
 
         if (params != null && params.length != 0) {
+                if(optionsMap.containsKey("updating")) {
+                    if(optionsMap.get("updating").equals("on")) {
+                         compiler.setUpdatingEnabled(true);
+                    } else {
+                        compiler.setUpdatingEnabled(false);
+                    }
+                }
+
                 if (optionsMap.containsKey("qs")) {
                     query = (String) optionsMap.get("qs");
                     executable = compiler.compile(query);
