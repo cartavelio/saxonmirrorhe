@@ -11,6 +11,7 @@ import com.saxonica.functions.extfn.cpp.CPPFunctionSet;
 import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.AugmentedSource;
+import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.s9api.*;
 
@@ -23,7 +24,6 @@ import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
-import org.graalvm.nativeimage.ObjectHandles;
 import org.graalvm.nativeimage.ObjectHandle;
 
 
@@ -32,7 +32,7 @@ import org.graalvm.nativeimage.ObjectHandle;
  */
 public class Xslt30Processor extends SaxonCAPI {
 
-
+     
 
 
 
@@ -108,6 +108,16 @@ public class Xslt30Processor extends SaxonCAPI {
             return handle.rawValue();
     }
 
+    @CEntryPoint(name = "createXslt30WithProcessor")
+    public static long createXslt30Processor1(IsolateThread thread, ObjectHandle processorRef) {
+            Processor processor = objectHandles.get(processorRef);
+            if(processor == null) {
+                return 0;
+            }
+            ObjectHandle handle = objectHandles.create(Xslt30Processor.newInstance(processor));
+            return handle.rawValue();
+    }
+
 
     public static Xslt30Processor newInstance(Processor proc) {
         return new Xslt30Processor(proc);
@@ -121,11 +131,15 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param xsl         - File name of the stylesheet
      * @param outFilename - the file to which the compiled package should be saved
      */
-    public void compileFromFileAndSave(String cwd, String xsl, String outFilename) throws SaxonApiException {
+    @CEntryPoint(name = "compileFromFileAndSave")
+    public static void compileFromFileAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer xsl, CCharPointer outFilename) throws SaxonApiException {
+        Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        Processor processor = xslt30Processor.getProcessor();
         XsltCompiler compiler = processor.newXsltCompiler();
-        Source source = resolveFileToSource(cwd, xsl);
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        Source source = resolveFileToSource(processor, cwd, CTypeConversion.toJavaString(xsl), ResourceRequest.XSLT_NATURE);
         XsltPackage pack = compiler.compilePackage(source);
-        File file = absoluteFile(cwd, outFilename);
+        File file = resolveFile(processor, cwd, CTypeConversion.toJavaString(outFilename), ResourceRequest.XSLT_NATURE);
         pack.save(file);
 
     }
@@ -137,14 +151,16 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param executable
      * @param filename
      */
-    public static void save(String cwd, XsltExecutable executable, String filename) throws SaxonApiException {
-        File file = SaxonCAPI.resolveFile(cwd, filename);
+    @CEntryPoint(name = "save")
+    public static void save(IsolateThread thread, CCharPointer cwd, ObjectHandle executableRef, CCharPointer filename) throws SaxonApiException {
+        File file = SaxonCAPI.resolveFile(null, CTypeConversion.toJavaString(cwd), CTypeConversion.toJavaString(filename), null);
         FileOutputStream stream = null;
         try {
             stream = new FileOutputStream(file);
         } catch (FileNotFoundException e) {
             throw new SaxonApiException(e.getMessage());
         }
+        XsltExecutable executable = objectHandles.get(executableRef);
         executable.export(stream);
     }
 
@@ -155,8 +171,14 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param str      - File name of the stylsheet
      * @param filename - the file to which the compiled package should be saved
      */
-    public void compileFromStringAndSave(String cwd, String str, String filename) throws SaxonApiException {
+    @CEntryPoint(name = "compileFromStringAndSave")
+    public static void compileFromStringAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cstr, CCharPointer cfilename) throws SaxonApiException {
+        Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        Processor processor = xslt30Processor.getProcessor();
 
+        String str = CTypeConversion.toJavaString(cstr);
+        String filename = CTypeConversion.toJavaString(cfilename);
+        String cwd = CTypeConversion.toJavaString(ccwd);
         if (processor == null || str == null || filename == null) {
             if (SaxonCAPI.debug) {
                 System.err.println("DEBUG: compileFromStringAndSave str is null");
@@ -173,7 +195,7 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         if (pack != null) {
 
-            File file = absoluteFile(cwd, filename);
+            File file = resolveFile(processor, cwd, filename, ResourceRequest.XSLT_NATURE);
 
             pack.save(file);
         }
@@ -186,32 +208,37 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param obj      -
      * @param filename - the file to which the compiled package should be saved
      */
-    public void compileFromXdmNodeAndSave(String cwd, Object obj, String filename) throws SaxonApiException {
-
+    @CEntryPoint(name = "compileFromXdmNodeAndSave")
+    public static void compileFromXdmNodeAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, ObjectHandle xdmNodeRef, CCharPointer ccwd, CCharPointer cfilename) throws SaxonApiException {
+        Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        Processor processor = xslt30Processor.getProcessor();
         if(processor == null) {
             return;
         }
         XsltCompiler compiler = processor.newXsltCompiler();
-        XdmNode node;
-        if (obj instanceof XdmNode) {
-            node = (XdmNode) obj;
-        } else {
+        XdmNode node = objectHandles.get(xdmNodeRef);
+        if (node == null) {
             SaxonApiException ex = new SaxonApiException("Failed to create Stylesheet from XdoNode");
             throw ex;
         }
 
         XsltPackage pack = compiler.compilePackage(node.asSource());
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        String filename = CTypeConversion.toJavaString(cfilename);
+
         if(pack != null) {
-            File file = new File(filename);
+            File file = resolveFile(processor, cwd, filename, ResourceRequest.XSLT_NATURE);
             pack.save(file);
         }
 
     }
 
-
-    public XsltExecutable compileFromAssociatedFile(String cwd, String filename, boolean jit, String[] sparams, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "compileFromAssociatedFile")
+    public static XsltExecutable compileFromAssociatedFile(ObjectHandle xslt30ProcessorRef, CCharPointer cwd, CCharPointer filename, boolean jit, String[] sparams, Object[] values) throws SaxonApiException {
 
         try {
+            Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+            Processor processor = xslt30Processor.getProcessor();
             XsltCompiler compiler = processor.newXsltCompiler();
             setStaticParametersFromArray(compiler, sparams, values);
             if (jit) {
@@ -221,10 +248,10 @@ public class Xslt30Processor extends SaxonCAPI {
             /*if (packagesToLoad.size() > 0) {
                 compilePackages(compiler);
             } */
-            Source source = resolveFileToSource(cwd, filename);
+            Source source = resolveFileToSource(processor, CTypeConversion.toJavaString(cwd), CTypeConversion.toJavaString(filename), ResourceRequest.XML_NATURE);
 
             //compiler.setErrorListener(errorListener);
-            compiler.setSchemaAware(schemaAware);
+            compiler.setSchemaAware(xslt30Processor.schemaAware);
             executable = compiler.compile(compiler.getAssociatedStylesheet(source, null, null, null));
             return executable;
         } catch (SaxonApiException ex) {
@@ -241,34 +268,24 @@ public class Xslt30Processor extends SaxonCAPI {
      * @return XsltExecutable
      */
 
-    @CEntryPoint(name = "compileFromFile1")
-    public static long compileFromFile1(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer cwd, CCharPointer stylesheetFile) {
 
-        net.sf.saxon.option.cpp.Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
-        XsltExecutable executable = null;
-        try {
-            executable = xslt30Processor.compileFromFile(CTypeConversion.toJavaString(cwd), CTypeConversion.toJavaString(stylesheetFile), false, null, null);
-        }catch(SaxonApiException ex) {
-            return 0;
-        }
-        ObjectHandle handle = objectHandles.create((Object)executable);
-        return handle.rawValue();
-    }
-    public XsltExecutable compileFromFile(String cwd, String filename, boolean jit, String[] sparams, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "compileFromFile")
+   public static XsltExecutable compileFromFile(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cfilename, boolean jit/*, String[] sparams, Object[] values*/) throws SaxonApiException {
 
+        Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        Processor processor = xslt30Processor.getProcessor();
         XsltCompiler compiler = processor.newXsltCompiler();
-        setStaticParametersFromArray(compiler, sparams, values);
+        //setStaticParametersFromArray(compiler, sparams, values); //TODO fixup parameters
+
         if (jit) {
             compiler.setJustInTimeCompilation(jit);
         }
         XsltExecutable executable = null;
-        /* if (packagesToLoad.size() > 0) {
-            compilePackages(compiler);
-        }  */
-        Source source = resolveFileToSource(cwd, filename);
+
+        Source source = resolveFileToSource(processor, CTypeConversion.toJavaString(ccwd), CTypeConversion.toJavaString(cfilename), ResourceRequest.XSLT_NATURE);
 
         //compiler.setErrorListener(errorListener);
-        compiler.setSchemaAware(schemaAware);
+        compiler.setSchemaAware(xslt30Processor.schemaAware);
         executable = compiler.compile(source);
         return executable;
 
@@ -287,32 +304,19 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
 
-    @CEntryPoint(name = "compileFromString1")
-    public static long compileFromString1(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer cwd, CCharPointer stylesheetFile) throws SaxonApiException {
 
-
+    @CEntryPoint(name = "compileFromString")
+    public static XsltExecutable compileFromString(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer stylesheet, boolean jit /*, String[] sparams, Object[] values*/) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
-        XsltExecutable executable = null;
-        try {
-            executable = xslt30Processor.compileFromString(CTypeConversion.toJavaString(cwd), CTypeConversion.toJavaString(stylesheetFile), false, null, null);
-        }catch(SaxonApiException ex) {
-            return 0;
-        }
-
-        ObjectHandle handle = objectHandles.create((Object)executable);
-        return handle.rawValue();
-    }
-
-    public XsltExecutable compileFromString(String cwd, String str, boolean jit, String[] sparams, Object[] values) throws SaxonApiException {
-        XsltCompiler compiler = processor.newXsltCompiler();
-        setStaticParametersFromArray(compiler, sparams, values);
+        XsltCompiler compiler = xslt30Processor.getProcessor().newXsltCompiler();
+        //setStaticParametersFromArray(compiler, sparams, values); //TODO remove comment - fixup parameters
         if (jit) {
             compiler.setJustInTimeCompilation(jit);
         }
         Source source;
-
-        StringReader reader = new StringReader(str);
-        compiler.setSchemaAware(schemaAware);
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        StringReader reader = new StringReader(CTypeConversion.toJavaString(stylesheet));
+        compiler.setSchemaAware(xslt30Processor.schemaAware);
         source = new StreamSource(reader);
         if (cwd != null && cwd.length() > 0) {
             if (!cwd.endsWith("/")) {
@@ -337,18 +341,18 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param values
      * @return XsltExecutable
      */
-    public XsltExecutable compileFromXdmNode(String cwd, Object obj, boolean jit, String[] sparams, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "compileFromXdmNode")
+    public static XsltExecutable compileFromXdmNode(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd,  ObjectHandle xdmNodeRef, boolean jit /*, String[] sparams, Object[] values*/) throws SaxonApiException {
 
-        XsltCompiler compiler = processor.newXsltCompiler();
-        setStaticParametersFromArray(compiler, sparams, values);
+        Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        XsltCompiler compiler = xslt30Processor.getProcessor().newXsltCompiler();
+        //setStaticParametersFromArray(compiler, sparams, values); //TODO fix up the handling of parameters in this method
         if (jit) {
             compiler.setJustInTimeCompilation(jit);
         }
 
-        XdmNode node;
-        if (obj instanceof XdmNode) {
-            node = (XdmNode) obj;
-        } else {
+        XdmNode node = objectHandles.get(xdmNodeRef);
+        if(node == null){
             SaxonApiException ex = new SaxonApiException("Failed to create Stylesheet from XdmNode");
             throw ex;
         }
@@ -363,7 +367,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    private void setStaticParametersFromArray(XsltCompiler compiler, String[] sparams, Object[] values) throws SaxonApiException {
+    private static void setStaticParametersFromArray(XsltCompiler compiler, String[] sparams, Object[] values) throws SaxonApiException {
         if (sparams != null && values != null) {
             for (int i = 0; i < sparams.length; i++) {
                 if (sparams[i].startsWith("sparam:")) {
@@ -400,7 +404,7 @@ public class Xslt30Processor extends SaxonCAPI {
             }
             XsltCompiler compiler = processor.newXsltCompiler();
 
-            Source source = resolveFileToSource(cwd, stylesheet);
+            Source source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
             //compiler.setErrorListener(errorListener);
 
             compiler.setSchemaAware(schemaAware);
@@ -421,13 +425,15 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
 
-
-    public static XdmValue applyTemplatesReturningValue(String cwd, XsltExecutable executable, Object sourceObj, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "applyTemplatesReturningValue")
+    public static long applyTemplatesReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle xsltExecutableRef, ObjectHandle sourceObjRef /*, String[] params, Object[] values*/) throws SaxonApiException {
+        XsltExecutable executable = objectHandles.get(xsltExecutableRef);
+        
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = new HashMap(); //TODO remove comment setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
         if(executable == null) {
             if(SaxonCAPI.debug) {
                 System.err.println("Error: executable is null");
@@ -436,7 +442,7 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
-
+        String cwd= CTypeConversion.toJavaString(ccwd);
         try {
             applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters);
         } catch(Exception ex) {
@@ -462,8 +468,9 @@ public class Xslt30Processor extends SaxonCAPI {
         } else {
             xdmResult = new XdmDestination();
         }
+        Object sourceObj = objectHandles.get(sourceObjRef);
         if (sourceObj instanceof String) {
-            Source source = resolveFileToSource(cwd, (String) sourceObj);
+            Source source = resolveFileToSource(processor, cwd, (String) sourceObj, ResourceRequest.XML_NATURE);
             if (paramsMap.containsKey("dtd")) {
                 AugmentedSource asource = AugmentedSource.makeAugmentedSource(source);
                 String option = (String) paramsMap.get("dtd");
@@ -497,7 +504,10 @@ public class Xslt30Processor extends SaxonCAPI {
         }
 
 
-        return getXdmValue(xdmResult, paramsMap);
+        XdmValue value = getXdmValue(xdmResult, paramsMap);
+
+        ObjectHandle handle = objectHandles.create(value);
+        return handle.rawValue();
     }
 
     private static XdmValue getXdmValue(Destination xdmResult, Map<String, Object> paramsMap) {
@@ -529,12 +539,14 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param values
      * @throws SaxonApiException
      */
-    public static void applyTemplatesReturningFile(String cwd, XsltExecutable executable, Object sourceObj, String outFilename, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "applyTemplatesReturningFile")
+    public static void applyTemplatesReturningFile(CCharPointer ccwd, ObjectHandle executableRef, ObjectHandle sourceObjRef, CCharPointer coutFilename /*, String[] params, Object[] values*/) throws SaxonApiException {
+        XsltExecutable executable = objectHandles.get(executableRef);
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = new HashMap(); //TODO setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
         if(executable == null) {
             throw new SaxonApiException("Error XsltExecutable is null");
 
@@ -542,14 +554,16 @@ public class Xslt30Processor extends SaxonCAPI {
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
         Serializer serializer = null;
+        String outFilename = CTypeConversion.toJavaString(coutFilename);
+        String cwd = CTypeConversion.toJavaString(ccwd);
         if (outFilename != null) {
             if (debug) {
                 System.err.println("DEBUG: XSLT30TransformerForCpp param: " + outFilename);
             }
-            serializer = resolveOutputFile(processor, cwd, outFilename);
+            serializer = resolveOutputFile(processor, cwd, outFilename, ResourceRequest.XML_NATURE);
         } else if (paramsMap.containsKey("o")) {
             String outfile = (String) paramsMap.get("o");
-            serializer = resolveOutputFile(processor, cwd, outfile);
+            serializer = resolveOutputFile(processor, cwd, outfile, ResourceRequest.XML_NATURE);
             if (debug) {
                 System.err.println("DEBUG: XSLT30TransformerForCpp param: " + outfile);
             }
@@ -563,9 +577,10 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException(ex);
 
         }
+        Object sourceObj = objectHandles.get(sourceObjRef);
         if (sourceObj instanceof String) {
 
-            Source source = resolveFileToSource(cwd, (String) sourceObj);
+            Source source = resolveFileToSource(processor, cwd, (String) sourceObj, ResourceRequest.XML_NATURE);
             if (paramsMap.containsKey("dtd")) {
                 AugmentedSource asource = AugmentedSource.makeAugmentedSource(source);
                 String option = (String) paramsMap.get("dtd");
@@ -599,12 +614,13 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    public static byte [] applyTemplatesReturningString(String cwd, XsltExecutable executable, Object sourceObj, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "applyTemplatesReturningString")
+    public static CCharPointer applyTemplatesReturningString(String cwd, XsltExecutable executable, Object sourceObj /*, String[] params, Object[] values*/) throws SaxonApiException {
         Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = new HashMap(); //TODO setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
         if(executable == null) {
             throw new SaxonApiException("Error XsltExecutable is null");
 
@@ -622,7 +638,7 @@ public class Xslt30Processor extends SaxonCAPI {
         }
 
         if (sourceObj instanceof String) {
-            Source source = resolveFileToSource(cwd, (String) sourceObj);
+            Source source = resolveFileToSource(processor, cwd, (String) sourceObj, ResourceRequest.XML_NATURE);
             if (paramsMap.containsKey("dtd")) {
                 AugmentedSource asource = AugmentedSource.makeAugmentedSource(source);
                 String option = (String) paramsMap.get("dtd");
@@ -652,7 +668,8 @@ public class Xslt30Processor extends SaxonCAPI {
         } else {
             throw new SaxonApiException("Source object is not of type (String, XdmValue or XdmValue[])");
         }
-        return bStream.toByteArray();
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
+        return holder.get();
     }
 
 
@@ -675,14 +692,14 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-
-    public static void callFunctionReturningFile(String cwd, XsltExecutable executable, String cFuncName, String outFilename, Objects[] arguments, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "callFunctionReturningFile")
+    public static void callFunctionReturningFile(String cwd, XsltExecutable executable, String cFuncName, String outFilename /*, Objects[] arguments, String[] params, Object[] values*/) throws SaxonApiException {
         Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
         QName qname = QName.fromClarkName(cFuncName);
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = new HashMap(); //TODO setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
         if(executable == null) {
             throw new SaxonApiException("Error XsltExecutable is null");
         }
@@ -690,28 +707,29 @@ public class Xslt30Processor extends SaxonCAPI {
         Processor processor = executable.getProcessor();
         Serializer serializer = null;
         if (outFilename != null) {
-            serializer = resolveOutputFile(processor, cwd, outFilename);
+            serializer = resolveOutputFile(processor, cwd, outFilename, ResourceRequest.XML_NATURE);
         } else if (paramsMap.containsKey("o")) {
             String outfile = (String) paramsMap.get("o");
-            serializer = resolveOutputFile(processor, cwd, outfile);
+            serializer = resolveOutputFile(processor, cwd, outfile, ResourceRequest.XML_NATURE);
         } else {
             throw new SaxonApiException("File name for CallFunction has not been set");
         }
 
         applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
 
-        transformer.callFunction(qname, getArguments(arguments), serializer);
+        //transformer.callFunction(qname, getArguments(arguments), serializer); //TODO uncomment
 
     }
 
-    public static XdmValue callFunctionReturningValue(String cwd, XsltExecutable executable, String cFuncName, Object[] arguments, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "callFunctionReturningValue")
+    public static long callFunctionReturningValue(String cwd, XsltExecutable executable, String cFuncName /*, Object[] arguments, String[] params, Object[] values*/) throws SaxonApiException {
 
         Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
         QName qname = QName.fromClarkName(cFuncName);
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, null, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = new HashMap(); //TODO setupConfigurationAndBuildMap(params, values, props, null, staticParameters, null, initialTemplateParameters, true);
 
         if(executable == null) {
             throw new SaxonApiException("Error XsltExecutable is null");
@@ -721,17 +739,19 @@ public class Xslt30Processor extends SaxonCAPI {
 
         applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters);
 
-        XdmValue result = transformer.callFunction(qname, getArguments(arguments));
-        return result;
+        XdmValue result = null;// TODO transformer.callFunction(qname, getArguments(arguments));
+        ObjectHandle handle = objectHandles.create(result);
+        return handle.rawValue();
     }
 
-    public static byte [] callFunctionReturningString(String cwd, XsltExecutable executable, String cFuncName, Object[] arguments, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "callFunctionReturningString")
+    public static CCharPointer callFunctionReturningString(String cwd, XsltExecutable executable, String cFuncName /*, Object[] arguments, String[] params, Object[] values*/) throws SaxonApiException {
         Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
         QName qname = QName.fromClarkName(cFuncName);
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = new HashMap(); //TODO setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
 
         if(executable == null) {
             throw new SaxonApiException("Error XsltExecutable is null");
@@ -743,13 +763,15 @@ public class Xslt30Processor extends SaxonCAPI {
         Serializer serializer = processor.newSerializer(bStream);
         applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
 
-        transformer.callFunction(qname, getArguments(arguments), serializer);
+        // TODO transformer.callFunction(qname, getArguments(arguments), serializer);
         serializer = null;
-        return bStream.toByteArray();
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
+        return holder.get();
     }
 
 
-    public static void callTemplateReturningFile(String cwd, XsltExecutable executable, String templateName, String outFilename, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "callTemplateReturningFile")
+    public static void callTemplateReturningFile(String cwd, XsltExecutable executable, String templateName, String outFilename /*, String[] params, Object[] values*/) throws SaxonApiException {
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
@@ -762,15 +784,15 @@ public class Xslt30Processor extends SaxonCAPI {
         if (templateName != null) {
             qname = QName.fromClarkName(templateName);
         }
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = new HashMap(); //TODO setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
         Serializer serializer = null;
         if (outFilename != null) {
-            serializer = resolveOutputFile(processor, cwd, outFilename);
+            serializer = resolveOutputFile(processor, cwd, outFilename, ResourceRequest.XML_NATURE);
         } else if (paramsMap.containsKey("o")) {
             String outfile = (String) paramsMap.get("o");
-            serializer = resolveOutputFile(processor, cwd, outfile);
+            serializer = resolveOutputFile(processor, cwd, outfile, ResourceRequest.XML_NATURE);
         } else {
             throw new SaxonApiException("File name for CallFunction has not been set");
         }
@@ -780,7 +802,8 @@ public class Xslt30Processor extends SaxonCAPI {
         transformer.callTemplate(qname, serializer);
     }
 
-    public static XdmValue callTemplateReturningValue(String cwd, XsltExecutable executable, String clarkName, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "callTemplateReturningValue")
+    public static long callTemplateReturningValue(String cwd, XsltExecutable executable, String clarkName /*, String[] params, Object[] values*/) throws SaxonApiException {
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
@@ -794,7 +817,7 @@ public class Xslt30Processor extends SaxonCAPI {
         if (clarkName != null) {
             qname = QName.fromClarkName(clarkName);
         }
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = new HashMap(); //TODO setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
 
@@ -820,7 +843,9 @@ public class Xslt30Processor extends SaxonCAPI {
 
         transformer.callTemplate(qname, xdmResult);
 
-        return getXdmValue(xdmResult, paramsMap);
+        XdmValue value =  getXdmValue(xdmResult, paramsMap);
+        ObjectHandle handle = objectHandles.create(value);
+        return handle.rawValue();
     }
 
     private void setsource(String cwd, Xslt30Transformer transformer, Object sourceObj, Map<String, Object> paramsMap) throws SaxonApiException {
@@ -828,7 +853,7 @@ public class Xslt30Processor extends SaxonCAPI {
             if (sourceObj instanceof String) {
                 XdmNode node;
                 DocumentBuilder builder = processor.newDocumentBuilder();
-                Source source = resolveFileToSource(cwd, (String) sourceObj);
+                Source source = resolveFileToSource(processor, cwd, (String) sourceObj, ResourceRequest.XML_NATURE);
                 if (paramsMap.containsKey("dtd")) {
                     AugmentedSource asource = AugmentedSource.makeAugmentedSource(source);
                     String option = (String) paramsMap.get("dtd");
@@ -848,7 +873,12 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    public static byte[] callTemplateReturningString(String cwd, XsltExecutable executable, String clarkName, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "callTemplateReturningString")
+    public static CCharPointer callTemplateReturningString(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer cclarkName /*, String[] params, Object[] values*/) throws SaxonApiException {
+        XsltExecutable executable = objectHandles.get(executableRef);
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        String clarkName = CTypeConversion.toJavaString(cclarkName);
+
         QName qname = null;
         if (clarkName != null) {
             qname = QName.fromClarkName(clarkName);
@@ -862,11 +892,12 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException("Error XsltExecutable is null");
         }
 
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = new HashMap(); //TODO setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
 
         ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+
         Serializer serializer = processor.newSerializer(bStream);
 
         //setsource(cwd, transformer, sourceObj, paramsMap);
@@ -875,16 +906,9 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
         transformer.callTemplate(qname, serializer);
-        byte [] result = bStream.toByteArray();
-        /*if(SaxonCAPI.debug) {
-            System.err.println("Java callTemplateReturningString output = " + new String(result) + " len=" + result.length);
-            for (int j=0; j<result.length; j++) {
-                  System.err.format("0x%02X", result[j]);
-               }
-            System.out.println();
-        }  */
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
+        return holder.get();
 
-        return result;
     }
 
     /**
@@ -903,7 +927,16 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param params         - parameters and property names given as an array of stings
      * @param values         - the values of the paramaters and properties. given as a array of Java objects
      */
-    public static void transformToFile(String cwd, Xslt30Processor xslt30Processor, XsltExecutable executable, String sourceFilename, String stylesheet, String outFilename, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "transformToFile")
+    public static void transformToFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle xslt30ProcessorRef, ObjectHandle executableRef, CCharPointer csourceFilename, CCharPointer cstylesheet, CCharPointer coutFilename /*, String[] params, Object[] values*/) throws SaxonApiException {
+        XsltExecutable executable = objectHandles.get(executableRef);
+        Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        String stylesheet = CTypeConversion.toJavaString(cstylesheet);
+        String sourceFilename = CTypeConversion.toJavaString(csourceFilename);
+        String outFilename = CTypeConversion.toJavaString(coutFilename);
+
+
         try {
             Serializer serializer = null;
             Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
@@ -911,7 +944,7 @@ public class Xslt30Processor extends SaxonCAPI {
             Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
             Properties props = new Properties();
             Source source;
-            Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+            Map<String, Object> paramsMap = new HashMap(); //TODO setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
             Xslt30Transformer transformer;
             Processor processor;
 
@@ -926,10 +959,10 @@ public class Xslt30Processor extends SaxonCAPI {
             }
 
             if (outFilename != null) {
-                serializer = resolveOutputFile(processor, cwd, outFilename);
+                serializer = resolveOutputFile(processor, cwd, outFilename, ResourceRequest.XML_NATURE);
             } else if (paramsMap.containsKey("o")) {
                 String outfile = (String) paramsMap.get("o");
-                serializer = resolveOutputFile(processor, cwd, outfile);
+                serializer = resolveOutputFile(processor, cwd, outfile, ResourceRequest.XML_NATURE);
             } else if (serializer == null) {
                 throw new SaxonApiException("Output file not set for this transformation");
             }
@@ -949,7 +982,7 @@ public class Xslt30Processor extends SaxonCAPI {
                 transformer.setGlobalContextItem(doc);
                 transformer.transform(doc.asSource(), serializer);
             } else if (sourceFilename != null) {
-                source = resolveFileToSource(cwd, sourceFilename);
+                source = resolveFileToSource(processor, cwd, sourceFilename, ResourceRequest.XML_NATURE);
 
                 transformer.transform(source, serializer);
             }
@@ -1028,7 +1061,7 @@ public class Xslt30Processor extends SaxonCAPI {
             if (map.containsKey("s")) {
                 valuei = map.get("s");
                 if (valuei instanceof String) {
-                    source = SaxonCAPI.resolveFileToSource(cwd, (String) valuei);
+                    source = SaxonCAPI.resolveFileToSource(processor, cwd, (String) valuei, ResourceRequest.XML_NATURE);
                     XdmNode node = builder.build(source);
                     transformer.setGlobalContextItem(node);
                 } else if (debug) {
@@ -1079,7 +1112,7 @@ public class Xslt30Processor extends SaxonCAPI {
                 if(value instanceof SaxonCMessageListener) {
                    transformer.setMessageListener((SaxonCMessageListener)value);
                 } else {
-                    transformer.setMessageListener(new SaxonCMessageListener(cwd, (String)value));
+                    transformer.setMessageListener(new SaxonCMessageListener(processor, cwd, (String)value));
                 }
 
             }
@@ -1139,7 +1172,15 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param values     - the values of the paramaters and properties. given as a array of Java objects
      * @return result as an XdmNode
      */
-    public static XdmValue transformToValue(String cwd, Xslt30Processor xslt30Processor, XsltExecutable executable, String sourceFile, String stylesheet, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "transformToValue")
+    public static long transformToValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle xslt30ProcessorRef, ObjectHandle executableRef, CCharPointer csourceFile, CCharPointer cstylesheet /*, String[] params, Object[] values*/) throws SaxonApiException {
+        XsltExecutable executable = objectHandles.get(executableRef);
+        Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        String stylesheet = CTypeConversion.toJavaString(cstylesheet);
+        String sourceFile = CTypeConversion.toJavaString(csourceFile);
+
+
         Source source;
 
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
@@ -1147,7 +1188,7 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
         try {
-            Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+            Map<String, Object> paramsMap = new HashMap(); //TODO setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
             Xslt30Transformer transformer;
             Processor processor;
 
@@ -1193,7 +1234,7 @@ public class Xslt30Processor extends SaxonCAPI {
                  Object valuei = paramsMap.get("s");
                  if (valuei instanceof String) {
                      DocumentBuilder builder = processor.newDocumentBuilder();
-                     source = SaxonCAPI.resolveFileToSource(cwd, (String) valuei);
+                     source = SaxonCAPI.resolveFileToSource(processor, cwd, (String) valuei, ResourceRequest.XML_NATURE);
                      doc = builder.build(source);
                  } else if (debug) {
                      System.err.println("DEBUG: value error for property 's'");
@@ -1203,7 +1244,7 @@ public class Xslt30Processor extends SaxonCAPI {
             if (sourceFile == null && doc != null) {
                 transformer.transform(doc.asSource(), destination);
             } else if (sourceFile != null) {
-                source = resolveFileToSource(cwd, sourceFile);
+                source = resolveFileToSource(processor, cwd, sourceFile, ResourceRequest.XML_NATURE);
 
                 transformer.transform(source, destination);
 
@@ -1211,7 +1252,9 @@ public class Xslt30Processor extends SaxonCAPI {
                 throw new SaxonApiException("Source not set in transform method");
             }
 
-            return getXdmValue(destination, paramsMap);
+            XdmValue value = getXdmValue(destination, paramsMap);
+            ObjectHandle handle = objectHandles.create(value);
+            return handle.rawValue();
         } catch (Exception ex) {
             throw new SaxonApiException(ex);
         }
@@ -1235,62 +1278,18 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param values     - the values of the paramaters and properties. given as a array of Java objects
      * @return result as a string representation in a byte array
      */
-
-
-
-
- /*   @CEntryPoint(name = "transformToString1")
-    public static  CCharPointer transformToString1(IsolateThread thread, long xsltExecutableRef, CCharPointer cwd, CCharPointer sourceFile, CCharPointer stylesheetFile) {
-        Processor proc = new Processor(false);
-        Xslt30Processor xslt30Processor = Xslt30Processor.newInstance(proc);
-        String result = "Failed";
-        try {
-            byte[] resultBytes = transformToString(CTypeConversion.toJavaString(cwd), xslt30Processor, null, CTypeConversion.toJavaString(sourceFile), CTypeConversion.toJavaString(stylesheetFile), null, null);
-            if (resultBytes != null) {
-                result = new String(resultBytes);
-
-            }  else {
-                result =  "Failed: Results bytes is null";
-            }
-        } catch(SaxonApiException ex) {
-            result =  "Failed: exception thrown: "+ex.getMessage();
-        }
-
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(result);
-        return holder.get();
-
-    }         */
-
-    @CEntryPoint(name = "transformToString1")
-    public static  CCharPointer transformToString1(IsolateThread thread, ObjectHandle xslt30ProcessorRef, ObjectHandle xsltExecutableRef, CCharPointer cwd, CCharPointer sourceFile, CCharPointer stylesheetFile) {
-
+    @CEntryPoint(name = "transformToString")
+    public static CCharPointer transformToString(IsolateThread thread, CCharPointer ccwd, ObjectHandle xslt30ProcessorRef, ObjectHandle executableRef, CCharPointer csourceFile, CCharPointer cstylesheet /*, String[] params, Object[] values*/) throws SaxonApiException {
+        XsltExecutable executable = objectHandles.get(executableRef);
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
-        XsltExecutable executable = objectHandles.get(xsltExecutableRef);
-        String result = "Failed";
-        try {
-            byte[] resultBytes = transformToString(CTypeConversion.toJavaString(cwd), xslt30Processor, executable, CTypeConversion.toJavaString(sourceFile), CTypeConversion.toJavaString(stylesheetFile), null, null);
-            if (resultBytes != null) {
-                result = new String(resultBytes);
-
-            }  else {
-                result =  "Failed: Results bytes is null";
-            }
-        } catch(SaxonApiException ex) {
-            result =  "Failed: exception thrown: "+ex.getMessage();
-        }
-
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(result);
-        return holder.get();
-
-    }
-
-    public static byte[] transformToString(String cwd, Xslt30Processor xslt30Processor, XsltExecutable executable, String sourceFile, String stylesheet, String[] params, Object[] values) throws SaxonApiException {
-
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        String stylesheet = CTypeConversion.toJavaString(cstylesheet);
+        String sourceFile = CTypeConversion.toJavaString(csourceFile);
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = new HashMap(); //TODO setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
         try {
             Source source = null;
             Xslt30Transformer transformer;
@@ -1331,7 +1330,7 @@ public class Xslt30Processor extends SaxonCAPI {
                  Object valuei = paramsMap.get("s");
                  if (valuei instanceof String) {
                      DocumentBuilder builder = processor.newDocumentBuilder();
-                     source = SaxonCAPI.resolveFileToSource(cwd, (String) valuei);
+                     source = SaxonCAPI.resolveFileToSource(processor, cwd, (String) valuei, ResourceRequest.XML_NATURE);
                      doc = builder.build(source);
                  } else if (debug) {
                      System.err.println("DEBUG: value error for property 's'");
@@ -1341,12 +1340,13 @@ public class Xslt30Processor extends SaxonCAPI {
             if (sourceFile == null && doc != null) {
                 source = doc.asSource();
             } else if (sourceFile != null) {
-                source = resolveFileToSource(cwd, sourceFile);
+                source = resolveFileToSource(processor, cwd, sourceFile, ResourceRequest.XML_NATURE);
             }
             //transformer.setErrorListener(errorListener);
             transformer.transform(source, serializer);
             serializer = null;
-            return bStream.toByteArray();
+            final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
+            return holder.get();
         } catch (Exception e) {
             SaxonApiException ex = new SaxonApiException(e);
             throw ex;

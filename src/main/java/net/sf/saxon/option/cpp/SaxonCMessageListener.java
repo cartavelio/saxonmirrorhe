@@ -6,10 +6,10 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 package net.sf.saxon.option.cpp;
-import net.sf.saxon.s9api.MessageListener2;
-import net.sf.saxon.s9api.QName;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XdmNode;
+import net.sf.saxon.lib.ResourceRequest;
+import net.sf.saxon.s9api.*;
+
+import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
 import java.io.*;
 import java.util.ArrayList;
@@ -17,9 +17,12 @@ import java.util.List;
 public class SaxonCMessageListener implements MessageListener2 {
     int mode = 0;
     String messageFilename = null;
-    File file = null;
+    Source sourceFile = null;
     List<XdmNode> xslMessages = new ArrayList<>();
-    public SaxonCMessageListener(String cwd, String mode) throws SaxonApiException {
+    Processor processor = null;
+
+    public SaxonCMessageListener(Processor proc, String cwd, String mode) throws SaxonApiException {
+        processor = proc;
         if (mode.equals("-:on")) {
             this.mode = 1;
         } else if (mode.equals("-:off")) {
@@ -27,7 +30,7 @@ public class SaxonCMessageListener implements MessageListener2 {
         }  else {
             this.mode = 2;
             messageFilename = cwd + mode.substring(1);
-            file = SaxonCAPI.resolveFile(cwd, messageFilename);
+            sourceFile = SaxonCAPI.resolveFileToSource(processor, cwd, messageFilename, ResourceRequest.XML_NATURE);
         }
     }
     @Override
@@ -39,7 +42,7 @@ public class SaxonCMessageListener implements MessageListener2 {
             System.err.println(content.getStringValue());
         } else if (mode == 2) {
             xslMessages.add(content);
-            try (FileWriter fw = new FileWriter(file, true);
+            try (FileWriter fw = new FileWriter(new File(sourceFile.getSystemId()), true); //TODO change this to use Source
                  BufferedWriter bw = new BufferedWriter(fw);
                  PrintWriter out = new PrintWriter(bw)) {
                 out.println(content.getStringValue());

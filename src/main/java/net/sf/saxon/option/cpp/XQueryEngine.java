@@ -10,6 +10,7 @@ package net.sf.saxon.option.cpp;
 import com.saxonica.functions.extfn.cpp.CPPFunctionSet;
 import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.s9api.*;
 
 import javax.xml.transform.Source;
@@ -218,7 +219,7 @@ public class XQueryEngine extends SaxonCAPI {
                         }
 
                     } else {
-                        queryFile = resolveFile(cwd, (String) optionsMap.get("q"));
+                        queryFile = resolveFile(processor, cwd, (String) optionsMap.get("q"), ResourceRequest.XQUERY_NATURE);
 
                         try {
                             executable = compiler.compile(queryFile);
@@ -266,7 +267,7 @@ public class XQueryEngine extends SaxonCAPI {
     public void executeQueryToFile(String cwd, String outFilename, String[] params, Object[] values) throws SaxonApiException {
             Serializer serializer = null;
             if(outFilename != null) {
-                serializer = resolveOutputFile(processor, cwd, outFilename);
+                serializer = resolveOutputFile(processor, cwd, outFilename, ResourceRequest.XML_NATURE);
             }
             XQueryEvaluator eval = xqueryEvaluator(cwd, params, values,  serializer);
             if (serializer != null) {
@@ -295,7 +296,7 @@ public class XQueryEngine extends SaxonCAPI {
 
 
                 if (optionsMap.containsKey("o")) {
-                    serializer = api.resolveOutputFile(processor, cwd, (String) optionsMap.get("o"));
+                    serializer = api.resolveOutputFile(processor, cwd, (String) optionsMap.get("o"), ResourceRequest.XML_NATURE);
                     eval.setDestination(serializer);
                 }
 
@@ -310,7 +311,7 @@ public class XQueryEngine extends SaxonCAPI {
                 }
 
                 if (optionsMap.containsKey("s")) {
-                    source = api.resolveFileToSource(cwd, (String) optionsMap.get("s"));
+                    source = api.resolveFileToSource(processor, cwd, (String) optionsMap.get("s"), null);
                     eval.setSource(source);
 
                 }
@@ -365,7 +366,7 @@ public class XQueryEngine extends SaxonCAPI {
         String[] valuesCon = {"on"};
         SaxonCAPI.applyToConfiguration(processor, paramcon, valuesCon);
         XQueryEngine xquery = new XQueryEngine(processor);
-        XdmNode doc = xquery.parseXmlString(null, "<bookstore>\n" +
+        /*XdmNode doc = xquery.parseXmlString(null, "<bookstore>\n" +
                 "\n" +
                 "<book category=\"COOKING\">\n" +
                 "  <title lang=\"en\">Everyday Italian</title>\n" +
@@ -411,7 +412,7 @@ public class XQueryEngine extends SaxonCAPI {
         System.out.println(qname.getNamespaceURI());
         System.out.println(qname.getPrefix());
         System.out.println(qname.getLocalName());
-        System.out.println(qname.toString());
+        System.out.println(qname.toString());  */
 
     }
 
