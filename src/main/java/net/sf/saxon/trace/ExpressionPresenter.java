@@ -51,7 +51,7 @@ public class ExpressionPresenter {
     private NamespaceMap namespaceMap = NamespaceMap.emptyMap();
     private NamespaceUri defaultNamespace;
     private ExportOptions options = new ExportOptions();
-    private boolean relocatable = false;
+
 
     /**
      * Make an uncommitted ExpressionPresenter. This must be followed by a call on init()
@@ -118,11 +118,7 @@ public class ExpressionPresenter {
     public void init(Configuration config, StreamResult out, boolean checksum) {
         SerializationProperties props = makeDefaultProperties(config);
         if (config.getXMLVersion() == Configuration.XML11) {
-            if ("JS".equals(getOptions().target)) {
-                config.getLogger().warning("For target=JS, the SEF file will use XML 1.0, which disallows control characters");
-            } else {
-                props.setProperty(OutputKeys.VERSION, "1.1");
-            }
+            props.setProperty(OutputKeys.VERSION, "1.1");
         }
         try {
             receiver = config.getSerializerFactory().getReceiver(out, props);
@@ -238,17 +234,6 @@ public class ExpressionPresenter {
     }
 
     /**
-     * Ask whether the package can be deployed to a different location, with a different base URI
-     *
-     * @return if true then static-base-uri() represents the deployed location of the package,
-     * rather than its compile time location
-     */
-
-    public boolean isRelocatable() {
-        return relocatable;
-    }
-
-    /**
      * Say whether the package can be deployed to a different location, with a different base URI
      *
      * @param relocatable if true then static-base-uri() represents the deployed location of the package,
@@ -256,7 +241,7 @@ public class ExpressionPresenter {
      */
 
     public void setRelocatable(boolean relocatable) {
-        this.relocatable = relocatable;
+        this.options.relocatable = relocatable;
     }
 
 
@@ -333,7 +318,7 @@ public class ExpressionPresenter {
     }
 
     private String truncatedModuleName(String module) {
-        if (relocatable) {
+        if (options.relocatable) {
             // If not exporting the base URI, cut the filename used for diagnostic location of errors down to its last component
             String[] parts = module.split("/");
             for (int p = parts.length - 1; p >= 0; p--) {
@@ -347,7 +332,7 @@ public class ExpressionPresenter {
 
     public void emitRetainedStaticContext(RetainedStaticContext sc, RetainedStaticContext parentSC) {
         try {
-            if (!((ExportOptions) options).suppressStaticContext && !relocatable && sc.getStaticBaseUri() != null && (parentSC == null || !sc.getStaticBaseUri().equals(parentSC.getStaticBaseUri()))) {
+            if (!options.suppressStaticContext && !options.relocatable && sc.getStaticBaseUri() != null && (parentSC == null || !sc.getStaticBaseUri().equals(parentSC.getStaticBaseUri()))) {
                 emitAttribute("baseUri", sc.getStaticBaseUriString());
             }
             if (!sc.getDefaultCollationName().equals(NamespaceConstant.CODEPOINT_COLLATION_URI) &&
@@ -362,7 +347,7 @@ public class ExpressionPresenter {
             if (!NamespaceConstant.FN.equals(defaultFnNs)) {
                 emitAttribute("defaultFunctionNS", defaultFnNs);
             }
-            if (!((ExportOptions)options).suppressStaticContext && (parentSC == null || !sc.declaresSameNamespaces(parentSC))) {
+            if (!options.suppressStaticContext && (parentSC == null || !sc.declaresSameNamespaces(parentSC))) {
                 UnicodeBuilder ub = new UnicodeBuilder();
                 for (Iterator<String> iter = sc.iteratePrefixes(); iter.hasNext(); ) {
                     String p = iter.next();
@@ -644,12 +629,12 @@ public class ExpressionPresenter {
     public static class ExportOptions {
         public String target = "";
         public int targetVersion = 0;
+        public boolean relocatable = false;
         public StylesheetPackage rootPackage;
         public Map<Component, Integer> componentMap;
         public Map<StylesheetPackage, Integer> packageMap;
         public boolean explaining;
         public boolean suppressStaticContext;
-        public boolean addStaticType;
     }
 }
 

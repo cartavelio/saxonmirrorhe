@@ -507,6 +507,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
             getTargetFunction().exportAttributes(out);
             if (localPart.equals("concat")
                     && "JS".equals(out.getOptions().target)
+                    && out.getOptions().targetVersion == 2
                     && getArity() == 1
                     && getArg(0) instanceof Block) {
                 // We've reduced concat to a single sequence-valued argument; now we need to spread it out to multiple

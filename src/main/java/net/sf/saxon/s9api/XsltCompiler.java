@@ -350,21 +350,31 @@ public class XsltCompiler {
     /**
      * Set the target edition under which the stylesheet will be executed.
      *
-     * @param edition the Saxon edition for the run-time environment. One of "EE", "PE", "HE", or "JS".
+     * @param edition the Saxon edition for the run-time environment. One of "EE", "PE", "HE",
+     *                or "JS", "JS2", or "JS3".
      * @since 9.7.0.5. Experimental and subject to change.
      */
 
     public void setTargetEdition(String edition) {
-        if (!("EE".equals(edition) || "PE".equals(edition) || "HE".equals(edition) || "JS".equals(edition))) {
-            throw new IllegalArgumentException("Unknown Saxon edition " + edition);
+        switch (edition) {
+            case "EE":
+            case "PE":
+            case "HE":
+            case "JS":
+            case "JS2":
+            case "JS3":
+                compilerInfo.setTargetEdition(edition);
+                return;
+            default:
+                throw new IllegalArgumentException("Unknown Saxon edition " + edition);
         }
-        compilerInfo.setTargetEdition(edition);
     }
 
     /**
      * Get the target edition under which the stylesheet will be executed.
      *
-     * @return the Saxon edition for the run-time environment. One of "EE", "PE", "HE", or "JS".
+     * @return the Saxon edition for the run-time environment. One of "EE", "PE", "HE",
+     * or "JS", "JS2", "JS3"
      * @since 9.7.0.5. Experimental and subject to change.
      */
 

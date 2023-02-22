@@ -116,7 +116,7 @@ public class Transform {
         options.addRecognizedOption("explain", CommandLineOptions.TYPE_FILENAME,
                                     "Display compiled expression tree and optimization decisions in human-readable form");
         options.addRecognizedOption("export", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
-                                    "Display compiled expression tree and optimization decisions for exportation");
+                                    "Export compiled stylesheet to specified SEF file");
         options.addRecognizedOption("ext", CommandLineOptions.TYPE_BOOLEAN,
                                     "Allow calls to Java extension functions and xsl:result-document");
         options.addRecognizedOption("im", CommandLineOptions.TYPE_QNAME | CommandLineOptions.VALUE_REQUIRED,
@@ -181,7 +181,7 @@ public class Transform {
                                     "Display version and timing information, and names of output files");
         options.addRecognizedOption("target", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
                                     "Target Saxon edition for execution via -export");
-        options.setPermittedValues("target", new String[]{"EE", "PE", "HE", "JS"}, null);
+        options.setPermittedValues("target", new String[]{"EE", "PE", "HE", "JS", "JS2", "JS3"}, null);
         options.addRecognizedOption("T", CommandLineOptions.TYPE_CLASSNAME,
                                     "Use named TraceListener class, or standard TraceListener");
         //#if CSHARP==false
