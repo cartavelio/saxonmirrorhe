@@ -1144,10 +1144,10 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
                 exp = exp.getParentExpression();
                 limit++;
             } else {
-                return exp.location;
+                break;
             }
         }
-        return exp.location;
+        return exp.location == null ? Loc.NONE : exp.location;
     }
 
     /**
