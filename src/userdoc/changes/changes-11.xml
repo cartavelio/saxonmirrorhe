@@ -362,11 +362,16 @@
         <h2>Changes to Extension Functions</h2>
         
         <p>Many of the extension functions in the <code>saxon</code> namespace have been re-implemented
-        as <i>integrated extension functions</i> where they were previously <i>reflexive extension functions</i>.
-        The only noticeable effect should be that they now enforce the specification more strictly. In
+        as <i>integrated extension functions</i> where they were previously <i>reflexive extension functions</i>.</p>
+        
+        <p>The main impact is that these functions now enforce the specification more strictly. In
         particular, the function name must be spelled as specified; it is no longer possible to use
         alternative spellings such as <code>saxon:printStack</code> for <code>saxon:print-stack</code>,
-        or <code>saxon:stringToBase64Binary</code> for <code>saxon:string-to-base64Binary</code>.</p>
+        or <code>saxon:stringToBase64Binary</code> for <code>saxon:string-to-base64Binary</code>. The functions
+        may also be stricter about what types of arguments they accept.</p>
+        
+        <p>Another effect of the change is that calls on these functions can no longer be customized by use of
+            a user-written <code>JavaExtensionFunctionFactory</code>.</p>
         
         <p class="javaonly">In SaxonJ, the functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> now accept
         any encoding supported by the Java VM.</p>
