@@ -1,7 +1,7 @@
 <article id="help-system" title="Using this Documentation">
     <h1>Using this Documentation</h1>
-    <p>This documentation system runs as a single-page web application, exploiting XSLT 3.0 running in the
-        browser. This section provides extra detail on how to get the most out of the documentation,
+    <p>This documentation system runs as a single-page web application, implemented using Saxon-JS 
+        (XSLT 3.0 running in the browser). This section provides extra detail on how to get the most out of the documentation,
         along with some extra details on how Saxon-JS is used to run the application.</p>
     <nav>
         <ul/>
@@ -44,32 +44,30 @@
     </section>
     <section id="technical" title="Technical Details">
         <h1>Technical Details</h1>
-        <p>This section provides information on the design of this application. The app has been
-            updated to run with Saxon-JS rather than Saxon-CE. The stylesheets have been
-            updated for use with Saxon-JS: to use XSLT 3.0, and new interactive XSLT extensions
-            available with Saxon-JS.</p>
-        <!--<p>This section provides information on the design of this application. The major design
-            considerations are outlined below:</p>
-        <ul>
-            <li>Separation of visual style from functionality<ul>
-                    <li>CSS = Visual Style</li>
-                    <li>HTML = Visual Tree</li>
-                    <li>XSLT = Functionality</li>
-                </ul></li>
-
-            <li>'Thin Server' design - no build pipeline</li>
-            <li>Side-effect free transforms</li>
-            <li>SEO and Accessibility - Restricted static-HTML transformer</li>
-            <li>Scalability - Lazy loading &amp; processing</li>
-            <li>Browser history &amp; bookmarkability - simulated client/server split</li>
-            <li>Three schemas supported<ul>
-                    <li>HTML5 Article Element Schema</li>
-                    <li>Function Specification Schema</li>
-                    <li>JavaDoc Data Schema</li>
-                </ul></li>
-            <li>Maintainability - Predominantly coded in XSLT 2.0</li>
-            <li>State-management and non-standard browser features - Used 'Raw' JS</li>
-        </ul>-->
+        <p>This section provides information on the design of this application, which is implemented
+            using XSLT 3.0 running in the browser under Saxon-JS, plus a very small amount of 
+            Javascript (mainly to do highlighting of search terms). </p>
+        
+        <p>The underlying documents are maintained largely in XHTML5 (plus a few custom extensions) throughout
+        their lifecycle. The workflow is as follows:</p>
+        
+        <ol>
+            <li>At publishing time, there is a complex set of XSLT stylesheets to assemble
+            the XHTML5 text. Much of the narrative text is authored in XHTML5, but some parts
+            (notably the specifications of function libraries, the definitions of configuration
+            properties, and the Java and C# API documentation)
+            are assembled from more structured XML sources. The publishing-time workflow is
+            controlled using a Gradle build script. The workflow also includes validation, for example
+            to check the integrity of links.</li>
+            <li>At this stage, two versions of the text are created, one for delivery as static HTML
+            pages, one for interactive delivery in the browser.</li>
+            <li>The responsibility for formatting the text in the browser, and for handling
+            interaction, is split between the browser and the Saxon-JS XSLT stylesheets.
+            Routine text rendition of static text is done using standard CSS; XSLT is used to handle
+            more complex interactions such as maintaining of breadcrumbs, cross-section
+            linking, and filtering of the change history section by topic and version history.</li>
+        </ol>
+ 
         <p>For details on the resource files that generate this application, see the next section:</p>
         <nav>
             <ul/>

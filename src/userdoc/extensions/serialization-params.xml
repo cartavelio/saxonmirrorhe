@@ -290,9 +290,8 @@
                 <p>For this to work, the code must be compiled with tracing enabled. This can be
                     achieved by setting the option <code>config.setCompileWithTracing(true)</code>
                     on the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>
-                    object, or equivalently by setting the property
-                        <code>Feature.COMPILE_WITH_TRACING.name</code> on the JAXP
-                        <code>TransformerFactory</code>. Note that this compile-time option imposes
+                    object, or equivalently by setting the configuration property <a class="feature" href="COMPILE_WITH_TRACING"/>. 
+                    Note that this compile-time option imposes
                     a substantial run-time overhead, even if tracing is not switched on at run-time
                     by providing a <code>TraceListener</code>.</p>
             </desc>

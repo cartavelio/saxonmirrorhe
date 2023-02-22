@@ -76,28 +76,7 @@
         </p>
       </td>
     </tr>
-    <tr>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p> </p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>
-          <a class="bodylink" href="dotnetextensions">Reflexive extension functions (.NET)</a>
-        </p>
-      </td>
-    </tr>
+ 
     <tr>
       <td>
         <p>§</p>
@@ -307,6 +286,7 @@
     </tr>
   </table>
   <section id="java-to-xdm-conversion" title="Converting Java values to XDM values">
+    <div class="javaonly">
     <h1>Converting Java values to XDM values</h1>
     
     <p>This section describes the general rules applied by Saxon for converting Java values to
@@ -544,7 +524,7 @@
       Java object". The required type for a wrapped object of Java class <code>java.util.Map</code>
       is written using the QName <code>jt:java.util.Map</code>, where the namespace prefix
       <code>jt</code> represents the namespace <code>http://saxon.sf.net/java-type</code>.</p>
-    
+    </div>
     
   </section>
   <section id="integratedfunctions" title="Integrated extension functions">
@@ -552,10 +532,11 @@
 
 
     <p>There are two ways of writing extension functions. The traditional way is to map the name of
-      the function to a <dfn>Java</dfn> or <dfn>.NET</dfn> method: specifically, the namespace URI
-      of the function name maps to the Java or .NET class name, and the local part of the function
+      the function to a <dfn>Java</dfn> or <dfn>C#</dfn> method: specifically, the namespace URI
+      of the function name maps to the Java or C# class name, and the local part of the function
       name maps to the Java or .NET method name. These are known as <i>reflexive</i> extension
-      functions, and are described in later pages (use of these requires Saxon-PE or Saxon-EE).</p>
+      functions, and are described in later pages (use of these requires Saxon-PE or Saxon-EE,
+      and they are not available under Saxon-CS).</p>
 
     <p>Since Saxon 9.2, this technique has been supplemented by a new mechanism, referred to as
         <i>integrated extension functions</i> (available in all Saxon editions). </p>
@@ -570,7 +551,7 @@
           result.</p>
       </li>
       <li>
-        <p>There is no ambiguity about which of several candidate Java or .NET methods is
+        <p>There is no ambiguity about which of several candidate Java or C# methods is
           invoked.</p>
       </li>
       <li>
@@ -578,7 +559,7 @@
           classes.</p>
       </li>
       <li>
-        <p>All conversions from XPath values to Java or .NET values are entirely under user
+        <p>All conversions from XPath values to Java or C# values are entirely under user
           control.</p>
       </li>
       <li>
@@ -598,9 +579,10 @@
       </li>
     </ul>
 
-    <p>There are two ways of writing integrated extension functions: the simple API and the full
-      API. Both interfaces are now available for both the Java and .NET platforms (the simple API
-      for .NET is available since 9.9.1). The resulting combinations are described on the following
+    <p>There are several ways of writing integrated extension functions, both in Java and C#: 
+      simple APIs that make it very easy to implement a function, and richer APIs that allow
+      more capability, especially the ability to use the static and dynamic XPath context.
+      The resulting combinations are described on the following
       pages.</p>
 
     <nav>
@@ -608,6 +590,7 @@
     </nav>
 
     <section id="ext-simple-J" title="Java extension functions: simple interface">
+      <div class="javaonly">
       <h1>Java extension functions: simple interface</h1>
 
 
@@ -660,10 +643,11 @@
         access to static or dynamic context information, and (b) that it does not support pipelined
         evaluation of the arguments or result. To avoid these restrictions, use the <a
           class="bodylink" href="../ext-full-J">full interface</a> described on the next page.</p>
-
+      </div>
     </section>
 
     <section id="ext-full-J" title="Java extension functions: full interface">
+      <div class="javaonly">
       <h1>Java extension functions: full interface</h1>
 
 
@@ -970,76 +954,43 @@
           <code>XQConnection</code> by casting it to the Saxon implementation class
           (<code>SaxonXQDataSource</code> or <code>SaxonXQConnection</code>) and calling
           <code>getConfiguration()</code>.</p>
-
+      </div>
     </section>
     
-    <section id="ext-simple-N" title=".NET extension functions: simple interface">
-      <h1>.NET extension functions: simple interface</h1>
+    <section id="ext-simple-N" title="C# extension functions: simple interface">
+      <div class="csonly">
+      <h1>C# extension functions: simple interface</h1>
       
+      <p>A simple extension function can be registered in Saxon-CS by calling the method</p>
       
+      <p><code>Processor.RegisterExtensionFunction(QName, arity, Func&lt;XdmValue[], XdmValue&gt;)</code></p>
       
-      <p>The simple API for integrated .NET extension functions is available via the .NET class
-        <a class="javalink" href="Saxon.Api.ExtensionFunction">ExtensionFunction</a>
-        defined in the <code>Saxon.Api</code> module. Here is a simple example that defines an extension function
-        to calculate square roots, registers this extension function with the 
-        <a class="javalink" href="Saxon.Api.Processor">Processor</a>, and then invokes it from an XPath expression:</p>
+      <p>The first two arguments are the name and arity of the function. The third argument is the
+      implementation of the function, which can conveniently be supplied as a simple lambda expression.
+      For example, a square-root function might be:</p>
       
-      <samp><![CDATA[public class SqrtSimple : ExtensionFunction {
-    
-    public XdmValue Call(XdmValue[] arguments)
-    {
-        if (!(arguments[0] is XdmEmptySequence))
-        {
-            XdmAtomicValue arg = (XdmAtomicValue)arguments[0].ItemAt(0);
-            double val = (double)arg.Value;
-            double sqrt = System.Math.Sqrt(val);
-            return new XdmAtomicValue(sqrt);
-        }
-        else
-        {
-            return XdmValue.MakeValue((double)0);
-        }
-    }
-
-    public XdmSequenceType[] GetArgumentTypes()
-    {
-        return new XdmSequenceType[]{
-            new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?')
-        };
-    }
-
-    public QName GetName()
-    {
-        return new QName("http://math.com/", "sqrtSimple");
-    }
-
-    public XdmSequenceType GetResultType()
-    {
-        return new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), ' ');
-    }
-}
-            
-Processor proc = new Processor();
-proc.RegisterExtensionFunction(new SqrtSimple());
-XPathCompiler xpc = proc.NewXPathCompiler();
-xpc.DeclareNamespace("mf", "http://math.com/");
-XdmItem result = xpc.EvaluateSingle("mf:sqrtSimple(2)", null);
-Console.WriteLine("Square root of 2 is " + result);]]></samp>
+      <p><code>proc.RegisterExtensionFunction(new QName("urn:math", "sqrt"), 1, 
+        val => new XdmAtomicValue(Math.sqrt(val.GetDoubleValue()))</code></p>
       
+      <p>This can then be invoked from XPath as <code>Q{urn:math}sqrt(2)</code>.</p>
       
-      <p>Full details of the interface are defined in the <a class="apilink" href="/dotnetdoc">.NET API documentation</a>.</p>
+      <p>Note that because nothing is known about the expected types of the function arguments or result,
+        any conversions needed are entirely the responsibility of the function implementation.
+      </p>
       
-      <p>The main restrictions of the simple interface are (a) that the extension function has no
-        access to static or dynamic context information, and (b) that it does not support pipelined
-        evaluation of the arguments or result. To avoid these restrictions, use the <a
+     
+      <p>The main restrictions of the simple interface are that the extension function has no
+        access to static or dynamic context information. To avoid these restrictions, use the <a
           class="bodylink" href="../ext-fns-N">full interface</a> described on the next page.</p>
-      
+      </div>
     </section>
 
-    <section id="ext-fns-N" title=".NET extension functions: full interface">
-      <h1>.NET extension functions: full interface</h1>
+    <section id="ext-fns-N" title="C# extension functions: full interface">
+      <div class="csonly">
+      <h1>C# extension functions: full interface</h1>
 
-
+   <p>TODO: there's actually an intermediate interface using class <code>ExtensionFunction</code> but I'm not
+   documenting it because I don't know if we want to retain it...</p>
 
       <p>The full API for integrated .NET extension functions is available via the .NET classes
         <a class="javalink" href="Saxon.Api.ExtensionFunctionDefinition">ExtensionFunctionDefinition</a> and 
@@ -1107,10 +1058,11 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
 
 
       <p>Full details of the interface are defined in the <a class="apilink" href="/dotnetdoc">.NET API documentation</a>.</p>
-
+      </div>
     </section>
   </section>
   <section id="functions" title="Writing reflexive extension functions in Java">
+    <div class="javaonly">
     <h1>Writing reflexive extension functions in Java</h1>
 
     <aside>This section applies to Saxon-PE and Saxon-EE only</aside>
@@ -1129,20 +1081,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
             <code>java.io.File.exists</code>).</p>
       </li>
     </ul>
-    <aside>Java extension functions can also be used when you are running on the .NET platform,
-      provided the class implementing the function is a standard class in the OpenJDK class library
-      (which covers nearly all the classes defined in the JDK). In other cases, you should compile
-      the Java code into a .NET assembly using the IKVMC compiler, in which case it behaves in the
-      same way as an extension function written in any other .NET language and compiled into CIL:
-      see <a class="bodylink" href="../dotnetextensions">Writing extension functions for .NET</a>
-    </aside>
-
-
-    <p>There are a number of extension functions supplied with the Saxon product: for details, see
-        <a class="bodylink" href="/extensions">Extensions</a>. The source code of these methods,
-      which in most cases is extremely simple, can be used as an example for writing other user
-      extension functions. It is found in class <a class="javalink" href="com.saxonica.functions.extfn">com.saxonica.functions.extfn</a>.</p>
-
+ 
     <p>
       <strong>The command line option <code>-TJ</code> is useful for <dfn>debugging</dfn> the loading of Java
         extensions. It gives detailed information about the methods that are examined for a possible
@@ -1170,11 +1109,8 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       example <code>xmlns:date="http://www.jclark.com/xt/java/java.util.Date"</code>). The part of
       the URI before the final "/" is immaterial. The format
         <code>xmlns:date="java.util.Date"</code> is also supported. To permit this extended syntax
-      for namespaces, you need to set a property on the <a class="javalink"
-        href="net.sf.saxon.Configuration">Configuration</a>:
-        <code>config.setConfigurationProperty(Feature.ALLOW_OLD_JAVA_URI_FORMAT, true)</code>.
-      The flag can also be set in the <a class="bodylink"
-        href="/configuration/configuration-file">configuration file</a>.</aside>
+      for namespaces, you need to set the configuration property 
+      <a class="feature" href="ALLOW_OLD_JAVA_URI_FORMAT"/>.</aside>
 
     <p>The Saxon namespace URI <code>http://saxon.sf.net/</code> is recognised as a special case. In
       most cases it causes the function to be loaded from the class
@@ -1240,8 +1176,9 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
     <nav>
       <ul/>
     </nav>
-
+    </div>
     <section id="choosing-overload" title="Choosing among overloaded methods">
+      <div class="javaonly">
       <h1>Choosing among overloaded methods</h1>
 
 
@@ -1529,9 +1466,11 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       <p>The fact that a particular method is chosen as the target does not give a guarantee that
         conversion of the arguments will succeed at run-time. This is particularly true with methods
         that expect a node in an external object model such as DOM or XOM.</p>
+      </div>
     </section>
 
     <section id="staticmethods" title="Calling Static Methods in a Java Class">
+      <div class="javaonly">
       <h1>Calling Static Methods in a Java Class</h1>
 
 
@@ -1586,9 +1525,11 @@ public static int lineNumber(XPathContext c) {
       <samp><![CDATA[<line xmlns:nd="java:com.example.code.NodeData">
     { nd:line-number() }
 </line>]]></samp>
+      </div>
     </section>
 
     <section id="constructors" title="Calling Java Constructors">
+      <div class="javaonly">
       <h1>Calling Java Constructors</h1>
 
 
@@ -1618,9 +1559,11 @@ public static int lineNumber(XPathContext c) {
       <p>In the XPath type hierarchy, external object types are a fourth kind of item, alongside
         nodes, atomic values, and functions. (In earlier Saxon releases, external object types were
         considered subtypes of <code>xs:anyAtomicType</code>, but this is no longer the case.)</p>
+      </div>
     </section>
 
     <section id="instance-methods" title="Calling Java Instance-Level Methods">
+      <div class="javaonly">
       <h1>Calling Java Instance-Level Methods</h1>
       
       <p>There are two ways of calling <strong>instance-level methods</strong>
@@ -1719,9 +1662,11 @@ public static int lineNumber(XPathContext c) {
         example) is implemented internally as an instance of the class defined in the namespace used
         to invoke the method. Using this mechanism successfully therefore requires some knowledge of
         the Saxon internals.</p>
+      </div>
     </section>
   
   <section id="converting-args" title="Converting Arguments to Java Extension Functions">
+    <div class="javaonly">
     <h1>Converting Arguments to Java Extension Functions</h1>
 
 
@@ -1749,8 +1694,9 @@ public static int lineNumber(XPathContext c) {
     <nav>
       <ul/>
     </nav>
-
+    </div>
     <section id="converting-arguments" title="Converting Method Arguments - General Rules">
+      <div class="javaonly">
       <h1>Converting Method Arguments - General Rules</h1>
 
 
@@ -1933,9 +1879,11 @@ public static int lineNumber(XPathContext c) {
         </ul>
       </li>
       </ol>
+      </div>
     </section>
 
     <section id="converting-atomic" title="Converting Atomic Values">
+      <div class="javaonly">
       <h1>Converting Atomic Values</h1>
 
 
@@ -2234,9 +2182,11 @@ public static int lineNumber(XPathContext c) {
           (<code>Integer</code> or <code>Boolean</code>), except that with the boxed types, an empty
         sequence can be supplied in the function call and is translated to a Java null value as the
         actual argument.</p>
+        </div>
     </section>
 
     <section id="converting-node" title="Converting Nodes">
+      <div class="javaonly">
       <h1>Converting Nodes</h1>
 
 
@@ -2266,9 +2216,11 @@ public static int lineNumber(XPathContext c) {
         going to have odd behaviour in edge cases. The only real reason for using it is to interface
         existing code that already uses the DOM. In general it is better to write extension functions
         to use the <code>NodeInfo</code> interface.</p>
+      </div>
     </section>
 
     <section id="converting-wrapped-java" title="Converting Wrapped Java Objects">
+      <div class="javaonly">
       <h1>Converting Wrapped Java Objects</h1>
 
 
@@ -2338,9 +2290,11 @@ public static int lineNumber(XPathContext c) {
         the same level in the type hierarchy as nodes, atomic values, and function items. Atomizing
         a wrapped Java object produces an instance of <code>xs:string</code> containing the
         result of the <code>toString()</code> method applied to the underlying object.</p>
+      </div>
     </section>
   </section>
     <section id="function-result" title="Converting the Result of a Java Extension Function">
+      <div class="javaonly">
       <h1>Converting the Result of a Java Extension Function</h1>
       
       <p>The result of a Java extension function is converted to an XDM value (a value suitable for use
@@ -2387,9 +2341,10 @@ public static int lineNumber(XPathContext c) {
         </li>
       </ul>
       
-      
+      </div>
     </section>
   <section id="exceptions" title="Handling exceptions in reflexive extension functions">
+    <div class="javaonly">
     <h1>Handling exceptions in reflexive extension functions</h1>
 
 
@@ -2421,774 +2376,22 @@ public static int lineNumber(XPathContext c) {
     <p>Note that this applies to cases where the extension function is successfully called, and the
       called function throws an exception. Failures to invoke the extension function are mapped to
       Saxon error codes and the original Java exception is not directly available.</p>
+    </div>
   </section>
   </section>
-  <section id="dotnetextensions" title="Writing reflexive extension functions for .NET">
-    <h1>Writing reflexive extension functions for .NET</h1>
-
-    <aside>Reflexive extension functions involve dynamic loading of assemblies, which can be tricky
-      to get working. Also, they aren't supported under Saxon-HE. Consider using <a class="bodylink"
-        href="../integratedfunctions">integrated extension functions</a> instead.</aside>
-
-    <p>On the .NET platform extension functions may be implemented in any .NET language (the
-      examples here assume C#).</p>
-    <aside>Queries and stylesheets running on the .NET platform may also call Java extension
-      functions, provided the Java class is part of the standard library implemented in the OpenJDK
-      DLL, or in Saxon itself. For calling conventions, see <a class="bodylink" href="../functions"
-        >Writing extension functions in Java</a>. If you want to write your own extensions in Java,
-      you will need to compile them to .NET assemblies using IKVMC.</aside>
-
-    <p>An extension function is invoked using a name such as <code>prefix:localname()</code>. The
-      prefix must be the prefix associated with a namespace declaration that is in scope. The
-      namespace URI is used to identify a .NET class, and the local name is used to identify a
-      method, property, or constructor within the class.</p>
-
-    <p>
-      <strong>The command line option <code>-TJ</code> is useful for debugging the loading of .NET extensions. It
-        gives detailed information about the methods that are examined for a possible
-        match.</strong>
-    </p>
-
-    <p>The basic form of the namespace URI is <code>clitype:</code> followed by the fully-qualified type name
-      (for example <code>xmlns:env="clitype:System.Environment"</code>). This form works for system
-      classes and classes in a loaded <dfn>assembly</dfn>. If an assembly needs to be loaded, extra
-      information can be given in the form of URI query parameters. For example
-        <code>xmlns:env="clitype:Acme.Payroll.Employee?asm=payroll;ver=4.12.0.0"</code>.</p>
-
-    <p>The parameters that are recognized are:</p>
-    <table>
-      <tr>
-        <td>
-          <p><strong>Keyword</strong></p>
-        </td>
-        <td>
-          <p><strong>Value</strong></p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>asm</p>
-        </td>
-        <td>
-          <p>The simple name of the assembly</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>ver</p>
-        </td>
-        <td>
-          <p>The version number, up to four integers separated by periods</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>loc</p>
-        </td>
-        <td>
-          <p>The culture (locale), for example "en-US"</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>sn</p>
-        </td>
-        <td>
-          <p>The public key token of the assembly's strong name, as 16 hex digits</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>from</p>
-        </td>
-        <td>
-          <p>The location of the assembly, as a URI</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>partialname</p>
-        </td>
-        <td>
-          <p>The partial name of the assembly (as supplied to
-              <code>Assembly.LoadWithPartialName()</code>)</p>
-        </td>
-      </tr>
-    </table>
-
-    <p>If the <code>from</code> keyword is present, the other parameters are ignored. The value of
-        <code>from</code> must be the URI of the DLL to be loaded: if it is relative, it is relative
-      to the base URI of the expression containing the call to the extension function (regardless of
-      where the namespace is actually declared).</p>
-
-    <p>If the <code>partialname</code> keyword is present, the assembly is loaded (if possible)
-      using <code>Assembly.LoadWithPartialName()</code> and the other parameters are ignored.</p>
-
-    <p>If the assembly is a library DLL in the global assembly cache, use the <code>gacutil
-        /l</code> command to list the assemblies present in the GAC, and to extract the required
-      version, culture, and strong name attributes. For example, suppose you want to call a static
-      method <code>disappear()</code> in class <code>Conjurer</code> in namespace
-        <code>Magic.Circle</code>, and this class is contained in an assembly <code>Magic</code>
-      listed as:</p>
-
-    <p>
-      <code>Magic, Version=7.2.2200.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a4b,
-        Custom=null</code>
-    </p>
-
-    <p>Then the URI you would use to identify this class is
-        <code>clitype:Magic.Circle.Conjurer?asm=Magic;ver=7.2.2200.0;sn=b03f5f7f11d50a4b</code>, and
-      an actual call of the function might take the form:</p>
-    <samp><![CDATA[<xsl:value-of select="m:disappear()"
-     xmlns:m="clitype:Magic.Circle.Conjurer?asm=Magic;ver=7.2.2200.0;sn=b03f5f7f11d50a4b"/> 
-]]></samp>
-    <h2 class="subtitle">Tips for Dynamic Loading in .NET</h2>
-
-    <p>Here are some hints and tips that might help you to get dynamic loading working under
-      .NET.</p>
-    
-    <p>First, do you actually need to use dynamic loading? An easier approach is to link the code
-      containing the extension functions into your C# or VB.NET code and pass Saxon a reference to
-      the containing type. This can be done with:</p>
-    
-    <samp><![CDATA[Processor proc = new Processor(true);
-proc.BindExtensions("http://example.com", typeof(Extension.Functions));
-]]></samp>
-    
-    <p>If you do this, then extension functions using the namespace URI
-      <code>"http://example.com"</code> will be found in the class/type
-      <code>Extension.Functions</code> without any need for dynamic loading.</p>
-
-    <p><strong>The command line option <code>-TJ</code> is useful for <dfn>debugging</dfn> the loading of .NET
-        extensions. It gives detailed information about the methods that are examined for a possible
-        match. The equivalent in the API is to set the Processor property
-          <code>"http://saxon.sf.net/feature/trace-external-functions"</code></strong>.</p>
-
-    <p>First decide whether you want to load the assembly (DLL) containing the extension functions
-      from local filestore or from the <dfn>Global Assembly Cache</dfn>.</p>
-
-    <p>If you want to load it from the <dfn>GAC</dfn> you must compile the assembly with a
-        <dfn>strong name</dfn>, and deploy it to the GAC. For advice on doing this, see <a
-        href="http://support.microsoft.com/kb/324168" class="bodylink"
-        >http://support.microsoft.com/kb/324168</a>. (In .NET framework 2.0 there was a handy
-      Control Panel tool for this, but it is no longer available for security reasons.)</p>
-
-    <p>For local loading, the following techniques work:</p>
-    <ul>
-      <li>
-        <p>If the query or transformation is controlled from a user-written application in C# or
-          another .NET language, include the extension function implementation in the same assembly
-          as the controlling application, or in another assembly which is statically referenced from
-          the controlling application. In this case it is only necessary to name the assembly, for
-          example <code>&lt;e att="{my:ext()}"
-            xmlns:my="clitype:Namespace.ClassName?asm=Samples"/&gt;</code>.
-        </p>
-      </li>
-      <li>
-        <p>Another approach is to copy the assembly into the same directory as the controlling
-          application or, if using the Saxon <code>Query</code> or <code>Transform</code> command
-          from the command line, the directory containing the Saxon <code>Query.exe</code> and
-            <code>Transform.exe</code> executables. Again in this case it should simply be necessary
-          to give the assembly name as above.</p>
-      </li>
-      <li>
-        <p>As an alternative, an assembly held in local filestore can be loaded by reference to the
-          file, for example
-            <code>xmlns:my="clitype:Namespace.ClassName?from=file:///c:/lib/Samples.dll"</code>. The
-          URI can be given as an absolute URI, or as a relative URI which is interpreted relative to
-          the base URI of the expression containing the function call.</p>
-      </li>
-    </ul>
-
-    <p>For production running it is probably more appropriate to place the assembly holding
-      extension functions in the global assembly cache. It can then generally be referenced in one
-      of two ways:</p>
-    <ul>
-      <li>
-        <p>By partial name, for example
-            <code>xmlns:my="clitype:Namespace.ClassName?partialname=Samples"</code>
-        </p>
-      </li>
-      <li>
-        <p>By fully-qualified name, for example
-            <code>xmlns:my="clitype:Namespace.ClassName?asm=Samples;ver=3.0.0.1;loc=neutral;sn=e1f2a3b4e1f2a3b4"</code>
-        </p>
-      </li>
-    </ul>
-
-    <p>The following example shows how to call system methods in the .NET framework:</p>
-    <samp><![CDATA[<out xmlns:Environment="clitype:System.Environment" 
-     xmlns:OS="clitype:System.OperatingSystem">
-    <xsl:variable name="os" select="Environment:OSVersion()"/>
-    <v platform="{OS:Platform($os)}" version="{OS:Version($os)}"/>
-</out>
-]]></samp>
-    <h2 class="subtitle">Identifying and Calling Specific Methods</h2>
-
-    <p>The rest of this section considers how a .NET method, property, or constructor is identified.
-      This decision (called binding) is always made at the time the XPath expression is
-      compiled.</p>
-
-    <p>There are three cases to consider: static methods, constructors, and instance-level methods.
-      In addition, a public property in a class is treated as if it were a zero-argument method, so
-      static properties can be accessed in the same way as static methods, and instance-level
-      properties in the same way as instance-level methods. (Note that the property name is used
-      directly: it is not prefixed by "get".)</p>
-    <nav>
-      <ul/>
-    </nav>
-    
-    <p>In XSLT, the system function <code>function-available(String name)</code> returns true if
-      there appears to be a method available with the right name. The function also has an optional
-      second argument to test whether there is a method with the appropriate number of arguments.
-      However, it is not possible to test whether the arguments are of appropriate types. If the
-      function name is "new" it returns true so long as the class is not an abstract class or
-      interface, and so long as it has at least one constructor.</p>
-
-    <section id="staticmethods.net" title="Calling Static Methods in a .NET Class">
-      <h1>Calling Static Methods in a .NET Class</h1>
-
-
-      <p><strong>Static methods</strong> can be called directly. The localname of the function must
-        match the name of a public static method in this class. The names match if they contain the
-        same characters, excluding hyphens and forcing any character that follows a hyphen to
-        upper-case. For example the XPath function call <code>To-string()</code> matches the .NET
-        method <code>ToString()</code>; but the function call can also be written as
-          <code>ToString()</code> if you prefer.</p>
-
-      <p>If there are several methods in the class that match the localname, and that have the
-        correct number of arguments, then the system attempts to find the one that is the best fit
-        to the types of the supplied arguments: for example if the call is <code>f(1,2)</code> then
-        a method with two <code>int</code> arguments will be preferred to one with two
-          <code>float</code> arguments. The rules for deciding between methods are quite complex.
-        Essentially, for each candidate method, Saxon calculates the "distance" between the types of
-        the supplied arguments and the .NET class of the corresponding argument in the method's
-        signature, using a set of tables. For example, the distance between the XPath
-        data type <code>xs:integer</code> and the .NET type <code>long</code> is very small, while
-        the distance between an XPath <code>xs:integer</code> and a .NET <code>bool</code> is much
-        larger. If there is one candidate method where the distances of all arguments are
-        less-than-or-equal-to the distances computed for other candidate methods, and the distance
-        of at least one argument is smaller, then that method is chosen.</p>
-
-      <p>If there are several methods with the same name and the correct number of arguments, but
-        none is preferable to the others under these rules, an error is reported: the message
-        indicates that there is more than one method that matches the function call.</p>
-
-      <p>This binding is carried out statically, using the static types of the supplied arguments,
-        not the dynamic types obtained when the arguments are evaluated. If there is insufficient
-        static type information to distinguish the candidate methods, an error is reported. You can
-        supply additional type information using the <code>treat as</code> expression, or by
-        casting. Often it is enough simply to declare the types of the variables used as arguments
-        to the function call. <i>Note however that if the argument can be evaluated at compile time, 
-        then the type of the actual value will be used in preference to the declared type. 
-        This is particularly relevant if the argument evaluates to an empty sequence. 
-        If you need to invoke an overloaded method in this way, use an argument expression 
-        that cannot be evaluated at compile time.</i></p>
-
-      <p>For example (in XSLT):</p>
-      <samp><![CDATA[<xsl:value-of select="math:Sqrt($arg)" xmlns:math="clitype:System.Math"/>
-]]></samp>
-
-      <p>This will invoke the static method <code>System.Math#Sqrt()</code>, applying it to the
-        value of the variable <code>$arg</code>, and copying the value of the square root of
-          <code>$arg</code> to the result tree. The value of $arg must be convertible to a double
-        under the same rules as for a native XPath function call.</p>
-
-      <p>Similarly (in XQuery):</p>
-      <samp><![CDATA[<a xmlns:double="type:System.Double"/> 
-                              {double:MaxValue()} </a>
-]]></samp>
-
-      <p>This will output the value of the static field <code>System.Double#MaxValue</code>. (In
-        practice, it is better to declare the namespace in the query prolog, or predeclare it using
-        the API, because it will then not be copied to the result tree.)</p>
-
-      <p>A static method called as an extension function may have an extra first argument of type <a
-          class="javalink" href="net.sf.saxon.expr.XPathContext">net.sf.saxon.expr.XPathContext</a>.
-        This argument is not supplied by the calling XPath or XQuery code, but by Saxon itself. The
-          <code>XPathContext</code> object provides methods to access many internal Saxon resources,
-        the most useful being <code>getContextItem()</code> which returns the context item from the
-        dynamic context. The class <code>net.sf.saxon.expr.XPathContext</code> is in the assembly
-        <code>saxon-he-10.#.dll</code>, and the module containing the code of the extension function will
-        therefore need to contain a reference to that DLL. The class itself is written in Java, and
-        is documented in the Javadoc documentation. The <code>XPathContext</code> object is
-        available with static or instance-level methods, but not with constructors.</p>
-
-      <p>The following example shows a function that obtains the host language from the Saxon
-        evaluation context:</p>
-      <samp><![CDATA[public static string HostLanguage(net.sf.saxon.expr.XPathContext context)
-{
-    int lang = context.getController().getExecutable().getHostLanguage();
-    if (lang == net.sf.saxon.Configuration.XQUERY)
-    {
-        return "XQuery";
-    }
-    else if (lang == net.sf.saxon.Configuration.XSLT)
-    {
-        return "XSLT";
-    }
-    else if (lang == net.sf.saxon.Configuration.XPATH)
-    {
-        return "XPath";
-    }
-    else
-    {
-        return "unknown";
-    }
-}]]></samp>
-
-      <p>If this method appears in class <code>com.example.code.Utils</code>, then it can be
-        accessed using the following code in XSLT:</p>
-      <samp><![CDATA[<xsl:value-of select="nd:HostLanguage()" 
-    xmlns:nd="java:com.example.code.Utils"/>]]></samp>
-
-      <p>or the following in XQuery:</p>
-      <samp><![CDATA[<line xmlns:nd="java:com.example.code.Utils">
-    { nd:HostLanguage() }
-</line>]]></samp>
-    </section>
-
-    <section id="constructors.net" title="Calling .NET Constructors">
-      <h1>Calling .NET Constructors</h1>
-
-
-      <p><strong>.NET class constructors</strong> are called by using the function named
-          <code>new()</code>. If there are several constructors, then again the system tries to find
-        the one that is the best fit, according to the types of the supplied arguments. The result
-        of calling <code>new()</code> is an XPath value whose type is denoted by a QName whose local
-        name is the actual .NET class (for example <code>System.Data.SqlClient.SqlConnection</code>
-        or <code>System.Collections.ArrayList</code>) and whose namespace URI is
-          <code>http://saxon.sf.net/clitype</code>. The only things that can be done with a wrapped
-        .NET Object are to assign it to a variable, to pass it to an extension function, and to
-        convert it to a string or boolean, using the rules given below.</p>
-
-      <p>The use of external object types in namespace <code>http://saxon.sf.net/clitype</code>
-        reflects the .NET type hierarchy. For example, if a variable is declared to accept a type of
-          <code>net:System.Collections.IList</code>, then a value of type
-          <code>net:System.Collections.ArrayList</code> will be accepted, but a value of type
-          <code>net:System.Collections.HashTable</code> will not.</p>
-    </section>
-
-    <section id="instance-methods.net" title="Calling .NET Instance-Level Methods">
-      <h1>Calling .NET Instance-Level Methods</h1>
-
-
-      <p><strong>Instance-level methods</strong> (that is, non-static methods) are called by
-        supplying an extra first argument of type <code>external .NET object</code> which is the
-        object on which the method is to be invoked. An external .NET Object may be created by
-        calling an extension function (e.g. a constructor) that returns an object; it may also be
-        passed to the query or stylesheet as the value of a global parameter. Matching of method
-        names is done as for static methods. If there are several methods in the class that match
-        the localname, the system again tries to find the one that is the best fit, according to the
-        types of the supplied arguments.</p>
-
-      <p>For example, the following XSLT stylesheet prints the operating system name and
-        version.</p>
-      <samp><![CDATA[<xsl:stylesheet version="2.0" 
-                xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-				
-<xsl:template name="main">
-  <out xmlns:env="clitype:System.Environment" xmlns:os="clitype:System.OperatingSystem">
-    <xsl:variable name="os" select="env:OSVersion()"/>
-      <v platform="{os:Platform($os)}" version="{os:Version($os)}"/>
-  </out>  
-</xsl:template>
-</xsl:stylesheet>]]></samp>
-
-      <p>The equivalent in XQuery is:</p>
-      <samp><![CDATA[declare namespace env="clitype:System.Environment";
-declare namespace os="clitype:System.OperatingSystem";
-let $os := env:OSVersion() return
-<v platform="{os:Platform($os)}" version="{os:Version($os)}"/>
-]]></samp>
-
-      <p>As with static methods, an instance-level .NET method called as an extension function may
-        have an extra first argument of class <a class="javalink"
-          href="net.sf.saxon.expr.XPathContext">net.sf.saxon.expr.XPathContext</a>. This argument is
-        not supplied by the calling XPath or XQuery code, but by Saxon itself. The
-          <code>XPathContext</code> object provides methods to access many internal Saxon resources,
-        the most useful being <code>getContextItem()</code> which returns the context item from the
-        dynamic context.</p>
-
-      <p>If any exceptions are thrown by the method, or if a matching method cannot be found,
-        processing of the stylesheet will be abandoned. If the tracing option <code>-TJ</code> has been set on
-        the command line, a full stack trace will be output. The exception will be wrapped in a
-          <code>TransformerException</code> and passed to any user-specified
-          <code>ErrorListener</code> object, so the <code>ErrorListener</code> can also produce
-        extra diagnostics.</p>
-    </section>
+ 
   
-  <section id="converting-args.net" title="Converting Arguments to .NET Extension Functions">
-    <h1>Converting Arguments to .NET Extension Functions</h1>
 
-
-    <p>This section describes how XPath values supplied in a call to a .NET extension function are
-      converted to .NET values.</p>
-    <nav>
-      <ul/>
-    </nav>
-
-    <section id="converting-atomic.net" title="Converting Atomic Values and Sequences">
-      <h1>Converting Atomic Values and Sequences</h1>
-
-
-      <p>The following conversions are supported between the static type of the supplied value of
-        the argument, and the declared .NET type of the argument. The mappings are given in order of
-        preference; a type that appears earlier in the list has smaller "conversion distance" than
-        one appearing later. These priorities are used to decide which method to call when the class
-        has several methods of the same name. Simple classes (such as boolean) are acceptable
-        wherever the corresponding wrapper class (Boolean) is allowed. Class names shown in italics
-        are Saxon-specific classes.</p>
-
-      <p>If the value is a <i>.NET external object</i> (typically the result of a call to another
-        extension function), then the underlying .NET object is passed to the method. An error will
-        occur if it is the wrong .NET type.</p>
-
-      <p>If the required type is one of the types used in the <code>Saxon.Api</code> namespace to
-        represent XPath values (for example <a class="javalink" href="Saxon.Api.XdmValue">XdmValue</a>, 
-        <a class="javalink" href="Saxon.Api.XdmNode">XdmNode</a>,
-          <a class="javalink" href="Saxon.Api.XdmAtomicValue">XdmAtomicValue</a>), 
-        then the value is converted to an instance of this class and
-        passed over unchanged. If the expected type is <code>XdmAtomicValue</code> and the supplied
-        value is a node, the node will be atomized (this must result in a single atomic value). Use
-        of types such as <code>XdmValue</code> is available only when the query or transformation is
-        invoked using the .NET API, it does not work when running from the command line.</p>
-
-      <p>If the static type of the supplied value allows a sequence of more than one item, then
-        Saxon looks for a method that expects a <a class="javalink" href="net.sf.saxon.om.SequenceIterator">net.sf.saxon.om.SequenceIterator</a>, a
-        <a class="javalink" href="net.sf.saxon.om.Sequence">net.sf.saxon.om.Sequence</a>, an <code>ICollection</code> or an array, in that
-        order. (The first two classes are Saxon-specific.) In all these cases except the last, the
-        item type of the supplied value plays no role.</p>
-
-      <p>Nodes in the supplied sequence are atomized only if the .NET method requires an atomic type
-        such as an integer or string. If the method requires an <code>ICollection</code>, then the contents of
-        the sequence will be supplied unchanged. The objects in the list will typically be Saxon
-          <a class="javalink" href="net.sf.saxon.om.Item">net.sf.saxon.om.Item</a> objects. (Saxon
-        does not yet recognize the generic types in .NET 2.0, which allow the item type of a
-        collection to be declared.) If atomization is required, you can force it by calling the
-          <code>data()</code> function.</p>
-
-      <p>If the required type is an array, Saxon will attempt to create an array of the required
-        type. This will not always succeed, for example if the array has type <code>X[]</code> where
-        <code>X</code> is an interface rather than a concrete class. If it is an array of items or nodes, the
-        nodes in the supplied sequence will be inserted into the array directly; if it is an array
-        of a type such as integer or double, the sequence will first be atomized.</p>
-
-      <p>If the supplied value is a singleton (a sequence of one item) then the type of that item is
-        decisive. If it is a sequence of length zero or more than one, then the general rules for a
-        sequence are applied, and the types of the items within the sequence are irrelevant.</p>
-
-      <p>If the supplied value contains more than one item and only a single item is expected, an error
-        is reported. There is no implicit extraction of the first value (as happened in earlier
-        releases).</p>
-      <table>
-        <tr>
-          <td>
-            <p>
-              <strong>Supplied type</strong>
-            </p>
-          </td>
-          <td>
-            <p>
-              <strong>Required type</strong>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>xs:string</p>
-          </td>
-          <td>
-            <p>
-              <i>StringValue</i>, String</p>
-          </td>
-        </tr>        
-        <tr>
-          <td>
-            <p>xs:boolean</p>
-          </td>
-          <td>
-            <p>
-              <i>BooleanValue</i>, Boolean</p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>xs:float</p>
-          </td>
-          <td>
-            <p>
-              <i>FloatValue</i>, Single, Double</p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>xs:double</p>
-          </td>
-          <td>
-            <p>
-              <i>DoubleValue</i>, Double</p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>xs:decimal</p>
-          </td>
-          <td>
-            <p>
-              <i>DecimalValue</i>, Decimal, Double, Single</p>
-          </td>
-        </tr>        
-        <tr>
-          <td>
-            <p>xs:integer</p>
-          </td>
-          <td>
-            <p>
-              <i>IntegerValue</i>, Decimal, Int64, Int32, Int16, Double, Single</p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>xs:date, xs:gDay, xs:gMonthDay, xs:gMonth, xs:gYearMonth, xs: gYear</p>
-          </td>
-          <td>
-            <p>
-              <i>DateValue</i>, DateTime</p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>xs:dateTime</p>
-          </td>
-          <td>
-            <p>
-              <i>DateTimeValue</i>, DateTime</p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>xs:time</p>
-          </td>
-          <td>
-            <p>
-              <i>TimeValue</i>, DateTime</p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>xs:duration, xs:yearMonthDuration, xs:dayTimeDuration</p>
-          </td>
-          <td>
-            <p>
-              <i>DurationValue</i>
-            </p>
-          </td>
-        </tr>        
-        <tr>
-          <td>
-            <p>xs:hexBinary</p>
-          </td>
-          <td>
-            <p>
-              <i>HexBinaryValue</i></p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>xs:base64Binary</p>
-          </td>
-          <td>
-            <p>
-              <i>Base64BinaryValue</i></p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>xs:anyURI</p>
-          </td>
-          <td>
-            <p>
-              <i>AnyURIValue</i>, Uri, String</p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>xs:QName</p>
-          </td>
-          <td>
-            <p>
-              <i>QNameValue</i>, System.Xml.XmlQualifiedName</p>
-          </td>
-        </tr>            
-        <!--<tr>
-          <td>
-            <p>node</p>
-          </td>
-          <td>
-            <p>
-              <i>SingletonNodeSet</i>, NodeList, (Element, Attr, Document, DocumentFragment,
-              Comment, Text, ProcessingInstruction, CharacterData), Node, Boolean, Byte, Character,
-              Double, Float, Integer, Long, Short, (String, CharSequence), Object</p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>sequence</p>
-          </td>
-          <td>
-            <p>
-              <i>SequenceIterator</i>, <i>SequenceValue</i>, List, NodeList, <i>NodeInfo</i>, Node,
-              (String, CharSequence), Boolean, Byte, Character, Double, Float, Integer, Long, Short,
-              Object</p>
-          </td>
-        </tr>-->      
-      </table>  
-
-      <p>Saxon tries to select the appropriate method based on the <i>static type</i> of the
-        arguments to the function call. If there are several candidate methods, and there is
-        insufficient information available to decide which is most appropriate, an error is
-        reported. The remedy is to cast the arguments to a more specific type.</p>
-    </section>
-
-    <section id="converting-node.net" title="Converting Nodes and Sequences of Nodes">
-      <h1>Converting Nodes and Sequences of Nodes</h1>
-
-
-      <p>If the expected type is a generic collection type, an array of the Saxon class <a
-          class="javalink" href="net.sf.saxon.om.NodeInfo">NodeInfo</a>, a 
-        <a class="javalink" href="net.sf.saxon.om.Sequence">Sequence</a> or a
-          <a class="javalink" href="net.sf.saxon.om.SequenceIterator">SequenceIterator</a>, Saxon
-        will pass the nodes supplied in the call in their native Saxon representation.</p>
-
-      <p>Saxon also recognizes <code>System.Xml.Node</code> and its subtypes. However, calling a
-        method that expects an instance if <code>System.Xml.Node</code> will only work if the actual
-        node supplied as the argument value is a Saxon-wrapped DOM node, that is (a) the input to
-        the stylesheet or query must be supplied in the form of a wrapped DOM, and (b) the external
-        function must be called supplying a node obtained from the input document, not some node in
-        a temporary tree created in the course of stylesheet or query processing.</p>
-
-      <p>If an external function returns an <code>System.Xml.Node</code> then it will be wrapped as
-        a Saxon node. This may be expensive if it is done a lot, since each such node will acquire
-        its own document wrapper.</p>
-    </section>
-
-    <section id="converting-wrapped-dotnet" title="Converting Wrapped .NET Objects">
-      <h1>Converting Wrapped .NET Objects</h1>
-
-
-      <p>Saxon allows an extension function to return an arbitrary .NET object. This will then be
-        wrapped as an XPath item, so that it can be held in a variable and passed subsequently as an
-        argument to another extension function. This second extension function will see the original
-        .NET object minus its wrapper, provided it is declared to expect the appropriate .NET
-        class.</p>
-
-      <p>A wrapped .NET object may be converted to another data type as follows.</p>
-      <ul>
-        <li>
-          <p>It is converted to a string by using its <code>ToString()</code> method; if the object is null, the
-            result is the empty string "".</p>
-        </li>
-        <li>
-          <p>It is converted to a boolean as follows: if it is null, the result is false, otherwise
-            it is converted to a string and the result is true if and only if the string is
-            non-empty.</p>
-        </li>
-      </ul>
-
-      <p>The type of a wrapped .NET object may be declared in a variable declaration or function
-        signature using a type name whose namespace URI is <code>http://saxon.sf.net/clitype</code>, and
-        whose local name is the fully qualified name of the .NET class, with any "$" signs replaced
-        by hyphens. For example, the <code>sql:connection</code> extension function returns a value
-        of type <code>{http://saxon.sf.net/clitype}System.Data.SqlClient.SqlConnection</code>.</p>
-    </section>
-  </section>
-  <section id="function-result.net" title="Converting the Result of a .NET Extension Function">
-    <h1>Converting the Result of a .NET Extension Function</h1>
-
-
-    <p>This section explains how the value returned by a .NET extension function is converted to an
-      XPath value.</p>
-
-    <p>The result type of the method is converted to an XPath value as follows.</p>
-    <ul>
-      <li>
-        <p>If the method returns void, the XPath value is an empty sequence.</p>
-      </li>
-      <li>
-        <p>If the method returns null, the XPath value is an empty sequence.</p>
-      </li>
-      <li>
-        <p>If the method is a constructor, the XPath value is of type "wrapped .NET object". The
-          only way of using this is by passing it to another external function, or by converting it
-          to one of the standard XPath data types as described above.</p>
-      </li>
-      <li>
-        <p>If the returned value is an <a class="javalink" href="Saxon.Api.XdmValue">XdmValue</a> or one of its subclasses such as
-            <a class="javalink" href="Saxon.Api.XdmNode">XdmNode</a> or 
-          <a class="javalink" href="Saxon.Api.XdmAtomicValue">XdmAtomicValue</a>, then it is used unchanged, after
-          unwrapping. (These types are defined in the <code>Saxon.Api</code> namespace.) Note that if the method
-          constructs a new <code>XdmNode</code> and returns it, then it must be built using the name pool that is
-          in use by the transformation or query, which means in practice that it must be built using
-          a <a class="javalink" href="Saxon.Api.DocumentBuilder">DocumentBuilder</a> derived from the same <code>Saxon.Api.Processor</code>.</p>
-      </li>
-      <li>
-        <p>If the returned value is a .NET bool, the XPath result is a boolean.</p>
-      </li>
-      <li>
-        <p>If the returned value is a .NET double, the XPath result is a double.</p>
-      </li>
-      <li>
-        <p>If the returned value is a .NET float, the XPath result is a float.</p>
-      </li>
-      <li>
-        <p>If the returned value is a .NET Int64, Int32, or Int16, or one of their object wrapper
-          equivalents, the XPath result is an integer.</p>
-      </li>
-      <li>
-        <p>If the returned value is a .NET string, the XPath result is a string.</p>
-      </li>
-      <li>
-        <p>If the returned value is an instance of the Saxon class
-          <a class="javalink" href="net.sf.saxon.om.NodeInfo">net.sf.saxon.om.NodeInfo</a> (a node in a Saxon tree), the XPath value will be
-          a sequence containing a single node.</p>
-      </li>
-      <li>
-        <p>If the returned value is an instance of the Saxon class
-          <a class="javalink" href="net.sf.saxon.om.Sequence">net.sf.saxon.om.Sequence</a>, the returned value is used unchanged.</p>
-      </li>
-      <li>
-        <p>If the returned value is is an instance of the Saxon class
-          <a class="javalink" href="net.sf.saxon.om.SequenceIterator">net.sf.saxon.om.SequenceIterator</a> (an iterator over a sequence), the XPath
-          value will be the sequence represented by this iterator. It is essential that this
-          iterator properly implements the method <code>getAnother()</code> which returns a new
-          iterator over the same sequence of nodes or values, positioned at the start of the
-          sequence.</p>
-      </li>
-      <li>
-        <p>If the returned value is an instance of the .NET interface
-            <code>System.Collections.IEnumerable</code>, or if it is an array, the XPath value will
-          be the sequence represented by the contents of this collection or array. The members of
-          the list or array will each be converted to an XPath value, as if each member was supplied
-          from a separate function call. An error is reported if the result contains a list or array
-          nested within another list or array. The contents of the list or array are copied
-          immediately on return from the function, so the original collection or array object itself
-          may be safely re-used.</p>
-      </li>
-      <li>
-        <p>If the result is any other .NET object (including null), it is returned as a "wrapped
-          .NET object".</p>
-      </li>
-    </ul>
-  </section>
-  </section>
+    
+ 
   <section id="instructions" title="Writing XSLT extension instructions">
+    <div class="javaonly">
     <h1>Writing XSLT extension instructions</h1>
 
 
     <p>
       <aside>This feature is available in Saxon-PE and Saxon-EE only.<br/>
-        User-written extension instructions are not currently supported on the .NET platform.</aside>
+        User-written extension instructions are not currently supported on Saxon-CS.</aside>
     </p>
 
     <p>Saxon implements the element extensibility feature defined in the XSLT standard. This feature
@@ -3373,7 +2576,7 @@ let $os := env:OSVersion() return
     Saxon also supplies an <code>XPathContext</code> object which contains details of the dynamic context.
     This should not be modified, but can be used as the basis for creating a new dynamic context if required.</p>
     
-
+    </div>
   </section>
   <section id="config-extend" title="Extending the Configuration">
     <h1>Extending the Configuration</h1>
@@ -3628,6 +2831,7 @@ let $os := env:OSVersion() return
     </section>
 
     <section id="localizing" title="Localizing numbers and dates">
+      <div class="javaonly">
       <h1>Localizing numbers and dates</h1>
 
       <p>It is possible to define a <dfn>localized numbering</dfn> sequence for use by
@@ -3762,6 +2966,7 @@ config.setLocalizerFactory(new LocalizerFactory() {
 
       <xi:include href="extensibility/locales-ICU-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
       <xi:include href="extensibility/other-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+      </div>
     </section>
 
     <section id="uri-resolution" title="Customizing URI Resolution">

@@ -148,9 +148,8 @@
     </category>
     
     <category name="xquery10">
-        <p>A new configuration option has been added for XQuery processing: 
-            <code java="net.sf.saxon.lib.FeatureKeys#XQUERY_MULTIPLE_MODULE_IMPORTS"
-                >FeatureKeys.XQUERY_MULTIPLE_MODULE_IMPORTS</code>. The option is false by default,
+        <p>A new configuration option has been added for XQuery processing:
+            <a class="feature" href="XQUERY_MULTIPLE_MODULE_IMPORTS"/>. The option is false by default,
         and should be set to true to retain the behaviour of previous releases. If the option is false,
         then when an <code>import module</code> declaration is encountered for a particular module namespace URI,
         and there is already a loaded module for that namespace, then the existing module is used without checking
@@ -367,9 +366,8 @@
             switched on in several ways: the collection URI can include the query parameter
                 <code>stable=yes</code>; the collection finder can return a
             <code java="net.sf.saxon.lib.ResourceCollection">ResourceCollection</code> object whose 
-            <code>isStable()</code> method returns true; or the Configuration property <code
-                java="net.sf.saxon.lib.FeatureKeys#STABLE_COLLECTION_URI"
-                >FeatureKeys.STABLE_COLLECTION_URI</code> can be set to true. A collection
+            <code>isStable()</code> method returns true; or the configuration property 
+            <a class="feature" href="STABLE_COLLECTION_URI"/> can be set to true. A collection
         is stable if any of these methods returns true.</p>
 
         <p>The option <code>unparsed=true</code> among the query parameters of the collection URI is
@@ -551,8 +549,8 @@
             </li>
         </ul>
 
-        <p>A new option for schema processing has been added:
-                <code>FeatureKeys.IMPLICIT_SCHEMA_IMPORTS</code>. This disables the rule that it is
+        <p>A new option for schema processing has been added: <a class="feature" href="IMPLICIT_SCHEMA_IMPORTS"/>
+            This disables the rule that it is
             not permitted for a schema document A to contain a reference to a schema component in
             namespace N unless document A contains an <code>&lt;xs:import&gt;</code> declaration for
             namespace N. Although the XSD specification imposes this rule, there are schemas in

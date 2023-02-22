@@ -18,23 +18,6 @@
 
  
  
- 
-      <p>The Saxon source code is written in Java. It has been ported to the .NET platform by cross-compiling
-the bytecode produced by the Java compiler into the IL code used on .NET, and adding various components
-designed to integrate Saxon fully into the .NET environment. These additions include:</p>
-      <ol>
-         <li>
-         <p>Addition of command-line interfaces <code>Transform</code>, <code>Query</code>, and <code>Validate</code>.</p>
-      </li>
-         <li>
-         <p>Addition of a front-end API suitable for calling Saxon from .NET languages such as C#, VB.NET, or ASP.NET.</p>
-      </li>
-         <li>
-         <p>Internal changes within Saxon to take advantage of services offered by the .NET Common Language Runtime,
-for example collation support, URI handling, and XML parsing.</p>
-      </li>
-      </ol>
-
    <p>The initial release of Saxon-CS corresponds in functionality to Saxon-EE on Java, and requires a license key that
       enables all Saxon-EE facilities.</p>
          
@@ -62,14 +45,12 @@ as their Java counterparts, with some exceptions. They are described in the foll
       </li>
       </ul>
 
-      <p>An introduction to the API for Saxon on .NET is provided at <a class="bodylink" href="/dotnet/dotnetapi">Saxon API for .NET</a>;
+      <p>An introduction to the API for Saxon on .NET is provided at <a class="bodylink" href="dotnetapi">Saxon API for .NET</a>;
 full specifications are available in the <a href="/dotnetdoc" class="apilink">.NET API</a>.</p>
 
       <p>For information about writing extension functions using .NET languages, see
 <a class="bodylink" href="/extensibility/dotnetextensions">Writing extension functions for .NET</a>.</p>
          
-      <aside>Saxon has been successfully run under the Mono environment (Mono is a .NET emulation for non-Microsoft platforms).
-      However, it has not been comprehensively validated under Mono and there may be undiscovered restrictions.</aside>   
    <section id="dotnetapi" title="Saxon API for .NET">
       <h1>Saxon API for .NET</h1>
       
@@ -84,8 +65,7 @@ available in the <a href="/dotnetdoc" class="apilink">.NET API</a>.</p>
           directory, see <a class="bodylink" href="/samples/dotnetsamples">Example applications for
               .NET</a> for further information.</p>
 
-      <p>All the classes referred to below are in the namespace <code>Saxon.Api</code>, and can be loaded from the
-assembly <code>saxonapi.dll</code>.</p>
+      <p>All the classes referred to below are in the namespace <code>Saxon.Api</code>.</p>
 
       <p>The first thing the application needs to do is to create a <a class="javalink" href="Saxon.Api.Processor">Processor</a>. The <code>Processor</code>
 holds configuration information for Saxon, and shared resources such as the name pool and schema pool. It is possible
@@ -247,28 +227,61 @@ The places where such escape hatches are provided are shown below:</p>
       <p>When you run Saxon on the .NET platform, the XML parsing is delegated to
          the <code>System.Xml</code> parser
 supplied with the .NET platform.</p>
-
-
-      <p>Note that the Microsoft parser does not notify ID or IDREF values from the DTD, or expand attributes with
-fixed or default values, unless DTD validation is requested. This can be requested using the <code>-v</code> option on the
-command line, or via the API. (See the <code>DtdValidation</code> property of the <a class="javalink" href="Saxon.Api.DocumentBuilder">DocumentBuilder</a>
-class.)</p>
       
-      <p>The Microsoft parser rejects documents that specify <code><![CDATA[<?xml version="1.1"?>]]></code>, 
-         or that use namespace undeclarations in the form <code>xmlns:p=""</code></p>
+      <p>The Microsoft parser has some limitations:</p>
+      
+      <ul>
+         <li><p>It does not notify ID or IDREF values from the DTD, or expand attributes with
+            fixed or default values, unless DTD validation is requested. This can be requested using the <code>-v</code> option on the
+            command line, or via the API. (See the <code>DtdValidation</code> property of the <a class="javalink" href="Saxon.Api.DocumentBuilder">DocumentBuilder</a>
+            class.)</p></li>
+         <li><p>It rejects documents that specify <code><![CDATA[<?xml version="1.1"?>]]></code>, 
+            or that use namespace undeclarations in the form <code>xmlns:p=""</code>.</p></li>
+         <li><p>It does not notify unparsed entities to Saxon. 
+            The XSLT functions <a class="bodylink code" href="/functions/fn/unparsed-entity-uri">unparsed-entity-uri()</a>
+            and <a class="bodylink code" href="/functions/fn/unparsed-entity-public-id">unparsed-entity-public-id()</a> will 
+            therefore not work.</p></li>
+      </ul>
+      
+      <p>There are several ways the Microsoft parser can be used:</p>
+      
+      <ul>
+         <li><p>In interfaces where a source XML document is provided by supplying a URI, or a <code>Stream</code>,
+         or a <code>TextReader</code>, Saxon will invoke the Microsoft parser to parse the content.
+         In this case the parser operates as a stream-based (pull-mode) parser, notifying parsing
+         events to Saxon as they occur. Saxon may build a tree representation of the document
+         internally, or it may process the data in streamed mode. This is generally more efficient
+         than supplying a DOM.</p></li>
+         <li><p>Some interfaces also allow you to supply input in the form of an <code>XmlReader</code>.
+            This allows you to control the settings and options applied to the <code>XmlReader</code>.
+         Some settings may produce behavior that is not conformant with the W3C specifications
+         (for example, switching character checking off), and which could potentially cause
+         Saxon to behave unpredictably.</p></li>
+         <li><p>You can also use the Microsoft parser to construct an in-memory DOM tree (represented
+         by an <code>XmlDocument</code> or <code>XmlNode</code>). Some Saxon interfaces
+            also accept input in the form of an <code>XmlDocument</code> or <code>XmlNode</code>.
+         There are two ways Saxon can handle a DOM:</p>
+         <ul>
+            <li><p>The DOM can be copied to an internal Saxon tree structure.</p>
+            <p>Note that there's no point constructing a DOM just so Saxon can rebuild it:
+            it's better to let Saxon parse the XML and build its own tree. However, this
+            option is useful if you are using a DOM for other reasons, for example if your
+            application has other parts that are DOM-based.</p></li>
+            <li><p>The DOM can be <i>wrapped</i> as a Saxon tree. This avoids the cost
+            and memory overhead of copying the tree, but the result is slower to navigate.</p></li>
+            <li><p><i>(Saxon-CS does not currently offer the Domino model, which is a hybrid
+            between copying and wrapping: it uses the DOM as supplied, but adds indexes for fast
+            searching.)</i></p></li>
+         </ul></li>
+      </ul>
 
-      <p>The Microsoft parser does not notify unparsed entities to Saxon. 
-         The XSLT functions <a class="bodylink code" href="/functions/fn/unparsed-entity-uri">unparsed-entity-uri()</a>
-         and <a class="bodylink code" href="/functions/fn/unparsed-entity-public-id">unparsed-entity-public-id()</a> will 
-         therefore not work.</p>
+      <p>To use OASIS catalogs with the Microsoft parser, download nuget package <code>Org.XmlResolver</code>
+      and nominate this as your <code>XmlResolver</code> before invoking the parser.</p>
          
-      <p>Support for OASIS catalogs is not currently available.</p>
       
       <p>No other XML parser is currently supported, although it is in principle possible to plug in a third party
-      parser by creating a user-defined implementation of the <code>ActiveSource</code> interface, and using this
-      wherever a <code>Source</code> object is called for.</p>
+      parser provided it is capable of delivering a Saxon <code>XdmNode</code> or a DOM <code>XmlNode</code>.</p>
       
-      <!-- TODO: but most interfaces don't accept a Source object.... -->
       
       <h2>HTML Parsing</h2>
       

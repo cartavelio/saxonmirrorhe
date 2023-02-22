@@ -604,9 +604,8 @@
             <status>
                 <p>Following a change in the W3C specification, from Saxon 9.7 assertions are now
                     disabled by default. To enable assertions, use
-                    the <code>-ea</code> command line option, or the <a class="bodylink code"
-                        href="/configuration/config-features"
-                        >Feature.XSLT_ENABLE_ASSERTIONS</a> configuration property,
+                    the <code>-ea</code> command line option, or the 
+                    configuration property <a class="feature" href="XSLT_ENABLE_ASSERTIONS"/>,
                 or call <code>XsltCompiler.enableAssertions(true)</code> in the s9api interface.</p>
             </status>
         </xsl-element>
@@ -1480,8 +1479,8 @@
                     available in Saxon 9.9.</p>
                 <p></p>
                 <p>If you are concerned about security implications of this feature, you can disable it
-                    either statically or dynamically, by setting the configuration property <a class="bodylink code"
-                        href="/configuration/config-features">Feature.DISABLE_XSL_EVALUATE</a>.</p>
+                    either statically or dynamically, by setting the configuration property 
+                    <a class="feature" href="DISABLE_XSL_EVALUATE"/>.</p>
                 
             </status>
             <see-also name="evaluate" type="functions" namespace="saxon"/>
@@ -3817,9 +3816,9 @@
                         any URI where the Java VM has the capability to open a writable connection.
                         Users have reported success in using "ftp:" and "mailto:" URIs.</p>
                     
-                    <p>If the configuration option <a class="bodylink code"
-                        href="/configuration/config-features">Feature.ALLOW_EXTERNAL_FUNCTIONS</a>
-                        is set, then for security reasons use of the
+                    <p>If the configuration option 
+                        <a class="feature" href="ALLOW_EXTERNAL_FUNCTIONS"/>
+                        is set to false, then for security reasons use of the
                         <code>xsl:result-document</code> instruction with the <code>href</code>
                         attribute is disallowed.</p>
                 </attribute>
@@ -3882,8 +3881,7 @@
                 <attribute name="saxon:asynchronous" use="optional" data-type="boolean">The default
                     for Saxon-EE is <code>yes</code>, which causes the instruction to be evaluated
                     in a separate thread, if there is a spare thread available (the maximum number
-                    of threads used is configurable using <a class="bodylink code"
-                        href="/configuration/config-features">Feature.RESULT_DOCUMENT_THREADS</a>).
+                    of threads used is configurable using the property <a class="feature" href="RESULT_DOCUMENT_THREADS"/>).
                     Use <code>no</code> to suppress multi-threading.
                     Asynchronous processing of <code>xsl:result-document</code> is automatically
                     suppressed if tracing (using a <code>TraceListener</code>) is enabled.
@@ -3971,12 +3969,10 @@
                     asynchronous. That is, the code to output the result document runs in a separate
                     thread, in parallel with other processing. The maximum number of threads used by
                         <code>xsl:result-document</code> instructions is limited by the
-                    configuration option <a class="bodylink code"
-                        href="/configuration/config-features"
-                        >Feature.RESULT_DOCUMENT_THREADS</a> which defaults to the number of
+                    configuration property <a class="feature" href="RESULT_DOCUMENT_THREADS"/>
+                    which defaults to the number of
                     processors available to the Java VM; setting this to zero or one will suppress
-                    multithreading. Setting <a class="bodylink code"
-                        href="/configuration/config-features">Feature.ALLOW_MULTITHREADING</a>
+                    multithreading. Setting <a class="feature" href="ALLOW_MULTITHREADING"/>
                     to false has the same effect. (This can be useful when debugging, because
                     otherwise the output from <code>xsl:message</code> and <code>fn:trace()</code>
                     can be very confusing). </p>
@@ -4322,8 +4318,7 @@
                     9.7.0.8, in Saxon-EE only (with XSLT 3.0 enabled), and becomes fully available
                 in all Saxon editions from 9.8 (but streaming requires Saxon-EE).</p>
                 <p><p>If streaming is requested and the expression cannot be evaluated in streaming mode, execution fails,
-                    unless the configuration option <a class="javalink"
-                        href="net.sf.saxon.lib.Feature#STREAMING_FALLBACK">Feature.STREAMING_FALLBACK</a> is set,
+                    unless the configuration property <a class="feature" href="STREAMING_FALLBACK"/> is set,
                     in which case it is executed in non-streaming mode, after issuing a warning.</p>
                 </p>
             </status>

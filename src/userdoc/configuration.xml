@@ -77,7 +77,7 @@
          <ul/>
       </nav>
 
-      <section id="jaxp-configuration" title="JAXP Factory Interfaces" for="J">
+      <section id="jaxp-configuration" title="JAXP Factory Interfaces" class="javaonly">
          <h1>JAXP Factory Interfaces</h1>
 
 
@@ -115,8 +115,8 @@
                class="javalink" href="net.sf.saxon.Configuration">Configuration</a> object. By casting from the JAXP interface to the Saxon implementation class
             it is also possible to call the <code>getConfiguration</code> method which exposes the <code>Configuration</code> object directly.</p>
 
-         <p>The Saxon-PE and Saxon-EE implementations of the <code>TransformerFactory</code> also allow the configuration property <a class="bodylink code"
-               href="/configuration/config-features">Feature.CONFIGURATION_FILE.name</a> to be set. The value is a filename containing the name of a
+         <p>The Saxon-PE and Saxon-EE implementations of the <code>TransformerFactory</code> also allow the configuration property 
+            <a class="feature" href="CONFIGURATION_FILE"/> to be set. The value is a filename containing the name of a
             configuration file, which must have the format described in <a class="bodylink" href="/configuration/configuration-file">Configuration file</a>.
             This causes any previously-initialized configuration to be discarded, and replaced with a new <code>Configuration</code> object built from the
             settings in the specified configuration file.</p>
@@ -148,7 +148,7 @@
             implementation class and call configuration-setting methods directly.</p>
 
       </section>
-      <section id="s9api-config" title="Configuration using s9api" for="J">
+      <section id="s9api-config" title="Configuration using s9api" class="javaonly">
          <h1>Configuration using s9api (Java)</h1>
 
 
@@ -173,7 +173,7 @@
           It's a nice snappy name, so we've retained it unchanged for Saxon 10.</aside>
       </section>
 
-      <section id="config-dotnet" title="Configuration using Saxon.Api (C#)" for="CS">
+      <section id="config-dotnet" title="Configuration using Saxon.Api (C#)" class="csonly">
          <h1>Configuration using Saxon.Api (C#)</h1>
 
 
@@ -213,15 +213,15 @@
 
          <p>For more specialized options, there is also a fallback mechanism. Each configuration property has a URI, which is always of the form
                <code>http://saxon.sf.net/feature/SOME_NAME</code>. Provided the property allows a string value (as most do), the property can be set from the
-            command line using the syntax <code>--SOME_NAME:value</code>. For example the property identified by <a class="bodylink code"
-               href="/configuration/config-features">Feature.LICENSE_FILE_LOCATION</a> has the URI
+            command line using the syntax <code>--SOME_NAME:value</code>. For example the property identified by 
+            <a class="feature" href="LICENSE_FILE_LOCATION"/> has the URI
                <code>http://saxon.sf.net/feature/licenseFileLocation</code>, and it can therefore be set on the command line using an option such as
                <code>--licenseFileLocation:c:/saxon/license.lic</code>. </p>
 
          <aside>For boolean-valued configuration properties, Saxon accepts any of the values "yes", "on", "true", or "1" to switch the option on, or "no",
             "off", "false", or "0" to switch it off.</aside>
       </section>
-      <section id="config-xqj" title="Configuration using XQJ" for="J">
+      <section id="config-xqj" title="Configuration using XQJ" class="javaonly">
          <h1>Configuration using XQJ</h1>
 
          <p>The root object in the XQJ (XQuery for Java) API is <code>javax.xml.query.XQDataSource</code>, and the Saxon implementation class is <a
@@ -255,7 +255,7 @@
          </ol>
 
       </section>
-      <section id="config-ant" title="Configuration when running Ant" for="J">
+      <section id="config-ant" title="Configuration when running Ant" class="javaonly">
          <h1>Configuration when running Ant</h1>
 
          <p>It is possible to run XSLT transformations from Ant using the <code>xslt</code> task, selecting Saxon as the XSLT processor by setting the
@@ -278,8 +278,9 @@
             <attribute name="http://saxon.sf.net/feature/xsd-version" value="1.1"/>
         </factory>
   </xslt>]]></samp>
-         <p>Many of the options available as configuration parameters (for example <a class="bodylink code" href="/configuration/config-features"
-               >Feature.XSLT_INITIAL_TEMPLATE</a>) were provided explicitly with Ant in mind. The provision of these parameters makes the customized version
+         <p>Many of the options available as configuration parameters (for example 
+            <a class="feature" href="XSLT_INITIAL_TEMPLATE"/>) were provided explicitly with Ant in mind. 
+            The provision of these parameters makes the customized version
             of the Ant XSLT task provided with some earlier Saxon versions redundant, and the customized task is no longer supported.</p>
          
          <aside><p>One configuration property that is particularly useful when running Ant is 

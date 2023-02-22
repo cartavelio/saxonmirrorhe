@@ -40,8 +40,7 @@
         
         <p>The XSLT 3.0 specification permits processors to support XPath 3.1, but also requires them to provide
             a mode of operation that only supports XPath 3.0. Saxon supports XPath 3.1 by default, but in the
-            interests of conformance, a configuration option <code
-                java="net.sf.saxon.lib.Feature#XPATH_VERSION_FOR_XSLT">Feature.XPATH_VERSION_FOR_XSLT</code> has been added;
+            interests of conformance, a configuration option <a class="feature" href="XPATH_VERSION_FOR_XSLT"/>  has been added;
             if set to the integer value "30", XPath expressions are restricted to use XPath 3.0 syntax, plus the
             extensions to XPath 3.0 syntax defined in the XSLT 3.0 recommendation.</p>
         
@@ -402,8 +401,7 @@
             <code>FeatureKeys.ALLOW_EXTERNAL_FUNCTIONS</code>. This avoids the expensive lookup using long string values. The old
             mechanism remains available but is deprecated.</p>
         
-        <p>If the configuration option <code
-            java="net.sf.saxon.lib.Feature#ALLOW_EXTERNAL_FUNCTIONS">Feature.ALLOW_EXTERNAL_FUNCTIONS</code> is set to false,
+        <p>If the configuration option <a class="feature" href="ALLOW_EXTERNAL_FUNCTIONS"/> is set to false,
         environment variables are no longer visible to the functions <code>fn:available-environment-variables</code>
         and <code>fn:environment-variable</code> (the behaviour is as if the environment variable did not exist).
         This brings these functions into line with the <code>fn:system-property</code> function.</p>
@@ -599,7 +597,7 @@
         
         <p>Saxon 9.9 implements a number of extensions to the XPath 3.1 grammar, for more information see <a class="bodylink"
             href="/extensions/syntax-extensions">Syntax Extensions</a>. These are enabled only if the configuration option
-            <code java="net.sf.saxon.lib.Feature#ALLOW_SYNTAX_EXTENSIONS">Feature.ALLOW_XPATH_SYNTAX_EXTENSIONS</code>
+            <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/>
             is set, and they require Saxon-PE or higher.</p>
         
         <p>Some of these syntax extensions were issued experimentally in Saxon 9.8, and the detailed rules have been refined in the light of 
@@ -679,8 +677,8 @@
         
         <p>The XSD 1.1 specification mandates support for XPath 2.0 in XPath expressions such as assertions.
             Saxon enforces conformance to XPath 2.0 by default, but also allows support for later versions
-            to be configured. This can be achieved by setting the configuration option <code
-                java="net.sf.saxon.lib.Feature#XPATH_VERSION_FOR_XSD">Feature.XPATH_VERSION_FOR_XSD</code>,
+            to be configured. This can be achieved by setting the configuration option 
+            <a class="feature" href="XPATH_VERSION_FOR_XSD"/>,
             for example setting the option to the integer value 31 enables support for XPath 3.1. (It is also possible,
         as in previous releases, to set the attribute <code>saxon:extensions="any-xpath-version"</code> on the
         <code>xs:schema</code> element.)</p>
