@@ -321,7 +321,7 @@ public class XMLEmitter extends Emitter {
     private static final byte[] QUOTE_SPACE = StringConstants.bytes("\" ");
     protected static final byte[] DOCTYPE = StringConstants.bytes("<!DOCTYPE ");
     private static final byte[] SYSTEM = StringConstants.bytes("  SYSTEM ");
-    private static final byte[] PUBLIC = StringConstants.bytes("  PUBLIC ");
+    private static final byte[] PUBLIC = StringConstants.bytes("  PUBLIC \"");
     protected static final byte[] RIGHT_ANGLE_NEWLINE = StringConstants.bytes(">\n");
 
     /**
@@ -360,12 +360,12 @@ public class XMLEmitter extends Emitter {
                 } else if (systemId == null && publicId != null) {     // handles the HTML case
                     writer.writeAscii(PUBLIC);
                     writer.write(publicId);
+                    writer.writeCodePoint('"');
                     writer.writeAscii(RIGHT_ANGLE_NEWLINE);
                     //writer.write("  PUBLIC \"" + publicId + "\">\n");
                 } else {
                     writer.writeAscii(PUBLIC);
                     writer.write(publicId);
-                    writer.writeAscii(RIGHT_ANGLE_NEWLINE);
                     writer.writeAscii(QUOTE_SPACE);
                     writer.write(quotedSystemId);
                     writer.writeAscii(RIGHT_ANGLE_NEWLINE);
