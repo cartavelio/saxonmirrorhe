@@ -154,15 +154,18 @@
                   Java methods and thereby gain privileged access to resources on your machine. </p>
             </td>
          </tr>
-         <tr class="javaonly">
+         <tr>
             <td>
                <p>-init:initializer</p>
             </td>
             <td>
-               <p>The value is the name of a user-supplied class that implements the interface <a
-                     class="javalink" href="net.sf.saxon.lib.Initializer">Initializer</a>; this
-                  initializer will be called during the initialization process, and may be used to
-                  set any options required on the <code>Configuration</code> programmatically.</p>
+               <p>The value identifies user-supplied code that is called during the initialization process, 
+                  and may be used to set any options required on the Saxon configuration.</p>
+               <p class="javaonly">For SaxonJ, the value is the name of a user-supplied class that implements the interface <a
+                  class="javalink" href="net.sf.saxon.lib.Initializer">Initializer</a>. The class must be on the classpath.</p>
+               <p class="csonly">For SaxonCS, the value is the filename of a user-written assembly that contains an implementation
+                  of the interface <code>Saxon.Api.IProcessorInitializer</code>. For details see <a class="bodylink"
+                     href="/saxon-cs/callbacks">Callbacks</a>.</p>
             </td>
          </tr>
          <tr>
@@ -608,9 +611,10 @@
                <p>-xi:(on|off)</p>
             </td>
             <td>
-               <p>Apply XInclude processing to all source XML documents (but not to schema documents). 
-                  This currently only works when documents are parsed
-                  using the Xerces parser, which is the default in JDK 1.5 and later.</p>
+               <p>Apply XInclude processing to all XML documents.
+                  This relies on XInclude support in the XML parser. The option affects documents read
+                  using functions such as <code>doc()</code>, <code>document()</code>, and <code>collection()</code>
+                  as well as the primary input document. It also affects schema documents.</p>
             </td>
          </tr>
          <tr class="javaonly">
