@@ -1,3 +1,14 @@
+// To support the documentation builds, we need to be able to run
+// the CSharp compiler under Mono. This is not used for releases.
+def mono = null
+["${System.getenv("SAXON_MONO_FRAMEWORK")}/bin/mono",
+ "${monoFramework}/bin/mono",
+ "z:/some/other/mono/path"].each { path ->
+  if (mono == null && new File(path).exists()) {
+    mono = path
+  }
+}
+
 // Find C# compiler: the first path that exists in this list
 // will be used as the C# compiler.
 //
@@ -6,8 +17,18 @@ def csharpCompiler = null
  "z:/some/other/compiler/path"].each { csc ->
   // This only makes sense on Windows, so always using file:/// is ok
   if (csharpCompiler == null && pathExists(csc)) {
-    csharpCompiler = csc
+    csharpCompiler = [ csc ]
   }
+}
+
+// Only the mono version of the C# compiler produces the correct
+// documentation XML. ¯\_(ツ)_/¯
+def monoCSharpCompiler = csharpCompiler
+def ikvmExecutable = ["${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe"]
+if (mono != null) {
+  ikvmExecutable = [mono, "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe"]
+  csharpCompiler = [mono, "${monoFramework}/lib/mono/4.5/csc.exe"]
+  monoCSharpCompiler = [mono, "${monoFramework}/lib/mono/4.5/mcs.exe"]
 }
 
 def additionalIkvmOptions = []
@@ -37,7 +58,6 @@ task hen_setupPreprocess(
   from "${projectDir}/src/main/java"
   into "${buildDir}/filtered/hen"
   include "net/sf/saxon/**/*.java"
-  include "net/sf/saxon/data/**"
   exclude "net/sf/saxon/option/cpp/**"
   exclude "net/sf/saxon/jetonnet/**"
   exclude "net/sf/saxon/Gizmo.java"
@@ -69,7 +89,6 @@ task pen_setupPreprocess(
   from "${projectDir}/src/main/java"
   into "${buildDir}/filtered/pen"
   include "net/sf/saxon/**/*.java"
-  include "net/sf/saxon/data/**"
   exclude "net/sf/saxon/option/cpp/**"
   exclude "net/sf/saxon/jetonnet/**"
   exclude "net/sf/saxon/Gizmo.java"
@@ -102,7 +121,6 @@ task pen_setupPreprocess(
   exclude "com/saxonica/config/JavaPlatformPE.java" 
   exclude "com/saxonica/config/JavaPlatformEE.java" 
   exclude "com/saxonica/config/JavaPlatformC.java"
-    exclude "com/saxonica/config/NativePlatformPE.java"
   exclude "com/saxonica/config/ee/**" 
   exclude "com/saxonica/stream/**" 
   exclude "com/saxonica/schema/**" 
@@ -133,7 +151,6 @@ task een_setupPreprocess(
   from "${projectDir}/src/main/java"
   into "${buildDir}/filtered/een"
   include "net/sf/saxon/**/*.java"
-  include "net/sf/saxon/data/**"
   exclude "net/sf/saxon/TransformerFactoryImpl.java"
   exclude "net/sf/saxon/BasicTransformerFactory.java"
   exclude "net/sf/saxon/option/cpp/**"
@@ -174,7 +191,7 @@ task een_setupPreprocess(
 
 task hen_preprocess(
   type: JavaExec,
-  dependsOn: ["hen_setupPreprocess"],
+  dependsOn: ["hen_setupPreprocess", "record_branch"],
   description: "Preprocess HE sources"
 ) {
   inputs.files fileTree(dir: "${buildDir}/filtered/hen")
@@ -184,7 +201,7 @@ task hen_preprocess(
   args "/c",
     "/i:${buildDir}/filtered/hen", "/o:${buildDir}/preprocess/hen",
     "/p:EE=false", "/p:PE=false", "/p:DOTNET=true",
-    "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
+    "/p:SAXONC=false", "/p:BYTECODE=false"
   doFirst {
     mkdir "${buildDir}/preprocess/hen"
   }
@@ -192,7 +209,7 @@ task hen_preprocess(
 
 task pen_preprocess(
   type: JavaExec,
-  dependsOn: ["pen_setupPreprocess"],
+  dependsOn: ["pen_setupPreprocess", "record_branch"],
   description: "Preprocess PE sources"
 ) {
   inputs.files fileTree(dir: "${buildDir}/filtered/pen")
@@ -202,7 +219,7 @@ task pen_preprocess(
   args "/c",
     "/i:${buildDir}/filtered/pen", "/o:${buildDir}/preprocess/pen",
     "/p:EE=false", "/p:PE=true", "/p:DOTNET=true",
-    "/p:SAXONC=false", "/p:BYTECODE=false", "/p:HOF=true", "/p:CSHARP=false"
+    "/p:SAXONC=false", "/p:BYTECODE=false", "/p:HOF=true"
   doFirst {
     mkdir "${buildDir}/preprocess/pen"
   }
@@ -210,7 +227,7 @@ task pen_preprocess(
 
 task een_preprocess(
   type: JavaExec,
-  dependsOn: ["een_setupPreprocess"],
+  dependsOn: ["een_setupPreprocess", "record_branch"],
   description: "Preprocess EE sources"
 ) {
   inputs.files fileTree(dir: "${buildDir}/filtered/een")
@@ -221,7 +238,7 @@ task een_preprocess(
     "/i:${buildDir}/filtered/een", "/o:${buildDir}/preprocess/een",
     "/p:EE=true", "/p:PE=false", "/p:DOTNET=true",
     "/p:SAXONC=false", "/p:BYTECODE=true", "/p:HOF=true",
-    "/p:STREAM=true", "/p:SCHEMA=true", "/p:CSHARP=false"
+    "/p:STREAM=true", "/p:SCHEMA=true"
   doFirst {
     mkdir "${buildDir}/preprocess/een"
   }
@@ -392,7 +409,7 @@ task hen_jar(
   dependsOn: ["henCompile"],
   description: "Build the HE jar file for Saxon .NET"
 ) {
-  archiveBaseName = "saxon${saxonMajorVersion}he"
+  archiveBaseName = "saxon10he"
   destinationDirectory = file("${buildDir}/n/jar")
   from ("build/classes/hen") {
     include "net/**/*.class"
@@ -411,7 +428,7 @@ task pen_jar(
   dependsOn: ["penCompile"],
   description: "Build the PE jar file for Saxon .NET"
 ) {
-  archiveBaseName = "saxon${saxonMajorVersion}pe"
+  archiveBaseName = "saxon10pe"
   destinationDirectory = file("${buildDir}/n/jar")
   from ("build/classes/pen") {
     include "net/**/*.class"
@@ -442,7 +459,7 @@ task pen_jar(
     exclude "com/saxonica/config/StandardSchemaResolver.class"
     exclude "com/saxonica/expr/ee/*.class"
   }
-  from ("src/main/java") {
+  from ("src/main/resources") {
     include "net/sf/saxon/data/**"
   }
   doFirst {
@@ -455,7 +472,7 @@ task een_jar(
   dependsOn: ["eenCompile"],
   description: "Build the EE jar file for Saxon .NET"
 ) {
-  archiveBaseName = "saxon${saxonMajorVersion}ee"
+  archiveBaseName = "saxon10ee"
   destinationDirectory = file("${buildDir}/n/jar")
   from ("build/classes/een") {
     include "net/**/*.class"
@@ -464,7 +481,7 @@ task een_jar(
     exclude "com/saxonica/config/EnterpriseTransformerFactory.class"
     exclude "com/saxonica/config/EnterpriseXPathFactory.class"
   }
-  from ("src/main/java") {
+  from ("src/main/resources") {
     include "net/sf/saxon/data/**"
   }
   doFirst {
@@ -515,6 +532,7 @@ task "n_notices"(
     from "${ikvmDir}/ikvm-${ikvmVersion}/bin"
     into "${buildDir}/n/bin/${release}"
     include "IKVM.OpenJDK.Core.dll"
+    include "IKVM.OpenJDK.Localedata.dll"
     include "IKVM.OpenJDK.Charsets.dll"
     include "IKVM.OpenJDK.Text.dll"
     include "IKVM.OpenJDK.Util.dll"
@@ -554,6 +572,17 @@ task "n_notices"(
     commandLine "${dotNetInstaller}",
       "/cc", "${buildDir}/n/${release}.iss"
   }
+
+  task "${release}nSigner"(
+    type: Exec,
+    dependsOn: ["${release}nInstaller"]
+  ) {
+    commandLine "signtool",
+      "sign", "/a",
+      "/tr", "http://rfc3161timestamp.globalsign.com/advanced",
+      "/td", "SHA256",
+      "${buildDir}/distributions/Saxon${RELEASE}${saxonMajorVersion}-${saxonMinorVersion}N-setup.exe"
+  }
 }
 
 task henDll(
@@ -561,12 +590,12 @@ task henDll(
   dependsOn: ["hen_setupDll"],
   description: "Build HE .dll with IKVM"
 ) {
-  inputs.files("${buildDir}/n/bin/he")
+  inputs.files("${buildDir}/n/bin/jar")
   inputs.file("${buildDir}/xerces/xerces.jar")
   inputs.file("${ikvmDir}/saxondotnet.snk")
   outputs.file("build/n/bin/he/saxon-he-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
-  def ikvmCommand = [ "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe" ] \
+  def ikvmCommand = ikvmExecutable \
   + additionalIkvmOptions \
   + ["-out:${buildDir}/n/bin/he/saxon-he-${saxonMajorVersion}.${saxonMinorVersion}.dll",
      "-assembly:saxon-he-${saxonMajorVersion}.${saxonMinorVersion}",
@@ -578,7 +607,7 @@ task henDll(
      "-reference:System.Xml.dll",
      "-reference:System.dll",
      "-reference:${buildDir}/n/bin/he/IKVM.OpenJDK.Core.dll",
-     "${buildDir}/n/jar/saxon${saxonMajorVersion}he.jar",
+     "${buildDir}/n/jar/saxon10he.jar",
      "${buildDir}/n/jar/xerces.jar"]
 
   commandLine ikvmCommand
@@ -592,12 +621,12 @@ task penDll(
   dependsOn: ["pen_setupDll"],
   description: "Build PE .dll with IKVM"
 ) {
-  inputs.files("${buildDir}/n/bin/pe")
+  inputs.files("${buildDir}/n/bin/jar")
   inputs.file("${buildDir}/xerces/xerces.jar")
   inputs.file("${ikvmDir}/saxondotnet.snk")
   outputs.file("build/n/bin/pe/saxon-pe-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
-  def ikvmCommand = [ "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe" ] \
+  def ikvmCommand = ikvmExecutable \
   + additionalIkvmOptions \
   + ["-out:${buildDir}/n/bin/pe/saxon-pe-${saxonMajorVersion}.${saxonMinorVersion}.dll",
      "-assembly:saxon-pe-${saxonMajorVersion}.${saxonMinorVersion}",
@@ -610,7 +639,7 @@ task penDll(
      "-reference:System.dll",
      "-reference:${buildDir}/n/bin/pe/IKVM.OpenJDK.Core.dll",
      "-reference:System.Security.dll",
-     "${buildDir}/n/jar/saxon${saxonMajorVersion}pe.jar",
+     "${buildDir}/n/jar/saxon10pe.jar",
      "${buildDir}/n/jar/xerces.jar",
      "${buildDir}/n/jar/tagsoup-${tagsoupVersion}.jar",
      "${buildDir}/n/jar/javax.mail-${mailVersion}.jar",
@@ -627,12 +656,12 @@ task eenDll(
   dependsOn: ["een_setupDll"],
   description: "Build EE .dll with IKVM"
 ) {
-  inputs.files("${buildDir}/n/bin/ee")
+  inputs.files("${buildDir}/n/bin/jar")
   inputs.file("${buildDir}/xerces/xerces.jar")
   inputs.file("${ikvmDir}/saxondotnet.snk")
-  outputs.file("build/n/bin/ee/saxon-ee-${saxonMajorVersion}.${saxonMinorVersion}.dll")
+  outputs.file("${buildDir}/n/bin/ee/saxon-ee-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
-  def ikvmCommand = [ "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe" ] \
+  def ikvmCommand = ikvmExecutable \
   + additionalIkvmOptions \
   + ["-out:${buildDir}/n/bin/ee/saxon-ee-${saxonMajorVersion}.${saxonMinorVersion}.dll",
      "-assembly:saxon-ee-${saxonMajorVersion}.${saxonMinorVersion}",
@@ -645,7 +674,7 @@ task eenDll(
      "-reference:System.dll",
      "-reference:${buildDir}/n/bin/ee/IKVM.OpenJDK.Core.dll",
      "-reference:System.Security.dll",
-     "${buildDir}/n/jar/saxon${saxonMajorVersion}ee.jar",
+     "${buildDir}/n/jar/saxon10ee.jar",
      "${buildDir}/n/jar/xerces.jar",
      "${buildDir}/n/jar/asm-${asmVersion}/asm-${asmVersion}.jar",
      "${buildDir}/n/jar/asm-${asmVersion}/asm-analysis-${asmVersion}.jar",
@@ -688,10 +717,14 @@ task unjar_Resolver(
   type: Copy,
   description: "Unjar Resolver for .NET build"
 ) {
-  inputs.file("${resolverJar}")
-  outputs.files(fileTree("${buildDir}/xerces/org/apache/xml/resolver"))
-  from zipTree(file("${resolverJar}"))
+  from zipTree(file(resolverJar))
   into "${buildDir}/xerces"
+}
+// This task is always out of date because
+// .../build/xerces/META-INF/MANIFEST.MF has changed.
+// Skip this if it doesn't seem to be necessary
+unjar_Resolver.onlyIf {
+  !file("${buildDir}/xerces/org/apache/xml/resolver/Catalog.class").exists()
 }
 
 task rejar_Xerces(
@@ -699,6 +732,8 @@ task rejar_Xerces(
   dependsOn: ["unjar_XercesImpl", "unjar_Resolver"],
   description: "Unjar Xerces and Resolver for .NET build"
 ) {
+  inputs.files fileTree("${buildDir}/xerces/org")
+  outputs.file "${buildDir}/xerces/xerces.jar"
   archiveBaseName = "xerces"
   destinationDirectory = file("${buildDir}/xerces")
   from ("${buildDir}/xerces") {
@@ -772,10 +807,11 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/he/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/he/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
-                  "-target:library", "-doc:${buildDir}/n/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/he/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+         "-target:library",
+         "-doc:${buildDir}/n/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/he",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -800,10 +836,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/he/Transform.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/he/Transform.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/he/Transform.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/he",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -827,10 +863,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/he/Query.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/he/Query.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/he/Query.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/he",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -854,10 +890,11 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/pe/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/pe/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
-                  "-target:library", "-doc:${buildDir}/n/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/pe/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+         "-target:library",
+         "-doc:${buildDir}/n/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/pe",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -882,10 +919,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/pe/Transform.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/pe/Transform.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/pe/Transform.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/pe",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -909,10 +946,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/pe/Query.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/pe/Query.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/pe/Query.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/pe",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -927,30 +964,77 @@ if (csharpCompiler == null) {
     }
   }
 
-  task een_csharpApi(
-    dependsOn: ["eenDll"],
-    description: "Compile Saxon.Api for EE"
-  ) {
-    inputs.files("${buildDir}/n/build/dll/ee")
-    inputs.files("${buildDir}/n/csharp/api")
-    outputs.file("${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
+  if (csharpCompiler == monoCSharpCompiler) {
+    task een_csharpApi(
+      dependsOn: ["eenDll"],
+      description: "Compile Saxon.Api for EE"
+    ) {
+      inputs.files("${buildDir}/n/build/dll/ee")
+      inputs.files("${buildDir}/n/csharp/api")
+      outputs.file("${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
-    doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
-                  "-target:library", "-doc:${buildDir}/n/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
-      fileTree(dir: "${buildDir}/n/bin/ee",
-               include: "*.dll").each { dll ->
-        args += ["-reference:${dll}"]
-      }
-      fileTree(dir: "${buildDir}/n/csharp/api/Saxon.Api",
-               include: "**/*.cs").each { cs ->
-        args += [cs]
+      doFirst {
+        println("********************************************************************")
+        println("Warning: this task will not generate useful documentation API XML.")
+        println("You must use the Mono/mcs compiler to get useful documentation.")
+        println("********************************************************************")
       }
 
-      exec {
-        commandLine args
+      doLast {
+        def args = csharpCompiler \
+        + ["-out:${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+           "-target:library",
+           "-doc:${buildDir}/n/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
+           "-keyfile:${ikvmDir}/saxondotnet.snk"]
+        fileTree(dir: "${buildDir}/n/bin/ee",
+                 include: "*.dll").each { dll ->
+          args += ["-reference:${dll}"]
+        }
+        fileTree(dir: "${buildDir}/n/csharp/api/Saxon.Api",
+                 include: "**/*.cs").each { cs ->
+          args += [cs]
+        }
+        
+        exec {
+          commandLine args
+        }
+      }
+    }
+  } else {
+    task een_csharpApi(
+      dependsOn: ["eenDll", "hen_ApiAssemblyInfo"],
+      description: "Compile Saxon.Api for EE"
+    ) {
+      inputs.files("${buildDir}/n/build/dll/ee")
+      inputs.files("${buildDir}/n/csharp/api")
+      outputs.file("${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
+
+      doLast {
+        def args = monoCSharpCompiler \
+        + ["/nologo",
+           "/debug+",
+           "-keyfile:${ikvmDir}/saxondotnet.snk",
+           "/optimize-",
+           "-out:${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+           "/target:library",
+           "/nostdlib-",
+           "/warn:3",
+           "/doc:${buildDir}/n/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
+           "/fullpaths"]
+        fileTree(dir: "${buildDir}/n/bin/ee",
+                 include: "*.dll").each { dll ->
+          if (!dll.toString().contains("saxon-ee-api")) {
+            args += ["-reference:${dll}"]
+          }
+        }
+        fileTree(dir: "${buildDir}/n/csharp/api/Saxon.Api",
+                 include: "**/*.cs").each { cs ->
+          args += [cs]
+        }
+
+        exec {
+          commandLine args
+        }
       }
     }
   }
@@ -964,10 +1048,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/ee/Transform.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/ee/Transform.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/ee/Transform.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/ee",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -991,10 +1075,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/ee/Query.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/ee/Query.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/ee/Query.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/ee",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -1018,10 +1102,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/ee/Validate.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/ee/Validate.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/ee/Validate.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/ee",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]

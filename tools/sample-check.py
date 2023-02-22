@@ -1,0 +1,341 @@
+#!/usr/bin/env python3
+
+import re
+import sys
+import click
+
+def check_against_map(expect, output):
+    found = {}
+
+    lines = []
+    with open(output, "r") as samples:
+        for line in samples.readlines():
+            lines.append(line.rstrip())
+
+    while len(lines) > 0:
+        line = lines[0]
+        lines = lines[1:]
+        title = re.match("^====\s*(.+?)\s*====\s*$", line)
+        if title:
+            found[title.group(1)] = 1
+            lines = check(expect, title.group(1), lines)
+        else:
+            pass
+
+    for title in expect:
+        if title not in found:
+            raise RuntimeError(f"Expected sample not found: {title}")
+
+
+def check_jaxpexamples(output):
+    check_against_map(
+        {"ParseOnly": ["", "Parsing complete"],
+         "Simple1": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "Simple2": ["", "Output written to Simple2.out"],
+         "FromStream": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "FromReader": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "UseTemplatesObj": ["", "", r"-+ transform of data",
+                             r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "UseTemplatesHandler": [r"^<\?xml.*[Uu][Tt][Ff]-8",
+                                 r"<XXhtml>", r"^is here-->", r"\s*<XXhead>"],
+         "SAXResult": ["setDocumentLocator", "startDocument", "startElement:"],
+         "ContentHandlerToContentHandler": ["setDocumentLocator", "startDocument", "startElement:"],
+         "XMLReader": ["setDocumentLocator", "startDocument", "startElement:"],
+         "XMLFilter": ["setDocumentLocator", "startDocument", "startElement:"],
+         "XMLFilterChain": ["setDocumentLocator", "startDocument", "startElement: , summary, summary"],
+         "DOMsubtree": [r"^<\?xml.*[Uu][Tt][Ff]-8.*<BOOKS xmlns",
+                        r"\s*<ITEM CAT=.MMP.>", r"\s*<TITLE>"],
+         "DOMtoDOM": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "Param": ["", "Transform 1 and 2 use different transformers", "", "",
+                   "----- Transform 1: set top-author parameter"],
+         "TransformerReuse": ["", "Transform 1 and 2 use the same transformer", "", "",
+                              "----- Transform 1: set top-author parameter"],
+         "OutputProperties": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*\$14.78"],
+         "UseAssociated": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "ContentHandlertoDOM": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "AsSerializer": [r"^<\?xml-stylesheet.*DOCTYPE HTML><BOOKLIST", "", r"\s*<BOOKS>"],
+         "NewDOMSerializer": [r"^<\?xml.*[Uu][Tt][Ff]-8", r"^<x xmlns=.nsx\.uri./>"],
+         "UsingURIResolver": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "done!": []
+     }, output)
+
+
+def check(expect, title, lines):
+    if title in expect:
+        for regex in expect[title]:
+            line = lines[0]
+            lines = lines[1:]
+            if not re.match(regex, line):
+                raise RuntimeError(f"Unexpected output for {title} ([{regex}] != [{line}])")
+    else:
+        raise RuntimeError(f"Unexpected sample: {title}!")
+
+    return lines
+
+
+def check_applyxpathjaxp(output, om):
+    lines = []
+    with open(output, "r") as samples:
+        for line in samples.readlines():
+            lines.append(line.rstrip())
+
+    expect = {"n/a": [r"^Loading classes,", f"^Querying {om}",
+                      r"^<output>", r"String Value => Pride and Prejudice",
+                      r"^</output>"]}
+
+    lines = check(expect, "n/a", lines)
+
+
+def check_examplecontenthandler(output):
+    lines = []
+    with open(output, "r") as samples:
+        for line in samples.readlines():
+            lines.append(line.rstrip())
+
+    expect = {"n/a": [r"^setDocumentLocator", r"^startDocument",
+                      r"^processingInstruction: xml-stylesheet",
+                      r"^startElement.*BOOKLIST"]}
+
+    lines = check(expect, "n/a", lines)
+
+
+def check_queryapiexamples(output):
+    check_against_map(
+        {"toStreamResult": [r"<\?xml", r"<a b=.c.>7<"],
+         "toSingleton": [r"^38\.5"],
+         "toDOM": [r"<\?xml.*<a xmlns=.*another.uri.*text<"],
+         "toSequence": [r"^1", r"^4", r"9", r"16"],
+         "toSerializedSequence": [r"<a>3.*<b>4.*>19"],
+         "toWrappedSequence": [r"<\?xml", r"^<result:sequence", r"^.*<result:element"],
+         "toHTMLFile": [r"Output written to booklist.html"],
+         "withParam": [r"^17\ \*\ 17 = 289"],
+         "pipeline": [r"3\*3\ \+\ 5 = 14\.0"],
+         "directFunction": [r"10 div 3 = 3\.33333", r"10 div 4 = 2.5", r"10 div 5 = 2"]
+         }, output)
+
+
+def check_s9apiexamplesom_pe(output):
+    check_against_map(
+        {"XPathDOM": ["", "Pride and Prejudice", "Wuthering Heights"],
+         "XPathJDOM": ["", "Pride and Prejudice", "Wuthering Heights"],
+         "XPathXOM": ["", r"^<TITLE>Pride and Prejudice<", r"<TITLE>Wuthering Heights<"],
+         "XPathDOM4J": ["", r"^<TITLE>Pride and Prejudice<", r"<TITLE>Wuthering Heights<"],
+         }, output)
+
+
+def check_s9apiexamplesom_ee(output):
+    check_against_map(
+        {"XPathDOM": ["", "Pride and Prejudice", "Wuthering Heights"],
+         "XPathJDOM": ["", "Pride and Prejudice", "Wuthering Heights"],
+         "XPathXOM": ["", r"^<TITLE>Pride and Prejudice<", r"<TITLE>Wuthering Heights<"],
+         "XPathDOM4J": ["", r"^<TITLE>Pride and Prejudice<", r"<TITLE>Wuthering Heights<"],
+         }, output)
+
+
+def check_s9apiexamples_he_pe(output):
+    check_against_map(
+        {"QueryA": ["", r"^<a b=.c.>7<"],
+         "QueryB": ["", r"Total: 385"],
+         "QueryC": ["", "apple: true", "banana: false", "cherry: true"],
+         "QueryD": ["", r"<\?xml.*<out><e>11<.*<e>12<.*<e>13"],
+         "QueryE": ["", r"Start element {}copy", r"^Start element {}ITEM"],
+         "TransformA": ["", "Output written to books.html"],
+         "TransformB": ["", "Output written to tour.html"],
+         "TransformC": ["", "apple: true", "banana: false", "cherry: true"],
+         "TransformD": ["", "103"],
+         "TransformE": ["", r"^<!DOCTYPE HTML.*", r"is here", r"^.*<head>"],
+         "TransformF": ["", r"^<\?xml", r"^.*<exists>false<"],
+         "TransformG": ["", "BOOKLIST/BOOKS/ITEM/TITLE", "BOOKLIST/BOOKS/ITEM/AUTHOR"],
+         "XPathA": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
+         "XPathB": ["", "Result: 6.11"],
+         "XPathDOM": ["", "Pride and Prejudice", "Wuthering Heights"],
+         "SerializeA": ["", r"^<a ", r"^.*<z xmlns=../>"],
+         "SerializeB": ["", r"<d>4</d>", r"<c>3</c>", r"<b>2</b>"],
+         "SerializeC": ["", r"Serialized result: 5 6 7 8 9 10 & 20"],
+         "SerializeD": ["", "Serialized result: <\?xml.*", r"<doc xmlns", r"^.*<heading"],
+         "NavigationA": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
+         "NavigationD": ["", r"^Tess of the .*", r"^Jude the Obscure"]
+         }, output)
+
+
+def check_s9apiexamples_ee(output):
+    check_against_map(
+        {"QueryA": ["", r"^<a b=.c.>7<"],
+         "QueryB": ["", r"Total: 385"],
+         "QueryC": ["", "apple: true", "banana: false", "cherry: true"],
+         "QueryD": ["", r"<\?xml.*<out><e>11<.*<e>12<.*<e>13"],
+         "QueryE": ["", r"Start element {}copy", r"^Start element {}ITEM"],
+         "TransformA": ["", "Output written to books.html"],
+         "TransformB": ["", "Output written to tour.html"],
+         "TransformC": ["", "apple: true", "banana: false", "cherry: true"],
+         "TransformD": ["", "103"],
+         "TransformE": ["", r"^<!DOCTYPE HTML.*", r"is here", r"^.*<head>"],
+         "TransformF": ["", r"^<\?xml", r"^.*<exists>false<"],
+         "TransformG": ["", "BOOKLIST/BOOKS/ITEM/TITLE", "BOOKLIST/BOOKS/ITEM/AUTHOR"],
+         "SchemaA": ["", "First schema validation succeeded.*", "Second schema validation failed.*",
+                     "In.*ITEM.*OLD-TITLE.*TITLE.*"],
+         "SchemaB": ["", "Validation succeeded"],
+         "XPathA": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
+         "XPathB": ["", "Result: 6.11"],
+         "XPathC": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
+         "XPathDOM": ["", "Pride and Prejudice", "Wuthering Heights"],
+         "SerializeA": ["", r"^<a ", r"^.*<z xmlns=../>"],
+         "SerializeB": ["", r"<d>4</d>", r"<c>3</c>", r"<b>2</b>"],
+         "SerializeC": ["", r"Serialized result: 5 6 7 8 9 10 & 20"],
+         "SerializeD": ["", "Serialized result: <\?xml.*", r"<doc xmlns", r"^.*<heading"],
+         "NavigationA": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
+         "NavigationB": ["", "Result: 6.11"],
+         "NavigationC": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
+         "NavigationD": ["", r"^Tess of the .*", r"^Jude the Obscure"]
+         }, output)
+
+
+def check_jdom2example(output):
+    lines = []
+    with open(output, "r") as samples:
+        for line in samples.readlines():
+            lines.append(line.rstrip())
+
+    expect = {"n/a": [r"^<!DOCTYPE HTML.*", r"^is here.*",
+                      r"^.*<head>"]}
+
+    lines = check(expect, "n/a", lines)
+
+
+def check_pullexamples(output):
+    check_against_map(
+        {"Serialize the input to the output": ["", r"^<\?xml.*", r"<\?xml-stylesheet",
+                                               "<BOOKLIST .*"],
+         "Validate the input": ["", "Done."],
+         "Transform the input to the output": ["", "<!DOCTYPE HTML.*", "^is here", "^.*<head>"],
+         "Run XQuery against the input": ["", r"<\?xml.*", "<book>", ".*<author>"],
+         "Remove PRICE elements from the input": ["", r"^<\?xml.*", r"<\?xml-stylesheet",
+                                                  "<BOOKLIST.*", "^.*xsi:", "^\s*<BOOKS>",
+                                                  "\s*<ITEM.*", "\s*<TITLE>", "\s*<AUTHOR>",
+                                                  "\s*<PUBLISHER>", "\s*<PUB-DATE>", "\s*<LANGUAGE>",
+                                                  "\s*<QUANTITY>", "\s*<ISBN>", "\s*<PAGES>", 
+                                                  "\s*<DIMENSIONS", "\s*<WEIGHT"],
+         "Compute average of PRICE elements in the input": ["", r"<result>11.1749.*"],
+         "Obtain query results using a pull iterator": ["", r"<\?xml.*", "^\s*<e .*", "^\s*<f "],
+         "Obtain query results using a pull iterator on a 'standard' tree": ["", r"<\?xml .*",
+                                                                             "<CATEGORIES "],
+         }, output)
+
+
+def check_schemavalidatorhandler(output):
+    lines = []
+    with open(output, "r") as samples:
+        for line in samples.readlines():
+            lines.append(line.rstrip())
+
+    expect = {"n/a": [r"^Element BOOKLIST of type .*BOOKLIST_anonymous",
+                      r"^\s*Attribute xsi:noNamespaceSchemaLocation \(specified\).*",
+                      r"^\s*Element BOOKS of type .*BOOKS_anonymous"]}
+
+    lines = check(expect, "n/a", lines)
+
+
+def check_xpathexamplesa(output):
+    lines = []
+    with open(output, "r") as samples:
+        for line in samples.readlines():
+            lines.append(line.rstrip())
+
+    expect = {"n/a": ["Pride and Prejudice", "Wuthering Heights", "The Big Over Easy"]}
+
+    lines = check(expect, "n/a", lines)
+
+
+def check_xqjexamples(output):
+    check_against_map(
+        {"TestA": ["", r"^<a b=.c.>7<"],
+         "TestB": ["", r"Total: 385"],
+         "TestC": ["", "banana: false", "apple: true", "orange: true", "^Failed as expected.*"],
+         "TestD": ["", "banana: false", "apple: true", "orange: true"],
+         "TestE": ["", "DOM node name: a", "DOM node namespace: http://a/uri", "DOM node children: 1"],
+         "TestF": ["", "setDocumentLocator", "startDocument",
+                   "startPrefixMapping: .*", "startPrefixMapping: .*",
+                   "startElement:.*"],
+         "TestG": ["", "<a xmlns=.*", "^\s*<b>4<"],
+         "TestH": ["", "1 peach 1951-10-11 PT5M 93.7 <the end>"],
+         "TestI": ["", "^start {.*", "^\s*start namespace .*", "^\s*start namespace .*"],
+         "TestJ": ["", "count: 24"],
+         "TestK": ["", r"<BOOKS>", r"^\s*<ITEM "],
+         "TestL": ["", r"Locale: Italian"],
+         "TestZ": ["", r"Output written to testZ.out"]
+         }, output)
+
+
+def check_xmarkbenchmark(output):
+    lines = []
+    with open(output, "r") as samples:
+        for line in samples.readlines():
+            lines.append(line.rstrip())
+
+    expect = {"n/a": [r"^<xmark-results .*", r"^\s*<file name=.xmark1.xml'"]}
+
+    lines = check(expect, "n/a", lines)
+
+
+@click.command()
+@click.option("--edition", default="he",
+              type=click.Choice(["he", "pe", "ee"]),
+              help="Saxon edition that produced the sample output")
+@click.option("--sample", required=True,
+              help="The name (key, really) of the sample to check")
+@click.argument("output",
+                type=click.Path(file_okay=True, dir_okay=False,
+                                resolve_path=True, readable=True))
+def check_samples(edition, sample, output):
+    try:
+        if sample == "JAXPExamples":
+            check_jaxpexamples(output)
+        elif sample == "ApplyXPathJAXP_dom":
+            check_applyxpathjaxp(output, "dom")
+        elif sample == "ApplyXPathJAXP_saxon":
+            check_applyxpathjaxp(output, "saxon")
+        elif sample == "ExampleContentHandler":
+            check_examplecontenthandler(output)
+        elif sample == "QueryAPIExamples":
+            check_queryapiexamples(output)
+        elif sample == "S9APIExamplesOM_ee":
+            check_s9apiexamplesom_ee(output)
+        elif sample == "S9APIExamplesOM_pe":
+            check_s9apiexamplesom_pe(output)
+        elif sample == "S9APIExamples_he":
+            check_s9apiexamples_he_pe(output)
+        elif sample == "S9APIExamples_pe":
+            check_s9apiexamples_he_pe(output)
+        elif sample == "S9APIExamples_ee":
+            check_s9apiexamples_ee(output)
+        elif sample == "JDOM2Example":
+            check_jdom2example(output)
+        elif sample == "PullExamples":
+            check_pullexamples(output)
+        elif sample == "QuickValidator":
+            pass # produces no output
+        elif sample == "SchemaValidatorExample_1":
+            pass # produces no output
+        elif sample == "SchemaValidatorExample_2":
+            pass # produces no output
+        elif sample == "SchemaValidatorHandlerExample_1":
+            check_schemavalidatorhandler(output)
+        elif sample == "SchemaValidatorHandlerExample_2":
+            check_schemavalidatorhandler(output)
+        elif sample == "XPathExampleSA":
+            check_xpathexamplesa(output)
+        elif sample == "XQJExamples":
+            check_xqjexamples(output)
+        elif sample == "XMarkBenchmark_1":
+            check_xmarkbenchmark(output)
+        else:
+            raise RuntimeError(f"Unexpected {sample}")
+
+        print(f"👍 {sample}")
+    except RuntimeError as err:
+        print(f"👎 {sample}")
+        print("\t", str(err))
+        sys.exit(1)
+
+if __name__ == "__main__":
+    check_samples()
