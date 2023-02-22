@@ -614,7 +614,12 @@ task graal_eec_jar(
     doLast {
       copy {
         into pypiDir
-        from "${projectDir}/src/main/c/Saxon.C.API/python-saxon/pypi_saxonc-${edition}"
+        from "${projectDir}/src/main/c/pypi"
+        filter { line ->
+          line.replaceAll('@@VERSION@@', saxonVersion)
+            .replace('@@edition@@', edition)
+            .replace('@@EDITION@@', edition.toUpperCase())
+        }
       }
     }
     
