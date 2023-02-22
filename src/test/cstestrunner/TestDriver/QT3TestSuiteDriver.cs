@@ -1,6 +1,5 @@
 ﻿using System;
 using SysCollGen = System.Collections.Generic;
-using System.Xml;
 using System.IO;
 using Saxon.Api;
 using static Saxon.Api.Steps;
@@ -13,6 +12,8 @@ using JConfiguration = Saxon.Hej.Configuration;
 using JVersion = Saxon.Hej.Version;
 using System.Linq;
 using System.Net;
+using System.Text;
+using Saxon.Hej.trans;
 
 
 namespace TestDriver {
@@ -411,7 +412,7 @@ namespace TestDriver {
 
 
             Environment env = getEnvironment(testCase, xpc);
-            if (env == null) {
+            if (env == null || !env.usable) {
                 notrun++;
                 return;
             }
@@ -577,6 +578,7 @@ namespace TestDriver {
                         testXpc.DeclareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
                         testXpc.DeclareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
                         testXpc.DeclareNamespace("map", "http://www.w3.org/2005/xpath-functions/map");
+                        testXpc.DeclareNamespace("array", "http://www.w3.org/2005/xpath-functions/array");
                         //testXpc.DeclareNamespace("math", NamespaceConstant.MATH);
                         //testXpc.DeclareNamespace("Dictionary", NamespaceConstant.Dictionary_FUNCTIONS);
 
@@ -591,11 +593,20 @@ namespace TestDriver {
                                 selector.ContextItem = env.contextItem;
                             }
 
-                            selector.InputXmlResolver = new TestUriResolver(env);
+                            selector.InputXmlResolver = env;
 
                             if (env.unparsedTextResolver != null) {
-                                // TODO
-                                //selector.Implementation.setUnparsedTextResolver(env.unparsedTextResolver);
+                                selector.Implementation.setUnparsedTextURIResolver(
+                                    (uri, enc, config) => {
+                                        Encoding encoding;
+                                        try {
+                                            encoding = enc == null ? null : Encoding.GetEncoding(enc);
+                                        }
+                                        catch (System.ArgumentException e) {
+                                            throw new XPathException("Unknown encoding " + enc, "FOUT1170");
+                                        }
+                                        return env.unparsedTextResolver(uri, encoding);
+                                    });
                             }
 
                             XdmValue result = selector.Evaluate();
@@ -619,23 +630,24 @@ namespace TestDriver {
                         testXqc.ErrorReporter = err => errorList.Add(err);
                         string decVars = env.paramDecimalDeclarations.ToString();
                         if (decVars.Length != 0) {
-                            int x = (exp.IndexOf("(:%DECL%:)"));
+                            int x = (exp.IndexOf("(:%DECL%:)", StringComparison.Ordinal));
                             if (x < 0) {
                                 exp = decVars + exp;
                             }
                             else {
-                                exp = exp.Substring(0, x) + decVars + exp.Substring(x + 13);
+                                exp = exp[..x] + decVars + exp[(x + 13)..];
                             }
                         }
 
                         string vars = env.paramDeclarations.ToString();
                         if (vars.Length != 0) {
-                            int x = (exp.IndexOf("(:%VARDECL%:)"));
+                            // ReSharper disable once StringLiteralTypo
+                            int x = (exp.IndexOf("(:%VARDECL%:)", StringComparison.Ordinal));
                             if (x < 0) {
                                 exp = vars + exp;
                             }
                             else {
-                                exp = exp.Substring(0, x) + vars + exp.Substring(x + 13);
+                                exp = exp[..x] + vars + exp[(x + 13)..];
                             }
                         }
 
@@ -879,49 +891,7 @@ namespace TestDriver {
             }
         }
 
-        public class TestUriResolver : XmlUrlResolver {
-            Environment env1;
-
-            public TestUriResolver(Environment env) {
-                this.env1 = env;
-            }
-
-            public override Uri ResolveUri(Uri base1, string href) {
-                XdmNode node = null;
-                try {
-                    node = env1.sourceDocs[href];
-                }
-                catch (Exception) {
-                    try {
-                        return (new XmlUrlResolver()).ResolveUri(base1, href);
-                    }
-                    catch (Exception) {
-                        return null;
-                    }
-                }
-
-                if (node == null) {
-                    return null;
-                }
-                else {
-                    return node.DocumentUri;
-                }
-            }
-        }
-
-
-        /**
-         * Static method called as an external function call to evaluate a literal when running in "unfolded" mode.
-         * The function simply returns the value of its argument - but the optimizer doesn't know that, so it
-         * can't pre-evaluate the call at compile time.
-         *
-         * @param value the value to be returned
-         * @return the supplied value, unchanged
-         */
-
-        /*public static Sequence lazyLiteral(Sequence value) {
-            return value;
-        } */
+        
 
         /**
          * Collect together information about all the dependencies of tests that use a given environment
