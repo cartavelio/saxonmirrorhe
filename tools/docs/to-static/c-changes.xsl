@@ -31,6 +31,7 @@
     <xsl:template match="ch:release" mode="ch">
         <section id="v{@number}" title="Changes in Release {@number}">
             <h1>Changes in Release <xsl:value-of select="@number"/> (<xsl:value-of select="format-date(@date, '[D] [MNn] [Y]')"/>)</h1>
+            <xsl:apply-templates select="ch:head" mode="ch"/>
             <nav>
                 <ul/>
             </nav>
