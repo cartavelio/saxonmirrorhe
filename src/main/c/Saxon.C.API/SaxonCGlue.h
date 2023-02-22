@@ -161,6 +161,8 @@ char * _getResourceDirectory();
  */
 int create_graalvm_isolate(sxnc_environment * env);
 
+int attach_graalvm_thread(sxnc_environment * env);
+
 
 int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license);
 

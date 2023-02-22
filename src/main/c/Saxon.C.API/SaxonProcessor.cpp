@@ -15,7 +15,7 @@
 #include "XdmAtomicValue.h"
 
 
-//#define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #include <signal.h>
@@ -287,7 +287,19 @@ void SaxonProcessor::initialize(bool l) {
 }
 
 void SaxonProcessor::attachCurrentThread() {
-//TODO remove method
+    std::cerr<<"attachCurrentThread called"<<std::endl;
+    //graal_isolate_t *isolate = SaxonProcessor::sxn_environ->isolate;
+    //graal_isolatethread_t *thread = nullptr;
+    //graal_create_isolate(nullptr, &isolate, nullptr);
+    int result = 0;
+    //graal_isolatethread_t *thread = nullptr;
+    //result = graal_attach_thread(isolate, &thread);
+   // sxnc_environment *sxn_environi = new sxnc_environment;
+    result = attach_graalvm_thread(SaxonProcessor::sxn_environ);
+    if(result != 0) {
+        std::cerr<<"attachCurrentThread failed"<<std::endl;
+
+    }
 
 }
 
@@ -364,7 +376,7 @@ bool SaxonProcessor::isSchemaAwareProcessor() {
 }
 
 void SaxonProcessor::applyConfigurationProperties() {
-    SaxonProcessor::attachCurrentThread();
+    //SaxonProcessor::attachCurrentThread();
     if (configProperties.size() > 0) {
         int size = configProperties.size();
         int64_t processorDataRef = createProcessorDataWithCapacity(SaxonProcessor::sxn_environ->thread, size);
@@ -756,7 +768,6 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename, SchemaValidator 
         if(exception->getMessage() != nullptr) {
             std::cerr<<"parseXmlFromFile, message ="<<exception->getMessage()<<std::endl;
         }
-        std::cerr<<"parseXmlFromFile, cp1"<<std::endl;
     }
     return nullptr;
 }
@@ -819,7 +830,7 @@ void SaxonProcessor::release() {
 /* ========= Factory method for Xdm ======== */
 
 XdmAtomicValue *SaxonProcessor::makeStringValue(const char *str) {
-    SaxonProcessor::attachCurrentThread();
+    //SaxonProcessor::attachCurrentThread();
     int64_t stringValueRef = j_makeStringValue(sxn_environ->thread, (char *) str);
     XdmAtomicValue * value = new XdmAtomicValue(stringValueRef, "xs:string");
     return value;
@@ -874,7 +885,7 @@ XdmAtomicValue *SaxonProcessor::makeBooleanValue(bool b) {
 }
 
 XdmAtomicValue *SaxonProcessor::makeQNameValue(const char *str) {
-    SaxonProcessor::attachCurrentThread();
+    //SaxonProcessor::attachCurrentThread();
     int64_t qnameValueRef = j_makeQNameValue(sxn_environ->thread, (char *)str);
     XdmAtomicValue *value = new XdmAtomicValue(qnameValueRef, "QName");
     return value;

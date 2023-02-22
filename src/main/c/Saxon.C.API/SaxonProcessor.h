@@ -22,9 +22,9 @@
 #include <windows.h>
 #endif
 
-//#define DEBUG //remove
+#define DEBUG //remove
 //#define MEM_DEBUG //remove
-#define CVERSION "12.1"
+#define CVERSION "12.0"
 #define CVERSION_API_NO 1210
 
 typedef void* (*allocFn)(size_t length);

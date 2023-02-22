@@ -641,7 +641,6 @@ task graal_eec_jar(
       copy {
         from "${projectDir}/src/main/c"
         into "${saxoncReleaseDir}"
-        include "setenv"
       }
     }
 
