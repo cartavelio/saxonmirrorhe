@@ -736,7 +736,7 @@ public class Transform {
                 if (isURI) {
                     ResourceRequest request = new ResourceRequest();
                     request.relativeUri = styleFileName;
-                    URI cwd = getCurrentWorkingDirectory();
+                    URI cwd = CommandLineOptions.getCurrentWorkingDirectory();
                     request.baseUri = cwd.toASCIIString();
                     request.uri = cwd.resolve(styleFileName).toString();
                     request.nature = ResourceRequest.XSLT_NATURE;
@@ -744,7 +744,7 @@ public class Transform {
                     styleSource = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
                 } else if (styleFileName.equals("-")) {
                     // take input from stdin
-                    String sysId = getCurrentWorkingDirectory().toASCIIString();
+                    String sysId = CommandLineOptions.getCurrentWorkingDirectory().toASCIIString();
                     //#if CSHARP==false
                     if (styleParserName != null && Version.platform.isJava()) {
                         XMLReader styleParser = config.getStyleParser();
@@ -958,12 +958,6 @@ public class Transform {
 
     public void doTransform(String[] args, String command) {
         doTransform(args);
-    }
-
-
-    @CSharpReplaceBody(code="return Saxon.Ejava.io.File.CurrentDirectoryUri();")
-    private static URI getCurrentWorkingDirectory() {
-        return new File(System.getProperty("user.dir")).toURI();
     }
 
 
@@ -1336,7 +1330,7 @@ public class Transform {
             Xslt30Transformer transformer = newTransformer(sheet, options);
             Serializer serializer;
             if (outputFile == null) {
-                transformer.setBaseOutputURI(getCurrentWorkingDirectory().toASCIIString());
+                transformer.setBaseOutputURI(CommandLineOptions.getCurrentWorkingDirectory().toASCIIString());
                 serializer = processor.newSerializer(System.out);
             } else {
                 serializer = processor.newSerializer(outputFile);
