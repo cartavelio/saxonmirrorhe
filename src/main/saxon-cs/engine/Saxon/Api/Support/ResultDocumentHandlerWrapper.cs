@@ -15,7 +15,7 @@ namespace Saxon.Api.Support {
         private PipelineConfiguration pipe;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saxon.Api.ResultDocumentHandlerWrapper"/> class.
+		/// Initializes a new instance of the <c>ResultDocumentHandlerWrapper</c> class.
         /// </summary>
         /// <param name="handler">Handler.</param>
         /// <param name="pipe">Pipe.</param>
