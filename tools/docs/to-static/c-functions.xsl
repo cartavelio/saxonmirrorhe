@@ -135,6 +135,8 @@
             <xsl:variable name="namespace" select="ancestor::section/@id"/>
             <xsl:variable name="default.saxon"
                 select="$implementation-doc/implement/default[@id = $namespace]/@saxon"/>
+            <xsl:variable name="default.platform"
+                select="$implementation-doc/implement/default[@id = $namespace]/@platform"/>
 
 
             <h1>
@@ -149,22 +151,6 @@
                 select="
                     every $proto in subsequence(fc:signatures/fc:proto, 2)
                         satisfies deep-equal(fc:signatures/fc:proto[1]/fc:in-spec, $proto/fc:in-spec)"/>
-
-            <xsl:if test="$same-spec-references">
-
-                <aside>
-                    <xsl:if test=".//fc:in-spec">
-                        <xsl:value-of select="fc:specs(fc:signatures/fc:proto[1]/fc:in-spec)"/>
-                    </xsl:if>
-                    <xsl:value-of
-                        select="
-                        fc:edition((string-join((fc:saxon-edition, fc:saxon-edition/@platform), ' '),
-                            $default.saxon,
-                            'default')[1])"
-                    />
-                </aside>
-
-            </xsl:if>
 
             <xsl:apply-templates select="fc:signatures" mode="f">
                 <xsl:with-param name="output-spec-references" select="not($same-spec-references)"/>
@@ -204,6 +190,25 @@
                     </xsl:if>
                 </xsl:for-each-group>
             </xsl:if>
+            
+            <h3 class="subtitle">Saxon availability</h3>
+            <p>
+                <xsl:if test="$same-spec-references">
+                    <xsl:if test=".//fc:in-spec">
+                        <xsl:value-of select="fc:specs(fc:signatures/fc:proto[1]/fc:in-spec)"/>
+                    </xsl:if>
+                </xsl:if>
+                <xsl:value-of
+                    select="
+                    fc:edition((fc:saxon-edition,
+                    $default.saxon,
+                    'default')[1])"/>
+                <xsl:value-of
+                    select="
+                    fc:platform((fc:saxon-edition/@platform,
+                    $default.platform,
+                    'default')[1])"/>
+            </p>
 
             <xsl:apply-templates select="fc:status" mode="f"/>
             <xsl:apply-templates select="fc:notes" mode="f"/>
