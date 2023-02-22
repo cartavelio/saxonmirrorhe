@@ -167,6 +167,44 @@
             The same effect (and more) can be achieved
         using the standard XSLT 3.0 instruction <code>xsl:evaluate</code>.</p>
         
+        <p>If XSLT 4.0 extensions are enabled, two new (experimental) values are available for <code>xsl:mode/@on-no-match</code>,
+        namely <code>shallow-copy-all</code> and <code>shallow-skip-all</code>. These have the same effect as <code>shallow-copy</code>
+        and <code>shallow-skip</code> respectively, except when processing maps and arrays</p>
+        
+        <p>For <code>shallow-skip-all</code>:</p>
+        
+        <ul>
+            <li>When processing an array that does not match any template rule, the array
+                is split into a set of parcels, one for each member of the array, and each parcel is processed by making
+                an implicit call on <code>xsl:apply-templates</code>. A parcel is represented as a single-entry map with the key
+                <code>"value"</code>, and can be matched using the pattern <code>match="record(value)"</code>. The value of the array
+                member can be extracted from the parcel using the function <code>fn:unparcel()</code>. If a parcel does not match any
+                template rule, then it will not be processed.
+           </li>
+            <li>When processing a map that does not match any template rule, the map
+            is split into a set of map entries, one for each key-value pair in the map. These entries are represented
+            as singleton maps, and they are processed by making an implicit call on <code>xsl:apply-templates</code>. However,
+            if a singleton map does not match any template rule, then to prevent infinite recursion 
+            it is not processed at all.</li>
+        </ul>
+        
+        <p>For <code>shallow-copy-all</code>:</p>
+        
+        <ul>
+            <li>When processing an array that does not match any template rule, a new array is created. The existing array
+                is split into a set of parcels, one for each member of the array, and each parcel is processed by making
+                an implicit call on <code>xsl:apply-templates</code>. A parcel is represented as a single-entry map with the key
+                <code>"value"</code>, and can be matched using the pattern <code>match="record(value)"</code>. The value of the array
+                member can be extracted from the parcel using the function <code>fn:unparcel()</code>. The template 
+            </li>
+            <li>When processing a map that does not match any template rule, a new map is created. The existing map
+                is split into a set of map entries, one for each key-value pair in the map. These entries are represented
+                as singleton maps, and they are processed by making an implicit call on <code>xsl:apply-templates</code>. Any
+                template rule that processes such a singleton map is required to return a result that is a map. The resulting
+                maps are merged, effectively by calling <code>map:merge()</code> with the <code>duplicates</code> option set
+                to <code>use-last</code>. If a singleton map does not match any template rule, then it is effectively skipped.</li>
+        </ul>
+        
        
  
 
