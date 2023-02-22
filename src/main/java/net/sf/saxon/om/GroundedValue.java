@@ -157,7 +157,7 @@ public interface GroundedValue extends Sequence {
     }
 
     /**
-     * Get an {@link Iterable<Item>} that wraps this <code>GroundedValue</code>, allowing
+     * Get an {@link Iterable} that wraps this <code>GroundedValue</code>, allowing
      * it to be used in a Java for-each loop.
      * @return an iterable delivering the contents of this value
      */

@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 /**
  * Interface representing a predicate applied to a node.
  *
- * <p>Note: the reason for not simply using {@link Predicate <NodeInfo>} is for C#: interfaces and delegates
+ * <p>Note: the reason for not simply using {@code Predicate<NodeInfo>} is for C#: interfaces and delegates
  * need to be provided separately.
  */
 @FunctionalInterface
