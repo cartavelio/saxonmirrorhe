@@ -1,21 +1,18 @@
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.internal.os.OperatingSystem;
 
 public class ManageBranchesPlugin implements Plugin<Project> {
   void apply(Project project) {
     // Where is git?
+    String exec = OperatingSystem.current().isWindows() ? "\\git.exe" : "/git"
     String git = null
     System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
       if (git == null) {
-        def fn = new File(dir + "/git")
+        def fn = new File(dir + exec)
         if (fn.exists() && fn.canExecute()) {
           git = fn.toString()
-        } else {
-          fn = new File(dir + "\\git.exe")
-          if (fn.exists() && fn.canExecute()) {
-            git = fn.toString()
-          }
         }
       }
     }
