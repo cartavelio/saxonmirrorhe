@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2021 Saxonica Limited.
+// Copyright (c) 2022 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -165,6 +165,11 @@ public:
     */
     SaxonProcessor(bool l);
 
+    //! The copy assignment= operator
+    /*!
+      * Create a copy of the Saxon Processor.
+      * @param other - SaxonProcessor object
+    */
     SaxonProcessor &operator=(const SaxonProcessor &other);
 
 
@@ -620,16 +625,15 @@ protected:
     jclass saxonCAPIClass; /*!< The SaxonCAPI instance */
     std::string cwdV; /*!< current working directory */
     //std::string resources_dir; /*!< current Saxon resources directory */
-    std::string versionStr;
+    std::string versionStr; /*!< The Saxon version string */
     std::map<std::string, XdmValue *> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
     std::map<std::string, std::string> configProperties; /*!< map of properties used for the transformation as (string, string) pairs */
     bool licensei; /*!< indicates whether the Processor requires a Saxon that needs a license file (i.e. Saxon-EE) other a Saxon-HE Processor is created  */
-    bool closed;
 
 
-    JNINativeMethod *nativeMethods;
+    JNINativeMethod *nativeMethods; /*!< native methods variable used in extension methods */
     std::vector<JNINativeMethod> nativeMethodVect; /*!< Vector of native methods defined by user */
-    SaxonApiException *exception;
+    SaxonApiException *exception; /*!< SaxonApiException object to capture exceptions thrown from the underlying Java code via JNI */
 
 
 private:
