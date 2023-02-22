@@ -210,7 +210,7 @@
 
          <p>In the Saxon.Api interface in SaxonCS, the root API object is the <a class="cslink" href="Saxon.Api.Processor">Saxon.Api.Processor</a>.
             This is a wrapper around a <code>Saxon.Hej.Configuration</code> (<code
-               java="net.sf.saxon.s9api.Configuration">net.sf.saxon.s9api.Configuration</code>) object, which should not normally be used directly (though it's exposed
+               java="net.sf.saxon.Configuration">net.sf.saxon.Configuration</code>) object, which should not normally be used directly (though it's exposed
             as public, just in case you need to). There are two ways to set configuration properties:</p>
             
             <ul>
