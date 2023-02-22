@@ -270,7 +270,7 @@ task rejar_Xerces(
         "-source", "${buildDir}/c/${release}c",
         "-target", "${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}.exe",
         "-company", "Saxonica",
-        "-product", "SaxonC ${RELEASE}",
+        "-product", "Saxon${RELEASE}C",
         "-version", saxonVersion
       doLast {
         signExe("${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}.exe")
