@@ -1,6 +1,6 @@
 package net.sf.saxon.option.cpp;
 
-import com.oracle.svm.core.annotate.*;
+import com.oracle.svm.core.Uninterruptible;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 
 import org.graalvm.nativeimage.c.function.CEntryPoint;
