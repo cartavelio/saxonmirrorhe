@@ -50,6 +50,16 @@
     <created by="Michael Kay" on="2022-05-12"/>
     <reason>We make no attempt to exit early.</reason>
   </exception>
+  
+  <exception test-case="sort-079" run="false" edition="HE">
+    <created by="Michael Kay" on="2023-02-02"/>
+    <reason>Saxon-HE sorts this one incorrectly because of Java collations.</reason>
+  </exception>
+  
+  <exception test-case="docbook-001" run="false" edition="HE">
+    <created by="Michael Kay" on="2023-02-02"/>
+    <reason>Stylesheet says "Can't make chunks with Saxonica's processor. Uses saxon:output which required PE.</reason>
+  </exception>
 
 
 </exceptions>
