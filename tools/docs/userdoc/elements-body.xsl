@@ -5,7 +5,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" exclude-result-prefixes="xs el e xsi"
     version="3.0"> 
 
-    <xsl:output indent="yes"/>
+    <xsl:output indent="no"/>
 
     <!-- Designed to transform src/elements/xsl-elements-expanded.xml; also used for:
         src/userdoc/extensions/instructions.xml (contains saxon-element elements)

@@ -12,7 +12,7 @@
         xsl-elements-src.xml and element-catalog.xml.
     -->
 
-    <xsl:output method="xml" indent="yes"/>
+    <xsl:output method="xml" indent="no"/>
 
     <xsl:variable name="catalog" select="doc(resolve-uri('element-catalog.xml', base-uri(/)))"
         doc:doc="The W3C Spec catalog that contains the syntax information for the elements in this section"/>

@@ -9,7 +9,7 @@
 
   <xsl:param name="GitHub" as="xs:string"/>
 
-  <xsl:output method="xml" indent="yes"/>
+  <xsl:output method="xml" indent="no"/>
 
   <xsl:mode on-no-match="shallow-copy"/>
 
