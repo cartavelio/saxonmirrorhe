@@ -48,11 +48,12 @@ public class PatternParser extends XPathParser {
     public Pattern parsePattern(String pattern, StaticContext env) throws XPathException {
         this.env = env;
         charChecker = env.getConfiguration().getValidCharacterChecker();
-        language = ParsedLanguage.XSLT_PATTERN;
+        setLanguage(ParsedLanguage.XSLT_PATTERN, env.getXPathVersion());
         String trimmed = pattern.trim();
         if (trimmed.startsWith("(:")) {
+            // Strip off any leading comments so that we can safely detect a SelectionPattern
             t = new Tokenizer();
-            t.languageLevel = 30;
+            t.languageLevel = env.getXPathVersion();
             t.tokenize(trimmed, 0, -1);
 
             int start = t.currentTokenStartOffset;

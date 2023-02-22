@@ -869,14 +869,9 @@ public abstract class StyleElement extends ElementImpl {
 
     public SequenceType makeSequenceType(String sequenceType)
             throws XPathException {
-        ExpressionContext env = getStaticContext();
-        int languageLevel = env.getXPathVersion();
-        if (languageLevel == 30) {
-            languageLevel = 305; // XPath 3.0 + XSLT extensions
-        }
         XPathParser parser =
-                getConfiguration().newExpressionParser("XP", false, languageLevel);
-
+                getConfiguration().newExpressionParser("XP", false);
+        getStaticContext();
         QNameParser qp = new QNameParser(staticContext.getNamespaceResolver())
                 .withAcceptEQName(staticContext.getXPathVersion() >= 30)
                 .withErrorOnBadSyntax("XPST0003")
@@ -890,7 +885,7 @@ public abstract class StyleElement extends ElementImpl {
             throws XPathException {
         getStaticContext();
         XPathParser parser =
-                getConfiguration().newExpressionParser("XP", false, 31);
+                getConfiguration().newExpressionParser("XP", false);
         QNameParser qp = new QNameParser(staticContext.getNamespaceResolver())
                 .withAcceptEQName(staticContext.getXPathVersion() >= 30)
                 .withErrorOnBadSyntax("XPST0003")

@@ -78,8 +78,7 @@ public class ExpressionTool {
     public static Expression make(String expression, StaticContext env,
                                   int start, int terminator,
                                   CodeInjector codeInjector) throws XPathException {
-        int languageLevel = env.getXPathVersion();
-        XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, languageLevel);
+        XPathParser parser = env.getConfiguration().newExpressionParser("XP", false);
         if (codeInjector != null) {
             parser.setCodeInjector(codeInjector);
         }

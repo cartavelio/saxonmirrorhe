@@ -1038,8 +1038,9 @@ public class AlphaCode {
     }
 
     public static String fromLexicalSequenceType(XPathContext context, String input) throws XPathException {
-        XPathParser parser = context.getConfiguration().newExpressionParser("XP", false, 31);
+        XPathParser parser = context.getConfiguration().newExpressionParser("XP", false);
         IndependentContext env = new IndependentContext(context.getConfiguration());
+        env.setXPathLanguageLevel(31); // TODO: alpha codes need to support 4.0 extended types
         env.declareNamespace("xs", NamespaceConstant.SCHEMA);
         env.declareNamespace("fn", NamespaceConstant.FN);
         SequenceType st = parser.parseSequenceType(input, env);

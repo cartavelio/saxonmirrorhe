@@ -175,6 +175,7 @@ public class Gizmo {
         config = Configuration.newConfiguration();
         config.setConfigurationProperty(Feature.ALLOW_SYNTAX_EXTENSIONS, true);
         env = new IndependentContext(config);
+        env.setXPathLanguageLevel(40);
         String source = null;
         String script = null;
         boolean interactive = true;
@@ -242,6 +243,7 @@ public class Gizmo {
         config = Configuration.newConfiguration();
         config.setConfigurationProperty(Feature.ALLOW_SYNTAX_EXTENSIONS, true);
         env = new IndependentContext(config);
+        env.setXPathLanguageLevel(40);
 
         env.declareNamespace("xml", NamespaceConstant.XML);
         env.declareNamespace("xsl", NamespaceConstant.XSLT);
@@ -440,7 +442,7 @@ public class Gizmo {
         for (StructuredQName var : variables.keySet()) {
             env.declareVariable(var);
         }
-        XPathParser scanner = config.newExpressionParser("XP", false, 31);
+        XPathParser scanner = config.newExpressionParser("XP", false);
         scanner.parse(selection.toString(), 0, terminator, env);
         int endPoint = scanner.getTokenizer().currentTokenStartOffset;
         XPathExpression expr = evaluator.createExpression(selection.substring(0, endPoint));
