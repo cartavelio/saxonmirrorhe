@@ -58,6 +58,40 @@ public class TestMessageListener {
     }
 
     @Test
+    public void testMessageLocation() {
+        try {
+            String xsl =
+                    "<xsl:transform version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
+                            "<xsl:template name='main'>\n" +
+                            "<xsl:variable name='e'>banana</xsl:variable>\n" +
+                            "<xsl:message><xsl:value-of select=\"concat('The message is: ', $e)\"/></xsl:message>\n" +
+                            "</xsl:template>\n" +
+                            "</xsl:transform>";
+            Processor p = new Processor(false);
+            XsltCompiler c = p.newXsltCompiler();
+            XsltExecutable e = c.compile(new StreamSource(new StringReader(xsl), "http://nominal.location/"));
+            XsltTransformer t = e.load();
+            t.setInitialTemplate(new QName("main"));
+            final StringBuilder sb = new StringBuilder();
+            t.setMessageListener(new MessageListener2() {
+                public void message(XdmNode content, QName errorCode, boolean terminate, SourceLocator locator) {
+                    //System.err.println("Location = " + locator.getSystemId() + "#" + locator.getLineNumber());
+                    assertEquals("http://nominal.location/", locator.getSystemId());
+                    assertEquals(4, locator.getLineNumber());
+                    sb.append(content.getStringValue());
+                }
+            });
+            t.setDestination(p.newSerializer(System.out));
+            t.transform();
+            assertEquals(22, sb.length());
+        } catch (SaxonApiException e1) {
+            e1.printStackTrace();
+            fail();
+        }
+    }
+
+
+    @Test
     public void testMessageTerminate() {
         // 2020-02-10: report on saxon help forum that in 9.9.1.6, the message listener is not called
         // when terminate="yes". Bug 4457.
