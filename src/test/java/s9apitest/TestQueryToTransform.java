@@ -90,7 +90,7 @@ public class TestQueryToTransform {
 
             XQueryExecutable exp = comp.compile(qry_base);
             XQueryEvaluator qe = exp.load();
-            qe.setErrorReporter(dynamicErrors::add);
+            //qe.setErrorReporter(dynamicErrors::add);
             qe.run(new NullDestination());
             fail("Unexpected success");
         } catch (URISyntaxException e) {
@@ -119,7 +119,7 @@ public class TestQueryToTransform {
             XQueryExecutable exp = comp.compile(qry_base);
             XQueryEvaluator qe = exp.load();
             qe.setContextItem(source);
-            qe.setErrorReporter(dynamicErrors::add);
+            //qe.setErrorReporter(dynamicErrors::add);
             qe.run(new NullDestination());
             fail("Unexpected success");
         } catch (URISyntaxException e) {

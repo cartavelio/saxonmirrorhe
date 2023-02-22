@@ -13,7 +13,6 @@ import net.sf.saxon.Query;
 import net.sf.saxon.lib.Initializer;
 import net.sf.saxon.lib.ModuleURIResolver;
 import org.junit.jupiter.api.Test;
-import org.junit.Ignore;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
@@ -129,7 +128,7 @@ public class QueryTests {
         }
     }
 
-    @Ignore
+    //@Ignore
     public void testQueryUpdate() {
         // This is an update test; copy the file into temp
         String tempfn = ConfigTest.DATA_DIR + "temp/books.xml";
@@ -194,6 +193,7 @@ public class QueryTests {
     public static class MyInitializer
             implements Initializer {
 
+        @Override
         public void initialize(Configuration config) {
             System.err.println("Initialize...");
             config.setModuleURIResolver(new Resolver());

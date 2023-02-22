@@ -2,7 +2,6 @@ package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
-import com.saxonica.ee.jaxp.ValidatorImpl;
 import jaxptest.ConfigTest;
 import millicom.MillicomTest;
 import net.sf.saxon.Configuration;
@@ -17,7 +16,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.ValidationException;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.ErrorHandler;
@@ -185,65 +183,65 @@ public class TestValidator {
         }
     }
 
-    @Test
-    public void testErrorListenerBug4744b() {
-
-        // This validation run should report exactly two validation errors.
-
-
-        final List<SAXParseException> errorList = new ArrayList<>();
-        FileOutputStream out = null;
-        try {
-            out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
-            Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
-            StreamSource source_xsd = new StreamSource(new File(ConfigTest.DATA_DIR + "../bugs/4744/UniqueKeyBug.xsd"));
-            StreamSource source_xml = new StreamSource(new File(ConfigTest.DATA_DIR + "../bugs/4744/UniqueKeyBug.xml"));
-            ErrorHandler handler = new ErrorHandler() {
-                @Override
-                public void error(SAXParseException exception) {
-                    errorList.add(exception);
-                }
-
-                @Override
-                public void fatalError(SAXParseException exception) throws SAXParseException {
-                    throw exception;
-                }
-
-                @Override
-                public void warning(SAXParseException exception) {
-                    errorList.add(exception);
-                }
-            };
-
-            SchemaValidator sv = sm.newSchemaValidator();
-            sv.setInvalidityHandler(new ValidatorImpl.InvalidityHandlerWrappingErrorHandler(handler));
-            sm.load(source_xsd);
-
-
-            Serializer serializer = proc.newSerializer();
-            serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
-            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            serializer.setOutputStream(out);
-            sv.setDestination(serializer);
-
-
-            sv.validate(source_xml);
-
-            out.close();
-            //fail("Validation errors not detected");
-
-        } catch (SaxonApiException sapie) {
-            try {
-                out.close();
-            } catch (IOException ee) {
-                fail();
-            }
-            assertEquals(1, errorList.size());
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-    }
+//    @Test
+//    public void testErrorListenerBug4744b() {
+//
+//        // This validation run should report exactly two validation errors.
+//
+//
+//        final List<SAXParseException> errorList = new ArrayList<>();
+//        FileOutputStream out = null;
+//        try {
+//            out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
+//            Processor proc = new Processor(true);
+//            SchemaManager sm = proc.getSchemaManager();
+//            StreamSource source_xsd = new StreamSource(new File(ConfigTest.DATA_DIR + "../bugs/4744/UniqueKeyBug.xsd"));
+//            StreamSource source_xml = new StreamSource(new File(ConfigTest.DATA_DIR + "../bugs/4744/UniqueKeyBug.xml"));
+//            ErrorHandler handler = new ErrorHandler() {
+//                @Override
+//                public void error(SAXParseException exception) {
+//                    errorList.add(exception);
+//                }
+//
+//                @Override
+//                public void fatalError(SAXParseException exception) throws SAXParseException {
+//                    throw exception;
+//                }
+//
+//                @Override
+//                public void warning(SAXParseException exception) {
+//                    errorList.add(exception);
+//                }
+//            };
+//
+//            SchemaValidator sv = sm.newSchemaValidator();
+//            sv.setInvalidityHandler(new ValidatorImpl.InvalidityHandlerWrappingErrorHandler(handler));
+//            sm.load(source_xsd);
+//
+//
+//            Serializer serializer = proc.newSerializer();
+//            serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+//            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+//            serializer.setOutputStream(out);
+//            sv.setDestination(serializer);
+//
+//
+//            sv.validate(source_xml);
+//
+//            out.close();
+//            //fail("Validation errors not detected");
+//
+//        } catch (SaxonApiException sapie) {
+//            try {
+//                out.close();
+//            } catch (IOException ee) {
+//                fail();
+//            }
+//            assertEquals(1, errorList.size());
+//        } catch (Exception e) {
+//            fail(e.getMessage());
+//        }
+//    }
 
 
 
@@ -1538,7 +1536,7 @@ public class TestValidator {
         testByteCodeJaxp(false);
     }
 
-    @Ignore
+
     public void testBug4507() {
         try {
             Processor proc = new Processor(true);
@@ -1556,7 +1554,7 @@ public class TestValidator {
         }
     }
 
-    @Ignore
+    //@Ignore
     @Tag("bytecode")
     public void testBug4507bytecode() {
         try {

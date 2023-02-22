@@ -13,7 +13,7 @@ import org.apache.axiom.om.OMXMLParserWrapper;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class AxiomTreeTests extends ObjectModelTests {
 

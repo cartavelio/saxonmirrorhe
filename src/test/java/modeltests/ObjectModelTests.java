@@ -1,18 +1,21 @@
 package modeltests;
 
 import jaxptest.ConfigTest;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.ibm.icu.impl.Assert.fail;
 import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
 import static net.sf.saxon.s9api.streams.Predicates.hasLocalName;
 import static net.sf.saxon.s9api.streams.Predicates.hasName;
@@ -23,8 +26,10 @@ import static net.sf.saxon.s9api.streams.Predicates.isText;
 import static net.sf.saxon.s9api.streams.Steps.attribute;
 import static net.sf.saxon.s9api.streams.Steps.child;
 import static net.sf.saxon.s9api.streams.Steps.descendant;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * This is an abstract class containing tests designed to exercise common functionality against
@@ -33,7 +38,8 @@ import static org.junit.Assert.assertTrue;
  */
 
 public abstract class ObjectModelTests {
-
+    protected final ConfigTest configTest = new ConfigTest();
+    
     abstract TreeModel getTreeModel();
 
     abstract XdmNode buildExternalDocument(Processor processor, String fileName);
@@ -275,10 +281,107 @@ public abstract class ObjectModelTests {
 
     }
 
+    @Test
+    public void testXPath() {
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.TRACE_EXTERNAL_FUNCTIONS, true);
+            XdmNode doc = buildExternalDocument(proc, "books.xml");
+            XPathCompiler xpc = proc.newXPathCompiler();
+            XPathSelector xp = xpc.compile(getExtensionFunctionCall()).load();
+            xp.setContextItem(doc);
+            XdmValue result = xp.evaluate();
+            assertEquals("Jane Austen", ((XdmAtomicValue) result).getStringValue());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testReflexiveExtension() {
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.TRACE_EXTERNAL_FUNCTIONS, true);
+            XdmNode doc = buildExternalDocument(proc, "books.xml");
+            XPathCompiler xpc = proc.newXPathCompiler();
+            XPathSelector xp = xpc.compile("string((//AUTHOR)[1])").load();
+            xp.setContextItem(doc);
+            XdmValue result = xp.evaluate();
+            assertEquals("Jane Austen", ((XdmAtomicValue)result).getStringValue() );
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * To be implemented in each subclass - supply an XPath extension function call that finds
+     * the string value of the first author in the document
+     * @return an XPath expression
+     */
+    public String getExtensionFunctionCall() {
+        // default implementation
+        return "string((//AUTHOR)[1])";
+    }
+
+    @Test
+    public void testDeepCopy() {
+        try {
+            Processor proc = new Processor(true);
+            XdmNode doc = buildExternalDocument(proc, "copytest.xml");
+            XdmNode root = doc.select(child("*")).findFirst().get();
+            XdmNode p1 = root.select(child("http://namespace.p.com/", "section")).findFirst().get();
+            XdmNode p2 = root.select(child("http://namespace.p2.com/", "section2")).findFirst().get();
+            XsltCompiler comp = proc.newXsltCompiler();
+
+            String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
+                    "<xsl:template name='t1'><xsl:copy-of select='.' copy-namespaces='yes'/></xsl:template>" +
+                    "<xsl:template name='t2'><xsl:copy-of select='.' copy-namespaces='no'/></xsl:template>" +
+                    "</xsl:stylesheet>";
+            XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
+            XsltTransformer trans = exec.load();
 
 
+            String result = doCopyTransform(proc, trans, p1, "t1");
+            assertTrue(result.contains("xmlns:p=\"http://namespace.p.com/\""));
+            assertTrue(result.contains("xmlns:q=\"http://namespace.q.com/\""));
+
+            result = doCopyTransform(proc, trans, p1, "t2");
+            assertTrue(result.contains("xmlns:p=\"http://namespace.p.com/\""));
+            assertFalse(result.contains("xmlns:q=\"http://namespace.q.com/\""));
+
+            result = doCopyTransform(proc, trans, p2, "t1");
+            assertTrue(result.contains("xmlns=\"http://namespace.p2.com/\""));
+            assertTrue(result.contains("xmlns:my=\"http://namespace.my.com/\""));
+            assertTrue(result.contains("xmlns:q=\"http://namespace.q.com/\""));
+
+            result = doCopyTransform(proc, trans, p2, "t2");
+            assertTrue(result.contains("xmlns=\"http://namespace.p2.com/\""));
+            assertTrue(result.contains("xmlns:my=\"http://namespace.my.com/\""));
+            assertFalse(result.contains("xmlns:q=\"http://namespace.q.com/\""));
 
 
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e);
+        }
+    }
+
+    private static String doCopyTransform(Processor proc, XsltTransformer trans, XdmNode input, String initialTemplate) throws SaxonApiException {
+        try {
+            StringWriter sw = new StringWriter();
+            trans.setSource(input.asSource());
+            trans.setDestination(proc.newSerializer(sw));
+            trans.setInitialTemplate(new QName(initialTemplate));
+            trans.transform();
+            return sw.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e);
+            throw e;
+        }
+    }
 
 
 }
