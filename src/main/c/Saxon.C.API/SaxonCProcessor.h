@@ -10,7 +10,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SaxonCGlue.h"
+#include "SaxonCGlue2.h"
 
 
 
@@ -20,9 +20,9 @@
  * <p/>
  */
 typedef struct {
-	jobject xqueryProc;
-	jobject xsltProc;
-	jobject xpathProc;
+	int64_t xqueryProc;
+    int64_t xsltProc;
+    int64_t xpathProc;
 } sxnc_processor;
 
 EXTERN_SAXONC
@@ -39,7 +39,7 @@ void freeSaxonc(sxnc_environment ** environi, sxnc_processor ** proc, sxnc_param
 
 void xsltSaveResultToFile(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char * source, char* stylesheet, char* outputfile, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
 
-const char * xsltApplyStylesheet(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, const char * source, const char* stylesheet, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
+const char * xsltApplyStylesheet1(sxnc_environment *environi, int64_t proc, char * cwd, char * source, char* stylesheet, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
 
 void executeQueryToFile(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char* outputfile, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
 

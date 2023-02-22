@@ -142,7 +142,7 @@ public class Predicates {
      */
 
     public static <T extends XdmItem> Predicate<XdmItem> empty(Step<T> step) {
-        return item -> step.apply(item).findFirst().isEmpty();
+        return item -> !step.apply(item).findFirst().isPresent();
     }
 
     /**

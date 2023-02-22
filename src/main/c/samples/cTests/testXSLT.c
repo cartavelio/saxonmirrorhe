@@ -1,19 +1,17 @@
 #include "../../Saxon.C.API/SaxonCProcessor.h"
-#include "../../Saxon.C.API/SaxonCXPath.h"
-
+/*#include "../../Saxon.C.API/SaxonCXPath.h" */
+#include "../../Saxon.C.API/SaxonCGlue2.h"
 
 int main()
 {
-    HANDLE myDllHandle;
-    //JNIEnv *(environi.env);
-    //JavaVM *jvm;
+   /* HANDLE myDllHandle;
     jclass  myClassInDll;
     int cap = 10;
-    sxnc_parameter * parameters; /*!< array of paramaters used for the transformation as (string, value) pairs */
+    sxnc_parameter * parameters;
     parameters;
     int parLen=0, parCap;
     parCap = cap;
-    sxnc_property * properties; /*!< array of properties used for the transformation as (string, string) pairs */
+    sxnc_property * properties;
     properties;
     int propLen=0;
     parCap = cap;
@@ -22,27 +20,44 @@ int main()
 
     initSaxonc(&environi, &processor, &parameters, &properties, parCap, parCap);
 
-    /*
-     * First of all, load required component.
-     * By the time of JET initialization, all components should be loaded.
-     */
-    environi->myDllHandle = loadDefaultDll ();
-	
-    /*
-     * Initialize JET run-time.
-     * The handle of loaded component is used to retrieve Invocation API.
-     */
-    //initDefaultJavaRT (&environi);
-    initJavaRT (environi->myDllHandle, &(environi->jvm), &(environi->env));
+    environi->myDllHandle = loadDefaultDll ();*/
+
+
+
+     /* graal_isolate_t *isolate = NULL;
+  graal_isolatethread_t *thread = NULL;
+
+  if (graal_create_isolate(NULL, &isolate, &thread) != 0) {
+    fprintf(stderr, "initialization error\n");
+    return 1;
+  }*/
+    sxnc_environment * environi;
+    environi  =  (sxnc_environment *)malloc(sizeof(sxnc_environment));
+    create_graalvm_isolate(environi);
+
+
+/*
+    graal_isolate_t *isolate = NULL;
+    graal_isolatethread_t *thread = NULL;
+    sxnc_environment * environi;
+    environi = malloc(sizeof(sxnc_environment));
+
+
+    create_graalvm_isolate(environi);*/
+
+    /*initJavaRT (environi->myDllHandle, &(environi->jvm), &(environi->env));
     const char *verCh = version(environi);
     printf("XSLT Tests\n\nSaxon version: %s \n", verCh);	
     jobject num = integerValue(environi, 5);
-    setParameter(&parameters, &parLen, &parCap,"", "numParam", num);
-  
+    setParameter(&parameters, &parLen, &parCap,"", "numParam", num);*/
 
-    const char *result = xsltApplyStylesheet(environi, &processor, NULL, "../data/cat.xml","../data/test.xsl", 0 ,0, 0, 0);
-  
-	
+
+    //const char *result = xsltApplyStylesheet(environi, &processor, NULL, "../data/cat.xml","../data/test.xsl", 0 ,0, 0, 0);
+    int64_t procRef = createSaxonProcessor2((environi->thread), 0);
+    printf("cp1\n");
+    printf("%ld", (long)procRef);
+
+    const char *result = xsltApplyStylesheet1(environi, procRef, "/home/ond1/work/repository/saxondev-11/src/main/c/samples/cTests", "../data/cat.xml","../data/test.xsl", 0 ,0, 0, 0);
 
     if(!result) {
       printf("result is null \n");
@@ -54,7 +69,9 @@ int main()
     /*
      * Finalize JET run-time.
      */
-    finalizeJavaRT (environi->jvm);
-    freeSaxonc(&environi, &processor, &parameters, &properties);
+    /*finalizeJavaRT (environi->jvm);
+    freeSaxonc(&environi, &processor, &parameters, &properties);*/
+
+    graal_tear_down (environi->thread);
     return 0;
 }
