@@ -234,6 +234,42 @@
       </result>
    </test-case>
    
+   <test-case name="internal-dtd-subset-001">
+      <description>Test saxon:internal-dtd-subset with XML output method</description>
+      <created by="Michael Kay" on="2021-07-19"/>
+      <dependencies>
+         <spec value="XSLT30+"/>
+         <feature value="Saxon-PE"/>
+      </dependencies>
+      <test>
+         <stylesheet file="internal-dtd-subset-001.xsl"/>
+         <initial-template name="main"/>
+      </test>
+      <result>
+         <all-of>
+            <serialization-matches><![CDATA[<!ELEMENT out (a)*>]]></serialization-matches>
+            <serialization-matches><![CDATA[<!ELEMENT a EMPTY>]]></serialization-matches>
+            <serialization-matches><![CDATA[<!ATTLIST a id ID #REQUIRED>]]></serialization-matches>
+         </all-of>
+      </result>
+   </test-case>
+   
+   <test-case name="internal-dtd-subset-002">
+      <description>Test saxon:internal-dtd-subset with serialize() and parse-xml()</description>
+      <created by="Michael Kay" on="2021-07-19"/>
+      <dependencies>
+         <spec value="XSLT30+"/>
+         <feature value="Saxon-PE"/>
+      </dependencies>
+      <test>
+         <stylesheet file="internal-dtd-subset-002.xsl"/>
+         <initial-template name="main"/>
+      </test>
+      <result>
+         <assert>/result = 'true'</assert>
+      </result>
+   </test-case>
+   
    <test-case name="single-quotes-001">
       <description>Test saxon:single-quotes with XML output method</description>
       <created by="Michael Kay" on="2017-05-25"/>
