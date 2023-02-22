@@ -4204,19 +4204,17 @@ public class Configuration implements SourceResolver, NotationSet {
     /**
      * Load a named output emitter or SAX2 ContentHandler and check it is OK.
      *
-     * @param clarkName the QName of the user-supplied ContentHandler (requested as a prefixed
+     * @param eqName the EQName of the user-supplied ContentHandler (requested as a prefixed
      *                  value of the method attribute in xsl:output, or anywhere that serialization parameters
-     *                  are allowed), encoded in Clark format as {uri}local
+     *                  are allowed), encoded in EQName format as Q{uri}local
      * @param props     the properties to be used in the case of a dynamically-loaded ContentHandler.
      * @return a Receiver (despite the name, it is not required to be an Emitter)
      * @throws net.sf.saxon.trans.XPathException if a failure occurs creating the Emitter
      */
 
-    public Receiver makeEmitter(String clarkName, Properties props) throws XPathException {
-        int brace = clarkName.indexOf('}');
-        String localName = clarkName.substring(brace + 1);
-        int colon = localName.indexOf(':');
-        String className = localName.substring(colon + 1);
+    public Receiver makeEmitter(String eqName, Properties props) throws XPathException {
+        StructuredQName sqName = StructuredQName.fromEQName(eqName);
+        String className = sqName.getLocalPart();
         Object handler;
         try {
             handler = dynamicLoader.getInstance(className, null);
