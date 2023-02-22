@@ -8,6 +8,7 @@ class ManageTestSuitesPluginExtension {
   String w3cXslt30TestSuiteDir = System.getenv("W3C_XSLT30_TEST_SUITE_DIR")
   String w3cXslt40TestSuiteDir = System.getenv("W3C_XSLT40_TEST_SUITE_DIR")
   String w3cXsdTestSuiteDir = System.getenv("W3C_XSD_TEST_SUITE_DIR")
+  String saxonExtraTestSuiteDir = System.getenv("SAXON_EXTRA_TEST_SUITE_DIR")
 }
 
 public class ManageTestSuitesPlugin implements Plugin<Project> {
@@ -31,6 +32,9 @@ public class ManageTestSuitesPlugin implements Plugin<Project> {
 
     extension.w3cXsdTestSuiteDir = project.findProperty("w3cXsdTestSuiteDir") ?:
       System.getenv("W3C_XSD_TEST_SUITE_DIR")
+
+    extension.saxonExtraTestSuiteDir = project.findProperty("saxonExtraTestSuiteDir") ?:
+      System.getenv("SAXON_EXTRA_TEST_SUITE_DIR")
 
     // ============================================================
     // In an ideal world, I'd make the build process more standalone

@@ -17,11 +17,12 @@ testSuite.configure([
 
   // This maps test suites to the directories that contain the tests.
   "directoryMap": ["qt3": testsuites.w3cQT3TestSuiteDir,
-                   "qt3extra": "${projectDir}/src/test/extra/qt3",
+                   "qt3extra": testsuites.saxonExtraTestSuiteDir + "/suites/qt3",
                    "qt4": testsuites.w3cQT4TestSuiteDir,
                    "xslt30": testsuites.w3cXslt30TestSuiteDir,
-                   "xslt30extra": "${projectDir}/src/test/extra/xslt30",
-                   "xsd": testsuites.w3cXsdTestSuiteDir
+                   "xslt30extra": testsuites.saxonExtraTestSuiteDir + "/suites/xslt30",
+                   "xsd": testsuites.w3cXsdTestSuiteDir,
+                   "xsdextra": testsuites.saxonExtraTestSuiteDir + "/suites/xsd"
   ]
 ])
 
@@ -86,6 +87,7 @@ def testSuiteMatrix = [
     "qt3extra": [
       "_class": "com.saxonica.testdriver.QT3TestDriverPE",
       "_exceptions": "${projectDir}/src/test/exceptions/qt3extra.xml",
+      "_catalog": "j-catalog.xml",
 
       "XP31": [
         "": [:]
@@ -135,6 +137,7 @@ def testSuiteMatrix = [
     "qt3extra": [
       "_class": "com.saxonica.testdriver.QT3TestDriverEE",
       "_exceptions": "${projectDir}/src/test/exceptions/qt3extra.xml",
+      "_catalog": "j-catalog.xml",
 
       "XP31": [
         "": [:],
@@ -227,6 +230,7 @@ def testSuiteMatrix = [
     ],
     "qt3extra": [
       "_exceptions": "${projectDir}/src/test/exceptions/qt3extra-cs.xml",
+      "_catalog": "j-catalog.xml",
 
       "XP31": [
         "": [:],
