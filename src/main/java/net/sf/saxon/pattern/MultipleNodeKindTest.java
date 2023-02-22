@@ -141,6 +141,17 @@ public final class MultipleNodeKindTest extends NodeTest {
         return fsb.toString();
     }
 
+    /*@NotNull*/
+    public String toShortString() {
+        if (nodeKindMask == CHILD_NODE.nodeKindMask) {
+            return "node()";
+        }
+        StringBuilder fsb = new StringBuilder(64);
+        LinkedList<PrimitiveUType> types = new LinkedList<>(uType.decompose());
+        format(types, fsb, it -> ((NodeKindTest)it).toShortString());
+        return fsb.toString();
+    }
+
     @Override
     public String toExportString() {
         StringBuilder fsb = new StringBuilder(64);
@@ -151,13 +162,14 @@ public final class MultipleNodeKindTest extends NodeTest {
 
     private void format(LinkedList<PrimitiveUType> list, StringBuilder fsb, Function<ItemType, String> show) {
         if (list.size() == 1) {
-            fsb.append(list.getFirst().toItemType().toString());
+            fsb.append(show.apply(list.getFirst().toItemType()));
         } else {
-            fsb.append('(');
-            fsb.append(list.getFirst().toItemType().toString());
-            list.removeFirst();
-            fsb.append('|');
-            format(list, fsb, show);
+            boolean first = true;
+            for (PrimitiveUType pu : list) {
+                fsb.append(first ? '(' : '|');
+                first = false;
+                fsb.append(show.apply(pu.toItemType()));
+            }
             fsb.append(')');
         }
     }

@@ -161,6 +161,16 @@ public class PatternParser extends XPathParser {
             } catch (XPathException e) {
                 pat = PatternMaker.fromExpression(exp.simplify(), env.getConfiguration(), true);
             }
+
+            pat.setOriginalText(pattern);
+            if (pat instanceof UnionPattern) {
+                String[] parts = pattern.split("\\|");
+                if (parts.length == 2) {
+                    ((UnionPattern) pat).p1.setOriginalText(parts[0]);
+                    ((UnionPattern) pat).p2.setOriginalText(parts[1]);
+                }
+            }
+
             if (exp instanceof FilterExpression && ((FilterExpression)exp).getBase() instanceof ContextItemExpression) {
                 if (allowSaxonExtensions && (pattern.startsWith("tuple") || pattern.startsWith("map") || pattern.startsWith("array") || pattern.startsWith("union"))) {
                     // no action, this is OK
