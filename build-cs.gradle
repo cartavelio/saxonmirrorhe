@@ -419,6 +419,9 @@ task dotnetTestDrivers(
       from "${projectDir}/tools/saxon-cs"
       into "${buildDir}/testdrivers"
       include "TestDrivers.*"
+      filter { line ->
+        line.replaceAll("@@csrid@@", csrid)
+      }
     }
   }
 
@@ -461,6 +464,9 @@ task dotnetExamples(
       from "${projectDir}/tools/saxon-cs"
       into "${buildDir}/examples"
       include "Examples.*"
+      filter { line ->
+        line.replaceAll("@@csrid@@", csrid)
+      }
     }
   }
 
