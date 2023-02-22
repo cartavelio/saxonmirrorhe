@@ -1,12 +1,16 @@
 using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
+using java.lang;
 using javax.xml.transform;
+using javax.xml.transform.stream;
 using net.sf.saxon;
 using net.sf.saxon.dotnet;
 using net.sf.saxon.lib;
+using net.sf.saxon.pull;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
+using SaxonCS3.Saxon.Impl.Helpers;
 
 namespace Saxon.Impl.Helpers {
     using System;
@@ -278,7 +282,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public IDynamicLoader getDefaultDynamicLoader() {
-            return null;
+            return new DynamicLoader();
         }
 
         public Stream locateResource(string filename, IList<string> messages) {
@@ -289,9 +293,49 @@ namespace Saxon.Impl.Helpers {
             if (source is ActiveSource activeSource) {
                 return activeSource;
             }
-            else {
-                return null;
+            if (source is StreamSource) {
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.DtdProcessing = DtdProcessing.Ignore;
+                XmlParserContext parserContext = new XmlParserContext(null, null, null, XmlSpace.Preserve);
+                parserContext.SystemId = source.getSystemId();
+                parserContext.BaseURI = source.getSystemId();
+                XmlReader xmlReader = null;
+                if (((StreamSource) source).getInputStream() != null) {
+                    xmlReader = XmlReader.Create(((StreamSource) source).getInputStream(),
+                        settings, parserContext);
+                }
+                else if (((StreamSource) source).getReader() != null) {
+                    xmlReader = XmlReader.Create(((StreamSource) source).getReader(),
+                        settings, parserContext);
+                }
+                else {
+                    string sysId = source.getSystemId();
+                    if (sysId == null) {
+                        throw new IllegalArgumentException("Supplied StreamSource includes no stream, reader, or URI");
+                    }
+                    else {
+                        Uri uri = new Uri(sysId);
+                        URIResolver ur = config.getURIResolver();
+                        if (ur is DotNetURIResolver) {
+                            XmlResolver xr = ((DotNetURIResolver) ur).getXmlResolver();
+                            object o = xr.GetEntity(uri, "xml", typeof(Stream));
+                            if (o is Stream) {
+                                xmlReader = XmlReader.Create((Stream) o, settings, parserContext);
+                            }
+                        }
+                    }
+                    
+                }
+
+                if (xmlReader == null) {
+                    throw new IllegalArgumentException("Unable to establish an XmlReader for supplied Source");
+                }
+
+                DotNetPullProvider provider = new DotNetPullProvider(xmlReader);
+                PullSource pullSource = new PullSource(provider);
+                return pullSource;
             }
+            return null;
         }
     }
 }

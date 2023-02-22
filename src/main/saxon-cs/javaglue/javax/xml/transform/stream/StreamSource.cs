@@ -1,28 +1,36 @@
+using System.IO;
 using java.io;
 
 namespace javax.xml.transform.stream {
     public class StreamSource : javax.xml.transform.Source {
 
         private string systemId;
+        private TextReader reader;
+        private Stream inputStream;
 
         public StreamSource() {
         }
 
-        public StreamSource(java.io.File file) {}
+        public StreamSource(java.io.File file) {
+            this.systemId = file.toURI().ToString();
+        }
 
         public StreamSource(string uri) {
+            this.systemId = uri;
         }
         public StreamSource(System.IO.TextReader reader) {
-            
+            this.reader = reader;
         }
         public StreamSource(System.IO.TextReader reader, string sysId) {
-            
+            this.reader = reader;
+            this.systemId = sysId;
         }
         public StreamSource(System.IO.Stream stream) {
-            
+            this.inputStream = stream;
         }
         public StreamSource(System.IO.Stream stream, string sysId) {
-            
+            this.inputStream = stream;
+            this.systemId = sysId;
         }
 
         public string getSystemId() {
@@ -34,18 +42,18 @@ namespace javax.xml.transform.stream {
         }
 
         public void setInputStream(System.IO.Stream stream) {
-            
+            this.inputStream = stream;
         }
         public System.IO.Stream getInputStream() {
-            return null;
+            return this.inputStream;
         }
 
         public void setReader(System.IO.TextReader reader) {
-            
+            this.reader = reader;
         }
 
         public System.IO.TextReader getReader() {
-            return null;
+            return this.reader;
         }
         
     }

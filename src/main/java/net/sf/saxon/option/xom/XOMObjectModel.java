@@ -269,7 +269,7 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
             return nodes.get(0);
         } else if (targetClass.isArray() && Node.class.isAssignableFrom(targetClass.getComponentType())) {
             Node[] array = (Node[]) Array.newInstance(targetClass.getComponentType(), nodes.size());
-            nodes.toArray(array);
+            array = nodes.toArray(array);
             return array;
         } else if (targetClass.isAssignableFrom(ArrayList.class)) {
             return nodes;

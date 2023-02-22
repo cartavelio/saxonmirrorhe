@@ -18,7 +18,6 @@ namespace java.util {
             this.defaults = defaults;
         }
         public string getProperty(string key) {
-            Console.WriteLine("getProperty " + key);
             if (dict.TryGetValue(key, out var value)) {
                 return value;
             } else {
@@ -30,7 +29,6 @@ namespace java.util {
             return getProperty(key) ?? defaultValue;
         }
         public void setProperty(string key, string value) {
-            Console.WriteLine("setProperty " + key + "=" + value);
             dict.Add(key, value);
         }
 

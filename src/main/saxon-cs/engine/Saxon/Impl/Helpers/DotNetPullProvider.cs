@@ -44,6 +44,7 @@ namespace System.Impl.Helpers {
                         }
                     }
                 }
+                parser.MoveToElement();
                 return atts;
             } else {
                 return net.sf.saxon.om.EmptyAttributeMap.getInstance();
@@ -75,6 +76,8 @@ namespace System.Impl.Helpers {
                 if ((used<limit)) {
                     nsBindings[used] = null;
                 }
+
+                parser.MoveToElement();
                 return nsBindings;
             } else {
                 return net.sf.saxon.om.NamespaceBinding.EMPTY_ARRAY;

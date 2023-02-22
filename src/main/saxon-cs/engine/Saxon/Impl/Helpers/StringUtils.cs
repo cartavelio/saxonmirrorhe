@@ -13,6 +13,10 @@ namespace Saxon.Impl.Helpers {
         public static bool stringEqualsIgnoreCase(string a, string b) {
             return String.Compare(a, b, true) == 0;
         }
+
+        public static string nullIfEmpty(string a) {
+            return string.IsNullOrEmpty(a) ? null : a;
+        }
         
  
 

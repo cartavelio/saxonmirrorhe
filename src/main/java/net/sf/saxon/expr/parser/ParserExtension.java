@@ -354,7 +354,7 @@ public class ParserExtension {
     public Expression createDynamicCurriedFunction(
             XPathParser p, Expression functionItem, ArrayList<Expression> args, IntSet placeMarkers) {
         Expression[] arguments = new Expression[args.size()];
-        args.toArray(arguments);
+        arguments = args.toArray(arguments);
         Expression result = curryFunction(functionItem, arguments, placeMarkers);
         p.setLocation(result, p.getTokenizer().currentTokenStartOffset);
         return result;

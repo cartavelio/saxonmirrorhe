@@ -846,7 +846,7 @@ public class CommandLineOptions {
                     fsb.append(minutes + "m ");
                 }
                 fsb.append(seconds + "s");
-                return fsb + " (" + nanosecs / 1e6 + "ms)";
+                return fsb.toString() + " (" + nanosecs / 1e6 + "ms)";
             } catch (XPathException e) {
                 return nanosecs / 1e6 + "ms";
             }

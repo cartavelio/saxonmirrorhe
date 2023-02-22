@@ -241,7 +241,7 @@ public class UType {
      */
 
     public Set<PrimitiveUType> decompose() {
-        Set<PrimitiveUType> result = new HashSet<PrimitiveUType>();
+        Set<PrimitiveUType> result = new HashSet<>();
         for (PrimitiveUType p : PrimitiveUType.values()) {
             if ((bits & (1<<p.getBit())) != 0) {
                 result.add(p);
@@ -315,7 +315,8 @@ public class UType {
         if (p.isEmpty()) {
             return ErrorType.getInstance();
         } else if (p.size() == 1) {
-            return p.iterator().next().toItemType();
+            Iterator<PrimitiveUType> iter = p.iterator();
+            return iter.hasNext() ? iter.next().toItemType() : null;
         } else if (ANY_NODE.subsumes(this)) {
             return AnyNodeTest.getInstance();
         } else if (equals(NUMERIC)) {

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using java.util;
 using Sys = System;
 using SysColl = System.Collections;
@@ -18,6 +19,9 @@ namespace java.lang
         }
 
         public static string getProperty(string name) {
+            if (name == "user.dir") {
+                return Sys.Environment.CurrentDirectory;
+            }
             return Sys.Environment.GetEnvironmentVariable(name);
         }
 
@@ -30,10 +34,8 @@ namespace java.lang
         }
         
         public static long nanoTime() {
-            long nano = 10000L * Sys.Diagnostics.Stopwatch.GetTimestamp();
-            nano /= Sys.TimeSpan.TicksPerMillisecond;
-            nano *= 100L;
-            return nano;
+            long ticks = Sys.Diagnostics.Stopwatch.GetTimestamp();
+            return ticks * (1_000_000_000L / Stopwatch.Frequency);
         }
         
         public static long currentTimeMillis() {

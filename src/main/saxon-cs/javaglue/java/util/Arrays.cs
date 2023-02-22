@@ -27,7 +27,7 @@ namespace java.util
 
         public static T[] copyOf<T>(T[] source, int length) {
             T[] dest = new T[length];
-            SysArray.Copy(source, 0, dest, 0, length);
+            SysArray.Copy(source, 0, dest, 0, Math.Min(length, source.Length));
             return dest;
         }
         

@@ -17,6 +17,7 @@ import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntPredicateProxy;
 
@@ -151,6 +152,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
         UnicodeBuilder buffer = new UnicodeBuilder();
         readFile(checker, reader, new AbstractUniStringConsumer() {
             @Override
+            @CSharpModifiers(code={"public", "override"})
             public UniStringConsumer accept(CodePoints chars) {
                 return buffer.accept(chars);
             }
@@ -177,7 +179,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
         int mask = 0;
         while (true) {
             actual = reader.read(buffer, 0, buffer.length);
-            if (actual < 0) {
+            if (isEndOfFile(actual)) {
                 break;
             }
             for (int c = 0; c < actual; ) {
@@ -229,6 +231,11 @@ public abstract class UnparsedTextFunction extends SystemFunction {
             }
         }
         reader.close();
+    }
+
+    @CSharpReplaceBody(code="return bytesRead == 0;")
+    private static boolean isEndOfFile(int bytesRead) {
+        return bytesRead < 0;
     }
 
 

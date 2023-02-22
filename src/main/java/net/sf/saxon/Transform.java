@@ -746,7 +746,7 @@ public class Transform {
                             quit("Stylesheet file " + sheetFile + " does not exist", 2);
                         }
                         //#if CSHARP==false
-                        if (styleParserName != null && Version.platform.isJava()) {
+                        if (false && styleParserName != null && Version.platform.isJava()) {
                             InputSource eis = new InputSource(sheetFile.toURI().toString());
                             XMLReader styleParser = config.getStyleParser();
                             styleSource = new SAXSource(styleParser, eis);
