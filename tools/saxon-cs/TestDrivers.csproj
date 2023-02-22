@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <Compile Include="../../src/test/cstestrunner/**" />
+    <Compile Remove="../../src/**/*.DS_Store" />
   </ItemGroup>
     
   <ItemGroup>
