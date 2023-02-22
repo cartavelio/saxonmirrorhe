@@ -70,6 +70,7 @@
       <xs:attribute name="environmentVariableResolver" use="optional" type="c:javaClassNameType"/>
       <xs:attribute name="errorListener" use="optional" type="c:javaClassNameType"/>
       <xs:attribute name="expandAttributeDefaults" use="optional" type="xs:boolean"/>
+      <xs:attribute name="commonResourceResolver" use="optional" type="c:javaClassNameType"/>
       <xs:attribute name="generateByteCode" use="optional" type="xs:boolean"/>
       <xs:attribute name="ignoreSAXSourceParser" use="optional" type="xs:boolean"/>
       <xs:attribute name="lazyConstructionMode" use="optional" type="xs:boolean"/>
