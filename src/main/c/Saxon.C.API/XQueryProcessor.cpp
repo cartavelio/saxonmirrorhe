@@ -30,7 +30,6 @@
         proc = p;
         exception = nullptr;
         cppXQ = j_createXQueryEngineWithProcessor(SaxonProcessor::sxn_environ->thread, (void *)p->procRef);
-
         if(cppXQ == -1) {
 
             std::cerr<<"Error: Failed to create the XPathProcessor internal object"<<std::endl;
@@ -222,7 +221,9 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
 
    void XQueryProcessor::setcwd(const char* dir){
-    cwdXQ = std::string(dir);
+        if(dir != nullptr) {
+            cwdXQ = std::string(dir);
+        }
    }
 
     void XQueryProcessor::setQueryBaseURI(const char * baseURI){
