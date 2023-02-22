@@ -63,7 +63,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      *   throw SaxonApiException if processor not licensed
     **/
     public SchemaValidatorForCpp(Processor proc) throws SaxonApiException {
-        processor = proc;
+        super(proc);
         schemaManager = processor.getSchemaManager();
         if (!processor.isSchemaAware()) {
             SaxonApiException ex = new SaxonApiException("Processor is not licensed for schema processing!");
@@ -656,8 +656,20 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
                         } else if (debug) {
                             System.err.println("Type of node Property error.");
                         }
-                    
-
+                    }  else if (params[i].equals("resources")) {
+                        char separatorChar = '/';
+                        if (SaxonCAPI.RESOURCES_DIR == null && values[i] instanceof String) {
+                            String dir1 = (String) values[i];
+                            if (!dir1.endsWith("/")) {
+                                dir1 = dir1.concat("/");
+                            }
+                            if (File.separatorChar != '/') {
+                                dir1.replace(separatorChar, File.separatorChar);
+                                separatorChar = '\\';
+                                dir1.replace('/', '\\');
+                            }
+                            SaxonCAPI.RESOURCES_DIR = dir1;
+                        }
                     } else if (params[i].equals("string")) {
                         thisClass.setsourceAsString((String) values[i]);
                     } else if (params[i].startsWith("param:")) {
@@ -750,6 +762,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
 
     public static void main(String[] args) throws SaxonApiException {
+        SaxonCAPI.debug = true;
         Processor processor = new Processor(true);
         SchemaValidatorForCpp validatorForCpp = new SchemaValidatorForCpp(processor);
 

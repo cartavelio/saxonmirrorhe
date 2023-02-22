@@ -77,10 +77,49 @@ public class XPathProcessor extends SaxonCAPI {
         compiler.declareNamespace(prefix, uri);
     }
 
+    /**
+     * Declare a variable as part of the static context for XPath expressions compiled using this
+     * {@code XPathCompiler}. It is an error for the XPath expression to refer to a variable unless it has been
+     * declared, unless the method {@link #setAllowUndeclaredVariables(boolean)} has been called to permit
+     * undeclared variables. This method declares the existence of the variable, but it does not
+     * bind any value to the variable; that is done later, when the XPath expression is evaluated.
+     * The variable is allowed to have any type (that is, the required type is <code>item()*</code>).
+     *
+     * @param qname The name of the variable, expressions as a clark name string
+     */
 
-    /* TODO public void declareVariable(String qname, ItemType itemType, OccurrenceIndicator occurrences) {
-        compiler.declareVariable(QName.fromClarkName(qname));
-    } */
+    public void declareVariable(String qname) {
+        if(compiler != null) {
+            compiler.declareVariable(QName.fromClarkName(qname));
+        }
+    }
+
+
+    /**
+     * Import a schema namespace: that is, add the element and attribute declarations and type definitions
+     * contained in a given namespace to the static context for the XPath expression.
+     * <p>This method will not cause the schema to be loaded. That must be done separately, using the
+     * {@link SchemaManager}. This method will not fail if the schema has not been loaded (but in that case
+     * the set of declarations and definitions made available to the XPath expression is empty). The schema
+     * document for the specified namespace may be loaded before or after this method is called.</p>
+     * <p>This method does not bind a prefix to the namespace. That must be done separately, using the
+     * {@link #declareNamespace(String, String)} method.</p>
+     *
+     * @param uri The schema namespace to be imported. To import declarations in a no-namespace schema,
+     *            supply a zero-length string.
+     */
+    public void importSchemaNamespace(String uri) {
+        if(compiler != null) {
+            compiler.importSchemaNamespace(uri);
+        }
+    }
+
+
+    public void setAllowUndeclaredVariables(boolean allow) {
+        if(compiler != null) {
+            compiler.setAllowUndeclaredVariables(allow);
+        }
+    }
 
     /**
      * Set whether XPath 1.0 backwards compatibility mode is to be used. In backwards compatibility
@@ -344,6 +383,9 @@ public class XPathProcessor extends SaxonCAPI {
 
             }
 
+
+            
+
             if (map.containsKey("extc")) {
                 //extension function library path
                 String libName = (String) map.get("extc");
@@ -383,7 +425,8 @@ public class XPathProcessor extends SaxonCAPI {
                 "    <person>text2</person>\n" +
                 "    <person1>text3</person1>\n" +
                 "</out>");
-        XdmNode node2 = xpath.parseXmlFile("/Users/ond1/work/development/svn/test", "books.xml");
+        xpath.declareNamespace("p", "http://one.com/");
+        XdmNode node2 = xpath.parseXmlFile("/Users/ond1/work/development/svn/test", null, "books.xml");
         XdmNode[] children1 = XdmUtils.getChildren(XdmUtils.getChildren(node)[0]);
         // xpath.setContextItem(node);
         Object[] values3 = {node2};
