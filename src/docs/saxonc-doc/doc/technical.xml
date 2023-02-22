@@ -1,5 +1,5 @@
-<article id="technical" title="Technical Information">
-   <h1>Technical Information</h1>
+<article id="technical" title="Technical information">
+   <h1>Technical information</h1>
 
    <p>SaxonC is built by cross compiling the Java code of Saxon 11 using the Excelsior JET
       15.3 Enterprise edition (MP1). This generates platform specific machine code, which we
@@ -30,7 +30,7 @@
       <li>The XQuery Update feature is not supported.</li>
    </ul>
 
-   <h2>Feedback/Comments:</h2>
+   <h2>Feedback/comments:</h2>
 
    <p>Please use the help forums and bug trackers for SaxonC at <a
          href="https://saxonica.plan.io/projects/saxon-c" target="_blank">saxonica.plan.io</a> if
