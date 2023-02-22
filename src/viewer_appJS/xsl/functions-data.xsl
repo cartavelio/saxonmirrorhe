@@ -84,8 +84,10 @@
 
     <!-- Namespace functions list, on main page. -->
     <xsl:variable name="sfns" as="element()*" select="fc:fn-list(fc:function)"/>
+    
+    <div id="platform-fn"></div>
 
-    <p>Number of functions: <xsl:value-of select="count($sfns)"/></p>
+    <p>Number of functions: <span id="platform-fn-count"><xsl:value-of select="count($sfns)"/></span> of <xsl:value-of select="count($sfns)"/></p>
 
     <xsl:variable name="colsize" select="xs:integer(ceiling(count($sfns) div 3))"/>
 
@@ -122,7 +124,8 @@
 
  <!-- Contents of namespace function list: links to each function in namespace. -->
  <xsl:template match="fc:function" mode="index">
-  <span class="flink" data-href="{fc:name}" data-ns="{fc:namespace-ref(fc:name/@namespace)}">
+  <span class="flink" data-href="{fc:name}" data-ns="{fc:namespace-ref(fc:name/@namespace)}"
+   data-platform="{(.//fc:saxon-edition/@platform,'ALL')[1]}">
    <xsl:value-of select="fc:name"/>
   </span>
   <br/>
