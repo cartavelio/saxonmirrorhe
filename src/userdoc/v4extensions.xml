@@ -694,7 +694,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             
             <aside>The current proposal is undecided as to whether ":" or ":=" should be used after the keyword. Saxon 11 allows either.</aside>
             
-      </section>
+         </section>
+         
          <section id="downcasting" title="Automatic Downcasting">
             <h1>Automatic Downcasting</h1>
             
@@ -706,6 +707,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                casting operation, only a strict relabelling of the supplied value. For example, if the required type is <code>xs:integer</code>
                then you can supply the decimal value 3.0, but you can't supply 3.1, even though casting 3.1 to <code>xs:integer</code>
                is allowed.</p>
+         </section>
 
       </section>
          
