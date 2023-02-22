@@ -632,6 +632,8 @@ task graal_eec_jar(
                            ? "libs/nix"
                            : "libs/win"))
 
+    def location = "../"
+
     def libpath = ''
     def saxonc_lib = ''
     if (systemOs.isLinux()) {
@@ -681,6 +683,7 @@ task graal_eec_jar(
                   .replace('@@edition@@', edition)
                   .replace('@@EDITION@@', edition.toUpperCase())
                   .replace('@@libpath@@', libpath)
+                  .replace('@@location@@', location)
         }
       }
     }
@@ -868,6 +871,7 @@ task graal_eec_jar(
           line.replaceAll('@@VERSION@@', saxonVersion)
             .replace('@@edition@@', edition)
             .replace('@@EDITION@@', edition.toUpperCase())
+            .replace('@@location@@', '')
 	    .replace('@@libpath@@', libpath)
             .replace('[LAST-LINE-BUILD-PATCH]', lastLinePatch)
         }
