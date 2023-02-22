@@ -16,7 +16,7 @@ public class Message {
     private final Location _location;
 
     /**
-     * Construct a Message. This constructor is used internally by the xsl:message
+     * Construct a Message. This constructor is used internally by the <code>xsl:message</code>
      * instruction.
      */
 
@@ -34,6 +34,28 @@ public class Message {
 
     public XdmNode getContent() {
         return _content;
+    }
+
+    /**
+     * Get the string value of the message. This is a shortcut for {@code getContent().getStringValue()}.
+     * It returns the content of the message as a string, without XML escaping, and ignoring any XML markup.
+     * @return the message as an unescaped string
+     */
+
+    public String getStringValue() {
+        return _content.getStringValue();
+    }
+
+    /**
+     * Get the message content as a string, using XML serialization with options method="xml",
+     * indent="yes", omit-xml-declaration="yes". This is a shortcut for
+     * {@code getContent().toString()}. The result may include XML markup and XML escaping,
+     * though there is no guarantee that it will be a well-formed XML document (it may be
+     * a document fragment).
+     */
+
+    public String toString() {
+        return _content.toString();
     }
 
     /**
