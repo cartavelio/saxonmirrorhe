@@ -964,6 +964,10 @@
                   <xsl:text>  case </xsl:text>
                   <xsl:choose>
                      <xsl:when test="$selectorElem/@RESOLVED_TYPE = 'net.sf.saxon.s9api.HostLanguage'">Saxon.Api.HostLanguage.{name/@identifier}</xsl:when>
+                     <xsl:when test="$selectorElem/@RESOLVED_TYPE = 'net.sf.saxon.s9api.UnprefixedElementMatchingPolicy'">Saxon.Api.UnprefixedElementMatchingPolicy.{
+                        if (name/@identifier = 'DEFAULT_NAMESPACE') then 'DefaultNamespace' 
+                        else if (name/@identifier = 'ANY_NAMESPACE') then 'AnyNamespace' 
+                        else if (name/@identifier = 'DEFAULT_NAMESPACE_OR_NONE') then 'DefaultNamespaceOrNone' else '**'}</xsl:when>                   
                      <xsl:when test="$enumType and exists($firstLabel/@RESOLVED_TYPE)">{f:renameType($firstLabel/@RESOLVED_TYPE)}.{if (not($isSimpleEnum)) then 'InnerEnum.' else ''}{name/@identifier}</xsl:when>
                      <xsl:otherwise>
                         <xsl:apply-templates select="."/>
