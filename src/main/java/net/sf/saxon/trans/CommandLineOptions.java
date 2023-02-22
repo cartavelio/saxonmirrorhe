@@ -600,10 +600,14 @@ public class CommandLineOptions {
         for (String name : paramExpressions.stringPropertyNames()) {
             String value = paramExpressions.getProperty(name);
             // parameters starting with "?" are taken as XPath expressions
-            XPathCompiler xpc = processor.newXPathCompiler();
-            XPathExecutable xpe = xpc.compile(value);
-            XdmValue val = xpe.load().evaluate();
-            paramSetter.setParam(QName.fromClarkName(name), val);
+            try {
+                XPathCompiler xpc = processor.newXPathCompiler();
+                XPathExecutable xpe = xpc.compile(value);
+                XdmValue val = xpe.load().evaluate();
+                paramSetter.setParam(QName.fromClarkName(name), val);
+            } catch (SaxonApiException e) {
+                throw new SaxonApiException("Failure evaluating XPath expression {" + value + "} on command line", e.getCause());
+            }
         }
     }
 
@@ -672,10 +676,14 @@ public class CommandLineOptions {
         for (String name : paramExpressions.stringPropertyNames()) {
             String value = paramExpressions.getProperty(name);
             // parameters starting with "?" are taken as XPath expressions
-            XPathCompiler xpc = processor.newXPathCompiler();
-            XPathExecutable xpe = xpc.compile(value);
-            XdmValue val = xpe.load().evaluate();
-            compiler.setParameter(QName.fromClarkName(name), val);
+            try {
+                XPathCompiler xpc = processor.newXPathCompiler();
+                XPathExecutable xpe = xpc.compile(value);
+                XdmValue val = xpe.load().evaluate();
+                compiler.setParameter(QName.fromClarkName(name), val);
+            } catch (SaxonApiException e) {
+                throw new SaxonApiException("Failure evaluating XPath expression {" + value + "} on command line", e.getCause());
+            }
         }
 
     }
