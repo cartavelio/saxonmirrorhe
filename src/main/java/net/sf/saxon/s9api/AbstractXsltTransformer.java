@@ -96,6 +96,7 @@ public abstract class AbstractXsltTransformer {
         return controller.getBaseOutputURI();
     }
 
+    //#if CSHARP==false
     /**
      * Set an object that will be used to resolve URIs used in
      * fn:doc() and related functions.
@@ -109,6 +110,7 @@ public abstract class AbstractXsltTransformer {
     public void setURIResolver(URIResolver resolver) {
         controller.setResourceResolver(new ResourceResolverWrappingURIResolver(resolver));
     }
+    //#endif
 
     /**
      * Set the <code>ResourceResolver</code> to be used during stylesheet execution.
@@ -142,6 +144,7 @@ public abstract class AbstractXsltTransformer {
         return controller.getResourceResolver();
     }
 
+    //#if CSHARP==false
     /**
      * Get the URI resolver.
      *
@@ -155,6 +158,7 @@ public abstract class AbstractXsltTransformer {
         }
         return null;
     }
+    //#endif
 
     /**
      * Set an object that will be used to resolve URIs used in

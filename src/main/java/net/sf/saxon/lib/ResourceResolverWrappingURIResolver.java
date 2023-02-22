@@ -8,10 +8,15 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.trans.XPathException;
+import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.Objects;
 
 /**
@@ -41,23 +46,44 @@ public class ResourceResolverWrappingURIResolver implements ResourceResolver {
      */
     @Override
     public Source resolve(ResourceRequest request) throws XPathException {
+        String href;
         if (request.relativeUri != null && request.baseUri != null) {
-            try {
-                return uriResolver.resolve(request.relativeUri, request.baseUri);
-            } catch (TransformerException e) {
-                throw XPathException.makeXPathException(e);
-            }
+            href = request.relativeUri;
+        } else if (request.uri != null) {
+            href = request.uri;
+        } else {
+            return null;
         }
-        if (request.uri != null) {
-            try {
-                return uriResolver.resolve(request.uri, request.baseUri);
-            } catch (TransformerException e) {
-                throw XPathException.makeXPathException(e);
+        try {
+            Source resolved = uriResolver.resolve(href, request.baseUri);
+            //#if CSHARP==false
+            if (ResourceRequest.TEXT_NATURE.equals(request.nature)
+                    && resolved instanceof SAXSource
+                    && ((SAXSource) resolved).getInputSource() != null) {
+                // bug 5582. When unparsed text is requested, the resource resolver
+                // shouldn't return a SAXSource, but a legacy URIResolver may do so
+                InputSource is = ((SAXSource) resolved).getInputSource();
+                StreamSource ss = new StreamSource();
+                ss.setInputStream(is.getByteStream());
+                ss.setReader(is.getCharacterStream());
+                ss.setSystemId(is.getSystemId());
+                ss.setPublicId(is.getPublicId());
+                if (is.getEncoding() != null && is.getByteStream() != null && is.getCharacterStream() == null) {
+                    try {
+                        ss.setReader(new InputStreamReader(is.getByteStream(), is.getEncoding()));
+                    } catch (UnsupportedEncodingException e) {
+                        // no action, we may fail later
+                    }
+                }
+                resolved = ss;
             }
+            //#endif
+            return resolved;
+        } catch (TransformerException e) {
+            throw XPathException.makeXPathException(e);
         }
-        return null;
     }
-
+    
     public URIResolver getWrappedURIResolver() {
         return uriResolver;
     }

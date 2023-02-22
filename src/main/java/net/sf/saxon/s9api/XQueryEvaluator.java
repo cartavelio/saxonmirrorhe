@@ -206,6 +206,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
         return XdmValue.wrap(oval);
     }
 
+    //#if CSHARP==false
     /**
      * Set an object that will be used to resolve URIs used in
      * fn:doc() and related functions.
@@ -237,6 +238,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
             return null;
         }
     }
+    //#endif
 
     /**
      * Set the ResourceResolver to be used during query evaluation.

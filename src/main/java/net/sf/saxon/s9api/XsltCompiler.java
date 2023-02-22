@@ -108,6 +108,7 @@ public class XsltCompiler {
         return processor;
     }
 
+    //#if CSHARP==false
     /**
      * Set the URIResolver to be used during stylesheet compilation. This interface is
      * retained for backwards compatibility reasons. The supplied <code>URIResolver</code>
@@ -124,6 +125,7 @@ public class XsltCompiler {
         compilerInfo.setResourceResolver(
                 new ResourceResolverWrappingURIResolver(resolver));
     }
+    //#endif
 
     /**
      * Set the <code>ResourceResolver</code> to be used during stylesheet compilation.
@@ -174,6 +176,7 @@ public class XsltCompiler {
         compilerInfo.clearParameters();
     }
 
+    //#if CSHARP==false
     /**
      * Get the URIResolver to be used during stylesheet compilation.
      *
@@ -191,6 +194,7 @@ public class XsltCompiler {
             return null;
         }
     }
+    //#endif
 
     /**
      * Get the ResourceResolver to be used during stylesheet compilation.

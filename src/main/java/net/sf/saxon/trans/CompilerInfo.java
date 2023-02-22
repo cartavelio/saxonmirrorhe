@@ -153,6 +153,7 @@ public class CompilerInfo {
         return optimizerOptions.isSet(OptimizerOptions.JIT);
     }
 
+    //#if CSHARP==false
     /**
      * Set the URI Resolver to be used in this compilation episode.
      *
@@ -166,11 +167,12 @@ public class CompilerInfo {
     public void setURIResolver(URIResolver resolver) {
         resourceResolver = new ResourceResolverWrappingURIResolver(resolver);
     }
+    //#endif
 
     /**
-     * Set the URI Resolver to be used in this compilation episode.
+     * Set the resource Resolver to be used in this compilation episode.
      *
-     * @param resolver The URIResolver to be used. This is used to dereference URIs encountered in constructs
+     * @param resolver The resource resolver to be used. This is used to dereference URIs encountered in constructs
      *                 such as xsl:include, xsl:import, and xsl:import-schema.
      * @since 8.7
      */
@@ -366,6 +368,7 @@ public class CompilerInfo {
         return optimizerOptions.isSet(OptimizerOptions.BYTE_CODE);
     }
 
+    //#if CSHARP==false
     /**
      * Get the URI Resolver being used in this compilation episode.
      *
@@ -381,6 +384,7 @@ public class CompilerInfo {
             return null;
         }
     }
+    //#endif
 
     /**
      * Get the ResourceResolver being used
