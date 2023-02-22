@@ -13,19 +13,16 @@ import net.sf.saxon.expr.JPConverter;
 import net.sf.saxon.expr.PJConverter;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.ExternalObjectModel;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
-import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.SequenceExtent;
-import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -296,6 +293,18 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
             receiver.endDocument();
             receiver.close();
         } else {
+            // Do a quick check (not guaranteed to catch all cases) that this isn't a non-namespace-aware DOM,
+            // to catch the common case of failing to set namespace-awareness on the DOM factory
+            if (startNode.getNodeType() == Type.DOCUMENT) {
+                Element top = ((Document) startNode).getDocumentElement();
+                if (top != null && top.getNamespaceURI() == null) {
+                    if (top.getNodeName().contains(":")) {
+                        throw new XPathException("Supplied DOM uses namespaces, but is not created as namespace-aware");
+                    } else if (top.hasAttribute("xmlns")) {
+                        throw new XPathException("Supplied DOM declares a default namespace, but is not created as namespace-aware");
+                    }
+                }
+            }
             DOMSender driver = new DOMSender(startNode, receiver);
             driver.setSystemId(source.getSystemId());
             receiver.open();
