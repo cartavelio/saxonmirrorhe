@@ -19,7 +19,7 @@
 
     <p>Saxon implements the <a href="http://www.w3.org/TR/xslt-30/" class="bodylink">XSLT 3.0
             Recommendation</a> from the World Wide Web Consortium: see <a class="bodylink"
-            href="/conformance/xslt30">XSLT 3.0 Conformance</a>. The information here is designed to
+            href="/conformance/xslt30">XSLT 3.0 conformance</a>. The information here is designed to
         give a comprehensive summary of the features, but for the full specification, consult the
         official standard.</p>
     
@@ -234,7 +234,7 @@
             <examples>
                 <p>Examples of this element can be found in the <a
                         href="http://www.w3.org/TR/xslt-30/#regex-examples" class="bodylink">XSLT
-                        3.0 Specification</a>.</p>
+                        3.0 specification</a>.</p>
             </examples>
             <in-spec>xslt20</in-spec>
             <in-spec>xslt30</in-spec>
@@ -390,7 +390,7 @@
                 </ul>
 
                 <p>The full syntax of select expressions is outlined in <a class="bodylink"
-                        href="/expressions">XPath Syntax</a>; some examples of the most
+                        href="/expressions">XPath syntax</a>; some examples of the most
                     useful forms of select expression are given in the example below.</p>
             </details>
             <examples>
@@ -713,8 +713,7 @@
                 <attribute name="name" use="mandatory">Attribute name, interpreted as an
                         <i>attribute value template</i>, so it may contain string expressions within
                     curly braces. The full syntax of string expressions is outlined in <a
-                        class="bodylink" href="/expressions">XPath Expression
-                    Syntax</a>.</attribute>
+                        class="bodylink" href="/expressions">XPath syntax</a>.</attribute>
                 <attribute name="namespace" use="optional">The namespace URI of the
                     attribute.</attribute>
                 <attribute name="select" use="optional">The attribute value may be given either by a
@@ -1077,7 +1076,7 @@
 
                 <p>The test condition in the <code>xsl:when</code> element is a boolean expression.
                     The full syntax of expressions is outlined in <a class="bodylink"
-                        href="/expressions">XPath Syntax</a>.</p>
+                        href="/expressions">XPath syntax</a>.</p>
             </details>
             <examples>
                 <example>
@@ -1653,7 +1652,7 @@
                     the statement will iterate. The XSLT statements subordinate to the
                     <code>xsl:for-each</code> element are applied to each item in the input sequence
                     in turn. The full syntax of expressions is outlined in <a class="bodylink"
-                        href="/expressions">XPath Syntax</a>.</attribute>
+                        href="/expressions">XPath syntax</a>.</attribute>
                 <attribute name="array" use="optional">Experimental addition in XSLT 4.0, 
                     allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
                     Defines an array over which
@@ -1840,7 +1839,7 @@
                         >Unicode Collation Algorithm</a>, or is a collation otherwise recognized by
                     Saxon: see <a class="bodylink"
                         href="/localization/sorting-and-collations"
-                        >Sorting and Collations</a>.</attribute>
+                        >Sorting and collations</a>.</attribute>
             </attributes>
             <details>
                 <p>There are four possible ways of defining the grouping using different attributes:
@@ -2080,7 +2079,7 @@
             <attributes>
                 <attribute name="test" use="mandatory">The boolean expression to be tested. The full
                     syntax of boolean expressions is outlined in <a class="bodylink"
-                        href="/expressions">XPath Syntax</a>.</attribute>
+                        href="/expressions">XPath syntax</a>.</attribute>
                 <attribute name="then" use="optional">Proposed extension for XSLT 4.0; defines the value
                 to be returned if the <code>test</code> condition is true, as an alternative to evaluating
                 the sequence constructor. If the <code>then</code> attribute is present, the <code>xsl:if</code>
@@ -2145,7 +2144,7 @@
                         user-written <code>URIResolver</code> can be supplied. Note that it is the
                         compile-time <code>URIResolver</code> that is used, not the run-time
                             <code>URIResolver</code>. See also <a class="bodylink"
-                                href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML Catalogs</a>.</p>
+                                href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML catalogs</a>.</p>
                     <p>If the URI is relative, then it is interpreted relative to the base URI of
                         the <code>xsl:import</code> element itself, which normally is the location
                         of the file containing the source stylesheet module. If the stylesheet is
@@ -2233,7 +2232,7 @@
                             <code>XMLResolver</code>). Note that it is the compile-time
                             <code>URIResolver</code> that is used, not the run-time
                             <code>URIResolver</code>. See also <a class="bodylink"
-                                href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML Catalogs</a>.</p>
+                                href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML catalogs</a>.</p>
 
                     <p>If the URI is relative, then it is interpreted relative to the base URI of
                         the <code>xsl:include</code> element itself, which normally is the location
@@ -2462,7 +2461,7 @@
                     when comparing strings. If present it must be a collation URI recognized by Saxon: see <a
                         class="bodylink"
                         href="/localization/sorting-and-collations"
-                        >Sorting and Collations</a>.</attribute>
+                        >Sorting and collations</a>.</attribute>
             </attributes>
             <details>
                 <p>Note that: <ol>
@@ -2881,7 +2880,8 @@
             <details>
                 <p>By default the message is displayed on the standard error output stream. You can
                     supply your own message handler if you want it handled differently: for
-                    details see <a class="bodylink" href="/using-xsl/stylesheet-output/message-output">Message Output</a>.</p>
+                    details see <a class="bodylink" href="/using-xsl/stylesheet-output/message-output">Message
+                        output</a>.</p>
                 
                 <p>A user-written message handler is called with a <code>Message</code> object containing
                 the details of the message. This allows the application to extract:</p>
@@ -2940,7 +2940,7 @@
                     that template rules using this mode must be capable of being evaluated in a
                         <dfn>streaming</dfn> manner. This imposes restrictions on the content of the
                     template rules. For details, see <a class="bodylink"
-                        href="/streaming">Streaming XML Documents</a>. Requires
+                        href="/streaming">Streaming XML documents</a>. Requires
                     Saxon-EE.</attribute>
                 <attribute name="use-accumulators" use="optional">Relevant only when this mode is
                     the initial mode of the transformation. Defines the set of accumulators
@@ -3322,7 +3322,7 @@
                         href="http://site.icu-project.org/">ICU - International Components for
                         Unicode</a> as described in <a class="bodylink"
                             href="/localization/ICU-numbers-and-dates">Numbers
-                            and Dates from ICU</a>. Otherwise, a selection of languages are
+                            and dates from ICU</a>. Otherwise, a selection of languages are
                     supported directly, and it is possible to add support for others, using
                     <code>Numberer</code> classes as described in <a class="bodylink"
                         href="/localization/localizing-numbers-and-dates">Localizing numbers and
@@ -3794,8 +3794,8 @@
             <in-spec>xslt30</in-spec>
             <saxon-edition>ALL</saxon-edition>
             <status>
-                <p>See <a class="bodylink" href="/extensions/output-extras">Additional Serialization
-                        Parameters</a> for descriptions of additional attributes supported by Saxon-PE and Saxon-EE
+                <p>See <a class="bodylink" href="/extensions/output-extras">Additional serialization
+                        parameters</a> for descriptions of additional attributes supported by Saxon-PE and Saxon-EE
                     on the <code>xsl:output</code> declaration.</p>
 
                 <p>The new XSLT 3.0 attribute <code>parameter-document</code> is first implemented in
@@ -3889,7 +3889,7 @@
                         Collation Algorithm</a>), or collations otherwise recognized by Saxon (see
                     <a class="bodylink"
                         href="/localization/sorting-and-collations"
-                        >Sorting and Collations</a>).</attribute>
+                        >Sorting and collations</a>).</attribute>
                 <attribute name="extension-element-prefixes" use="optional">Standard attribute that
                     may appear on any XSLT element. Used to declare the use of extension
                     instructions in a particular namespace.</attribute>
@@ -4274,8 +4274,8 @@
                     corresponding <a class="bodylink code" href="../output">xsl:output</a> element
                     documentation.</p>
                 
-                <p>See <a class="bodylink" href="/extensions/output-extras">Additional Serialization
-                    Parameters</a> for descriptions of additional attributes supported by Saxon-PE
+                <p>See <a class="bodylink" href="/extensions/output-extras">Additional serialization
+                    parameters</a> for descriptions of additional attributes supported by Saxon-PE
                     and Saxon-EE on <code>xsl:result-document</code> and <code>xsl:output</code>.
                     Any values specified on the <code>xsl:result-document</code> instruction
                     override the values specified on the <code>xsl:output</code> declaration.</p>
@@ -4347,7 +4347,7 @@
                     failure. It also means that when a user written result document resolver is in
                     use, it will be called to handle this case with the base output URI supplied as
                     the URI argument. For more information, see <a class="bodylink"
-                        href="/using-xsl/stylesheet-output/secondary-output">Secondary Output</a>.</p>
+                        href="/using-xsl/stylesheet-output/secondary-output">Secondary output</a>.</p>
             </status>
             <see-also name="output" type="xsl-elements"/>
         </xsl-element>
@@ -4469,7 +4469,7 @@
                     present it must be a collation URI recognized by
                     Saxon: see <a class="bodylink"
                         href="/localization/sorting-and-collations"
-                        >Sorting and Collations</a>.</attribute>
+                        >Sorting and collations</a>.</attribute>
                 <attribute name="stable" use="optional">Permitted only on the first
                         <code>xsl:sort</code> element within a sort key. Determines the ordering
                     when two sort key values compare equal. For such elements, the value
@@ -4639,7 +4639,7 @@
                 
                 
                 <p>For more details on streaming, see <a class="bodylink"
-                    href="/streaming">Streaming XML Documents</a>.</p>
+                    href="/streaming">Streaming XML documents</a>.</p>
             </details>
             <examples>
                 <example>
@@ -4745,7 +4745,7 @@
                         Collation Algorithm</a>), or collations otherwise recognized by Saxon (see
                         <a class="bodylink"
                             href="/localization/sorting-and-collations"
-                            >Sorting and Collations</a>).</attribute>
+                            >Sorting and collations</a>).</attribute>
                 <attribute name="extension-element-prefixes" use="optional">Standard attribute that
                     may appear on any XSLT element. Used to declare the use of extension
                     instructions in a particular namespace.</attribute>
@@ -4847,7 +4847,7 @@
                     <p>Pattern to identify the type of node to be processed. The most common form of
                         pattern is simply an element name. However, more complex patterns may also
                         be used: the syntax of patterns is given in more detail in <a
-                            class="bodylink" href="../patterns">XSLT Pattern Syntax</a>. The
+                            class="bodylink" href="../patterns">XSLT pattern syntax</a>. The
                         following examples show some of the possibilities:</p>
                     <table>
                         <tr>
@@ -5258,8 +5258,8 @@
                     <p>Identifes the expression. If this is not specified, the value to be output is
                         obtained by evaluating the sequence constructor contained within the
                             <code>xsl:value-of</code> element. The full syntax of expressions is
-                        outlined in <a class="bodylink" href="/expressions">XPath Expression
-                            Syntax</a>. Here are some examples of expressions that can be used in
+                        outlined in <a class="bodylink" href="/expressions">XPath 
+                            syntax</a>. Here are some examples of expressions that can be used in
                         the <code>select</code> attribute:</p>
                     <table>
                         <tr>
@@ -5686,7 +5686,7 @@
 
         <p>Patterns define a condition that an item may or may not satisfy: an item either matches
             the pattern, or it does not. The syntax of patterns is a subset of that for the <a
-                class="bodylink" href="/expressions">XPath expressions</a>. In XSLT 3.0 there are
+                class="bodylink" href="/expressions">XPath syntax</a>. In XSLT 3.0 there are
             two kinds of pattern:</p>
 
         <ul>

@@ -251,9 +251,9 @@
          
          <p>For full details, including lists of the available command line options for each of
             these interfaces, see the following:</p>
-         <ul><li><a class="bodylink" href="/using-xsl/commandline">XSLT from the Command Line</a></li>
-            <li><a class="bodylink" href="/using-xquery/commandline">XQuery from the Command Line</a></li>
-            <li><a class="bodylink" href="/schema-processing/commandline">Validation from the Command Line</a></li>
+         <ul><li><a class="bodylink" href="/using-xsl/commandline">XSLT from the command line</a></li>
+            <li><a class="bodylink" href="/using-xquery/commandline">XQuery from the command line</a></li>
+            <li><a class="bodylink" href="/schema-processing/commandline">Validation from the command line</a></li>
          </ul>
 
          <p>For more specialized options, there is also a fallback mechanism. Each configuration property has a URI, which is always of the form

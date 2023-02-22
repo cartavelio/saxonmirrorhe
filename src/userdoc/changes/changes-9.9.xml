@@ -596,7 +596,7 @@
         <h2>XPath Syntax Extensions</h2>
         
         <p>Saxon 9.9 implements a number of extensions to the XPath 3.1 grammar, for more information see <a class="bodylink"
-            href="/v4extensions/xslt-syntax-extensions">Syntax Extensions</a>. These are enabled only if the configuration option
+            href="/v4extensions/xslt-syntax-extensions">Syntax extensions</a>. These are enabled only if the configuration option
             <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/>
             is set, and they require Saxon-PE or higher.</p>
         
@@ -619,7 +619,8 @@
         <h2>XSLT syntax extensions</h2>
         
         <p>The syntax of match patterns is extended to make it easier to match maps and arrays (see
-            <a class="bodylink" href="/v4extensions/xslt-syntax-extensions/match-patterns">XSLT Syntax Extensions: Match Patterns</a>).</p>
+            <a class="bodylink" href="/v4extensions/xslt-syntax-extensions/match-patterns">XSLT syntax
+                extensions: match patterns</a>).</p>
         
         <p>In particular the syntax <code>ma-type predicate*</code> is allowed, where <code>ma-type</code>
             is any of:</p>
@@ -650,8 +651,8 @@
     
     <category name="sql">
         <p>A number of SQL extension functions are now available, designed to supersede the existing SQL extension
-            instructions. See the <a class="bodylink" href="/sql-extension">Saxon SQL Extension</a> section and <a
-                class="bodylink" href="/functions/sql">Function Library</a> for details.</p>
+            instructions. See the <a class="bodylink" href="/sql-extension">Saxon SQL extension</a> section and <a
+                class="bodylink" href="/functions/sql">Function library</a> for details.</p>
     </category>
     
     <category name="sourcedocs">

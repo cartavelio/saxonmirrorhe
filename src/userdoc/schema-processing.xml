@@ -84,7 +84,7 @@
                   semicolons; the files are OASIS XML catalogs used to define how public identifiers
                   and system identifiers (URIs) used in a source document or schema are to be
                   redirected, typically to resources available locally. For more details see <a
-                     class="bodylink" href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML Catalogs</a>. </p>
+                     class="bodylink" href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML catalogs</a>. </p>
             </td>
          </tr>
          <tr>
@@ -410,7 +410,8 @@
                <p>--<i>feature</i>:value</p>
             </td>
             <td>
-               <p>Set a configuration feature: see <a class="bodylink" href="/configuration/config-features">Configuration Features</a>.
+               <p>Set a configuration feature: see <a class="bodylink"
+                  href="/configuration/config-features">Configuration features</a>.
                   The value used here is the part of the name after the last "/", for example
                      <code>--allow-external-functions:off</code>. Only features accepting a string
                   or boolean may be set; for booleans the values
@@ -446,7 +447,7 @@
 
       <p>Parameters on the command line can be used to supply values for any
             <code>saxon:param</code> declarations in the schema. See <a class="bodylink"
-            href="../extensions11/parameterizing-schemas">Parameterizing Schemas</a> for details. The format of
+            href="../extensions11/parameterizing-schemas">Parameterizing schemas</a> for details. The format of
          parameters is the same as for the XSLT and XQuery command lines: <code>name=value</code> to
          supply a simple value; <code>+name=filename</code> to supply the contents of an XML
          document as the parameter value; or <code>?name=expression</code> to supply the result of
@@ -912,8 +913,8 @@
 
       <p>To run a schema-aware transformation or query from the command line, use appropriate options on the 
          <code>Transform</code> or <code>Query</code> command
-         (see <a class="bodylink" href="/using-xsl/commandline">XSLT from the Command Line</a> and <a class="bodylink"
-            href="/using-xquery/commandline">XQuery from the Command Line</a> respectively), for example
+         (see <a class="bodylink" href="/using-xsl/commandline">XSLT from the command line</a> and <a class="bodylink"
+            href="/using-xquery/commandline">XQuery from the command line</a> respectively), for example
             <code>-val:strict</code> to request strict validation of the source document, or
             <code>-val:lax</code> for lax validation. This applies not only to the principal source
          document loaded from the command line, but to all documents loaded via the <a
@@ -1019,8 +1020,8 @@
       </ul>
       
       <p>The simplest way to create an SCM file is from the command line, as
-         described in <a class="bodylink" href="../commandline">Validation from the Command
-            Line</a>: use the <code>-export</code> option. 
+         described in <a class="bodylink" href="../commandline">Validation from the command
+            line</a>: use the <code>-export</code> option. 
          Alternatively, an SCM file can be generated programmatically:</p>
       
       <ul>
@@ -1092,7 +1093,7 @@
       <p>From release 9.5, Saxon-EE includes full support for the XML Schema 1.1 specification,
          which is a W3C Recommendation. The main changes between XSD 1.0 and XSD 1.1 are listed in
          the following pages (see <a class="bodylink" href="/conformance/schema11">XML Schema 1.1
-            Conformance</a> for further information).</p>
+            conformance</a> for further information).</p>
 
       <p>From Saxon 9.8, use of XML Schema 1.1 features is enabled by default. To disable use of XML
          Schema 1.1 features, set the command line flag <code>-xsdversion:1.0</code> or the

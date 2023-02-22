@@ -72,7 +72,7 @@
         <p>Type checking on maps has been improved. In particular, the static type of the expression <code>map:get(M, K)</code> (or equivalent
         constructs such as <code>M(K)</code> or <code>M?K</code> is now deduced from the type of the map if known. The checking is even
         stronger if the new (Saxon-specific) mechanism of tuple types (now renamed "record types") is used: see 
-            <a class="bodylink" href="/v4extensions/new-types/record-types">Record Types</a>.</p>
+            <a class="bodylink" href="/v4extensions/new-types/record-types">Record types</a>.</p>
  
     </category>
     
@@ -127,15 +127,16 @@
         
         <p>Added more command line options related to tracing: <code>-Tout:filename</code> specifies the destination for -T trace output; 
             while <code>-Tlevel:(none|low|normal|high)</code> controls the level of detail in the output. The same functionality
-            is available via API and configuration options. For more information see <a class="bodylink" href="/configuration/config-features">Configuration Features</a>.</p>
+            is available via API and configuration options. For more information see <a class="bodylink"
+                href="/configuration/config-features">Configuration features</a>.</p>
         
         <p>When the <code>-qs</code> option is used on the command line, the static base URI of the query is the current working
-            directory. (See <a href="/using-xquery/commandline" class="bodylink">XQuery from the Command Line</a>.)</p>
+            directory. (See <a href="/using-xquery/commandline" class="bodylink">XQuery from the command line</a>.)</p>
         
         <p>Type checking on maps has been improved. In particular, the static type of the expression <code>map:get(M, K)</code> (or equivalent
             constructs such as <code>M(K)</code> or <code>M?K</code> is now deduced from the type of the map if known. The checking is even
             stronger if the new (Saxon-specific) mechanism of tuple types (now renamed "record types") is used: see 
-            <a class="bodylink" href="/v4extensions/new-types/record-types">Record Types</a>.</p>
+            <a class="bodylink" href="/v4extensions/new-types/record-types">Record types</a>.</p>
         
         <p>Annotations on functions, including annotation assertions, are now fully supported. The annotation information is now retained
         as a property of a function and its type. Multiple annotations with the same name are allowed (which requires some change to internal
@@ -206,7 +207,8 @@
             <p>A new tree model called the Domino model is introduced for handling DOM documents. This is available
             in Saxon-EE only. It offers substantial performance improvements when the input to a query or transformation
             is supplied in the form of a DOM, and is therefore the default way of handled DOM input in Saxon-EE.
-            Further details are available at <a class="bodylink code" href="/sourcedocs/tree-models/domino">The Domino Tree Model</a>.</p>
+            Further details are available at <a class="bodylink code"
+                href="/sourcedocs/tree-models/domino">The Domino tree model</a>.</p>
         </category>
 
     <category name="serialization">
@@ -398,7 +400,7 @@
         
         <p>The serialization property <code>saxon:single-quotes="yes|no"</code> controls whether the XML and HTML output methods use single
             or double quotes to delimit attributes (see <a class="bodylink"
-                href="/extensions/output-extras/serialization-parameters">Serialization Parameters</a>). The default is to use
+                href="/extensions/output-extras/serialization-parameters">Serialization parameters</a>). The default is to use
             double quotes, except in cases where character maps are involved; single
         quotes can be useful if the lexical XML/HTML is to be wrapped in a string literal delimited by double quotes, for example in JSON. This
         does not eliminate the need to escape double quotes (as <code>\"</code>) in such a context, but it means that fewer characters are
@@ -477,7 +479,8 @@
         <code>map(xs:string, map(xs:integer, xs:string))</code>, it is possible to use a type alias, which is a QName prefixed with a tilde,
         for example <code>~inventory</code>. Type aliases can be declared in XSLT using the extension element
             <code>&lt;saxon:type-alias&gt;</code>;
-            they are not currently available in XQuery. More details: see <a class="bodylink" href="/v4extensions/new-types/type-aliases">Type Aliases</a>.</p>
+            they are not currently available in XQuery. More details: see <a class="bodylink"
+                href="/v4extensions/new-types/type-aliases">Type aliases</a>.</p>
         
         <p><b>Union Types</b>. A union type is an extension to the syntax for an <code>ItemType</code>.
             An example is <code>union(xs:dateTime, xs:date, xs:time)</code>, which denotes a union type
@@ -486,13 +489,13 @@
             when writing a function that is designed to take arguments of more than one type. They can also be used in other
             places where an <code>ItemType</code> is required, for example in a <code>cast as</code> expression. 
             Requires Saxon-EE. The semantics are the same as for union types defined in a schema. For further details
-            see <a class="bodylink" href="/v4extensions/new-types/union-types">Union Types</a></p>
+            see <a class="bodylink" href="/v4extensions/new-types/union-types">Union types</a></p>
         
         <p><b>Tuple Types</b> (subsequently renamed <b>Record Types</b>). A tuple type is an extension to the syntax for an <code>ItemType</code>. An example is
         <code>tuple(ssn: xs:string, emp: element(employee))</code>. A tuple type is essentially a way of defining a more
         precise type for maps. This example type will be satisfied by any map that has an entry whose key is "ssn" and whose
         value is a string, plus an entry whose key is "emp" and whose value is an <code>employee</code> element. More details: 
-            see <a class="bodylink" href="/v4extensions/new-types/record-types">Record Types</a>.</p>
+            see <a class="bodylink" href="/v4extensions/new-types/record-types">Record types</a>.</p>
         
         <!--<p>saxon:split-before(sequence, function), saxon:split-after(sequence, function): these extension functions partition a sequence
             into an array of non-empty sequences, splitting the sequence immediately before|after any item for which the specified function
