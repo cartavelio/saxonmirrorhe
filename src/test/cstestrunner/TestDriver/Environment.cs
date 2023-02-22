@@ -637,7 +637,10 @@ namespace TestDriver {
                     }
                 }
                 else {
-                    return new StandardUnparsedTextResolver().resolve(absoluteURI, encoding.EncodingName, config);
+                    if (encoding == null) {
+                        encoding = Encoding.UTF8;
+                    }
+                    return new StandardUnparsedTextResolver().resolve(absoluteURI, encoding.WebName, config);
                 }
 
             }
@@ -655,7 +658,7 @@ namespace TestDriver {
         
             foreach (XdmNode coll in env.Children("collection")) {
                 var resourceList = new SysCollGen.List<Saxon.Api.IResource>();
-                String collectionURI = coll.GetAttributeValue(new QName("uri"));
+                string collectionURI = coll.GetAttributeValue(new QName("uri"));
                 if (collectionURI == null) {
                     collectionURI = "";
                 }
@@ -685,8 +688,8 @@ namespace TestDriver {
                 environment.processor.RegisterCollection(collectionURI, collection);
         
                 foreach (XdmNode source in coll.Children("source")) {
-                    String href = source.GetAttributeValue(new QName("file"));
-                    String frag = null;
+                    string href = source.GetAttributeValue(new QName("file"));
+                    string frag = null;
                     int hash = href.IndexOf('#');
                     if (hash > 0) {
                         frag = href.Substring(hash + 1);
@@ -713,12 +716,14 @@ namespace TestDriver {
                     else {
                         resourceList.Add(Saxon.Api.Resource.XmlResource(uriStr, doc));
                     }
-        
-                    environment.sourceDocs.Add(uriStr, doc);
+
+                    if (!environment.sourceDocs.ContainsKey(uriStr)) {
+                        environment.sourceDocs.Add(uriStr, doc);
+                    }
                 }
                 
                 foreach (XdmNode query in coll.Children("query")) {
-                    String queryExpr = query.GetStringValue();
+                    string queryExpr = query.GetStringValue();
                     XQueryEvaluator evaluator = environment.xqueryCompiler.Compile(queryExpr).Load();
                     XdmValue result = evaluator.Evaluate();
 
@@ -726,60 +731,7 @@ namespace TestDriver {
                         resourceList.Add(new AtomicResource(null, itemi));
                     }
                 }
-                
-        
-                // foreach (XdmItem source in xpc.Evaluate("resources", coll)) {
-                //     String uri = ((XdmNode) source).GetAttributeValue(new QName("uri"));
-                //     String href = ((XdmNode) source).GetAttributeValue(new QName("file"));
-                //     String encoding = ((XdmNode) source).GetAttributeValue(new QName("encoding"));
-                //     String media = ((XdmNode) source).GetAttributeValue(new QName("media-type"));
-                //     Saxon.Hej.resource.AbstractResourceCollection.InputDetails details =
-                //         new Saxon.Hej.resource.AbstractResourceCollection.InputDetails();
-                //     details.encoding = encoding;
-                //     details.contentType = media;
-                //     FileStream file = null;
-                //     if (href != null) {
-                //         if (href.StartsWith("http")) {
-                //             try {
-                //                 URL url = new URL(href);
-                //                 URLConnection connection = url.openConnection();
-                //                 if (details.contentType == null) {
-                //                     details.contentType = connection.getContentType();
-                //                 }
-                //
-                //                 details.contentType = connection.getContentType();
-                //             }
-                //             catch (Exception e) {
-                //                 throw new Exception(e.StackTrace);
-                //             }
-                //         }
-                //         else {
-                //             try {
-                //                 file = new FileStream(res.ResolveUri(((XdmNode) env).BaseUri, href).AbsolutePath,
-                //                     FileMode.Open, FileAccess.Read);
-                //                 Resource resourcej = collectioni.MakeResource(config, details,
-                //                     res.ResolveUri(((XdmNode) env).BaseUri, href).AbsolutePath);
-                //                 if (resourcej != null) {
-                //                     resourceList.Add(resourcej);
-                //                 }
-                //                 else {
-                //                     driver.println("** Error in building collection environment: Resource " + href +
-                //                                    " not found: ");
-                //                 }
-                //             }
-                //             catch (Exception e) {
-                //                 driver.println("** IO Error in building collection environment: " + e.Message);
-                //             }
-                //
-                //             if (media != null && href.EndsWith("xquery")) {
-                //                 driver.RegisterXQueryModule(res.ResolveUri(((XdmNode) env).BaseUri, href),
-                //                     res.ResolveUri(((XdmNode) env).BaseUri, href).AbsolutePath);
-                //             }
-                //         }
-                //     }
-                // }
-        
-                
+
             }
 
             
