@@ -165,7 +165,7 @@ function userFunctionExample($saxon, $proc, $xmlfile, $xslFile){
   echo '<b>userFunctionExample:</b><br/>';
   global $resultg;
 
-  $saxon->registerPHPFunctions(" /usr/lib/php/20170718/saxon");
+  $saxon->registerPHPFunctions(" /usr/lib/php/20190718/saxon");
   $proc->setSourceFromFile($xmlfile);
   $proc->compileFromFile($xslFile);
 
@@ -175,11 +175,7 @@ function userFunctionExample($saxon, $proc, $xmlfile, $xslFile){
   } else {
     echo "Result is null";
     if($proc->exceptionOccurred()){
-      echo "Exception occurred";
-    }
-    $errCount = $proc->getExceptionCount();
-    for($i=0;$i<$errCount;$i++) {
-      echo 'Error Message='.$proc->getErrorMessage($i);
+      echo 'Error Message='.$proc->getErrorMessage();
     }
   }
 
