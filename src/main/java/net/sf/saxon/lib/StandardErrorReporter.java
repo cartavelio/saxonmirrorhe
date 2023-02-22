@@ -246,7 +246,7 @@ public class StandardErrorReporter
      *
      * <p>After calling this method to report a static error, the compiler will normally
      * continue to detect and report further errors, but the method can abort the
-     * compilation by calling {@link StaticError#setTerminationMessage(String)}</p>
+     * compilation by calling {@link XmlProcessingError#setTerminationMessage(String)}</p>
      *
      * @param err The error information.
      */

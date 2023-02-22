@@ -681,7 +681,7 @@ public class XQueryCompiler {
     /**
      * List of errors. The caller should supply an empty list before calling Compile; the processor will then populate
      * the list with error information obtained during the compilation. Each error will be included as an object of type
-     * {@link StaticError}.
+     * {@link XmlProcessingError}.
      * <p>If no error list is supplied by the caller, error information will be written to the standard error stream.
      * Applications should then ensure that the contents of this stream are made visible to the query author.</p>
      * <p>By supplying a custom List with a user-written add() method, it is possible to intercept error conditions as they occur.
@@ -691,11 +691,11 @@ public class XQueryCompiler {
      * <p>Calling this method is equivalent to calling <code>setErrorReporter(errorList::add)</code>: that is,
      * it registers an {@link ErrorReporter} whose {@link ErrorReporter#report} method adds the error to the list.</p>
      *
-     * @param errorList a (typically empty) list that will be populated with {@link StaticError} objects giving details
+     * @param errorList a (typically empty) list that will be populated with {@link XmlProcessingError} objects giving details
      *                  of any static errors found in the query.
      * @since 9.9. Redefined in 10.0 as a convenience wrapper over the new {@link #setErrorReporter(ErrorReporter)} method.
      */
-    public void setErrorList(List<? super StaticError> errorList) {
+    public void setErrorList(List<? super XmlProcessingError> errorList) {
         //noinspection Convert2MethodRef
         setErrorReporter(err -> errorList.add(err));
     }

@@ -852,7 +852,7 @@ public class CommandLineOptions {
         }
     }
 
-    @CSharpReplaceBody(code="\"dotnet saxon \" + command.GetType().Name.ToLower();")
+    @CSharpReplaceBody(code="return \"dotnet saxon \" + command.GetType().Name.ToLower();")
     public static String getCommandName(Object command) {
         String s = command.getClass().getName();
         if (s.startsWith("cli.Saxon.Cmd.DotNet")) {

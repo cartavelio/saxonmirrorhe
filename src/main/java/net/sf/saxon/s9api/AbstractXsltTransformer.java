@@ -148,12 +148,17 @@ public abstract class AbstractXsltTransformer {
     //#endif
 
     /**
-     * Set a callback that will be used when reporting a dynamic error or warning
+     * Set a callback that will be used when reporting a dynamic error or warning. This is relevant primarily
+     * for non-fatal errors
      */
 
     public void setErrorReporter(ErrorReporter reporter) {
         controller.setErrorReporter(reporter);
     }
+
+    /**
+     * Get the callback that will be used when reporting a dynamic error or warning
+     */
 
     public ErrorReporter getErrorReporter() {
         return controller.getErrorReporter();

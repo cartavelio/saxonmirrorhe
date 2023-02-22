@@ -38,6 +38,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
     protected Configuration config;
     protected String collectionURI;
     protected URIQueryParameters params = null;
+    protected boolean noExceptions = false;
 
 
     /**
@@ -149,22 +150,20 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                 onError = params.getOnError().get();
             }
             final Controller controller = context.getController();
-            //        final PipelineConfiguration oldPipe = context.getConfiguration().makePipelineConfiguration();
-            //        oldPipe.setController(context.getController());
-            //        final PipelineConfiguration newPipe = new PipelineConfiguration(oldPipe);
-            final ErrorReporter oldErrorListener =
+
+            final ErrorReporter oldErrorReporter =
                     controller == null ? new StandardErrorReporter() : controller.getErrorReporter();
 
-            setupErrorHandlingForCollection(options, onError, oldErrorListener);
+            setupErrorHandlingForCollection(options, onError, oldErrorReporter);
         }
         return options;
     }
 
-    public static void setupErrorHandlingForCollection(ParseOptions options, int onError, ErrorReporter oldErrorListener) {
+    public static void setupErrorHandlingForCollection(ParseOptions options, int onError, ErrorReporter oldErrorReporter) {
         if (onError == URIQueryParameters.ON_ERROR_IGNORE) {
             options.setErrorReporter(new ErrorSuppressor());
         } else if (onError == URIQueryParameters.ON_ERROR_WARNING) {
-            options.setErrorReporter(new ErrorAsWarningReporter(oldErrorListener));
+            options.setErrorReporter(new ErrorAsWarningReporter(oldErrorReporter));
         }
     }
 
@@ -264,8 +263,10 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
          * Get the character content of the resource, either as stored, or by
          * reading and decoding the input stream
          *
-         * @return the character content of the resource
-         * @throws XPathException in the event of a failure
+         * @return the character content of the resource, or null if the resource cannot be read and
+         * errors are suppressed.
+         * @throws XPathException in the event of a failure, if the default setting on-error=fail is used;
+         * otherwise, return null in the event of a failure.
          */
 
         public String obtainCharacterContent() throws XPathException {
@@ -281,7 +282,11 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                     }
                     return characterContent = CatalogCollection.makeStringFromStream(stream, enc);
                 } catch (IOException e) {
-                    throw new XPathException(e);
+                    if (onError == URIQueryParameters.ON_ERROR_FAIL) {
+                        throw new XPathException(e);
+                    } else {
+                        return null;
+                    }
                 }
             }
         }

@@ -320,9 +320,9 @@ public final class Atomizer extends UnaryExpression {
     protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         p &= ~StaticProperty.NODESET_PROPERTIES;
-        if (!untyped) {
-            p |= StaticProperty.NOT_UNTYPED_ATOMIC;
-        }
+//        if (!untyped) {
+//            p |= StaticProperty.NOT_UNTYPED_ATOMIC;
+//        }
         return p | StaticProperty.NO_NODES_NEWLY_CREATED;
     }
 

@@ -124,6 +124,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
 
     @Override
+    @CSharpModifiers(code={"public", "virtual"})
     public String getSystemId() {
         if (treeInfo instanceof GenericTreeInfo) {
             return treeInfo.getRootNode().getSystemId();
@@ -458,7 +459,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     @Override
     public NamespaceMap getAllNamespaces() {
         if (getNodeKind() == Type.ELEMENT) {
-            throw new AssertionError("not implemented for " + getClass());
+            throw new AssertionError("getAllNamespaces() not implemented for " + getClass());
         }
         return null;
     }

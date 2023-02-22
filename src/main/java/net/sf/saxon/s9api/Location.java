@@ -21,6 +21,8 @@ public interface Location extends SourceLocator
         , Locator
         //#endif
 {
+    //#if CSHARP==false
+    //Inherited methods from SourceLocator are implicit in C#
 
     /**
      * Get the system ID. This should be the system identifier of an XML external entity; if a stylesheet module
@@ -67,6 +69,8 @@ public interface Location extends SourceLocator
 
     @Override
     int getColumnNumber();
+
+    //#endif
 
     /**
      * Get an immutable copy of this Location object. By default Location objects may be mutable, so they

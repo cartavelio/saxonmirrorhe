@@ -245,7 +245,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     /**
      * Get the value of the item as a UnicodeString. This is in some cases more efficient than
      * the version of the method that returns a String.
-     * @return
+     * @return the string value of the node
      */
 
     @Override
@@ -1062,7 +1062,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         }
 
         /**
-         * Starting with ix positioned at a node, which in the last in a span, calculate the length
+         * Starting with ix positioned at a node, which is the last in a span, calculate the length
          * of the span, that is the number of DOM nodes mapped to this XPath node.
          *
          * @return the number of nodes spanned

@@ -14,6 +14,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.StringValue;
 
 /**
@@ -83,6 +84,7 @@ public abstract class ExtensionFunctionCall implements Callable {
      *                        consistent with each other).
      */
 
+    @CSharpModifiers(code={"public", "virtual"})
     public void supplyStaticContext(StaticContext context, int locationId, Expression[] arguments) throws XPathException {
         // default implementation does nothing
     }
@@ -109,6 +111,7 @@ public abstract class ExtensionFunctionCall implements Callable {
      */
 
     /*@Nullable*/
+    @CSharpModifiers(code = {"public", "virtual"})
     public Expression rewrite(StaticContext context, Expression[] arguments) throws XPathException {
         // default implementation does nothing
         return null;
@@ -128,6 +131,7 @@ public abstract class ExtensionFunctionCall implements Callable {
      *                    be an instance of the same function class as the source function.
      */
 
+    @CSharpModifiers(code = {"public", "virtual"})
     public void copyLocalData(ExtensionFunctionCall destination) {
         // default implementation does nothing
     }
@@ -183,6 +187,7 @@ public abstract class ExtensionFunctionCall implements Callable {
      *                        code will add information about the error location.
      */
 
+    @CSharpModifiers(code = {"public", "virtual"})
     public boolean effectiveBooleanValue(XPathContext context, Sequence[] arguments) throws XPathException {
         return ExpressionTool.effectiveBooleanValue(call(context, arguments).iterate());
     }
@@ -194,6 +199,7 @@ public abstract class ExtensionFunctionCall implements Callable {
      * @return the streaming implementation of the extension function
      */
 
+    @CSharpModifiers(code = {"public", "virtual"})
     public Object getStreamingImplementation() {
         return null;
     }

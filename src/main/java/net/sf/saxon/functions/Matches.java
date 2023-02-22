@@ -30,6 +30,7 @@ public class Matches extends RegexFunction {
         return true;
     }
 
+    //#if CSHARP==false
     /**
      * Interface used by compiled bytecode
      *
@@ -64,6 +65,7 @@ public class Matches extends RegexFunction {
         }
         return re.containsMatch(input.getUnicodeStringValue());
     }
+    //#endif
 
     /**
      * Evaluate the expression
