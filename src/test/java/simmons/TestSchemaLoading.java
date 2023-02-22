@@ -1,9 +1,8 @@
 package simmons;
 
-import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -17,13 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestSchemaLoading {
 
     private final Processor _processor;
+    private final String DIR = "/Users/mike/bugs/2020/4554-Simmons/saxon-schema-bug/";
 
     public TestSchemaLoading() {
-        _processor = ProcessorFactory.createProcessor();
+        _processor = ProcessorFactory.createProcessor(DIR);
     }
 
     private void loadSchema(final String location) throws SaxonApiException {
-        _processor.setConfigurationProperty(Feature.TIMING, true);
+        //_processor.setConfigurationProperty(Feature.TIMING, true);
         _processor.getSchemaManager().load(new StreamSource(location));
     }
 
@@ -38,9 +38,11 @@ public class TestSchemaLoading {
     @Tag("mikeonly")
     public void testFastCase() throws Exception {
         long start = System.currentTimeMillis();
-        loadSchema("filing-copy/taxonomy/ext.xsd");
+        loadSchema(DIR + "filing-copy/taxonomy/ext.xsd");
         assertSchemaCount();
-        System.err.println("Time in ms: " + (System.currentTimeMillis() - start));
+        final long elapsed = System.currentTimeMillis() - start;
+        Assertions.assertTrue(elapsed < 5000, "testFastCase");
+        System.err.println("Time in ms (testFastCase): " + elapsed);
     }
 
 
@@ -50,9 +52,13 @@ public class TestSchemaLoading {
     @Test
     @Tag("mikeonly")
     public void testFastCaseB() throws Exception {
+        long start = System.currentTimeMillis();
         loadSchema("http://xbrl.ifrs.org/taxonomy/2019-03-27/full_ifrs/full_ifrs-cor_2019-03-27.xsd");
-        loadSchema("filing/taxonomy/ext.xsd");
+        loadSchema(DIR + "filing/taxonomy/ext.xsd");
         assertSchemaCount();
+        final long elapsed = System.currentTimeMillis() - start;
+        Assertions.assertTrue(elapsed < 5000, "testFastCaseB");
+        System.err.println("Time in ms (testFastCaseB): " + elapsed);
     }
 
     /**
@@ -62,10 +68,12 @@ public class TestSchemaLoading {
     @Tag("mikeonly")
     public void testSlowCase() throws Exception {
         long start = System.currentTimeMillis();
-        loadSchema("filing/taxonomy/ext.xsd");
+        loadSchema(DIR + "filing/taxonomy/ext.xsd");
         loadSchema("http://xbrl.ifrs.org/taxonomy/2019-03-27/full_ifrs/full_ifrs-cor_2019-03-27.xsd");
         assertSchemaCount();
-        System.err.println("Time in ms: " + (System.currentTimeMillis() - start));
+        final long elapsed = System.currentTimeMillis() - start;
+        Assertions.assertTrue(elapsed < 5000, "testFastCase");
+        System.err.println("Time in ms (testSlowCase): " + elapsed);
     }
 
 }
