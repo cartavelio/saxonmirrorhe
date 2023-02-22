@@ -166,9 +166,7 @@ task rejar_Xerces(
           include "Saxon.C.API/jni/**/*.h"
           include "Saxon.C.API/readme.md"
           exclude "Saxon.C.API/config.m4"
-          exclude "Saxon.C.API/HEC"
-          exclude "Saxon.C.API/PEC"
-          exclude "Saxon.C.API/EEC"
+          exclude "Saxon.C.API/SaxonCGlue.c"
           exclude "Saxon.C.API/Makefile"
           exclude "Saxon.C.API/PHP7-Build/config.m4"
           exclude "Saxon.C.API/PHP7-Build/config.w32"
@@ -237,7 +235,14 @@ task rejar_Xerces(
       doLast {
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
-          from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
+          from("${projectDir}/src/main/c/Saxon.C.API") {
+            include "SaxonCGlue.c"
+          }
+          filter { line ->
+            line.replaceAll("@@VERSION@@", saxonVersion)
+            .replaceAll("@@release@@", release)
+            .replaceAll("@@RELEASE@@", RELEASE)
+          }
         }
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
@@ -279,7 +284,14 @@ task rejar_Xerces(
       doLast {
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
-          from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
+          from("${projectDir}/src/main/c/Saxon.C.API") {
+            include "SaxonCGlue.c"
+          }
+          filter { line ->
+            line.replaceAll("@@VERSION@@", saxonVersion)
+            .replaceAll("@@release@@", release)
+            .replaceAll("@@RELEASE@@", RELEASE)
+          }
         }
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
@@ -327,7 +339,14 @@ task rejar_Xerces(
       doLast {
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
-          from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
+          from("${projectDir}/src/main/c/Saxon.C.API") {
+            include "SaxonCGlue.c"
+          }
+          filter { line ->
+            line.replaceAll("@@VERSION@@", saxonVersion)
+            .replaceAll("@@release@@", release)
+            .replaceAll("@@RELEASE@@", RELEASE)
+          }
         }
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
