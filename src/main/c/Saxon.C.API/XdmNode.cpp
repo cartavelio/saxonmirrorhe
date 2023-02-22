@@ -10,7 +10,9 @@ XdmNode::XdmNode(int64_t obj): XdmItem(obj), baseURI(nullptr), nodeName(nullptr)
 
 }
 
-XdmNode::XdmNode(XdmNode * p, int64_t obj, XDM_NODE_KIND kind): XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),  childCount(-1), children(nullptr), parent(p), typedValue(nullptr), attrValues(nullptr),  attrCount(-1), nodeKind(kind){}
+XdmNode::XdmNode(XdmNode * p, int64_t obj, XDM_NODE_KIND kind): XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),  childCount(-1), children(nullptr), parent(p), typedValue(nullptr), attrValues(nullptr),  attrCount(-1), nodeKind(kind){
+
+}
 
 
 XdmNode::XdmNode(const XdmNode &other) {
@@ -31,6 +33,7 @@ bool XdmNode::isAtomic() {
     
     XDM_NODE_KIND XdmNode::getNodeKind(){
 	if(nodeKind == UNKNOWN) {
+        std::cerr<<"j_getNodeKind value="<<value<<std::endl;
 	    int kvalue = (int) j_getNodeKind(SaxonProcessor::sxn_environ->thread, (void *)value);
 		nodeKind = static_cast<XDM_NODE_KIND>(kvalue);
 	} 

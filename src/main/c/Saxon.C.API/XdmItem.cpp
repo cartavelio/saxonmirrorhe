@@ -17,6 +17,7 @@ XdmItem::XdmItem(const XdmItem &other): XdmValue(other){
 
 
 XdmItem::XdmItem(int64_t objRef){
+    std::cerr<<"XdmItem constructor value="<<objRef<<std::endl;
     value = objRef;
     xdmSize =1;
     refCount =0;
