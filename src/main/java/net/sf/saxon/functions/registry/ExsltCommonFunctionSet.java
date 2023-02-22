@@ -16,7 +16,7 @@ import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -76,15 +76,15 @@ public class ExsltCommonFunctionSet extends BuiltInFunctionSet {
             Item value = arguments[0].head();
             ItemType type = SequenceTool.getItemType(value, th);
             if (th.isSubType(type, AnyNodeTest.getInstance())) {
-                return StringItem.bmp("node-set");
+                return StringValue.bmp("node-set");
             } else if (th.isSubType(type, BuiltInAtomicType.STRING)) {
-                return StringItem.bmp("string");
+                return StringValue.bmp("string");
             } else if (NumericType.isNumericType(type)) {
-                return StringItem.bmp("number");
+                return StringValue.bmp("number");
             } else if (th.isSubType(type, BuiltInAtomicType.BOOLEAN)) {
-                return StringItem.bmp("boolean");
+                return StringValue.bmp("boolean");
             } else {
-                return new StringItem(type.toString());
+                return new StringValue(type.toString());
             }
         }
     }

@@ -13,7 +13,7 @@ import net.sf.saxon.lib.SubstringMatcher;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -36,12 +36,12 @@ public class SubstringBefore extends CollatingFunctionFixed {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         UnicodeString s0 = getUniStringArg(arguments[0]);
         UnicodeString s1 = getUniStringArg(arguments[1]);
 
         StringCollator collator = getStringCollator();
-        return new StringItem(((SubstringMatcher)collator).substringBefore(s0, s1));
+        return new StringValue(((SubstringMatcher)collator).substringBefore(s0, s1));
     }
 
     @Override

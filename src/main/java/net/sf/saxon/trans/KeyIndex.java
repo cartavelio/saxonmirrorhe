@@ -26,7 +26,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.*;
 
@@ -56,7 +56,7 @@ public class KeyIndex {
     private final Map <AtomicMatchKey, Object> index;
     private UType keyTypesPresent = UType.VOID;
     private final UType keyTypesConvertedFromUntyped = UType.STRING_LIKE;
-    private List<StringItem> untypedKeys;
+    private List<StringValue> untypedKeys;
     private ConversionRules rules;
     private int implicitTimezone;
     private StringCollator collation;
@@ -222,7 +222,7 @@ public class KeyIndex {
                     if (untypedKeys == null) {
                         untypedKeys = new ArrayList<>(20);
                     }
-                    untypedKeys.add((StringItem)keyVal);
+                    untypedKeys.add((StringValue)keyVal);
                 }
                 addEntry(amk, node, isFirst);
             }
@@ -307,7 +307,7 @@ public class KeyIndex {
             type = BuiltInAtomicType.DOUBLE;
         }
         StringConverter converter = type.getStringConverter(rules);
-        for (StringItem v : untypedKeys) {
+        for (StringValue v : untypedKeys) {
             AtomicMatchKey uk = getCollationKey(v, collation, implicitTimezone);
             AtomicValue convertedValue = converter.convertString(v.getUnicodeStringValue()).asAtomic();
             AtomicMatchKey amk = getCollationKey(convertedValue, collation, implicitTimezone);

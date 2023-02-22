@@ -19,7 +19,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.value.DoubleValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.StringToDouble11;
 import net.sf.saxon.value.Whitespace;
 
@@ -281,8 +281,8 @@ public class JsonReceiver implements Receiver {
                 }
             } else {
                 Sequence result = SystemFunction.dynamicCall(
-                        numberFormatter, pipe.getXPathContext(), new Sequence[]{new StringItem(uContent)});
-                output.accept(((StringItem)result).getUnicodeStringValue());
+                        numberFormatter, pipe.getXPathContext(), new Sequence[]{new StringValue(uContent)});
+                output.accept(((StringValue)result).getUnicodeStringValue());
             }
 
         } else if (local.equals("string")) {

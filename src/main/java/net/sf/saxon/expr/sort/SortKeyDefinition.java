@@ -21,7 +21,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.net.URI;
@@ -71,7 +71,7 @@ public class SortKeyDefinition extends PseudoExpression {
     public SortKeyDefinition() {
         order = new Operand(this, new StringLiteral("ascending"), OperandRole.SINGLE_ATOMIC);
         caseOrder = new Operand(this, new StringLiteral("#default"), OperandRole.SINGLE_ATOMIC);
-        language = new Operand(this, new StringLiteral(StringItem.EMPTY_STRING), OperandRole.SINGLE_ATOMIC);
+        language = new Operand(this, new StringLiteral(StringValue.EMPTY_STRING), OperandRole.SINGLE_ATOMIC);
     }
 
     /**
@@ -576,7 +576,7 @@ public class SortKeyDefinition extends PseudoExpression {
         }
 
         if (stable != null) {
-            StringItem stableVal = (StringItem) stable.getChildExpression().evaluateItem(context);
+            StringValue stableVal = (StringValue) stable.getChildExpression().evaluateItem(context);
             String s = Whitespace.trim(stableVal.getStringValue());
             if (s.equals("yes") || s.equals("no") || s.equals("true") || s.equals("false") || s.equals("1") || s.equals("0")) {
                 // no action

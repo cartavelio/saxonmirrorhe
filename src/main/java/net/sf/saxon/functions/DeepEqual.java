@@ -401,7 +401,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                 if ((flags & COMPARE_STRING_VALUES) == 0) {
                     ar = deepEqual(n1.atomize().iterate(), n2.atomize().iterate(), comparer, context, 0);
                 } else {
-                    ar = comparer.comparesEqual(new StringItem(n1.getUnicodeStringValue()), new StringItem(n2.getUnicodeStringValue()));
+                    ar = comparer.comparesEqual(new StringValue(n1.getUnicodeStringValue()), new StringValue(n2.getUnicodeStringValue()));
                 }
                 if (!ar) {
                     explain(reporter, "attribute values differ", flags, n1, n2);

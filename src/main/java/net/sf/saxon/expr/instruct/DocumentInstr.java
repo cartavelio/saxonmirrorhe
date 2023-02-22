@@ -28,7 +28,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.TextFragmentValue;
 import net.sf.saxon.value.UntypedAtomicValue;
 
@@ -197,7 +197,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                 return ((ValueOf) getContentExpression()).convertToCastAsString();
             } else {
                 Expression fn = SystemFunction.makeCall(
-                        "string-join", getRetainedStaticContext(), getContentExpression(), new StringLiteral(StringItem.EMPTY_STRING));
+                        "string-join", getRetainedStaticContext(), getContentExpression(), new StringLiteral(StringValue.EMPTY_STRING));
                 CastExpression cast = new CastExpression(fn, BuiltInAtomicType.UNTYPED_ATOMIC, false);
                 ExpressionTool.copyLocationInfo(this, cast);
                 return cast;

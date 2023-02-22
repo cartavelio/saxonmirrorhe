@@ -20,7 +20,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.sql.Connection;
@@ -62,7 +62,7 @@ public class SQLUpdate extends ExtensionInstruction {
 
         AttributeInfo dbWhere = atts.get("", "where");
         if (dbWhere == null) {
-            where = new StringLiteral(StringItem.EMPTY_STRING);
+            where = new StringLiteral(StringValue.EMPTY_STRING);
         } else {
             where = makeAttributeValueTemplate(dbWhere.getValue(), dbWhere);
         }

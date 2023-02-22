@@ -197,7 +197,7 @@ public class Serialize extends SystemFunction implements Callable {
         AtomicIterator keysIterator = map.keys();
         AtomicValue key;
         while ((key = keysIterator.next()) != null) {
-            if (key instanceof StringItem) {
+            if (key instanceof StringValue) {
                 String keyName = key.getStringValue();
                 if (isParamName(keyName)) {
                     RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0);
@@ -268,7 +268,7 @@ public class Serialize extends SystemFunction implements Callable {
                         .append(qNameValue.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue())
                         .append('}')
                         .append(qNameValue.getComponent(AccessorFn.Component.LOCALNAME).getUnicodeStringValue());
-            } else if (allowStar && item instanceof StringItem && item.getStringValue().equals("*")) {
+            } else if (allowStar && item instanceof StringValue && item.getStringValue().equals("*")) {
                 stringVal.append(" *");
             } else {
                 throw new XPathException("Invalid serialization parameter value: expected sequence of QNames "
@@ -315,11 +315,11 @@ public class Serialize extends SystemFunction implements Callable {
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         for (KeyValuePair pair : map.keyValuePairs()) {
             AtomicValue key = pair.key;
-            if (!(key instanceof StringItem)) {
+            if (!(key instanceof StringValue)) {
                 throw new XPathException(
                         "Keys in a character map must all be strings. Found a value of type " + key.getItemType(), "XPTY0004");
             }
-            if (((StringItem) key).length() != 1) {
+            if (((StringValue) key).length() != 1) {
                 throw new XPathException("Keys in a character map must all be one-character strings. Found " + Err.wrap(key.show()), "SEPM0016");
             }
             if (!SequenceType.SINGLE_STRING.matches(pair.value, th)) {
@@ -470,12 +470,12 @@ public class Serialize extends SystemFunction implements Callable {
 
 
     @Override
-    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return evalSerialize(arguments[0].iterate(),
             arguments.length == 1 ? null : arguments[1].head(), context);
     }
 
-    private StringItem evalSerialize(SequenceIterator iter, Item param, XPathContext context) throws XPathException {
+    private StringValue evalSerialize(SequenceIterator iter, Item param, XPathContext context) throws XPathException {
 
         SerializationProperties params;
 
@@ -503,7 +503,7 @@ public class Serialize extends SystemFunction implements Callable {
                 while ((k = keyIter.next()) != null) {
                     if (k instanceof QNameValue) {
                         String s = ((QNameValue) k).getStructuredQName().getEQName();
-                        paramMap = paramMap.addEntry(new StringItem(s), paramMap.get(k));
+                        paramMap = paramMap.addEntry(new StringValue(s), paramMap.get(k));
                     }
                 }
                 Map<String, Sequence> checkedOptions = getDetails().optionDetails.processSuppliedOptions(paramMap, context);
@@ -535,7 +535,7 @@ public class Serialize extends SystemFunction implements Callable {
             PipelineConfiguration pipe = context.getConfiguration().makePipelineConfiguration();
             Receiver out = sf.getReceiver(result, params, pipe);
             SequenceCopier.copySequence(iter, out);
-            return new StringItem(builder.toString());
+            return new StringValue(builder.toString());
         } catch (XPathException e) {
             e.maybeSetErrorCode("SENR0001");
             throw e;

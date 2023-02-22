@@ -87,8 +87,8 @@ public class ObjectValue<T> implements ExternalObject<T> {
      * to be the result of the toString() method, as an xs:string value.
      */
     @Override
-    public StringItem atomize() {
-        return new StringItem(getUnicodeStringValue().tidy());
+    public StringValue atomize() {
+        return new StringValue(getUnicodeStringValue().tidy());
     }
 
     /**

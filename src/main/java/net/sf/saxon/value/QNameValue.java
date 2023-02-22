@@ -152,7 +152,7 @@ public class QNameValue extends QualifiedNameValue {
     public AtomicValue getComponent(AccessorFn.Component part) {
         switch (part) {
             case LOCALNAME:
-                return new StringItem(getLocalName(), BuiltInAtomicType.NCNAME);
+                return new StringValue(getLocalName(), BuiltInAtomicType.NCNAME);
             case NAMESPACE:
                 return new AnyURIValue((getNamespaceURI()));
             case PREFIX:
@@ -160,7 +160,7 @@ public class QNameValue extends QualifiedNameValue {
                 if (prefix.isEmpty()) {
                     return null;
                 } else {
-                    return new StringItem(prefix, BuiltInAtomicType.NCNAME);
+                    return new StringValue(prefix, BuiltInAtomicType.NCNAME);
                 }
             default:
                 throw new UnsupportedOperationException("Component of QName must be URI, Local Name, or Prefix");

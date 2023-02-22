@@ -9,7 +9,7 @@ package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.*;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.math.BigInteger;
 import java.util.regex.Matcher;
@@ -149,7 +149,7 @@ public class AlphanumericCollator implements StringCollator {
             // handle an alphabetic part (even if zero-length)
 
             AtomicMatchKey part = baseCollator.getCollationKey(cs.substring(pos1, m1start));
-            sb = sb.concat(((StringItem) part).getContent());
+            sb = sb.concat(((StringValue) part).getContent());
 
 
             // reached end?
@@ -161,7 +161,7 @@ public class AlphanumericCollator implements StringCollator {
             // handle a numeric part
 
             int n1 = Integer.parseInt(s.substring(m1start, m1.end()));
-            sb = sb.concat(StringItem.bmp(n1 + "").getContent());
+            sb = sb.concat(StringValue.bmp(n1 + "").getContent());
 
             // move on to the next part of the string
 

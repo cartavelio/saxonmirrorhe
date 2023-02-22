@@ -9,7 +9,7 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * A ATokenIterator is an iterator over the strings that result from tokenizing a string using a regular expression
@@ -19,7 +19,7 @@ public class ATokenIterator implements AtomicIterator {
 
     private final UnicodeString input;
     private final REMatcher matcher;
-    private StringItem current;
+    private StringValue current;
     private int prevEnd;
 
 
@@ -34,7 +34,7 @@ public class ATokenIterator implements AtomicIterator {
     }
 
     @Override
-    public StringItem next() {
+    public StringValue next() {
         if (prevEnd < 0) {
             current = null;
             return null;
@@ -42,16 +42,16 @@ public class ATokenIterator implements AtomicIterator {
 
         if (matcher.match(input, prevEnd)) {
             int start = matcher.getParenStart(0);
-            current = new StringItem(input.substring(prevEnd, start));
+            current = new StringValue(input.substring(prevEnd, start));
             prevEnd = matcher.getParenEnd(0);
         } else {
-            current = new StringItem(input.substring(prevEnd));
+            current = new StringValue(input.substring(prevEnd));
             prevEnd = -1;
         }
         return currentStringValue();
     }
 
-    private StringItem currentStringValue() {
+    private StringValue currentStringValue() {
         return current;
     }
 

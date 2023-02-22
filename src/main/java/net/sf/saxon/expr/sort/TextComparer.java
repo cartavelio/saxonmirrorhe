@@ -13,7 +13,7 @@ import net.sf.saxon.str.EmptyUniString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * A Comparer used for comparing sort keys when data-type="text". The items to be
@@ -76,8 +76,8 @@ public class TextComparer implements AtomicComparer {
         return baseComparer.compareAtomicValues(toStringValue(a), toStringValue(b));
     }
 
-    private StringItem toStringValue(AtomicValue a) {
-        return new StringItem(a==null ? (UnicodeString) EmptyUniString.getInstance() : a.getUnicodeStringValue());
+    private StringValue toStringValue(AtomicValue a) {
+        return new StringValue(a==null ? (UnicodeString) EmptyUniString.getInstance() : a.getUnicodeStringValue());
     }
 
     /**

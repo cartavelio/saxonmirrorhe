@@ -15,7 +15,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Function to perform a cast to a union type
@@ -140,7 +140,7 @@ public class UnionConstructorFunction extends AbstractFunction {
 
         // 1. If the value is a string or untypedAtomic, try casting to each of the member types
 
-        if (value instanceof StringItem && !(value instanceof AnyURIValue)) {
+        if (value instanceof StringValue && !(value instanceof AnyURIValue)) {
             try {
                 return targetType.getTypedValue(value.getUnicodeStringValue(), resolver, rules);
             } catch (ValidationException e) {
@@ -243,7 +243,7 @@ public class UnionConstructorFunction extends AbstractFunction {
 
         // 1. If the value is a string or untypedAtomic, try casting to each of the member types
 
-        if (value instanceof StringItem && !(value instanceof AnyURIValue)) {
+        if (value instanceof StringValue && !(value instanceof AnyURIValue)) {
             try {
                 return targetType.getTypedValue(value.getUnicodeStringValue(), nsResolver, rules);
             } catch (ValidationException e) {

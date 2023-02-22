@@ -9,7 +9,7 @@ package net.sf.saxon.expr.number;
 
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntSet;
 
 import java.util.List;
@@ -41,7 +41,7 @@ public class IrregularGroupFormatter extends NumericGroupFormatter {
 
     @Override
     public String format(String value) {
-        StringItem in = new StringItem(value);
+        StringValue in = new StringValue(value);
         int l, m = 0;
         for (l = 0; l < in.length(); l++) {
             if (groupingPositions.contains(l)) {

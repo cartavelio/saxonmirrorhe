@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.Map;
@@ -228,7 +228,7 @@ public class JsonHandler {
     private String replace(String s, XPathContext context) throws XPathException {
         if (fallbackFunction != null) {
             Sequence[] args = new Sequence[1];
-            args[0] = new StringItem(s);
+            args[0] = new StringValue(s);
             Sequence result = SystemFunction.dynamicCall(fallbackFunction, context, args).head();
             Item first = result.head();
             return first == null ? "" : first.getStringValue();

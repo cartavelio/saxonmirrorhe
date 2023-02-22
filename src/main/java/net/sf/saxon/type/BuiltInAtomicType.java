@@ -1015,7 +1015,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
             return AtomicArray.EMPTY_ATOMIC_ARRAY;
         }
         if (fingerprint == StandardNames.XS_STRING) {
-            return new StringItem(stringValue.tidy());
+            return new StringValue(stringValue.tidy());
         } else if (fingerprint == StandardNames.XS_UNTYPED_ATOMIC) {
             return new UntypedAtomicValue(stringValue);
         }
@@ -1053,7 +1053,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
             throws ValidationException {
         // Fast path for common cases
         if (fingerprint == StandardNames.XS_STRING) {
-            return new StringItem(value.tidy());
+            return new StringValue(value.tidy());
         } else if (fingerprint == StandardNames.XS_UNTYPED_ATOMIC) {
             return new UntypedAtomicValue(value);
         }

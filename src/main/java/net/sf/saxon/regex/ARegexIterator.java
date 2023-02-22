@@ -14,7 +14,7 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntToIntHashMap;
 
@@ -82,7 +82,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public StringItem next() {
+    public StringValue next() {
         try {
             if (nextSubstring == null && prevEnd >= 0) {
                 // we've returned a match (or we're at the start), so find the next match
@@ -148,8 +148,8 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
         }
     }
 
-    private StringItem currentStringValue() {
-        return new StringItem(current);
+    private StringValue currentStringValue() {
+        return new StringValue(current);
     }
 
 

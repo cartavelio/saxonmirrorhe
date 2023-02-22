@@ -13,7 +13,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Optional;
 
@@ -34,7 +34,7 @@ public class EnvironmentVariable extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Optional<StringItem> value = getVariable((StringItem) arguments[0].head(), context);
+        Optional<StringValue> value = getVariable((StringValue) arguments[0].head(), context);
         if (value.isPresent()) {
             return value.get();
         } else {
@@ -42,7 +42,7 @@ public class EnvironmentVariable extends SystemFunction {
         }
     }
 
-    private static Optional<StringItem> getVariable(StringItem environVar, XPathContext context) {
+    private static Optional<StringValue> getVariable(StringValue environVar, XPathContext context) {
         EnvironmentVariableResolver resolver = context.getConfiguration().getConfigurationProperty(
                 Feature.ENVIRONMENT_VARIABLE_RESOLVER);
         String environVarName = environVar.getStringValue();
@@ -58,7 +58,7 @@ public class EnvironmentVariable extends SystemFunction {
             }
         }
 
-        return Optional.of(new StringItem(environValue));
+        return Optional.of(new StringValue(environValue));
     }
 
 }

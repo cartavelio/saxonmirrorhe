@@ -11,7 +11,7 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntToIntHashMap;
@@ -76,7 +76,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public StringItem next() {
+    public StringValue next() {
         if (nextSubstring == null && prevEnd >= 0) {
             // we've returned a match (or we're at the start), so find the next match
             if (matcher.find()) {
@@ -116,7 +116,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
                 return null;
             }
         }
-        return StringItem.makeStringValue(current);
+        return StringValue.makeStringValue(current);
     }
 
     /**

@@ -18,7 +18,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashMap;
 
 import java.util.Arrays;
@@ -106,7 +106,7 @@ public class SerializationParamsHandler {
                     }
                     String ch = getAttribute(gChild, "character");
                     String str = getAttribute(gChild, "map-string");
-                    StringItem chValue = new StringItem(ch);
+                    StringValue chValue = new StringValue(ch);
 
                     if (chValue.length() != 1) {
                         throw new XPathException("In the serialization parameters, the value of @character in the character map " +

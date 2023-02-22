@@ -20,7 +20,7 @@ import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,7 +45,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringItem hrefVal = (StringItem) arguments[0].head();
+        StringValue hrefVal = (StringValue) arguments[0].head();
         String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
         try {
             return SequenceTool.itemOrEmpty(evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context));
@@ -62,12 +62,12 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
         boolean stable = context.getConfiguration().getBooleanProperty(Feature.STABLE_UNPARSED_TEXT);
         if (stable) {
             Sequence result = call(context, arguments);
-            StringItem value = (StringItem)result.head();
+            StringValue value = (StringValue)result.head();
             if (value != null) {
                 destination.append(value, Loc.NONE, ReceiverOption.NONE);
             }
         } else {
-            StringItem href = (StringItem) arguments[0].head();
+            StringValue href = (StringValue) arguments[0].head();
             URI absoluteURI = getAbsoluteURI(href.getStringValue(), getStaticBaseUriString(), context);
             String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
             UniStringConsumer consumer = destination.getStringReceiver(false);
@@ -97,9 +97,9 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
      * @throws XPathException if evaluation fails
      */
 
-    public static StringItem evalUnparsedText(StringItem hrefVal, String base, String encoding, XPathContext context) throws XPathException {
+    public static StringValue evalUnparsedText(StringValue hrefVal, String base, String encoding, XPathContext context) throws XPathException {
         UnicodeString content;
-        StringItem result;
+        StringValue result;
         boolean stable = context.getConfiguration().getBooleanProperty(Feature.STABLE_UNPARSED_TEXT);
         try {
             if (hrefVal == null) {
@@ -118,7 +118,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                             if (existing.codePointAt(0) == errorValue) {
                                 throw new XPathException(existing.substring(1).toString(), "FOUT1170");
                             }
-                            return new StringItem(existing);
+                            return new StringValue(existing);
                         }
                     }
                     XPathException error = null;
@@ -142,9 +142,9 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
             } else {
                 UnicodeBuilder consumer = new UnicodeBuilder();
                 readFile(absoluteURI, encoding, consumer, context);
-                return new StringItem(consumer.toUnicodeString());
+                return new StringValue(consumer.toUnicodeString());
             }
-            result = new StringItem(content);
+            result = new StringValue(content);
         } catch (XPathException err) {
             err.maybeSetErrorCode("FOUT1170");
             throw err;

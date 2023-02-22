@@ -872,8 +872,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             if (u0) {
                 // a0 is untyped atomic
                 if (a1 instanceof NumericValue) {
-                    return UntypedNumericComparer.quickCompare((StringItem) a0, (NumericValue) a1, operator, rules);
-                } else if (a1 instanceof StringItem) {
+                    return UntypedNumericComparer.quickCompare((StringValue) a0, (NumericValue) a1, operator, rules);
+                } else if (a1 instanceof StringValue) {
                     // no conversion needed
                 } else {
                     AtomicType prim = a1.getPrimitiveType();
@@ -886,8 +886,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             } else {
                 // a1 is untyped atomic
                 if (a0 instanceof NumericValue) {
-                    return UntypedNumericComparer.quickCompare((StringItem) a1, (NumericValue) a0, Token.inverse(operator), rules);
-                } else if (a0 instanceof StringItem) {
+                    return UntypedNumericComparer.quickCompare((StringValue) a1, (NumericValue) a0, Token.inverse(operator), rules);
+                } else if (a0 instanceof StringValue) {
                     // no conversion needed
                 } else {
                     AtomicType prim = a0.getPrimitiveType();

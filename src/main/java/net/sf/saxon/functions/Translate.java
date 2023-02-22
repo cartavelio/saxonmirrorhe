@@ -13,7 +13,7 @@ import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntToIntHashMap;
@@ -61,7 +61,7 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
      * @return the converted string
      */
 
-    public static StringItem translate(StringItem sv0, StringItem sv1, StringItem sv2) {
+    public static StringValue translate(StringValue sv0, StringValue sv1, StringValue sv2) {
 
         // if the size of the strings is above some threshold, use a hash map to avoid O(n*m) performance
         if (sv0.length() * sv1.length() > 1000) {
@@ -80,7 +80,7 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
                 sb.append(j < 0 ? c : sv2.getContent().codePointAt(j));
             }
         }
-        return new StringItem(sb.toUnicodeString());
+        return new StringValue(sb.toUnicodeString());
     }
 
     /**
@@ -91,7 +91,7 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
      * @return a map that maps characters to their replacements (or to -1 if the character is to be removed)
      */
 
-    private static IntToIntMap buildMap(StringItem arg1, StringItem arg2) {
+    private static IntToIntMap buildMap(StringValue arg1, StringValue arg2) {
         IntToIntMap map = new IntToIntHashMap(arg1.length32(), 0.5);
         // allow plenty of free space, it's better for lookups (though worse for iteration)
         IntIterator iter = arg1.codePoints();
@@ -118,7 +118,7 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
      * @return the translated character string
      */
 
-    public static StringItem translateUsingMap(StringItem in, IntToIntMap map) {
+    public static StringValue translateUsingMap(StringValue in, IntToIntMap map) {
         UnicodeBuilder builder = new UnicodeBuilder();
         IntIterator iter = in.codePoints();
         while (iter.hasNext()) {
@@ -133,7 +133,7 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
             }
             // else no action, delete the character
         }
-        return new StringItem(builder.toUnicodeString());
+        return new StringValue(builder.toUnicodeString());
     }
 
     /**
@@ -145,16 +145,16 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringItem sv0 = (StringItem) arguments[0].head();
+    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+        StringValue sv0 = (StringValue) arguments[0].head();
         if (sv0 == null) {
-            return StringItem.EMPTY_STRING;
+            return StringValue.EMPTY_STRING;
         }
         if (staticMap != null) {
             return translateUsingMap(sv0, staticMap);
         } else {
-            StringItem sv1 = (StringItem) arguments[1].head();
-            StringItem sv2 = (StringItem) arguments[2].head();
+            StringValue sv1 = (StringValue) arguments[1].head();
+            StringValue sv2 = (StringValue) arguments[2].head();
             return translate(sv0, sv1, sv2);
         }
     }

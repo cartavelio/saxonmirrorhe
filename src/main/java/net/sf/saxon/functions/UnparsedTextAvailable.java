@@ -12,7 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 public class UnparsedTextAvailable extends UnparsedTextFunction implements Callable {
@@ -28,7 +28,7 @@ public class UnparsedTextAvailable extends UnparsedTextFunction implements Calla
      */
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringItem hrefVal = (StringItem) arguments[0].head();
+        StringValue hrefVal = (StringValue) arguments[0].head();
         if (hrefVal == null) {
             return BooleanValue.FALSE;
         }
@@ -37,7 +37,7 @@ public class UnparsedTextAvailable extends UnparsedTextFunction implements Calla
                 evalUnparsedTextAvailable(hrefVal, encoding, context));
     }
 
-    public boolean evalUnparsedTextAvailable(StringItem hrefVal, String encoding, XPathContext context) {
+    public boolean evalUnparsedTextAvailable(StringValue hrefVal, String encoding, XPathContext context) {
         try {
             UnparsedText.evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context);
             return true;

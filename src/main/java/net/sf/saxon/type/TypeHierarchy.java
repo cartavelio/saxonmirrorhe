@@ -155,7 +155,7 @@ public class TypeHierarchy {
                         converter = ItemMapper.of(item -> {
                             if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
                                 return Converter.convert(
-                                        (StringItem) item, (AtomicType) requiredItemType, config.getConversionRules());
+                                        (StringValue) item, (AtomicType) requiredItemType, config.getConversionRules());
                             } else {
                                 return item;
                             }

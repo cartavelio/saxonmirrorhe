@@ -27,7 +27,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.DoubleValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -426,8 +426,8 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
 
         if (t0.equals(BuiltInAtomicType.STRING) || t1.equals(BuiltInAtomicType.STRING) ||
                 (t0.equals(BuiltInAtomicType.UNTYPED_ATOMIC) && t1.equals(BuiltInAtomicType.UNTYPED_ATOMIC))) {
-            StringItem s0 = new StringItem(a0.getUnicodeStringValue());
-            StringItem s1 = new StringItem(a1.getUnicodeStringValue());
+            StringValue s0 = new StringValue(a0.getUnicodeStringValue());
+            StringValue s1 = new StringValue(a1.getUnicodeStringValue());
             return ValueComparison.compare(s0, operator, s1, comparer, false);
         }
 

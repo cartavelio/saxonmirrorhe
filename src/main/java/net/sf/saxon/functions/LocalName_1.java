@@ -13,7 +13,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * This class supports the local-name() function
@@ -23,12 +23,12 @@ public class LocalName_1 extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item item, XPathContext context) throws XPathException {
-        return StringItem.makeStringValue(((NodeInfo) item).getLocalPart());
+        return StringValue.makeStringValue(((NodeInfo) item).getLocalPart());
     }
 
     @Override
     public Sequence resultWhenEmpty() {
-        return StringItem.EMPTY_STRING;
+        return StringValue.EMPTY_STRING;
     }
 
     @Override

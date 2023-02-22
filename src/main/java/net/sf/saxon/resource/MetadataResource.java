@@ -18,7 +18,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Map;
 
@@ -59,7 +59,7 @@ public class MetadataResource implements Resource {
         }
 
         // Add the resourceURI of the resource as the "name" property
-        map.initialPut("name", StringItem.makeStringValue(resourceURI));
+        map.initialPut("name", StringValue.makeStringValue(resourceURI));
 
         // Add a fetch() function, which can be used to fetch the resource
         Callable fetcher = new CallableLambda((context1, arguments) -> content.getItem(context1));

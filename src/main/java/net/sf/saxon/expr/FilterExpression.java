@@ -1132,8 +1132,8 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                         if (it.next() != null) {
                             ExpressionTool.ebvError("sequence of two or more items starting with a boolean value", getFilter());
                         }
-                    } else if (first instanceof StringItem) {
-                        ebv = !((StringItem) first).isEmpty();
+                    } else if (first instanceof StringValue) {
+                        ebv = !((StringValue) first).isEmpty();
                         if (it.next() != null) {
                             ExpressionTool.ebvError("sequence of two or more items starting with a boolean value", getFilter());
                         }

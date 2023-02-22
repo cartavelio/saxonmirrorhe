@@ -30,7 +30,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Map;
 
@@ -70,7 +70,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
         pipe.setXPathContext(context);
         UnicodeBuilder uniBuffer = new UnicodeBuilder();
         convertToJson(xml, uniBuffer, options, context);
-        return new StringItem(uniBuffer.toUnicodeString());
+        return new StringValue(uniBuffer.toUnicodeString());
     }
 
     private Options getOptions(XPathContext context, Sequence[] arguments) throws XPathException {

@@ -15,7 +15,7 @@ import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.EmptyUniString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -63,9 +63,9 @@ public class Replace extends RegexFunction  {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
 
-        StringItem arg0 = (StringItem)arguments[0].head();
+        StringValue arg0 = (StringValue)arguments[0].head();
         UnicodeString input = arg0 == null ? EmptyUniString.getInstance() : arg0.getUnicodeStringValue();
 
         UnicodeString replacement = arguments[2].head().getUnicodeStringValue();
@@ -80,7 +80,7 @@ public class Replace extends RegexFunction  {
                 }
             }
         }
-        return new StringItem(re.replace(input, replacement));
+        return new StringValue(re.replace(input, replacement));
     }
 
     /**

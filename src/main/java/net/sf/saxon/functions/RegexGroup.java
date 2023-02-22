@@ -12,7 +12,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 public class RegexGroup extends SystemFunction {
@@ -27,14 +27,14 @@ public class RegexGroup extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         RegexIterator iter = context.getCurrentRegexIterator();
         if (iter == null) {
-            return StringItem.EMPTY_STRING;
+            return StringValue.EMPTY_STRING;
         }
         NumericValue gp0 = (NumericValue) arguments[0].head();
         String s = iter.getRegexGroup((int) gp0.longValue());
-        return StringItem.makeStringValue(s);
+        return StringValue.makeStringValue(s);
     }
 }
 

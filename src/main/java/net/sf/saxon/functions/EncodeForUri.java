@@ -17,7 +17,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSingletonIterator;
 
@@ -35,7 +35,7 @@ public class EncodeForUri extends ScalarSystemFunction {
 
     @Override
     public Sequence resultWhenEmpty() {
-        return StringItem.EMPTY_STRING;
+        return StringValue.EMPTY_STRING;
     }
 
     /**
@@ -50,7 +50,7 @@ public class EncodeForUri extends ScalarSystemFunction {
      * @return the %HH-encoded string
      */
 
-    public static StringItem escape(CodePoints s, String allowedPunctuation) {
+    public static StringValue escape(CodePoints s, String allowedPunctuation) {
         s = s.tidy();
         UnicodeBuilder sb = new UnicodeBuilder();
         IntIterator iter = s.codePoints();
@@ -67,7 +67,7 @@ public class EncodeForUri extends ScalarSystemFunction {
             }
 
         }
-        return new StringItem(sb.toUnicodeString());
+        return new StringValue(sb.toUnicodeString());
     }
 
     private static final String hex = "0123456789ABCDEF";

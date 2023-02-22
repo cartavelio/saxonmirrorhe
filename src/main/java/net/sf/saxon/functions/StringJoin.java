@@ -26,7 +26,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * fn:string-join(string* $sequence, string $separator)
@@ -179,7 +179,7 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
             if (position == 0 && returnEmptyIfEmpty) {
                 return EmptySequence.getInstance();
             } else {
-                return new StringItem(data.toUnicodeString());
+                return new StringValue(data.toUnicodeString());
             }
         }
     }

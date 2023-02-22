@@ -252,7 +252,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     if (error.getCause() != null) {
                         s += "(" + error.getCause().getMessage() + ")";
                     }
-                    return new StringItem(s);
+                    return new StringValue(s);
                 case "value":
                     Sequence value = error.getErrorObject();
                     if (value == null) {
@@ -265,7 +265,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     if (module == null) {
                         return EmptySequence.getInstance();
                     } else {
-                        return new StringItem(module);
+                        return new StringValue(module);
                     }
                 case "line-number":
                     int line = locator == null ? -1 : locator.getLineNumber();
@@ -297,7 +297,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
     }
 
 
-    private static StringItem valueKey = new StringItem(new Twine8(StringConstants.bytes("value")));
+    private static StringValue valueKey = new StringValue(new Twine8(StringConstants.bytes("value")));
 
     /**
      * Implementation of the function saxon:array-as-sequence-of-maps(array)

@@ -21,7 +21,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.net.URI;
@@ -197,7 +197,7 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
         }
 
         if (langAtt == null || langAtt.equals("")) {
-            lang = new StringLiteral(StringItem.EMPTY_STRING);
+            lang = new StringLiteral(StringValue.EMPTY_STRING);
         } else {
             useDefaultCollation = false;
             if (lang instanceof StringLiteral) {
@@ -206,7 +206,7 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
                     ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(s);
                     if (vf != null) {
                         compileError("The lang attribute must be a valid language code", "XTDE0030");
-                        lang = new StringLiteral(StringItem.EMPTY_STRING);
+                        lang = new StringLiteral(StringValue.EMPTY_STRING);
                     }
                 }
             }

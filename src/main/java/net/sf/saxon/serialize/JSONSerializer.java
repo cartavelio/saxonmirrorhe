@@ -24,7 +24,7 @@ import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.stream.StreamResult;
@@ -173,10 +173,10 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
             emitter.endArray();
         } else if (item instanceof NodeInfo) {
             String s = serializeNode((NodeInfo) item);
-            emitter.writeAtomicValue(new StringItem(s));
+            emitter.writeAtomicValue(new StringValue(s));
         } else if (unfailing) {
             CodePoints s = item.getUnicodeStringValue();
-            emitter.writeAtomicValue(new StringItem(s.tidy()));
+            emitter.writeAtomicValue(new StringValue(s.tidy()));
         } else {
             throw new XPathException("JSON output method cannot handle an item of type " + item.getClass(), "SERE0021");
         }

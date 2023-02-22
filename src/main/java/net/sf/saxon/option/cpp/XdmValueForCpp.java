@@ -18,7 +18,7 @@ import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * * This class is to use with Saxon on C++
@@ -50,7 +50,7 @@ public class XdmValueForCpp {
         ConversionRules rules = new ConversionRules();
         Converter converter = rules.getConverter(BuiltInAtomicType.STRING, type);
 
-        value = XdmValue.wrap(converter.convert(new StringItem(valueStr)).asAtomic());
+        value = XdmValue.wrap(converter.convert(new StringValue(valueStr)).asAtomic());
     }
 
 

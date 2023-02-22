@@ -75,7 +75,7 @@ public class ListCastableFunction extends ListConstructorFunction {
         if (iter.next() != null) {
             return BooleanValue.FALSE;
         }
-        if (!(val instanceof StringItem) || val instanceof AnyURIValue) {
+        if (!(val instanceof StringValue) || val instanceof AnyURIValue) {
             return BooleanValue.FALSE;
         }
 

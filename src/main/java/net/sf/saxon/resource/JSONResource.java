@@ -15,7 +15,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +58,7 @@ public class JSONResource implements Resource {
         }
         Map<String, Sequence> options = new HashMap<>();
         options.put("liberal", BooleanValue.FALSE);
-        options.put("duplicates", StringItem.bmp("use-first"));
+        options.put("duplicates", StringValue.bmp("use-first"));
         options.put("escape", BooleanValue.FALSE);
         return ParseJsonFn.parse(jsonStr, options, context);
     }

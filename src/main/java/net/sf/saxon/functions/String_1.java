@@ -19,7 +19,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -31,7 +31,7 @@ public class String_1 extends ScalarSystemFunction {
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
         try {
-            return new StringItem(arg.getUnicodeStringValue());
+            return new StringValue(arg.getUnicodeStringValue());
         } catch (UnsupportedOperationException err) {
             throw new XPathException(err.getMessage(), "FOTY0014");
         }
@@ -39,7 +39,7 @@ public class String_1 extends ScalarSystemFunction {
 
     @Override
     public Sequence resultWhenEmpty() {
-        return StringItem.EMPTY_STRING;
+        return StringValue.EMPTY_STRING;
     }
 
     /**

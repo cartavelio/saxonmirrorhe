@@ -29,7 +29,7 @@ import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
@@ -361,7 +361,7 @@ public class SourceBinding {
             NodeInfo first = kids.next();
             if (first == null) {
                 if (declaredType == null) {
-                    select = new StringLiteral(StringItem.EMPTY_STRING);
+                    select = new StringLiteral(StringValue.EMPTY_STRING);
                     select.setRetainedStaticContext(sourceElement.makeRetainedStaticContext());
                 } else {
                     if (sourceElement instanceof XSLLocalParam || sourceElement instanceof XSLGlobalParam) {

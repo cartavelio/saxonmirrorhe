@@ -21,7 +21,7 @@ import net.sf.saxon.regex.ARegexIterator;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trans.XPathException;
 
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntToIntHashMap;
 
@@ -81,7 +81,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public StringItem next() {
+    public StringValue next() {
         if (nextString == null && prevEnd >= 0) {
             // we've returned a match (or we're at the start), so find the next match
             if (matcher.MoveNext()) {
@@ -122,7 +122,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
                 return null;
             }
         }
-        return StringItem.makeStringValue(currentString);
+        return StringValue.makeStringValue(currentString);
     }
 
     /**
@@ -132,7 +132,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     public Item current() {
-        return StringItem.makeStringValue(currentString);
+        return StringValue.makeStringValue(currentString);
     }
 
     /**
@@ -194,7 +194,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
             // The "actions" in each list are: +N: start group N; -N: end group N.
             IntHashMap<List<Integer>> actions = new IntHashMap<List<Integer>>(c);
 
-            StringItem[] groupArray = new StringItem[c - 1];
+            StringValue[] groupArray = new StringValue[c - 1];
             IEnumerator en = groups.GetEnumerator();
             int i = 0;
             // we're not interested in group 0

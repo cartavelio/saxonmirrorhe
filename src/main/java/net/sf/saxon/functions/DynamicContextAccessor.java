@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.DateTimeValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * A DynamicContextAccessor is a function that takes no arguments, but operates implicitly on the
@@ -105,7 +105,7 @@ public abstract class DynamicContextAccessor extends SystemFunction {
         @Override
         public AtomicValue evaluate(XPathContext context) throws XPathException {
             String lang = context.getConfiguration().getDefaultLanguage();
-            return new StringItem(lang, BuiltInAtomicType.LANGUAGE);
+            return new StringValue(lang, BuiltInAtomicType.LANGUAGE);
         }
     }
 

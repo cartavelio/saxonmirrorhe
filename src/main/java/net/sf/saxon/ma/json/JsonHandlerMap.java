@@ -18,7 +18,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +60,7 @@ public class JsonHandlerMap extends JsonHandler {
     public boolean setKey(String unEscaped, String reEscaped) {
         this.keys.push(reEscaped);
         MapItem map = (MapItem) stack.peek();
-        return map.get(new StringItem(reEscaped)) != null;
+        return map.get(new StringValue(reEscaped)) != null;
     }
 
     /**
@@ -146,7 +146,7 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void writeString(String val) throws XPathException {
-        writeItem(new StringItem(reEscape(val)));
+        writeItem(new StringValue(reEscape(val)));
     }
 
     /**

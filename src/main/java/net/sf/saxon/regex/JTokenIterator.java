@@ -8,7 +8,7 @@
 package net.sf.saxon.regex;
 
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,7 +42,7 @@ public class JTokenIterator implements AtomicIterator {
     }
 
     @Override
-    public StringItem next() {
+    public StringValue next() {
         if (prevEnd < 0) {
             current = null;
             return null;
@@ -55,7 +55,7 @@ public class JTokenIterator implements AtomicIterator {
             current = input.substring(prevEnd, input.length());
             prevEnd = -1;
         }
-        return StringItem.makeStringValue(current);
+        return StringValue.makeStringValue(current);
     }
 
 }
