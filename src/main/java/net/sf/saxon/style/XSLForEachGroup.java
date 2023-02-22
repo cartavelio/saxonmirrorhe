@@ -9,6 +9,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.ForEachGroup;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -22,6 +23,7 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
@@ -38,6 +40,7 @@ public final class XSLForEachGroup extends StyleElement {
     /*@Nullable*/ private Expression select = null;
     private Expression groupBy = null;
     private Expression groupAdjacent = null;
+    private Expression breakWhen = null;
     private Pattern starting = null;
     private Pattern ending = null;
     private Expression collationName;
@@ -82,6 +85,7 @@ public final class XSLForEachGroup extends StyleElement {
         String groupAdjacentAtt = null;
         String startingAtt = null;
         String endingAtt = null;
+        String breakWhenAtt = null;
         String collationAtt = null;
 
         for (AttributeInfo att : attributes()) {
@@ -107,15 +111,17 @@ public final class XSLForEachGroup extends StyleElement {
                 case "group-ending-with":
                     endingAtt = value;
                     break;
+                case "break-when":
+                    // Saxon extension
+                    requireSyntaxExtensions("break-when");
+                    breakWhenAtt = "function($group as item()*, $next as item()) as Q{http://www.w3.org/2001/XMLSchema}boolean " +
+                            "{ Q{http://www.w3.org/2005/xpath-functions}boolean(" + value + ") }";
+                    //System.err.println(breakWhenAtt);
+                    breakWhen = makeExpression(breakWhenAtt, att);
+                    break;
                 case "collation":
                     collationAtt = Whitespace.trim(value);
                     collationName = makeAttributeValueTemplate(collationAtt, att);
-                    break;
-                case "bind-group":
-                    compileError("The bind-group attribute has been dropped from the XSLT 3.0 specification", "XTSE0090");
-                    break;
-                case "bind-grouping-key":
-                    compileError("The bind-grouping-key attribute has been dropped from the XSLT 3.0 specification", "XTSE0090");
                     break;
                 case "composite":
                     composite = processBooleanAttribute("composite", value);
@@ -134,10 +140,11 @@ public final class XSLForEachGroup extends StyleElement {
         int c = (groupByAtt == null ? 0 : 1) +
                 (groupAdjacentAtt == null ? 0 : 1) +
                 (startingAtt == null ? 0 : 1) +
-                (endingAtt == null ? 0 : 1);
+                (endingAtt == null ? 0 : 1) +
+                (breakWhenAtt == null ? 0 : 1);
         if (c != 1) {
             compileError("Exactly one of the attributes group-by, group-adjacent, group-starting-with, " +
-                    "and group-ending-with must be specified", "XTSE1080");
+                    "and group-ending-with must be specified", "XTSE1080"); //TODO: add break-when when it becomes mainstream
         }
 
         if (startingAtt != null) {
@@ -209,6 +216,20 @@ public final class XSLForEachGroup extends StyleElement {
             } catch (XPathException err) {
                 compileError(err);
             }
+        } else if (breakWhen != null) {
+            breakWhen = typeCheck("break-when", breakWhen);
+            try {
+                SpecificFunctionType breakWhenType = new SpecificFunctionType(
+                        new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM}, SequenceType.SINGLE_BOOLEAN);
+                RoleDiagnostic role =
+                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/break-when", 0);
+                role.setErrorCode("XTTE1100");
+                breakWhen = tc.staticTypeCheck(breakWhen,
+                                                   SequenceType.makeSequenceType(breakWhenType, StaticProperty.EXACTLY_ONE),
+                                                   role, visitor);
+            } catch (XPathException err) {
+                compileError(err);
+            }
         }
 
         starting = typeCheck("starting", starting);
@@ -246,7 +267,7 @@ public final class XSLForEachGroup extends StyleElement {
             }
         }
 
-        byte algorithm = 0;
+        byte algorithm = ForEachGroup.GROUP_BY;
         Expression key = null;
         if (groupBy != null) {
             algorithm = ForEachGroup.GROUP_BY;
@@ -260,6 +281,9 @@ public final class XSLForEachGroup extends StyleElement {
         } else if (ending != null) {
             algorithm = ForEachGroup.GROUP_ENDING;
             key = ending;
+        } else if (breakWhen != null) {
+            algorithm = ForEachGroup.GROUP_BREAKING_WHEN;
+            key = breakWhen;
         }
 
         Expression action = compileSequenceConstructor(compilation, decl, true);

@@ -10,8 +10,8 @@ package net.sf.saxon.om;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.LastPositionFinder;
-import net.sf.saxon.expr.RangeIterator;
-import net.sf.saxon.expr.ReverseRangeIterator;
+import net.sf.saxon.expr.AscendingRangeIterator;
+import net.sf.saxon.expr.DescendingRangeIterator;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.s9api.Location;
@@ -84,8 +84,8 @@ public class SequenceTool {
 
     public static Sequence toLazySequence(SequenceIterator iterator) throws XPathException {
         if (iterator.getProperties().contains(SequenceIterator.Property.GROUNDED) &&
-                !(iterator instanceof RangeIterator) &&
-                !(iterator instanceof ReverseRangeIterator)) {
+                !(iterator instanceof AscendingRangeIterator) &&
+                !(iterator instanceof DescendingRangeIterator)) {
             return iterator.materialize();
         } else {
             return new LazySequence(iterator);
@@ -94,8 +94,8 @@ public class SequenceTool {
 
     public static Sequence toLazySequence2(SequenceIterator iterator) throws XPathException {
         if (iterator.getProperties().contains(SequenceIterator.Property.GROUNDED) &&
-                !(iterator instanceof RangeIterator) &&
-                !(iterator instanceof ReverseRangeIterator)) {
+                !(iterator instanceof AscendingRangeIterator) &&
+                !(iterator instanceof DescendingRangeIterator)) {
             return iterator.materialize();
         } else {
             return new LazySequence(iterator);

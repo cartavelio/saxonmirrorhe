@@ -53,6 +53,7 @@ import net.sf.saxon.tree.tiny.TreeStatistics;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
+import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntHashSet;
 import net.sf.saxon.z.IntSet;
 import org.xml.sax.*;
@@ -124,6 +125,7 @@ import java.util.function.Predicate;
 public class Configuration implements SourceResolver, NotationSet {
 
     protected static Set<Feature> booleanFeatures = new HashSet<>(40);
+    protected static Set<Feature> stringFeatures = new HashSet<>(40);
     private transient ApiProvider apiProcessor = null;
     private transient CharacterSetFactory characterSetFactory;
 
@@ -163,6 +165,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private transient DynamicLoader dynamicLoader = new DynamicLoader();
 
     private final IntSet enabledProperties = new IntHashSet(64);
+    private final IntHashMap<String> stringProperties = new IntHashMap<>(); // TODO: not yet widely used
 
     private List<ExternalObjectModel> externalObjectModels = new ArrayList<>(4);
 
@@ -4366,6 +4369,8 @@ public class Configuration implements SourceResolver, NotationSet {
                 setExpandAttributeDefaults(b);
             }
             internalSetBooleanProperty(feature, value);
+        } else if (stringFeatures.contains(feature)) {
+            stringProperties.put(feature.code, requireString(feature.name, value));
         } else {
             switch (feature.code) {
                 case FeatureCode.ALLOWED_PROTOCOLS:
@@ -5002,6 +5007,8 @@ public class Configuration implements SourceResolver, NotationSet {
         booleanFeatures.add(Feature.XQUERY_MULTIPLE_MODULE_IMPORTS);
         booleanFeatures.add(Feature.RETAIN_NODE_FOR_DIAGNOSTICS);
         booleanFeatures.add(Feature.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS);
+
+        stringFeatures.add(Feature.ZIP_URI_PATTERN);
     }
 
 
@@ -5041,6 +5048,14 @@ public class Configuration implements SourceResolver, NotationSet {
     public <T> T getConfigurationProperty(Feature<T> feature) {
         if (booleanFeatures.contains(feature)) {
             return (T) Boolean.valueOf(getBooleanProperty(feature));
+        }
+        if (stringFeatures.contains(feature)) {
+            String value = stringProperties.get(feature.code);
+            if (value == null) {
+                return (T)feature.defaultValue;
+            } else {
+                return (T)value;
+            }
         }
         switch (feature.code) {
 

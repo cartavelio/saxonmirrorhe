@@ -12,7 +12,10 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.lib.CollectionFinder;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ResourceCollection;
+import net.sf.saxon.regex.ARegularExpression;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 
@@ -114,7 +117,8 @@ public class StandardCollectionFinder implements CollectionFinder {
 
         // check if file is a zip file
 
-        if (isJarFileURI(collectionURI)) {
+        String regex = context.getConfiguration().getConfigurationProperty(Feature.ZIP_URI_PATTERN);
+        if (isJarFileURI(collectionURI) || ARegularExpression.compile(regex, "").containsMatch(StringView.of(collectionURI).tidy())) {
             return new JarCollection(context, collectionURI, params);
         }
 

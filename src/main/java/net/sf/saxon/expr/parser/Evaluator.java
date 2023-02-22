@@ -433,14 +433,15 @@ public abstract class Evaluator {
                 base = it.materialize();
             }
             if (base instanceof IntegerRange) {
-                long start = ((IntegerRange) base).getStart() + tail.getStart() - 1;
+                long step = ((IntegerRange) base).getStep();
+                long start = ((IntegerRange) base).getStart() + (tail.getStart() - 1) * step;
                 long end = ((IntegerRange) base).getEnd();
                 if (start == end) {
                     return Int64Value.makeIntegerValue(end);
                 } else if (start > end) {
                     return EmptySequence.getInstance();
                 } else {
-                    return new IntegerRange(start, end);
+                    return new IntegerRange(start, step, end);
                 }
             }
             if (base instanceof GroundedValue) {

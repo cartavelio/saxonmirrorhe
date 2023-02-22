@@ -10,9 +10,9 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.json.JsonReceiver;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.serialize.charcode.CharacterSet;
 import net.sf.saxon.serialize.codenorm.Normalizer;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
@@ -228,19 +228,11 @@ public class JSONEmitter {
     private void emitOpen(char bracket, boolean oneLiner) throws XPathException {
         conditionalComma(true);
         oneLinerStack.push(oneLiner);
-//        if (isIndenting) {
-//            emit(' ');
-//        }
         emit(bracket);
         first = true;
-        if (isIndenting) {
-            if (oneLiner) {
-                emit(' ');
-            } else {
-                //indent(level + 1);
-            }
+        if (isIndenting && oneLiner) {
+            emit(' ');
         }
-
     }
 
     private void emitClose(char bracket, int level) throws XPathException {
@@ -249,7 +241,7 @@ public class JSONEmitter {
             if (oneLiner) {
                 emit(' ');
             } else {
-                indent(level);
+                indent(level - 1);
             }
         }
         emit(bracket);
@@ -259,16 +251,17 @@ public class JSONEmitter {
 
     private void conditionalComma(boolean opening) throws XPathException {
         boolean wasFirst = first;
+        boolean actuallyIndenting = isIndenting && level != 0 && !oneLinerStack.peek();
         if (first) {
             first = false;
         } else if (!afterKey) {
             emit(',');
         }
-        if (wasFirst && afterKey) {
+        if ((wasFirst && afterKey)) {
             emit(' ');
-        } else if (isIndenting && !afterKey && level != 0) {
+        } else if (actuallyIndenting && !afterKey) {
             emit('\n');
-            for (int i = 0; i < indentSpaces * (level + 1); i++) {
+            for (int i = 0; i < indentSpaces * level; i++) {
                 emit(' ');
             }
         }

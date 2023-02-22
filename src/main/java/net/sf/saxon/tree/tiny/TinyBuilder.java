@@ -212,7 +212,7 @@ public class TinyBuilder extends Builder {
         TinyTree tt = tree;
         if (tt != null) {
             tree.commentBuffer = commentBuilder.toUnicodeString();
-            //tree.textBuffer.close();
+            tree.textBuffer.close();
             tt.addNode(Type.STOPPER, 0, 0, 0, -1);
             tt.condense(statistics);
         }
@@ -464,20 +464,20 @@ public class TinyBuilder extends Builder {
         TinyTree tt = tree;
         assert tt != null;
 
-//        LargeTextBuffer buffer = tt.textBuffer;
-//        int bufferStart = buffer.length();
-//        tt.appendChars(chars);
-//        int bufferEnd = buffer.length();
-//        int len = bufferEnd - bufferStart;
-//        int n = tt.numberOfNodes - 1;
-//        if (tt.nodeKind[n] == Type.TEXT && tt.depth[n] == currentDepth) {
-//            // merge this text node with the previous text node
-//            tt.beta[n] += len;
-//        } else {
-            //System.err.println("Adding text node (" + bufferStart + " - " + bufferEnd + ") - " + Err.wrap(chars));
-            //nodeNr = tt.addNode(Type.TEXT, currentDepth, bufferStart, len, -1);
-        nodeNr = tt.addNode(Type.TEXT, currentDepth, tt.textChunksUsed, -1, -1);
+        LargeTextBuffer buffer = tt.textBuffer;
+        int bufferStart = buffer.length();
         tt.appendChars(chars);
+        int bufferEnd = buffer.length();
+        int len = bufferEnd - bufferStart;
+        int n = tt.numberOfNodes - 1;
+        if (tt.nodeKind[n] == Type.TEXT && tt.depth[n] == currentDepth) {
+            // merge this text node with the previous text node
+            tt.beta[n] += len;
+        } else {
+            //System.err.println("Adding text node (" + bufferStart + " - " + bufferEnd + ") - " + Err.wrap(chars));
+            nodeNr = tt.addNode(Type.TEXT, currentDepth, bufferStart, len, -1);
+            //nodeNr = tt.addNode(Type.TEXT, currentDepth, tt.textChunksUsed, -1, -1);
+            //tt.appendChars(chars);
 
             int prev = prevAtDepth[currentDepth];
             if (prev > 0) {
@@ -486,7 +486,7 @@ public class TinyBuilder extends Builder {
             tt.next[nodeNr] = prevAtDepth[currentDepth - 1];
             prevAtDepth[currentDepth] = nodeNr;
             siblingsAtDepth[currentDepth]++;
-//        }
+        }
         return nodeNr;
     }
 

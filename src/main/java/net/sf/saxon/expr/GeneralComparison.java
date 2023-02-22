@@ -17,12 +17,14 @@ import net.sf.saxon.functions.Minimax;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.RangeIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
-import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -455,54 +457,56 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         }
 
         // look for (N to M = I)
-        if (operator == Token.EQUALS) {
+//        if (operator == Token.EQUALS) {
 
-            // First a variable range...
-
-            if (getLhsExpression() instanceof RangeExpression) {
-                Expression min = ((RangeExpression) getLhsExpression()).getLhsExpression();
-                Expression max = ((RangeExpression) getLhsExpression()).getRhsExpression();
-                IntegerRangeTest ir = new IntegerRangeTest(getRhsExpression(), min, max);
-                ExpressionTool.copyLocationInfo(this, ir);
-                return ir;
-            }
-
-            if (getRhsExpression() instanceof RangeExpression) {
-                Expression min = ((RangeExpression) getRhsExpression()).getLhsExpression();
-                Expression max = ((RangeExpression) getRhsExpression()).getRhsExpression();
-                IntegerRangeTest ir = new IntegerRangeTest(getLhsExpression(), min, max);
-                ExpressionTool.copyLocationInfo(this, ir);
-                return ir;
-            }
-
-            // Now a fixed range...
-
-            if (getLhsExpression() instanceof Literal) {
-                GroundedValue value0 = ((Literal) getLhsExpression()).getGroundedValue();
-                if (value0 instanceof IntegerRange) {
-                    long min = ((IntegerRange) value0).getStart();
-                    long max = ((IntegerRange) value0).getEnd();
-                    IntegerRangeTest ir = new IntegerRangeTest(getRhsExpression(),
-                            Literal.makeLiteral(Int64Value.makeIntegerValue(min), this),
-                            Literal.makeLiteral(Int64Value.makeIntegerValue(max), this));
-                    ExpressionTool.copyLocationInfo(this, ir);
-                    return ir;
-                }
-            }
-
-            if (getRhsExpression() instanceof Literal) {
-                GroundedValue value1 = ((Literal) getRhsExpression()).getGroundedValue();
-                if (value1 instanceof IntegerRange) {
-                    long min = ((IntegerRange) value1).getStart();
-                    long max = ((IntegerRange) value1).getEnd();
-                    IntegerRangeTest ir = new IntegerRangeTest(getLhsExpression(),
-                            Literal.makeLiteral(Int64Value.makeIntegerValue(min), this),
-                            Literal.makeLiteral(Int64Value.makeIntegerValue(max), this));
-                    ExpressionTool.copyLocationInfo(this, ir);
-                    return ir;
-                }
-            }
-        }
+//            // First a variable range...
+//
+//            if (getLhsExpression() instanceof RangeExpression) {
+//                throw new AssertionError("Optimisation needs rethinking");
+////                Expression min = ((RangeExpression) getLhsExpression()).getLhsExpression();
+////                Expression max = ((RangeExpression) getLhsExpression()).getRhsExpression();
+////                IntegerRangeTest ir = new IntegerRangeTest(getRhsExpression(), min, max);
+////                ExpressionTool.copyLocationInfo(this, ir);
+////                return ir;
+//            }
+//
+//            if (getRhsExpression() instanceof RangeExpression) {
+//                throw new AssertionError("Optimisation needs rethinking");
+////                Expression min = ((RangeExpression) getRhsExpression()).getLhsExpression();
+////                Expression max = ((RangeExpression) getRhsExpression()).getRhsExpression();
+////                IntegerRangeTest ir = new IntegerRangeTest(getLhsExpression(), min, max);
+////                ExpressionTool.copyLocationInfo(this, ir);
+////                return ir;
+//            }
+//
+//            // Now a fixed range...
+//
+//            if (getLhsExpression() instanceof Literal) {
+//                GroundedValue value0 = ((Literal) getLhsExpression()).getGroundedValue();
+//                if (value0 instanceof IntegerRange) {
+//                    long min = ((IntegerRange) value0).getStart();
+//                    long max = ((IntegerRange) value0).getEnd();
+//                    IntegerRangeTest ir = new IntegerRangeTest(getRhsExpression(),
+//                            Literal.makeLiteral(Int64Value.makeIntegerValue(min), this),
+//                            Literal.makeLiteral(Int64Value.makeIntegerValue(max), this));
+//                    ExpressionTool.copyLocationInfo(this, ir);
+//                    return ir;
+//                }
+//            }
+//
+//            if (getRhsExpression() instanceof Literal) {
+//                GroundedValue value1 = ((Literal) getRhsExpression()).getGroundedValue();
+//                if (value1 instanceof IntegerRange) {
+//                    long min = ((IntegerRange) value1).getStart();
+//                    long max = ((IntegerRange) value1).getEnd();
+//                    IntegerRangeTest ir = new IntegerRangeTest(getLhsExpression(),
+//                            Literal.makeLiteral(Int64Value.makeIntegerValue(min), this),
+//                            Literal.makeLiteral(Int64Value.makeIntegerValue(max), this));
+//                    ExpressionTool.copyLocationInfo(this, ir);
+//                    return ir;
+//                }
+//            }
+//        }
 
         // If the operator is gt, ge, lt, le then replace X < Y by min(X) < max(Y)
 
@@ -704,6 +708,28 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         try {
             if (value1 == null) {
                 return false;
+            }
+            if (iter0 instanceof RangeIterator) {
+                if (value1 instanceof UntypedAtomicValue) {
+                    value1 = StringConverter.StringToInteger.INSTANCE.convertString(value1.getUnicodeStringValue()).asAtomic();
+                }
+                RangeIterator ri = (RangeIterator)iter0;
+                switch (singletonOperator) {
+                    case Token.FEQ:
+                        return ri.containsEq((NumericValue)value1);
+                    case Token.FNE:
+                        return ri.getFirst().compareTo(ri.getLast()) != 0 || ri.getFirst().compareTo(((NumericValue)value1)) != 0;
+                    case Token.FLE:
+                        return ri.getMin().compareTo(((NumericValue) value1)) <= 0;
+                    case Token.FLT:
+                        return ri.getMin().compareTo(((NumericValue) value1)) < 0;
+                    case Token.FGE:
+                        return ri.getMax().compareTo(((NumericValue) value1)) >= 0;
+                    case Token.FGT:
+                        return ri.getMax().compareTo(((NumericValue) value1)) > 0;
+                    default:
+                        throw new AssertionError();
+                }
             }
             AtomicValue item0;
             AtomicComparer boundComparer = comparer.provideContext(context);

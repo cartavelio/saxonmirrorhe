@@ -221,6 +221,14 @@ public abstract class Token {
      */
     public static final int TREAT_AS = 47;
     /**
+     * operator "??"
+     */
+    public static final int QMARK_QMARK = 48;
+    /*
+     * operator "!!
+     */
+    public static final int BANG_BANG = 49;
+    /**
      * operator "eq"
      */
     public static final int FEQ = 50;       // "Fortran" style comparison operators eq, ne, etc
@@ -351,6 +359,10 @@ public abstract class Token {
      * "orElse" (Saxon extension)
      */
     public static final int OR_ELSE = 81;
+    /**
+     * "by"
+     */
+    public static final int BY = 82;
 
 
     // The following tokens are used only in the query prolog. They are categorized
@@ -654,6 +666,8 @@ public abstract class Token {
         tokens[INSTANCE_OF] = "instance of";
         tokens[CAST_AS] = "cast as";
         tokens[TREAT_AS] = "treat as";
+        tokens[QMARK_QMARK] = "??";
+        tokens[BANG_BANG] = "!!";
         tokens[FEQ] = "eq";
         tokens[FNE] = "ne";
         tokens[FGT] = "gt";
@@ -680,6 +694,7 @@ public abstract class Token {
         tokens[ARROW] = "=>";
         tokens[AND_ALSO] = "andAlso";
         tokens[OR_ELSE] = "orElse";
+        tokens[BY] = "by";
         tokens[STRING_CONSTRUCTOR_INITIAL] = "``[<string>`{";
         tokens[STRING_LITERAL_BACKTICKED] = "``[<string>]``";
         tokens[OTHERWISE] = "otherwise";
