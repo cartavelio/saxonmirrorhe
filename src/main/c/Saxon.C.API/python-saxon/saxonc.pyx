@@ -1459,10 +1459,13 @@ cdef class PyXsltExecutable:
      def set_capture_result_documents(self, bool value):
         """
         set_capture_result_documents(self, value)
-        When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
-        via a user defined dictionary object where we have the pair document URI and XdmNode object.
+        Enable the capture of the result-document output into a PyXdmMap. This overrides the default mechanism.
+        If this option is enabled, then any document created using xsl:result-document is saved (as a PyXdmNode)
+        in a PyXdmMap object where it is accessible using the URI as a key. After the execution of the transformation
+        a call on the get_result_documents method is required to get access to the result-documents in the map.
         Args:
-            value (bool): True true enables map object which is used to save the result documents from the transformation
+            value (bool): true causes secondary result documents from the transformation to be saved in a map;
+            false disables this option.
         """
         cdef bool c_value
         c_value = value
@@ -1475,7 +1478,9 @@ cdef class PyXsltExecutable:
          returned if the user has not enabled this feature via the method set_capture_result_documents
 
          Returns:
-             dict [str, PyXdmNode]: Dict of the key, value pair. URI of each document and the document as PyXdmNode object.
+             dict [str, PyXdmNode]: Dict of the key, value pair. Indexed by the absolute URI of each result
+             document, and the corresponding value is an PyXdmNode object containing the result document (as
+             an in-memory tree, without serialization).
          """
          cdef map[string , saxoncClasses.XdmNode * ] c_dataMap
          cdef dict p_dataMap = {}
