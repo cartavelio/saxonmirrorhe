@@ -108,9 +108,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <value>The underlying Destination object</value>
-        public Saxon.Hej.s9api.Destination UnderlyingDestination {
-            get { return destination; }
-        }
+        public Saxon.Hej.s9api.Destination UnderlyingDestination => destination;
     }
 }
 

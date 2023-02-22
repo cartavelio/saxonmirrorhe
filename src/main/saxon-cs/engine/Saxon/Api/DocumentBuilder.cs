@@ -494,7 +494,7 @@ namespace Saxon.Api {
         /// an alternative that creates a wrapper around the Linq tree, allowing it to be modified in situ.
         /// </para>
         /// </remarks>
-        /// <param name="source">The Link document or element node to be copied to form a Saxon tree</param>
+        /// <param name="source">The Linq document or element node to be copied to form a Saxon tree</param>
         /// <returns>An <c>XdmNode</c>, the document or element node corresponding to the supplied
         /// Linq node. If the supplied source was an XDocument node, the result will be an XDM document node;
         /// if it was an XElement node, it will be an XDM element node forming the outermost element of

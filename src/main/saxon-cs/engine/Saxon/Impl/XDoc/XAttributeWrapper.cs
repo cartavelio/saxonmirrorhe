@@ -80,6 +80,10 @@ namespace Saxon.Impl.XDoc {
             return node.Name.Namespace == XNamespace.None ? "" : node.Name.NamespaceName;
         }
 
+        public override NamespaceUri getNamespaceUri() {
+            return NamespaceUri.of(getURI());
+        }
+
         public override string getPrefix() {
             XNamespace ns = node.Name.Namespace;
             if (ns == XNamespace.None) {
