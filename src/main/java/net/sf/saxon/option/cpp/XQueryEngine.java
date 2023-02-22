@@ -85,7 +85,7 @@ public class XQueryEngine extends SaxonCAPI {
             return handle.rawValue();
     }
 
-    @CEntryPoint(name = "createXQueryEngine")
+    @CEntryPoint(name = "createXQueryEngineWithProcessor")
     public static long createXQueryEngine(IsolateThread thread, ObjectHandle processorRef) {
             Processor processor = objectHandles.get(processorRef);
             if(processor == null) {

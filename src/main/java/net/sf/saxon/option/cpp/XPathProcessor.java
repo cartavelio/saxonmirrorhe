@@ -69,7 +69,7 @@ public class XPathProcessor extends SaxonCAPI {
             return handle.rawValue();
     }
 
-    @CEntryPoint(name = "createXPathProcessor")
+    @CEntryPoint(name = "createXPathProcessorWithProcessor")
     public static long createXPathProcessor(IsolateThread thread, ObjectHandle processorRef) {
             Processor processor = objectHandles.get(processorRef);
             if(processor == null) {
