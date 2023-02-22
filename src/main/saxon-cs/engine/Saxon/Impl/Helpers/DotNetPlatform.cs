@@ -76,7 +76,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public string getPlatformSuffix() {
-            return "N";
+            return "CS";
         }
 
         public System.IO.Stream locateResource(string filename, SysCollGen.List<string> messages) {
