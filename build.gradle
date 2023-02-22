@@ -120,7 +120,7 @@ dependencies {
   preprocessor (
     [group: 'com.igormaznitsa', name: 'jcp', version: '7.0.4'],
     [group: 'com.tonicsystems', name: 'jarjar', version: '0.6' ],
-    [group: 'net.sf.saxon', name: 'Saxon-HE', version: '10.3' ],
+    [group: 'net.sf.saxon', name: 'Saxon-HE', version: '10.8' ],
     files(saxonLicenseDir)
   )
   implementation (
