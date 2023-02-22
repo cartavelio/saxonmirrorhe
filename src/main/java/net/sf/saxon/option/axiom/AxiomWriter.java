@@ -103,7 +103,7 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
                              Location location, int properties) throws XPathException {
         flush();
         String local = elemName.getLocalPart();
-        NamespaceUri uri = elemName.getURI();
+        NamespaceUri uri = elemName.getNamespaceUri();
         String prefix = elemName.getPrefix();
         if (ancestors.isEmpty()) {
             startDocument(ReceiverOption.NONE);
@@ -129,7 +129,7 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
             NamespaceBinding[] declarations = namespaces.getDifferences(parentNamespaces, false);
             for (NamespaceBinding ns : declarations) {
                 String nsprefix = ns.getPrefix();
-                NamespaceUri nsuri = ns.getURI();
+                NamespaceUri nsuri = ns.getNamespaceUri();
                 if (nsprefix.equals("")) {
                     element.declareDefaultNamespace(nsuri.toString());
                 } else if (nsuri.isEmpty()) {
@@ -145,7 +145,7 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
         for (AttributeInfo att : attributes) {
             NodeName nameCode = att.getNodeName();
             String attlocal = nameCode.getLocalPart();
-            NamespaceUri atturi = nameCode.getURI();
+            NamespaceUri atturi = nameCode.getNamespaceUri();
             String attprefix = nameCode.getPrefix();
             OMNamespace ns = atturi.isEmpty() ? null : factory.createOMNamespace(atturi.toString(), attprefix);
             OMAttribute attr = factory.createOMAttribute(attlocal, ns, att.getValue());

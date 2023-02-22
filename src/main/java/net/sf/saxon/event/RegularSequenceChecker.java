@@ -349,28 +349,28 @@ public class RegularSequenceChecker extends ProxyReceiver {
             String prefix = elemName.getPrefix();
             if (prefix.isEmpty()) {
                 NamespaceUri declaredDefaultUri = namespaces.getDefaultNamespace();
-                if (!declaredDefaultUri.equals(elemName.getURI())) {
-                    throw new IllegalStateException("URI of element Q{" + elemName.getURI() +
+                if (!declaredDefaultUri.equals(elemName.getNamespaceUri())) {
+                    throw new IllegalStateException("URI of element Q{" + elemName.getNamespaceUri() +
                                                             "}" + elemName.getLocalPart() +
                                                             " does not match declared default namespace {"
                                                             + declaredDefaultUri + "}");
                 }
             } else {
-                NamespaceUri declaredUri = namespaces.getURI(prefix);
+                NamespaceUri declaredUri = namespaces.getNamespaceUri(prefix);
                 if (declaredUri == null) {
                     throw new IllegalStateException("Prefix " + prefix + " has not been declared");
-                } else if (!declaredUri.equals(elemName.getURI())) {
+                } else if (!declaredUri.equals(elemName.getNamespaceUri())) {
                     throw new IllegalStateException("Prefix " + prefix + " is bound to the wrong namespace");
                 }
             }
             for (AttributeInfo att : attributes) {
                 NodeName name = att.getNodeName();
-                if (!name.getURI().isEmpty()) {
+                if (!name.getNamespaceUri().isEmpty()) {
                     String attPrefix = name.getPrefix();
-                    NamespaceUri declaredUri = namespaces.getURI(attPrefix);
+                    NamespaceUri declaredUri = namespaces.getNamespaceUri(attPrefix);
                     if (declaredUri == null) {
                         throw new IllegalStateException("Prefix " + attPrefix + " has not been declared for attribute " + att.getNodeName().getDisplayName());
-                    } else if (!declaredUri.equals(name.getURI())) {
+                    } else if (!declaredUri.equals(name.getNamespaceUri())) {
                         throw new IllegalStateException("Prefix " + prefix + " is bound to the wrong namespace {" + declaredUri + "}");
                     }
                 }

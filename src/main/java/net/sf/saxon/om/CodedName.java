@@ -42,7 +42,7 @@ public class CodedName implements NodeName {
      * @return the URI. Returns the empty string to represent the no-namespace
      */
     @Override
-    public NamespaceUri getURI() {
+    public NamespaceUri getNamespaceUri() {
         return pool.getURI(fingerprint);
     }
 
@@ -77,7 +77,7 @@ public class CodedName implements NodeName {
         if (prefix.isEmpty()) {
             return qn;
         } else {
-            return new StructuredQName(prefix, qn.getURI(), qn.getLocalPart());
+            return new StructuredQName(prefix, qn.getNamespaceUri(), qn.getLocalPart());
         }
     }
 
@@ -143,7 +143,7 @@ public class CodedName implements NodeName {
      */
     @Override
     public int hashCode() {
-        return StructuredQName.computeHashCode(getURI(), getLocalPart());
+        return StructuredQName.computeHashCode(getNamespaceUri(), getLocalPart());
     }
 
     /**
@@ -156,7 +156,7 @@ public class CodedName implements NodeName {
             if (n.hasFingerprint()) {
                 return getFingerprint() == n.getFingerprint();
             } else {
-                return n.getLocalPart().equals(getLocalPart()) && n.hasURI(getURI());
+                return n.getLocalPart().equals(getLocalPart()) && n.hasURI(getNamespaceUri());
             }
         } else {
             return false;

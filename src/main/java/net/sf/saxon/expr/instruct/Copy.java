@@ -409,7 +409,7 @@ public class Copy extends ElementCreator {
             // Always output the namespace of the element name itself
             NamespaceBinding ns = nodeName.getNamespaceBinding();
             if (!ns.isDefaultUndeclaration()) {
-                receiver.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
+                receiver.namespace(ns.getPrefix(), ns.getNamespaceUri(), ReceiverOption.NONE);
             }
         }
     }

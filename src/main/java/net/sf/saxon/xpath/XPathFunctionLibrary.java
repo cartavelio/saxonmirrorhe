@@ -85,7 +85,7 @@ public class XPathFunctionLibrary implements FunctionLibrary {
             return null;
         }
         StructuredQName qn = functionName.getComponentName();
-        QName name = new QName(qn.getURI().toString(), qn.getLocalPart());
+        QName name = new QName(qn.getNamespaceUri().toString(), qn.getLocalPart());
         XPathFunction function = resolver.resolveFunction(name, functionName.getArity());
         if (function == null) {
             return null;
@@ -116,7 +116,7 @@ public class XPathFunctionLibrary implements FunctionLibrary {
         }
         StructuredQName functionName = symbolicName.getComponentName();
         int arity = symbolicName.getArity();
-        QName name = new QName(functionName.getURI().toString(), functionName.getLocalPart());
+        QName name = new QName(functionName.getNamespaceUri().toString(), functionName.getLocalPart());
         XPathFunction function = resolver.resolveFunction(name, arity);
         if (function == null) {
             return null;
@@ -140,7 +140,7 @@ public class XPathFunctionLibrary implements FunctionLibrary {
     public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
         return resolver != null &&
                 resolver.resolveFunction(
-                        new QName(functionName.getComponentName().getURI().toString(),
+                        new QName(functionName.getComponentName().getNamespaceUri().toString(),
                                   functionName.getComponentName().getLocalPart()),
                         functionName.getArity()) != null;
     }

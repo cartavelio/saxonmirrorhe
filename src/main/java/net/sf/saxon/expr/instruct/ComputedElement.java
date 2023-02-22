@@ -312,7 +312,7 @@ public class ComputedElement extends ElementCreator {
                     StructuredQName qn = StructuredQName.fromEQName(rawName);
                     prefix = "";
                     localName = qn.getLocalPart();
-                    uri = qn.getURI();
+                    uri = qn.getNamespaceUri();
                 } catch (IllegalArgumentException e) {
                     throw new XPathException("Invalid EQName in computed element constructor: " + e.getMessage(), "XQDY0074");
                 }

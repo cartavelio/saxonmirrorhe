@@ -43,7 +43,7 @@ public class TypeAvailable extends SystemFunction {
             throw e;
         }
 
-        NamespaceUri uri = qName.getURI();
+        NamespaceUri uri = qName.getNamespaceUri();
         if (uri.equals(NamespaceUri.JAVA_TYPE)) {
             try {
                 String className = JavaExternalObjectType.localNameToClassName(qName.getLocalPart());

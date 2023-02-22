@@ -596,8 +596,8 @@ public class VirtualCopy implements NodeInfo {
                 }
                 for (AttributeInfo att : original.attributes()) {
                     NodeName name = att.getNodeName();
-                    if (name.getURI() != null) {
-                        NamespaceBinding b = new NamespaceBinding(name.getPrefix(), name.getURI());
+                    if (name.getNamespaceUri() != null) {
+                        NamespaceBinding b = new NamespaceBinding(name.getPrefix(), name.getNamespaceUri());
                         if (!allNamespaces.contains(b)) {
                             allNamespaces.add(b);
                         }

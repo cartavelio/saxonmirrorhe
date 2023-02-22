@@ -127,7 +127,7 @@ public final class AttributeGetter extends Expression {
         assert item instanceof NodeInfo;
         NodeInfo node = (NodeInfo) item;
         if (node.getNodeKind() == Type.ELEMENT) {
-            String val = node.getAttributeValue(attributeName.getURI(), attributeName.getLocalPart());
+            String val = node.getAttributeValue(attributeName.getNamespaceUri(), attributeName.getLocalPart());
             return val == null ? null : StringValue.makeUntypedAtomic(StringView.tidy(val));
         } else {
             return null;
@@ -154,7 +154,7 @@ public final class AttributeGetter extends Expression {
         assert item instanceof NodeInfo;
         NodeInfo node = (NodeInfo) item;
         if (node.getNodeKind() == Type.ELEMENT) {
-            String val = node.getAttributeValue(attributeName.getURI(), attributeName.getLocalPart());
+            String val = node.getAttributeValue(attributeName.getNamespaceUri(), attributeName.getLocalPart());
             if (val != null) {
                 return StringView.tidy(val);
             }

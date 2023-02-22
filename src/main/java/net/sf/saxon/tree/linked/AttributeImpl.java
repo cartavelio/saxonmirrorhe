@@ -326,7 +326,7 @@ public class AttributeImpl extends NodeImpl {
             AttributeInfo att = getAttributeInfo();
             owner.setAttributeInfo(getSiblingPosition(),
                                    new AttributeInfo(newNameCode, BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), att.getLocation(), att.getProperties()));
-            NamespaceUri newURI = newNameCode.getURI();
+            NamespaceUri newURI = newNameCode.getNamespaceUri();
             if (!newURI.isEmpty()) {
                 // new attribute name is in a namespace
                 String newPrefix = newNameCode.getPrefix();

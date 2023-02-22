@@ -126,7 +126,7 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
                              Location location, int properties) throws XPathException {
         flush();
         String qname = elemName.getDisplayName();
-        NamespaceUri uri = elemName.getURI();
+        NamespaceUri uri = elemName.getNamespaceUri();
         Element element;
         if (ancestors.isEmpty()) {
             startDocument(ReceiverOption.NONE);
@@ -160,7 +160,7 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
             NamespaceBinding[] declarations = namespaces.getDifferences(parentNamespaces, false);
             for (NamespaceBinding ns : declarations) {
                 String nsprefix = ns.getPrefix();
-                String nsuri = ns.getURI().toString();
+                String nsuri = ns.getNamespaceUri().toString();
                 try {
                     element.addNamespaceDeclaration(nsprefix, nsuri);
                 } catch (MalformedURIException e) {
@@ -172,7 +172,7 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
 
         for (AttributeInfo att : attributes) {
             String attqname = att.getNodeName().getDisplayName();
-            NamespaceUri atturi = att.getNodeName().getURI();
+            NamespaceUri atturi = att.getNodeName().getNamespaceUri();
             Nodes nodes;
             try {
                 nodes = nodeFactory.makeAttribute(attqname, atturi.toString(), att.getValue(), Attribute.Type.CDATA);

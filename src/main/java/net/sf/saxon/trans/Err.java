@@ -110,7 +110,7 @@ public class Err {
             if (s.startsWith("Q{")) {
                 try {
                     StructuredQName qn = StructuredQName.fromEQName(sb.toString());
-                    String uri = abbreviateURI(qn.getURI());
+                    String uri = abbreviateURI(qn.getNamespaceUri());
                     s = "Q{" + uri + "}" + qn.getLocalPart();
                 } catch (Exception e) {
                     s = sb.toString();
@@ -249,7 +249,7 @@ public class Err {
                 eqName = "Q" + eqName;
             }
             StructuredQName sq = StructuredQName.fromEQName(eqName);
-            return "Q{" + abbreviateURI(sq.getURI()) + "}" + sq.getLocalPart();
+            return "Q{" + abbreviateURI(sq.getNamespaceUri()) + "}" + sq.getLocalPart();
         } catch (Exception e) {
             return eqName;
         }

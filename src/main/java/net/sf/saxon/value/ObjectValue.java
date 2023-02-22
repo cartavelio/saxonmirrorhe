@@ -13,6 +13,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.type.TypeHierarchy;
 
 import java.util.Objects;
@@ -102,7 +103,9 @@ public class ObjectValue<T> implements AnyExternalObject {
     @Override
     @CSharpReplaceBody(code="return Saxon.Hej.type.AnyExternalObjectType.THE_INSTANCE;")
     public ItemType getItemType(/*@Nullable*/ TypeHierarchy th) {
-        return th.getConfiguration().getJavaExternalObjectType(value.getClass());
+        synchronized(th.getConfiguration()) {
+            return JavaExternalObjectType.of(value.getClass());
+        }
     }
 
     /**

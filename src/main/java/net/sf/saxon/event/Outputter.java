@@ -174,7 +174,7 @@ public abstract class Outputter implements Receiver {
         // directly into a Receiver should try to avoid decomposing the attributes and namespaces.
         startElement(elemName, type, location, properties);
         for (NamespaceBinding ns : namespaces) {
-            namespace(ns.getPrefix(), ns.getURI(), properties);
+            namespace(ns.getPrefix(), ns.getNamespaceUri(), properties);
         }
         for (AttributeInfo att : attributes) {
             attribute(att.getNodeName(), att.getType(), att.getValue(), att.getLocation(), att.getProperties());
@@ -220,7 +220,7 @@ public abstract class Outputter implements Receiver {
     public void namespaces(NamespaceBindingSet bindings, int properties) throws XPathException {
         // Optimized in ComplexContentOutputter subclass
         for (NamespaceBinding nb: bindings) {
-            namespace(nb.getPrefix(), nb.getURI(), properties);
+            namespace(nb.getPrefix(), nb.getNamespaceUri(), properties);
         }
     }
 

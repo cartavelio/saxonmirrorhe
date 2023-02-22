@@ -354,7 +354,7 @@ public abstract class NodeImpl
     @Override
     public NamespaceUri getNamespaceUri() {
         NodeName qName = getNodeName();
-        return qName == null ? NamespaceUri.NULL : qName.getURI();
+        return qName == null ? NamespaceUri.NULL : qName.getNamespaceUri();
     }
 
     /**

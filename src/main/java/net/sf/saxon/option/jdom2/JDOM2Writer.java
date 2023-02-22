@@ -103,7 +103,7 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
                              Location location, int properties) throws XPathException {
         flush();
         String local = elemName.getLocalPart();
-        NamespaceUri uri = elemName.getURI();
+        NamespaceUri uri = elemName.getNamespaceUri();
         String prefix = elemName.getPrefix();
         Element element;
         if (ancestors.isEmpty()) {
@@ -130,7 +130,7 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
         for (AttributeInfo att : attributes) {
             NodeName nameCode = att.getNodeName();
             String attlocal = nameCode.getLocalPart();
-            NamespaceUri atturi = nameCode.getURI();
+            NamespaceUri atturi = nameCode.getNamespaceUri();
             String attprefix = nameCode.getPrefix();
             String value = att.getValue();
             Namespace ns = attprefix.isEmpty() ?
@@ -150,7 +150,7 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
 
     private void namespace(Element element, NamespaceBinding namespaceBinding) throws XPathException {
         String prefix = namespaceBinding.getPrefix();
-        NamespaceUri uri = namespaceBinding.getURI();
+        NamespaceUri uri = namespaceBinding.getNamespaceUri();
         if (uri.isEmpty() && prefix.length() != 0) {
             // ignore XML 1.1 namespace undeclarations because JDOM can't handle them
             return;

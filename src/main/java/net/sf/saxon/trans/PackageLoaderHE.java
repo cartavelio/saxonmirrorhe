@@ -2344,7 +2344,7 @@ public class PackageLoaderHE implements IPackageLoader {
             SystemFunction f = null;
             if (name.startsWith("Q{")) {
                 StructuredQName qName = StructuredQName.fromEQName((name));
-                NamespaceUri uri = qName.getURI();
+                NamespaceUri uri = qName.getNamespaceUri();
                 if (uri == NamespaceUri.MATH) {
                     f = MathFunctionSet.getInstance().makeFunction(qName.getLocalPart(), arity);
                 } else if (uri == NamespaceUri.MAP_FUNCTIONS) {

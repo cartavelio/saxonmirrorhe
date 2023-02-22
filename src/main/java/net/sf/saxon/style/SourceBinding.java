@@ -109,7 +109,7 @@ public class SourceBinding {
                 staticAtt = Whitespace.trim(att.getValue());
             } else if (f.equals("visibility") && permittedAttributes.contains(BindingProperty.VISIBILITY)) {
                 visibilityAtt = Whitespace.trim(att.getValue());
-            } else if (NamespaceUri.SAXON.equals(attName.getURI())) {
+            } else if (NamespaceUri.SAXON.equals(attName.getNamespaceUri())) {
                 if (sourceElement.isExtensionAttributeAllowed(attName.getDisplayName())) {
                     if (attName.getLocalPart().equals("assignable") && permittedAttributes.contains(BindingProperty.ASSIGNABLE)) {
                         assignableAtt = Whitespace.trim(att.getValue());
@@ -214,7 +214,7 @@ public class SourceBinding {
                 String tunnelAtt = Whitespace.trim(att.getValue());
                 boolean tunnel = sourceElement.processBooleanAttribute("tunnel", tunnelAtt);
                 setProperty(BindingProperty.TUNNEL, tunnel);
-            } else if (NamespaceUri.SAXON.equals(attName.getURI())) {
+            } else if (NamespaceUri.SAXON.equals(attName.getNamespaceUri())) {
                 if (attName.getLocalPart().equals("as")) {
                     extraAsAtt = att.getValue();
                 }

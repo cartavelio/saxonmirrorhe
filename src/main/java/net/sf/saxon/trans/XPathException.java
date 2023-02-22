@@ -453,7 +453,7 @@ public class XPathException extends TransformerException {
 
     /*@Nullable*/
     public NamespaceUri getErrorCodeNamespace() {
-        return errorCode == null ? null : errorCode.getURI();
+        return errorCode == null ? null : errorCode.getNamespaceUri();
     }
 
     /**

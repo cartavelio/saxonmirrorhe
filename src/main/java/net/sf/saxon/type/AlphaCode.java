@@ -860,7 +860,7 @@ public class AlphaCode {
                                     itemType = contentTest;
                                 }
                             } else {
-                                itemType = new NameTest(Type.ELEMENT, qName.getURI(), qName.getLocalPart(), config.getNamePool());
+                                itemType = new NameTest(Type.ELEMENT, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
                                 if (contentTest != null) {
                                     itemType = new CombinedNodeTest((NodeTest) itemType, Token.INTERSECT, contentTest);
                                 }
@@ -874,7 +874,7 @@ public class AlphaCode {
                                     itemType = contentTest;
                                 }
                             } else {
-                                itemType = new NameTest(Type.ATTRIBUTE, qName.getURI(), qName.getLocalPart(), config.getNamePool());
+                                itemType = new NameTest(Type.ATTRIBUTE, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
                                 if (contentTest != null) {
                                     itemType = new CombinedNodeTest((NodeTest) itemType, Token.INTERSECT, contentTest);
                                 }
@@ -891,7 +891,7 @@ public class AlphaCode {
                                 }
                             }
                             if (itemType == null) {
-                                itemType = new NameTest(Type.ELEMENT, qName.getURI(), qName.getLocalPart(), config.getNamePool());
+                                itemType = new NameTest(Type.ELEMENT, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
                             }
                             break;
                         }
@@ -906,7 +906,7 @@ public class AlphaCode {
                                 }
                             }
                             if (itemType == null) {
-                                itemType = new NameTest(Type.ATTRIBUTE, qName.getURI(), qName.getLocalPart(), config.getNamePool());
+                                itemType = new NameTest(Type.ATTRIBUTE, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
                             }
                             break;
                         }

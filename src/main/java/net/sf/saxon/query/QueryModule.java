@@ -954,7 +954,7 @@ public class QueryModule implements StaticContext {
     public Expression bindVariable(/*@NotNull*/ StructuredQName qName) throws XPathException {
         GlobalVariable var = variables.get(qName);
         if (var == null) {
-            NamespaceUri uri = qName.getURI();
+            NamespaceUri uri = qName.getNamespaceUri();
             if ((uri.equals(NamespaceUri.NULL) && isMainModule()) || uri.equals(moduleNamespace) || importsNamespace(uri)) {
                 QueryModule main = getTopLevelModule();
                 var = main.libraryVariables.get(qName);
@@ -1162,7 +1162,7 @@ public class QueryModule implements StaticContext {
             StructuredQName qName = uv.getVariableQName();
             GlobalVariable var = variables.get(qName);
             if (var == null) {
-                NamespaceUri uri = qName.getURI();
+                NamespaceUri uri = qName.getNamespaceUri();
                 if (importsNamespace(uri)) {
                     QueryModule main = getTopLevelModule();
                     var = main.libraryVariables.get(qName);
@@ -1449,7 +1449,7 @@ public class QueryModule implements StaticContext {
         if (activeNamespaces != null) {
             for (int i = activeNamespaces.size() - 1; i >= 0; i--) {
                 if (activeNamespaces.get(i).getPrefix().equals(prefix)) {
-                    NamespaceUri ns = activeNamespaces.get(i).getURI();
+                    NamespaceUri ns = activeNamespaces.get(i).getNamespaceUri();
                     if (ns.isEmpty() && !prefix.equals("")) {
                         // the namespace is undeclared
                         return null;
@@ -1571,8 +1571,8 @@ public class QueryModule implements StaticContext {
             NamespaceBinding an = activeNamespaces.get(n);
             if (!prefixes.contains(an.getPrefix())) {
                 prefixes.add(an.getPrefix());
-                if (!an.getURI().isEmpty()) {
-                    result = result.put(an.getPrefix(), an.getURI());
+                if (!an.getNamespaceUri().isEmpty()) {
+                    result = result.put(an.getPrefix(), an.getNamespaceUri());
                 }
             }
         }
@@ -1612,10 +1612,10 @@ public class QueryModule implements StaticContext {
             NamespaceBinding an = activeNamespaces.get(n);
             if (!prefixes.contains(an.getPrefix())) {
                 prefixes.add(an.getPrefix());
-                if (an.getURI().isEmpty()) {
+                if (an.getNamespaceUri().isEmpty()) {
                     result = result.remove(an.getPrefix());
                 } else {
-                    result = result.put(an.getPrefix(), an.getURI());
+                    result = result.put(an.getPrefix(), an.getNamespaceUri());
                 }
             }
         }

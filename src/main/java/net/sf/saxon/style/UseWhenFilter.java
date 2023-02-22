@@ -140,7 +140,7 @@ public class UseWhenFilter extends ProxyReceiver {
         for (AttributeInfo att : attributes) {
             NodeName attName = att.getNodeName();
             attName.obtainFingerprint(getNamePool());
-            NamespaceUri uri = attName.getURI();
+            NamespaceUri uri = attName.getNamespaceUri();
             if (uri.equals(stdAttUri)) {
                 String local = attName.getLocalPart();
                 switch (local) {
@@ -455,7 +455,7 @@ public class UseWhenFilter extends ProxyReceiver {
         for (AttributeInfo att : attributes) {
             NodeName attName = att.getNodeName();
             String local = attName.getLocalPart();
-            NamespaceUri uri = attName.getURI();
+            NamespaceUri uri = attName.getNamespaceUri();
             if (local.startsWith("_") && (uri.isEmpty() || uri.equals(NamespaceUri.SAXON)) && local.length() >= 2) {
                 String value = att.getValue();
                 AttributeLocation attLocation =

@@ -389,7 +389,7 @@ public abstract class StyleElement extends ElementImpl {
             compileError(e);
             qName = new StructuredQName("saxon", NamespaceUri.SAXON, "error-name");
         }
-        if (NamespaceUri.isReserved(qName.getURI())) {
+        if (NamespaceUri.isReserved(qName.getNamespaceUri())) {
             if (qName.hasURI(NamespaceUri.XSLT)) {
                 if (qName.getLocalPart().equals("initial-template")
                         && (this instanceof XSLTemplate || this instanceof XSLCallTemplate)) {
@@ -601,7 +601,7 @@ public abstract class StyleElement extends ElementImpl {
 
     public String getAttributeValue(String clarkName) {
         NodeName nn = FingerprintedQName.fromClarkName(clarkName);
-        return getAttributeValue(nn.getURI(), nn.getLocalPart());
+        return getAttributeValue(nn.getNamespaceUri(), nn.getLocalPart());
     }
 
     /**
@@ -621,7 +621,7 @@ public abstract class StyleElement extends ElementImpl {
 
     protected void checkUnknownAttribute(NodeName nc) {
 
-        NamespaceUri attributeURI = nc.getURI();
+        NamespaceUri attributeURI = nc.getNamespaceUri();
         String clarkName = nc.getStructuredQName().getClarkName();
 
         if (forwardsCompatibleModeIsEnabled()) {
@@ -960,7 +960,7 @@ public abstract class StyleElement extends ElementImpl {
             if ("#all".equals(Whitespace.trim(ext))) {
                 List<NamespaceUri> excluded = new ArrayList<>();
                 for (NamespaceBinding binding : getAllNamespaces()) {
-                    excluded.add(binding.getURI());
+                    excluded.add(binding.getNamespaceUri());
                 }
                 excludedNamespaces = excluded.toArray(new NamespaceUri[0]);
             } else {
@@ -1433,7 +1433,7 @@ public abstract class StyleElement extends ElementImpl {
             String lname;
             if (typeAtt.startsWith("Q{")) {
                 StructuredQName q = makeQName(typeAtt, "XTSE1520", "type");
-                uri = q.getURI();
+                uri = q.getNamespaceUri();
                 lname = q.getLocalPart();
             } else {
                 String[] parts = NameChecker.getQNameParts(typeAtt);

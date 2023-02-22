@@ -49,7 +49,7 @@ public class Valve extends ProxyReceiver {
                              Location location, int properties) throws XPathException {
         if (!started) {
             started = true;
-            if (elemName.getURI().equals(testNamespace)) {
+            if (elemName.getNamespaceUri().equals(testNamespace)) {
                 alternativeReceiver.open();
                 alternativeReceiver.startDocument(ReceiverOption.NONE);
                 try {

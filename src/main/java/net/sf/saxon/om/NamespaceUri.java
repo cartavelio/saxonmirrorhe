@@ -174,6 +174,10 @@ public class NamespaceUri {
      */
     public final static NamespaceUri ARRAY_FUNCTIONS = NamespaceUri.of("http://www.w3.org/2005/xpath-functions/array");
 
+    public final static NamespaceUri EXPATH_BINARY = NamespaceUri.of("http://expath.org/ns/binary");
+
+    public final static NamespaceUri EXPATH_FILE = NamespaceUri.of("http://expath.org/ns/file");
+
     /**
      * The XHTML namespace http://www.w3.org/1999/xhtml
      */

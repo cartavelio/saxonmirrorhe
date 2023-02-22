@@ -459,7 +459,7 @@ public class StylesheetModule {
                 }
 
             } else if (child instanceof DataElement) {
-                if (((DataElement) child).getNodeName().getURI().isEmpty()) {
+                if (((DataElement) child).getNodeName().getNamespaceUri().isEmpty()) {
                     Loc loc = new Loc(child);
                     previousElement.compileError(
                             "Top-level elements must be in a namespace: " + ((DataElement) child).getNodeName().getLocalPart() + " is not",

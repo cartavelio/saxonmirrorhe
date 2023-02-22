@@ -132,7 +132,7 @@ public abstract class XSLAcceptExpose extends StyleElement {
                                  this instanceof XSLAccept ? "XTSE3032" : "XTSE3022", "names");
                 } else if (componentTypeCode == StandardNames.XSL_FUNCTION) {
                     StructuredQName name = makeQName(tok.substring(0, hash), null, "names");
-                    test = new NameTest(Type.ELEMENT, name.getURI(), name.getLocalPart(), getNamePool());
+                    test = new NameTest(Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), getNamePool());
                     int arity = 0;
                     try {
                         arity = Integer.parseInt(tok.substring(hash + 1));
@@ -180,7 +180,7 @@ public abstract class XSLAcceptExpose extends StyleElement {
 
                 } else {
                     StructuredQName name = makeQName(tok, null, "names");
-                    test = new NameTest(Type.ELEMENT, name.getURI(), name.getLocalPart(), getNamePool());
+                    test = new NameTest(Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), getNamePool());
                     explicitComponentTests.add(new ComponentTest(componentTypeCode, test, -1));
                 }
             }

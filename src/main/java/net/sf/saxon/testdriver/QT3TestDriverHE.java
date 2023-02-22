@@ -8,6 +8,7 @@
 package net.sf.saxon.testdriver;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Version;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.ResolveURI;
@@ -178,6 +179,17 @@ public class QT3TestDriverHE extends TestDriver {
         } else if ("saxon:platform".equals(type)) {
             for (String p : value.split(" ")) {
                 if (p.equals("J")) {
+                    return true;
+                }
+            }
+            return false;
+        } else if ("saxon:version".equals(type)) {
+            int thisVersion = Version.getStructuredVersionNumber()[0];
+            for (String p : value.split(" ")) {
+                if (p.equals(thisVersion + "")) {
+                    return true;
+                }
+                if (p.endsWith("+") && Integer.parseInt(p.replace("+", "")) <= thisVersion) {
                     return true;
                 }
             }

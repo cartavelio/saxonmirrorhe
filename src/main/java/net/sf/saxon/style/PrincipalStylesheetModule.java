@@ -1116,13 +1116,13 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 //precedenceBoundary = i;
             }
             if (aliasesAtThisPrecedence.contains(scode)) {
-                if (!namespaceAliasMap.get(scode).getURI().equals(resultBinding.getURI())) {
+                if (!namespaceAliasMap.get(scode).getNamespaceUri().equals(resultBinding.getNamespaceUri())) {
                     xna.compileError("More than one alias is defined for the same namespace", "XTSE0810");
                 }
             }
             if (namespaceAliasMap.get(scode) == null) {
                 namespaceAliasMap.put(scode, resultBinding);
-                aliasResultUriSet.add(resultBinding.getURI());
+                aliasResultUriSet.add(resultBinding.getNamespaceUri());
             }
             aliasesAtThisPrecedence.add(scode);
         }

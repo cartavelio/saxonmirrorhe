@@ -272,7 +272,7 @@ public class CDATAFilter extends ProxyReceiver {
         while (st2.hasMoreTokens()) {
             String expandedName = st2.nextToken();
             StructuredQName sq = StructuredQName.fromClarkName(expandedName);
-            NamespaceUri uri = sq.getURI();
+            NamespaceUri uri = sq.getNamespaceUri();
             if (!isHTML || (isHTML4 && !uri.equals(NamespaceUri.NULL))
                     || (isHTML5 && !uri.equals(NamespaceUri.NULL) && !uri.equals(NamespaceUri.XHTML))) {
                 nameList.add(new FingerprintedQName("", uri, sq.getLocalPart()));

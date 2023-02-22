@@ -52,7 +52,7 @@ public class TypeInfoImpl implements TypeInfo {
 
     @Override
     public String getTypeNamespace() {
-        return schemaType.getStructuredQName().getURI().toString();
+        return schemaType.getStructuredQName().getNamespaceUri().toString();
     }
 
     /**

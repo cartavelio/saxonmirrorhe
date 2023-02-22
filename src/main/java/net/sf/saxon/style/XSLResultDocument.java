@@ -280,7 +280,7 @@ public class XSLResultDocument extends StyleElement {
             if (exp instanceof StringLiteral) {
                 String s = ((StringLiteral) exp).stringify();
                 String lname = property.getLocalPart();
-                NamespaceUri uri = property.getURI();
+                NamespaceUri uri = property.getNamespaceUri();
                 try {
 
                     ResultDocument.setSerializationProperty(localProps, uri, lname, s,

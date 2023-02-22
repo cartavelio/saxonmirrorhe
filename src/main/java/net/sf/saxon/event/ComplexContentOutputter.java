@@ -343,7 +343,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
             if (rejectDuplicates) {
 
                 // Handle declarations whose prefix is duplicated for this element.
-                NamespaceUri uri = pendingNSMap.getURI(prefix);
+                NamespaceUri uri = pendingNSMap.getNamespaceUri(prefix);
                 if (uri != null && !uri.equals(namespaceUri)) {
                     XPathException err = new XPathException(
                             "Cannot create two namespace nodes with the same prefix "
@@ -513,7 +513,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         NamespaceMap ns2;
         if (inherit) {
             NamespaceMap inherited = inheritedNamespaces.peek();
-            if (!inherited.getDefaultNamespace().isEmpty() && elemName.getURI().isEmpty()) {
+            if (!inherited.getDefaultNamespace().isEmpty() && elemName.getNamespaceUri().isEmpty()) {
                 inherited = inherited.remove("");
             }
             ns2 = inherited.putAll(namespaces);
@@ -551,11 +551,11 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
 
     private NodeName checkProposedPrefix(NodeName nodeName, int seq) {
         String nodePrefix = nodeName.getPrefix();
-        NamespaceUri nodeURI = nodeName.getURI();
+        NamespaceUri nodeURI = nodeName.getNamespaceUri();
         if (nodeURI.isEmpty()) {
             return nodeName;
         } else {
-            NamespaceUri uri = pendingNSMap.getURI(nodePrefix);
+            NamespaceUri uri = pendingNSMap.getNamespaceUri(nodePrefix);
             if (uri == null) {
                 pendingNSMap = pendingNSMap.put(nodePrefix, nodeURI);
                 return nodeName;

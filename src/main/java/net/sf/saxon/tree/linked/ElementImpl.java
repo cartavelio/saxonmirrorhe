@@ -444,7 +444,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
     @Override
     public void rename(NodeName newName, boolean inherit) {
         String prefix = newName.getPrefix();
-        NamespaceUri uri = newName.getURI();
+        NamespaceUri uri = newName.getNamespaceUri();
         NamespaceBinding ns = new NamespaceBinding(prefix, uri);
         NamespaceUri uc = getURIForPrefix(prefix, true);
         if (uc == null) {
@@ -474,17 +474,17 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
     @Override
     public void addNamespace(/*@NotNull*/ NamespaceBinding binding, boolean inherit) {
-        if (binding.getURI().isEmpty()) {
+        if (binding.getNamespaceUri().isEmpty()) {
             throw new IllegalArgumentException("Cannot add a namespace undeclaration");
         }
-        NamespaceUri existing = namespaceMap.getURI(binding.getPrefix());
+        NamespaceUri existing = namespaceMap.getNamespaceUri(binding.getPrefix());
         if (existing != null) {
-            if (!existing.equals(binding.getURI())) {
+            if (!existing.equals(binding.getNamespaceUri())) {
                 throw new IllegalArgumentException("New namespace conflicts with existing namespace binding");
             }
         } else {
             NamespaceMap oldMap = namespaceMap;
-            namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getURI());
+            namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getNamespaceUri());
             if (inherit && namespaceMap != oldMap) {
                 for (NodeInfo child : children(NodeKindTest.ELEMENT)) {
                     ((ElementImpl) child).inheritParentNamespaces(binding, oldMap, namespaceMap);
@@ -499,7 +499,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             if (namespaceMap == oldParentMap) {
                 namespaceMap = newParentMap;
             } else {
-                namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getURI());
+                namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getNamespaceUri());
             }
             for (NodeInfo child : children(NodeKindTest.ELEMENT)) {
                 ((ElementImpl) child).inheritParentNamespaces(binding, oldMap, namespaceMap);
@@ -578,7 +578,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             if (uc == null) {
                 // The namespace is not already declared on the element
                 addNamespace(binding, inheritNamespaces);
-            } else if (!uc.equals(binding.getURI())) {
+            } else if (!uc.equals(binding.getNamespaceUri())) {
                 throw new IllegalStateException(
                         "Namespace binding of new name conflicts with existing namespace binding");
             }
@@ -651,7 +651,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      */
     @Override
     public void addNamespace(String prefix, NamespaceUri uri) {
-        NamespaceUri existingURI = namespaceMap.getURI(prefix);
+        NamespaceUri existingURI = namespaceMap.getNamespaceUri(prefix);
         if (existingURI == null) {
             namespaceMap = namespaceMap.put(prefix, uri);
         } else if (!existingURI.equals(uri)) {
@@ -701,7 +701,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
                 return NamespaceUri.NULL;
             }
         } else {
-            return namespaceMap.getURI(prefix);
+            return namespaceMap.getNamespaceUri(prefix);
         }
     }
 
@@ -726,7 +726,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
     /*@Nullable*/
     public boolean isInScopeNamespace(/*@NotNull*/ NamespaceUri uri) {
         for (NamespaceBinding b : namespaceMap) {
-            if (b.getURI().equals(uri)) {
+            if (b.getNamespaceUri().equals(uri)) {
                 return true;
             }
         }
@@ -783,8 +783,8 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
     private void deepAddNamespaces(NamespaceMap inheritedNamespaces) {
         NamespaceMap childNamespaces = namespaceMap;
         for (NamespaceBinding binding : inheritedNamespaces) {
-            if (childNamespaces.getURI(binding.getPrefix()) == null) {
-                childNamespaces = childNamespaces.put(binding.getPrefix(), binding.getURI());
+            if (childNamespaces.getNamespaceUri(binding.getPrefix()) == null) {
+                childNamespaces = childNamespaces.put(binding.getPrefix(), binding.getNamespaceUri());
             } else {
                 inheritedNamespaces = inheritedNamespaces.remove(binding.getPrefix());
             }

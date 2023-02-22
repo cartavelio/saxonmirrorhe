@@ -148,7 +148,7 @@ public class DOMWriter extends Builder {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
         String qname = elemName.getDisplayName();
-        String uri = elemName.getURI().toString();
+        String uri = elemName.getNamespaceUri().toString();
         try {
             Element element = document.createElementNS("".equals(uri) ? null : uri, qname);
             if (nextSibling != null && level == 0) {
@@ -163,7 +163,7 @@ public class DOMWriter extends Builder {
                 NamespaceBinding[] declarations = namespaces.getDifferences(parentNamespaces, false);
                 for (NamespaceBinding ns : declarations) {
                     String prefix = ns.getPrefix();
-                    String nsuri = ns.getURI().toString();
+                    String nsuri = ns.getNamespaceUri().toString();
                     if (!nsuri.equals(NamespaceConstant.XML)) {
                         if (prefix.isEmpty()) {
                             element.setAttributeNS(NamespaceConstant.XMLNS, "xmlns", nsuri);
@@ -178,7 +178,7 @@ public class DOMWriter extends Builder {
 
             for (AttributeInfo att : attributes) {
                 NodeName attName = att.getNodeName();
-                String atturi = attName.getURI().toString();
+                String atturi = attName.getNamespaceUri().toString();
                 element.setAttributeNS("".equals(atturi) ? null : atturi, attName.getDisplayName(), att.getValue());
                 if (attName.equals(StandardNames.XML_ID_NAME) ||
                         ReceiverOption.contains(properties, ReceiverOption.IS_ID) ||
@@ -366,12 +366,12 @@ public class DOMWriter extends Builder {
                         String attName = att.getName();
                         if (attName.startsWith("xmlns")) {
                             if (attName.length() == 5) {
-                                if (nsMap.getURI("") == null) {
+                                if (nsMap.getNamespaceUri("") == null) {
                                     nsMap = nsMap.bind("", NamespaceUri.of(att.getValue()));
                                 }
                             } else if (attName.charAt(5) == ':') {
                                 String prefix = attName.substring(6);
-                                if (nsMap.getURI(prefix) == null) {
+                                if (nsMap.getNamespaceUri(prefix) == null) {
                                     nsMap = nsMap.bind(attName.substring(6), NamespaceUri.of(att.getValue()));
                                 }
                             }

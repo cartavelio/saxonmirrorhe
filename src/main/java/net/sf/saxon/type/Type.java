@@ -348,7 +348,7 @@ public abstract class Type {
         if (t1 instanceof JavaExternalObjectType && t2 instanceof JavaExternalObjectType) {
             Class<?> c1 = ((JavaExternalObjectType) t1).getJavaClass();
             Class<?> c2 = ((JavaExternalObjectType) t2).getJavaClass();
-            return new JavaExternalObjectType(leastCommonSuperClass(c1, c2));
+            return JavaExternalObjectType.of(leastCommonSuperClass(c1, c2));
         }
         //#endif
         if (t1 instanceof MapType && t2 instanceof MapType) {
@@ -428,7 +428,7 @@ public abstract class Type {
         if (t1 instanceof JavaExternalObjectType && t2 instanceof JavaExternalObjectType) {
             Class<?> c1 = ((JavaExternalObjectType) t1).getJavaClass();
             Class<?> c2 = ((JavaExternalObjectType) t2).getJavaClass();
-            return new JavaExternalObjectType(leastCommonSuperClass(c1, c2));
+            return JavaExternalObjectType.of(leastCommonSuperClass(c1, c2));
         }
         //#endif
         return AnyItemType.getInstance();

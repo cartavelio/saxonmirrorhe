@@ -50,8 +50,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        register("merge", 1, MapMerge::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, STAR | INS, null);
+        register("merge", 1, e -> e.populate( MapMerge::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, STAR | INS, null));
 
         SpecificFunctionType ON_DUPLICATES_CALLBACK_TYPE = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
@@ -71,64 +71,64 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         mergeOptionDetails.addAllowedOption(MapMerge.onDuplicatesKey, oneOnDuplicatesFunction, null);
 
 
-        register("merge", 2, MapMerge::new, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("merge", 2, e -> e.populate( MapMerge::new, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
-                .setOptionDetails(mergeOptionDetails);
+                .setOptionDetails(mergeOptionDetails));
 
-        register("entry", 2, MapEntry::new, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("entry", 2, e -> e.populate( MapEntry::new, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
-                .arg(1, AnyItemType.getInstance(), STAR | NAV, null);
+                .arg(1, AnyItemType.getInstance(), STAR | NAV, null));
 
-        register("find", 2, MapFind::new, ArrayItemType.getInstance(), ONE, 0)
+        register("find", 2, e -> e.populate( MapFind::new, ArrayItemType.getInstance(), ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
-        register("get", 2, MapGet::new, AnyItemType.getInstance(), STAR, 0)
+        register("get", 2, e -> e.populate( MapGet::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
         SpecificFunctionType indexArg = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.SINGLE_ATOMIC);
 
-        register("index", 2, MapIndex::new, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("index", 2, e -> e.populate( MapIndex::new, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, indexArg, ONE, null);
+                .arg(1, indexArg, ONE, null));
 
-        register("put", 3, MapPut::new, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("put", 3, e -> e.populate( MapPut::new, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
-                .arg(2, AnyItemType.getInstance(), STAR | NAV, null);
+                .arg(2, AnyItemType.getInstance(), STAR | NAV, null));
 
-        register("contains", 2, MapContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("contains", 2, e -> e.populate( MapContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
-        register("remove", 2, MapRemove::new, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("remove", 2, e -> e.populate( MapRemove::new, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR | ABS, null);
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR | ABS, null));
 
-        register("keys", 1, MapKeys::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
+        register("keys", 1, e -> e.populate( MapKeys::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
-        register("size", 1, MapSize::new, BuiltInAtomicType.INTEGER, ONE, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
+        register("size", 1, e -> e.populate( MapSize::new, BuiltInAtomicType.INTEGER, ONE, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
         ItemType actionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
 
-        register("for-each", 2, MapForEach::new, AnyItemType.getInstance(), STAR, 0)
+        register("for-each", 2, e -> e.populate( MapForEach::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, actionType, ONE | INS, null);
+                .arg(1, actionType, ONE | INS, null));
 
-        register("entries", 1, MapEntries::new, MapType.ANY_MAP_TYPE, STAR, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
+        register("entries", 1, e -> e.populate( MapEntries::new, MapType.ANY_MAP_TYPE, STAR, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
-        register("untyped-contains", 2, MapUntypedContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("untyped-contains", 2, e -> e.populate( MapUntypedContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
 
     }
@@ -303,7 +303,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             return new SimpleArrayItem(result);
         }
 
-        private void processSequence(Sequence in, AtomicValue key, List<GroundedValue> result) throws XPathException {
+        private void processSequence(Sequence in, AtomicValue key, List<GroundedValue> result) {
             SequenceTool.supply(in.iterate(), (ItemConsumer<? super Item>) item -> {
                 if (item instanceof ArrayItem) {
                     for (Sequence sequence : ((ArrayItem) item).members()) {

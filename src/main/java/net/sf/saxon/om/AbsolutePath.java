@@ -207,10 +207,10 @@ public class AbsolutePath {
                     break;
                 case Type.ATTRIBUTE:
                     fsb.append('@');
-                    if (!name.getURI().isEmpty()) {
+                    if (!name.getNamespaceUri().isEmpty()) {
                         if (option == 'u') {
                             fsb.append("Q{");
-                            fsb.append(name.getURI());
+                            fsb.append(name.getNamespaceUri());
                             fsb.append("}");
                         } else if (option == 'p') {
                             String prefix = name.getPrefix();
@@ -220,7 +220,7 @@ public class AbsolutePath {
                             }
                         } else if (option == 's') {
                             fsb.append("Q{");
-                            fsb.append(Err.abbreviateURI(name.getURI()));
+                            fsb.append(Err.abbreviateURI(name.getNamespaceUri()));
                             fsb.append("}");
                         }
                     }
@@ -229,7 +229,7 @@ public class AbsolutePath {
                 case Type.ELEMENT:
                     if (option == 'u') {
                         fsb.append("Q{");
-                        fsb.append(name.getURI());
+                        fsb.append(name.getNamespaceUri());
                         fsb.append("}");
                     } else if (option == 'p') {
                         String prefix = name.getPrefix();
@@ -238,9 +238,9 @@ public class AbsolutePath {
                             fsb.append(':');
                         }
                     } else if (option == 's') {
-                        if (!name.getURI().isEmpty()) {
+                        if (!name.getNamespaceUri().isEmpty()) {
                             fsb.append("Q{");
-                            fsb.append(Err.abbreviateURI(name.getURI()));
+                            fsb.append(Err.abbreviateURI(name.getNamespaceUri()));
                             fsb.append("}");
                         }
                     }

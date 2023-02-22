@@ -93,7 +93,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
         for (AttributeInfo att : atts) {
             NodeName name = att.getNodeName();
-            NamespaceUri uri = name.getURI();
+            NamespaceUri uri = name.getNamespaceUri();
             String local = name.getLocalPart();
             if (uri.isEmpty()) {
                 switch (local) {

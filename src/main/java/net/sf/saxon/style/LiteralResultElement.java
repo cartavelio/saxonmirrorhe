@@ -118,7 +118,7 @@ public class LiteralResultElement extends StyleElement {
             for (AttributeInfo att : atts) {
                 NodeName name = att.getNodeName();
                 int fp = name.getFingerprint();
-                NamespaceUri attURI = name.getURI();
+                NamespaceUri attURI = name.getNamespaceUri();
 
                 if (attURI.equals(NamespaceUri.XSLT)) {
                     if (!STANDARD_ATTRIBUTES.contains(fp)) {
@@ -189,13 +189,13 @@ public class LiteralResultElement extends StyleElement {
             if (sheet.hasNamespaceAliases()) {
                 NamespaceMap aliasedNamespaces = retainedNamespaces;
                 for (NamespaceBinding nb : retainedNamespaces) {
-                    NamespaceUri suri = nb.getURI();
+                    NamespaceUri suri = nb.getNamespaceUri();
                     NamespaceBinding ncode = sheet.getNamespaceAlias(suri);
-                    if (ncode != null && !ncode.getURI().equals(suri)) {
+                    if (ncode != null && !ncode.getNamespaceUri().equals(suri)) {
                         // apply the namespace alias.
                         aliasedNamespaces = aliasedNamespaces.remove(nb.getPrefix());
-                        if (!ncode.getURI().isEmpty()) {
-                            aliasedNamespaces = aliasedNamespaces.put(ncode.getPrefix(), ncode.getURI());
+                        if (!ncode.getNamespaceUri().isEmpty()) {
+                            aliasedNamespaces = aliasedNamespaces.put(ncode.getPrefix(), ncode.getNamespaceUri());
                         }
                     }
                 }
@@ -205,9 +205,9 @@ public class LiteralResultElement extends StyleElement {
 
                 NamespaceUri elementURI = getNamespaceUri();
                 NamespaceBinding elementAlias = sheet.getNamespaceAlias(elementURI);
-                if (elementAlias != null && !elementAlias.getURI().equals(elementURI)) {
+                if (elementAlias != null && !elementAlias.getNamespaceUri().equals(elementURI)) {
                     resultNodeName = new FingerprintedQName(elementAlias.getPrefix(),
-                            elementAlias.getURI(),
+                            elementAlias.getNamespaceUri(),
                             getLocalPart());
                 }
             }
@@ -246,14 +246,14 @@ public class LiteralResultElement extends StyleElement {
 
                     NodeName anameCode = attributeNames[i];
                     NodeName alias = anameCode;
-                    NamespaceUri attURI = anameCode.getURI();
+                    NamespaceUri attURI = anameCode.getNamespaceUri();
 
                     if (!attURI.isEmpty()) {    // attribute has a namespace prefix
                         NamespaceBinding newBinding = sheet.getNamespaceAlias(attURI);
-                        if (newBinding != null && !newBinding.getURI().equals(attURI)) {
+                        if (newBinding != null && !newBinding.getNamespaceUri().equals(attURI)) {
                             alias = new FingerprintedQName(
                                     newBinding.getPrefix(),
-                                    newBinding.getURI(),
+                                    newBinding.getNamespaceUri(),
                                     anameCode.getLocalPart());
                             changed = true;
                         }
@@ -282,7 +282,7 @@ public class LiteralResultElement extends StyleElement {
 
             NamespaceMap afterExclusions = retainedNamespaces;
             for (NamespaceBinding nb : retainedNamespaces) {
-                NamespaceUri uri = nb.getURI();
+                NamespaceUri uri = nb.getNamespaceUri();
                 if (isExcludedNamespace(uri) && !sheet.isAliasResultNamespace(uri)) {
                     afterExclusions = afterExclusions.remove(nb.getPrefix());
                 }

@@ -145,7 +145,7 @@ public class MetaTagAdjuster extends ProxyReceiver {
         nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
         if (seekingHead && matchesName(elemName, "head")) {
             String headPrefix = elemName.getPrefix();
-            NamespaceUri headURI = elemName.getURI();
+            NamespaceUri headURI = elemName.getNamespaceUri();
             FingerprintedQName metaCode = new FingerprintedQName(headPrefix, headURI, "meta");
             AttributeMap atts = EmptyAttributeMap.getInstance();
             atts = atts.put(new AttributeInfo(new NoNamespaceName("http-equiv"),

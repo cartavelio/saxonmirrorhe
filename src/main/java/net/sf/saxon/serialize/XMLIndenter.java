@@ -150,9 +150,9 @@ public class XMLIndenter extends ProxyReceiver {
                 for (NamespaceBinding binding : nbs) {
                     String prefix = binding.getPrefix();
                     if (prefix.isEmpty()) {
-                        len += 9 + binding.getURI().toString().length();
+                        len += 9 + binding.getNamespaceUri().toString().length();
                     } else {
-                        len += prefix.length() + 10 + binding.getURI().toString().length();
+                        len += prefix.length() + 10 + binding.getNamespaceUri().toString().length();
                     }
                 }
             }

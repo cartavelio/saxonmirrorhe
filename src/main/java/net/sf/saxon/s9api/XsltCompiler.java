@@ -118,6 +118,7 @@ public class XsltCompiler {
      * @deprecated since 11.1. Use {@link #setResourceResolver}
      */
 
+    @Deprecated
     public void setURIResolver(URIResolver resolver) {
         compilerInfo.setResourceResolver(
                 new ResourceResolverWrappingURIResolver(resolver));
@@ -180,6 +181,7 @@ public class XsltCompiler {
      * @deprecated since 11.1 - use a <code>ResourceResolver</code> instead
      */
 
+    @Deprecated
     public URIResolver getURIResolver() {
         ResourceResolver rr = compilerInfo.getResourceResolver();
         if (rr instanceof ResourceResolverWrappingURIResolver) {

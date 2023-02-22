@@ -238,14 +238,25 @@ public class QName {
     }
 
     /**
-     * The namespace URI of the QName. Returns "" (the zero-length string) if the
+     * The namespace URI of the QName. Returns the zero-length string if the
+     * QName is not in a namespace.
+     *
+     * @return the namespace part of the QName, or "" for a name in no namespace
+     */
+
+    public String getURI() {
+        return sqName.getNamespaceUri().toString();
+    }
+
+    /**
+     * The namespace URI of the QName. Returns {@link NamespaceUri#NULL} (the zero-length string) if the
      * QName is not in a namespace.
      *
      * @return the namespace part of the QName, or "" for a name in no namespace
      */
 
     public NamespaceUri getNamespaceURI() {
-        return sqName.getURI();
+        return sqName.getNamespaceUri();
     }
 
     /**

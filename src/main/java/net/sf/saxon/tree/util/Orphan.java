@@ -404,7 +404,7 @@ public final class Orphan implements MutableNodeInfo {
         if (nodeName == null) {
             return NamespaceUri.NULL;
         } else {
-            return nodeName.getURI();
+            return nodeName.getNamespaceUri();
         }
     }
 

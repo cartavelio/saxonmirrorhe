@@ -38,7 +38,7 @@ public class XSLAccumulatorRule extends StyleElement {
             NodeName attName = att.getNodeName();
             String value = att.getValue();
             String f = attName.getDisplayName();
-            if (attName.getURI().isEmpty()) {
+            if (attName.getNamespaceUri().isEmpty()) {
                 switch (f) {
                     case "match":
                         matchAtt = value;

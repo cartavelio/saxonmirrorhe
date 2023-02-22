@@ -90,7 +90,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
         uris = new NamespaceUri[bindingArray.length];
         for (int i=0; i<bindingArray.length; i++) {
             prefixes[i] = bindingArray[i].getPrefix();
-            uris[i] = bindingArray[i].getURI();
+            uris[i] = bindingArray[i].getNamespaceUri();
             if (prefixes[i].equals("xml")) {
                 bindsXmlNamespace = true;
                 if (!uris[i].equals(NamespaceUri.XML)) {
@@ -160,7 +160,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
      */
 
     @Override
-    public NamespaceUri getURI(String prefix) {
+    public NamespaceUri getNamespaceUri(String prefix) {
         if (prefix.equals("xml")) {
             return NamespaceUri.XML;
         }
@@ -373,7 +373,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
         } else {
             NamespaceMap map = this;
             for (NamespaceBinding nb : namespaces) {
-                map = map.put(nb.getPrefix(), nb.getURI());
+                map = map.put(nb.getPrefix(), nb.getNamespaceUri());
             }
             return map;
         }
@@ -563,7 +563,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
                 return NamespaceUri.NULL;
             }
         }
-        return getURI(prefix);
+        return getNamespaceUri(prefix);
     }
 
     /**
@@ -597,7 +597,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (NamespaceBinding nb : this) {
-            sb.append(nb.getPrefix()).append("=").append(nb.getURI()).append(" ");
+            sb.append(nb.getPrefix()).append("=").append(nb.getNamespaceUri()).append(" ");
         }
         return sb.toString();
     }
