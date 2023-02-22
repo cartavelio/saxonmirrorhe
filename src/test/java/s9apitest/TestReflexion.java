@@ -659,6 +659,7 @@ public class TestReflexion {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
+            comp.setJustInTimeCompilation(false);
             XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             exec.export(out);
