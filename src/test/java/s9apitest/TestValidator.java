@@ -1066,24 +1066,29 @@ public class TestValidator {
     }
 
     public void runSchemaListener(SchemaFactory schemaFactory) throws SAXException, IOException {
-        File schemaFile = new File(configTest.getDataDir() + "personal.xsd");
-        File xmlFile = new File(configTest.getDataDir() + "personal-schema.xml");
-        MyErrorHandler errorHandler = new MyErrorHandler();
+        try {
+            File schemaFile = new File(configTest.getDataDir() + "personal.xsd");
+            File xmlFile = new File(configTest.getDataDir() + "personal-schema.xml");
+            MyErrorHandler errorHandler = new MyErrorHandler();
 
-        // Set error handler
-        schemaFactory.setErrorHandler(errorHandler);
+            // Set error handler
+            schemaFactory.setErrorHandler(errorHandler);
 
-        // Strict schema validation
-        //schemaFactory.setProperty(FeatureKeys.SCHEMA_VALIDATION, Validation.STRICT);
-        Schema schema = schemaFactory.newSchema(schemaFile);
-        Validator newValidator = schema.newValidator();
-        newValidator.setErrorHandler(errorHandler);
-        newValidator.validate(new SAXSource(new InputSource(new FileInputStream(xmlFile))));
-        // Note: no exception expected
+            // Strict schema validation
+            //schemaFactory.setProperty(FeatureKeys.SCHEMA_VALIDATION, Validation.STRICT);
+            Schema schema = schemaFactory.newSchema(schemaFile);
+            Validator newValidator = schema.newValidator();
+            newValidator.setErrorHandler(errorHandler);
+            newValidator.validate(new SAXSource(new InputSource(new FileInputStream(xmlFile))));
+            // Note: no exception expected, although the input is invalid
 
-        assertEquals(0, errorHandler.warnings, "warnings");
-        assertTrue(errorHandler.errors >= 5, "errors");
-        assertEquals(0, errorHandler.fatals, "fatals");
+            assertEquals(0, errorHandler.warnings, "warnings");
+            assertTrue(errorHandler.errors >= 5, "errors");
+            assertEquals(0, errorHandler.fatals, "fatals");
+        } catch (SAXException | IOException e) {
+            e.printStackTrace();
+            fail(e);
+        }
     }
 
     @Test
@@ -1188,10 +1193,9 @@ public class TestValidator {
 
     private static void loadSchemaFromNode(EnterpriseConfiguration config, File urlStr) throws XPathException {
         Source s = new StreamSource(urlStr);
-        ParseOptions options = new ParseOptions();
+        ParseOptions options = new ParseOptions().withLineNumbering(true);
         // Note: At 9.8, the test fails if line numbering is switched off, because line numbers
         // are used to determined identity of schema components.
-        options.setLineNumbering(true);
         NodeInfo ni = config.buildDocumentTree(s, options).getRootNode();
         //System.out.println( QueryResult.serialize(ni) );
         //System.out.println( ni.getSystemId() );

@@ -2,6 +2,7 @@ package jaxptest;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.AllElementsSpaceStrippingRule;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
@@ -28,9 +29,10 @@ public class MemoryTest {
             System.err.println("init: " + initFree);
             StreamSource source = new StreamSource(configTest.getXMarkDir() + "xmark1.xml"); //Use 100Mb for real work
             Configuration config = new Configuration();
-            config.getParseOptions().setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+            ParseOptions options = config.getParseOptions()
+                    .withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
             config.setTreeModel(Builder.TINY_TREE_CONDENSED);
-            NodeInfo doc = config.buildDocumentTree(source).getRootNode();
+            NodeInfo doc = config.buildDocumentTree(source, options).getRootNode();
             System.gc();
             long finalFree = getUsedMemory();
             System.err.println("final: " + finalFree);
@@ -50,9 +52,10 @@ public class MemoryTest {
             System.err.println("init: " + initFree);
             StreamSource source = new StreamSource(configTest.getXMarkDir() + "xmark1.xml");  //Use 100Mb for real work
             Configuration config = new Configuration();
-            config.getParseOptions().setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+            ParseOptions options = config.getParseOptions()
+                    .withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
             config.setTreeModel(Builder.LINKED_TREE);
-            NodeInfo doc = config.buildDocumentTree(source).getRootNode();
+            NodeInfo doc = config.buildDocumentTree(source, options).getRootNode();
             System.gc();
             long finalFree = getUsedMemory();
             System.err.println("final: " + finalFree);

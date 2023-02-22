@@ -268,6 +268,7 @@ public class TestPackage {
         try {
             Processor processor1 = new Processor(true);
             XsltCompiler compiler = processor1.newXsltCompiler();
+            compiler.setJustInTimeCompilation(false);
             XsltExecutable top = compiler.compile(
                     new StreamSource(new File(configTest.getDataDir() + "bills.xsl")));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -275,6 +276,7 @@ public class TestPackage {
             Processor processor2 = new Processor(false);
             processor2.getUnderlyingConfiguration().disableLicensing();
             XsltCompiler compiler2 = processor2.newXsltCompiler();
+            compiler2.setJustInTimeCompilation(false);
             compiler2.compile(new StreamSource(new ByteArrayInputStream(baos.toByteArray())));
             Xslt30Transformer trans = top.load30();
             XdmValue result = trans.applyTemplates(new StreamSource(new File(configTest.getDataDir() + "bills.xml")));

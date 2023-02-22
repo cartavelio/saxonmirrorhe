@@ -8,6 +8,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
@@ -29,7 +30,7 @@ public class TestXMLParserOptions {
             Processor processor = new Processor(false);
             ParseOptions parserOptions = processor.getUnderlyingConfiguration().getParseOptions();
 
-            parserOptions.addParserFeature("http://xml.org/sax/features/external-general-entities", true);
+            parserOptions = parserOptions.withAdditionalParserFeature("http://xml.org/sax/features/external-general-entities", true);
             StringReader sr = new StringReader("<?xml version=\"1.0\" standalone=\"no\" ?>\n" +
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
@@ -37,7 +38,8 @@ public class TestXMLParserOptions {
                     "    \"https://www.saxonica.com/welcome/welcome.xml\">\n" +
                     "]>\n" +
                     "<saxonica>&welcome;</saxonica>");
-            SAXSource source = new SAXSource(new InputSource(sr));
+            Source source = new SAXSource(new InputSource(sr));
+            source = new AugmentedSource(source, parserOptions);
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode doc = builder.build(source);
             XQueryCompiler c = processor.newXQueryCompiler();
@@ -67,8 +69,8 @@ public class TestXMLParserOptions {
     public void testDisableOnExternalEntityExpansion() {
         try {
             Processor processor = new Processor(false);
-            ParseOptions parserOptions = processor.getUnderlyingConfiguration().getParseOptions();
-            parserOptions.addParserFeature("http://xml.org/sax/features/external-general-entities", false);
+            ParseOptions parserOptions = processor.getUnderlyingConfiguration().getParseOptions()
+                    .withAdditionalParserFeature("http://xml.org/sax/features/external-general-entities", false);
             StringReader sr = new StringReader("<?xml version=\"1.0\" standalone=\"no\" ?>\n" +
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
@@ -76,7 +78,8 @@ public class TestXMLParserOptions {
                     "    \"http://www.saxonica.com/welcome/welcome.xml\">\n" +
                     "]>\n" +
                     "<saxonica>&welcome;</saxonica>");
-            SAXSource source = new SAXSource(new InputSource(sr));
+            Source source = new SAXSource(new InputSource(sr));
+            source = new AugmentedSource(source, parserOptions);
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode doc = builder.build(source);
             XQueryCompiler c = processor.newXQueryCompiler();
@@ -410,9 +413,9 @@ public class TestXMLParserOptions {
             File dataFile = new File(configTest.getBugsDir() + "/4996/xmlSchemaDefaultAttributeA.xml");
             InputSource inputSource = new InputSource(dataFile.toURI().toString());
             SAXSource source1 = new SAXSource(xmr, inputSource);
-            ParseOptions options = new ParseOptions();
-            options.setSchemaValidationMode(Validation.STRICT);
-            options.setUseXsiSchemaLocation(true);
+            ParseOptions options = new ParseOptions()
+                    .withSchemaValidationMode(Validation.STRICT)
+                    .withUseXsiSchemaLocation(true);
             AugmentedSource as = new AugmentedSource(source1, options);
             XsltTransformer trans = exp.load();
             trans.setSource(as);

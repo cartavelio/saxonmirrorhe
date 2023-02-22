@@ -1,7 +1,6 @@
 package performance;
 
 import com.saxonica.ee.domino.DominoTreeModel;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.event.PipelineConfiguration;
@@ -32,10 +31,8 @@ public class TreeModelPerformanceDescendantAxis extends PerformanceTestCase {
     private void searchXPathDescendants(final TreeModel model, final String fileName, final int expected) {
         Processor proc = new Processor(true);
         final Configuration config = proc.getUnderlyingConfiguration();
-        final ParseOptions options = new ParseOptions();
-        options.setModel(model);
+        final ParseOptions options = new ParseOptions().withModel(model);
         StreamSource source = new StreamSource(new File(fileName));
-        PipelineConfiguration pipe = config.makePipelineConfiguration();
         TreeInfo tree = null;
         NodeInfo documentElement = null;
         try {
