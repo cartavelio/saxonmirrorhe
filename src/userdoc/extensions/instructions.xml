@@ -50,7 +50,7 @@
           or a contained sequence constructor, but not both. The effect is the same as evaluating the equivalent
           <code>xsl:sequence</code> instruction and then passing the result into a curly array constructor.</p>
         <p>The <code>saxon:array</code> instruction can be exported to a SEF file; the resulting SEF file
-        can be used by Saxon/J but not by Saxon-JS.</p>
+        can be used by SaxonJ but not by SaxonJS.</p>
       </details>
       <examples>       
         <example>
@@ -99,7 +99,7 @@
           or a contained sequence constructor, but not both. The effect is the same as evaluating the equivalent
           <code>xsl:sequence</code> instruction and then passing the result into a square array constructor.</p>
         <p>The <code>saxon:array-member</code> instruction can be exported to a SEF file; the resulting SEF file
-          can be used by Saxon/J but not by Saxon-JS.</p>
+          can be used by SaxonJ but not by SaxonJS.</p>
         <aside>Internally, the result of <code>saxon:array-member</code> is an external Java object of class
           <code>com.saxonica.functions.extfn.ArrayMemberValue</code> that wraps an arbitrary sequence. This object
         is specially recognized by (for example) <code>saxon:array</code> and by curly array constructors, causing
@@ -188,7 +188,7 @@
         disabled using the configuration property <a class="feature" href="ALLOW_MULTITHREADING"/>.</p>
         
         <p>The <code>saxon:assign</code> instruction can be exported to a SEF file; the resulting SEF file
-          can be used by Saxon/J but not by Saxon-JS.</p>
+          can be used by SaxonJ but not by SaxonJS.</p>
       </details>
       <examples>
         <example>
@@ -802,7 +802,7 @@
       </description>
       <details>
         <p>With maps and arrays, item types can become quite complex, and they are not always
-          very meaningful. For example, in a Saxon-JS stylesheet implementing an interactive
+          very meaningful. For example, in a SaxonJS stylesheet implementing an interactive
           chess game, the state of the board might be represented by the type <code>array(array(xs:integer))</code>,
           while a move or possible move might be represented as <code>map(xs:string, xs:integer)</code>.
           Such types do little to make the code more readable, and they create a potential problem in exposing
