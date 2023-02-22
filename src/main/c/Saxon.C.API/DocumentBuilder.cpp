@@ -144,16 +144,16 @@
 
     void DocumentBuilder::setBaseUri(const char* uri) {
         SaxonProcessor::attachCurrentThread();
-        static jmethodID db_dtdID = nullptr;
-	    if (!db_dtdID ) {
+        static jmethodID db_baseID = nullptr;
+	    if (!db_baseID ) {
 
 	        return;
 	    }
-		db_dtdID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(docBuilderClass,
+		db_baseID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(docBuilderClass,
 					"setBaseURI",
 					"(Z)");
         baseURI= std::string(uri);
-        SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_dtdID, dtdVal);
+        SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_baseID,  baseURI.c_str());
 
     }
 
