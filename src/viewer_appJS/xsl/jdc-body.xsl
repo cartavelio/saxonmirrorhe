@@ -436,7 +436,8 @@
                     <xsl:value-of select="@type"/>
                 </xsl:when>
                 <xsl:otherwise>
-                    <span class="{if ($isDotNetApiMember) then 'cslink' else 'javalink'}" data-href="{@fulltype}">
+                    <span class="{if (starts-with(@fulltype, 'net.sf.saxon.') or
+                        starts-with(@fulltype, 'com.saxonica.')) then 'javalink' else 'cslink'}" data-href="{@fulltype}">
                         <xsl:value-of select="@type"/>
                     </span>
                 </xsl:otherwise>
