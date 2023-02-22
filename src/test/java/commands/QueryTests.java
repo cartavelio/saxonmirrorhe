@@ -12,6 +12,8 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Query;
 import net.sf.saxon.lib.Initializer;
 import net.sf.saxon.lib.ModuleURIResolver;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.XQueryExecutable;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -193,6 +195,21 @@ public class QueryTests {
                 "-init:commands.QueryTests$MyInitializer"};
         try {
             Query.main(args);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testQueryInitializerUsingSystemProperty() {
+        try {
+            System.setProperty("SAXON_INITIALIZER", "commands.QueryTests$MyInitializer");
+            Processor proc = new Processor(true);
+            XQueryExecutable exec = proc.newXQueryCompiler().compile(
+                    "import module namespace h = \"http://example.org/ns/hello\"; h:new-hello('world')");
+            exec.load().run(proc.newSerializer(System.out));
+            System.clearProperty("SAXON_INITIALIZER");
         } catch (Exception e) {
             e.printStackTrace();
             fail();
