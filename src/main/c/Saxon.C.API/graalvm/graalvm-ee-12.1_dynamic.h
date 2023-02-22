@@ -134,7 +134,7 @@ typedef long long int (*j_createXQueryEngine_fn_t)(graal_isolatethread_t*);
 
 typedef long long int (*j_createXQueryEngineWithProcessor_fn_t)(graal_isolatethread_t*, void *);
 
-typedef char* (*j_executeQueryToString_fn_t)(graal_isolatethread_t*, void *, char*, void *);
+typedef char* (*j_executeQueryToString_fn_t)(graal_isolatethread_t*, void *, void *, char*, void *);
 
 typedef long long int (*j_executeQueryToValue_fn_t)(graal_isolatethread_t*, void *, char*, void *);
 

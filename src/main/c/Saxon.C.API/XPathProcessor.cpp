@@ -102,68 +102,62 @@ XPathProcessor::~XPathProcessor(){
 XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
     //SaxonProcessor::attachCurrentThread();
   	if (xpathStr == nullptr) {
-		std::cerr << "Error:: XPath string cannot be empty or nullptr" << std::endl;
+	exception = new SaxonApiException("Error:: XPath string cannot be empty or nullptr");
 	return nullptr;
     }
 
 
 	setProperty("resources", proc->getResourcesDirectory());
     allocFn fn = operator new;
-    int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    long long * results = j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (void *)fn, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)processorDataRef);
+    int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties,0);
+    std::cerr<<"evaluate ======"<<std::endl;
+    long long * results = j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
 
-	if(!results) {
+	if(results != nullptr) {
+	    XdmValue * value = new XdmValue();
+	    int size = results[0];
+        std::cerr<<"size="<<size<<std::endl;
+    for(int i = 1; i<size; i++){
+        if(results[i]=='\0') {
+            break;
+        }
+        std::cerr<<"i"<<i<<" result"<<results[i]<<std::endl;
+        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results[i]);
+        XdmItem * xdmItem = nullptr;
+        std::cerr<<"i"<<i<<" Type="<<typeRef<<std::endl;
 
-		//exception = proc->checkAndCreateException(cppClass);
+        if(typeRef == 1) {
+            xdmItem = new XdmAtomicValue(results[i]);
+            value->addXdmItem(xdmItem);
 
-		/*if(exception != nullptr) {
-		    std::cout<<exception->getMessage();
-		}*/
-		return nullptr;
+        } else if(typeRef == 2) {
+            xdmItem = new XdmNode(results[i]);
+            value->addXdmItem(xdmItem);
+
+        }  else if (typeRef == 4) {
+            xdmItem =  new XdmMap(results[i]);
+            value->addXdmItem(xdmItem);
+
+        } else if (typeRef == 3) {
+            xdmItem =  new XdmArray(results[i]);
+            value->addXdmItem(xdmItem);
+
+        } else if (typeRef == 5) {
+            xdmItem =  new XdmFunctionItem(results[i]);
+            value->addXdmItem(xdmItem);
+        } else {
+            xdmItem = new XdmItem(results[i]);
+            value->addXdmItem(xdmItem);
+        }
+
+    }
+		return value;
+	} else if(results == nullptr){
+	    exception = new SaxonApiException();
 	}
 
-	//int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
 
-
-	//if (sizex>0) {
-
-	    //TODO get type from the array
-		/*jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
-		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
-		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
-        jclass mapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
-        jclass arrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmArray");
-
-		XdmValue * value = new XdmValue();
-		XdmItem * xdmItem = nullptr;
-		for (int p=0; p < sizex; ++p) 
-		{
-			jobject resulti = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(results, p);
-
-			if(SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, atomicValueClass)           == JNI_TRUE) {
-				xdmItem = new XdmAtomicValue(resulti);
-
-			} else if(SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, nodeClass)           == JNI_TRUE) {
-				xdmItem = new XdmNode(resulti);
-
-			}  else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, mapClass)           == JNI_TRUE) {
-                xdmItem =  new XdmMap(resulti);
-            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, arrayClass)           == JNI_TRUE) {
-                xdmItem =  new XdmArray(resulti);
-            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, functionItemClass)           == JNI_TRUE) {
-                xdmItem =  new XdmFunctionItem(resulti);
-            } else {
-			    continue;
-			}
-  
-
-			value->addXdmItem(xdmItem);
-		}*/
-
-		//return value;
-	
-//}
-return nullptr;
+    return nullptr;
 
 }
 
@@ -171,47 +165,49 @@ XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
 
 
     if (xpathStr == nullptr) {
-        std::cerr << "Error:: XPath string cannot be empty or nullptr" << std::endl;
+        exception = new SaxonApiException("Error:: XPath string cannot be empty or nullptr");
         return nullptr;
     }
 
 
     setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    int64_t results = j_evaluateSingle(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)processorDataRef);
+    int64_t result = j_evaluateSingle(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
 
-/*
-	if (result) {
-		jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
-		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
-		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
-        jclass mapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
-        jclass arrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmArray");
-		XdmItem * xdmItem = nullptr;
-		if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, atomicValueClass)           == JNI_TRUE) {
-			xdmItem = new XdmAtomicValue(result);
+    if (result > 0) {
+        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
+        XdmItem * xdmItem = nullptr;
 
-		} else if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, nodeClass)           == JNI_TRUE) {
 
-			xdmItem = new XdmNode(result);
+        if(typeRef == 1) {
+            xdmItem = new XdmAtomicValue(result);
+            return xdmItem;
 
-		} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapClass)           == JNI_TRUE) {
+        } else if(typeRef == 2) {
+            xdmItem = new XdmNode(result);
+            return xdmItem;
+
+        }  else if (typeRef == 4) {
             xdmItem =  new XdmMap(result);
-        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, arrayClass)           == JNI_TRUE) {
+            return xdmItem;
+
+        } else if (typeRef == 3) {
             xdmItem =  new XdmArray(result);
-        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
-		    xdmItem = new XdmFunctionItem(result);
+            return xdmItem;
 
-		}
-		SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-		return xdmItem;
-	} else  {
-			exception = proc->checkAndCreateException(cppClass);
+        } else if (typeRef == 5) {
+            xdmItem =  new XdmFunctionItem(result);
+            return xdmItem;
+        }
+        xdmItem = new XdmItem(result);
+        return xdmItem;
+    }else if(result== -2){
 
-     		}*/
+        exception = new SaxonApiException();
 
 
-return nullptr;
+    }
+    return nullptr;
 
 }
 
@@ -243,16 +239,20 @@ void XPathProcessor::setContextFile(const char * filename) {
 
 void XPathProcessor::declareNamespace(const char *prefix, const char * uri){
     //SaxonProcessor::attachCurrentThread();
-        if (uri == nullptr) {
-		return;
-        }
+    if (prefix == nullptr) {
+        exception = new SaxonApiException("Null prefix supplied to declareNamespace()");
+        return;
+    }
+    if (uri == nullptr) {
+        exception = new SaxonApiException("Null namespace URI supplied to declareNamespace()");
+        return;
+    }
 	j_xp_declareNamespace(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)prefix, (char *)uri);
 
 }
 
 
 void XPathProcessor::declareVariable(const char * name){
-    SaxonProcessor::attachCurrentThread();
     if (name == nullptr) {
 		return;
     }
@@ -301,8 +301,8 @@ bool XPathProcessor::effectiveBooleanValue(const char * xpathStr) {
 
     setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    //bool resultsi = (bool)j_effectiveBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)processorDataRef);
-    return false;//resultsi;
+    bool resultsi = (bool)j_effectiveBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    return resultsi;
 }
 
 

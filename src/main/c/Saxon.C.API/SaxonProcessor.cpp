@@ -827,7 +827,7 @@ XdmAtomicValue *SaxonProcessor::makeIntegerValue(int i) {
     //SaxonProcessor::attachCurrentThread();
     //jobject obj = integerValue(*SaxonProcessor::sxn_environ, i);
 
-    int64_t intValueRef = j_makeDoubleValue(sxn_environ->thread, i);
+    int64_t intValueRef = j_makeIntegerValue(sxn_environ->thread, i);
     XdmAtomicValue * value = new XdmAtomicValue(intValueRef, "Q{http://www.w3.org/2001/XMLSchema}integer");
     return value;
 }
@@ -850,7 +850,7 @@ XdmAtomicValue *SaxonProcessor::makeLongValue(long l) {
     //SaxonProcessor::attachCurrentThread();
     //jobject obj = longValue(*SaxonProcessor::sxn_environ, l);
 
-    int64_t longValueRef = j_makeBooleanValue(sxn_environ->thread, l);
+    int64_t longValueRef = j_makeLongValue(sxn_environ->thread, l);
     XdmAtomicValue *value = new XdmAtomicValue(longValueRef, "Q{http://www.w3.org/2001/XMLSchema}long");
     return value;
 }

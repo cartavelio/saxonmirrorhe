@@ -18,6 +18,8 @@ import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.nativeimage.c.type.WordPointer;
+import org.graalvm.word.WordFactory;
 
 import javax.xml.transform.Source;
 import java.net.URI;
@@ -72,7 +74,7 @@ public class XPathProcessor extends SaxonCAPI {
             return handle.rawValue();
     }
 
-    @CEntryPoint(name = "createXPathProcessorWithProcessor")
+    @CEntryPoint(name = "createXPathProcessorWithProcessor", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createXPathProcessor(IsolateThread thread, ObjectHandle processorRef) {
             Processor processor = objectHandles.get(processorRef);
             if(processor == null) {
@@ -243,11 +245,13 @@ public class XPathProcessor extends SaxonCAPI {
      * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
-    @CEntryPoint(name = "j_evaluate")
+    @CEntryPoint(name = "j_evaluate", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
     public static CLongPointer evaluate(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
-
         XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
-        String cwd = CTypeConversion.toJavaString(ccwd);
+        String cwd = null;
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd = CTypeConversion.toJavaString(ccwd);
+        }
         String xpathStr = CTypeConversion.toJavaString(c_xpathStr);
         XPathCompiler compiler = xPathProcessor.getCompiler();
         if (SaxonCAPI.debug) {
@@ -259,16 +263,21 @@ public class XPathProcessor extends SaxonCAPI {
         Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
         setupXPathCompiler(compiler, optionsMap);
 
-
         XPathSelector selector = compiler.compile(xpathStr).load();
         applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
         /*if (contextItem != null) {
             selector.setContextItem(contextItem);
         } */
         XdmValue value = selector.evaluate();//compiler.evaluate(xpathStr, contextItem);
-
-        long[] valueRefs = new long[value.size()];
-        int i = 0;
+        int size = value.size();
+        if(size >0) {
+            size+=1;
+        }
+        long[] valueRefs = new long[size];
+        if(size>0) {
+            valueRefs[0] = value.size();
+        }
+        int i = 1;
         for (XdmItem item : value) {
             ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(item);
             valueRefs[i] = objectHandle.rawValue();
@@ -337,7 +346,11 @@ public class XPathProcessor extends SaxonCAPI {
      **/
     @CEntryPoint(name = "j_evaluateSingle")
     public static long evaluateSingle(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
-        String cwd = CTypeConversion.toJavaString(ccwd);
+
+        String cwd = null;
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd = CTypeConversion.toJavaString(ccwd);
+        }
         String xpathStr = CTypeConversion.toJavaString(c_xpathStr);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
@@ -375,7 +388,11 @@ public class XPathProcessor extends SaxonCAPI {
         XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
 
         XPathCompiler compiler = xPathProcessor.getCompiler();
-        String cwd = CTypeConversion.toJavaString(c_cwd);
+        String cwd = null;
+
+        if(c_cwd != WordFactory.nullPointer()) {
+            CTypeConversion.toJavaString(c_cwd);
+        }
         String xpathStr = CTypeConversion.toJavaString(c_xpathStr);
         setupXPathCompiler(compiler, optionsMap);
         XPathSelector selector = compiler.compile(xpathStr).load();

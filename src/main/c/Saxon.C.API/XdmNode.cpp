@@ -27,17 +27,14 @@ bool XdmNode::isAtomic() {
 
     XdmNode::~XdmNode() {
        // if(getRefCount() <= 1) {
-        std::cerr<<"xdmNode destructor cp0"<<std::endl;
        if(baseURI != nullptr) {
         delete baseURI;
         baseURI = nullptr;
        }
-        std::cerr<<"xdmNode destructor cp1"<<std::endl;
        if(nodeName != nullptr) {
          delete nodeName;
          nodeName = nullptr;
        }
-        std::cerr<<"xdmNode destructor cp2"<<std::endl;
        if(localName != nullptr) {
          delete localName;
          localName = nullptr;
