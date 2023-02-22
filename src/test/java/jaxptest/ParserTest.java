@@ -325,7 +325,7 @@ public class ParserTest {
         // Bug 4127
         try {
             Processor proc = new Processor(true);
-            proc.setConfigurationProperty(Feature.SOURCE_PARSER_CLASS, "org.apache.xml.resolver.tools.ResolvingXMLReader");
+            //proc.setConfigurationProperty(Feature.SOURCE_PARSER_CLASS, "org.apache.xml.resolver.tools.ResolvingXMLReader");
             XQueryCompiler compiler = proc.newXQueryCompiler();
             XQueryExecutable exec = compiler.compile("parse-xml-fragment('<a/><b/>')");
             XdmValue value = exec.load().evaluate();

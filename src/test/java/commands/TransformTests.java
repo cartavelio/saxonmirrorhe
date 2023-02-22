@@ -445,8 +445,8 @@ public class TransformTests {
         };
         try {
             Transform.main(args);
-            assertTrue(new File(ConfigTest.DATA_DIR + "welch-ser/out/A.xsl.xml").exists(), "A exists");
-            assertTrue(new File(ConfigTest.DATA_DIR + "welch-ser/out/B.xsl.xml").exists(), "B exists");
+            assertTrue(new File(ConfigTest.DATA_DIR + "sandpit/welch-ser/out/A.xsl.xml").exists(), "A exists");
+            assertTrue(new File(ConfigTest.DATA_DIR + "sandpit/welch-ser/out/B.xsl.xml").exists(), "B exists");
         } catch (Exception e) {
             fail();
         } finally {
