@@ -68,15 +68,15 @@
         <aside>The mechanisms described here work equally well for other JVM-based languages such as Scala.</aside>
         <p>Saxon provides three mechanisms for writing extension functions in Java:</p>
         <ul>
-          <li><p><a class="bodylink" href="ext-simple-J">The Simple Interface</a>. This allows you to create an extension function
+          <li><p>The <a class="bodylink" href="ext-simple-J">Simple Interface</a> allows you to create an extension function
           by writing a class that implements the interface <code class="javalink">net.sf.saxon.s9api.ExtensionFunction</code>,
             and registering your implementation with the <code class="javalink">net.sf.saxon.s9api.Processor</code> object.</p></li>
-          <li><p><a class="bodylink" href="ext-full-J">The Full Interface</a>. This allows you to create an extension function
+          <li><p>The <a class="bodylink" href="ext-full-J">Full Interface</a> allows you to create an extension function
             by writing a class that implements the interface <code class="javalink">net.sf.saxon.s9api.ExtensionFunctionDefinition</code>,
             and registering your implementation with the <code class="javalink">net.sf.saxon.s9api.Processor</code> object. This
           interface is considerably more complex, but it gives more capability: in particular it allows the function full access
           to the XPath static and dynamic context.</p></li>
-          <li><p><a class="bodylink" href="reflexive-functions">The Reflexive Interface</a>. This allows you to call arbitrary Java code 
+          <li><p>The <a class="bodylink" href="reflexive-functions">Reflexive Interface</a> allows you to call arbitrary Java code 
             (public methods in public classes found on the classpath) directly. This mechanism requires Saxon-PE or -EE.
           There are complex rules for mapping XPath function names to Java class and method names, and for converting between
           Java data types and XPath data types.</p> 
@@ -1771,9 +1771,9 @@ public static int lineNumber(XPathContext c) {
     <p>There are two interfaces provided for writing extension functions in C#:</p>
     
     <ul>
-      <li><p>The <a class="bodylink" href="ext-simple-N">simple interface</a> allows
+      <li><p>The <a class="bodylink" href="ext-simple-N">Simple Interface</a> allows
       a function to be implemented using a lambda expression.</p></li>
-      <li><p>The <a class="bodylink" href="ext-fns-N">full interface</a> allows
+      <li><p>The <a class="bodylink" href="ext-fns-N">Full Interface</a> allows
         a function to be written as an implementation of the interface 
         <a class="cslink" href="Saxon.Api.ExtensionFunctionDefinition">ExtensionFunctionDefinition</a>.</p></li>
     </ul>
