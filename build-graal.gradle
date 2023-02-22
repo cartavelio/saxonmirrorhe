@@ -648,10 +648,10 @@ task all_saxonc_releases() {
     def libpath = ''
     def saxonc_lib = ''
     if (systemOs.isLinux()) {
-      libpath = "../libs/nix"
+      libpath = "../libs/nix/"
       saxonc_lib = "libsaxon-${edition}c-*.so"
     } else if (systemOs.isMacOsX()) {
-      libpath = "../libs/darwin"
+      libpath = "../libs/darwin/"
       saxonc_lib = "libsaxon-${edition}c-*.dylib"
     } else {
       libpath = "..\\\\libs\\\\win\\\\"
