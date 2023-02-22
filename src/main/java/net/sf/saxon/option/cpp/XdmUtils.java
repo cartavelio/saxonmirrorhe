@@ -286,9 +286,9 @@ public class XdmUtils {
     public static CCharPointer getLocalName(IsolateThread thread, ObjectHandle nodeRef) {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         QName qname = node.getNodeName();
-        if (qname == null) {
+        /*if (qname == null) {
             return null;
-        }
+        }  */
         final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(qname.getLocalName());
         return holder.get();
     }
@@ -305,9 +305,9 @@ public class XdmUtils {
     public static CCharPointer getNodeName(IsolateThread thread, ObjectHandle nodeRef) {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         QName qname = node.getNodeName();
-        if (qname == null) {
+        /*if (qname == null) {
             return null;
-        }
+        }   */
         final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(XdmUtils.getEQName(qname));
         return holder.get();
 
