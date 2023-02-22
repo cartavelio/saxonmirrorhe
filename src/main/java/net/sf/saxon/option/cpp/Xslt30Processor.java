@@ -778,7 +778,7 @@ public class Xslt30Processor extends SaxonCAPI {
     }
 
 
-    private static XdmValue[] getArguments(Object[] arguments) throws SaxonApiException {
+    public static XdmValue[] getArguments(Object[] arguments) throws SaxonApiException {
         if (arguments != null && arguments.length > 0) {
             XdmValue[] values = new XdmValue[arguments.length];
             if (debug && arguments != null) {
