@@ -447,7 +447,12 @@ public final class EvaluateInstr extends Expression {
             TypeChecker tc = config.getTypeChecker(false);
             expr = tc.staticTypeCheck(expr, requiredType, role, visitor);
             expr = ExpressionTool.resolveCallsToCurrentFunction(expr);
-            ContextItemStaticInfo cit = ContextItemStaticInfo.DEFAULT;   // TODO: we could set it to absent in some cases. See bug 5626
+            ContextItemStaticInfo cit;
+            if (contextItemOp != null) {
+                cit = config.makeContextItemStaticInfo(getContextItemExpr().getItemType(), false);
+            } else {
+                cit = ContextItemStaticInfo.ABSENT;
+            }
             expr = expr.typeCheck(visitor, cit).optimize(visitor, cit);
             slotMap = env.getStackFrameMap();
             ExpressionTool.allocateSlots(expr, slotMap.getNumberOfVariables(), slotMap);
