@@ -1,8 +1,8 @@
 package net.sf.saxon.style;
 
-import com.saxonica.config.ProfessionalConfiguration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -22,8 +22,7 @@ public class XSLArrayMember extends XSLSequence {
         if (getSelectExpression() == null) {
             setSelectExpression(compileSequenceConstructor(exec, decl, false));
         }
-        ProfessionalConfiguration config = (ProfessionalConfiguration)exec.getConfiguration();
-        SystemFunction arrayMem = config.getVendorFunctionSet().makeFunction("array-member", 1);
+        SystemFunction arrayMem = VendorFunctionSetHE.getInstance().makeFunction("array-member", 1);
         return arrayMem.makeFunctionCall(getSelectExpression());
     }
 

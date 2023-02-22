@@ -7,6 +7,8 @@
 
 package net.sf.saxon.functions.registry;
 
+import net.sf.saxon.functions.ArrayMember;
+import net.sf.saxon.ma.arrays.ArrayMemberValue;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.XPathContext;
@@ -66,6 +68,9 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
         register("apply", 2, ApplyFn.class, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyFunctionType.getInstance(), ONE, null)
                 .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
+
+        register("array-member", 1, ArrayMember.class, new JavaExternalObjectType(ArrayMemberValue.class), ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null);
 
         // Create a map according to the semantics of the XPath map constructor and XSLT xsl:map instruction
         register("create-map", 1, MapCreate.class, MapType.ANY_MAP_TYPE, ONE, 0)

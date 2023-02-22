@@ -788,7 +788,7 @@ public class AlphaCode {
                     theClass = Object.class;
                 }
             }
-            itemType = new JavaExternalObjectType(config, theClass);
+            itemType = new JavaExternalObjectType(theClass);
         }
         String indicator = tree.cardinality;
         int cardinality = Cardinality.fromOccurrenceIndicator(indicator);
