@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.accum.AccumulatorManager;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ParseOptions;
@@ -25,6 +26,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
@@ -847,6 +849,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
         final Controller controller = context.getController();
+        boolean isXSLT = getRetainedStaticContext().getPackageData().isXSLT();
         assert controller != null;
         if (schemaType == null /*&& copyNamespaces*/ && !copyForUpdate) {
             if (validation == Validation.PRESERVE) {
@@ -867,6 +870,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                         VirtualCopy vc = VirtualCopy.makeVirtualCopy((NodeInfo) item);
                         vc.setDropNamespaces(!copyNamespaces);
                         vc.getTreeInfo().setCopyAccumulators(copyAccumulators);
+                        if (isXSLT && copyAccumulators) {
+                            vc.getTreeInfo().setCopyAccumulators(true);
+                            AccumulatorManager am = ((XsltController) context.getController()).getAccumulatorManager();
+                            am.setApplicableAccumulators(vc.getTreeInfo(), am.getApplicableAccumulators(((NodeInfo) item).getTreeInfo()));
+                        }
                         if (((NodeInfo) item).getNodeKind() == Type.ELEMENT) {
                             vc.setSystemId(computeNewBaseUri((NodeInfo) item, getStaticBaseURIString()));
                         }
