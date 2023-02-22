@@ -10,7 +10,7 @@ package net.sf.saxon.tree.jiter;
 import java.util.Iterator;
 
 /**
- * An iterator over items, that concatenates the items returned by two supplied iterators.
+ * An iterable over arbitrary objects, that concatenates the objects returned by two supplied iterables.
  */
 
 public class ConcatenatingIterable<E> implements Iterable<E> {

@@ -20,15 +20,13 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.tree.iter.EmptyIterator;
-
+import net.sf.saxon.tree.jiter.ConcatenatingIterable;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
 
 
@@ -65,6 +63,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
      */
 
     public Choose(Expression[] conditions, Expression[] actions) {
+        assert conditions.length == actions.length;
         conditionOps = new Operand[conditions.length];
         for (int i=0; i<conditions.length; i++) {
             conditionOps[i] = new Operand(this, conditions[i], OperandRole.INSPECT);
@@ -132,6 +131,10 @@ public class Choose extends Instruction implements ConditionalInstruction {
         return _isInstruction;
     }
 
+    /**
+     * Get the number of branches (conditions) in the expression
+     * @return the number of conditions (which is the same as the number of actions)
+     */
 
     public int size() {
         return conditionOps.length;
@@ -150,25 +153,40 @@ public class Choose extends Instruction implements ConditionalInstruction {
         return exp instanceof Choose && ((Choose) exp).size() == 1;
     }
 
-    public int getNumberOfConditions() {
-        return size();
-    }
-    
+    /**
+     * Get the i'th condition counting from zero
+     * @param i the index of the required condition
+     * @return the i'th condition counting from zero
+     */
+
     public Expression getCondition(int i) {
         return conditionOps[i].getChildExpression();
     }
-    
+
+    /**
+     * Set the i'th condition counting from zero
+     *
+     * @param i the index of the required condition
+     * @param condition the new value of the i'th condition counting from zero
+     */
+
+
     public void setCondition(int i, Expression condition) {
         conditionOps[i].setChildExpression(condition);
     }
+
+    /**
+     * Get the sequence of conditions
+     * @return all the conditions, in order
+     */
 
     public Iterable<Operand> conditions() {
         return Arrays.asList(conditionOps);
     }
 
     /**
-     * Get i'th action operand
-     * @param i the action number
+     * Get i'th action operand (counting from zero)
+     * @param i the action number (counting from zero)
      * @return the i'th action to be evaluated when the corresponding condition is true
      */
     
@@ -177,32 +195,44 @@ public class Choose extends Instruction implements ConditionalInstruction {
     }
 
     /**
-     * Get i'th action to be performed
+     * Get i'th action to be performed or evaluated (counting from zero)
      *
-     * @param i the action number
+     * @param i the action number (counting from zero)
      * @return the i'th action to be evaluated when the corresponding condition is true
      */
 
     public Expression getAction(int i) {
         return actionOps[i].getChildExpression();
     }
-    
+
+    /**
+     * Set the i'th action counting from zero
+     *
+     * @param i         the index of the required action
+     * @param action the new value of the i'th action counting from zero
+     */
+
     public void setAction(int i, Expression action) {
         actionOps[i].setChildExpression(action);
     }
+
+    /**
+     * Get the sequence of actions
+     * @return all the actions, in order
+     */
 
     public Iterable<Operand> actions() {
         return Arrays.asList(actionOps);
     }
 
+    /**
+     * Get all the operands of the Choose expresssion - that is, all the conditions and all the actions
+     * @return all the operands, in undefined order.
+     */
+
     @Override
     public Iterable<Operand> operands() {
-        List<Operand> operanda = new ArrayList<Operand>(size()*2);
-        for (int i=0; i<size(); i++) {
-            operanda.add(conditionOps[i]);
-            operanda.add(actionOps[i]);
-        }
-        return operanda;
+        return new ConcatenatingIterable<>(Arrays.asList(conditionOps), Arrays.asList(actionOps));
     }
 
     /**
@@ -310,8 +340,8 @@ public class Choose extends Instruction implements ConditionalInstruction {
             } else if (conditions.size() == 1 && Literal.hasEffectiveBooleanValue(conditions.get(0), true)) {
                 return actions.get(0);
             } else if (conditions.size() != count) {
-                Expression[] c = conditions.toArray(new Expression[conditions.size()]);
-                Expression[] a = actions.toArray(new Expression[actions.size()]);
+                Expression[] c = conditions.toArray(new Expression[0]);
+                Expression[] a = actions.toArray(new Expression[0]);
                 Choose result = new Choose(c, a);
                 result.setRetainedStaticContext(getRetainedStaticContext());
                 return result;
@@ -482,10 +512,6 @@ public class Choose extends Instruction implements ConditionalInstruction {
                 if (err.isStaticError()) {
                     throw err;
                 }
-//                else if (err.isTypeError()) {
-//                    visitor.issueWarning("Branch " + (i + 1) + " of conditional will fail with a type error if executed. "
-//                        + err.getMessage(), getLocation());
-//                }
                 ErrorExpression ee = new ErrorExpression(new XmlProcessingException(err));
                 ExpressionTool.copyLocationInfo(getAction(i), ee);
                 setAction(i, ee);

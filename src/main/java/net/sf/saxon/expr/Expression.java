@@ -29,6 +29,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.jiter.MappingJavaIterable;
 import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ItemType;
@@ -189,14 +190,9 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
      * @return a list of operands
      */
 
-    protected List<Operand> operandSparseList(Operand... a) {
-        List<Operand> operanda = new ArrayList<>();
-        for (Operand o : a) {
-            if (o != null) {
-                operanda.add(o);
-            }
-        }
-        return operanda;
+    protected Iterable<Operand> operandSparseList(Operand... a) {
+        // The mapping function op -> op causes null operands to be dropped from the result
+        return new MappingJavaIterable<>(Arrays.asList(a), op -> op);
     }
 
     /**
