@@ -112,7 +112,14 @@ namespace Saxon.Hej.tree.linked {
                     location = (Saxon.Hej.s9api.Location)(o);
                 }
             }
-            Saxon.Hej.om.NamespaceMap ns = (Saxon.Hej.om.CopyOptions.includes(copyOptions, Saxon.Hej.om.CopyOptions.ALL_NAMESPACES) ? getAllNamespaces() : Saxon.Hej.om.NamespaceMap.emptyMap());
+            Saxon.Hej.om.NamespaceMap nsMap;
+            bool gatherAttributeNamespaces = false;
+            if (Saxon.Hej.om.CopyOptions.includes(copyOptions, Saxon.Hej.om.CopyOptions.ALL_NAMESPACES)) {
+                nsMap = getAllNamespaces();
+            } else {
+                nsMap = Saxon.Hej.om.NamespaceMap.of(getPrefix(), getURI());
+                gatherAttributeNamespaces = true;
+            }
             bool disallowNamespaceSensitiveContent = (((((copyOptions&Saxon.Hej.om.CopyOptions.TYPE_ANNOTATIONS)) != 0)) && ((((copyOptions&Saxon.Hej.om.CopyOptions.ALL_NAMESPACES)) == 0)));
             if ((copyTypes && disallowNamespaceSensitiveContent)) {
                 try {
@@ -137,8 +144,11 @@ namespace Saxon.Hej.tree.linked {
                     }
                 }
                 atts.Add(new Saxon.Hej.om.AttributeInfo(att.getNodeName(), attributeType, att.getValue(), att.getLocation(), 0));
+                if ((gatherAttributeNamespaces && !(att.getNodeName().getPrefix().Length==0))) {
+                    nsMap = nsMap.put(att.getNodeName().getPrefix(), att.getNodeName().getURI());
+                }
             }
-            @out.startElement(Saxon.Hej.om.NameOfNode.makeName(this), typeCode, Saxon.Hej.om.SequenceTool.attributeMapFromList(atts), ns, location, (Saxon.Hej.@event.ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY|Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK));
+            @out.startElement(Saxon.Hej.om.NameOfNode.makeName(this), typeCode, Saxon.Hej.om.SequenceTool.attributeMapFromList(atts), nsMap, location, (Saxon.Hej.@event.ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY|Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK));
             Saxon.Hej.tree.linked.NodeImpl next = getFirstChild();
             while ((next != null)) {
                 next.copy(@out, copyOptions, location);

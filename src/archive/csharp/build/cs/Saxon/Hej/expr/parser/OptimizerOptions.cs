@@ -19,6 +19,7 @@ namespace Saxon.Hej.expr.parser {
         public const int VOID_EXPRESSIONS = 8192;
         public const int TAIL_CALLS = 16384;
         public const int CONSTANT_FOLDING = 32768;
+        public const int REORDER_PREDICATES = 65536;
         private readonly int options;
         public readonly static Saxon.Hej.expr.parser.OptimizerOptions FULL_HE_OPTIMIZATION = new Saxon.Hej.expr.parser.OptimizerOptions("lvmt");
         public readonly static Saxon.Hej.expr.parser.OptimizerOptions FULL_EE_OPTIMIZATION = new Saxon.Hej.expr.parser.OptimizerOptions(-1);
@@ -63,6 +64,8 @@ namespace Saxon.Hej.expr.parser {
                 return MISCELLANEOUS;
               case 'n':
                 return CONSTANT_FOLDING;
+              case 'p':
+                return REORDER_PREDICATES;
               case 'r':
                 return RULE_SET;
               case 's':
@@ -119,6 +122,9 @@ namespace Saxon.Hej.expr.parser {
             }
             if (isSet(CONSTANT_FOLDING)) {
                 result += "n";
+            }
+            if (isSet(REORDER_PREDICATES)) {
+                result += "p";
             }
             if (isSet(RULE_SET)) {
                 result += "r";

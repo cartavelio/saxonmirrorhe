@@ -43,7 +43,7 @@ namespace Saxon.Hej.style {
             Saxon.Hej.style.StyleElement e = makeXSLElement(f, (Saxon.Hej.tree.linked.NodeImpl)(parent));
             if (((((e is Saxon.Hej.style.XSLStylesheet) || (e is Saxon.Hej.style.XSLPackage))) && (parent.getNodeKind() != Saxon.Hej.type.Type.DOCUMENT))) {
                 e = new Saxon.Hej.style.AbsentExtensionElement();
-                Saxon.Hej.trans.XmlProcessingIncident reason = new Saxon.Hej.trans.XmlProcessingIncident((elemName.getDisplayName()+" can only appear at the outermost level"), "XTSE0010");
+                Saxon.Hej.trans.XmlProcessingIncident reason = new Saxon.Hej.trans.XmlProcessingIncident((elemName.getDisplayName()+" can only appear at the outermost level"), "XTSE0010", e);
                 e.setValidationError(reason, Saxon.Hej.style.StyleElement.OnFailure.REPORT_ALWAYS);
             }
             if ((e != null)) {
@@ -90,7 +90,7 @@ namespace Saxon.Hej.style {
                         if ((((Saxon.Hej.style.XSLStylesheet)(parent)).getEffectiveVersion()<=processorVersion)) {
                             temp = new Saxon.Hej.style.AbsentExtensionElement();
                             temp.setCompilation(compilation);
-                            temp.setValidationError(new Saxon.Hej.trans.XmlProcessingIncident(("Unknown top-level XSLT declaration "+elemName.getDisplayName())), Saxon.Hej.style.StyleElement.OnFailure.REPORT_UNLESS_FORWARDS_COMPATIBLE);
+                            temp.setValidationError(new Saxon.Hej.trans.XmlProcessingIncident(("Unknown top-level XSLT declaration "+elemName.getDisplayName()), "XTSE0010", location), Saxon.Hej.style.StyleElement.OnFailure.REPORT_UNLESS_FORWARDS_COMPATIBLE);
                         }
                     } else {
                         temp = new Saxon.Hej.style.AbsentExtensionElement();
@@ -98,7 +98,7 @@ namespace Saxon.Hej.style {
                         temp.setLocation(baseURI, lineNumber, columnNumber);
                         temp.setCompilation(compilation);
                         temp.processStandardAttributes("");
-                        temp.setValidationError(new Saxon.Hej.trans.XmlProcessingIncident(("Unknown XSLT instruction "+elemName.getDisplayName()), "XTSE0010"), ((temp.getEffectiveVersion()>processorVersion) ? Saxon.Hej.style.StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE : Saxon.Hej.style.StyleElement.OnFailure.REPORT_ALWAYS));
+                        temp.setValidationError(new Saxon.Hej.trans.XmlProcessingIncident(("Unknown XSLT instruction "+elemName.getDisplayName()), "XTSE0010", location), ((temp.getEffectiveVersion()>processorVersion) ? Saxon.Hej.style.StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE : Saxon.Hej.style.StyleElement.OnFailure.REPORT_ALWAYS));
                     }
                 }
                 if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.SAXON)) {

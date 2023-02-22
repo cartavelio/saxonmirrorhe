@@ -317,7 +317,9 @@ namespace Saxon.Eej.config {
         private Saxon.Hej.functions.FunctionLibraryList makeBuiltInExtensionLibraryList() { lock(this) {
             vendorFunctionSet = makeVendorFunctionSet();
             Saxon.Hej.functions.FunctionLibraryList result = new Saxon.Hej.functions.FunctionLibraryList();
-            result.addFunctionLibrary(vendorFunctionSet);
+            if ((vendorFunctionSet != null)) {
+                result.addFunctionLibrary(vendorFunctionSet);
+            }
             result.addFunctionLibrary(Saxon.Hej.functions.MathFunctionSet.getInstance());
             result.addFunctionLibrary(Saxon.Hej.ma.map.MapFunctionSet.getInstance());
             result.addFunctionLibrary(Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance());

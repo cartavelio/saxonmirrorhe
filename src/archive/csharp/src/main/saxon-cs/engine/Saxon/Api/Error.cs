@@ -12,7 +12,7 @@ namespace Saxon.Api {
     /// </summary>
     /// <remarks>
     /// The constructor for this class is internal; instances of this class can be created
-    /// internally by Saxon-CS, but not by user application code.
+    /// internally by SaxonCS, but not by user application code.
     /// </remarks>
     public class Error
     {

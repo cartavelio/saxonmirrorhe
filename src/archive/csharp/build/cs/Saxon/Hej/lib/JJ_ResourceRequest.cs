@@ -10,6 +10,10 @@ namespace Saxon.Hej.lib {
         public const string XML_NATURE = "https://www.iana.org/assignments/media-types/application/xml";
         public const string DTD_NATURE = "https://www.iana.org/assignments/media-types/application/xml-dtd";
         public const string EXTERNAL_ENTITY_NATURE = "https://www.iana.org/assignments/media-types/application/xml-external-parsed-entity";
+        public const string ANY_PURPOSE = null;
+        public const string SCHEMA_NATURE = "http://www.w3.org/2001/XMLSchema";
+        public const string VALIDATION_PURPOSE = "http://www.rddl.org/purposes#validation";
+        public const string ANY_NATURE = null;
         public string uri;
         public string baseUri;
         public string relativeUri;

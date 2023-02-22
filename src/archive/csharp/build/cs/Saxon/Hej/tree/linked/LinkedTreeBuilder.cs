@@ -99,6 +99,9 @@ namespace Saxon.Hej.tree.linked {
             if (((xmlId != null) && Saxon.Hej.value.Whitespace.containsWhitespace(Saxon.Hej.str.StringTool.codePoints(xmlId.getValue())))) {
                 suppliedAttributes = suppliedAttributes.put(new Saxon.Hej.om.AttributeInfo(xmlId.getNodeName(), xmlId.getType(), Saxon.Hej.value.Whitespace.trim(xmlId.getValue()), xmlId.getLocation(), xmlId.getProperties()));
             }
+            if ((location.getSystemId() == null)) {
+                location = new Saxon.Hej.expr.parser.Loc(getSystemId(), location.getLineNumber(), location.getColumnNumber());
+            }
             Saxon.Hej.tree.linked.ElementImpl elem = nodeFactory.makeElementNode(currentNode, elemName, type, isNilled, suppliedAttributes, namespaceStack.Peek(), pipe, location, (allocateSequenceNumbers ? nextNodeNumber++ : -1));
             while ((depth>=arrays.Count)) {
                 arrays.Add(new Saxon.Hej.tree.linked.NodeImpl[20]);

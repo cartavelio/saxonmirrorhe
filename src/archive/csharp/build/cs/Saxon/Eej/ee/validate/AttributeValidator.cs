@@ -9,6 +9,9 @@ namespace Saxon.Eej.ee.validate {
         private Saxon.Eej.ee.schema.AttributeWildcard attributeWildcard = null;
         private int idAttributes = 0;
         internal Saxon.Hej.type.SimpleType latestAttributeType = null;
+        private Saxon.Hej.om.AttributeMap previousAttributeMap;
+        private Saxon.Hej.om.AttributeMap previousValidatedAttributes;
+        private System.Collections.Generic.IList<Saxon.Hej.om.NamespaceBinding> previousNamespaceBindings;
         public AttributeValidator(Saxon.Hej.@event.Receiver next) : base (next) {
         }
         public void setAttributeGroup(Saxon.Eej.ee.schema.AttributeGroupDecl attributeGroup) {
@@ -20,6 +23,10 @@ namespace Saxon.Eej.ee.validate {
             }
         }
         public override Saxon.Hej.om.AttributeMap validateAttributes(Saxon.Hej.om.AttributeMap @in, System.Collections.Generic.IList<Saxon.Hej.om.NamespaceBinding> additionalNamespaces) {
+            if ((@in == previousAttributeMap)) {
+                Saxon.Impl.Helpers.ListUtils.AddAll(additionalNamespaces, previousNamespaceBindings);
+                return previousValidatedAttributes;
+            }
             Saxon.Hej.@event.PipelineConfiguration pipe = getPipelineConfiguration();
             Saxon.Hej.om.AttributeMap result = Saxon.Hej.om.EmptyAttributeMap.getInstance();
             foreach (Saxon.Hej.om.AttributeInfo att in @in) {
@@ -175,6 +182,9 @@ namespace Saxon.Eej.ee.validate {
                     }
                 }
             }
+            previousAttributeMap = @in;
+            previousValidatedAttributes = result;
+            previousNamespaceBindings = additionalNamespaces;
             return result;
         }
         private void checkNamespaceSensitiveDefaultValue(Saxon.Eej.ee.schema.AttributeUse use, Saxon.Hej.str.UnicodeString value) {

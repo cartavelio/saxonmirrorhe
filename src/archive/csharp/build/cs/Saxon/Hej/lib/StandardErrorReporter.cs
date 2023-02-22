@@ -64,11 +64,14 @@ namespace Saxon.Hej.lib {
             }
             string message = constructMessage(error, "", "Warning ");
             if (!(warningsIssued.Contains(message))) {
-                logger.warning(message);
-                warningCount++;
                 if ((warningCount>getMaximumNumberOfWarnings())) {
-                    logger.info("No more warnings will be displayed");
+                    if ((warningCount == (getMaximumNumberOfWarnings()+1))) {
+                        logger.info("No more warnings will be displayed");
+                    }
+                } else {
+                    logger.warning(message);
                 }
+                warningCount++;
                 warningsIssued.Add(message);
             }
         }
@@ -197,7 +200,9 @@ namespace Saxon.Hej.lib {
                             appendStackTrace(e, sw);
                             sb.append('\n').append(sw);
                         } else {
-                            sb.append(". Caused by ").append(e.GetType().Name);
+                            if (!(message.Contains(e.Message))) {
+                                sb.append(". Caused by ").append(e.GetType().Name);
+                            }
                         }
                     }
                     string next = e.Message;

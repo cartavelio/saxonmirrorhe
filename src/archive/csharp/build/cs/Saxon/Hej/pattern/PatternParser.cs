@@ -42,7 +42,7 @@ namespace Saxon.Hej.pattern {
                                         let.setVariableQName(varName);
                                         Saxon.Hej.expr.InstanceOfExpression condition = new Saxon.Hej.expr.InstanceOfExpression(new Saxon.Hej.expr.LocalVariableReference(let), Saxon.Hej.value.SequenceType.SINGLE_NUMERIC);
                                         Saxon.Hej.expr.LocalVariableReference @ref = new Saxon.Hej.expr.LocalVariableReference(let);
-                                        @ref.setStaticType(Saxon.Hej.value.SequenceType.SINGLE_NUMERIC, null, 0);
+                                        @ref.setStaticType(Saxon.Hej.value.SequenceType.ANY_SEQUENCE, null, 0);
                                         Saxon.Hej.expr.ValueComparison comparison = new Saxon.Hej.expr.ValueComparison(@ref, Saxon.Hej.expr.parser.Token.FEQ, Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.PLUS_ONE));
                                         Saxon.Hej.expr.instruct.Choose choice = new Saxon.Hej.expr.instruct.Choose(new Saxon.Hej.expr.Expression[]{condition, Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.TRUE)}, new Saxon.Hej.expr.Expression[]{comparison, new Saxon.Hej.expr.LocalVariableReference(let)});
                                         let.setSequence(filter);

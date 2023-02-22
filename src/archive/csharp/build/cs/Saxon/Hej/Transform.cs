@@ -26,7 +26,7 @@ namespace Saxon.Hej {
             options.addRecognizedOption("ea", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Enable assertions");
             options.addRecognizedOption("expand", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Expand attribute defaults from DTD or Schema");
             options.addRecognizedOption("explain", Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME, "Display compiled expression tree and optimization decisions in human-readable form");
-            options.addRecognizedOption("export", Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME, "Display compiled expression tree and optimization decisions for exportation");
+            options.addRecognizedOption("export", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Display compiled expression tree and optimization decisions for exportation");
             options.addRecognizedOption("ext", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Allow calls to Java extension functions and xsl:result-document");
             options.addRecognizedOption("im", (Saxon.Hej.trans.CommandLineOptions.TYPE_QNAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Name of initial mode");
             options.addRecognizedOption("it", Saxon.Hej.trans.CommandLineOptions.TYPE_QNAME, "Name of initial template");
@@ -46,7 +46,7 @@ namespace Saxon.Hej {
             options.addRecognizedOption("repeat", (Saxon.Hej.trans.CommandLineOptions.TYPE_INTEGER|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Run N times for performance measurement");
             options.addRecognizedOption("s", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Source XML file for primary input");
             options.addRecognizedOption("sa", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Run in schema-aware mode");
-            options.addRecognizedOption("scmin", Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME, "Pre-load schema in SCM format");
+            options.addRecognizedOption("scmin", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Pre-load schema in SCM format");
             options.addRecognizedOption("strip", (Saxon.Hej.trans.CommandLineOptions.TYPE_ENUMERATION|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Handling of whitespace text nodes in source documents");
             options.setPermittedValues("strip", new string[]{"none", "all", "ignorable"}, null);
             options.addRecognizedOption("t", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Display version and timing information, and names of output files");
@@ -55,7 +55,7 @@ namespace Saxon.Hej {
             options.addRecognizedOption("T", Saxon.Hej.trans.CommandLineOptions.TYPE_CLASSNAME, "Use named TraceListener class, or standard TraceListener");
             options.addRecognizedOption("Tlevel", Saxon.Hej.trans.CommandLineOptions.TYPE_STRING, "Level of detail for trace listener output");
             options.setPermittedValues("Tlevel", new string[]{"none", "low", "normal", "high"}, "normal");
-            options.addRecognizedOption("Tout", Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME, "File for trace listener output");
+            options.addRecognizedOption("Tout", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "File for trace listener output");
             options.addRecognizedOption("tree", (Saxon.Hej.trans.CommandLineOptions.TYPE_ENUMERATION|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Use specified tree model for source documents");
             options.setPermittedValues("tree", new string[]{"linked", "tiny", "tinyc"}, null);
             options.addRecognizedOption("traceout", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "File for output of trace() and -T output");
@@ -413,15 +413,15 @@ namespace Saxon.Hej {
                     if (isURI) {
                         Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                         request.relativeUri = styleFileName;
-                        System.Uri cwd = getCurrentWorkingDirectory();
+                        System.Uri cwd = Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory();
                         request.baseUri = cwd.OriginalString;
                         request.uri = new System.Uri(cwd, styleFileName).ToString();
                         request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSLT_NATURE;
-                        request.purpose = "transformation";
+                        request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                         styleSource = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                     } else {
                         if (styleFileName.Equals("-")) {
-                            string sysId = getCurrentWorkingDirectory().OriginalString;
+                            string sysId = Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory().OriginalString;
                             styleSource = new Saxon.Ejavax.xml.transform.stream.StreamSource(System.Console.In, sysId);
                         } else {
                             Saxon.Hej.trans.packages.PackageLibrary library = config.getDefaultXsltCompilerInfo().getPackageLibrary();
@@ -560,9 +560,6 @@ namespace Saxon.Hej {
         }
         public void doTransform(string[] args, string command) {
             doTransform(args);
-        }
-        private static System.Uri getCurrentWorkingDirectory() {
-            return Saxon.Ejava.io.File.CurrentDirectoryUri();
         }
         protected internal void initializeConfiguration(Saxon.Hej.Configuration config) {
         }
@@ -703,7 +700,7 @@ namespace Saxon.Hej {
                 Saxon.Hej.s9api.Xslt30Transformer transformer = newTransformer(sheet, options);
                 Saxon.Hej.s9api.Serializer serializer;
                 if ((outputFile == null)) {
-                    transformer.setBaseOutputURI(getCurrentWorkingDirectory().OriginalString);
+                    transformer.setBaseOutputURI(Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory().OriginalString);
                     serializer = processor.newSerializer(System.Console.Out);
                 } else {
                     serializer = processor.newSerializer(outputFile);

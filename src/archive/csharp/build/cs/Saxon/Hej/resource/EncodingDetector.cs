@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.resource {
     public class EncodingDetector {
-        public static string inferStreamEncoding(System.IO.Stream @is, Saxon.Hej.lib.Logger err) {
+        public static string inferStreamEncoding(System.IO.Stream @is, string defaultEncoding, Saxon.Hej.lib.Logger err) {
             Saxon.Hej.query.InputStreamMarker marker = new Saxon.Hej.query.InputStreamMarker(@is);
             marker.mark(100);
             byte[] start = new byte[100];
             int read = @is.Read(start, 0, 100);
             marker.reset();
-            return inferEncoding(start, read, err);
+            return inferEncoding(start, read, defaultEncoding, err);
         }
-        private static string inferEncoding(byte[] start, int read, Saxon.Hej.lib.Logger logger) {
+        private static string inferEncoding(byte[] start, int read, string defaultEncoding, Saxon.Hej.lib.Logger logger) {
             bool debug = (logger != null);
             if ((read>=2)) {
                 if (((ch(start[0]) == 0xFE) && (ch(start[1]) == 0xFF))) {
@@ -83,7 +83,7 @@ namespace Saxon.Hej.resource {
             if (debug) {
                 logger.info("unparsed-text(): assuming fallback encoding (UTF-8)");
             }
-            return "UTF-8";
+            return defaultEncoding;
         }
         private static int ch(byte b) {
             return ((int)(b)&unchecked((int)0xff));

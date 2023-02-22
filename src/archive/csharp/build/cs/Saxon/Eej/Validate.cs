@@ -87,6 +87,7 @@ namespace Saxon.Eej {
                     badUsage("");
                     return 0;
                 }
+                useURLs = "on".Equals(options.getOptionValue("u"));
                 value = options.getOptionValue("limits");
                 if ((value != null)) {
                     int comma = value.IndexOf(',');
@@ -109,7 +110,11 @@ namespace Saxon.Eej {
                 }
                 value = options.getOptionValue("s");
                 if ((value != null)) {
-                    Saxon.Ejava.util.StringTokenizer tokenizer = new Saxon.Ejava.util.StringTokenizer(value, System.IO.Path.PathSeparator.ToString());
+                    string delim = System.IO.Path.PathSeparator.ToString();
+                    if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(value))) {
+                        delim = " \t\n\r\f";
+                    }
+                    Saxon.Ejava.util.StringTokenizer tokenizer = new Saxon.Ejava.util.StringTokenizer(value, delim);
                     while (tokenizer.hasMoreTokens()) {
                         sourceFileNames.Add(tokenizer.nextToken());
                     }
@@ -120,7 +125,6 @@ namespace Saxon.Eej {
                     showTime = true;
                 }
                 topLevelElementName = options.getOptionValue("top");
-                useURLs = "on".Equals(options.getOptionValue("u"));
                 value = options.getOptionValue("val");
                 if ((value != null)) {
                     validationMode = value;
@@ -156,12 +160,12 @@ namespace Saxon.Eej {
                     if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(schemaFileName))) {
                         Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                         request.relativeUri = schemaFileName;
-                        System.Uri cwd = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI();
+                        System.Uri cwd = Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory();
                         request.baseUri = cwd.ToString();
                         request.uri = new System.Uri(cwd, schemaFileName).ToString();
                         request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSD_NATURE;
-                        request.purpose = "schema validation";
-                        schemaSource = request.resolve(config.getResourceResolver());
+                        request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.VALIDATION_PURPOSE;
+                        schemaSource = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                     } else {
                         if (schemaFileName.Equals("-")) {
                             schemaSource = new Saxon.Ejavax.xml.transform.stream.StreamSource(System.Console.In);
@@ -323,12 +327,12 @@ namespace Saxon.Eej {
             if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(sourceFileName))) {
                 Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                 request.relativeUri = sourceFileName;
-                System.Uri cwd = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI();
+                System.Uri cwd = Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory();
                 request.baseUri = cwd.ToString();
                 request.uri = new System.Uri(cwd, sourceFileName).ToString();
                 request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
-                request.purpose = "source document";
-                sourceInput = request.resolve(config.getResourceResolver());
+                request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
+                sourceInput = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
             } else {
                 if (sourceFileName.Equals("-")) {
                     sourceInput = new Saxon.Ejavax.xml.transform.stream.StreamSource(System.Console.In);

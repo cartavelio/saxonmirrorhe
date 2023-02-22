@@ -61,7 +61,7 @@ namespace Saxon.Hej.lib {
                     throw Saxon.Hej.trans.XPathException.makeXPathException(err);
                 }
                 rr.nature = Saxon.Hej.lib.NamespaceConstant.OUTPUT;
-                rr.purpose = "serialization";
+                rr.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                 Saxon.Ejavax.xml.transform.Source source = rr.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                 Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions();
                 options.setSchemaValidationMode(Saxon.Hej.lib.Validation.LAX);
@@ -652,8 +652,14 @@ namespace Saxon.Hej.lib {
         }
         private string checkMethod(string key, string value) {
             if ((((!("xml".Equals(value)) && !("html".Equals(value))) && !("xhtml".Equals(value))) && !("text".Equals(value)))) {
-                if ((!(Saxon.Hej.lib.SaxonOutputKeys.JSON_NODE_OUTPUT_METHOD.Equals(key)) && (("json".Equals(value) || "adaptive".Equals(value))))) {
-                    return value;
+                string allowed;
+                if (Saxon.Hej.lib.SaxonOutputKeys.JSON_NODE_OUTPUT_METHOD.Equals(key)) {
+                    allowed = "xml|html|xhtml|text";
+                } else {
+                    allowed = "xml|html|xhtml|text|json|adaptive";
+                    if (("json".Equals(value) || "adaptive".Equals(value))) {
+                        return value;
+                    }
                 }
                 if (value.StartsWith("{")) {
                     value = ("Q"+value);
@@ -661,7 +667,7 @@ namespace Saxon.Hej.lib {
                 if (isValidEQName(value)) {
                     checkExtensions(value);
                 } else {
-                    throw new Saxon.Hej.trans.XPathException(((("Invalid value ("+value)+") for serialization method: ")+"must be xml|html|xhtml|text|json|adaptive, or a QName in 'Q{uri}local' form"), "SEPM0016");
+                    throw new Saxon.Hej.trans.XPathException(((((("Invalid value ("+value)+") for serialization method: ")+"must be ")+allowed)+", or a QName in 'Q{uri}local' form"), "SEPM0016");
                 }
             }
             return value;

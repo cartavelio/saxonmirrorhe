@@ -146,7 +146,12 @@ namespace Saxon.Hej.style {
             Saxon.Hej.Configuration config = env.getConfiguration();
             Saxon.Hej.lib.StringCollator collator = null;
             if ((collationName != null)) {
-                collator = findCollation(collationName, getBaseURI());
+                try {
+                    collator = findCollation(collationName, getBaseURI());
+                } catch (Saxon.Hej.trans.XPathException err) {
+                    compileError(((("Failed to load collation "+collationName)+": ")+err.Message), "XTSE1210");
+                    collator = Saxon.Hej.expr.sort.CodepointCollator.getInstance();
+                }
                 if ((collator == null)) {
                     compileError((("The collation name "+Saxon.Hej.trans.Err.wrap(collationName, Saxon.Hej.trans.Err.URI))+" is not recognized"), "XTSE1210");
                     collator = Saxon.Hej.expr.sort.CodepointCollator.getInstance();

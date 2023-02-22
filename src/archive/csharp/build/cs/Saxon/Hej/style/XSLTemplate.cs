@@ -225,7 +225,7 @@ namespace Saxon.Hej.style {
                     if (!(Saxon.Hej.value.BigDecimalValue.castableAsDecimal(priorityAtt))) {
                         compileError((("Invalid numeric value for priority ("+priority)+')'), "XTSE0530");
                     }
-                    priority = System.Double.Parse(priorityAtt);
+                    priority = Saxon.Impl.Helpers.Utils.ParseDouble(priorityAtt);
                 } catch (Saxon.Ejava.lang.NumberFormatException err) {
                     compileError((("Invalid numeric value for priority ("+priority)+')'), "XTSE0530");
                 }

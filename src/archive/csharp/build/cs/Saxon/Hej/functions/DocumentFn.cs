@@ -234,7 +234,7 @@ namespace Saxon.Hej.functions {
                 request.uri = href;
             }
             request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
-            request.purpose = "source document";
+            request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
             try {
                 return request.resolve(resolver, config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
             } catch (Saxon.Hej.trans.XPathException err) {
@@ -348,7 +348,7 @@ namespace Saxon.Hej.functions {
                     request.uri = documentKey.getAbsoluteURI();
                     request.streamable = true;
                     request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
-                    request.purpose = "source document";
+                    request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                     source = request.resolve(context.getResourceResolver(), config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                     if ((source == null)) {
                         Saxon.Hej.trans.XPathException xerr = new Saxon.Hej.trans.XPathException(("Failed to resolve streamed document URI "+request.uri), "FODC0005");

@@ -442,7 +442,7 @@ namespace Saxon.Hej.expr {
             return new Saxon.Hej.value.BigDecimalValue(result);
         }
         private static Singulink.Numerics.BigDecimal internalDecimalDivide(Singulink.Numerics.BigDecimal A, Singulink.Numerics.BigDecimal B) {
-            return A/B;
+            return Singulink.Numerics.BigDecimal.Divide(A, B, 18, Singulink.Numerics.RoundingMode.MidpointToZero);
         }
         public class DecimalModDecimal : Saxon.Hej.expr.Calculator {
             public override Saxon.Hej.value.AtomicValue compute(Saxon.Hej.value.AtomicValue a, Saxon.Hej.value.AtomicValue b, Saxon.Hej.expr.XPathContext c) {

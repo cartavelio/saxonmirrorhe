@@ -6,8 +6,8 @@ namespace Saxon.Hej.value {
         public static Saxon.Hej.value.NumericValue parseNumber(string @in) {
             if (((@in.IndexOf('e')>=0) || (@in.IndexOf('E')>=0))) {
                 try {
-                    return new Saxon.Hej.value.DoubleValue(System.Double.Parse(@in));
-                } catch (/* substitute exception */ System.FormatException e) {
+                    return new Saxon.Hej.value.DoubleValue(Saxon.Impl.Helpers.Utils.ParseDouble(@in));
+                } catch (Saxon.Ejava.lang.NumberFormatException e) {
                     return Saxon.Hej.value.DoubleValue.NaN;
                 }
             } else {

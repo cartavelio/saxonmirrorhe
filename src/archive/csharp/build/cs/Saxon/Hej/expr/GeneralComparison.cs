@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr {
     #pragma warning disable 659
-    public abstract class GeneralComparison : Saxon.Hej.expr.BinaryExpression, Saxon.Hej.expr.ComparisonExpression, Saxon.Hej.expr.Callable {
+    public abstract class GeneralComparison : Saxon.Hej.expr.BinaryExpression, Saxon.Hej.expr.ComparisonExpression {
         public enum ComparisonCardinality {
             ONE_TO_ONE,
             MANY_TO_ONE,
@@ -209,7 +209,6 @@ namespace Saxon.Hej.expr {
             return base.computeHashCode();
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
-            Saxon.Hej.type.TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
             Saxon.Hej.expr.StaticContext env = visitor.getStaticContext();
             getLhs().optimize(visitor, contextInfo);
             getRhs().optimize(visitor, contextInfo);
@@ -331,50 +330,7 @@ namespace Saxon.Hej.expr {
             return false;
         }
         public override Saxon.Hej.value.BooleanValue evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            switch (comparisonCardinality) {
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.ONE_TO_ONE:
-                {
-                    Saxon.Hej.value.AtomicValue value0 = (Saxon.Hej.value.AtomicValue)(getLhsExpression().evaluateItem(context));
-                    Saxon.Hej.value.AtomicValue value1 = (Saxon.Hej.value.AtomicValue)(getRhsExpression().evaluateItem(context));
-                    return Saxon.Hej.value.BooleanValue.get(evaluateOneToOne(value0, value1, context));
-                }
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_ONE:
-                {
-                    Saxon.Hej.om.SequenceIterator iter0 = getLhsExpression().iterate(context);
-                    Saxon.Hej.value.AtomicValue value1 = (Saxon.Hej.value.AtomicValue)(getRhsExpression().evaluateItem(context));
-                    return Saxon.Hej.value.BooleanValue.get(evaluateManyToOne(iter0, value1, context));
-                }
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_MANY:
-                {
-                    Saxon.Hej.om.SequenceIterator iter1 = getLhsExpression().iterate(context);
-                    Saxon.Hej.om.SequenceIterator iter2 = getRhsExpression().iterate(context);
-                    return Saxon.Hej.value.BooleanValue.get(evaluateManyToMany(iter1, iter2, context));
-                }
-            }
-            return null;
-        }
-        public Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-            switch (comparisonCardinality) {
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.ONE_TO_ONE:
-                {
-                    Saxon.Hej.value.AtomicValue value0 = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
-                    Saxon.Hej.value.AtomicValue value1 = (Saxon.Hej.value.AtomicValue)(arguments[1].head());
-                    return Saxon.Hej.value.BooleanValue.get(evaluateOneToOne(value0, value1, context));
-                }
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_ONE:
-                {
-                    Saxon.Hej.om.SequenceIterator iter0 = arguments[0].iterate();
-                    Saxon.Hej.value.AtomicValue value1 = (Saxon.Hej.value.AtomicValue)(arguments[1].head());
-                    return Saxon.Hej.value.BooleanValue.get(evaluateManyToOne(iter0, value1, context));
-                }
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_MANY:
-                {
-                    Saxon.Hej.om.SequenceIterator iter1 = arguments[0].iterate();
-                    Saxon.Hej.om.SequenceIterator iter2 = arguments[1].iterate();
-                    return Saxon.Hej.value.BooleanValue.get(evaluateManyToMany(iter1, iter2, context));
-                }
-            }
-            return null;
+            return Saxon.Hej.value.BooleanValue.get(effectiveBooleanValue(context));
         }
         public override bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext context) {
             switch (comparisonCardinality) {

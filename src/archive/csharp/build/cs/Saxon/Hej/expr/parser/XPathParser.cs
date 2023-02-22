@@ -1665,7 +1665,7 @@ namespace Saxon.Hej.expr.parser {
               case Saxon.Hej.expr.parser.Token.STRING_LITERAL:
                 return parseStringLiteral(true);
               case Saxon.Hej.expr.parser.Token.STRING_LITERAL_BACKTICKED:
-                return parseStringLiteral(true);
+                return parseBackTickedStringLiteral();
               case Saxon.Hej.expr.parser.Token.STRING_CONSTRUCTOR_INITIAL:
                 return parseStringConstructor();
               case Saxon.Hej.expr.parser.Token.NUMBER:
@@ -1855,9 +1855,14 @@ namespace Saxon.Hej.expr.parser {
             return (traceable ? makeTracer(lit, null) : lit);
         }
         protected internal Saxon.Hej.expr.Expression parseStringLiteral(bool traceable) {
-            Saxon.Hej.expr.Literal literal = makeStringLiteral(t.currentTokenValue);
+            Saxon.Hej.expr.Literal literal = makeStringLiteral(t.currentTokenValue, true);
             nextToken();
             return (traceable ? makeTracer(literal, null) : literal);
+        }
+        protected internal Saxon.Hej.expr.Expression parseBackTickedStringLiteral() {
+            Saxon.Hej.expr.Literal literal = makeStringLiteral(t.currentTokenValue, false);
+            nextToken();
+            return makeTracer(literal, null);
         }
         protected internal virtual Saxon.Hej.expr.Expression parseStringConstructor() {
             grumble("String constructor expressions are allowed only in XQuery");
@@ -1902,7 +1907,7 @@ namespace Saxon.Hej.expr.parser {
             setLocation(@ref, offset);
             return @ref;
         }
-        protected internal virtual Saxon.Hej.expr.Literal makeStringLiteral(string currentTokenValue) {
+        protected internal virtual Saxon.Hej.expr.Literal makeStringLiteral(string currentTokenValue, bool unescape) {
             Saxon.Hej.expr.StringLiteral literal = new Saxon.Hej.expr.StringLiteral(currentTokenValue);
             setLocation(literal);
             return literal;

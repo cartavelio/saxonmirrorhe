@@ -198,7 +198,11 @@ namespace Saxon.Hej.str {
             lastSegment = null;
         }
         public int length() {
-            return ((completeSegments.Count*SEGLEN)+(((lastSegment == null) ? 0 : lastSegmentLength)));
+            if ((lastSegment == null)) {
+                return ((((completeSegments.Count-1))*SEGLEN)+lastSegmentLength);
+            } else {
+                return ((completeSegments.Count*SEGLEN)+lastSegmentLength);
+            }
         }
         public void setLength(int newLength) {
             if ((newLength<length())) {

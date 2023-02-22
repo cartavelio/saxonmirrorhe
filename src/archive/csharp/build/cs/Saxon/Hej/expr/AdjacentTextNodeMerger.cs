@@ -62,7 +62,7 @@ namespace Saxon.Hej.expr {
                             maybeEmpty = true;
                         }
                     } else {
-                        maybetext = (th.relationship(action.getItemType(), Saxon.Hej.pattern.NodeKindTest.TEXT) != Saxon.Hej.type.Affinity.DISJOINT);
+                        maybetext = action.getStaticUType(contextInfo.getContextItemUType()).overlaps(Saxon.Hej.type.UType.TEXT);
                         maybeEmpty |= maybetext;
                     }
                     if ((prevtext && maybetext)) {

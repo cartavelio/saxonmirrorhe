@@ -120,7 +120,7 @@ namespace Saxon.Hej.value {
                     if ((value<0)) {
                         return badTime("Non-numeric fractional seconds component", s);
                     }
-                    double fractionalSeconds = System.Double.Parse(('.'+part));
+                    double fractionalSeconds = Saxon.Impl.Helpers.Utils.ParseDouble(('.'+part));
                     tv.nanosecond = (int)((long)System.Math.Round((fractionalSeconds*1_000_000_000), System.MidpointRounding.AwayFromZero));
                     if (((tv.hour == 24) && (tv.nanosecond != 0))) {
                         return badTime("If hour is 24, fractional seconds must be 0", s);

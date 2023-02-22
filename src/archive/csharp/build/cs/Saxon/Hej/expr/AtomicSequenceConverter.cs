@@ -227,6 +227,9 @@ namespace Saxon.Hej.expr {
         protected internal override string displayOperator(Saxon.Hej.Configuration config) {
             return "convert";
         }
+        public override string ToString() {
+            return (((("convertTo_"+getRequiredItemType().ToString())+"(")+getBaseExpression().ToString())+")");
+        }
         public override void export(Saxon.Hej.trace.ExpressionPresenter destination) {
             destination.startElement("convert", this);
             destination.emitAttribute("from", Saxon.Hej.type.AlphaCode.fromItemType(getBaseExpression().getItemType()));

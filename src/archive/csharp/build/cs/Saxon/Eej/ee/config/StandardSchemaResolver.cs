@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.config {
     public class StandardSchemaResolver : Saxon.Hej.lib.SchemaURIResolver {
-        public const string SCHEMA_NATURE = "http://www.w3.org/2001/XMLSchema";
-        public const string VALIDATION_PURPOSE = "http://www.rddl.org/purposes#validation";
         private Saxon.Eej.config.EnterpriseConfiguration config;
         private static readonly Saxon.Ejavax.xml.transform.stream.StreamSource[] EMPTY_SOURCE_ARRAY = new Saxon.Ejavax.xml.transform.stream.StreamSource[0];
         private Saxon.Hej.lib.JJ_ResourceResolver resourceResolver;
@@ -31,7 +29,13 @@ namespace Saxon.Eej.ee.config {
                 return new Saxon.Ejavax.xml.transform.Source[]{fetchResource("xpath-functions.scm", config)};
             }
             if (Saxon.Hej.lib.NamespaceConstant.XLINK.Equals(targetNamespace)) {
-                locations = new string[]{"https://www.w3.org/1999/xlink.xsd"};
+                locations = null;
+            }
+            if (((((locations == null) || (locations.Length == 0))) && (targetNamespace != null))) {
+                Saxon.Ejavax.xml.transform.Source source = resolveNamespaceURI(targetNamespace, baseURI);
+                if ((source != null)) {
+                    return new Saxon.Ejavax.xml.transform.Source[]{source};
+                }
             }
             if (((locations == null) || (locations.Length == 0))) {
                 return EMPTY_SOURCE_ARRAY;
@@ -51,7 +55,7 @@ namespace Saxon.Eej.ee.config {
             rr.relativeUri = location;
             rr.baseUri = baseURI;
             rr.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSD_NATURE;
-            rr.purpose = "schema module";
+            rr.purpose = Saxon.Hej.lib.JJ_ResourceRequest.VALIDATION_PURPOSE;
             try {
                 rr.uri = Saxon.Hej.functions.ResolveURI.makeAbsolute(location, baseURI).ToString();
             } catch (System.UriFormatException err) {
@@ -65,7 +69,7 @@ namespace Saxon.Eej.ee.config {
             rr.baseUri = baseURI;
             rr.uriIsNamespace = true;
             rr.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSD_NATURE;
-            rr.purpose = "schema module";
+            rr.purpose = Saxon.Hej.lib.JJ_ResourceRequest.VALIDATION_PURPOSE;
             try {
                 return rr.resolve(config.getResourceResolver());
             } catch (Saxon.Ejavax.xml.transform.TransformerException ex) {

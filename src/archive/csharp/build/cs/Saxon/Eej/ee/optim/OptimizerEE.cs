@@ -557,6 +557,9 @@ namespace Saxon.Eej.ee.optim {
             return f;
         }
         public override Saxon.Hej.expr.FilterExpression reorderPredicates(Saxon.Hej.expr.FilterExpression f, Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo cisi) {
+            if (!(isOptionSet(Saxon.Hej.expr.parser.OptimizerOptions.REORDER_PREDICATES))) {
+                return f;
+            }
             Saxon.Hej.expr.Expression @base = f.getBase();
             if (!(((@base is Saxon.Hej.expr.FilterExpression)))) {
                 return f;
@@ -1198,7 +1201,7 @@ namespace Saxon.Eej.ee.optim {
             }
         }
         public override Saxon.Hej.expr.Expression generateMultithreadedInstruction(Saxon.Hej.expr.Expression instruction) {
-            if (((instruction is Saxon.Hej.expr.instruct.ForEach) && config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_MULTITHREADING))) {
+            if ((((instruction is Saxon.Hej.expr.instruct.ForEach) && config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_MULTITHREADING)) && !(((Saxon.Hej.expr.instruct.ForEach)(instruction)).isContainsTailCall()))) {
                 Saxon.Hej.expr.instruct.ForEach @base = (Saxon.Hej.expr.instruct.ForEach)(instruction);
                 Saxon.Eej.ee.parallel.MultithreadedForEach result = new Saxon.Eej.ee.parallel.MultithreadedForEach(@base.getSelectExpression(), @base.getActionExpression(), false, @base.getNumberOfThreadsExpression());
                 result.setInstruction(@base.isInstruction());

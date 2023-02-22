@@ -194,7 +194,7 @@ namespace Saxon.Hej.style {
                 request.baseUri = baseUriStr;
                 request.uri = key.getAbsoluteURI();
                 request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSLT_NATURE;
-                request.purpose = "stylesheet module";
+                request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                 Saxon.Ejavax.xml.transform.Source source = request.resolve(resolver, config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                 if ((source == null)) {
                     Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(((("Unable to resolve "+elemName.getDisplayName())+" stylesheet URI ")+href), "XTSE0165");

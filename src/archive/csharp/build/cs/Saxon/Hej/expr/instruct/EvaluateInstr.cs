@@ -258,7 +258,7 @@ namespace Saxon.Hej.expr.instruct {
                 expr = tc.staticTypeCheck(expr, requiredType, role, visitor);
                 Saxon.Hej.type.ItemType contextItemType = Saxon.Hej.type.Type.ITEM_TYPE;
                 expr = Saxon.Hej.expr.parser.ExpressionTool.resolveCallsToCurrentFunction(expr);
-                Saxon.Hej.expr.parser.ContextItemStaticInfo cit = config.makeContextItemStaticInfo(contextItemType, (context.getContextItem() == null));
+                Saxon.Hej.expr.parser.ContextItemStaticInfo cit = Saxon.Hej.expr.parser.ContextItemStaticInfo.DEFAULT;
                 expr = expr.typeCheck(visitor, cit).optimize(visitor, cit);
                 slotMap = env.getStackFrameMap();
                 Saxon.Hej.expr.parser.ExpressionTool.allocateSlots(expr, slotMap.getNumberOfVariables(), slotMap);
@@ -277,7 +277,11 @@ namespace Saxon.Hej.expr.instruct {
             c2.openStackFrame(slotMap);
             if ((getActualParams() != null)) {
                 for (int i = 0; (i<getActualParams().Length); i++) {
-                    int slot = slotMap.getVariableMap().IndexOf(getActualParams()[i].getVariableQName());
+                    Saxon.Hej.om.StructuredQName variableQName = getActualParams()[i].getVariableQName();
+                    if (((dynamicParams != null) && (dynamicParams.get(new Saxon.Hej.value.QNameValue(variableQName, Saxon.Hej.type.BuiltInAtomicType.QNAME)) != null))) {
+                        continue ;
+                    }
+                    int slot = slotMap.getVariableMap().IndexOf(variableQName);
                     c2.setLocalVariable(slot, getActualParams()[i].getSelectValue(context));
                 }
             }

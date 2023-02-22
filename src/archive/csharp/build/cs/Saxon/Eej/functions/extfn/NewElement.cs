@@ -13,7 +13,7 @@ namespace Saxon.Eej.functions.extfn {
             Saxon.Hej.value.AtomicValue nameArg = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
             Saxon.Hej.value.QNameValue name;
             if ((nameArg is Saxon.Hej.value.QNameValue)) {
-                name = (Saxon.Hej.value.QNameValue)(arguments[0].head());
+                name = (Saxon.Hej.value.QNameValue)(nameArg);
             } else {
                 string s = nameArg.getStringValue();
                 Saxon.Hej.om.StructuredQName q = Saxon.Hej.om.StructuredQName.fromLexicalQName(s, false, true, getRetainedStaticContext());

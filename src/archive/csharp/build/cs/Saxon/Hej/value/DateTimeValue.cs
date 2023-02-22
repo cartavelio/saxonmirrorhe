@@ -239,7 +239,7 @@ namespace Saxon.Hej.value {
                     if ((value<0)) {
                         return badDate("Non-numeric fractional seconds component", s);
                     }
-                    double fractionalSeconds = System.Double.Parse(('.'+part));
+                    double fractionalSeconds = Saxon.Impl.Helpers.Utils.ParseDouble(('.'+part));
                     int nanoSeconds = (int)((long)System.Math.Round((fractionalSeconds*1_000_000_000), System.MidpointRounding.AwayFromZero));
                     if ((nanoSeconds == 1_000_000_000)) {
                         nanoSeconds--;

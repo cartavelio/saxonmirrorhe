@@ -272,7 +272,7 @@ namespace Saxon.Hej.expr {
             return Saxon.Hej.value.SequenceType.makeSequenceType(getItemType(), getCardinality());
         }
         public virtual Saxon.Hej.type.UType getStaticUType(Saxon.Hej.type.UType contextItemType) {
-            return Saxon.Hej.type.UType.ANY;
+            return getItemType().getUType();
         }
         public virtual int getDependencies() {
             if ((staticProperties == -1)) {

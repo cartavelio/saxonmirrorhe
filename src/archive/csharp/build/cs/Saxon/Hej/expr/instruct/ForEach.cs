@@ -31,6 +31,12 @@ namespace Saxon.Hej.expr.instruct {
         public override bool isInstruction() {
             return _isInstruction;
         }
+        public void setContainsTailCall(bool tc) {
+            containsTailCall = tc;
+        }
+        public bool isContainsTailCall() {
+            return containsTailCall;
+        }
         public Saxon.Hej.expr.Expression getSelect() {
             return selectOp.getChildExpression();
         }
@@ -120,7 +126,7 @@ namespace Saxon.Hej.expr.instruct {
             if (((getSelect().getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE) && (getAction() is Saxon.Hej.expr.AxisExpression))) {
                 return new Saxon.Hej.expr.SimpleStepExpression(getSelect(), getAction());
             }
-            if (((threadsOp != null) && !(Saxon.Hej.expr.Literal.isEmptySequence(getThreads())))) {
+            if ((((threadsOp != null) && !(Saxon.Hej.expr.Literal.isEmptySequence(getThreads()))) && !(containsTailCall))) {
                 return visitor.obtainOptimizer().generateMultithreadedInstruction(this);
             }
             return this;
@@ -274,6 +280,9 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("forEach", this);
+            if (containsTailCall) {
+                @out.emitAttribute("flags", "t");
+            }
             getSelect().export(@out);
             getAction().export(@out);
             if ((separatorOp != null)) {

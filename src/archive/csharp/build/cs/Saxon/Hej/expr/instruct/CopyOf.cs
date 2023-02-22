@@ -180,6 +180,9 @@ namespace Saxon.Hej.expr.instruct {
             }
             return getSelect().getItemType();
         }
+        public override Saxon.Hej.type.UType getStaticUType(Saxon.Hej.type.UType contextItemType) {
+            return getSelect().getStaticUType(contextItemType);
+        }
         public override int getCardinality() {
             return getSelect().getCardinality();
         }

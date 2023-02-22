@@ -224,7 +224,7 @@ namespace Saxon.Hej.functions {
                           case "xpath-version":
                             {
                                 try {
-                                    if ((System.Double.Parse(val)>3.1)) {
+                                    if ((Saxon.Impl.Helpers.Utils.ParseDouble(val)>3.1)) {
                                         unsuitable("xpath-version", val);
                                     }
                                 } catch (Saxon.Ejava.lang.NumberFormatException nfe) {
@@ -235,7 +235,7 @@ namespace Saxon.Hej.functions {
                           case "xsd-version":
                             {
                                 try {
-                                    if ((System.Double.Parse(val)>1.1)) {
+                                    if ((Saxon.Impl.Helpers.Utils.ParseDouble(val)>1.1)) {
                                         unsuitable("xsd-version", val);
                                     }
                                 } catch (Saxon.Ejava.lang.NumberFormatException nfe) {
@@ -308,7 +308,7 @@ namespace Saxon.Hej.functions {
                         request.relativeUri = stylesheetLocation;
                         request.uri = Saxon.Hej.functions.ResolveURI.makeAbsolute(stylesheetLocation, @base).ToString();
                         request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSLT_NATURE;
-                        request.purpose = "transformation";
+                        request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                         style = request.resolve(xsltCompiler.getResourceResolver(), config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                     } catch (System.UriFormatException e) {
                         throw new Saxon.Hej.trans.XPathException(("Failed to resolve stylesheet-location in fn:transform: "+e.Message));
@@ -623,7 +623,7 @@ namespace Saxon.Hej.functions {
                                 rr.relativeUri = sourceLocation;
                                 rr.baseUri = @base;
                                 rr.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
-                                rr.purpose = "source document";
+                                rr.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                                 try {
                                     rr.uri = Saxon.Hej.functions.ResolveURI.makeAbsolute(sourceLocation, @base).ToString();
                                 } catch (System.UriFormatException err) {

@@ -211,7 +211,13 @@ namespace Saxon.Hej.om {
             }
         }
         public static void process(Saxon.Hej.om.Sequence value, Saxon.Hej.@event.Outputter output, Saxon.Hej.s9api.Location locationId) {
-            supply(value.iterate(), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((it => output.append(it, locationId, Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES))));
+            try {
+                supply(value.iterate(), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((it => output.append(it, locationId, Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES))));
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                Saxon.Hej.trans.XPathException xpe = e.getXPathException();
+                xpe.maybeSetLocation(locationId);
+                throw xpe;
+            }
         }
         public static Saxon.Hej.om.Sequence[] makeSequenceArray(int length) {
             return new Saxon.Hej.om.Sequence[length];

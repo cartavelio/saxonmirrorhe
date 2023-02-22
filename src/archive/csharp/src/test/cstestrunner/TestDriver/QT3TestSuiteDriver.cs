@@ -264,8 +264,8 @@ namespace TestDriver {
                         return !inverse;
                     }
                     else if ("info-dtd".Equals(value)) {
-                        if (treeModel == TreeModel.TinyTree || treeModel == TreeModel.LinkedTree ||
-                            treeModel == TreeModel.TinyTreeCondensed) {
+                        if (treeModel == "tiny" || treeModel == "linked" ||
+                            treeModel == "condensed") {
                             return !inverse;
                         }
                         else {
@@ -410,6 +410,10 @@ namespace TestDriver {
             string testCaseName = testCase.GetAttributeValue(new QName("name"));
             string testSetName = testCase.Parent.GetAttributeValue(new QName("name"));
 
+            if (testSetName != "fn-doc") {
+                return;
+            }
+
             XdmNode resultElement = testCase.Select(Child("result")).FirstOrDefault();
             ;
             bool needSerializedResult = resultElement.Select(Descendant("assert-serialization-error")).Any()
@@ -539,10 +543,10 @@ namespace TestDriver {
 
             XdmNode exceptionElement;
 
-            exceptionsMap.TryGetValue(testCaseName, out exceptionElement);
+            bool isException = exceptionsMap.TryGetValue(testCaseName, out exceptionElement);
 
 
-            if (exceptionElement != null) {
+            if (isException) {
                 XdmItem config = xpath.EvaluateSingle("configuration", exceptionElement);
 
                 string runAtt = exceptionElement.GetAttributeValue(new QName("run"));

@@ -124,7 +124,7 @@ namespace Saxon.Hej.str {
                 }
             }
             if (allWhite) {
-                return Saxon.Hej.str.CompressedWhitespace.compressWS(@in, offset, end);
+                return Saxon.Hej.str.CompressedWhitespace.compressWS(@in, offset, len);
             }
             if ((max<256)) {
                 byte[] array = new byte[len];

@@ -56,6 +56,14 @@ namespace Saxon.Api {
         /// to strip whitespace, or <c>input-type-annotations="strip"</c> to remove type
         /// annotations, since this will result in the transformation operating on a virtual document
         /// implemented as a view or wrapper of the supplied document.</para>
+        /// <para>The name of this property is potentially misleading. If the supplied node is not
+        /// a document node (for example, if it is the outermost element in the document), then
+        /// the global context item for the transformation (that is, the value of "." when referenced
+        /// withing a global variable in the stylesheet) will actually be the root node of the
+        /// containing document tree. The supplied element node, however, is used as the
+        /// "initial match selection": that is, the transformation will start by finding a template
+        /// rule that matches the element, and evaluating that template with the element as its
+        /// context item.</para> 
         /// </remarks>
 
         public XdmNode InitialContextNode {
@@ -299,7 +307,7 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// Close the <c>Destination</c>, releasing any resources that need to be released.
+        /// Close this <c>Destination</c>, releasing any resources that need to be released.
         /// </summary>
         /// <remarks>
         /// This method is called by the system on completion of a query or transformation.
@@ -353,7 +361,7 @@ namespace Saxon.Api {
             s9Transformer.setDestination(destination.UnderlyingDestination);
             s9Transformer.transform();
         }
-
+        
         /// <summary>
         /// Escape hatch to the underlying implementation
         /// </summary>

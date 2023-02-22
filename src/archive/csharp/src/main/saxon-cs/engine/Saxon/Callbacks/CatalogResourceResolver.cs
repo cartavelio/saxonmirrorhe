@@ -9,6 +9,7 @@ using Saxon.Api;
 using Saxon.Ejava.io;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej.resource;
 using Saxon.Hej.trans;
 
 namespace Saxon.Callbacks {
@@ -80,7 +81,11 @@ namespace Saxon.Callbacks {
                         
                     }
                     if (rr != null) {
-                        return new StreamSource(rr.GetInputStream(), rr.GetResolvedUri().ToString());
+                        TypedStreamSource result = new TypedStreamSource();
+                        result.setSystemId(rr.GetResolvedUri().ToString());
+                        result.setInputStream(rr.GetInputStream());
+                        result.setContentType(rr.GetContentType());
+                        return result;
                     }
                 }
 

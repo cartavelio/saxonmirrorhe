@@ -9,6 +9,7 @@ namespace Saxon.Hej.style {
         private bool prepared = false;
         public override void initialise(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType elementType, Saxon.Hej.om.AttributeMap atts, Saxon.Hej.om.NodeInfo parent, int sequenceNumber) {
             base.initialise(elemName, elementType, atts, parent, sequenceNumber);
+            processDefaultCollationAttribute();
             declaredModes = getLocalPart().Equals("package");
         }
         public string getName() {

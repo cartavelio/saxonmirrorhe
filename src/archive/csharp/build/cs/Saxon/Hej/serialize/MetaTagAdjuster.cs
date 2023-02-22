@@ -66,6 +66,11 @@ namespace Saxon.Hej.serialize {
                                 found = true;
                                 break ;
                             }
+                        } else {
+                            if (comparesEqual(name, "charset")) {
+                                found = true;
+                                break ;
+                            }
                         }
                     }
                     inMetaTag = found;

@@ -302,7 +302,13 @@ namespace Saxon.Hej.tree.tiny {
             prevAtDepth[currentDepth] = nodeNr;
             siblingsAtDepth[currentDepth]++;
             string localLocation = locationId.getSystemId();
-            tt.setSystemId(nodeNr, localLocation);
+            if ((isUseEventLocation() && (localLocation != null))) {
+                tt.setSystemId(nodeNr, localLocation);
+            } else {
+                if ((currentDepth == 1)) {
+                    tt.setSystemId(nodeNr, systemId);
+                }
+            }
             if (((localLocation != null) && !(localLocation.Equals(baseURI)))) {
                 uniformBaseURI = false;
                 tree.setUniformBaseUri(null);

@@ -26,6 +26,9 @@ namespace Saxon.Hej.trans {
         private readonly Saxon.Ejava.util.Properties paramExpressions = new Saxon.Ejava.util.Properties();
         private readonly Saxon.Ejava.util.Properties paramFiles = new Saxon.Ejava.util.Properties();
         private readonly Saxon.Ejava.util.Properties serializationParams = new Saxon.Ejava.util.Properties();
+        public static System.Uri getCurrentWorkingDirectory() {
+            return Saxon.Ejava.io.File.CurrentDirectoryUri();
+        }
         public void addRecognizedOption(string option, int optionProperties, string helpText) {
             Saxon.Impl.Helpers.MapUtils.Put(recognizedOptions, option, optionProperties);
             Saxon.Impl.Helpers.MapUtils.Put(optionHelp, option, helpText);
@@ -199,7 +202,7 @@ namespace Saxon.Hej.trans {
                 if ((((getOptionValue("u") != null)) || isImplicitURI(optionValue))) {
                     Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                     request.nature = "urn:oasis:names:tc:entity:xmlns:xml:catalog";
-                    request.purpose = "catalog";
+                    request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                     foreach (string s in System.Text.RegularExpressions.Regex.Split(optionValue, ";")) {
                         Saxon.Ejavax.xml.transform.Source sourceInput;
                         try {
@@ -424,10 +427,14 @@ namespace Saxon.Hej.trans {
             applyFileParameters(processor, paramSetter);
             foreach (string name in paramExpressions.stringPropertyNames()) {
                 string value = paramExpressions.getProperty(name);
-                Saxon.Hej.s9api.XPathCompiler xpc = processor.newXPathCompiler();
-                Saxon.Hej.s9api.XPathExecutable xpe = xpc.compile(value);
-                Saxon.Api.XdmValue val = xpe.load().evaluate();
-                /*Delegate.setParam()*/paramSetter(Saxon.Api.QName.FromClarkName(name), val);
+                try {
+                    Saxon.Hej.s9api.XPathCompiler xpc = processor.newXPathCompiler();
+                    Saxon.Hej.s9api.XPathExecutable xpe = xpc.compile(value);
+                    Saxon.Api.XdmValue val = xpe.load().evaluate();
+                    /*Delegate.setParam()*/paramSetter(Saxon.Api.QName.FromClarkName(name), val);
+                } catch (Saxon.Api.SaxonApiException e) {
+                    throw new Saxon.Api.SaxonApiException((("Failure evaluating XPath expression {"+value)+"} on command line"), e.InnerException);
+                }
             }
         }
         private void applyFileParameters(Saxon.Hej.s9api.Processor processor, Saxon.Hej.trans.CommandLineOptions.ParamSetter paramSetter) {
@@ -468,10 +475,14 @@ namespace Saxon.Hej.trans {
             }
             foreach (string name in paramExpressions.stringPropertyNames()) {
                 string value = paramExpressions.getProperty(name);
-                Saxon.Hej.s9api.XPathCompiler xpc = processor.newXPathCompiler();
-                Saxon.Hej.s9api.XPathExecutable xpe = xpc.compile(value);
-                Saxon.Api.XdmValue val = xpe.load().evaluate();
-                compiler.setParameter(Saxon.Api.QName.FromClarkName(name), val);
+                try {
+                    Saxon.Hej.s9api.XPathCompiler xpc = processor.newXPathCompiler();
+                    Saxon.Hej.s9api.XPathExecutable xpe = xpc.compile(value);
+                    Saxon.Api.XdmValue val = xpe.load().evaluate();
+                    compiler.setParameter(Saxon.Api.QName.FromClarkName(name), val);
+                } catch (Saxon.Api.SaxonApiException e) {
+                    throw new Saxon.Api.SaxonApiException((("Failure evaluating XPath expression {"+value)+"} on command line"), e.InnerException);
+                }
             }
         }
         public void applyFileParams(Saxon.Hej.s9api.Processor processor, Saxon.Hej.s9api.Xslt30Transformer transformer) {
@@ -489,7 +500,7 @@ namespace Saxon.Hej.trans {
                     Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                     request.uri = sourceFileName;
                     request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
-                    request.purpose = "source document";
+                    request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                     sourceInput = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                 } catch (Saxon.Hej.trans.XPathException e) {
                     throw new Saxon.Api.SaxonApiException(e);

@@ -68,16 +68,6 @@ namespace Saxon.Hej.tree.iter {
         public virtual void discharge() {
         }
 
-        /* Creating stub method isActuallyGrounded to satisfy interface GroundedIterator */
-        public virtual bool isActuallyGrounded() {
-            throw new System.NotImplementedException();
-        }
-
-        /* Creating stub method getResidue to satisfy interface GroundedIterator */
-        public virtual Saxon.Hej.om.GroundedValue getResidue() {
-            throw new System.NotImplementedException();
-        }
-
         /* Creating stub method hasNext to satisfy interface LookaheadIterator */
         public virtual bool hasNext() {
             throw new System.NotImplementedException();
@@ -88,6 +78,21 @@ namespace Saxon.Hej.tree.iter {
             throw new System.NotImplementedException();
         }
 
+        /* Creating stub method isActuallyGrounded to satisfy interface GroundedIterator */
+        public virtual bool isActuallyGrounded() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method getResidue to satisfy interface GroundedIterator */
+        public virtual Saxon.Hej.om.GroundedValue getResidue() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method next to satisfy interface SequenceIterator */
+        public virtual Saxon.Hej.om.Item next() {
+            throw new System.NotImplementedException();
+        }
+
         /* Creating stub method supportsGetLength to satisfy interface LastPositionFinder */
         public virtual bool supportsGetLength() {
             throw new System.NotImplementedException();
@@ -95,11 +100,6 @@ namespace Saxon.Hej.tree.iter {
 
         /* Creating stub method getLength to satisfy interface LastPositionFinder */
         public virtual int getLength() {
-            throw new System.NotImplementedException();
-        }
-
-        /* Creating stub method next to satisfy interface SequenceIterator */
-        public virtual Saxon.Hej.om.Item next() {
             throw new System.NotImplementedException();
         }
 

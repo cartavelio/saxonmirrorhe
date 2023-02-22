@@ -781,6 +781,9 @@ namespace Saxon.Hej.trans {
         if ((sep != null)) {
             forEach.setSeparatorExpression(sep);
         }
+        string flags = element.getAttributeValue("", "flags");
+        bool containsTailCall = ((flags != null) && flags.Contains("t"));
+        forEach.setContainsTailCall(containsTailCall);
         return forEach;
     } else {
         Saxon.Hej.expr.instruct.ForEach forEach = new Saxon.Hej.expr.instruct.ForEach(lhs, rhs, false, threads);
@@ -893,8 +896,12 @@ namespace Saxon.Hej.trans {
                 exp = Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance().makeFunction(name.getLocalPart(), args.Length).makeFunctionCall(args);
             } else {
                 if (name.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON)) {
-                    loader.needsPELicense("Saxon extension functions");
-                    exp = null;
+                    if (name.getLocalPart().Equals("apply")) {
+                        exp = Saxon.Hej.functions.registry.XPath30FunctionSet.getInstance().makeFunction("apply", 2).makeFunctionCall(args);
+                    } else {
+                        loader.needsPELicense("Saxon extension functions");
+                        exp = null;
+                    }
                 }
             }
         }
@@ -2068,7 +2075,6 @@ namespace Saxon.Hej.trans {
                         break ;
                       case "globalVariable":
                         cc = readGlobalVariable(grandchild);
-                        codeGen = true;
                         break ;
                       case "globalParam":
                         cc = readGlobalParam(grandchild);
@@ -2378,7 +2384,7 @@ namespace Saxon.Hej.trans {
                 int precedence = getIntegerAttribute(templateRuleElement, "prec");
                 int rank = getIntegerAttribute(templateRuleElement, "rank");
                 string priorityAtt = templateRuleElement.getAttributeValue("", "prio");
-                double priority = System.Double.Parse(priorityAtt);
+                double priority = Saxon.Impl.Helpers.Utils.ParseDouble(priorityAtt);
                 int sequence = getIntegerAttribute(templateRuleElement, "seq");
                 int part = getIntegerAttribute(templateRuleElement, "part");
                 if ((part == System.Int32.MinValue)) {
@@ -3083,9 +3089,7 @@ namespace Saxon.Hej.trans {
         private void resolveFixups() {
             Saxon.Hej.style.StylesheetPackage pack = packStack.Peek();
             foreach (Saxon.Hej.expr.ComponentInvocation call in fixups.Peek()) {
-                if (processComponentReference(pack, call)) {
-                    break ;
-                }
+                processComponentReference(pack, call);
             }
             pack.allocateBinderySlots();
         }

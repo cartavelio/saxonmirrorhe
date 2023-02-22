@@ -348,8 +348,20 @@ namespace Saxon.Hej.tree.util {
               case Saxon.Hej.type.Type.ELEMENT:
                 {
                     Saxon.Hej.type.SchemaType annotation = ((((copyOptions&Saxon.Hej.om.CopyOptions.TYPE_ANNOTATIONS)) != 0) ? node.getSchemaType() : Saxon.Hej.type.Untyped.getInstance());
-                    Saxon.Hej.om.NamespaceMap ns = (Saxon.Hej.om.CopyOptions.includes(copyOptions, Saxon.Hej.om.CopyOptions.ALL_NAMESPACES) ? node.getAllNamespaces() : Saxon.Hej.om.NamespaceMap.emptyMap());
-                    @out.startElement(Saxon.Hej.om.NameOfNode.makeName(node), annotation, node.attributes(), ns, locationId, (Saxon.Hej.@event.ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY|Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK));
+                    Saxon.Hej.om.NamespaceMap nsMap;
+                    Saxon.Hej.om.NodeName elementName = Saxon.Hej.om.NameOfNode.makeName(node);
+                    if (Saxon.Hej.om.CopyOptions.includes(copyOptions, Saxon.Hej.om.CopyOptions.ALL_NAMESPACES)) {
+                        nsMap = node.getAllNamespaces();
+                    } else {
+                        nsMap = Saxon.Hej.om.NamespaceMap.of(elementName.getPrefix(), elementName.getURI());
+                        foreach (Saxon.Hej.om.AttributeInfo att in node.attributes()) {
+                            Saxon.Hej.om.NodeName attName = att.getNodeName();
+                            if (!(attName.getPrefix().Length==0)) {
+                                nsMap = nsMap.put(attName.getPrefix(), attName.getURI());
+                            }
+                        }
+                    }
+                    @out.startElement(Saxon.Hej.om.NameOfNode.makeName(node), annotation, node.attributes(), nsMap, locationId, (Saxon.Hej.@event.ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY|Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK));
                     foreach (Saxon.Hej.om.NodeInfo child in node.children()) {
                         child.copy(@out, copyOptions, locationId);
                     }

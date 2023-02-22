@@ -408,7 +408,11 @@ namespace Saxon.Hej.@event {
                     if (errorCode.StartsWith("SENR")) {
                         throw new Saxon.Hej.trans.XPathException((("Cannot serialize a "+thing)+" using this output method"), errorCode, locationId);
                     } else {
-                        throw new Saxon.Hej.trans.XPathException((("Cannot add a "+thing)+" to an XDM node tree"), errorCode, locationId);
+                        string msg = (((("Cannot add a "+thing)+" (")+Saxon.Hej.trans.Err.depict(item))+") to an XDM node tree");
+                        if ((pendingStartTag != null)) {
+                            msg += ((" (currently writing element "+pendingStartTag.getDisplayName())+")");
+                        }
+                        throw new Saxon.Hej.trans.XPathException(msg, errorCode, locationId);
                     }
                   case Saxon.Hej.om.Genre.NODE:
                   default:

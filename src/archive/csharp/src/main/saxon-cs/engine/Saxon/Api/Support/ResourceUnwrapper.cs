@@ -4,7 +4,7 @@ using Saxon.Hej.om;
 namespace Saxon.Api.Support {
     
     /// <summary>
-    /// Converts an <c>Saxon.Api.IResource</c> (the external Saxon-CS representation) to an <c>Saxon.Hej.lib.Resource</c>
+    /// Converts an <c>Saxon.Api.IResource</c> (the external SaxonCS representation) to an <c>Saxon.Hej.lib.Resource</c>
     /// (the internal representation).
     /// </summary>
     public class ResourceUnwrapper : Saxon.Hej.lib.Resource {

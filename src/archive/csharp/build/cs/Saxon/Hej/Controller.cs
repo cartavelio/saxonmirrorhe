@@ -434,11 +434,15 @@ namespace Saxon.Hej {
             if ((source is Saxon.Hej.om.NodeSource)) {
                 return ((Saxon.Hej.om.NodeSource)(source)).getNode();
             } else {
-                if (((((source is Saxon.Ejavax.xml.transform.stream.StreamSource) && (source.getSystemId() != null)) && (((Saxon.Ejavax.xml.transform.stream.StreamSource)(source)).getInputStream() == null)) && (((Saxon.Ejavax.xml.transform.stream.StreamSource)(source)).getReader() == null))) {
-                    Saxon.Hej.om.DocumentKey key = new Saxon.Hej.om.DocumentKey(source.getSystemId());
-                    Saxon.Hej.om.TreeInfo existing = sourceDocumentPool.find(key);
-                    if ((existing != null)) {
-                        return existing.getRootNode();
+                if ((source is Saxon.Hej.om.TreeInfo)) {
+                    return ((Saxon.Hej.om.TreeInfo)(source)).getRootNode();
+                } else {
+                    if (((((source is Saxon.Ejavax.xml.transform.stream.StreamSource) && (source.getSystemId() != null)) && (((Saxon.Ejavax.xml.transform.stream.StreamSource)(source)).getInputStream() == null)) && (((Saxon.Ejavax.xml.transform.stream.StreamSource)(source)).getReader() == null))) {
+                        Saxon.Hej.om.DocumentKey key = new Saxon.Hej.om.DocumentKey(source.getSystemId());
+                        Saxon.Hej.om.TreeInfo existing = sourceDocumentPool.find(key);
+                        if ((existing != null)) {
+                            return existing.getRootNode();
+                        }
                     }
                 }
             }

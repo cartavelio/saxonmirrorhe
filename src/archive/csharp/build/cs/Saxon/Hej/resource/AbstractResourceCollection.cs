@@ -130,7 +130,7 @@ namespace Saxon.Hej.resource {
                             string enc = encoding;
                             if ((enc == null)) {
                                 stream = Saxon.Hej.query.InputStreamMarker.ensureMarkSupported(stream);
-                                enc = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(stream, null);
+                                enc = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(stream, "UTF-8", null);
                             }
                             return characterContent = Saxon.Hej.resource.CatalogCollection.makeStringFromStream(stream, enc);
                         } catch (System.IO.IOException e) {

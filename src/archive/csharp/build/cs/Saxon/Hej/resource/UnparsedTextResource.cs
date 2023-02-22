@@ -18,7 +18,7 @@ namespace Saxon.Hej.resource {
                     if ((details.encoding == null)) {
                         try {
                             System.IO.Stream @is = new System.IO.MemoryStream(details.binaryContent);
-                            details.encoding = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(@is, null);
+                            details.encoding = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(@is, "UTF-8", null);
                             @is.Close();
                         } catch (System.IO.IOException e) {
                             throw new Saxon.Hej.trans.XPathException(e);
@@ -49,7 +49,7 @@ namespace Saxon.Hej.resource {
                     string enc = encoding;
                     if ((enc == null)) {
                         stream = Saxon.Hej.query.InputStreamMarker.ensureMarkSupported(stream);
-                        enc = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(stream, null);
+                        enc = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(stream, "UTF-8", null);
                     }
                     unparsedText = Saxon.Hej.resource.CatalogCollection.makeStringFromStream(stream, enc);
                 } catch (System.IO.IOException e) {

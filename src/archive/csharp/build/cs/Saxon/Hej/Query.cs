@@ -261,11 +261,11 @@ namespace Saxon.Hej {
                             throw;
                         }
                     }
+                    long endTime = Saxon.Ejava.lang.System.nanoTime();
+                    if ((r>=3)) {
+                        totalTime += (endTime-startTime);
+                    }
                     if (showTime) {
-                        long endTime = Saxon.Ejava.lang.System.nanoTime();
-                        if ((r>=3)) {
-                            totalTime += (endTime-startTime);
-                        }
                         if ((repeat<100)) {
                             config.getLogger().info(("Execution time: "+Saxon.Hej.trans.Timer.showExecutionTimeNano((endTime-startTime))));
                             config.getLogger().info(Saxon.Hej.trans.Timer.showMemoryUsed());
@@ -275,8 +275,8 @@ namespace Saxon.Hej {
                                 break ;
                             }
                         }
-                        startTime = endTime;
                     }
+                    startTime = endTime;
                 }
                 if ((repeat>3)) {
                     config.getLogger().info(("Average execution time: "+Saxon.Hej.trans.Timer.showExecutionTimeNano((totalTime/((r-3))))));
@@ -475,15 +475,15 @@ namespace Saxon.Hej {
             if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(sourceFileName))) {
                 Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                 request.relativeUri = sourceFileName;
-                System.Uri cwd = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI();
+                System.Uri cwd = Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory();
                 request.baseUri = cwd.ToString();
                 request.uri = new System.Uri(cwd, sourceFileName).ToString();
                 request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
-                request.purpose = "source document";
+                request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                 sourceInput = request.resolve(config.getResourceResolver());
             } else {
                 if (sourceFileName.Equals("-")) {
-                    string sysId = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI().OriginalString;
+                    string sysId = Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory().OriginalString;
                     sourceInput = new Saxon.Ejavax.xml.transform.stream.StreamSource(System.Console.In, sysId);
                 } else {
                     Saxon.Ejava.io.File sourceFile = new Saxon.Ejava.io.File(sourceFileName);
@@ -499,12 +499,12 @@ namespace Saxon.Hej {
             Saxon.Hej.s9api.XQueryExecutable exp;
             if (queryFileName.Equals("-")) {
                 System.IO.TextReader queryReader = standardInputReader();
-                compiler.setBaseURI(new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI());
+                compiler.setBaseURI(Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory());
                 exp = compiler.compile(queryReader);
             } else {
                 if ((queryFileName.StartsWith("{") && queryFileName.EndsWith("}"))) {
                     string q = queryFileName.Substring(1, (queryFileName.Length-1) - 1);
-                    compiler.setBaseURI(new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI());
+                    compiler.setBaseURI(Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory());
                     exp = compiler.compile(q);
                 } else {
                     if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(queryFileName))) {

@@ -109,16 +109,47 @@ namespace Saxon.Hej.expr {
                 if (!(singleValued)) {
                     Saxon.Hej.type.ItemType nodeType = getBaseExpression().getItemType();
                     if ((nodeType is Saxon.Hej.pattern.NodeTest)) {
-                        Saxon.Hej.type.SchemaType st = ((Saxon.Hej.pattern.NodeTest)(nodeType)).getContentType();
-                        if ((((st == Saxon.Hej.type.Untyped.getInstance()) || st.isAtomicType()) || ((st.isComplexType() && (st != Saxon.Hej.type.AnyType.getInstance()))))) {
-                            singleValued = true;
-                        }
                         if (!(nodeType.getUType().overlaps(Saxon.Hej.type.UType.ELEMENT.union(Saxon.Hej.type.UType.ATTRIBUTE)))) {
                             singleValued = true;
+                        } else {
+                            Saxon.Hej.type.SchemaType st = ((Saxon.Hej.pattern.NodeTest)(nodeType)).getContentType();
+                            if (isSingleValuedSchemaType(st)) {
+                                singleValued = true;
+                            }
                         }
                     }
                 }
             }
+        }
+        private bool isSingleValuedSchemaType(Saxon.Hej.type.SchemaType st) {
+            if ((st == Saxon.Hej.type.Untyped.getInstance())) {
+                return true;
+            }
+            if (st.isSimpleType()) {
+                Saxon.Hej.type.SimpleType sim = (Saxon.Hej.type.SimpleType)(st);
+                if (sim.isAtomicType()) {
+                    return true;
+                } else {
+                    if (sim.isListType()) {
+                        return false;
+                    } else {
+                        if (sim.isUnionType()) {
+                            return ((Saxon.Hej.type.UnionType)(sim)).isPlainType();
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            }
+            if (st.isComplexType()) {
+                if ((st == Saxon.Hej.type.AnyType.getInstance())) {
+                    return false;
+                }
+                if (((Saxon.Hej.type.ComplexType)(st)).isSimpleContent()) {
+                    return isSingleValuedSchemaType(((Saxon.Hej.type.ComplexType)(st)).getSimpleContentType());
+                }
+            }
+            return false;
         }
         private string expandMessage(string message) {
             if ((roleDiagnostic == null)) {
@@ -236,6 +267,9 @@ namespace Saxon.Hej.expr {
             operandItemType = getBaseExpression().getItemType();
             Saxon.Hej.type.TypeHierarchy th = getConfiguration().getTypeHierarchy();
             return getAtomizedItemType(getBaseExpression(), untyped, th);
+        }
+        public override Saxon.Hej.type.UType getStaticUType(Saxon.Hej.type.UType contextItemType) {
+            return Saxon.Hej.type.UType.ANY_ATOMIC.intersection(getItemType().getUType());
         }
         public static Saxon.Hej.type.ItemType getAtomizedItemType(Saxon.Hej.expr.Expression operand, bool alwaysUntyped, Saxon.Hej.type.TypeHierarchy th) {
             Saxon.Hej.type.ItemType @in = operand.getItemType();

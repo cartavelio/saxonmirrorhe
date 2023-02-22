@@ -245,7 +245,7 @@ namespace Saxon.Eej.config {
             if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION)) {
                 return new Saxon.Eej.ee.extfn.VendorFunctionSetEE(this);
             } else {
-                return null;
+                return base.makeVendorFunctionSet();
             }
         }
         public override Saxon.Hej.expr.instruct.UserFunction newUserFunction(bool memoFunction, Saxon.Hej.trans.FunctionStreamability streamability) {
@@ -919,6 +919,9 @@ namespace Saxon.Eej.config {
         }
         public override Saxon.Hej.expr.parser.OptimizerOptions getOptimizerOptions() {
             return optimizerOptions.intersect(Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION);
+        }
+        public override Saxon.Hej.expr.parser.OptimizerOptions getPermittedOptimizerOptions() {
+            return Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION;
         }
         public override Saxon.Hej.expr.parser.Optimizer obtainOptimizer() {
             if (!(isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION))) {

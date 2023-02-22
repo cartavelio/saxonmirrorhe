@@ -121,7 +121,7 @@ namespace Saxon.Hej.functions.hof {
             foreach (Saxon.Hej.expr.instruct.GlobalVariable var in lib.getImportedGlobalVariables()) {
                 Saxon.Hej.om.GroundedValue value;
                 Saxon.Hej.value.QNameValue qNameValue = new Saxon.Hej.value.QNameValue(var.getVariableQName(), Saxon.Hej.type.BuiltInAtomicType.QNAME);
-                if (qNameValue.getNamespaceURI().Equals(moduleUri)) {
+                if ((qNameValue.getNamespaceURI().Equals(moduleUri) && !(var.isPrivate()))) {
                     try {
                         value = ((/*1430*/Saxon.Hej.om.GroundedValue)var.evaluateVariable(newContext));
                     } catch (Saxon.Hej.trans.XPathException e) {
@@ -141,7 +141,7 @@ namespace Saxon.Hej.functions.hof {
             foreach (Saxon.Hej.query.XQueryFunction function in functionLib.getFunctionDefinitions()) {
                 Saxon.Hej.ma.map.MapItem newMap;
                 Saxon.Hej.value.QNameValue functionQName = new Saxon.Hej.value.QNameValue(function.getFunctionName(), Saxon.Hej.type.BuiltInAtomicType.QNAME);
-                if (functionQName.getNamespaceURI().Equals(moduleUri)) {
+                if ((functionQName.getNamespaceURI().Equals(moduleUri) && !(function.isPrivate()))) {
                     Saxon.Hej.expr.instruct.UserFunction userFunction = function.getUserFunction();
                     Saxon.Hej.functions.hof.UserFunctionReference.BoundUserFunction buf = new Saxon.Hej.functions.hof.UserFunctionReference.BoundUserFunction(agent, userFunction, null, newController);
                     if ((functionsMap.get(functionQName) != null)) {

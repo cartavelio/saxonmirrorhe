@@ -179,7 +179,12 @@ namespace Saxon.Hej.style {
             Saxon.Hej.lib.StringCollator collator = null;
             if ((collationName is Saxon.Hej.expr.StringLiteral)) {
                 string uri = ((Saxon.Hej.expr.StringLiteral)(collationName)).stringify();
-                collator = findCollation(uri, getBaseURI());
+                try {
+                    collator = findCollation(uri, getBaseURI());
+                } catch (Saxon.Hej.trans.XPathException err) {
+                    compileError(((("Failed to load collation "+uri)+": ")+err.Message), "XTDE1110");
+                    collator = Saxon.Hej.expr.sort.CodepointCollator.getInstance();
+                }
                 if ((collator == null)) {
                     compileError((("The collation name '"+collationName)+"' has not been defined"), "XTDE1110");
                 }

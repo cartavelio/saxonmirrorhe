@@ -986,6 +986,9 @@ namespace Saxon.Hej {
         public virtual Saxon.Hej.expr.parser.OptimizerOptions getOptimizerOptions() {
             return optimizerOptions.intersect(Saxon.Hej.expr.parser.OptimizerOptions.FULL_HE_OPTIMIZATION);
         }
+        public virtual Saxon.Hej.expr.parser.OptimizerOptions getPermittedOptimizerOptions() {
+            return Saxon.Hej.expr.parser.OptimizerOptions.FULL_HE_OPTIMIZATION;
+        }
         public virtual Saxon.Hej.expr.parser.Optimizer obtainOptimizer() {
             if ((optimizer == null)) {
                 optimizer = new Saxon.Hej.expr.parser.Optimizer(this);
@@ -1106,7 +1109,7 @@ namespace Saxon.Hej {
                 return (Saxon.Hej.lib.ActiveSource)(source);
             }
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
-                return new Inner_ActiveSource_429(this, source, config);
+                return new Inner_ActiveSource_430(this, source, config);
             }
             Saxon.Hej.lib.ActiveSource activeSource = Saxon.Hej.Version.platform.resolveSource(source, config);
             if ((activeSource != null)) {
@@ -1329,13 +1332,13 @@ namespace Saxon.Hej {
                       case Saxon.Hej.lib.FeatureCode.OPTIMIZATION_LEVEL:
                         if ((value is int)) {
                             int v = (int)(value);
-                            optimizerOptions = ((v == 0) ? new Saxon.Hej.expr.parser.OptimizerOptions(0) : Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION);
+                            optimizerOptions = ((v == 0) ? new Saxon.Hej.expr.parser.OptimizerOptions(0) : Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION.intersect(getPermittedOptimizerOptions()));
                         } else {
                             string s = requireString(name, value);
                             if (System.Text.RegularExpressions.Regex.IsMatch(s, "[0-9]+")) {
-                                optimizerOptions = ("0".Equals(s) ? new Saxon.Hej.expr.parser.OptimizerOptions(0) : Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION);
+                                optimizerOptions = ("0".Equals(s) ? new Saxon.Hej.expr.parser.OptimizerOptions(0) : Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION.intersect(getPermittedOptimizerOptions()));
                             } else {
-                                optimizerOptions = new Saxon.Hej.expr.parser.OptimizerOptions(s);
+                                optimizerOptions = new Saxon.Hej.expr.parser.OptimizerOptions(s).intersect(getPermittedOptimizerOptions());
                             }
                         }
                         if ((optimizer != null)) {
@@ -1872,9 +1875,9 @@ namespace Saxon.Hej {
             return label;
         }
     
-        private class Inner_ActiveSource_429 : Saxon.Hej.lib.ActiveSource {
+        private class Inner_ActiveSource_430 : Saxon.Hej.lib.ActiveSource {
             private readonly Configuration outerInstance;
-            public Inner_ActiveSource_429(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
+            public Inner_ActiveSource_430(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
                 this.outerInstance = outerInstance;
                 this.source = source;
                 this.config = config;

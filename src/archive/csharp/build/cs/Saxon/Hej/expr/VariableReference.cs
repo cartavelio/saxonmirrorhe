@@ -262,12 +262,10 @@ namespace Saxon.Hej.expr {
                 err.maybeSetLocation(getLocation());
                 throw;
             } catch (Saxon.Ejava.lang.NullPointerException err) {
-                System.Console.Error.WriteLine(err);
                 string msg = (((("Internal error: no value for variable $"+getDisplayName())+" at line ")+getLocation().getLineNumber())+(((getLocation().getSystemId() == null) ? "" : (" of "+getLocation().getSystemId()))));
                 new Saxon.Hej.lib.StandardDiagnostics().logStackTrace(c, c.getConfiguration().getLogger(), 2);
                 throw new Saxon.Ejava.lang.AssertionError(msg);
             } catch (Saxon.Ejava.lang.AssertionError err) {
-                System.Console.Error.WriteLine(err);
                 string msg = (((((err.Message+". Variable reference $")+getDisplayName())+" at line ")+getLocation().getLineNumber())+(((getLocation().getSystemId() == null) ? "" : (" of "+getLocation().getSystemId()))));
                 new Saxon.Hej.lib.StandardDiagnostics().logStackTrace(c, c.getConfiguration().getLogger(), 2);
                 throw new Saxon.Ejava.lang.AssertionError(msg);

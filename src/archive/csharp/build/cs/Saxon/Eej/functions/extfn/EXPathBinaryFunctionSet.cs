@@ -578,12 +578,12 @@ namespace Saxon.Eej.functions.extfn {
                 int offset = (int)(((Saxon.Hej.value.NumericValue)(arguments[1].head())).longValue());
                 int len = (int)(((Saxon.Hej.value.NumericValue)(arguments[2].head())).longValue());
                 checkIndex(value, offset, len);
-                byte[] @in = value.getBinaryValue();
-                bool negative = (((@in[offset]&unchecked((int)0x80))) != 0);
                 bool bigEnd = endianness(arguments, 3);
                 if ((len == 0)) {
                     return Saxon.Hej.value.Int64Value.ZERO;
                 }
+                byte[] @in = value.getBinaryValue();
+                bool negative = (((@in[(bigEnd ? offset : (offset+1))]&unchecked((int)0x80))) != 0);
                 if ((len>7)) {
                     System.Numerics.BigInteger big = bigIntegerFromBytes(offset, len, @in, bigEnd);
                     return new Saxon.Hej.value.BigIntegerValue(big);

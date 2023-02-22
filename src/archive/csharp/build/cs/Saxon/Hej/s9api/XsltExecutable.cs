@@ -43,6 +43,9 @@ namespace Saxon.Hej.s9api {
             Saxon.Hej.Configuration config = processor.getUnderlyingConfiguration();
             try {
                 Saxon.Hej.style.StylesheetPackage topLevelPackage = preparedStylesheet.getTopLevelPackage();
+                if (topLevelPackage.isJustInTimeCompilation()) {
+                    throw new Saxon.Api.SaxonApiException("Cannot export a stylesheet compiled with just-in-time compilation enabled");
+                }
                 Saxon.Hej.trace.ExpressionPresenter presenter = config.newExpressionExporter(target, destination, topLevelPackage);
                 presenter.setRelocatable(topLevelPackage.isRelocatable());
                 topLevelPackage.export(presenter);

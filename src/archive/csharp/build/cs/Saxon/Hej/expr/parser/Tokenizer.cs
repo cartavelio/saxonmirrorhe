@@ -575,7 +575,7 @@ namespace Saxon.Hej.expr.parser {
                         int newlines = 0;
                         while (true) {
                             if ((j>=inputLength)) {
-                                throw new Saxon.Hej.trans.XPathException("Unclosed string template in expression");
+                                throw new Saxon.Hej.trans.XPathException("Unclosed string constructor in expression");
                             }
                             if ((input[j] == '\n')) {
                                 newlines++;

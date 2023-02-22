@@ -88,6 +88,7 @@ namespace Saxon.Hej.tree.util {
         public class DescendantAxisIterator : Saxon.Hej.tree.iter.AxisIterator {
             private readonly Saxon.Hej.tree.util.SteppingNode start;
             private Saxon.Hej.tree.util.SteppingNode current;
+            private bool done;
             private readonly Saxon.Hej.tree.util.SteppingNavigator.Stepper stepper;
             public DescendantAxisIterator(Saxon.Hej.tree.util.SteppingNode start, bool includeSelf, Saxon.Hej.pattern.NodeTest test)  {
                 this.start = start;
@@ -140,11 +141,17 @@ namespace Saxon.Hej.tree.util {
                 }
             }
             public Saxon.Hej.om.Item next() {
+                if (done) {
+                    return null;
+                }
                 if ((current == null)) {
                     current = start;
                     return start;
                 }
                 Saxon.Hej.tree.util.SteppingNode curr = stepper.step(current);
+                if ((curr == null)) {
+                    done = true;
+                }
                 return current = curr;
             }
         

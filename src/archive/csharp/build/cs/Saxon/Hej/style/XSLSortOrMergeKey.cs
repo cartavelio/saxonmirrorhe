@@ -43,7 +43,12 @@ namespace Saxon.Hej.style {
                     compileError((("Collation name '"+collationString)+"' is not a valid URI"));
                     collationString = Saxon.Hej.lib.NamespaceConstant.CODEPOINT_COLLATION_URI;
                 }
-                stringCollator = findCollation(collationString, getBaseURI());
+                try {
+                    stringCollator = findCollation(collationString, getBaseURI());
+                } catch (Saxon.Hej.trans.XPathException err) {
+                    compileError(((("Failed to load collation "+collationString)+": ")+err.Message), "XTDE1035");
+                    stringCollator = Saxon.Hej.expr.sort.CodepointCollator.getInstance();
+                }
                 if ((stringCollator == null)) {
                     compileError((("Collation "+collationString)+" has not been defined"), "XTDE1035");
                     stringCollator = Saxon.Hej.expr.sort.CodepointCollator.getInstance();

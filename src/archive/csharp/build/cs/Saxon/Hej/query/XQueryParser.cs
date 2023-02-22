@@ -1599,7 +1599,7 @@ namespace Saxon.Hej.query {
                         throw Saxon.Hej.trans.XPathException.makeXPathException(err);
                     }
                     rr.nature = Saxon.Hej.lib.NamespaceConstant.OUTPUT;
-                    rr.purpose = "serialization";
+                    rr.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                     Saxon.Ejavax.xml.transform.Source source = rr.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                     Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions();
                     options.setSchemaValidationMode(Saxon.Hej.lib.Validation.LAX);
@@ -1931,6 +1931,7 @@ namespace Saxon.Hej.query {
                 }
                 if ((t.currentToken == Saxon.Hej.expr.parser.Token.ASSIGN)) {
                     Saxon.Hej.expr.flwor.LetClause letClause = new Saxon.Hej.expr.flwor.LetClause();
+                    setLocation(clause, t.currentTokenStartOffset);
                     clauseList.Add(letClause);
                     nextToken();
                     Saxon.Hej.expr.flwor.LocalVariableBinding v = new Saxon.Hej.expr.flwor.LocalVariableBinding(varQName, type);
@@ -3093,6 +3094,9 @@ namespace Saxon.Hej.query {
                     grumble("End of input encountered within element start tag");
                 }
                 char delim = c;
+                if (((c != '"') && (c != '\''))) {
+                    grumble((("Expected ' or \" as attribute delimiter - found '"+c)+"'"));
+                }
                 bool isNamespace = ("xmlns".Equals(attName) || attName.StartsWith("xmlns:"));
                 int end;
                 if (isNamespace) {
@@ -3648,16 +3652,20 @@ namespace Saxon.Hej.query {
             }
             return exp;
         }
-        protected internal override Saxon.Hej.expr.Literal makeStringLiteral(string token) {
-            Saxon.Hej.expr.StringLiteral lit;
-            if ((token.IndexOf('&') == -1)) {
-                lit = new Saxon.Hej.expr.StringLiteral(token);
+        protected internal override Saxon.Hej.expr.Literal makeStringLiteral(string token, bool doUnescaping) {
+            if (doUnescaping) {
+                Saxon.Hej.expr.StringLiteral lit;
+                if ((token.IndexOf('&') == -1)) {
+                    lit = new Saxon.Hej.expr.StringLiteral(token);
+                } else {
+                    string sb = unescape(token);
+                    lit = new Saxon.Hej.expr.StringLiteral(Saxon.Hej.value.StringValue.makeStringValue(sb));
+                }
+                setLocation(lit);
+                return lit;
             } else {
-                string sb = unescape(token);
-                lit = new Saxon.Hej.expr.StringLiteral(Saxon.Hej.value.StringValue.makeStringValue(sb));
+                return base.makeStringLiteral(token, doUnescaping);
             }
-            setLocation(lit);
-            return lit;
         }
         protected internal override string unescape(string token) {
             return new Saxon.Hej.query.XQueryParser.Unescaper(env.getConfiguration().getValidCharacterChecker()).unescape(token);

@@ -87,6 +87,12 @@ namespace Saxon.Hej.@event {
             }
             return true;
         }
+        public override void append(Saxon.Hej.om.Item item) {
+            if (isSignificant(item)) {
+                start();
+            }
+            base.append(item);
+        }
         public override void append(Saxon.Hej.om.Item item, Saxon.Hej.s9api.Location locationId, int copyNamespaces) {
             if (isSignificant(item)) {
                 start();

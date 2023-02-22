@@ -215,6 +215,9 @@ namespace Saxon.Hej.style {
                         string href = Saxon.Hej.value.Whitespace.trim(use.getAttributeValue("", "href"));
                         Saxon.Hej.om.DocumentKey key = Saxon.Hej.functions.DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), false);
                         Saxon.Hej.om.TreeInfo includedTree = Saxon.Impl.Helpers.MapUtils.Get(compilation.getStylesheetModules(), key);
+                        if ((includedTree == null)) {
+                            throw new Saxon.Hej.trans.XPathException((("Internal problem: the included stylesheet module '"+href)+"' should be in the compiler's module store, but was not found"));
+                        }
                         Saxon.Hej.style.StyleElement incWrapper = (Saxon.Hej.style.StyleElement)(((Saxon.Hej.tree.linked.DocumentImpl)(includedTree.getRootNode())).getDocumentElement());
                         gatherUsePackageDeclarations(compilation, incWrapper, declarations);
                     }

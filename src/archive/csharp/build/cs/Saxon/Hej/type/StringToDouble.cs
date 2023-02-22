@@ -143,7 +143,7 @@ namespace Saxon.Hej.type {
                                 throw new Saxon.Ejava.lang.NumberFormatException(("invalid floating point value: "+s));
                             }
                             try {
-                                return System.Double.Parse(n);
+                                return Saxon.Impl.Helpers.Utils.ParseDouble(n);
                             } catch (Saxon.Ejava.lang.NumberFormatException nfe) {
                                 throw;
                             } catch (System.Exception err) {

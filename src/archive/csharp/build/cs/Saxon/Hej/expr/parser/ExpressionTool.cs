@@ -577,8 +577,15 @@ namespace Saxon.Hej.expr.parser {
                     list.Add(function);
                 }
             } else {
-                foreach (Saxon.Hej.expr.Operand o in e.operands()) {
-                    gatherCalledFunctions(o.getChildExpression(), list);
+                if ((e is Saxon.Hej.functions.hof.UserFunctionReference)) {
+                    Saxon.Hej.expr.instruct.UserFunction function = ((Saxon.Hej.functions.hof.UserFunctionReference)(e)).getNominalTarget();
+                    if (!(list.Contains(function))) {
+                        list.Add(function);
+                    }
+                } else {
+                    foreach (Saxon.Hej.expr.Operand o in e.operands()) {
+                        gatherCalledFunctions(o.getChildExpression(), list);
+                    }
                 }
             }
         }
@@ -773,7 +780,9 @@ namespace Saxon.Hej.expr.parser {
                 total += expressionSize(o.getChildExpression());
                 if ((o.getChildExpression() is Saxon.Hej.functions.hof.UserFunctionReference)) {
                     Saxon.Hej.expr.instruct.UserFunction uf = ((Saxon.Hej.functions.hof.UserFunctionReference)(o.getChildExpression())).getNominalTarget();
-                    total += expressionSize(uf.getBody());
+                    if ((uf.getFunctionName() == null)) {
+                        total += expressionSize(uf.getBody());
+                    }
                 }
             }
             return total;
@@ -846,8 +855,9 @@ namespace Saxon.Hej.expr.parser {
                         let.setVariableQName(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, ("dot"+exp.GetHashCode())));
                         let.setRequiredType(Saxon.Hej.value.SequenceType.makeSequenceType(contextItemType, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE));
                         let.setSequence(new Saxon.Hej.expr.ContextItemExpression());
-                        let.setAction(exp);
-                        bool changed = factorOutDot(exp, let);
+                        Saxon.Hej.expr.Expression actionCopy = exp.copy(new Saxon.Hej.expr.parser.RebindingMap());
+                        let.setAction(actionCopy);
+                        bool changed = factorOutDot(actionCopy, let);
                         if (changed) {
                             return let;
                         } else {

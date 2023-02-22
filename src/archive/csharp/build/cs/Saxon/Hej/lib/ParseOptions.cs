@@ -102,7 +102,11 @@ namespace Saxon.Hej.lib {
                 if ((parserFeatures == null)) {
                     parserFeatures = new System.Collections.Generic.Dictionary<string, bool>();
                 }
-                Saxon.Impl.Helpers.MapUtils.PutAll(parserFeatures, options.parserFeatures);
+                foreach (System.Collections.Generic.KeyValuePair<string,bool> feature in options.parserFeatures) {
+                    if (feature.Value) {
+                        Saxon.Impl.Helpers.MapUtils.Put(parserFeatures, feature.Key, true);
+                    }
+                }
             }
             if ((options.parserProperties != null)) {
                 if ((parserProperties == null)) {

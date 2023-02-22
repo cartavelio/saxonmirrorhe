@@ -121,6 +121,7 @@ namespace Saxon.Hej.ma.json {
                 output.accept(Saxon.Hej.str.BMPString.of("\"")).accept(Saxon.Hej.str.StringView.of(key)).accept(Saxon.Hej.str.BMPString.of("\"")).accept(Saxon.Hej.str.BMPString.of(@base));
             }
             string local = elemName.getLocalPart();
+            checkParent(local, parent);
             switch (local) {
               case "array":
                 if (indenting) {
@@ -142,7 +143,6 @@ namespace Saxon.Hej.ma.json {
                 keyChecker.Push(new System.Collections.Generic.HashSet<string>());
                 break ;
               case "null":
-                checkParent(local, parent);
                 output.accept(Saxon.Hej.str.BMPString.of("null"));
                 atStart = false;
                 break ;
@@ -154,12 +154,10 @@ namespace Saxon.Hej.ma.json {
                         throw new Saxon.Hej.trans.XPathException((("xml-to-json: value of escaped attribute ("+escaped)+") is not a valid xs:boolean"), ERR_INPUT);
                     }
                 }
-                checkParent(local, parent);
                 atStart = false;
                 break ;
               case "boolean":
               case "number":
-                checkParent(local, parent);
                 atStart = false;
                 break ;
               default:

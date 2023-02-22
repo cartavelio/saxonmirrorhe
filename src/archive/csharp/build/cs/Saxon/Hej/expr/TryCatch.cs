@@ -126,13 +126,17 @@ namespace Saxon.Hej.expr {
             c1.createThreadManager();
             c1.setErrorReporter(new Saxon.Hej.expr.TryCatch.FilteringErrorReporter(c.getErrorReporter(), catchClauses));
             try {
-                Saxon.Hej.om.Sequence v = Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(tryOp.getChildExpression(), c1);
-                c1.waitForChildThreads();
-                Saxon.Hej.expr.TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
-                if ((tci is Saxon.Hej.expr.instruct.BreakInstr)) {
-                    ((Saxon.Hej.expr.instruct.BreakInstr)(tci)).markContext(c);
+                try {
+                    Saxon.Hej.om.Sequence v = Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(tryOp.getChildExpression(), c1);
+                    c1.waitForChildThreads();
+                    Saxon.Hej.expr.TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
+                    if ((tci is Saxon.Hej.expr.instruct.BreakInstr)) {
+                        ((Saxon.Hej.expr.instruct.BreakInstr)(tci)).markContext(c);
+                    }
+                    return v.iterate();
+                } catch (Saxon.Hej.trans.UncheckedXPathException ue) {
+                    throw ue.getXPathException();
                 }
-                return v.iterate();
             } catch (Saxon.Hej.trans.XPathException err) {
                 if (err.isGlobalError()) {
                     err.setIsGlobalError(false);
@@ -173,14 +177,18 @@ namespace Saxon.Hej.expr {
                 o2.setPipelineConfiguration(pipe);
             }
             try {
-                tryOp.getChildExpression().process(o2, c1);
-                c1.waitForChildThreads();
-                Saxon.Hej.expr.TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
-                if ((tci is Saxon.Hej.expr.instruct.BreakInstr)) {
-                    ((Saxon.Hej.expr.instruct.BreakInstr)(tci)).markContext(context);
-                }
-                if (rollbackOutput) {
-                    ((Saxon.Hej.@event.OutputterEventBuffer)(o2)).replay(output);
+                try {
+                    tryOp.getChildExpression().process(o2, c1);
+                    c1.waitForChildThreads();
+                    Saxon.Hej.expr.TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
+                    if ((tci is Saxon.Hej.expr.instruct.BreakInstr)) {
+                        ((Saxon.Hej.expr.instruct.BreakInstr)(tci)).markContext(context);
+                    }
+                    if (rollbackOutput) {
+                        ((Saxon.Hej.@event.OutputterEventBuffer)(o2)).replay(output);
+                    }
+                } catch (Saxon.Hej.trans.UncheckedXPathException ue) {
+                    throw ue.getXPathException();
                 }
             } catch (Saxon.Hej.trans.XPathException err) {
                 if (err.isGlobalError()) {

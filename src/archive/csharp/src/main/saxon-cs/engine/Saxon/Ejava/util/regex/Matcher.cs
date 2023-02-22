@@ -23,11 +23,23 @@ namespace Saxon.Ejava.util.regex {
         }
 
         public bool find() {
-            latestMatch = regex.Match(input, position);
+            // From the Javadoc: This method starts at the beginning of this matcher's region, or, if a previous
+            // invocation of the method was successful and the matcher has not since been reset,
+            // at the first character not matched by the previous match.
+            // However, see https://stackoverflow.com/questions/73579877, and bug 5655.
+            // It seems that after a successful zero-length match, the method actually advances one character.
+            // This implementation assumes that there are no calls after an unsuccessful match.
+            
+            int start = latestMatch?.Index ?? 0;
+            if (latestMatch?.Length == 0) {
+                start++;
+            }
+            latestMatch = regex.Match(input, start);
             if (latestMatch.Success) {
                 position = latestMatch.Index + latestMatch.Length;
+                return true;
             }
-            return latestMatch.Success;
+            return false;
         }
 
         public string replaceAll(string str) {
