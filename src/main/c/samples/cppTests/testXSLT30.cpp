@@ -1438,6 +1438,7 @@ void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *
         const char *svalue = value->itemAt(0)->getStringValue();
         cout << "testResolveUri = " << svalue << endl;
         sresult->success++;
+        delete svalue;
         delete value;
     }
 

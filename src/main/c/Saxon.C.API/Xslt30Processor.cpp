@@ -694,7 +694,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
 
 const char * Xslt30Processor::transformFileToString(const char* source,
 		const char* stylesheet) {
-
+           std::cerr<<"source in transformFiletoString="<<source<<" stylsheet="<<stylesheet<<std::endl;
 	if(exceptionOccurred()) {
 		//Possible error detected in the compile phase. Processor not in a clean state.
 		//Require clearing exception.

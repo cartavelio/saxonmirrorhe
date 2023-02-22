@@ -3,7 +3,8 @@
     package-version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:pkg="urn:use-me"
-    version="3.0">
+    version="3.0"
+    name="package-test">
     
     <xsl:mode on-no-match="text-only-copy" />
     

@@ -5,6 +5,8 @@ with saxonc.PySaxonProcessor(license=True) as proc:
    print("Test Python")
    print(proc.version)
    #print(dir(proc))
+
+
    xdmAtomicval = proc.make_boolean_value(False)
 
    xsltproc = proc.new_xslt30_processor()
