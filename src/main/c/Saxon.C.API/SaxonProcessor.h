@@ -100,15 +100,6 @@ class DocumentBuilder;
 class SaxonApiException;
 
 
-//! A struct object to represent parameters.
-/*! Internal use only. This struct represents parameters to pass back the Java code. These two arrays acts as a map to represent the parameters. */
-/*typedef struct {
-    jobjectArray stringArray;
-    jobjectArray objectArray;
-
-} JParameters;*/
-
-
 
 //==========================================
 
