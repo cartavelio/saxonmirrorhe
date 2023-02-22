@@ -133,7 +133,7 @@ public class StandardUnparsedTextResolver
             if (contentType != null) {
                 ParsedContentType parsedContentType = new ParsedContentType(contentType);
                 String contentEncoding = parsedContentType.encoding;
-                if (contentEncoding == null) {
+                if (contentEncoding != null) {
                     encoding = contentEncoding;
                 }
                 if (encoding == null) {
