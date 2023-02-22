@@ -1203,9 +1203,13 @@
                <td>
                   <span class="signature">setCaptureResultDocuments(bool $flag)</span>
                   <div class="fcomment">Enable the capture of the result-document output into an <a class="bodylink code" href="../saxon_c_php_xdmmap">Saxon\XdmMap</a>.
-                     When the <code>xsl:result-document</code> is used and is evaluated this method enables handling of the documents as the destination
-                     via a user defined std::map object where we have the pair document URI and XdmNode object. The argument $flag when true enables the map object which is 
-                     used to save the result documents from the transformation</div>
+                     If this option is enabled, then any document created using xsl:result-document is saved (as an <a
+                        class="bodylink code" href="../saxon_c_php_xdmnode">XdmNode</a>) in a <a
+                           class="bodylink code" href="../saxon_c_php_xdmmap">XdmMap</a> object where it
+                     is accessible using the URI as a key. After the execution of the transformation a call on
+                     the <code>getResultDocuments</code> method is required to get access to the result-documents in the map.
+                     Supplying true for the $flag parameter causes secondary result documents from the
+                     transformation to be saved in a map; false disables this option.</div>
                </td>
             </tr>
             <tr>
@@ -1215,8 +1219,11 @@
                <td>
                   <span class="signature">getResultDocuments()</span>
                   <div class="fcomment">Return the result-documents resulting from the execution of the stylesheet.
-                     Null is returned if the user has not enabled this feature via the method <code>setCaptureResultDocuments()</code>. The return type is <a class="bodylink code" href="../saxon_c_php_xdmmap">Saxon\XdmMap</a> 
-                     of result-document as the key value pair document uri string and XdmNode.</div>
+                     Null is returned if the user has not enabled this feature via the method <code>setCaptureResultDocuments()</code>. 
+                     Returns a <a class="bodylink code" href="../saxon_c_php_xdmmap">XdmMap</a> indexed
+                     by the absolute URI of the result document, and the corresponding value is an <a
+                        class="bodylink code" href="../saxon_c_php_xdmnode">XdmNode</a>
+                     containing the result document (as an in-memory tree, without serialization).</div>
                </td>
             </tr>
             <tr>
