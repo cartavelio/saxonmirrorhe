@@ -750,23 +750,7 @@ public class Block extends Instruction {
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        TailCall tc = null;
-        for (Operand o : operands()) {
-            Expression child = o.getChildExpression();
-            try {
-                if (child instanceof TailCallReturner) {
-                    tc = ((TailCallReturner) child).processLeavingTail(output, context);
-                } else {
-                    child.process(output, context);
-                    tc = null;
-                }
-            } catch (XPathException e) {
-                e.maybeSetLocation(child.getLocation());
-                e.maybeSetContext(context);
-                throw e;
-            }
-        }
-        return tc;
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     /**

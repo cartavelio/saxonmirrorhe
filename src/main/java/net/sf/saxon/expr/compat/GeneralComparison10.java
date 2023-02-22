@@ -9,6 +9,10 @@ package net.sf.saxon.expr.compat;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
@@ -464,6 +468,22 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
     @Override
     protected String tag() {
         return "gc10";
+    }
+
+    @Override
+    public Elaborator getElaborator() {
+        return new GeneralComparison10Elaborator();
+    }
+
+    private static class GeneralComparison10Elaborator extends BooleanElaborator {
+
+        @Override
+        public BooleanEvaluator elaborateForBoolean() {
+            GeneralComparison10 expr = (GeneralComparison10) getExpression();
+            PullEvaluator eval0 = expr.getLhsExpression().makeElaborator().elaborateForPull();
+            PullEvaluator eval1 = expr.getRhsExpression().makeElaborator().elaborateForPull();
+            return context -> expr.effectiveBooleanValue(eval0.iterate(context), eval1.iterate(context),context);
+        }
     }
 }
 

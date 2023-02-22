@@ -8,25 +8,15 @@
 package net.sf.saxon.functions.registry;
 
 import com.saxonica.functions.extfn.CharactersFn;
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.trans.SymbolicName;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
-
-import java.net.URISyntaxException;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in XPath 3.1 without the
@@ -57,7 +47,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.ATOMIC_SEQUENCE);
 
-        register("all", 2, e -> e.populate( SefFunction::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
+        register("all", 2, e -> e.populate(AllFn::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, predicate, ONE, null));
 
@@ -72,55 +62,55 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("concat", 1, e -> e.populate( Concat::new, BuiltInAtomicType.STRING, ONE, SEQV)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
 
-        register("highest", 1, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+        register("highest", 1, e -> e.populate(net.sf.saxon.functions.hof.HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("highest", 2, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+        register("highest", 2, e -> e.populate(net.sf.saxon.functions.hof.HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
-        register("highest", 3, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+        register("highest", 3, e -> e.populate(net.sf.saxon.functions.hof.HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null));
 
-        register("identity", 1, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
+        register("identity", 1, e -> e.populate( IdentityFn::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("index-where", 2, e -> e.populate( SefFunction::new, BuiltInAtomicType.INTEGER, STAR, LATE)
+        register("index-where", 2, e -> e.populate(IndexWhere::new, BuiltInAtomicType.INTEGER, STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null));
 
-        register("in-scope-namespaces", 1, e -> e.populate( SefFunction::new, MapType.ANY_MAP_TYPE, ONE, LATE)
+        register("in-scope-namespaces", 1, e -> e.populate( InScopeNamespacesFn::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, NodeKindTest.ELEMENT, STAR, null));
 
-        register("is-NaN", 1, e -> e.populate( SefFunction::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+        register("is-NaN", 1, e -> e.populate( IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
-        register("items-before", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+        register("items-before", 2, e -> e.populate(ItemsEnding.ItemsBefore::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null));
 
-        register("items-until", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+        register("items-until", 2, e -> e.populate(ItemsEnding.ItemsUntil::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null));
 
-        register("items-from", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+        register("items-from", 2, e -> e.populate(ItemsStarting.ItemsFrom::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null));
 
-        register("items-after", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+        register("items-after", 2, e -> e.populate(ItemsStarting.ItemsAfter::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null));
 
-        register("lowest", 1, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+        register("lowest", 1, e -> e.populate( net.sf.saxon.functions.hof.HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("lowest", 2, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+        register("lowest", 2, e -> e.populate(net.sf.saxon.functions.hof.HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
-        register("lowest", 3, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+        register("lowest", 3, e -> e.populate(net.sf.saxon.functions.hof.HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null));
@@ -131,73 +121,49 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("parts", 1, e -> e.populate( Parts::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
-        register("range", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, OPT, null));
+//        register("range", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+//                .arg(0, AnyItemType.getInstance(), STAR, null)
+//                .arg(1, predicate, OPT, null));
+//
+//        register("range", 3, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+//                .arg(0, AnyItemType.getInstance(), STAR, null)
+//                .arg(1, predicate, OPT, null)
+//                .arg(2, predicate, OPT, null));
+//
+//        register("range", 4, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+//                .arg(0, AnyItemType.getInstance(), STAR, null)
+//                .arg(1, predicate, OPT, null)
+//                .arg(2, predicate, OPT, null)
+//                .arg(3, MapType.ANY_MAP_TYPE,ONE, null));
 
-        register("range", 3, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+        register("replicate", 2, e -> e.populate(Replicate::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, OPT, null)
-                .arg(2, predicate, OPT, null));
+                .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
 
-        register("range", 4, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, OPT, null)
-                .arg(2, predicate, OPT, null)
-                .arg(3, MapType.ANY_MAP_TYPE,ONE, null));
-
-        register("slice", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
+        register("slice", 2, e -> e.populate( Slice::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null));   // TODO: define a record type
 
-        register("some", 2, e -> e.populate( SefFunction::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
+        register("some", 2, e -> e.populate(SomeFn::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, predicate, ONE, null));
 
+        register("uniform", 1, e -> e.populate(UniformFn::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL | UO)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
+
+        register("uniform", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE | UO)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+
+        register("unique", 1, e -> e.populate(UniqueFn::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL | UO)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
+
+        register("unique", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE | UO)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+
         register("unparcel", 1, e -> e.populate( UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, Parcel.TYPE, ONE, null));
-    }
-
-    public static class HighestOrLowest extends SefFunction {
-
-        public HighestOrLowest(){
-            super();
-        };
-
-        @Override
-        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            Sequence input = arguments[0];
-            String collationUri = null;
-            if (arguments.length >= 2) {
-                StringValue val = (StringValue)arguments[1].head();
-                if (val != null) {
-                    try {
-                        collationUri = ResolveURI.makeAbsolute(val.getStringValue(), getStaticBaseUriString()).toString();
-                    } catch (URISyntaxException e) {
-                        throw new XPathException(e);
-                    }
-                }
-            }
-            if (collationUri == null) {
-                collationUri = getRetainedStaticContext().getDefaultCollationName();
-            }
-            Function key;
-            if (arguments.length >= 3) {
-                key = (Function) arguments[2].head();
-            } else {
-                key = SystemFunction.makeFunction("data", getRetainedStaticContext(), 1);
-            }
-            SymbolicName.F delegate =
-                    new SymbolicName.F(new StructuredQName("", NamespaceUri.of("http://ns.saxonica.com/xpath-functions"), "mhk_highest"), 4);
-
-            Sequence[] args = new Sequence[4];
-            args[0] = input.materialize();
-            args[1] = new StringValue(collationUri);
-            args[2] = key;
-            args[3] = BooleanValue.get(getDetails().name.getLocalPart().equals("highest"));
-
-            return callFunction(context, delegate, args);
-        }
     }
 
 }

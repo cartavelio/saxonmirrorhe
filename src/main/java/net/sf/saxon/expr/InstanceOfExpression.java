@@ -7,11 +7,7 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.BooleanElaborator;
-import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -20,7 +16,6 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
@@ -254,36 +249,7 @@ public final class InstanceOfExpression extends UnaryExpression {
 
     @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
-        SequenceIterator iter = getBaseExpression().iterate(context);
-        return isInstance(iter, context);
-    }
-
-    /**
-     * Here is the method that does the work
-     * @param iter iterator over the operand sequence
-     * @param context dynamic evaluation context
-     * @return true if the operand is an instance of the required type
-     * @throws XPathException if a failure occurs evaluating the operand
-     */
-
-    private boolean isInstance(SequenceIterator iter, XPathContext context) throws XPathException {
-        try {
-            int count = 0;
-            for (Item item; (item = iter.next()) != null; ) {
-                count++;
-                if (!targetType.matches(item, context.getConfiguration().getTypeHierarchy())) {
-                    iter.close();
-                    return false;
-                }
-                if (count == 2 && !Cardinality.allowsMany(targetCardinality)) {
-                    iter.close();
-                    return false;
-                }
-            }
-            return !(count == 0 && ((targetCardinality & StaticProperty.ALLOWS_ZERO) == 0));
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
-        }
+        return makeElaborator().elaborateForBoolean().eval(context);
     }
 
     /**

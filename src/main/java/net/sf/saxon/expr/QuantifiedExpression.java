@@ -403,8 +403,7 @@ public class QuantifiedExpression extends Assignation {
 
             return context -> {
                 SequenceIterator base = selectEval.iterate(context);
-                Item it;
-                while ((it = base.next()) != null) {
+                for (Item it; (it = base.next()) != null;) {
                     context.setLocalVariable(slot, it);
                     if (some == satisfiesEval.eval(context)) {
                         base.close();

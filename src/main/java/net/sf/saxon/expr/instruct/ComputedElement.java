@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -496,6 +497,170 @@ public class ComputedElement extends ElementCreator {
         out.setChildRole("content");
         getContentExpression().export(out);
         out.endElement();
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new ComputedElementElaborator();
+    }
+
+    /**
+     * Elaborator for a FixedElement (literal result element) expression.
+     */
+
+    public static class ComputedElementElaborator extends ComplexNodePushElaborator {
+
+        @Override
+        @CSharpInnerClass(outer = false, extra = {"Saxon.Hej.expr.instruct.FixedElement instr", "Saxon.Hej.expr.elab.PushEvaluator contentPusher"})
+        public PushEvaluator elaborateForPush() {
+            final ComputedElement instr = (ComputedElement) getExpression();
+            final boolean isXSLT = instr.isXSLT();
+            final PushEvaluator contentPusher =
+                    instr.getContentExpression().makeElaborator().elaborateForPush();
+            final StringEvaluator namespaceEvaluator = instr.getNamespaceExp() == null ?
+                    null : instr.getNamespaceExp().makeElaborator().elaborateForString(true);
+            final ItemEvaluator nameEvaluator = instr.getNameExp().makeElaborator().elaborateForItem();
+            final ElementCreationDetails details = new ElementCreationDetails() {
+                @Override
+                public NodeName getNodeName(XPathContext context) throws XPathException {
+                    Controller controller = context.getController();
+                    assert controller != null;
+
+                    String prefix;
+                    String localName;
+                    NamespaceUri uri = null;
+
+                    // name needs to be evaluated at run-time
+                    AtomicValue nameValue = (AtomicValue) nameEvaluator.eval(context) ;
+                    if (nameValue == null) {
+                        String errorCode = isXSLT ? "XTDE0820" : "XPTY0004";
+                        XPathException err1 = new XPathException("Invalid element name (empty sequence)", errorCode, instr.getLocation());
+                        throw dynamicError(instr.getLocation(), err1, context);
+                    }
+                    //nameValue = nameValue.getPrimitiveValue();
+                    if (nameValue instanceof StringValue) {  // which includes UntypedAtomic
+                        // this will always be the case in XSLT
+                        String rawName = nameValue.getStringValue();
+                        rawName = Whitespace.trim(rawName);
+                        // this will always be the case in XSLT
+                        if (rawName.startsWith("Q{") && instr.allowNameAsQName) {
+                            // Unclear whether this is allowed: see https://github.com/w3c/qtspecs/issues/9
+                            // It clearly is NOT allowed in XSLT 3.0 (though for no good reason)
+                            try {
+                                StructuredQName qn = StructuredQName.fromEQName(rawName);
+                                prefix = "";
+                                localName = qn.getLocalPart();
+                                uri = qn.getNamespaceUri();
+                            } catch (IllegalArgumentException e) {
+                                throw new XPathException("Invalid EQName in computed element constructor: " + e.getMessage(), "XQDY0074");
+                            }
+                            if (!NameChecker.isValidNCName(localName)) {
+                                throw new XPathException("Local part of EQName in computed element constructor is invalid", "XQDY0074");
+                            }
+                        } else {
+                            try {
+                                String[] parts = NameChecker.getQNameParts(rawName);
+                                prefix = parts[0];
+                                localName = parts[1];
+                            } catch (QNameException err) {
+                                String message = "Invalid element name. " + err.getMessage();
+                                if (rawName.length() == 0) {
+                                    message = "Supplied element name is a zero-length string";
+                                }
+                                String errorCode = isXSLT ? "XTDE0820" : "XQDY0074";
+                                XPathException err1 = new XPathException(message, errorCode, instr.getLocation());
+                                throw dynamicError(instr.getLocation(), err1, context);
+                            }
+                        }
+                    } else if (nameValue instanceof QNameValue && instr.allowNameAsQName) {
+                        // this is allowed in XQuery
+                        localName = ((QNameValue) nameValue).getLocalName();
+                        uri = ((QNameValue) nameValue).getNamespaceURI();
+                        prefix = ((QNameValue) nameValue).getPrefix();
+                        if (prefix.equals("xmlns")) {
+                            XPathException err = new XPathException("Computed element name has prefix xmlns", "XQDY0096", instr.getLocation());
+                            throw dynamicError(instr.getLocation(), err, context);
+                        }
+                    } else {
+                        String errorCode = isXSLT ? "XTDE0820" : "XPTY0004";
+                        XPathException err = new XPathException("Computed element name has incorrect type", errorCode, instr.getLocation());
+                        err.setIsTypeError(true);
+                        throw dynamicError(instr.getLocation(), err, context);
+                    }
+
+                    if (namespaceEvaluator == null && uri == null) {
+                        uri = instr.getRetainedStaticContext().getURIForPrefix(prefix, true);
+                        if (uri == null) {
+                            String errorCode = isXSLT ? "XTDE0830" : prefix.equals("xmlns") ? "XQDY0096" : "XQDY0074";
+                            XPathException err = new XPathException("Undeclared prefix in element name: " + prefix, errorCode, instr.getLocation());
+                            throw dynamicError(instr.getLocation(), err, context);
+                        }
+                    } else {
+                        if (uri == null) {
+                            String nsUri = namespaceEvaluator.eval(context);
+                            uri = NamespaceUri.of(nsUri);
+                            // TODO: bypass check if it's a string literal
+                            if (!StandardURIChecker.getInstance().isValidURI(uri.toString())) {
+                                XPathException de = new XPathException(
+                                        "The value of the namespace attribute must be a valid URI", "XTDE0835", instr.getLocation());
+                                throw dynamicError(instr.getLocation(), de, context);
+                            }
+                        }
+                        if (uri.isEmpty()) {
+                            // there is a special rule for this case in the specification;
+                            // we force the element to go in the null namespace
+                            prefix = "";
+                        }
+                        if (prefix.equals("xmlns")) {
+                            // this isn't a legal prefix so we mustn't use it
+                            prefix = "x-xmlns";
+                        }
+                    }
+                    if (uri.equals(NamespaceUri.XMLNS)) {
+                        String errorCode = isXSLT ? "XTDE0835" : "XQDY0096";
+                        XPathException err = new XPathException("Cannot create element in namespace " + uri, errorCode, instr.getLocation());
+                        throw dynamicError(instr.getLocation(), err, context);
+                    }
+                    if (uri.equals(NamespaceUri.XML) != prefix.equals("xml")) {
+                        String message;
+                        if (prefix.equals("xml")) {
+                            message = "When the prefix is 'xml', the namespace URI must be " + NamespaceConstant.XML;
+                        } else {
+                            message = "When the namespace URI is " + NamespaceConstant.XML + ", the prefix must be 'xml'";
+                        }
+                        String errorCode = isXSLT ? "XTDE0835" : "XQDY0096";
+                        XPathException err = new XPathException(message, errorCode, instr.getLocation());
+                        throw dynamicError(instr.getLocation(), err, context);
+                    }
+
+                    return new FingerprintedQName(prefix, uri, localName);
+                }
+
+                @Override
+                public String getSystemId(XPathContext context) {
+                    return instr.getStaticBaseURIString();
+                }
+
+                @Override
+                public void processContent(Outputter output, XPathContext context) throws XPathException {
+                    TailCall tc = contentPusher.processLeavingTail(output, context);
+                    Expression.dispatchTailCall(tc);
+                }
+            };
+
+            return (out, context) -> {
+                instr.specificProcess(out, context, details);
+                return null;
+            };
+        }
+
+
     }
 
 

@@ -9,6 +9,10 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.FunctionAnnotationHandler;
 import net.sf.saxon.om.*;
@@ -19,7 +23,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.function.Supplier;
@@ -137,9 +140,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
-        SequenceIterator base = getBaseExpression().iterate(context);
-        Coercer coercer = new Coercer(requiredItemType, context.getConfiguration(), getLocation());
-        return new ItemMappingIterator(base, coercer, true);
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     /**
@@ -149,22 +150,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
     /*@Nullable*/
     @Override
     public Function evaluateItem(XPathContext context) throws XPathException {
-        Item item = getBaseExpression().evaluateItem(context);
-        if (item == null) {
-            return null;
-        }
-        if (!(item instanceof Function)) {
-            UType itemType = UType.getUType(item);
-            throw new XPathException(roleSupplier.get().composeErrorMessage(requiredItemType, itemType), "XPTY0004");
-        }
-        try {
-            checkAnnotations((Function)item, requiredItemType, context.getConfiguration());
-        } catch (XPathException err) {
-            err.maybeSetLocation(getLocation());
-            err.maybeSetContext(context);
-            throw err;
-        }
-        return new CoercedFunction((Function)item, requiredItemType);
+        return (Function)makeElaborator().elaborateForItem().eval(context);
     }
 
 
@@ -232,6 +218,16 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         destination.endElement();
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new FunctionSequenceCoercerElaborator();
+    }
+
     private static void checkAnnotations(Function item, FunctionItemType requiredItemType, Configuration config) throws XPathException {
         for (Annotation ann : requiredItemType.getAnnotationAssertions()) {
             FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ann.getAnnotationQName().getNamespaceUri());
@@ -269,6 +265,31 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         }
 
 
+    }
+
+    private static class FunctionSequenceCoercerElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            FunctionSequenceCoercer expr = (FunctionSequenceCoercer) getExpression();
+            PullEvaluator base = expr.getBaseExpression().makeElaborator().elaborateForPull();
+            Coercer coercer = new Coercer(expr.requiredItemType, expr.getConfiguration(), expr.getLocation());
+            return context -> new ItemMappingIterator(base.iterate(context), coercer, true);
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            FunctionSequenceCoercer expr = (FunctionSequenceCoercer) getExpression();
+            ItemEvaluator base = expr.getBaseExpression().makeElaborator().elaborateForItem();
+            Coercer coercer = new Coercer(expr.requiredItemType, expr.getConfiguration(), expr.getLocation());
+            return context -> {
+                Item item = base.eval(context);
+                if (item == null) {
+                    return null;
+                }
+                return coercer.mapItem(item);
+            };
+        }
     }
 }
 

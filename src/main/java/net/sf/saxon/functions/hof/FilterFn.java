@@ -43,18 +43,6 @@ public class FilterFn extends SystemFunction {
             final Function function, SequenceIterator basis, final XPathContext context) {
         return ItemMappingIterator.filter(basis,
                     item -> ((BooleanValue) dynamicCall(function, context, new Sequence[]{item}).head()).getBooleanValue());
-//        )
-//        ItemMappingFunction map = new ItemMappingFunction() {
-//            private final Sequence[] args = new Sequence[1];
-//
-//            @Override
-//            public Item mapItem(Item item) throws XPathException {
-//                args[0] = item;
-//                BooleanValue result = (BooleanValue) dynamicCall(function, context, args).head();
-//                return result.getBooleanValue() ? item : null;
-//            }
-//        };
-//        return new ItemMappingIterator(basis, map);
     }
 
     @Override

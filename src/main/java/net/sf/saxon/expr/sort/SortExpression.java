@@ -7,10 +7,11 @@
 
 package net.sf.saxon.expr.sort;
 
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -33,9 +34,11 @@ public class SortExpression extends Expression
 
     private final Operand selectOp;
     private final Operand sortOp;
-    private transient AtomicComparer[] comparators = null;
+    private AtomicComparer[] comparators = null;
     // created early if all comparators can be created statically
     // transient because Java RuleBasedCollator is not serializable
+
+    private ItemEvaluator[] sortKeyEvaluators;
 
     /**
      * Create a sort expression
@@ -107,12 +110,6 @@ public class SortExpression extends Expression
         return operandList(selectOp, sortOp);
     }
 
-    private static final OperandRole SAME_FOCUS_SORT_KEY =
-            new OperandRole(OperandRole.HIGHER_ORDER, OperandUsage.ABSORPTION, SequenceType.OPTIONAL_ATOMIC);
-    private static final OperandRole NEW_FOCUS_SORT_KEY =
-            new OperandRole(OperandRole.USES_NEW_FOCUS | OperandRole.HIGHER_ORDER, OperandUsage.ABSORPTION, SequenceType.OPTIONAL_ATOMIC);
-
-
     /**
      * Add a representation of this expression to a PathMap. The PathMap captures a map of the nodes visited
      * by an expression in a source tree.
@@ -142,28 +139,33 @@ public class SortExpression extends Expression
             } else {
                 sortKeyDefinition.getSortKey().addToPathMap(pathMap, pathMapNodeSet);
             }
-            Expression e = sortKeyDefinition.getOrder();
-            if (e != null) {
-                e.addToPathMap(pathMap, pathMapNodeSet);
-            }
-            e = sortKeyDefinition.getCaseOrder();
-            if (e != null) {
-                e.addToPathMap(pathMap, pathMapNodeSet);
-            }
-            e = sortKeyDefinition.getDataTypeExpression();
-            if (e != null) {
-                e.addToPathMap(pathMap, pathMapNodeSet);
-            }
-            e = sortKeyDefinition.getLanguage();
-            if (e != null) {
-                e.addToPathMap(pathMap, pathMapNodeSet);
-            }
-            e = sortKeyDefinition.getCollationNameExpression();
-            if (e != null) {
-                e.addToPathMap(pathMap, pathMapNodeSet);
-            }
+            addSortKeyDetailsToPathMap(pathMap, pathMapNodeSet, sortKeyDefinition);
         }
         return target;
+    }
+
+
+    public static void addSortKeyDetailsToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet, SortKeyDefinition skd) {
+        Expression e = skd.getOrder();
+        if (e != null) {
+            e.addToPathMap(pathMap, pathMapNodeSet);
+        }
+        e = skd.getCaseOrder();
+        if (e != null) {
+            e.addToPathMap(pathMap, pathMapNodeSet);
+        }
+        e = skd.getDataTypeExpression();
+        if (e != null) {
+            e.addToPathMap(pathMap, pathMapNodeSet);
+        }
+        e = skd.getLanguage();
+        if (e != null) {
+            e.addToPathMap(pathMap, pathMapNodeSet);
+        }
+        e = skd.getCollationNameExpression();
+        if (e != null) {
+            e.addToPathMap(pathMap, pathMapNodeSet);
+        }
     }
 
     /**
@@ -400,6 +402,13 @@ public class SortExpression extends Expression
                 comps[s] = comp;
             }
         }
+        if (sortKeyEvaluators == null) {
+            int len = getSortKeyDefinitionList().size();
+            sortKeyEvaluators = new ItemEvaluator[len];
+            for (int s = 0; s < len; s++) {
+                sortKeyEvaluators[s] = getSortKeyDefinition(s).getSortKey().makeElaborator().elaborateForItem();
+            }
+        }
         iter = new SortedIterator(context, iter, this, comps, getSortKeyDefinition(0).isSetContextForSortKey());
         ((SortedIterator) iter).setHostLanguage(getPackageData().getHostLanguage());
         return iter;
@@ -416,7 +425,7 @@ public class SortExpression extends Expression
 
     @Override
     public AtomicValue evaluateSortKey(int n, XPathContext c) throws XPathException {
-        return (AtomicValue) getSortKeyDefinition(n).getSortKey().evaluateItem(c);
+        return (AtomicValue) sortKeyEvaluators[n].eval(c);
     }
 
     @Override

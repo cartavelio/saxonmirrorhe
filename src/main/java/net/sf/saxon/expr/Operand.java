@@ -7,8 +7,6 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.OperandElaborator;
-import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -33,7 +31,6 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
     private final Expression parentExpression;
     private Expression childExpression;
     private OperandRole role;
-    private OperandEvaluator operandEvaluator;
 
     /**
      * Create an operand object
@@ -274,14 +271,6 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
         } else {
             return OperandUsage.INSPECTION;
         }
-    }
-
-    public synchronized OperandEvaluator getOperandEvaluator(XPathContext context) {
-        if (operandEvaluator == null) {
-            context.getConfiguration();
-            operandEvaluator = new OperandElaborator(getChildExpression());
-        }
-        return operandEvaluator;
     }
 
 

@@ -10,10 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.LazySequence;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -40,6 +37,12 @@ public class DistinctValues extends CollatingFunctionFixed {
         return "DistinctValues";
     }
 
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        StringCollator collator = getStringCollator();
+        return new LazySequence(new DistinctIterator(arguments[0].iterate(), collator, context));
+    }
+
 
     /**
      * Iterator class to return the distinct values in a sequence
@@ -51,6 +54,7 @@ public class DistinctValues extends CollatingFunctionFixed {
         private final StringCollator collator;
         private final XPathContext context;
         private final HashSet<AtomicMatchKey> lookup = new HashSet<>(40);
+        private Action onDuplicates = null;
 
         /**
          * Create an iterator over the distinct values in a sequence
@@ -94,6 +98,13 @@ public class DistinctValues extends CollatingFunctionFixed {
                 if (lookup.add(key)) {
                     // returns true if newly added (if not, keep looking)
                     return nextBase;
+                } else if (onDuplicates != null) {
+                    try {
+                        onDuplicates.doAction();
+                    } catch (XPathException e) {
+                        // should not happen
+                        throw new UncheckedXPathException(e);
+                    }
                 }
             }
         }
@@ -108,13 +119,13 @@ public class DistinctValues extends CollatingFunctionFixed {
             base.discharge();
         }
 
+        public void notifyDuplicates(Action onDuplicates) {
+            this.onDuplicates = onDuplicates;
+        }
+
     }
 
-    @Override
-    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringCollator collator = getStringCollator();
-        return new LazySequence(new DistinctIterator(arguments[0].iterate(), collator, context));
-    }
+
 
 }
 

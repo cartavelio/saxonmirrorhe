@@ -402,7 +402,18 @@ public class ContextItemExpression extends Expression {
 
         @Override
         public PullEvaluator elaborateForPull() {
-            return super.elaborateForPull();
+            ContextItemExpression cie = (ContextItemExpression) getExpression();
+            if (cie.isContextPossiblyUndefined()) {
+                return context -> {
+                    Item current = context.getContextItem();
+                    if (current == null) {
+                        cie.reportAbsentContext(context);
+                    }
+                    return SingletonIterator.makeIterator(current);
+                };
+            } else {
+                return context -> SingletonIterator.makeIterator(context.getContextItem());
+            }
         }
     }
 }

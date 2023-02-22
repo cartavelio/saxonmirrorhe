@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
@@ -215,4 +219,37 @@ public class ConsumingOperand extends UnaryExpression {
     public String toShortString() {
         return "consume(" + getBaseExpression().toShortString() + ")";
     }
+
+    public Elaborator getElaborator() {
+        return new ConsumingOperandElaborator();
+    }
+    private static class ConsumingOperandElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            ConsumingOperand expr = (ConsumingOperand) getExpression();
+            PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+            return context -> {
+                if (context.getStackFrame().holdsDynamicValue()) {
+                    return context.getStackFrame().popDynamicValue().iterate();
+                } else {
+                    return baseEval.iterate(context);
+                }
+            };
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            ConsumingOperand expr = (ConsumingOperand) getExpression();
+            ItemEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
+            return context -> {
+                if (context.getStackFrame().holdsDynamicValue()) {
+                    return context.getStackFrame().popDynamicValue().head();
+                } else {
+                    return baseEval.eval(context);
+                }
+            };
+        }
+    }
+
 }

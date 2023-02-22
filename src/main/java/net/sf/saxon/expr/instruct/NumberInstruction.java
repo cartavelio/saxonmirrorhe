@@ -241,10 +241,19 @@ public class NumberInstruction extends Expression {
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
         NodeInfo source = (NodeInfo) selectOp.getChildExpression().evaluateItem(context);
-        return iterateSource(source, context);
+        return getPlaceMarker(source, context);
     }
 
-    private SequenceIterator iterateSource(NodeInfo source, XPathContext context) throws XPathException {
+    /**
+     * Get the "place marker" of a node (as described in the XSLT 3.0 specification): this is a sequence
+     * of integers
+     * @param source the node whose place marker is required
+     * @param context the XPath evaluation context
+     * @return an iterator over the integers making up the place marker
+     * @throws XPathException if things go wrong
+     */
+
+    private SequenceIterator getPlaceMarker(NodeInfo source, XPathContext context) throws XPathException {
         List<AtomicValue> numbers = new ArrayList<>(1);
         switch (level) {
             case SIMPLE: {
@@ -323,7 +332,7 @@ public class NumberInstruction extends Expression {
             ItemEvaluator sourceEval = expr.selectOp.getChildExpression().makeElaborator().elaborateForItem();
             return context -> {
                 NodeInfo source = (NodeInfo)sourceEval.eval(context);
-                return expr.iterateSource(source, context);
+                return expr.getPlaceMarker(source, context);
             };
         }
     }

@@ -272,13 +272,6 @@ public class NamedTemplate extends Actor implements TraceableComponent {
         }
 
         return bodyEvaluator.processLeavingTail(output, context);
-//        if (bodyIsTailCallReturner) {
-//            return ((TailCallReturner) body).processLeavingTail(output, context);
-//        } else if (body != null) {
-//            bodyEvaluator.process(output, context);
-//        }
-//
-//        return null;
     }
 
 

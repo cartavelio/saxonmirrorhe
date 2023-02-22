@@ -9,8 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.OperandElaborator;
-import net.sf.saxon.expr.oper.OperandEvaluator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
@@ -48,7 +47,7 @@ public abstract class Actor implements ExpressionOwner, Location {
     private Component declaringComponent;
     private Visibility declaredVisibility = Visibility.UNDEFINED;
     private RetainedStaticContext retainedStaticContext;
-    private OperandEvaluator bodyEvaluator;
+    private PushEvaluator bodyEvaluator;
 
     public Actor() {
     }
@@ -307,13 +306,11 @@ public abstract class Actor implements ExpressionOwner, Location {
         setBody(expr);
     }
 
-    //private PushEvaluator pushEvaluator = (out, context) -> body.processLeavingTail(out, context);
-
-
     protected TailCall process(Outputter out, XPathContext context) throws XPathException {
-        if (bodyEvaluator == null) {
-            context.getConfiguration();
-            bodyEvaluator = new OperandElaborator(body);
+        synchronized(this) {
+            if (bodyEvaluator == null) {
+                bodyEvaluator = body.makeElaborator().elaborateForPush();
+            }
         }
         return bodyEvaluator.processLeavingTail(out, context);
     }

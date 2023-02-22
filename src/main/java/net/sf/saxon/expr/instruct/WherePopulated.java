@@ -10,10 +10,17 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.WherePopulatedOutputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
@@ -108,8 +115,7 @@ public class WherePopulated extends UnaryExpression implements ItemMappingFuncti
      */
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        WherePopulatedOutputter filter = new WherePopulatedOutputter(output);
-        getBaseExpression().process(filter, context);
+        dispatchTailCall(makeElaborator().elaborateForPush().processLeavingTail(output, context));
     }
 
     /**
@@ -190,6 +196,32 @@ public class WherePopulated extends UnaryExpression implements ItemMappingFuncti
     @Override
     public String getStreamerName() {
         return "WherePopulated";
+    }
+
+    public Elaborator getElaborator() {
+        return new WherePopulatedElaborator();
+    }
+
+    private static class WherePopulatedElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            WherePopulated expr = (WherePopulated) getExpression();
+            PushEvaluator basePush = expr.getBaseExpression().makeElaborator().elaborateForPush();
+            return (output, context) -> {
+                WherePopulatedOutputter filter = new WherePopulatedOutputter(output);
+                TailCall tc = basePush.processLeavingTail(filter, context);
+                dispatchTailCall(tc);
+                return null;
+            };
+        }
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            WherePopulated expr = (WherePopulated) getExpression();
+            PullEvaluator basePull = expr.getBaseExpression().makeElaborator().elaborateForPull();
+            return context -> new ItemMappingIterator(basePull.iterate(context), expr);
+        }
     }
 }
 

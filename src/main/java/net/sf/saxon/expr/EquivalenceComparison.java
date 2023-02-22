@@ -8,6 +8,10 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
@@ -273,6 +277,33 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
     @Override
     protected void explainExtraAttributes(ExpressionPresenter out) {
         out.emitAttribute("cardinality", "singleton");
+    }
+
+    @Override
+    public Elaborator getElaborator() {
+        return new EquivalenceComparisonElaborator();
+    }
+
+    private static class EquivalenceComparisonElaborator extends BooleanElaborator {
+        @Override
+        public BooleanEvaluator elaborateForBoolean() {
+            EquivalenceComparison expr = (EquivalenceComparison)getExpression();
+            ItemEvaluator eval0 = expr.getLhsExpression().makeElaborator().elaborateForItem();
+            ItemEvaluator eval1 = expr.getRhsExpression().makeElaborator().elaborateForItem();
+            return context -> {
+                AtomicValue v0 = (AtomicValue) eval0.eval(context);
+                AtomicValue v1 = (AtomicValue) eval1.eval(context);
+
+                if (v0 == null || v1 == null) {
+                    return (v0 == v1);
+                }
+
+                AtomicComparer comp2 = expr.comparer.provideContext(context);
+                return (expr.knownToBeComparable || Type.isGuaranteedComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), false))
+                        && comp2.comparesEqual(v0, v1);
+
+            };
+        }
     }
 }
 

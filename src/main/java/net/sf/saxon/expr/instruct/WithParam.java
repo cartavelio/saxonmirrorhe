@@ -205,16 +205,16 @@ public class WithParam  {
      * @return the evaluator object
      */
 
-    public SequenceEvaluator getEvaluationMode() {
+    public SequenceEvaluator getEvaluator() {
         if (evaluator == null) {
-            computeEvaluator();
+            makeEvaluator();
         }
         return evaluator;
     }
 
 
 
-    private void computeEvaluator() {
+    private void makeEvaluator() {
         evaluator = selectOp.getChildExpression().makeElaborator().lazily(true);
     }
 
@@ -314,7 +314,7 @@ public class WithParam  {
         // There is a select attribute: do a lazy evaluation of the expression,
         // which will already contain any code to force conversion to the required type.
         if (evaluator == null) {
-            computeEvaluator();
+            makeEvaluator();
         }
         int savedOutputState = context.getTemporaryOutputState();
         context.setTemporaryOutputState(StandardNames.XSL_WITH_PARAM);

@@ -7,11 +7,11 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
-import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.CopyOf;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
@@ -24,6 +24,8 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
@@ -46,8 +48,8 @@ import java.util.function.Supplier;
 public class SlashExpression extends BinaryExpression
         implements ContextSwitchingExpression {
 
-    boolean contextFree;
-    boolean indexingDisabled;
+    private boolean contextFree;
+    private boolean indexingDisabled;
 
     /**
      * Constructor
@@ -322,7 +324,7 @@ public class SlashExpression extends BinaryExpression
             // (XPath section 2.3.4 explicitly allows us to change it.)
             // However, in the interests of predictable execution, hand-optimization, and
             // diagnosable error behaviour, we retain the original order.
-            Stack<Expression> filters = new Stack<Expression>();
+            Stack<Expression> filters = new Stack<>();
             while (underlyingStep instanceof FilterExpression) {
                 filters.push(((FilterExpression) underlyingStep).getFilter());
                 underlyingStep = ((FilterExpression) underlyingStep).getSelectExpression();
@@ -331,11 +333,6 @@ public class SlashExpression extends BinaryExpression
                 newStep = new FilterExpression(newStep, filters.pop());
                 ExpressionTool.copyLocationInfo(getStep(), newStep);
             }
-
-            //System.err.println("Simplified this:");
-            //    display(10);
-            //System.err.println("as this:");
-            //    new PathExpression(startPath.start, newStep).display(10);
 
             Expression newPath = ExpressionTool.makePathExpression(startPath.getStart(), newStep);
             if (!(newPath instanceof SlashExpression)) {
@@ -532,7 +529,7 @@ public class SlashExpression extends BinaryExpression
         return Math.max(product, MAX_COST);
     }
 
-    public Expression tryToMakeSorted(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
+    public Expression tryToMakeSorted(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) {
         // Replace //x/y by descendant::y[parent::x] to eliminate the need for sorting
         // into document order, and to make the expression streamable
 
@@ -613,22 +610,6 @@ public class SlashExpression extends BinaryExpression
     public int getImplementationMethod() {
         return ITERATE_METHOD;
     }
-
-    /**
-     * Determine which aspects of the context the expression depends on. The result is
-     * a bitwise-or'ed value composed from constants such as XPathContext.VARIABLES and
-     * XPathContext.CURRENT_NODE
-     */
-
-//    public int computeDependencies() {
-//        return getStart().getDependencies() |
-//                // not all dependencies in the step matter, because the context node, etc,
-//                // are not those of the outer expression
-//                (getStep().getDependencies() &
-//                        (StaticProperty.DEPENDS_ON_XSLT_CONTEXT |
-//                                StaticProperty.DEPENDS_ON_LOCAL_VARIABLES |
-//                                StaticProperty.DEPENDS_ON_USER_FUNCTIONS));
-//    }
 
     /**
      * Copy an expression. This makes a deep copy.
@@ -1007,7 +988,7 @@ public class SlashExpression extends BinaryExpression
 
     public Expression getRemainingSteps() {
         if (getStart() instanceof SlashExpression) {
-            List<Expression> list = new ArrayList<Expression>(8);
+            List<Expression> list = new ArrayList<>(4);
             gatherSteps(list);
             Expression rem = rebuildSteps(list.subList(1, list.size()));
             ExpressionTool.copyLocationInfo(this, rem);
@@ -1072,7 +1053,7 @@ public class SlashExpression extends BinaryExpression
 
     public Expression getLeadingSteps() {
         if (getStep() instanceof SlashExpression) {
-            List<Expression> list = new ArrayList<Expression>(8);
+            List<Expression> list = new ArrayList<>(4);
             gatherSteps(list);
             Expression rem = rebuildSteps(list.subList(0, list.size()-1));
             ExpressionTool.copyLocationInfo(this, rem);
@@ -1126,32 +1107,51 @@ public class SlashExpression extends BinaryExpression
 
         @Override
         public PullEvaluator elaborateForPull() {
-            SlashExpression forEach = (SlashExpression) getExpression();
-            PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
-            PullEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPull();
-            ContextMappingFunction mapper = context -> action.iterate(context);
-            return context -> {
-                XPathContextMinor c2 = context.newMinorContext();
-                c2.trackFocus(select.iterate(context));
-                return new ContextMappingIterator(mapper, c2);
-            };
+            SlashExpression expr = (SlashExpression) getExpression();
+            PullEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForPull();
+            PullEvaluator action = expr.getActionExpression().makeElaborator().elaborateForPull();
+            if (expr.contextFree && expr.getStep() instanceof AxisExpression) {
+                AxisExpression step = (AxisExpression)expr.getStep();
+                return context -> MappingIterator.map(select.iterate(context), item -> step.iterate((NodeInfo)item));
+            } else {
+                ContextMappingFunction mapper = CSharp.methodRef(action::iterate);
+                return context -> {
+                    XPathContextMinor c2 = context.newMinorContext();
+                    c2.trackFocus(select.iterate(context));
+                    return new ContextMappingIterator(mapper, c2);
+                };
+            }
         }
 
         @Override
         public PushEvaluator elaborateForPush() {
-            SlashExpression forEach = (SlashExpression)getExpression();
-            PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
-            PushEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPush();
-            return (out, context) -> {
-                XPathContextMinor c2 = context.newMinorContext();
-                FocusIterator iter = c2.trackFocus(select.iterate(context));
-                TailCall tc = null;
-                while (iter.next() != null) {
-                    dispatchTailCall(tc);
-                    tc = action.processLeavingTail(out, c2);
-                }
-                return tc;
-            };
+            SlashExpression expr = (SlashExpression)getExpression();
+            PullEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForPull();
+            PushEvaluator action = expr.getActionExpression().makeElaborator().elaborateForPush();
+            if (expr.contextFree && expr.getStep() instanceof AxisExpression) {
+                AxisExpression step = (AxisExpression) expr.getStep();
+                return (out, context) -> {
+                    SequenceIterator outer = select.iterate(context);
+                    for (Item a; (a = outer.next()) != null; ) {
+                        AxisIterator inner = step.iterate((NodeInfo)a);
+                        for (NodeInfo b; (b = inner.next()) != null;) {
+                           out.append(b);
+                        }
+                    }
+                    return null;
+                };
+            } else {
+                return (out, context) -> {
+                    XPathContextMinor c2 = context.newMinorContext();
+                    FocusIterator iter = c2.trackFocus(select.iterate(context));
+                    TailCall tc = null;
+                    while (iter.next() != null) {
+                        dispatchTailCall(tc);
+                        tc = action.processLeavingTail(out, c2);
+                    }
+                    return tc;
+                };
+            }
 
         }
     }

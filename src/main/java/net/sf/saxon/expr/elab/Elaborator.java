@@ -226,6 +226,14 @@ public abstract class Elaborator {
         return zeroLengthWhenAbsent ? EmptyUnicodeString.getInstance() : null;
     }
 
+    protected final UnicodeString handlePossiblyNullUnicodeString(UnicodeString str, boolean zeroLengthWhenAbsent) {
+        if (str == null && zeroLengthWhenAbsent) {
+            return EmptyUnicodeString.getInstance();
+        } else {
+            return str;
+        }
+    }
+
     /**
      * Helper method that returns either a zero length string or null, depending
      * on the parameter
@@ -235,6 +243,14 @@ public abstract class Elaborator {
 
     protected final String handleNullString(boolean zeroLengthWhenAbsent) {
         return zeroLengthWhenAbsent ? "" : null;
+    }
+
+    protected final String handlePossiblyNullString(String str, boolean zeroLengthWhenAbsent) {
+        if (str == null && zeroLengthWhenAbsent) {
+            return "";
+        } else {
+            return str;
+        }
     }
 
 }

@@ -9,6 +9,10 @@ package net.sf.saxon.xpath;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
@@ -219,7 +223,33 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new XPathFunctionCallElaborator();
+    }
 
+    private static class XPathFunctionCallElaborator extends PullElaborator {
 
+        @Override
+        public PullEvaluator elaborateForPull() {
+            XPathFunctionCall expr = (XPathFunctionCall)getExpression();
+            SequenceEvaluator[] argEvals = new SequenceEvaluator[expr.getArity()];
+            for (int i = 0; i < argEvals.length; i++) {
+                argEvals[i] = expr.getArg(i).makeElaborator().lazily(true);
+            }
+            return context -> {
+                Sequence[] argValues = new Sequence[expr.getArity()];
+                for (int i = 0; i < argEvals.length; i++) {
+                    argValues[i] = argEvals[i].evaluate(context);
+                }
+                return expr.call(context, argValues).iterate();
+            };
+        }
+    }
 }
 

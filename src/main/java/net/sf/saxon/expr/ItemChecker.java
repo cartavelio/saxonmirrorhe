@@ -235,8 +235,7 @@ public final class ItemChecker extends UnaryExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        SequenceIterator base = getBaseExpression().iterate(context);
-        return checkSequence(base, context);
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     public SequenceIterator checkSequence(SequenceIterator base, XPathContext context) {
@@ -268,8 +267,7 @@ public final class ItemChecker extends UnaryExpression {
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        Item item = getBaseExpression().evaluateItem(context);
-        return checkItem(item, context);
+        return makeElaborator().elaborateForItem().eval(context);
     }
 
     public Item checkItem(Item item, XPathContext context) throws XPathException {
@@ -305,21 +303,7 @@ public final class ItemChecker extends UnaryExpression {
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        Expression next = getBaseExpression();
-        int card = StaticProperty.ALLOWS_ZERO_OR_MORE;
-        if (next instanceof CardinalityChecker) {
-            card = ((CardinalityChecker) next).getRequiredCardinality();
-            next = ((CardinalityChecker) next).getBaseExpression();
-        }
-        if ((next.getImplementationMethod() & PROCESS_METHOD) != 0 && !(requiredItemType instanceof DocumentNodeTest)) {
-            TypeCheckingFilter filter = new TypeCheckingFilter(output);
-            filter.setRequiredType(requiredItemType, card, roleSupplier.get(), getLocation());
-            next.process(filter, context);
-            filter.finalCheck();
-        } else {
-            // Force pull-mode evaluation
-            super.process(output, context);
-        }
+        dispatchTailCall(makeElaborator().elaborateForPush().processLeavingTail(output, context));
     }
 
     /**

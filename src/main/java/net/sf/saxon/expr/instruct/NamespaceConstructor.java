@@ -11,15 +11,19 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.*;
 
 import java.util.function.Supplier;
@@ -132,6 +136,11 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
             throw dynamicError(getLocation(), err, context);
         }
         String prefix = Whitespace.trim(value.getStringValue());
+        return checkPrefix(prefix, context);
+    }
+
+    public String checkPrefix(String prefix, XPathContext context) throws XPathException {
+        prefix = Whitespace.trim(prefix);
         if (!(prefix.isEmpty() || NameChecker.isValidNCName(prefix))) {
             String errorCode = isXSLT() ? "XTDE0920" : "XQDY0074";
             XPathException err = new XPathException("Namespace prefix is invalid: " + prefix, errorCode, getLocation());
@@ -145,6 +154,7 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
         }
         return prefix;
     }
+
 
     @Override
     public void processValue(UnicodeString value, Outputter output, XPathContext context) throws XPathException {
@@ -224,5 +234,97 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
         out.endElement();
     }
 
+    @Override
+    public Elaborator getElaborator() {
+        return new NamespaceConstructorElaborator();
+    }
 
+
+    private static class NamespaceConstructorElaborator extends SimpleNodePushElaborator {
+        @Override
+        public PushEvaluator elaborateForPush() {
+            NamespaceConstructor expr = (NamespaceConstructor) getExpression();
+            Location loc = expr.getLocation();
+            String literalPrefix = expr.getNameExp() instanceof StringLiteral
+                    ? ((StringLiteral)expr.getNameExp()).stringify() : null;
+            NamespaceUri literalUri = expr.getSelect() instanceof StringLiteral
+                    ? NamespaceUri.of(((StringLiteral)expr.getSelect()).stringify()) : null;
+            if (literalPrefix != null && literalUri != null) {
+                try {
+                    expr.checkPrefix(literalPrefix, getConfiguration().getConversionContext());
+                    expr.checkPrefixAndUri(literalPrefix, literalUri.toString(), getConfiguration().getConversionContext());
+                } catch (XPathException e) {
+                    return (output, context) -> {
+                        throw e;
+                    };
+                }
+                return (output, context) ->  {
+                    output.namespace(literalPrefix, literalUri, ReceiverOption.REJECT_DUPLICATES);
+                    return null;
+                };
+            } else {
+                StringEvaluator nameEval = expr.getNameExp().makeElaborator().elaborateForString(true);
+                StringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForString(true);
+                return (output, context) -> {
+                    String prefix = nameEval.eval(context);
+                    String uri = contentEval.eval(context);
+                    expr.checkPrefix(prefix, context);
+                    expr.checkPrefixAndUri(prefix, uri, context);
+                    try {
+                        output.namespace(prefix, NamespaceUri.of(uri), ReceiverOption.REJECT_DUPLICATES);
+                    } catch (XPathException err) {
+                        throw Instruction.dynamicError(loc, err, context);
+                    }
+
+                    return null;
+                };
+            }
+
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            NamespaceConstructor expr = (NamespaceConstructor) getExpression();
+            Location loc = expr.getLocation();
+            String literalPrefix = expr.getNameExp() instanceof StringLiteral
+                    ? ((StringLiteral) expr.getNameExp()).stringify() : null;
+            NamespaceUri literalUri = expr.getSelect() instanceof StringLiteral
+                    ? NamespaceUri.of(((StringLiteral) expr.getSelect()).stringify()) : null;
+            if (literalPrefix != null && literalUri != null) {
+                try {
+                    expr.checkPrefix(literalPrefix, getConfiguration().getConversionContext());
+                    expr.checkPrefixAndUri(literalPrefix, literalUri.toString(), getConfiguration().getConversionContext());
+                } catch (XPathException e) {
+                    return (context) -> {
+                        throw e;
+                    };
+                }
+                return (context) -> {
+                    Orphan o = new Orphan(context.getConfiguration());
+                    o.setNodeKind(Type.NAMESPACE);
+                    o.setStringValue(literalUri.toUnicodeString());
+                    if (!literalPrefix.isEmpty()) {
+                        o.setNodeName(new NoNamespaceName(literalPrefix));
+                    }
+                    return o;
+                };
+            } else {
+                StringEvaluator nameEval = expr.getNameExp().makeElaborator().elaborateForString(true);
+                UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
+                return context -> {
+                    String prefix = nameEval.eval(context);
+                    UnicodeString uri = contentEval.eval(context);
+                    expr.checkPrefix(prefix, context);
+                    expr.checkPrefixAndUri(prefix, uri.toString(), context);
+                    Orphan o = new Orphan(context.getConfiguration());
+                    o.setNodeKind(Type.NAMESPACE);
+                    o.setStringValue(uri);
+                    if (!prefix.isEmpty()) {
+                        o.setNodeName(new NoNamespaceName(prefix));
+                    }
+                    return o;
+                };
+            }
+        }
+    }
 }

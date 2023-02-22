@@ -35,7 +35,7 @@ public class ForClauseOuterPush extends TuplePush {
      */
     @Override
     public void processTuple(XPathContext context) throws XPathException {
-        SequenceIterator iter = forClause.getSequenceOp().getOperandEvaluator(context).iterate(context);
+        SequenceIterator iter = forClause.getSequence().makeElaborator().elaborateForPull().iterate(context);
         int pos = 0;
         Item next = iter.next();
         if (next == null) {

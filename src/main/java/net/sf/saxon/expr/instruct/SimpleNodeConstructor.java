@@ -232,14 +232,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        UnicodeString value = getSelectOp().getOperandEvaluator(context).evaluateAsString(context);
-        try {
-            processValue(value, output, context);
-        } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            throw e;
-        }
-        return null;
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
 
@@ -260,7 +253,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        Item contentItem = getSelectOp().getOperandEvaluator(context).evaluateItem(context);
+        Item contentItem = getSelect().makeElaborator().elaborateForItem().eval(context);
         UnicodeString content;
         if (contentItem == null) {
             content = EmptyUnicodeString.getInstance();

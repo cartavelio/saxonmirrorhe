@@ -14,6 +14,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorManager;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
@@ -29,6 +30,7 @@ import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -521,7 +523,7 @@ public class MergeInstr extends Instruction {
                         GroupIterator mgi = context.getCurrentMergeGroupIterator();
                         final XPathContextMajor c1 = context.newContext();
                         c1.setCurrentMergeGroupIterator(mgi);
-                        SequenceIterator inputIterator = getMergedInputIterator(context, comps, c1);
+                        SequenceIterator inputIterator = getMergedInputIterator(context, comps);
 
                         // Now perform the merge into a grouped sequence
                         inputIterator = new MergeGroupingIterator(inputIterator, getComparer(mergeSources[0].mergeKeyDefinitions, comps), null);
@@ -543,10 +545,10 @@ public class MergeInstr extends Instruction {
         try {
             AtomicComparer[] comps = getComparators(context);
 
-            GroupIterator mgi = context.getCurrentMergeGroupIterator();
-            final XPathContextMajor c1 = context.newContext();
-            c1.setCurrentMergeGroupIterator(mgi);
-            SequenceIterator inputIterator = getMergedInputIterator(context, comps, c1);
+            //GroupIterator mgi = context.getCurrentMergeGroupIterator();
+            //final XPathContextMajor c1 = context.newContext();
+            //c1.setCurrentMergeGroupIterator(mgi);
+            SequenceIterator inputIterator = getMergedInputIterator(context, comps);
 
             // Now perform the merge into a grouped sequence
             inputIterator = new MergeGroupingIterator(inputIterator,
@@ -554,8 +556,9 @@ public class MergeInstr extends Instruction {
                                                       getLastPositionFinder(context));
 
             // and apply the merging action to each group of duplicate items within this sequence
-            c1.setCurrentMergeGroupIterator((GroupIterator) inputIterator);
-            XPathContext c3 = c1.newMinorContext();
+            //c1.setCurrentMergeGroupIterator((GroupIterator) inputIterator);
+            XPathContextMajor c3 = context.newContext();
+            c3.setCurrentMergeGroupIterator((GroupIterator) inputIterator);
             c3.trackFocus(inputIterator);
             return new ContextMappingIterator(cxt -> getAction().iterate(cxt), c3);
         } catch (XPathException e) {
@@ -569,12 +572,11 @@ public class MergeInstr extends Instruction {
      * (but without actually combining duplicate entries)
      * @param context the dynamic evaluation context
      * @param comps the comparers to be used for comparing adjacent items in the sequence
-     * @param c1  TODO not sure why we need this
      * @return an iterator over the merged sources
      * @throws XPathException if anything goes wrong
      */
 
-    private SequenceIterator getMergedInputIterator(XPathContext context, AtomicComparer[] comps, final XPathContextMajor c1) throws XPathException {
+    private SequenceIterator getMergedInputIterator(XPathContext context, AtomicComparer[] comps) throws XPathException {
         // Now construct a tree of merge iterators, one for each merge sequence, for each merge source.
 
         SequenceIterator inputIterator = EmptyIterator.getInstance();
@@ -585,7 +587,7 @@ public class MergeInstr extends Instruction {
             if (ms.streamable && ms.getForEachSource() != null) {
 //#ifdefined STREAM
                 List<ContextMappingIterator> msIters =
-                        MergeInstrAdjunct.makeSourceIterators(ms, getPackageData(), c1);
+                        MergeInstrAdjunct.makeSourceIterators(ms, getPackageData(), context);
                 for (ContextMappingIterator iter : msIters) {
                     inputIterator = makeMergeIterator(inputIterator, comps, ms, iter);
                 }
@@ -595,19 +597,19 @@ public class MergeInstr extends Instruction {
                 options.setSchemaValidationMode(ms.validation);
                 options.setTopLevelType(ms.schemaType);
                 options.setApplicableAccumulators(ms.accumulators);
-                SequenceIterator uriIter = ms.getForEachSource().iterate(c1);
+                SequenceIterator uriIter = ms.getForEachSource().iterate(context);
                 XsltController controller = (XsltController)context.getController();
                 final AccumulatorManager accumulatorManager = controller.getAccumulatorManager();
                 anchorsIter = ItemMappingIterator.map(uriIter, baseItem -> {
                     String uri = baseItem.getStringValue();
                     NodeInfo node = DocumentFn.makeDoc(uri, getRetainedStaticContext().getStaticBaseUriString(),
-                                                       getPackageData(), options, c1, getLocation(), true);
+                                                       getPackageData(), options, context, getLocation(), true);
                     if (node != null) {
                         accumulatorManager.setApplicableAccumulators(node.getTreeInfo(), ms.accumulators);
                     }
                     return node;
                 });
-                XPathContext c2 = c1.newMinorContext();
+                XPathContext c2 = context.newMinorContext();
                 FocusIterator anchorsIterFocus = c2.trackFocus(anchorsIter);
                 while (anchorsIterFocus.next() != null) {
                     XPathContext c4 = c2.newMinorContext();
@@ -618,14 +620,14 @@ public class MergeInstr extends Instruction {
                     inputIterator = makeMergeIterator(inputIterator, comps, ms, contextMapKeysItr);
                 }
             } else if (ms.getForEachItem() != null) {
-                anchorsIter = ms.getForEachItem().iterate(c1);
-                XPathContext c2 = c1.newMinorContext();
+                anchorsIter = ms.getForEachItem().iterate(context);
+                XPathContext c2 = context.newMinorContext();
                 FocusIterator anchorsIterFocus = c2.trackFocus(anchorsIter);
                 while (anchorsIterFocus.next() != null) {
                     inputIterator = getInputIterator(comps, inputIterator, ms, c2);
                 }
             } else {
-                inputIterator = getInputIterator(comps, inputIterator, ms, c1);
+                inputIterator = getInputIterator(comps, inputIterator, ms, context);
 
             }
 
@@ -863,6 +865,16 @@ public class MergeInstr extends Instruction {
     }
 
     /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new MergeInstrElaborator();
+    }
+
+    /**
      * Get the (partial) name of a class that supports streaming of this kind of expression
      *
      * @return the partial name of a class that can be instantiated to provide streaming support in Saxon-EE,
@@ -899,6 +911,56 @@ public class MergeInstr extends Instruction {
             ItemWithMergeKeys newItem = new ItemWithMergeKeys(currentItem, ms.mergeKeyDefinitions, ms.sourceName, keyContext);
             return SingletonIterator.makeIterator(new ObjectValue<ItemWithMergeKeys>(newItem));
 
+        }
+    }
+
+    private static class MergeInstrElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            MergeInstr expr = (MergeInstr)getExpression();
+            PullEvaluator actionPull = expr.getAction().makeElaborator().elaborateForPull();
+            return context -> {
+                try {
+                    AtomicComparer[] comps = expr.getComparators(context);
+                    SequenceIterator inputIterator = expr.getMergedInputIterator(context, comps);
+
+                    // Now perform the merge into a grouped sequence
+                    inputIterator = new MergeGroupingIterator(inputIterator,
+                                                              expr.getComparer(expr.mergeSources[0].mergeKeyDefinitions, comps),
+                                                              expr.getLastPositionFinder(context));
+
+                    // and apply the merging action to each group of duplicate items within this sequence
+                    XPathContextMajor c3 = context.newContext();
+                    c3.setCurrentMergeGroupIterator((GroupIterator) inputIterator);
+                    c3.trackFocus(inputIterator);
+                    return new ContextMappingIterator(CSharp.methodRef(actionPull::iterate), c3);
+                } catch (XPathException e) {
+                    e.maybeSetLocation(expr.getLocation());
+                    throw e;
+                }
+            };
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            MergeInstr expr = (MergeInstr) getExpression();
+            PullEvaluator puller = elaborateForPull();
+            return (output, context) -> {
+                SequenceIterator iter = puller.iterate(context);
+                try {
+                    SequenceTool.supply(iter, /*(ItemConsumer<? super Item>)*/ it -> output.append(it, expr.getLocation(), ReceiverOption.ALL_NAMESPACES));
+                } catch (UncheckedXPathException err) {
+                    iter.close();
+                    XPathException e = err.getXPathException();
+                    e.maybeSetLocation(expr.getLocation());
+                    e.maybeSetContext(context);
+                    throw e;
+                } finally {
+                    iter.close();
+                }
+                return null;
+            };
         }
     }
 }

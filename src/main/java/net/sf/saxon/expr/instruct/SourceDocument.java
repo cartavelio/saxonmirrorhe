@@ -11,6 +11,10 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.Accumulator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.StringEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.lib.ParseOptions;
@@ -330,6 +334,36 @@ public class SourceDocument extends Instruction {
         }
     }
 
+    @Override
+    public Elaborator getElaborator() {
+        return new SourceDocumentElaborator();
+    }
 
+    private static class SourceDocumentElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            SourceDocument expr = (SourceDocument) getExpression();
+            StringEvaluator hrefEval = expr.getHref().makeElaborator().elaborateForString(false);
+            PushEvaluator bodyPush = expr.getBody().makeElaborator().elaborateForPush();
+            return (output, context) -> {
+                String href = hrefEval.eval(context);
+                NodeInfo doc = DocumentFn.makeDoc(href, expr.getStaticBaseURIString(), expr.getPackageData(),
+                                                  expr.parseOptions, context, expr.getLocation(), false);
+                if (doc != null) {
+                    Controller controller = context.getController();
+                    if (expr.accumulators != null && controller instanceof XsltController) {
+                        ((XsltController) controller).getAccumulatorManager().setApplicableAccumulators(
+                                doc.getTreeInfo(), expr.accumulators);
+                    }
+                    XPathContext c2 = context.newMinorContext();
+                    c2.setCurrentIterator(new ManualIterator(doc));
+                    return bodyPush.processLeavingTail(output, c2);
+                } else {
+                    return null;
+                }
+            };
+        }
+    }
 }
 

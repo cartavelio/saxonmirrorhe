@@ -322,26 +322,41 @@ public final class IdentityComparison extends BinaryExpression {
             final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
             final int operator = exp.getOperator();
 
-            return context -> {
-                NodeInfo v0 = (NodeInfo) p0.eval(context);
-                if (nullable0 && v0 == null) {
-                    return null;
-                }
-                NodeInfo v1 = (NodeInfo) p1.eval(context);
-                if (nullable1 && v1 == null) {
-                    return null;
-                }
-                switch (operator) {
-                    case Token.IS:
-                        return BooleanValue.get(v0.equals(v1));
-                    case Token.PRECEDES:
+            switch (operator) {
+                case Token.IS:
+                    if (nullable0 || nullable1) {
+                        return context -> {
+                            NodeInfo v0 = (NodeInfo) p0.eval(context);
+                            NodeInfo v1 = (NodeInfo) p1.eval(context);
+                            if (v0 == null || v1 == null) {
+                                return null;
+                            }
+                            return BooleanValue.get(v0.equals(v1));
+                        };
+                    } else {
+                        return context -> BooleanValue.get(p0.eval(context).equals(p1.eval(context)));
+                    }
+                case Token.PRECEDES:
+                    return context -> {
+                        NodeInfo v0 = (NodeInfo) p0.eval(context);
+                        NodeInfo v1 = (NodeInfo) p1.eval(context);
+                        if (v0 == null || v1 == null) {
+                            return null;
+                        }
                         return BooleanValue.get(GlobalOrderComparer.getInstance().compare(v0, v1) < 0);
-                    case Token.FOLLOWS:
+                    };
+                case Token.FOLLOWS:
+                    return context -> {
+                        NodeInfo v0 = (NodeInfo) p0.eval(context);
+                        NodeInfo v1 = (NodeInfo) p1.eval(context);
+                        if (v0 == null || v1 == null) {
+                            return null;
+                        }
                         return BooleanValue.get(GlobalOrderComparer.getInstance().compare(v0, v1) > 0);
-                    default:
-                        throw new UnsupportedOperationException("Unknown node identity test");
-                }
-            };
+                    };
+                default:
+                    throw new IllegalStateException();
+            }
 
         }
 

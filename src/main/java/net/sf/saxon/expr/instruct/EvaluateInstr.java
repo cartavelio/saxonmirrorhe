@@ -10,6 +10,7 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.LFUCache;
 import net.sf.saxon.functions.ExecutableFunctionLibrary;
@@ -276,247 +277,7 @@ public final class EvaluateInstr extends Expression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
-
-        Configuration config = context.getConfiguration();
-        if (config.getBooleanProperty(Feature.DISABLE_XSL_EVALUATE)) {
-            throw new XPathException("xsl:evaluate has been disabled", "XTDE3175");
-        }
-
-        final String exprText = getXpath().evaluateAsString(context).toString();
-        String baseUri =
-                getBaseUriExpr() == null ? getStaticBaseURIString() : Whitespace.trim(getBaseUriExpr().evaluateAsString(context).toString());
-
-        Item focus = getContextItemExpr().evaluateItem(context);
-
-        NodeInfo namespaceContextBase = null;
-        if (getNamespaceContextExpr() != null) {
-            namespaceContextBase = (NodeInfo) getNamespaceContextExpr().evaluateItem(context);
-        }
-
-        String schemaAwareAttr = Whitespace.trim(getSchemaAwareExpr().evaluateAsString(context).toString());
-        boolean isSchemaAware;
-        if ("yes".equals(schemaAwareAttr)||"true".equals(schemaAwareAttr)||"1".equals(schemaAwareAttr)) {
-            isSchemaAware = true;
-        } else if ("no".equals(schemaAwareAttr)||"false".equals(schemaAwareAttr)||"0".equals(schemaAwareAttr)) {
-            isSchemaAware = false;
-        } else {
-            XPathException err = new XPathException("The schema-aware attribute of xsl:evaluate must be yes|no|true|false|0|1");
-            err.setErrorCode("XTDE0030");
-            err.setLocation(getLocation());
-            err.setXPathContext(context);
-            throw err;
-        }
-
-        Expression expr = null;
-        SlotManager slotMap = null;
-
-        // Create a cache key so the compiled expression can be reused
-
-        StringBuilder fsb = new StringBuilder(exprText.length() + (baseUri == null ? 4 : baseUri.length()) + 40);
-        fsb.append(baseUri);
-        fsb.append("##");
-        fsb.append(schemaAwareAttr);
-        fsb.append("##");
-        fsb.append(exprText);
-        if (namespaceContextBase != null) {
-            fsb.append("##");
-            namespaceContextBase.generateId(fsb);
-        }
-        String cacheKey = fsb.toString();
-        Collection<XPathVariable> declaredVars = null;
-
-        Controller controller = context.getController();
-        LFUCache<String, Object[]> cache;
-        //noinspection SynchronizationOnLocalVariableOrMethodParameter
-        synchronized (controller) {
-            cache = (LFUCache<String, Object[]>) controller.getUserData(this.getLocation(), "xsl:evaluate");
-            if (cache == null) {
-                cache = new LFUCache<>(100);
-                controller.setUserData(this.getLocation(), "xsl:evaluate", cache);
-            } else {
-                Object[] o = cache.get(cacheKey);
-                if (o != null) {
-                    expr = (Expression) o[0];
-                    slotMap = (SlotManager) o[1];
-                    declaredVars = (Collection<XPathVariable>) o[2];
-                }
-            }
-        }
-
-        MapItem dynamicParams = null;
-        if (dynamicParamsOp != null) {
-            dynamicParams = (MapItem)dynamicParamsOp.getChildExpression().evaluateItem(context);
-        }
-
-        if (expr == null) {
-
-            // Expression needs to be compiled. First create the static context...
-
-            int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-            MapItem options = (optionsOp == null  ? new HashTrieMap() :(MapItem)optionsOp.getChildExpression().evaluateItem(context));
-
-            IndependentContext env = new IndependentContext(config);
-            env.setWarningHandler((str, loc) -> {
-                String message = "In dynamic expression {" + exprText + "}: " + str;
-                context.getController().warning(message, null, loc);
-            });
-            env.setBaseURI(baseUri);
-            env.setExecutable(context.getController().getExecutable());
-            env.setXPathLanguageLevel(version == 40 ? 40 : config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT));
-            env.setDefaultCollationName(getRetainedStaticContext().getDefaultCollationName());
-            if (getNamespaceContextExpr() != null) {
-                env.setNamespaces(namespaceContextBase);
-            } else {
-                env.setNamespaceResolver(getRetainedStaticContext());
-                env.setDefaultElementNamespace(getRetainedStaticContext().getDefaultElementNamespace());
-            }
-            // Copy the function library list, except for XSLT-defined system functions and private user-written functions
-            FunctionLibraryList libraryList0 = ((StylesheetPackage)getRetainedStaticContext().getPackageData()).getFunctionLibrary();
-            FunctionLibraryList libraryList1 = new FunctionLibraryList();
-            for (FunctionLibrary lib : libraryList0.getLibraryList()) {
-                if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet)lib).getNamespace().equals(NamespaceUri.FN)) {
-                    // Exclude XSLT-defined functions
-                    libraryList1.addFunctionLibrary(version == 40 ? XPath40FunctionSet.getInstance() : XPath31FunctionSet.getInstance());
-                } else if (lib instanceof StylesheetFunctionLibrary || lib instanceof ExecutableFunctionLibrary) {
-                    libraryList1.addFunctionLibrary(new PublicStylesheetFunctionLibrary(lib));
-                } else {
-                    libraryList1.addFunctionLibrary(lib);
-                }
-            }
-            env.setFunctionLibrary(libraryList1);
-            env.setDecimalFormatManager(getRetainedStaticContext().getDecimalFormatManager());
-            //env.setXPathLanguageLevel(config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT));
-            if (isSchemaAware) {
-                GroundedValue allowAny = options.get(StringValue.bmp("allow-any-namespace"));
-                if (allowAny != null && allowAny.effectiveBooleanValue()) {
-                    env.setImportedSchemaNamespaces(config.getImportedNamespaces());
-                } else {
-                    env.setImportedSchemaNamespaces(importedSchemaNamespaces);
-                }
-            }
-
-            GroundedValue defaultCollation = options.get(StringValue.bmp("default-collation"));
-            if (defaultCollation != null) {
-                env.setDefaultCollationName(defaultCollation.head().getStringValue());
-            }
-
-            Map<StructuredQName, Integer> locals = new HashMap<>();
-            if (dynamicParams != null) {
-                SequenceTool.supply(dynamicParams.keys(), (ItemConsumer<? super Item>) paramName -> {
-                    if (!(paramName instanceof QNameValue)) {
-                        final AtomicType primitiveItemType = ((AtomicValue) paramName).getPrimitiveType();
-                        XPathException err = new XPathException(
-                                "Parameter names supplied to xsl:evaluate must have type xs:QName, not " +
-                                        primitiveItemType.getDisplayName(), "XTTE3165");
-                        err.setIsTypeError(true);
-                        throw err;
-                    }
-                    XPathVariable var = env.declareVariable((QNameValue) paramName);
-                    locals.put(((QNameValue) paramName).getStructuredQName(), var.getLocalSlotNumber());
-                });
-            }
-
-            if (getActualParams() != null) {
-                for (WithParam actualParam : getActualParams()) {
-                    StructuredQName name = actualParam.getVariableQName();
-                    if (!locals.containsKey(name)) {
-                        XPathVariable var = env.declareVariable(name);
-                        locals.put(name, var.getLocalSlotNumber());
-                    }
-                }
-            }
-
-            // Now compile the expression
-
-            try {
-                expr = ExpressionTool.make(exprText, env, 0, Token.EOF, null);
-            } catch (XPathException e) {
-                XPathException err = new XPathException("Static error in XPath expression supplied to xsl:evaluate: " +
-                        e.getMessage() + ". Expression: {" + exprText + "}");
-                err.setErrorCode("XTDE3160");
-                err.setLocation(getLocation());
-                throw err;
-            }
-
-            // Type check, and allocate slots for variables
-
-            expr.setRetainedStaticContext(env.makeRetainedStaticContext());
-            Supplier<RoleDiagnostic> role =
-                    () -> new RoleDiagnostic(RoleDiagnostic.EVALUATE_RESULT, exprText, 0);
-            ExpressionVisitor visitor = ExpressionVisitor.make(env);
-            TypeChecker tc = config.getTypeChecker(false);
-            expr = tc.staticTypeCheck(expr, requiredType, role, visitor);
-            expr = ExpressionTool.resolveCallsToCurrentFunction(expr);
-            ContextItemStaticInfo cit;
-            if (contextItemOp != null) {
-                cit = config.makeContextItemStaticInfo(getContextItemExpr().getItemType(), false);
-            } else {
-                cit = ContextItemStaticInfo.ABSENT;
-            }
-            expr = expr.typeCheck(visitor, cit).optimize(visitor, cit);
-            slotMap = env.getStackFrameMap();
-            ExpressionTool.allocateSlots(expr, slotMap.getNumberOfVariables(), slotMap);
-            //expr.setContainer(env);
-
-            // Save the compiled expression in the cache for next time
-
-            if (cacheKey != null) {
-                declaredVars = env.getDeclaredVariables();
-                cache.put(cacheKey, new Object[]{expr, slotMap, declaredVars});
-                //System.err.println("Cache miss, size = " + cache.size());
-            }
-        }
-
-        XPathContextMajor c2 = context.newContext();
-        if (focus == null) {
-            c2.setCurrentIterator(null);
-        } else {
-            ManualIterator mono = new ManualIterator(focus);
-            c2.setCurrentIterator(mono);
-        }
-        c2.openStackFrame(slotMap);
-
-        if (getActualParams() != null) {
-            for (int i = 0; i < getActualParams().length; i++) {
-                int slot = slotMap.getVariableMap().indexOf(getActualParams()[i].getVariableQName());
-                c2.setLocalVariable(slot, getActualParams()[i].getSelectValue(context));
-            }
-        }
-
-        if (dynamicParams != null) {
-            AtomicIterator iter = dynamicParams.keys();
-            QNameValue paramName;
-            while ((paramName = (QNameValue) iter.next()) != null) {
-                int slot = slotMap.getVariableMap().indexOf(paramName.getStructuredQName());
-                if (slot >= 0) {
-                    // can be false if the with-params changes from one call to the next
-                    c2.setLocalVariable(slot, dynamicParams.get(paramName));
-                }
-            }
-        }
-
-        // Check that all required variables are present
-        for (XPathVariable var : declaredVars) {
-            final StructuredQName name = var.getVariableQName();
-            Predicate<Expression> nameMatch = e ->
-                    e instanceof LocalVariableReference &&
-                        ((LocalVariableReference) e).getVariableName().equals(name) &&
-                        ((LocalVariableReference) e).getBinding() instanceof XPathVariable;
-
-            if (dynamicParams != null && dynamicParams.get(new QNameValue(name, BuiltInAtomicType.QNAME)) == null &&
-                    !isActualParam(name) &&
-                    ExpressionTool.contains(expr, false, nameMatch)) {
-                throw new XPathException("No value has been supplied for variable " + name.getDisplayName(), "XPST0008");
-            }
-        }
-        try {
-            return expr.iterate(c2);
-        } catch (XPathException err) {
-            XPathException e2 = new XPathException("Dynamic error in expression {" + exprText + "} called using xsl:evaluate", err);
-            e2.setLocation(getLocation());
-            e2.setErrorCodeQName(err.getErrorCodeQName());
-            throw e2;
-        }
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     /**
@@ -661,5 +422,275 @@ public final class EvaluateInstr extends Expression {
 
     public Expression getDynamicParams() {
         return dynamicParamsOp.getChildExpression();
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new EvaluateInstrElaborator();
+    }
+
+    private static class EvaluateInstrElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            EvaluateInstr instr = (EvaluateInstr) getExpression();
+            StringEvaluator exprTextEval = instr.getXpath().makeElaborator().elaborateForString(false);
+            StringEvaluator baseUriEval = instr.getBaseUriExpr() == null
+                    ? null : instr.getBaseUriExpr().makeElaborator().elaborateForString(false);
+            ItemEvaluator contextItemEval = instr.getContextItemExpr().makeElaborator().elaborateForItem();
+            ItemEvaluator namespaceContextEval = instr.getNamespaceContextExpr() == null
+                    ? null : instr.getNamespaceContextExpr().makeElaborator().elaborateForItem();
+            StringEvaluator schemaAwareEval = instr.getSchemaAwareExpr().makeElaborator().elaborateForString(false);
+            ItemEvaluator dynamicParamsEval = instr.getDynamicParams() == null
+                    ? null : instr.getDynamicParams().makeElaborator().elaborateForItem();
+            ItemEvaluator optionsEval = instr.optionsOp == null ? null : instr.optionsOp.getChildExpression().makeElaborator().elaborateForItem();
+            return context -> {
+                Configuration config = context.getConfiguration();
+                if (config.getBooleanProperty(Feature.DISABLE_XSL_EVALUATE)) {
+                    throw new XPathException("xsl:evaluate has been disabled", "XTDE3175");
+                }
+
+                final String exprText = exprTextEval.eval(context);
+                String baseUri =
+                        baseUriEval == null ? instr.getStaticBaseURIString() : Whitespace.trim(baseUriEval.eval(context));
+
+                Item focus = contextItemEval.eval(context);
+
+                NodeInfo namespaceContextBase = null;
+                if (namespaceContextEval != null) {
+                    namespaceContextBase = (NodeInfo) namespaceContextEval.eval(context);
+                }
+
+                String schemaAwareAttr = Whitespace.trim(schemaAwareEval.eval(context));
+                boolean isSchemaAware;
+                if ("yes".equals(schemaAwareAttr) || "true".equals(schemaAwareAttr) || "1".equals(schemaAwareAttr)) {
+                    isSchemaAware = true;
+                } else if ("no".equals(schemaAwareAttr) || "false".equals(schemaAwareAttr) || "0".equals(schemaAwareAttr)) {
+                    isSchemaAware = false;
+                } else {
+                    XPathException err = new XPathException("The schema-aware attribute of xsl:evaluate must be yes|no|true|false|0|1");
+                    err.setErrorCode("XTDE0030");
+                    err.setLocation(instr.getLocation());
+                    err.setXPathContext(context);
+                    throw err;
+                }
+
+                Expression expr = null;
+                SlotManager slotMap = null;
+
+                // Create a cache key so the compiled expression can be reused
+
+                StringBuilder fsb = new StringBuilder(exprText.length() + (baseUri == null ? 4 : baseUri.length()) + 40);
+                fsb.append(baseUri);
+                fsb.append("##");
+                fsb.append(schemaAwareAttr);
+                fsb.append("##");
+                fsb.append(exprText);
+                if (namespaceContextBase != null) {
+                    fsb.append("##");
+                    namespaceContextBase.generateId(fsb);
+                }
+                String cacheKey = fsb.toString();
+                Collection<XPathVariable> declaredVars = null;
+
+                Controller controller = context.getController();
+                LFUCache<String, Object[]> cache;
+                //noinspection SynchronizationOnLocalVariableOrMethodParameter
+                synchronized(controller) {
+                    cache = (LFUCache<String, Object[]>) controller.getUserData(instr.getLocation(), "xsl:evaluate");
+                    if (cache == null) {
+                        cache = new LFUCache<>(100);
+                        controller.setUserData(instr.getLocation(), "xsl:evaluate", cache);
+                    } else {
+                        Object[] o = cache.get(cacheKey);
+                        if (o != null) {
+                            expr = (Expression) o[0];
+                            slotMap = (SlotManager) o[1];
+                            declaredVars = (Collection<XPathVariable>) o[2];
+                        }
+                    }
+                }
+
+                MapItem dynamicParams = null;
+                if (dynamicParamsEval != null) {
+                    dynamicParams = (MapItem) dynamicParamsEval.eval(context);
+                }
+
+                if (expr == null) {
+
+                    // Expression needs to be compiled. First create the static context...
+
+                    int version = instr.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+                    MapItem options = (optionsEval == null ? new HashTrieMap() : (MapItem) optionsEval.eval(context));
+
+                    IndependentContext env = new IndependentContext(config);
+                    env.setWarningHandler((str, loc) -> {
+                        String message = "In dynamic expression {" + exprText + "}: " + str;
+                        context.getController().warning(message, null, loc);
+                    });
+                    env.setBaseURI(baseUri);
+                    env.setExecutable(context.getController().getExecutable());
+                    env.setXPathLanguageLevel(version == 40 ? 40 : config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT));
+                    env.setDefaultCollationName(instr.getRetainedStaticContext().getDefaultCollationName());
+                    if (namespaceContextEval != null) {
+                        env.setNamespaces(namespaceContextBase);
+                    } else {
+                        env.setNamespaceResolver(instr.getRetainedStaticContext());
+                        env.setDefaultElementNamespace(instr.getRetainedStaticContext().getDefaultElementNamespace());
+                    }
+                    // Copy the function library list, except for XSLT-defined system functions and private user-written functions
+                    FunctionLibraryList libraryList0 = ((StylesheetPackage) instr.getRetainedStaticContext().getPackageData()).getFunctionLibrary();
+                    FunctionLibraryList libraryList1 = new FunctionLibraryList();
+                    for (FunctionLibrary lib : libraryList0.getLibraryList()) {
+                        if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceUri.FN)) {
+                            // Exclude XSLT-defined functions
+                            libraryList1.addFunctionLibrary(version == 40 ? XPath40FunctionSet.getInstance() : XPath31FunctionSet.getInstance());
+                        } else if (lib instanceof StylesheetFunctionLibrary || lib instanceof ExecutableFunctionLibrary) {
+                            libraryList1.addFunctionLibrary(new PublicStylesheetFunctionLibrary(lib));
+                        } else {
+                            libraryList1.addFunctionLibrary(lib);
+                        }
+                    }
+                    env.setFunctionLibrary(libraryList1);
+                    env.setDecimalFormatManager(instr.getRetainedStaticContext().getDecimalFormatManager());
+                    //env.setXPathLanguageLevel(config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT));
+                    if (isSchemaAware) {
+                        GroundedValue allowAny = options.get(StringValue.bmp("allow-any-namespace"));
+                        if (allowAny != null && allowAny.effectiveBooleanValue()) {
+                            env.setImportedSchemaNamespaces(config.getImportedNamespaces());
+                        } else {
+                            env.setImportedSchemaNamespaces(instr.importedSchemaNamespaces);
+                        }
+                    }
+
+                    GroundedValue defaultCollation = options.get(StringValue.bmp("default-collation"));
+                    if (defaultCollation != null) {
+                        env.setDefaultCollationName(defaultCollation.head().getStringValue());
+                    }
+
+                    Map<StructuredQName, Integer> locals = new HashMap<>();
+                    if (dynamicParams != null) {
+                        SequenceTool.supply(dynamicParams.keys(), (ItemConsumer<? super Item>) paramName -> {
+                            if (!(paramName instanceof QNameValue)) {
+                                final AtomicType primitiveItemType = ((AtomicValue) paramName).getPrimitiveType();
+                                XPathException err = new XPathException(
+                                        "Parameter names supplied to xsl:evaluate must have type xs:QName, not " +
+                                                primitiveItemType.getDisplayName(), "XTTE3165");
+                                err.setIsTypeError(true);
+                                throw err;
+                            }
+                            XPathVariable var = env.declareVariable((QNameValue) paramName);
+                            locals.put(((QNameValue) paramName).getStructuredQName(), var.getLocalSlotNumber());
+                        });
+                    }
+
+                    if (instr.getActualParams() != null) {
+                        for (WithParam actualParam : instr.getActualParams()) {
+                            StructuredQName name = actualParam.getVariableQName();
+                            if (!locals.containsKey(name)) {
+                                XPathVariable var = env.declareVariable(name);
+                                locals.put(name, var.getLocalSlotNumber());
+                            }
+                        }
+                    }
+
+                    // Now compile the expression
+
+                    try {
+                        expr = ExpressionTool.make(exprText, env, 0, Token.EOF, null);
+                    } catch (XPathException e) {
+                        XPathException err = new XPathException("Static error in XPath expression supplied to xsl:evaluate: " +
+                                                                        e.getMessage() + ". Expression: {" + exprText + "}");
+                        err.setErrorCode("XTDE3160");
+                        err.setLocation(instr.getLocation());
+                        throw err;
+                    }
+
+                    // Type check, and allocate slots for variables
+
+                    expr.setRetainedStaticContext(env.makeRetainedStaticContext());
+                    Supplier<RoleDiagnostic> role =
+                            () -> new RoleDiagnostic(RoleDiagnostic.EVALUATE_RESULT, exprText, 0);
+                    ExpressionVisitor visitor = ExpressionVisitor.make(env);
+                    TypeChecker tc = config.getTypeChecker(false);
+                    expr = tc.staticTypeCheck(expr, instr.requiredType, role, visitor);
+                    expr = ExpressionTool.resolveCallsToCurrentFunction(expr);
+                    ContextItemStaticInfo cit;
+                    if (instr.getContextItemExpr() != null) {
+                        cit = config.makeContextItemStaticInfo(instr.getContextItemExpr().getItemType(), false);
+                    } else {
+                        cit = ContextItemStaticInfo.ABSENT;
+                    }
+                    expr = expr.typeCheck(visitor, cit).optimize(visitor, cit);
+                    slotMap = env.getStackFrameMap();
+                    ExpressionTool.allocateSlots(expr, slotMap.getNumberOfVariables(), slotMap);
+                    //expr.setContainer(env);
+
+                    // Save the compiled expression in the cache for next time
+
+                    if (cacheKey != null) {
+                        declaredVars = env.getDeclaredVariables();
+                        cache.put(cacheKey, new Object[]{expr, slotMap, declaredVars});
+                        //System.err.println("Cache miss, size = " + cache.size());
+                    }
+                }
+
+                XPathContextMajor c2 = context.newContext();
+                if (focus == null) {
+                    c2.setCurrentIterator(null);
+                } else {
+                    ManualIterator mono = new ManualIterator(focus);
+                    c2.setCurrentIterator(mono);
+                }
+                c2.openStackFrame(slotMap);
+
+                if (instr.getActualParams() != null) {
+                    for (int i = 0; i < instr.getActualParams().length; i++) {
+                        int slot = slotMap.getVariableMap().indexOf(instr.getActualParams()[i].getVariableQName());
+                        c2.setLocalVariable(slot, instr.getActualParams()[i].getSelectValue(context));
+                    }
+                }
+
+                if (dynamicParams != null) {
+                    AtomicIterator iter = dynamicParams.keys();
+                    QNameValue paramName;
+                    while ((paramName = (QNameValue) iter.next()) != null) {
+                        int slot = slotMap.getVariableMap().indexOf(paramName.getStructuredQName());
+                        if (slot >= 0) {
+                            // can be false if the with-params changes from one call to the next
+                            c2.setLocalVariable(slot, dynamicParams.get(paramName));
+                        }
+                    }
+                }
+
+                // Check that all required variables are present
+                for (XPathVariable var : declaredVars) {
+                    final StructuredQName name = var.getVariableQName();
+                    Predicate<Expression> nameMatch = e ->
+                            e instanceof LocalVariableReference &&
+                                    ((LocalVariableReference) e).getVariableName().equals(name) &&
+                                    ((LocalVariableReference) e).getBinding() instanceof XPathVariable;
+
+                    if (dynamicParams != null && dynamicParams.get(new QNameValue(name, BuiltInAtomicType.QNAME)) == null &&
+                            !instr.isActualParam(name) &&
+                            ExpressionTool.contains(expr, false, nameMatch)) {
+                        throw new XPathException("No value has been supplied for variable " + name.getDisplayName(), "XPST0008");
+                    }
+                }
+                try {
+                    return expr.iterate(c2);
+                } catch (XPathException err) {
+                    XPathException e2 = new XPathException("Dynamic error in expression {" + exprText + "} called using xsl:evaluate", err);
+                    e2.setLocation(instr.getLocation());
+                    e2.setErrorCodeQName(err.getErrorCodeQName());
+                    throw e2;
+                }
+            };
+        }
     }
 }

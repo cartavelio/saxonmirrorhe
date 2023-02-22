@@ -8,6 +8,7 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -73,6 +74,16 @@ public abstract class PseudoExpression extends Expression {
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
         cannotEvaluate();
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        throw new UnsupportedOperationException();
     }
 }
 

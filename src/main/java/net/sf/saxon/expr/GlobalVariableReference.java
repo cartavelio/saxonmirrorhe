@@ -7,11 +7,7 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
@@ -19,6 +15,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -188,6 +185,17 @@ public class GlobalVariableReference extends VariableReference implements Compon
     public static class GlobalVariableReferenceElaborator extends PullElaborator {
 
         @Override
+        public EagerEvaluator eagerly() {
+            GlobalVariableReference varRef = (GlobalVariableReference) getExpression();
+            return CSharp.methodRef(varRef::evaluateVariable);
+        }
+
+        @Override
+        public SequenceEvaluator lazily(boolean repeatable) {
+            return eagerly();
+        }
+
+        @Override
         public PullEvaluator elaborateForPull() {
             GlobalVariableReference varRef = (GlobalVariableReference)getExpression();
             return context -> varRef.evaluateVariable(context).iterate();
@@ -198,8 +206,7 @@ public class GlobalVariableReference extends VariableReference implements Compon
             GlobalVariableReference varRef = (GlobalVariableReference) getExpression();
             return (out, context) -> {
                 SequenceIterator value = varRef.evaluateVariable(context).iterate();
-                Item it;
-                while ((it = value.next()) != null) {
+                for (Item it; (it = value.next()) != null;) {
                     out.append(it);
                 }
                 return null;

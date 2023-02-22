@@ -8,6 +8,9 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.ForEachGroup;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.sort.GroupIterator;
@@ -195,14 +198,8 @@ public class CurrentGroupCall extends Expression implements Callable {
 
     /*@NotNull*/
     @Override
-    public SequenceIterator iterate(XPathContext c) throws XPathException {
-        GroupIterator gi = c.getCurrentGroupIterator();
-        if (gi == null) {
-            XPathException err = new XPathException("There is no current group", "XTDE1061");
-            err.setLocation(getLocation());
-            throw err;
-        }
-        return gi.currentGroup().iterate();
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     /**
@@ -275,5 +272,31 @@ public class CurrentGroupCall extends Expression implements Callable {
         return "CurrentGroup";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new CurrentGroupCallElaborator();
+    }
+
+    private static class CurrentGroupCallElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            CurrentGroupCall expr = (CurrentGroupCall) getExpression();
+            return context -> {
+                GroupIterator gi = context.getCurrentGroupIterator();
+                if (gi == null) {
+                    XPathException err = new XPathException("There is no current group", "XTDE1061");
+                    err.setLocation(expr.getLocation());
+                    throw err;
+                }
+                return gi.currentGroup().iterate();
+            };
+        }
+    }
 }
 
