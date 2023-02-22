@@ -178,6 +178,14 @@ public class Serializer extends AbstractDestination {
          */
         SAXON_INDENT_SPACES(SaxonOutputKeys.INDENT_SPACES),
         /**
+         * Saxon extension: set to a string containing the internal DTD subset, which is output "as is",
+         * without any checking. The content should correspond to the rules for the <code>intSubset</code>
+         * production in the XML 1.1 grammar (note that this excludes the square-bracket delimiters).
+         * See also the <code>saxon:doctype</code> instruction, which allows the internal subset to be
+         * constructed programmatically.
+         */
+        SAXON_INTERNAL_DTD_SUBSET(SaxonOutputKeys.INTERNAL_DTD_SUBSET),
+        /**
          * Saxon extension: set to an integer (represented as a string) giving the desired maximum
          * length of lines when indenting. Default is 80.
          */

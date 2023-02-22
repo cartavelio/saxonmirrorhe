@@ -74,6 +74,7 @@ public class XSLResultDocument extends StyleElement {
         fans.add(SaxonOutputKeys.CHARACTER_REPRESENTATION);
         fans.add(SaxonOutputKeys.DOUBLE_SPACE);
         fans.add(SaxonOutputKeys.INDENT_SPACES);
+        fans.add(SaxonOutputKeys.INTERNAL_DTD_SUBSET);
         fans.add(SaxonOutputKeys.LINE_LENGTH);
         fans.add(SaxonOutputKeys.NEWLINE);
         fans.add(SaxonOutputKeys.NEXT_IN_CHAIN);
