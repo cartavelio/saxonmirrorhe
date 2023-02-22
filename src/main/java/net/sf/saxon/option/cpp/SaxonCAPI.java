@@ -712,17 +712,7 @@ public class SaxonCAPI {
             if(builder == null) {
                 builder = proci.newDocumentBuilder();
             }
-            Source source = null;
-            if (cwd != null && cwd.length() > 0) {
-                if (!cwd.endsWith("/")) {
-                    cwd = cwd.concat("/");
-                }
-                File file = new File(cwd, filename);
-                source = new StreamSource(file);
-                source.setSystemId(file.getAbsolutePath());
-            } else {
-                source = new StreamSource(new File(filename));
-            }
+            Source source = resolveFileToSource(cwd,filename);
             if (validator != null) {
                 builder.setSchemaValidator(validator);
             }
