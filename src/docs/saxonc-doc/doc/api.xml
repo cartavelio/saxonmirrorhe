@@ -25,10 +25,10 @@
             </td>
             <td>
                <p>A <code>SaxonProcessor</code> acts as a factory for generating XSLT, XQuery, XPath
-                  and Schema compilers. This class creates the Graalvm native-image run time data structure for a thread in a static struct
+                  and Schema compilers. This class creates the GraalVM Native Image run time data structure for a thread in a static struct
                   object which is shared across all <code>SaxonProcessor</code> objects created. For
                   C++ programs the static method <code>SaxonProcessor::release()</code> needs to be
-                  called at the end of a program to clean up the Graalvm threads. In the SaxonC Python
+                  called at the end of a program to clean up the GraalVM threads. In the SaxonC Python
                   and PHP extensions this release method is called internally.</p>
             </td>
             <td>
@@ -150,9 +150,9 @@
    <section id="saxon_c_cpp_api" title="SaxonC C++ API">
       <h1>SaxonC C++ API</h1>
 
-      <p>SaxonC 12 is built from the SaxonJ 12 Java product by cross compiling using Graalvm native-image.
+      <p>SaxonC 12 is built from the SaxonJ 12 Java product by cross compiling using GraalVM Native Image.
          This generates platform specific machine code, which is
-         interfaced with C/C++ using the Native image C API. The following SaxonC API
+         interfaced with C/C++ using the Native Image C API. The following SaxonC API
          classes are available in C++ to process XSLT, XQuery, XPath and Schema validation:</p>
       <ul>
          <li>

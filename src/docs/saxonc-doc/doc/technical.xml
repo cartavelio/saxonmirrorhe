@@ -1,7 +1,7 @@
 <article id="technical" title="Technical information">
    <h1>Technical information</h1>
 
-   <p>SaxonC is built by cross compiling the Java code of Saxon 12 using Graalvm native-image (version 22.3.0).
+   <p>SaxonC is built by cross compiling the Java code of Saxon 12 using GraalVM Native Image (version 22.3.0).
       This generates platform specific machine code, which we
       interface with C/C++ using the Native Image C API.</p>
 
@@ -23,9 +23,9 @@
 
    <p>The following limitations apply to the 12 release:</p>
    <ul>
-      <li>The ICU localization is currently not support in SaxonC-PE and SaxonC-EE.</li>
+      <li>ICU localization is currently not support in SaxonC-PE or SaxonC-EE.</li>
       <li>The XQuery Update feature is not supported.</li>
-      <li>Host language extension functions is currently not supported in SaxonC 12.</li>
+      <li>Host language extension functions are currently not supported in SaxonC 12.</li>
    </ul>
 
    <h2>Feedback/comments:</h2>
@@ -40,13 +40,13 @@
       <h1>Debugging</h1>
 
       <p>Exceptions and errors are captured and maintained silently in SaxonC, but can be accessed.
-         This is due to the call-back mechanism of the Graalvm Native Image C API. We therefore catch handle any exception thrown in the
-         Java code and report it in the C++ code as a <code>SaxonApiException</code> object.</p>
+         This is due to the call-back mechanism of the GraalVM Native Image C API. Exceptions thrown in the underlying
+         Java code are caught and reported in the C++ code as <code>SaxonApiException</code> objects.</p>
 
       <p>Any exceptions or errors found in a SaxonC Processor class can be accessed by the <code>getException()</code> method which
-         returns  an <code>SaxonApiException</code> object. The method
-               <code>getMessage()</code> indicates the underlying error message throw from the exception. It is also
-         possdible to get the error message directly from the Processor objects too. For example, see the following PHP code snippet:</p>
+         returns a <code>SaxonApiException</code> object. The method
+               <code>getMessage()</code> indicates the underlying error message thrown from the exception. It is also
+         possible to get the error message directly from the Processor objects. For example, see the following PHP code snippet:</p>
 
       <samp><![CDATA[<?php
   ...
