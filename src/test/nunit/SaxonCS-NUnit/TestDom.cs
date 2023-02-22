@@ -1443,26 +1443,28 @@ namespace SaxonCS_NUnit {
             }
         }
 
-        // [Test]
-        // public void testBug4509a() {
-        //     try {
-        //         Processor proc = new Processor(false);
-        //         net.sf.saxon.s9api.DocumentBuilder builder = proc.newDocumentBuilder();
-        //         XdmNode tree = builder.build(new StreamSource(new StringReader("<root xmlns='namespace'><a/><b/></root>")));
-        //         XmlDocument doc = (DocumentOverNodeInfo) DocumentOverNodeInfo.wrap(tree.getUnderlyingNode());
-        //         XmlElement root = doc.DocumentElement;
-        //         Assert.That(root.HasAttribute("xmlns"));
-        //         XmlElement a = (XmlElement) root.ChildNodes[0];
-        //         Assert.False(a.HasAttribute("xmlns"));
-        //         Assert.AreEqual(0, a.Attributes.Count);
-        //         XmlElement b = (XmlElement) root.ChildNodes[1];
-        //         Assert.False(b.HasAttribute("xmlns"));
-        //         Assert.AreEqual(0, b.Attributes.Count);
-        //     } catch (SaxonApiException err) {
-        //         Assert.Fail(err.getMessage());
-        //     }
-        // }
-
+        [Test]
+        public void testBug4509a() {
+            try {
+                Processor proc = new();
+                DocumentBuilder builder = proc.NewDocumentBuilder();
+                XdmNode input = builder.Build(new StringReader("<root xmlns='http://foo'><a/><b/></root>"));
+                DomDestination dest = new DomDestination();
+                proc.WriteXdmValue(input, dest);
+                XmlDocument doc = dest.XmlDocument;
+                XmlElement root = doc.DocumentElement;
+                Assert.That(root.HasAttribute("xmlns"));
+                XmlElement a = (XmlElement) root.ChildNodes[0];
+                Assert.False(a.HasAttribute("xmlns"));
+                Assert.AreEqual(0, a.Attributes.Count);
+                XmlElement b = (XmlElement) root.ChildNodes[1];
+                Assert.False(b.HasAttribute("xmlns"));
+                Assert.AreEqual(0, b.Attributes.Count);
+            }
+            catch (SaxonApiException err) {
+                Assert.Fail(err.Message);
+            }
+        }
 
         // [Test]
         // public void testBug4509b() {
