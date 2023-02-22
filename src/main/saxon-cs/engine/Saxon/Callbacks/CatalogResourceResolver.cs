@@ -8,6 +8,7 @@ using Org.XmlResolver.Utils;
 using Saxon.Api;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej.trans;
 
 namespace Saxon.Callbacks {
 
@@ -64,6 +65,9 @@ namespace Saxon.Callbacks {
                     else {
                         string href = request.relativeUri ?? request.uri;
                         string baseUri = request.baseUri ?? request.uri;
+                        if (string.IsNullOrEmpty(baseUri)) {
+                            baseUri = System.IO.Directory.GetCurrentDirectory();
+                        }
                         rr = catalogBasedResolver.CatalogResolver.ResolveUri(href, baseUri);
                         
                     }
@@ -77,6 +81,10 @@ namespace Saxon.Callbacks {
                 }
                 catch (System.ArgumentException) {
                     // Thrown for an unknown URI scheme
+                }
+                catch (System.UriFormatException u) {
+                    // Thrown for an invalid URI
+                    throw new XPathException("Invalid URI: ", u);
                 }
                 catch (System.IO.FileNotFoundException) {
                     // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent file
