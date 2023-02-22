@@ -24,10 +24,11 @@
  
    <p>The initial release of SaxonCS corresponds in functionality to Saxon-EE on Java, and requires a license key that
       enables Saxon-EE capability.</p>
-         
-         
+   
+   <p>For a "quick start" guide on how to get up and running using SaxonCS, see <a class="bodylink"
+      href="/about/gettingstarted/gettingstarteddotnet">Getting started with SaxonCS</a>.</p>
 
-      <p>Installation of Saxon on the .NET platform is described at <a class="bodylink" href="/about/installationdotnet">Installation (.NET)</a>.</p>
+      <p>Further details about installing Saxon on the .NET platform are described at <a class="bodylink" href="/about/installationdotnet">Installation (.NET)</a>.</p>
 
       <p>The commands <code>Transform</code>, <code>Query</code>, and <code>Validate</code> take the same parameters
 as their Java counterparts, with some exceptions. They are described in the following places:</p>
