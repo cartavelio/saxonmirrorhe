@@ -75,7 +75,7 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 
 Xslt30Processor::Xslt30Processor(const Xslt30Processor &other) {
 	proc = other.proc;
-	cppClass = other.cppClass;
+
 	cppXT = other.cppXT;
     cwdXT = other.cwdXT;
 	std::map<std::string, XdmValue*>::const_iterator paramIter = other.parameters.begin();

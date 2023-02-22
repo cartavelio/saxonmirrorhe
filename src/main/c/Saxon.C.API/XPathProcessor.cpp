@@ -61,6 +61,34 @@ XPathProcessor::XPathProcessor(SaxonProcessor* p, std::string curr) {
 }
 
 
+XPathProcessor::XPathProcessor(const XPathProcessor &other) {
+    cwdXP = other.cwdXP;
+    proc = other.proc; //TODO check thread safety
+
+    cppXP = other.cppXP;
+    std::map<std::string, XdmValue*>::const_iterator paramIter = other.parameters.begin();
+    while(paramIter != other.parameters.end())
+    {
+
+        XdmValue * valuei = paramIter->second;
+        if(valuei == nullptr) {
+
+        } else {
+            parameters[paramIter->first] = new XdmValue(*(valuei));
+        }
+        paramIter++;
+    }
+
+    std::map<std::string, std::string>::const_iterator propIter = other.properties.begin();
+    while (propIter != other.properties.end()) {
+        properties[propIter->first] = propIter->second;
+        propIter++;
+    }
+
+
+}
+
+
 XPathProcessor::~XPathProcessor(){
     //SaxonProcessor::attachCurrentThread();
     clearProperties();
