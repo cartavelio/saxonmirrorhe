@@ -16,6 +16,7 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -27,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -110,6 +112,22 @@ public class TestCollections {
     }
 
     @Test
+    public void testDirectoryForbiddenProtocol() {
+        try {
+            Processor p = new Processor(true);
+            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http https");
+            XPathCompiler c = p.newXPathCompiler();
+            XPathExecutable exec = c.compile("collection(.)!base-uri(.)");
+            XPathSelector eval = exec.load();
+            eval.setContextItem(composeURI(configTest.getDataDir(), "trax/xml/?select=*.xml;recurse=yes"));
+            XdmValue val = eval.evaluate();
+            fail("File scheme should have been disallowed");
+        } catch (SaxonApiException e) {
+            Assertions.assertTrue(e.getMessage().contains("has been disallowed"));
+        }
+    }
+
+    @Test
     public void testDirectoryWithContentType() {
         try {
             Processor p = new Processor(true);
@@ -137,6 +155,22 @@ public class TestCollections {
             assertEquals(5, val.size());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testDirectoryUriForbiddenProtocol() {
+        try {
+            Processor p = new Processor(true);
+            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http https");
+            XPathCompiler c = p.newXPathCompiler();
+            XPathExecutable exec = c.compile("uri-collection(.)");
+            XPathSelector eval = exec.load();
+            eval.setContextItem(composeURI(configTest.getDataDir(),"trax/xml/?select=*.foo"));
+            XdmValue val = eval.evaluate();
+            fail("File scheme should have been disallowed");
+        } catch (SaxonApiException e) {
+            Assertions.assertTrue(e.getMessage().contains("has been disallowed"));
         }
     }
 

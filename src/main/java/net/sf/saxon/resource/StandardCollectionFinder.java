@@ -87,9 +87,20 @@ public class StandardCollectionFinder
             throw new XPathException(e);
         }
 
-//        if (!context.getConfiguration().getAllowedUriTest().test(resolvedURI)) {
-//            throw new XPathException("URI scheme '" + resolvedURI.getScheme() + "' has been disallowed");
-//        }
+        String protocols = (String) context.getConfiguration().getConfigurationProperty(Feature.ALLOWED_PROTOCOLS);
+        boolean allow = "all".equals(protocols);
+        if (!allow) {
+            for (String protocol : protocols.split("\\s+")) {
+                if (resolvedURI.getScheme().equalsIgnoreCase(protocol)) {
+                    allow = true;
+                    break;
+                }
+            }
+        }
+
+        if (!allow) {
+            throw new XPathException("URI scheme '" + resolvedURI.getScheme() + "' has been disallowed");
+        }
 
         if ("file".equals(resolvedURI.getScheme())) {
             File file = new File(resolvedURI);
