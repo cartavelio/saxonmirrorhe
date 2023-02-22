@@ -3545,6 +3545,22 @@ cdef class PyXdmItem(PyXdmValue):
         val.derivednptr = val.derivedptr = <saxoncClasses.XdmNode*> self.derivedptr
         '''val.derivednptr.incrementRefCount()'''
         return val
+
+     def get_map_value(self):
+        """
+        get_node_value(self)
+        Get the subclass PyXdmNode for this PyXdmItem object current object if it is a node value
+
+        Returns:
+            PyXdmNode: Subclass this object to PyXdmNode or error
+        """
+        cdef PyXdmMap val = None
+        if self.is_atomic:
+          raise Exception("The PyXdmItem is an PyXdmAtomicValue therefore cannot be sub-classed to an PyXdmNode")
+        val = PyXdmMap()
+        val.derivedmmptr = val.derivedptr = <saxoncClasses.XdmMap*> self.derivedptr
+        '''val.derivednptr.incrementRefCount()'''
+        return val
      @property
      def head(self):
         """

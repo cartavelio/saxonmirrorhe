@@ -610,13 +610,7 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
                         value->addXdmItem(xdmItem);
                         return value;
 
-          			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
-                        xdmItem =  new XdmFunctionItem(result);
-                        SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                        value->addXdmItem(xdmItem);
-                        return value;
-
-          			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapClass)           == JNI_TRUE) {
+          			}  else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapClass)           == JNI_TRUE) {
                         xdmItem =  new XdmMap(result);
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                         value->addXdmItem(xdmItem);
@@ -628,6 +622,11 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
                         value->addXdmItem(xdmItem);
                         return value;
 
+                    } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
+                        xdmItem =  new XdmFunctionItem(result);
+                        SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+                        value->addXdmItem(xdmItem);
+                        return value;
                     }
 				    value = new XdmValue(result, false);
           	        SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);

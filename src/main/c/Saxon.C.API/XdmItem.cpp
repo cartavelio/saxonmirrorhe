@@ -36,6 +36,16 @@ bool XdmItem::isFunction(){
 
 }
 
+bool XdmItem::isMap(){
+   return false;
+
+}
+
+bool XdmItem::isArray(){
+   return false;
+
+}
+
 
 XdmItem * XdmItem::getHead(){
      std::cerr<<std::endl<<"XdmItem-getHead:"<<std::endl;

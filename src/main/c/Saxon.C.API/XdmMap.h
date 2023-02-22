@@ -211,10 +211,45 @@ public:
         return true;
     }
 
+    //! Determine whether the item is a map or some other type of item
+    /**
+     *
+     * @return true if the item is a Xdm map item, false if it is some other type
+     */
+    bool isMap(){
+        return true;
+    }
+
 	//! Get the type of the object
 	XDM_TYPE getType() {
 		return XDM_MAP;
 	}
+
+
+    //! The toString() method returns a simple XML serialization of the node with defaulted serialization parameters.
+    /**
+     *
+     * <p>In the case of an element node, the result will be a well-formed
+     * XML document serialized as defined in the W3C XSLT/XQuery serialization specification,
+     * using options method="xml", indent="yes", omit-xml-declaration="yes".</p>
+     * <p>In the case of a document node, the result will be a well-formed
+     * XML document provided that the document node contains exactly one element child,
+     * and no text node children. In other cases it will be a well-formed external
+     * general parsed entity.</p>
+     * <p>In the case of an attribute node, the output is a string in the form
+     * <code>name="value"</code>. The name will use the original namespace prefix.</p>
+     * <p>In the case of a namespace node, the output is a string in the form of a namespace
+     * declaration, that is <code>xmlns="uri"</code> or <code>xmlns:pre="uri"</code>.</p>
+     * <p>Other nodes, such as text nodes, comments, and processing instructions, are
+     * represented as they would appear in lexical XML. Note: this means that in the case
+     * of text nodes, special characters such as <code>&amp;</code> and <code>&lt;</code>
+     * are output in escaped form. To get the unescaped string value of a text node, use
+     * <code>getStringValue()</code> instead.</p>
+     *
+     * @return a simple XML serialization of the node. Under error conditions the method
+     * may return an error message which will always begin with the label "Error: ".
+     */
+    const char * toString();
 
 
 private:
