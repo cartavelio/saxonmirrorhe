@@ -515,6 +515,43 @@ task dotnetPublishZip(
   into "/SaxonCS-${saxonVersion}/"
 }
 
+task dotnetArchive(
+  dependsOn: ["dotnetRelease", "dotnetTestDrivers", "dotnetExamples"],
+  description: "Archives the generated CS sources"
+) {
+  copy {
+    from "${buildDir}/cs/"
+    into "${projectDir}/src/archive/csharp/build/cs"
+    exclude "bin/**"
+    exclude "obj/**"
+  }
+  copy {
+    from "${projectDir}/src/main/saxon-cs/"
+    into "${projectDir}/src/archive/csharp/src/main/saxon-cs/"
+    exclude "not-yet-needed/**"
+  }
+  copy {
+    from "${buildDir}/testdrivers/"
+    into "${projectDir}/src/archive/csharp/build/testdrivers/"
+    exclude "bin/**"
+    exclude "obj/**"
+  }
+  copy {
+    from "${projectDir}/src/test/cstestrunner/"
+    into "${projectDir}/src/archive/csharp/src/test/cstestrunner/"
+  }
+  copy {
+    from "${buildDir}/examples/"
+    into "${projectDir}/src/archive/csharp/build/examples/"
+    exclude "bin/**"
+    exclude "obj/**"
+  }
+  copy {
+    from "${projectDir}/src/samples/cs/"
+    into "${projectDir}/src/archive/csharp/src/samples/cs/"
+  }
+}
+
 task eecs_hello_world(
   dependsOn: ["eecs_dll"],
   description: "Execute a Hello World query"
