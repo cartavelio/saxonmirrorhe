@@ -97,7 +97,9 @@ public class CompilerInfo {
     public void copyFrom(CompilerInfo info) {
         config = info.config;
         uriResolver = info.uriResolver;
+        //#if CSHARP==false
         commonResourceResolver = info.commonResourceResolver;
+        //#endif
         errorReporter = info.errorReporter;
         codeInjector = info.codeInjector;
         recoveryPolicy = info.recoveryPolicy;
@@ -168,6 +170,7 @@ public class CompilerInfo {
         uriResolver = resolver;
     }
 
+    //#if CSHARP==false
     /**
      * Set the resource resolver to be used when resolving external identifiers and URIs.
      *
@@ -179,6 +182,7 @@ public class CompilerInfo {
     public void setCommonResourceResolver(CommonResourceResolver resolver) {
         commonResourceResolver = resolver;
     }
+    //#endif
 
     /**
      * Set the value of a stylesheet parameter. Static (compile-time) parameters must be provided using
@@ -379,6 +383,7 @@ public class CompilerInfo {
         return uriResolver;
     }
 
+    //#if CSHARP==false
     /**
      * Get the resource resolver being used.
      *
@@ -389,7 +394,6 @@ public class CompilerInfo {
         return commonResourceResolver;
     }
 
-    //#if CSHARP==false
     /**
      * Get the OutputURIResolver that will be used to resolve URIs used in the
      * href attribute of the xsl:result-document instruction.

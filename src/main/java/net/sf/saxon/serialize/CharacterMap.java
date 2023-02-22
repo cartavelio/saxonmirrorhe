@@ -8,9 +8,9 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.str.CompressedWhitespace;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.WhitespaceString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntHashMap;
@@ -113,7 +113,7 @@ public class CharacterMap {
     /*@NotNull*/
     public UnicodeString map(UnicodeString in, boolean insertNulls) {
 
-        if (!mapsWhitespace && in instanceof CompressedWhitespace) {
+        if (!mapsWhitespace && in instanceof WhitespaceString) {
             return in;
         }
 
