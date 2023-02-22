@@ -3,7 +3,6 @@ package net.sf.saxon.expr.elab;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -97,23 +96,11 @@ public abstract class Elaborator {
 
     public SequenceEvaluator lazily(boolean repeatable) {
         Expression expr = getExpression();
-        int card = expr.getCardinality();
-        if ((expr.getDependencies() &
-                     (StaticProperty.DEPENDS_ON_POSITION |
-                              StaticProperty.DEPENDS_ON_LAST |
-                              StaticProperty.DEPENDS_ON_CURRENT_ITEM |
-                              StaticProperty.DEPENDS_ON_CURRENT_GROUP |
-                              StaticProperty.DEPENDS_ON_REGEX_GROUP)) != 0) {
-            // we can't save these values in the closure, so we evaluate
-            // the expression now if they are needed
+        if (!expr.supportsLazyEvaluation()) {
             return eagerly();
-        } else if (!Cardinality.allowsMany(card)) {
-            ItemEvaluator itemEvaluator = elaborateForItem();
-            return Cardinality.allowsZero(card)
-                    ? new OptionalItemEvaluator(itemEvaluator)
-                    : new SingleItemEvaluator(itemEvaluator);
         } else if (repeatable) {
-            return new MemoClosureEvaluator(expr);
+            return new LearningEvaluator(
+                    expr, new MemoClosureEvaluator(expr, elaborateForPull()));
         } else {
             PullEvaluator pullEvaluator = elaborateForPull();
             return new LazyPullEvaluator(pullEvaluator);

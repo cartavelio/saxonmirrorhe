@@ -338,10 +338,10 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                         int argPos = entry.getValue();
                         int paramPos = fd.getPositionOfParameter(key);
                         if (paramPos < 0) {
-                            throw new UncheckedXPathException("Keyword " + key + " does not match the name of any declared parameter");
+                            throw new UncheckedXPathException("Keyword " + key + " does not match the name of any declared parameter", "XPST0142");
                         }
                         if (paramPos < positionalArgs) {
-                            throw new UncheckedXPathException("Parameter " + key + " is supplied both by position and by keyword");
+                            throw new UncheckedXPathException("Parameter " + key + " is supplied both by position and by keyword", "XPST0141");
                         }
                         Expression supplied = arguments[paramPos];
                         expandedArgs[argPos] = null;

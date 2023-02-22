@@ -44,7 +44,6 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.*;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trace.XQueryTraceCodeInjector;
 import net.sf.saxon.trace.XSLTTraceCodeInjector;
 import net.sf.saxon.trans.*;
@@ -3605,31 +3604,30 @@ public class Configuration implements SourceResolver, NotationSet {
         return xqe;
     }
 
-    /**
-     * Make a Closure, given the expected reference count
-     *
-     * @param expression the expression to be evaluated
-     * @param ref        the (nominal) number of times the value of the expression is required
-     * @param context    the XPath dynamic evaluation context
-     * @return the constructed Closure
-     * @throws XPathException if a failure occurs constructing the Closure
-     */
-
-    public Sequence makeClosure(Expression expression, int ref, XPathContext context) throws XPathException {
-        Instrumentation.count("makeClosure()");
-        if (getBooleanProperty(Feature.EAGER_EVALUATION)) {
-            // Using eager evaluation can make for easier debugging
-            SequenceIterator iter = expression.iterate(context);
-            return SequenceTool.toGroundedValue(iter);
-        }
-
-        Closure closure = ref > 1 ? new MemoClosure() : new Closure();
-        closure.setExpression(expression);
-        closure.setSavedXPathContext(context.newContext());
-        closure.saveContext(expression, context);
-        return closure;
-
-    }
+//    /**
+//     * Make a Closure, given the expected reference count
+//     *
+//     * @param expression the expression to be evaluated
+//     * @param ref        the (nominal) number of times the value of the expression is required
+//     * @param context    the XPath dynamic evaluation context
+//     * @return the constructed Closure
+//     * @throws XPathException if a failure occurs constructing the Closure
+//     */
+//
+//    public Sequence makeClosure(Expression expression, int ref, XPathContext context) throws XPathException {
+//        if (getBooleanProperty(Feature.EAGER_EVALUATION)) {
+//            // Using eager evaluation can make for easier debugging
+//            SequenceIterator iter = expression.iterate(context);
+//            return SequenceTool.toGroundedValue(iter);
+//        }
+//
+//        Closure closure = ref > 1 ? new MemoClosure() : new Closure();
+//        closure.setExpression(expression);
+//        closure.setSavedXPathContext(context.newContext());
+//        closure.saveContext(expression, context);
+//        return closure;
+//
+//    }
 
     /**
      * Make a SequenceExtent, given the expected reference count

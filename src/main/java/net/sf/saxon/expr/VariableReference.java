@@ -449,6 +449,19 @@ public abstract class VariableReference extends Expression implements BindingRef
     }
 
     /**
+     * Ask whether the expression supports lazy evaluation.
+     *
+     * @return false either if the expression cannot be evaluated lazily
+     * because it has dependencies that cannot be saved in the context, or
+     * because lazy evaluation is pointless (for example, for literals
+     * and variable references).
+     */
+    @Override
+    public boolean supportsLazyEvaluation() {
+        return false;
+    }
+
+    /**
      * Test if this expression is the same as another expression.
      * (Note, we only compare expressions that
      * have the same static and dynamic context).

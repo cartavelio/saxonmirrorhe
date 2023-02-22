@@ -18,7 +18,6 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.MemoClosure;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
@@ -32,10 +31,8 @@ import java.util.function.Supplier;
  * also for XSLT local variables.
  */
 
-public class LetExpression extends Assignation
-        implements MemoClosure.MemoClosureStatisticsConsumer {
+public class LetExpression extends Assignation {
 
-    //private int evaluationMode = ExpressionTool.UNDECIDED;
     private SequenceEvaluator evaluator = null;
     private boolean needsEagerEvaluation = false;
     private boolean needsLazyEvaluation = false;
@@ -112,21 +109,9 @@ public class LetExpression extends Assignation
         return needsLazyEvaluation;
     }
 
-    private int completed = 0;
-    private int abandoned = 0;
-
-    public void accept(MemoClosure.MemoClosureStatistics statistics) {
-        // Note, does thread-unsafe updates to the statistics
-        if (!needsLazyEvaluation) {
-            if (statistics.allRead) {
-                completed++;
-            } else {
-                abandoned++;
-            }
-            if (completed > 20 && abandoned == 0) {
-                setEvaluator(getSequence().makeElaborator().eagerly());
-            }
-        }
+    @Override
+    public boolean supportsLazyEvaluation() {
+        return !needsEagerEvaluation;
     }
 
     /**
@@ -143,10 +128,6 @@ public class LetExpression extends Assignation
     public void resetLocalStaticProperties() {
         super.resetLocalStaticProperties();
         references = new ArrayList<>(); // bug 3233
-//        if (evaluator == Evaluator.Variable.INSTANCE && !(getSequence() instanceof VariableReference)) {
-//            evaluator = null;
-//            setEvaluator();
-//        }
     }
 
     /**
@@ -406,13 +387,17 @@ public class LetExpression extends Assignation
     }
 
     public void setEvaluator() {
-        if (needsEagerEvaluation) {
-            setEvaluator(getSequence().makeElaborator().eagerly());
-        } else if (isIndexedVariable()) {
+        if (isIndexedVariable()) {
             PullEvaluator pullEval = getSequence().makeElaborator().elaborateForPull();
             setEvaluator(new IndexedVariableEvaluator(pullEval));
-        } else if (evaluator == null) {
+        } else if (needsEagerEvaluation || !getSequence().supportsLazyEvaluation()) {
+            setEvaluator(getSequence().makeElaborator().eagerly());
+        } else if (needsLazyEvaluation) {
             setEvaluator(getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1));
+        } else if (evaluator == null) {
+            setEvaluator(new LearningEvaluator(
+                    getSequence(),
+                    getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1)));
         }
     }
 
@@ -571,16 +556,14 @@ public class LetExpression extends Assignation
             if (needsEagerEvaluation) {
                 setEvaluator(getSequence().makeElaborator().eagerly());
             } else {
-                setEvaluator(getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1));
+                setEvaluator(new LearningEvaluator(
+                        getSequence(), getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1)));
             }
         }
         try {
             int savedOutputState = context.getTemporaryOutputState();
             context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
             Sequence result = evaluator.evaluate(context);
-            if (result instanceof MemoClosure) {
-                ((MemoClosure)result).setBindingExpression(this);
-            }
             context.setTemporaryOutputState(savedOutputState);
             return result;
         } catch (ClassCastException e) {
@@ -815,11 +798,21 @@ public class LetExpression extends Assignation
         }
 
         private SequenceEvaluator makeSequenceEvaluator(LetExpression let) {
-            if (let.needsEagerEvaluation) {
-                return let.getSequence().makeElaborator().eagerly();
-            } else {
-                return let.getSequence().makeElaborator().lazily(repeatable(let));
+            if (let.evaluator != null) {
+                return let.evaluator;
             }
+            let.setEvaluator();
+            return let.evaluator;
+//            SequenceEvaluator eval;
+//            if (let.needsEagerEvaluation) {
+//                eval = let.getSequence().makeElaborator().eagerly();
+//            } else {
+//                eval = new LearningSequenceEvaluator(
+//                        let.getSequence(),
+//                        let.getSequence().makeElaborator().lazily(repeatable(let)));
+//            }
+//            let.setEvaluator(eval);
+//            return eval;
         }
 
         /**

@@ -129,6 +129,19 @@ public class SuppliedParameterReference extends Expression {
     }
 
     /**
+     * Ask whether the expression supports lazy evaluation.
+     *
+     * @return false either if the expression cannot be evaluated lazily
+     * because it has dependencies that cannot be saved in the context, or
+     * because lazy evaluation is pointless (for example, for literals
+     * and variable references).
+     */
+    @Override
+    public boolean supportsLazyEvaluation() {
+        return false;
+    }
+
+    /**
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression

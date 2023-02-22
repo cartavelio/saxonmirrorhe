@@ -8,7 +8,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Closure;
 
 /**
- * A <code>LearningSequenceEvaluator</code> initially performs
+ * A <code>LearningEvaluator</code> initially performs
  * lazy evaluation of an expression; but if this proves unproductive,
  * it switches after a while to eager evaluation. Lazy evaluation is
  * considered unproductive if the input sequence is read to completion.
@@ -16,7 +16,7 @@ import net.sf.saxon.value.Closure;
  * and if the number of sequences that are completely read is equal to
  * the total number of evaluations, lazy evaluation is abandoned.
  */
-public class LearningSequenceEvaluator implements SequenceEvaluator {
+public class LearningEvaluator implements SequenceEvaluator {
 
     private final static int EVAL_LIMIT = 20;
 
@@ -26,7 +26,16 @@ public class LearningSequenceEvaluator implements SequenceEvaluator {
     private int count = 0;
     private boolean flipped;
 
-    public LearningSequenceEvaluator(Expression expr, SequenceEvaluator lazy) {
+    /**
+     * Construct a <code>LearningEvaluator</code>
+     * @param expr the expression to be evaluated
+     * @param lazy a SequenceEvaluator that evaluates the expression. Although this
+     *             is generally obtained by calling <code>getElaborator().lazily()</code>,
+     *             it does not necessarily perform lazy evaluation; some expressions
+     *             such as literals and variable references choose to evaluate
+     *             themselves eagerly all the time.
+     */
+    public LearningEvaluator(Expression expr, SequenceEvaluator lazy) {
         Instrumentation.count("LearningEvaluator");
         this.expression = expr;
         this.evaluator = lazy;
@@ -60,7 +69,7 @@ public class LearningSequenceEvaluator implements SequenceEvaluator {
     }
 
     /**
-     * Callback method called when a lazily-evaluated variable has been read to completion
+     * Callback method called when a lazily-evaluated expression has been read to completion
      * @param serialNumber identifies the evaluation
      */
 
@@ -80,6 +89,16 @@ public class LearningSequenceEvaluator implements SequenceEvaluator {
             flipped = true;
         }
 
+    }
+
+    /**
+     * Ask whether the LearningEvaluator has decided to use eager evaluation always
+     * @return true if sufficient evaluations have been performed to determine
+     * that lazy evaluation offers no benefits
+     */
+
+    public boolean hasDecidedToEvaluateEagerly() {
+        return flipped;
     }
 
     /**

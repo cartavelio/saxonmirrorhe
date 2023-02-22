@@ -26,12 +26,12 @@ public class SingletonIterator implements SequenceIterator, FocusIterator,
     private int currentPosition = -1;
 
     /**
-     * Protected constructor: external classes should use the factory method
+     * Constructor
      *
      * @param value the item to iterate over. Must not be null.
      */
 
-    protected SingletonIterator(Item value) {
+    public SingletonIterator(Item value) {
         assert value != null;
         //Instrumentation.count("SINGLETON ITERATOR");
         this.item = value;
