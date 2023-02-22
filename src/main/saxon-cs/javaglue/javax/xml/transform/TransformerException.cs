@@ -1,4 +1,3 @@
-using System.Management.Instrumentation;
 using java.lang;
 
 namespace javax.xml.transform
@@ -7,6 +6,9 @@ namespace javax.xml.transform
         private SourceLocator _locator;
         
         public TransformerException(string message) : base(message) {
+            
+        }
+        public TransformerException(System.Exception cause) : base(cause) {
             
         }
         public TransformerException(string message, SourceLocator locator) : base(message) {

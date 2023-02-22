@@ -47,6 +47,11 @@ namespace java.lang {
             this._builder.Append(("" + i));
             return this;
         }
+        
+        public StringBuilder append(long i) {
+            this._builder.Append(("" + i));
+            return this;
+        }
 
         public StringBuilder append(object obj) {
             this._builder.Append(obj);

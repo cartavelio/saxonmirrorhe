@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using net.sf.saxon.ma.map;
 using net.sf.saxon.om;
 using net.sf.saxon.value;
+using Saxon.Impl.DataModel;
 using KeyValuePair = net.sf.saxon.ma.map.KeyValuePair;
 
 namespace Saxon.Api {
@@ -17,7 +18,7 @@ namespace Saxon.Api {
         /// <summary>
         /// Create an empty <c>XdmMap</c>
         /// </summary>
-        public XdmMap() : base(new HashTrieMap()) {
+        public XdmMap() : base(new ImmMap()) {
         }
 
         // Wrap a supplied Saxon map
@@ -207,13 +208,13 @@ namespace Saxon.Api {
         /// <param name="input">the supplied map</param>
         /// <returns>the resulting <c>XdmMap</c></returns>
         public static XdmMap MakeMap(IDictionary input) {
-            HashTrieMap result = new HashTrieMap();
+            ImmMap result = new ImmMap();
             XdmAtomicValue key;
             XdmValue value;
 
             foreach (object keyi in input.Keys) {
                 key = XdmAtomicValue.MakeAtomicValue(keyi);
-                value = XdmValue.MakeValue(input[keyi]);
+                value = MakeValue(input[keyi]);
                 result.initialPut((AtomicValue) key.Unwrap(), value.value);
             }
 
