@@ -107,10 +107,12 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
                 URI absoluteURI;
                 try {
                     Source source = null;
-                    try {
-                        source = config.getSaxonResourceResolver().resolve(href, baseURI);
-                    } catch (TransformerException ex) {
-                        // Sigh. Nevermind then.
+                    if (config != null) {
+                        try {
+                            source = config.getSaxonResourceResolver().resolve(href, baseURI);
+                        } catch (TransformerException ex) {
+                            // Sigh. Nevermind then.
+                        }
                     }
                     if (source == null) {
                         absoluteURI = ResolveURI.makeAbsolute(href, baseURI);
@@ -135,10 +137,13 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
 
     private StreamSource resolvedNamespaceURI(String moduleURI, String baseURI) {
         try {
-            Source source = config.getSaxonResourceResolver().resolveNamespace(moduleURI, XQUERY_PURPOSE, null);
-            if (source == null && baseURI != null) {
-                String resuri = new URI(baseURI).resolve(moduleURI).toString();
-                source = config.getSaxonResourceResolver().resolveNamespace(resuri, XQUERY_PURPOSE, null);
+            Source source = null;
+            if (config != null) {
+                source = config.getSaxonResourceResolver().resolveNamespace(moduleURI, XQUERY_PURPOSE, null);
+                if (source == null && baseURI != null) {
+                    String resuri = new URI(baseURI).resolve(moduleURI).toString();
+                    source = config.getSaxonResourceResolver().resolveNamespace(resuri, XQUERY_PURPOSE, null);
+                }
             }
             if (source != null) {
                 return getQuerySource(new URI(source.getSystemId()));
@@ -169,10 +174,12 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
 
         String encoding = null;
         try {
-            InputStream is;
+            InputStream is = null;
             if ("classpath".equals(absoluteURI.getScheme())) {
                 String path = absoluteURI.getPath();
-                is = config.getDynamicLoader().getResourceAsStream(path);
+                if (config != null) {
+                    is = config.getDynamicLoader().getResourceAsStream(path);
+                }
                 if (is == null) {
                     XPathException se = new XPathException("Cannot locate module " + path + " on class path");
                     se.setErrorCode("XQST0059");
