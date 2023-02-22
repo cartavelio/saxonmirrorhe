@@ -17,7 +17,7 @@ task releaseResources(
         dependsOn: ["resources"],
         description: "Build the saxon-resources release"
 ) {
-    from "${buildDir}/resources"
+    from "${buildDir}/saxon-resources"
     archiveFileName = "saxon-resources-${saxonMajorVersion}.zip"
 }
 
@@ -28,7 +28,7 @@ task resources_notices(
         type: Copy,
         description: "Copies the notices for saxon-resources"
 ) {
-    into "${buildDir}/resources/notices"
+    into "${buildDir}/saxon-resources/notices"
     from ("${projectDir}/src/docs/notices") {
         include "ASM.txt"
         include "ICU-J.txt"
@@ -53,7 +53,7 @@ task resources_html_docs(
         type: Copy,
         description: "Copy docs base files into the resources folder"
 ) {
-    into "${buildDir}/resources/doc"
+    into "${buildDir}/saxon-resources/doc"
     from "${projectDir}/src/docs/resources/fixed"
 }
 
@@ -62,10 +62,10 @@ task resources_html_javadoc(
         dependsOn: ["userdoc_publish_html"],
         description: "Copy HTML javadoc into the resources folder"
 ) {
-    into "${buildDir}/resources/doc/javadoc"
+    into "${buildDir}/saxon-resources/doc/javadoc"
     from "${buildDir}/javadoc"
     doFirst {
-        mkdir "${buildDir}/resources/doc/javadoc"
+        mkdir "${buildDir}/saxon-resources/doc/javadoc"
     }
 }
 
@@ -74,10 +74,10 @@ task resources_html_dotnetdoc(
         dependsOn: ["userdoc_publish_html"],
         description: "Copy HTML dotnetdoc into the resources folder"
 ) {
-    into "${buildDir}/resources/doc/dotnetdoc"
+    into "${buildDir}/saxon-resources/doc/dotnetdoc"
     from "${buildDir}/dotnetdoc-html"
     doFirst {
-        mkdir "${buildDir}/resources/doc/dotnetdoc"
+        mkdir "${buildDir}/saxon-resources/doc/dotnetdoc"
     }
 }
 
@@ -99,7 +99,7 @@ task resources_userdoc_xml(
         dependsOn: ["source_userdoc_zip"],
         description: "Copy zipped userdoc source into the resources folder"
 ) {
-    into "${buildDir}/resources"
+    into "${buildDir}/saxon-resources"
     from "${buildDir}/distributions/source-userdoc.zip"
 }
 
@@ -109,7 +109,7 @@ task resources_drivers_src(
 ) {
   doLast {
     copy {
-      into "${buildDir}/resources/drivers/java"
+      into "${buildDir}/saxon-resources/drivers/java"
       from ("${buildDir}/src/testdrivers/eej") {
         exclude "com/saxonica/js"
       }
@@ -117,7 +117,7 @@ task resources_drivers_src(
   }
   doLast {
     copy {
-      into "${buildDir}/resources/drivers/java"
+      into "${buildDir}/saxon-resources/drivers/java"
       from ("src/main/java/") {
         include "com/saxonica/testdriver/gui/images/*"
       }
@@ -130,7 +130,7 @@ task resources_drivers(
         dependsOn: ["resources_drivers_src"],
         description: "Copy test drivers into the resources folder"
 ) {
-    into "${buildDir}/resources/drivers/java/classes"
+    into "${buildDir}/saxon-resources/drivers/java/classes"
     from ("${buildDir}/testdriver_classes/eej") {
         exclude "com/saxonica/js"
     }
@@ -148,7 +148,7 @@ task copy_usecases(
         type: Copy,
         description: "Copy use-cases into the resources folder"
 ) {
-    into "${buildDir}/resources/use-cases"
+    into "${buildDir}/saxon-resources/use-cases"
     from "${projectDir}/src/use-cases"
 }
 
@@ -156,7 +156,7 @@ task copy_samples(
         type: Copy,
         description: "Copy samples into the resources folder"
 ) {
-    into "${buildDir}/resources/samples"
+    into "${buildDir}/saxon-resources/samples"
     from ("${projectDir}/src/samples") {
         include "config/config.xml"
         include "config/config-HE.xml"
@@ -195,11 +195,11 @@ task gen_config_schema(
 ) {
     inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
     inputs.files "${projectDir}/src/samples/config/config-raw.xsd"
-    outputs.file "${buildDir}/resources/samples/config/config.xsd"
+    outputs.file "${buildDir}/saxon-resources/samples/config/config.xsd"
     classpath = configurations.preprocessor
     main = "net.sf.saxon.Transform"
     args "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToSchema.xsl",
-            "-o:${buildDir}/resources/samples/config/config.xsd",
+            "-o:${buildDir}/saxon-resources/samples/config/config.xsd",
             "-it:main",
             "FeatureKeys=FeatureKeys.xml",
             "AdditionalFeatures=AdditionalFeatures.xml",
@@ -210,7 +210,7 @@ task samples_j_src(
         type: Copy,
         description: "Copy Java samples into the resources folder"
 ) {
-    into "${buildDir}/resources/samples/java"
+    into "${buildDir}/saxon-resources/samples/java"
     from "${projectDir}/src/samples/java"
 }
 
@@ -219,7 +219,7 @@ task samples_j(
         dependsOn: ["copy_usecases", "samples_j_src", "run_eej_samples_ee"],
         description: "Copy compiled Java samples into the resources folder"
 ) {
-    into "${buildDir}/resources/samples/java/classes"
+    into "${buildDir}/saxon-resources/samples/java/classes"
     from "${buildDir}/samples/classes/run/ee"
 }
 
@@ -227,7 +227,7 @@ task samples_n(
         type: Copy,
         description: "Copy .NET samples into the resources folder"
 ) {
-    into "${buildDir}/resources/samples/cs"
+    into "${buildDir}/saxon-resources/samples/cs"
     from "${projectDir}/src/samples/cs"
 }
 
@@ -236,10 +236,10 @@ task gen_readme(
         description: "Generate readme.txt for saxon-resources download"
 ) {
     inputs.file "${projectDir}/src/docs/resources/readme.xsl"
-    outputs.file "${buildDir}/resources/readme.txt"
+    outputs.file "${buildDir}/saxon-resources/readme.txt"
     classpath = configurations.documentation
     main = "com.saxonica.Transform"
     args "-xsl:${projectDir}/src/docs/resources/readme.xsl",
             "-it:main",
-            "-o:${buildDir}/resources/readme.txt"
+            "-o:${buildDir}/saxon-resources/readme.txt"
 }
