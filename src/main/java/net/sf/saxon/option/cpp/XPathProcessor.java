@@ -266,9 +266,7 @@ public class XPathProcessor extends SaxonCAPI {
             selector.setContextItem(contextItem);
         } */
         XdmValue value = selector.evaluate();//compiler.evaluate(xpathStr, contextItem);
-        if (value.size() == 0) {
-            return null;
-        }
+
         long[] valueRefs = new long[value.size()];
         int i = 0;
         for (XdmItem item : value) {
