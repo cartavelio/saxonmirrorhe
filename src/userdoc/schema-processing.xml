@@ -49,7 +49,8 @@
       <kbd>-xsd:schema.xsd -s:instance.xml</kbd>
 
       <p>In this form of the command, it is possible to specify multiple schema documents and/or
-         multiple instance documents, in both cases as a semicolon-separated list. Glob syntax (such
+         multiple instance documents, as a list of names separated by semicolon (on Windows)
+         or colon (on Linux and MacOS). Glob syntax (such
          as <code>*.xml</code>) is available only if the <code>-s:</code> prefix is omitted, because
          the shell has to recognize the argument as a filename.</p>
 
@@ -225,9 +226,11 @@
             </td>
             <td>
                <p>Supplies a list of source documents to be validated. Each document is validated
-                  using the same options. The value is a list of filenames separated by semicolons.
+                  using the same options. The value is a list of filenames separated by semicolons (on Windows)
+                  or by colons (on Linux and MacOS); but if the <code>-u</code> option is used, then the list
+                  is a whitespace-separated list of URIs.
                   It is also possible to specify the names of source documents as arguments without
-                  any preceding option flag; in this case shell wildcards can be used. A filename
+                  any preceding option flag; in this case shell wildcards ("globs") can be used. A filename
                   can be specified as "<code>-</code>" to read the source document from standard
                   input, in which case the base URI is taken from that of the current directory.</p>
                <p>
@@ -299,8 +302,11 @@
             </td>
             <td>
                <p>Indicates that the name of the source document and schema document are supplied as
-                  URIs; otherwise they are taken as filenames, unless they start with "http:" or
-                  "file:", in which case they they are taken as URLs.</p>
+                  URIs; otherwise they are taken as filenames, unless they start with "http:", "https:",
+                  "file:", or "classpath:", in which case they they are taken as URLs.</p>
+               <p>In addition, when this option is specified, multiple URIs supplied in the <code>-s</code>
+               option must be separated by whitespace rather than by the usual file separator (colon or semicolon).
+               To achieve this, the list of names needs to be in quotes.</p>
             </td>
          </tr>
          <tr>
@@ -356,20 +362,18 @@
                <p>-xsd:file;file...</p>
             </td>
             <td>
-               <p>Supplies a list of schema documents to be used for validation. The value is a list
-                  of filenames separated by semicolons. If no source documents are supplied, the
-                  schema documents will be processed and any errors in the schema will be notified.
-                  This option must not be used when <code>-scmin</code> is specified. The option may
-                  be omitted, in which case the schema to be used for validation will be located
-                  using the <code>xsi:schemaLocation</code> and
-                     <code>xsi:noNamespaceSchemaLocation</code> attributes in the source document. A
-                  filename can be specified as "<code>-</code>" to read the schema from standard
-                  input, in which case the base URI is taken from that of the current directory.</p>
+               <p>Supplies a list of schema documents to be used for validation.
+                  The value is a list of filenames separated by semicolons (on Windows)
+                  or by colons (on Linux and MacOS); but if the <code>-u</code> option is used, then the list
+                  is a whitespace-separated list of URIs.</p>
                <p>The documents may either be source XSD schema documents, or compiled SCM files generated
                previously using the <code>-export</code> option. Loading precompiled schemas in SCM format
                is substantially faster. In addition, an SCM file may contain an embedded license key, in which
                case it is possible to use it for validation using a Saxon-EE configuration that does not have its
                own license.</p>
+               <p>NOTE: the format changed between 11.x and 12.x. In 11.x the separator was a semicolon
+               regardless of the operating system platform, and regardless of the <code>-u</code> option.
+               It was changed for consistency with the <code>-s</code> option.</p>
             </td>
          </tr>
          <tr>
