@@ -1,6 +1,5 @@
 package modeltests;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.s9api.DocumentBuilder;
@@ -33,6 +32,21 @@ public class JDOM2TreeTests extends ObjectModelTests {
             fail();
             return null;
         }
+    }
+
+    /**
+     * To be implemented in each subclass - supply an XPath extension function call that finds
+     * the string value of the first author in the document
+     *
+     * @return an XPath expression
+     */
+    @Override
+    public String getExtensionFunctionCall() {
+        return "Q{java:modeltests.JDOM2TreeTests}firstAuthor(/)";
+    }
+
+    public static String firstAuthor(Document doc) {
+        return doc.getRootElement().getChild("BOOKS").getChild("ITEM").getChild("AUTHOR").getText();
     }
 }
 

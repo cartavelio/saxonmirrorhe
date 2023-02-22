@@ -30,8 +30,8 @@ public class TestPipeline {
 		XsltCompiler xslt_compiler1 = processor.newXsltCompiler();
 
 		try {
-			xslt_executable1 = xslt_compiler1.compile(new StreamSource(new FileInputStream(xslt1)));
-		} catch (FileNotFoundException | SaxonApiException e) {
+			xslt_executable1 = xslt_compiler1.compile(xslt1);
+		} catch (SaxonApiException e) {
 		    fail();
 			e.printStackTrace();
 		}
@@ -49,8 +49,8 @@ public class TestPipeline {
 		// transformer2
 		XsltCompiler xslt_compiler2 = processor.newXsltCompiler();
 		try {
-			xslt_executable2 = xslt_compiler2.compile(new StreamSource(new FileInputStream(xslt2)));
-		} catch (FileNotFoundException | SaxonApiException e) {
+			xslt_executable2 = xslt_compiler2.compile(xslt2);
+		} catch (SaxonApiException e) {
 		    fail();
 			e.printStackTrace();
 		}

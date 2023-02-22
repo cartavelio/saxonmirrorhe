@@ -1,6 +1,5 @@
 package modeltests;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.dom4j.DOM4JObjectModel;
 import net.sf.saxon.s9api.DocumentBuilder;
@@ -49,5 +48,22 @@ public class DOM4JTreeTests extends ObjectModelTests {
         // No action. DOM4J doesn't support access to elements by ID (It has an elementsById() method, but that treats
         // an attribute as an ID attribute if its name is "ID".)
     }
+
+    /**
+     * To be implemented in each subclass - supply an XPath extension function call that finds
+     * the string value of the first author in the document
+     *
+     * @return an XPath expression
+     */
+    @Override
+    public String getExtensionFunctionCall() {
+        return "Q{java:modeltests.DOM4JTreeTests}firstAuthor(/)";
+    }
+
+    public static String firstAuthor(Document doc) {
+        return doc.getRootElement().element("BOOKS").element("ITEM").element("AUTHOR").getStringValue();
+    }
+
+
 }
 
