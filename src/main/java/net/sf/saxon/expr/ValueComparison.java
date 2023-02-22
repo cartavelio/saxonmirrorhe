@@ -543,16 +543,12 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                 return context -> resultWhenEmpty;
             }
 
-            GenericAtomicComparer.AtomicComparisonFunction comparer;
-            try {
-                comparer = GenericAtomicComparer.makeAtomicComparisonFunction(
+            GenericAtomicComparer.AtomicComparisonFunction comparer =
+                    GenericAtomicComparer.makeAtomicComparisonFunction(
                         operandType(expr.getLhsExpression()),
                         operandType(expr.getRhsExpression()),
                         defaultCollation,
                         operator, true);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
 
 
             final boolean nullable0 = Cardinality.allowsZero(card0);
