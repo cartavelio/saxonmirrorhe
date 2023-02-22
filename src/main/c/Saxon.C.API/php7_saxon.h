@@ -49,6 +49,9 @@
 #include "XdmNode.h"
 #include "XdmAtomicValue.h"
 #include "XdmFunctionItem.h"
+#include "XdmMap.h"
+#include "XdmArray.h"
+
 /*class SaxonProcessor;
 class XQueryProcessor;
 class XsltProcessor;
@@ -134,6 +137,27 @@ struct xdmAtomicValue_object {
     zend_object std;
 };
 
+
+struct xdmFunctionItem_object {
+
+    XdmFunctionItem * xdmFunctionItem;
+    zend_object std;
+};
+
+
+struct xdmMap_object {
+
+    XdmMap * xdmMap;
+    zend_object std;
+};
+
+
+struct xdmArray_object {
+
+    XdmArray * xdmArray;
+    zend_object std;
+};
+
 struct xslt30Processor_object {
 
     Xslt30Processor *xslt30Processor;
@@ -149,7 +173,7 @@ struct xsltExecutable_object {
 
 
 #define PHP_SAXON_EXTNAME  "saxonc"
-#define PHP_SAXON_EXTVER   "1.3.0"
+#define PHP_SAXON_EXTVER   "11.1"
 
 /*
  * Class:     com_saxonica_functions_extfn_PhpCall_PhpFunctionCall
@@ -262,7 +286,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XsltExecutable,  getErrorCode);
     PHP_METHOD(XsltExecutable,  getErrorMessage);
     PHP_METHOD(XsltExecutable,  setSaveXslMessage);
-    PHP_METHOD(XsltExecutable,  setSaveResultDocument);
+    PHP_METHOD(XsltExecutable,  setCaptureResultDocuments);
     PHP_METHOD(XsltExecutable,  getResultDocuments);
 
 
@@ -383,6 +407,47 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XdmAtomicValue,  getLongValue);
     PHP_METHOD(XdmAtomicValue,  getPrimitiveTypeName);
     PHP_METHOD(XdmAtomicValue,  isAtomic);
+
+
+
+ /*     ============== PHP Interface of   XdmFunctionItem =============== */
+
+    PHP_METHOD(XdmFunctionItem,  getName);
+    PHP_METHOD(XdmFunctionItem,  getArity);
+    PHP_METHOD(XdmFunctionItem,  getSystemFunction);
+    PHP_METHOD(XdmFunctionItem,  call);
+
+
+
+
+ /*     ============== PHP Interface of   XdmMap =============== */
+
+    PHP_METHOD(XdmMap,  __construct);
+    PHP_METHOD(XdmMap,  __destruct);
+    PHP_METHOD(XdmMap,  mapSize);
+    PHP_METHOD(XdmMap,  get);
+    PHP_METHOD(XdmMap,  put);
+    PHP_METHOD(XdmMap,  remove);
+    PHP_METHOD(XdmMap,  isEmpty);
+    PHP_METHOD(XdmMap,  containsKey);
+    PHP_METHOD(XdmMap,  keys);
+    PHP_METHOD(XdmMap,  asMap);
+    PHP_METHOD(XdmMap,  values);
+
+
+
+
+ /*     ============== PHP Interface of   XdmArray =============== */
+
+    PHP_METHOD(XdmArray,  __construct);
+    PHP_METHOD(XdmArray,  __destruct);
+    PHP_METHOD(XdmArray,  get);
+    PHP_METHOD(XdmArray,  put);
+    PHP_METHOD(XdmArray,  addMember);
+    PHP_METHOD(XdmArray,  concat);
+    PHP_METHOD(XdmArray,  values);
+    PHP_METHOD(XdmArray,  getArity);
+    PHP_METHOD(XdmArray,  arrayLength);
 
 
 #endif /* PHP_SAXON_H */

@@ -241,7 +241,7 @@ cdef extern from "../SaxonProcessor.h":
 
         void setInitialMode(const char * modeName)
 
-        void setSaveResultDocument(bool flag)
+        void setCaptureResultDocuments(bool flag)
 
         # The initial value to which templates are to be applied (equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>)
         void setInitialMatchSelection(XdmValue * selection)

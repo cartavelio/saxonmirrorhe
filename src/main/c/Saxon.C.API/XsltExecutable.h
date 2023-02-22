@@ -282,7 +282,7 @@ public:
      * @param 
      * @param flag - true enables map object which is used to save the result documents from the transformation
     */
-    void setSaveResultDocument(bool flag);
+    void setCaptureResultDocuments(bool flag);
 
 
     /**
