@@ -55,52 +55,6 @@ public class CatalogResourceResolver implements
         this.catalogBasedResolver = resolver;
     }
 
-//    /**
-//     * Return a new instance of the resolver. This method creates a new CommonResourceResolver
-//     * that uses the same underlying {@link org.xmlresolver.Resolver}.
-//     * @return A new CatalogResourceResolver.
-//     */
-//    public CommonResourceResolver newInstance() {
-//        CommonResourceResolver newResolver = new CatalogResourceResolver(catalogBasedResolver);
-//        newResolver.copyFrom(this);
-//        return newResolver;
-//    }
-
-//    /**
-//     * Chains an entity resolver.
-//     * @param resolver the fallback resolver. If the fallback resolver is an instance of <code>EntityResolver2</code>,
-//     *                 it will be used as the fallback for that interface as well.
-//     * @return this
-//     */
-//    public CommonResourceResolver chain(EntityResolver resolver) {
-//        nextEntityResolver = resolver;
-//        if (resolver instanceof EntityResolver2) {
-//            nextEntityResolver2 = (EntityResolver2) resolver;
-//        }
-//        return this;
-//    }
-//
-//    /**
-//     * Chains an entity resolver.
-//     * @param resolver the fallback resolver.
-//     * @return this
-//     */
-//    public CommonResourceResolver chain(EntityResolver2 resolver) {
-//        nextEntityResolver = resolver;
-//        nextEntityResolver2 = resolver;
-//        return this;
-//    }
-//
-//    /**
-//     * Chains a URI resolver.
-//     * @param resolver the fallback resolver.
-//     * @return this.
-//     */
-//    public CommonResourceResolver chain(ResourceResolver resolver) {
-//        nextResourceResolver = resolver;
-//        return this;
-//    }
-
     /**
      * Calls {@link org.xmlresolver.XMLResolverConfiguration#getFeature} on the underlying
      * resolver configuration.
