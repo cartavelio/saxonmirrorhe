@@ -66,6 +66,27 @@
       <reason>Spec for fn:replace#4 not yet agreed and not implemented</reason>
    </exception>
    
+   <exception test-set="fn-tokenize" test-case="  
+      fn-tokenize-40-001
+      fn-tokenize-40-002" run="false" report="not implemented">
+      <created by="Michael Kay" on="2023-01-17"/>
+      <reason>Tokenize#2 does not currently allow second argument to be an empty sequence</reason>
+   </exception>
+   
+   <exception test-set="fn-remove" test-case="  
+      fn-remove-40-001
+      fn-remove-40-002
+      fn-remove-40-003
+      fn-remove-40-004
+      fn-remove-40-005
+      fn-remove-40-006
+      fn-remove-40-008" run="false" report="not implemented">
+      <created by="Michael Kay" on="2023-01-17"/>
+      <reason>Remove does not currently allow second argument to be a sequence</reason>
+   </exception>
+   
+   
+   
    
  
    <exception test-set="fn-slice"  run="false" report="not implemented">
@@ -143,6 +164,11 @@
    <exception test-set="prod-ThinArrow"  run="false" report="not implemented">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="prod-IfExpr" test-case="reject-proposed-ternary-operator" run="false" report="not implemented">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Ternary conditionals implemented in Saxon 12, but now dropped from spec.</reason>
    </exception>
    
    <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="insufficient tests">
