@@ -63,7 +63,7 @@ namespace SaxonCS_NUnit {
                 Serializer serializer = proc.NewSerializer();
                 serializer.SetOutputProperty(Serializer.INDENT, "yes");
                 serializer.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
-                serializer.SetOutputStream(output);
+                serializer.OutputStream = output;
                 sv.SetDestination(serializer);
 
                 sv.Validate(new StringReader(source_xml));
@@ -663,7 +663,7 @@ namespace SaxonCS_NUnit {
                 Serializer serializer = proc.NewSerializer();
                 serializer.SetOutputProperty(Serializer.INDENT, "yes");
                 serializer.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
-                serializer.SetOutputStream(output);
+                serializer.OutputStream = output;
                 sv.SetDestination(serializer);
 
 
@@ -793,7 +793,7 @@ namespace SaxonCS_NUnit {
 
                 dest = proc.NewSerializer();
                 dest.SetOutputProperty(Serializer.INDENT, "yes");
-                dest.SetOutputFile(ConfigTest.DATA_DIR + "sandpit/validationReport.xml");
+                dest.OutputFile = ConfigTest.DATA_DIR + "sandpit/validationReport.xml";
 
                 // dest.setOutputWriter(writer);
                 validator.SetValidityReporting(dest);
@@ -1157,7 +1157,7 @@ namespace SaxonCS_NUnit {
                 Serializer serializer = proc.NewSerializer();
                 serializer.SetOutputProperty(Serializer.INDENT, "yes");
                 serializer.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
-                serializer.SetOutputStream(output);
+                serializer.OutputStream = output;
                 sv.SetDestination(serializer);
                 sv.Validate(new Uri(ConfigTest.DataDirUri, "../bugs/4744/UniqueKeyBug.xml"));
 

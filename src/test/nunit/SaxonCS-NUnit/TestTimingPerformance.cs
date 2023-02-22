@@ -81,7 +81,7 @@ namespace SaxonCS_NUnit
                 var destination = _processor.NewSerializer();
                 using (var output = File.Open(outputPath, FileMode.Create))
                 {
-                    destination.SetOutputStream(output);
+                    destination.OutputStream = output;
                     transformer.Run(destination);
                 }
             }
