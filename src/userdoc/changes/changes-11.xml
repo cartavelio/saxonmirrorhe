@@ -70,6 +70,10 @@
             </tbody>
         </table>
         
+        <p>The class <code>StaticError</code> has been folded into <code>XmlProcessingError</code>. Any remaining references
+            to <code>StaticError</code> can generally be replaced with references to <code>XmlProcessingError</code>. The name
+            <code>StaticError</code> had become misleading because its instances were in many cases dynamic errors.</p>
+        
  
     </category>
 
