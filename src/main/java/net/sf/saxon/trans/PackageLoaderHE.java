@@ -1376,6 +1376,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
     private ItemType parseItemType(NodeInfo element, String attValue) throws XPathException {
         IndependentContext env = makeStaticContext(element);
+        env.setXPathLanguageLevel(31);
         return parser.parseExtendedItemType(attValue, env);
     }
 

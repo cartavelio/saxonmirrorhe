@@ -377,6 +377,7 @@ public class XPathParser {
                 break;
             case XSLT_PATTERN:
             case SEQUENCE_TYPE:
+            case EXTENDED_ITEM_TYPE:
                 if (!(version == 20 || version == 30 || version == 31 || version == 40)) {
                     throw new IllegalArgumentException("Unsupported language version " + version);
                 }
@@ -610,7 +611,7 @@ public class XPathParser {
 
     public ItemType parseExtendedItemType(String input, StaticContext env) throws XPathException {
         this.env = env;
-        language = ParsedLanguage.EXTENDED_ITEM_TYPE;
+        setLanguage(ParsedLanguage.EXTENDED_ITEM_TYPE, env.getXPathVersion());
         t = new Tokenizer();
         t.languageLevel = env.getXPathVersion();
         allowSaxonExtensions = t.allowSaxonExtensions = true;
