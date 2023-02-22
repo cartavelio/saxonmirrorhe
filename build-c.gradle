@@ -207,7 +207,7 @@ task rejar_Xerces(
           exclude "samples/cTests/build64-linux.sh"
           exclude "samples/cTests/buildhec.sh"
           exclude "samples/cTests/buildpec.sh"
-
+          include "samples/data/**/*"
           exclude "samples/data/config_file.xml"
           exclude "samples/data/package*"
           include "saxon-data/**/*"
