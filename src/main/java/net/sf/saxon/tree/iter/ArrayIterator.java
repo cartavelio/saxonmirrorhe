@@ -239,7 +239,12 @@ public abstract class ArrayIterator implements SequenceIterator,
 
         @Override
         public SequenceIterator getReverseIterator() {
-            return Reverse.reverseIterator(Arrays.asList(items));
+            if (start == 0 && end == items.length) {
+                return Reverse.reverseIterator(Arrays.asList(items));
+            } else {
+                List<T> sublist = Arrays.asList(items).subList(start, end);
+                return Reverse.reverseIterator(sublist);
+            }
         }
 
     }
