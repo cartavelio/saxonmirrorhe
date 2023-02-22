@@ -441,6 +441,83 @@ PHP_METHOD(Xslt30Processor, setJustInTimeCompilation)
     }
 }
 
+
+PHP_METHOD(Xslt30Processor,  setTargetEdition)
+{
+    Xslt30Processor *xslt30Processor;
+    char * str;
+    size_t len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &str, &str) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    xslt30Processor_object * obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
+    xslt30Processor = obj->xslt30Processor;
+    if (xslt30Processor != nullptr) {
+
+        if(str != nullptr) {
+            xslt30Processor->setTargetEdition(str);
+        }
+    }
+}
+
+PHP_METHOD(Xslt30Processor,  setRelocate)
+{
+    Xslt30Processor *xslt30Processor;
+    bool relocate = false;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "b", &relocate) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
+    xslt30Processor = obj->xslt30Processor;
+    if (xslt30Processor != nullptr) {
+        xslt30Processor->setRelocate(relocate);
+    }
+}
+
+PHP_METHOD(Xslt30Processor,  setFastCompilation)
+{
+    Xslt30Processor *xslt30Processor;
+    bool fast = false;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "b", &fast) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
+    xslt30Processor = obj->xslt30Processor;
+    if (xslt30Processor != nullptr) {
+        xslt30Processor->setFastCompilation(fast);
+    }
+}
+
+PHP_METHOD(Xslt30Processor,  setXsltLanguageVersion)
+{
+    Xslt30Processor *xslt30Processor;
+    char * str;
+    size_t len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &str, &str) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    xslt30Processor_object * obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
+    xslt30Processor = obj->xslt30Processor;
+    if (xslt30Processor != nullptr) {
+
+        if(str != nullptr) {
+            xslt30Processor->setFastCompilation(str);
+        }
+    }
+}
+
 PHP_METHOD(Xslt30Processor, setcwd)
 {
     Xslt30Processor *xslt30Processor;

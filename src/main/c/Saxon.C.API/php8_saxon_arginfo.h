@@ -356,6 +356,23 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setJustInTimeCompilation, 0, 0, 1)
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setTargetEdition, 0, 0, 1)
+ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setRelocate, 0, 0, 1)
+ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setFastCompilation, 0, 0, 1)
+ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setXsltLanguageVersion, 0, 0, 1)
+ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setParameter, 0, 0, 2)
 ZEND_ARG_INFO(0, name)
 ZEND_ARG_INFO(0, value)

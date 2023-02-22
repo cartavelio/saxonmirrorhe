@@ -96,6 +96,47 @@ public:
     void setJustInTimeCompilation(bool jit);
 
 
+    //! Set the target edition
+    /**
+     * Set the target edition under which the stylesheet will be executed.
+     * @param edition - the Saxon edition for the run-time environment. One of "EE", "PE", "HE",
+     *                or "JS", "JS2", or "JS3".
+     */
+    void setTargetEdition(const char* edition);
+
+    //! Set the XSLT (and XPath) language level to be supported by the processor
+    /**
+     * Set the value to "4.0"
+     * to enable support for experimental features defined in the XSLT 4.0 proposal (which is likely to change
+     * before it stabilizes).
+     * @param version the language level to be supported. The values "3.0" and "4.0" are recognized
+     */
+    void setXsltLanguageVersion(const char* version);
+
+    //! Request fast compilation
+    /**
+     * Fast compilation will generally be achieved at the expense of run-time performance
+     * and quality of diagnostics. Fast compilation is a good trade-off if (a) the stylesheet is known to be correct,
+     * and (b) once compiled, it is only executed once against a document of modest size.
+     * <p>Fast compilation may result in static errors going unreported, especially if they occur in code
+     * that is never executed.</p>
+     * <p><i>The current implementation is equivalent to switching off all optimizations other than just-in-time
+     * compilation of template rules. Setting this option, however, indicates an intent rather than a mechanism,
+     * and the implementation details may change in future to reflect the intent.</i></p>
+     * @param fast set to true to request fast compilation; set to false to revert to the optimization options
+     *             defined in the Configuration.
+     */
+    void setFastCompilation(bool fast);
+
+    //! Indicate package deployable to a different location
+    /**
+     * Say whether any package produced by this compiler can be deployed to a different location, with a different base URI
+     * @param relocatable if true then static-base-uri() represents the deployed location of the package,
+     *                    rather than its compile time location
+     */
+    void setRelocatable(bool relocatable);
+
+
     //! Set the value of a stylesheet parameter.
     /**
      * Static (compile-time) parameters must be provided using

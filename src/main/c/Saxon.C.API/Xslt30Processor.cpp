@@ -154,6 +154,26 @@ void Xslt30Processor::setJustInTimeCompilation(bool jit){
     jitCompilation = jit;
 }
 
+void Xslt30Processor::setFastCompilation(bool fast){
+    if(fast) {
+        setProperty("-fastCompile", "1");
+    } else {
+        setProperty("-fastCompile", "0");
+    }
+}
+
+void Xslt30Processor::setXsltLanguageVersion(const char* version) {
+    if (version != nullptr) {
+        setProperty("-lang", version);
+    }
+}
+
+void Xslt30Processor::setTargetEdition(const char* edition) {
+    if (edition != nullptr) {
+        setProperty("-target", edition);
+    }
+}
+
 
 void Xslt30Processor::clearParameters(bool delValues) {
 	if(delValues){
@@ -218,7 +238,8 @@ void Xslt30Processor::createException(const char * message) {
 
 void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* filename) {
     proc->attachCurrentThread();
-    long status = j_compileFromXdmNodeAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT,  (void *)node->getUnderlyingValue(),  (char *)cwdXT.c_str(), (char *)filename);
+    int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
+    long status = j_compileFromXdmNodeAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT,  (void *)node->getUnderlyingValue(),  (char *)cwdXT.c_str(), (char *)filename, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(status == -2) {
         createException();
     }
@@ -227,7 +248,8 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 
     void Xslt30Processor::compileFromStringAndSave(const char* stylesheetStr, const char* filename){
         proc->attachCurrentThread();
-        long status = j_compileFromStringAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheetStr, (char *)filename);
+        int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
+        long status = j_compileFromStringAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheetStr, (char *)filename, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
         if(status == -2) {
             createException();
         }
@@ -245,7 +267,8 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
             createException("Output filename is null");
             return;
         }
-        long status = j_compileFromFileAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)xslFilename, (char *)filename);
+        int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
+        long status = j_compileFromFileAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)xslFilename, (char *)filename, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
         if(status == -2) {
             createException();
         }
