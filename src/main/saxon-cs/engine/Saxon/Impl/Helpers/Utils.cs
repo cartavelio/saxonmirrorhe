@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Saxon.Ejava.lang;
 using Math = System.Math;
 
@@ -130,6 +131,19 @@ namespace Saxon.Impl.Helpers {
             }
             else {
                 return BitConverter.ToSingle(bytes, start);
+            }
+        }
+        
+        /// <summary>
+        /// Parse a string as a double - emulation of java.lang.Double.parseDouble()
+        /// </summary>
+
+        public static double ParseDouble(string str) {
+            try {
+                return System.Double.Parse(str, CultureInfo.InvariantCulture);
+            }
+            catch (FormatException e) {
+                throw new NumberFormatException(e.Message);
             }
         }
 
