@@ -240,7 +240,7 @@ public abstract class FunctionCall extends Expression {
                 // because the default value expression was not necessarily available when the function call
                 // was first parsed, in the case where it is a forwards reference
                 if (arg instanceof DefaultedArgumentExpression && fd != null) {
-                    if (i <= fd.getMinimumArity()) {
+                    if (i < fd.getMinimumArity()) {
                         // This argument cannot be omitted
                         throw new XPathException("No value supplied for " + RoleDiagnostic.ordinal(i + 1) +
                                                          " parameter of function " +
