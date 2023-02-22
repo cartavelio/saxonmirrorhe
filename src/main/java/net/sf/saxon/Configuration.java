@@ -4006,8 +4006,9 @@ public class Configuration implements SourceResolver, NotationSet {
             return new ActiveSource() {
                 @Override
                 public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
-                    resolveSource(((AugmentedSource)source).getContainedSource(), config)
-                            .deliver(receiver, ((AugmentedSource) source).getParseOptions());
+                    options.merge(((AugmentedSource) source).getParseOptions());
+                    resolveSource(((AugmentedSource) source).getContainedSource(), config)
+                            .deliver(receiver, options);
                 }
 
                 @Override
@@ -5442,10 +5443,6 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return a CompilerService, or null
      */
     public ICompilerService makeCompilerService(HostLanguage hostLanguage) {
-        return null;
-    }
-
-    public IElaborationService makeElaborationService() {
         return null;
     }
 
