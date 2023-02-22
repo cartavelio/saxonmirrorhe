@@ -233,16 +233,6 @@ public class ParserExtension {
         return null;
     }
 
-    /**
-     * Parse a function argument. The special marker "?" is allowed and causes "null"
-     * to be returned
-     */
-
-    public Expression makeArgumentPlaceMarker(XPathParser p) {
-        return null;
-    }
-
-
 
     public static class TemporaryXSLTVariableBinding implements LocalBinding {
         SourceBinding declaration;

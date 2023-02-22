@@ -2733,14 +2733,18 @@ public class XPathParser {
         nextToken();
         if (t.currentToken != Token.RPAR) {
             while (true) {
-                Expression arg = parseFunctionArgument();
-                if (arg == null) {
+                Expression arg;
+                int peek = t.peekAhead();
+                if (t.currentToken == Token.QMARK && (peek == Token.COMMA || peek == Token.RPAR)) {
+                    nextToken();
                     // this is a "?" placemarker
                     if (placeMarkers == null) {
                         placeMarkers = new IntArraySet();
                     }
                     placeMarkers.add(args.size());
                     arg = Literal.makeEmptySequence(); // a convenient fiction
+                } else {
+                    arg = parseFunctionArgument();
                 }
                 args.add(arg);
                 if (t.currentToken == Token.COMMA) {
@@ -3459,19 +3463,45 @@ public class XPathParser {
 
         // the "(" has already been read by the Tokenizer: now parse the arguments
 
+        Map<String, Expression> keywordArgs = null;
         nextToken();
         if (t.currentToken != Token.RPAR) {
             while (true) {
-                Expression arg = parseFunctionArgument();
-                if (arg == null) {
-                    // this is a "?" placemarker
-                    if (placeMarkers == null) {
-                        placeMarkers = new IntArraySet();
+                int peek = t.peekAhead();
+                Expression arg;
+                if (t.currentToken == Token.NAME && (peek == Token.COLON || peek == Token.ASSIGN)) {
+                    // keyword argument
+                    // TODO: decide whether to use COLON or ASSIGN, not both...
+                    if (!NameChecker.isValidNCName(t.currentTokenValue)) {
+                        grumble("Name used as argument keyword must be a valid NCName (a space may be missing after ':')");
                     }
-                    placeMarkers.add(args.size());
-                    arg = Literal.makeEmptySequence(); // a convenient fiction
+                    String keyword = t.currentTokenValue;
+                    nextToken(); // read the operator
+                    nextToken(); // position on the expression giving the value
+                    arg = parseExprSingle();
+                    if (keywordArgs == null) {
+                        keywordArgs = new HashMap<>();
+                    } else if (keywordArgs.containsKey(keyword)) {
+                        grumble("Duplicate keyword '" + keyword + "'in function arguments");
+                    }
+                    keywordArgs.put(keyword, arg);
+                } else {
+                    if (keywordArgs != null) {
+                        grumble("Keyword arguments must not be followed by positional arguments in a function call");
+                    }
+                    if (t.currentToken == Token.QMARK && (peek == Token.COMMA || peek == Token.RPAR)) {
+                        nextToken();
+                        // this is a "?" placemarker
+                        if (placeMarkers == null) {
+                            placeMarkers = new IntArraySet();
+                        }
+                        placeMarkers.add(args.size());
+                        arg = Literal.makeEmptySequence(); // a convenient fict
+                    } else {
+                        arg = parseExprSingle();
+                    }
+                    args.add(arg);
                 }
-                args.add(arg);
                 if (t.currentToken == Token.COMMA) {
                     nextToken();
                 } else {
@@ -3479,6 +3509,9 @@ public class XPathParser {
                 }
             }
             expect(Token.RPAR);
+            if (keywordArgs != null) {
+                args.add(makeMapExpression(keywordArgs));
+            }
         }
         nextToken();
 
@@ -3539,6 +3572,17 @@ public class XPathParser {
 
         return makeTracer(fcall, functionName);
 
+    }
+
+    private Expression makeMapExpression(Map<String, Expression> keywordArgs) throws XPathException {
+        Expression[] block = new Expression[keywordArgs.size()];
+        int i=0;
+        for (Map.Entry<String, Expression> entry : keywordArgs.entrySet()) {
+            StringLiteral key = new StringLiteral(entry.getKey());
+            block[i++] = MapFunctionSet.getInstance().makeFunction("entry", 2).makeFunctionCall(key, entry.getValue());
+        }
+        Block entries = new Block(block);
+        return MapFunctionSet.getInstance().makeFunction("merge", 1).makeFunctionCall(entries);
     }
 
     /*@NotNull*/
@@ -3678,13 +3722,6 @@ public class XPathParser {
 
     /*@Nullable*/
     public Expression parseFunctionArgument() throws XPathException {
-        if (t.currentToken == Token.QMARK) {
-            int next = t.peekAhead();
-            if (next == Token.COMMA || next == Token.RPAR) {
-                nextToken();
-                return parserExtension.makeArgumentPlaceMarker(this);
-            }
-        }
         return parseExprSingle();
     }
 

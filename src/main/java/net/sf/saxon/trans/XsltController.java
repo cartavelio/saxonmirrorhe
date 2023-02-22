@@ -560,7 +560,6 @@ public class XsltController extends Controller {
      * @since 9.7
      */
 
-    // ndw ??? no longer an @Override
     public boolean isAssertionsEnabled() {
         return assertionsEnabled;
     }

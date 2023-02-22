@@ -475,7 +475,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     protected Configuration readConfigurationFile(Source source) throws XPathException {
-        return new ConfigurationReader().makeConfiguration(source);
+        return makeConfigurationReader().makeConfiguration(source);
     }
 
     protected Configuration readConfigurationFile(Source source, Configuration baseConfiguration) throws XPathException {
