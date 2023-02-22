@@ -42,8 +42,18 @@ public class Replace extends RegexFunction  {
      */
     @Override
     public Expression makeFunctionCall(Expression... arguments) {
-        boolean maybeQ = arguments.length == 4 && (!(arguments[3] instanceof StringLiteral) || ((StringLiteral) arguments[3]).stringify().contains("q"));
-        if (arguments[2] instanceof StringLiteral && !maybeQ) {
+        boolean doEarlyReplacementCheck = true;
+        if (arguments.length == 4) {
+            if (arguments[3] instanceof StringLiteral) {
+                String flags = ((StringLiteral) arguments[3]).stringify();
+                if (flags.contains("q") || flags.contains(";")) {
+                    doEarlyReplacementCheck = false;
+                }
+            } else {
+                doEarlyReplacementCheck = false;
+            }
+        }
+        if (arguments[2] instanceof StringLiteral && doEarlyReplacementCheck) {
             // Do early checking of the replacement expression if known statically
             UnicodeString rep = ((StringLiteral) arguments[2]).getString();
             if (checkReplacement(rep) == null) {
@@ -71,7 +81,7 @@ public class Replace extends RegexFunction  {
         UnicodeString replacement = arguments[2].head().getUnicodeStringValue();
 
         RegularExpression re = getRegularExpression(arguments);
-        if (!re.getFlags().contains("q")) {
+        if (!re.getFlags().contains("q") && !re.isPlatformNative()) {
             if (!replacementChecked) {
                 // if it is a string literal, the check was done at compile time
                 String msg = checkReplacement(replacement);

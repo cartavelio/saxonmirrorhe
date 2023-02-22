@@ -192,5 +192,15 @@ public class ARegularExpression implements RegularExpression {
     public String getFlags() {
         return rawFlags;
     }
+
+    /**
+     * Ask whether the regular expression is using platform-native syntax (Java or .NET), or XPath syntax
+     *
+     * @return true if using platform-native syntax
+     */
+    @Override
+    public boolean isPlatformNative() {
+        return false;
+    }
 }
 
