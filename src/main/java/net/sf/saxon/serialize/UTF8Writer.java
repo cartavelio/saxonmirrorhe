@@ -425,30 +425,8 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
         } else if (chars instanceof ZenoString) {
             ((ZenoString)chars).writeSegments(this);
         } else if (chars.getWidth() <= 8) {
-            if (chars instanceof Twine8) {
-                int width = chars.getWidth();
-                if (width == 7) {
-                    writeAscii(((Twine8) chars).getByteArray(), 0, chars.length32());
-                } else if (width == 8) {
-                    writeLatin1(((Twine8) chars).getByteArray(), 0, chars.length32());
-                }
-            } else if (chars instanceof Slice8) {
-                Slice8 s8 = (Slice8) chars;
-                int width = chars.getWidth();
-                if (width == 7) {
-                    writeAscii(s8.getByteArray(), s8.getStart(), s8.getEnd() - s8.getStart());
-                } else if (width == 8) {
-                    writeLatin1(s8.getByteArray(), s8.getStart(), s8.getEnd() - s8.getStart());
-                }
-            } else if (chars instanceof WhitespaceString) {
-                ((WhitespaceString)chars).write(this);
-            } else {
-                // probably doesn't happen
-                IntIterator iter = chars.codePoints();
-                while (iter.hasNext()) {
-                    write(iter.next());
-                }
-            }
+            writeWidth8OrLower(chars);
+
         } else if (chars.getWidth() == 16) {
             if (chars instanceof Twine16) {
                 write(((Twine16)chars).getCharArray());
@@ -463,6 +441,35 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
             }
         }
     }
+
+    private void writeWidth8OrLower(UnicodeString chars) throws IOException
+    {
+        if (chars instanceof Twine8) {
+            int width = chars.getWidth();
+            if (width == 7) {
+                writeAscii(((Twine8) chars).getByteArray(), 0, chars.length32());
+            } else if (width == 8) {
+                writeLatin1(((Twine8) chars).getByteArray(), 0, chars.length32());
+            }
+        } else if (chars instanceof Slice8) {
+            Slice8 s8 = (Slice8) chars;
+            int width = chars.getWidth();
+            if (width == 7) {
+                writeAscii(s8.getByteArray(), s8.getStart(), s8.getEnd() - s8.getStart());
+            } else if (width == 8) {
+                writeLatin1(s8.getByteArray(), s8.getStart(), s8.getEnd() - s8.getStart());
+            }
+        } else if (chars instanceof WhitespaceString) {
+            ((WhitespaceString)chars).write(this);
+        } else {
+            // probably doesn't happen
+            IntIterator iter = chars.codePoints();
+            while (iter.hasNext()) {
+                write(iter.next());
+            }
+        }
+    }
+
 
     @Override
     public void write(String str)
