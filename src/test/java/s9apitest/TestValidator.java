@@ -178,7 +178,7 @@ public class TestValidator {
             XdmNode validDoc = dest.getXdmNode();
             assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "anyType"), validDoc.getTypeAnnotationName());
             XdmNode books = validDoc.select(Steps.descendant("BOOKS")).firstItem();
-            assertEquals(NamespaceUri.ANONYMOUS, books.getTypeAnnotationName().getNamespaceURI());
+            assertEquals(NamespaceUri.ANONYMOUS, books.getTypeAnnotationName().getNamespaceUri());
             XdmNode price = books.select(Steps.path("ITEM", "PRICE")).firstItem();
             assertEquals(new QName("moneyType"), price.getTypeAnnotationName());
             assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "decimal"), ((XdmAtomicValue)price.getTypedValue()).getPrimitiveTypeName());
