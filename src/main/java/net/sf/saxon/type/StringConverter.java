@@ -911,7 +911,7 @@ public abstract class StringConverter extends Converter {
                 // This check added in 9.3. The XSLT spec says that this check should not be performed during
                 // validation. However, this appears to be based on an incorrect assumption: see spec bug 6952
                 if (!getConversionRules().isDeclaredNotation(uri, parts[1])) {
-                    System.err.println(getConversionRules().isDeclaredNotation(uri, parts[1]));
+                    //System.err.println(getConversionRules().isDeclaredNotation(uri, parts[1]));
                     return new ValidationFailure("Notation {" + uri + "}" + parts[1] + " is not declared in the schema");
                 }
                 return new NotationValue(parts[0], uri, parts[1], false);

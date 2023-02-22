@@ -12,15 +12,17 @@ import java.util.Map;
 
 /**
  * Internal class used for instrumentation purposes. It maintains a number of counters and displays these at the
- * end of the run. Currently implemented only for the Transform command line, with -t option set.
+ * end of the run. The counters are output by calling Instrumentation.report(), typically at the end of a run.
  */
 
 public class Instrumentation {
 
-    public static final boolean ACTIVE = false;
+    // Set this flag to true to enable counters to be maintained
+    public static final boolean ACTIVE = true;
 
     public static HashMap<String, Long> counters = new HashMap<>();
 
+    // Increment a named counter
     public static void count(String counter) {
         if (counters.containsKey(counter)) {
             counters.put(counter, counters.get(counter) + 1);
@@ -29,6 +31,7 @@ public class Instrumentation {
         }
     }
 
+    // Increase a named counter by a set amount
     public static void count(String counter, long increment) {
         if (counters.containsKey(counter)) {
             counters.put(counter, counters.get(counter) + increment);
@@ -46,6 +49,7 @@ public class Instrumentation {
     }
     //#endif
 
+    // Output the current counter values
     public static void report() {
         if (ACTIVE && !counters.isEmpty()) {
             System.err.println("COUNTERS");
@@ -55,6 +59,7 @@ public class Instrumentation {
         }
     }
 
+    // Reset all counters
     public static void reset() {
         counters.clear();
     }
