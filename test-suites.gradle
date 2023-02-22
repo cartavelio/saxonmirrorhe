@@ -196,11 +196,6 @@ def testSuiteMatrix = [
       "_depends": ["cloneXsdTestSuite"],
       "_summarizeresults": "${projectDir}/src/test/extra/tools/summarize-results.xsl",
 
-      "XSD10": [
-        "_exceptions": "${projectDir}/src/test/exceptions/xsd.xml",
-        "": [:],
-        "bc": ["bytecode": "on"]
-      ],
       "XSD11": [
         "_exceptions": "${projectDir}/src/test/exceptions/xsd11.xml",
         "": [:],
@@ -271,10 +266,6 @@ def testSuiteMatrix = [
       ]
     ],
     "xsd": [
-      "XSD10": [
-        "_exceptions": "${projectDir}/src/test/exceptions/xsdcs.xml",
-        "": [:]
-      ],
       "XSD11": [
         "_exceptions": "${projectDir}/src/test/exceptions/xsd11cs.xml",
         "": [:]
