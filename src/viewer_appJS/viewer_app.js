@@ -35,3 +35,36 @@ var goback = function() {
     window.history.back();
 };
 
+// Encapsulation for the saved scroll state
+const createScrollState = () => {
+  let scrollTop = -1;
+  return ({
+    "set": (ypos) => {
+      scrollTop = ypos;
+    },
+    "get": () => {
+      return scrollTop;
+    }
+  });
+};
+const scrollState = createScrollState();
+
+// Need a top-level function in order to access it from within
+// SaxonJS using window.getViewerScrollState
+function getViewerScrollState() {
+  return scrollState.get();
+}
+
+// Update the scroll state when the window history is popped.
+// If we're navigating with the "back" button, then the state
+// saved by f:anchor-navigation in viewer_app.xsl will be
+// available and the saved scrollTop position will be >= 0.
+// If that's not the case, store -1 in the saved state to
+// tell the viewer application to ignore the saved state.
+window.onpopstate = function(event) {
+  if (event.state != null && 'scrollTop' in event.state) {
+    scrollState.set(event.state.scrollTop);
+  } else {
+    scrollState.set(-1);
+  }
+};
