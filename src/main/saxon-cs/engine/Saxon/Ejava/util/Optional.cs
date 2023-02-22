@@ -31,6 +31,19 @@ namespace Saxon.Ejava.util {
             // TODO: require non-null?
             return new Optional<T>(value);
         }
+
+        public override bool Equals(object other) {
+            if (other is Optional<T> o) {
+                return _present == o._present && _value.Equals(o._value);
+            }
+            else {
+                return false;
+            }
+        }
+
+        public override int GetHashCode() {
+            return _present ? _value.GetHashCode() : -1;
+        }
     }
 
 }
