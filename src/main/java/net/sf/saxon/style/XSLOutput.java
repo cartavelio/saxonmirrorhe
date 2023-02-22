@@ -241,8 +241,8 @@ public class XSLOutput extends StyleElement {
             props.setProperty(property, old + " " + value);
             precedences.put(property, thisPrecedence);
         } else {
-            Integer oldPrec = precedences.get(property);
-            if (oldPrec == null) {
+            int oldPrec = precedences.getOrDefault(property, Integer.MIN_VALUE);
+            if (oldPrec == Integer.MIN_VALUE) {
                 return;    // shouldn't happen but ignore it
             }
             if (oldPrec > thisPrecedence) {

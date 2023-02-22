@@ -642,9 +642,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             } else {
                 transformer.setBaseOutputURI(new File(resultsDir + "/results/output.xml").toURI().toString());
             }*/
-            transformer.setMessageListener((content, terminate, locator) -> {
-                outcome.addXslMessage(content);
-                System.err.println(content.getStringValue());
+            transformer.setMessageHandler(message -> {
+                outcome.addXslMessage(message.getContent());
+                System.err.println(message.getContent().getStringValue());
             });
 
 

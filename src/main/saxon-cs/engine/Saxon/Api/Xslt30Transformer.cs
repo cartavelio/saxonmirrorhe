@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using java.util.function;
 using javax.xml.transform.stream;
 using net.sf.saxon.@event;
 using net.sf.saxon.lib;
@@ -10,6 +11,7 @@ using net.sf.saxon.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
+using StandardMessageHandler = Saxon.Callbacks.StandardMessageHandler;
 
 namespace Saxon.Api {
     /// <summary>An <code>Xslt30Transformer</code> represents a compiled and loaded stylesheet ready for execution.
@@ -68,14 +70,15 @@ namespace Saxon.Api {
     public class Xslt30Transformer {
         private IResultDocumentHandler resultDocumentHandler;
         private StandardLogger traceFunctionDestination;
-        private IMessageListener messageListener;
-        private IMessageListener2 messageListener2;
         private net.sf.saxon.s9api.Xslt30Transformer transformer;
+        private readonly StandardMessageHandler _standardMessageHandler;
 
         // internal constructor
 
         internal Xslt30Transformer(net.sf.saxon.s9api.Xslt30Transformer transformer) {
             this.transformer = transformer;
+            _standardMessageHandler = new StandardMessageHandler(transformer.controller.getConfiguration());
+            transformer.controller.setMessageHandler(message => _standardMessageHandler.accept(message));
             //this.globalParameterSet = new GlobalParameterSet(globalParameters);
         }
 
@@ -262,14 +265,14 @@ namespace Saxon.Api {
         public bool AssertionsEnabled => transformer.isAssertionsEnabled();
         
         /// <summary>
-        /// Listener for messages output using <c>&lt;xsl:message&gt;</c>.
+        /// Handler for messages output using <c>&lt;xsl:message&gt;</c>.
         /// </summary>
         /// <remarks> 
-        /// <para>The caller may supply a message listener before calling <c>Run</c>;
-        /// the processor will then invoke the listener once for each message generated during
+        /// <para>The caller may supply a message handler before calling <c>Run</c>;
+        /// the processor will then invoke the handler once for each message generated during
         /// the transformation. Each message will be output as an object of type <c>XdmNode</c>
         /// representing a document node.</para>
-        /// <para>If no message listener is supplied by the caller, message information will be written to
+        /// <para>If no message handler is supplied by the caller, message information will be written to
         /// the standard error stream.</para>
         /// <para>Each message is presented as an XML document node. Calling <c>ToString()</c>
         /// on the message object will usually generate an acceptable representation of the
@@ -277,18 +280,15 @@ namespace Saxon.Api {
         /// <para>When the <c>xsl:message</c> instruction specifies <c>terminate="yes"</c>,
         /// the message is first notified using this interface, and then an exception is thrown
         /// which terminates the transformation.</para>
-        /// <para>The <c>MessageListener2</c> property interface differs from the old <c>MessageListener</c>
-        /// in allowing the error code supplied to xsl:message to be notified. The old interface has
-        /// now been dropped.</para>
         /// </remarks>
 
-        public IMessageListener2 MessageListener2 {
-            set {
-                messageListener2 = value;
-                transformer.setMessageListener(
-                    new MessageListener2Proxy(value, makePipelineConfiguration()).getMessageListener());
+        public Consumer<Message> MessageListener {
+            get {
+                return transformer.controller.getMessageHandler();
             }
-            get => messageListener2;
+            set {
+                transformer.controller.setMessageHandler(value);
+            }
         }
 
         /// <summary>

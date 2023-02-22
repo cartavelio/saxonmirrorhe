@@ -582,12 +582,7 @@ public abstract class StandardNames {
      */
 
     public static int getFingerprint(String uri, String localName) {
-        Integer fp = lookup.get('{' + uri + '}' + localName);
-        if (fp == null) {
-            return -1;
-        } else {
-            return fp;
-        }
+        return lookup.getOrDefault('{' + uri + '}' + localName, -1);
     }
 
     /**

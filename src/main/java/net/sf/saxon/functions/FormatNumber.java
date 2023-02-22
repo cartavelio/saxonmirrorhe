@@ -735,9 +735,6 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
          */
         private void formatDecimal(BigDecimal dval, StringBuilder fsb) {
             int exponent = 0;
-            /*if (maxFractionPartSize == 0 && minWholePartSize == 0) {
-                minWholePartSize = 1;
-            }*/ // this bit of logic is now included in the SubPicture class
             if (minExponentSize == 0) {
                 dval = dval.setScale(maxFractionPartSize, RoundingMode.HALF_EVEN);
             } else if (dval.signum() != 0) {

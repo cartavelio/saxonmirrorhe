@@ -3,9 +3,14 @@ using SysRegex = System.Text.RegularExpressions;
 using java.lang;
 
 namespace java.util.regex {
+    
+    /*
+     * Emulates the API of the Java regex engine by delegating all calls to the .NET regex engine
+     */
     public class Matcher {
 
         private SysRegex.Regex regex;
+        private SysRegex.Match latestMatch;
         private string input;
 
         public Matcher(SysRegex.Regex regex, string input) {
@@ -13,15 +18,18 @@ namespace java.util.regex {
             this.input = input;
         }
         public bool matches() {
-            return regex.Match(input).Success;
+            latestMatch = regex.Match(input);
+            return latestMatch.Success;
         }
 
         public bool find() {
-            return regex.Match(input).Success;
+            latestMatch = regex.Match(input);
+            return latestMatch.Success;
         }
         
         public bool find(int start) {
-            return regex.Match(input, start).Success;
+            latestMatch = regex.Match(input, start);
+            return latestMatch.Success;
         }
         
         public string replaceAll(string str) {
@@ -29,11 +37,11 @@ namespace java.util.regex {
         }
 
         public string group(int gp) {
-            return "";
+            return latestMatch.Groups[gp].Value;
         }
 
         public int groupCount() {
-            return 0;
+            return latestMatch.Groups.Count;
         }
 
         public int start() {

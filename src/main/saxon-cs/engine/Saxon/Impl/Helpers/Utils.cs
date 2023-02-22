@@ -10,11 +10,11 @@ namespace Saxon.Impl.Helpers {
         }
 
         public static string intToHexString(int i) {
-            throw new NotImplementedException();
+            return i.ToString("X");
         }
         
         public static string longToHexString(long i) {
-            throw new NotImplementedException();
+            return i.ToString("X");
         }
         
  

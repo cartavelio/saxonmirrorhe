@@ -228,8 +228,8 @@ public class SimpleMode extends Mode {
      */
 
     public void setExplicitProperty(String name, String value, int precedence) {
-        Integer p = explicitPropertyPrecedences.get(name);
-        if (p != null) {
+        int p = explicitPropertyPrecedences.getOrDefault(name, Integer.MIN_VALUE);
+        if (p != Integer.MIN_VALUE) {
             if (p < precedence) {
                 explicitPropertyPrecedences.put(name, precedence);
                 explicitPropertyValues.put(name, value);

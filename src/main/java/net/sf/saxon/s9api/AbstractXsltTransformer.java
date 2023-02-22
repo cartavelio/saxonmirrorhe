@@ -38,6 +38,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * A class that exists to contain common code shared between XsltTransformer and Xslt30Transformer
@@ -52,9 +53,9 @@ public abstract class AbstractXsltTransformer {
     protected Processor processor;
     protected XsltController controller;
     protected boolean baseOutputUriWasSet = false;
-    private MessageListener messageListener;
+    //#if CSHARP==false
     private MessageListener2 messageListener2;
-
+    //#endif
 
     AbstractXsltTransformer(Processor processor, XsltController controller) {
         this.processor = processor;
@@ -221,48 +222,26 @@ public abstract class AbstractXsltTransformer {
         });
     }
 
+    //#if CSHARP==false
     /**
-     * Set the MessageListener to be notified whenever the stylesheet evaluates an
-     * <code>xsl:message</code> instruction.  If no MessageListener is nominated,
-     * the output of <code>xsl:message</code> instructions will be serialized and sent
-     * to the standard error stream.
-     *
-     * @param listener the MessageListener to be used
-     * @deprecated since 10.0 - use {@link #setMessageListener(MessageListener2)}
-     */
-
-    public synchronized void setMessageListener(MessageListener listener) {
-        this.messageListener = listener;
-        controller.setMessageFactory(() -> new MessageListenerProxy(listener, controller.makePipelineConfiguration()));
-    }
-
-    /**
-     * Set the MessageListener to be notified whenever the stylesheet evaluates an
-     * <code>xsl:message</code> instruction.  If no MessageListener is nominated,
-     * the output of <code>xsl:message</code> instructions will be serialized and sent
-     * to the standard error stream.
-     * <p>
-     * <p>The <code>MessageListener2</code> interface differs from <code>MessageListener</code>
-     * in allowing the error code supplied to xsl:message to be notified.</p>
-     *
-     * @param listener the MessageListener to be used
+     * Set the MessageListener to be notified of {@code xsl:message} and {@code xsl:assert} output.
+     * @param listener the MessageListener to be notified
      */
 
     public synchronized void setMessageListener(MessageListener2 listener) {
-        this.messageListener2 = listener;
-        controller.setMessageFactory(() -> new MessageListener2Proxy(listener, controller.makePipelineConfiguration()));
+        messageListener2 = listener;
+        setMessageHandler(message -> listener.message(
+                message.getContent(), message.getErrorCode(), message.isTerminate(), message.getLocation())
+        );
     }
 
     /**
-     * Get the MessageListener to be notified whenever the stylesheet evaluates an
-     * <code>xsl:message</code> instruction. If no MessageListener has been nominated,
-     * return null
-     *
-     * @return the user-supplied MessageListener, or null if none has been supplied
+     * Set a message handler to be notified of {@code xsl:message} and {@code xsl:assert} output.
+     * @param messageHandler the message handler to be notified
      */
 
-    public MessageListener getMessageListener() {
-        return messageListener;
+    public void setMessageHandler(Consumer<Message> messageHandler) {
+        controller.setMessageHandler(messageHandler);
     }
 
     /**
@@ -276,6 +255,8 @@ public abstract class AbstractXsltTransformer {
     public MessageListener2 getMessageListener2() {
         return messageListener2;
     }
+
+    //#endif
 
     /**
      * Say whether assertions (xsl:assert instructions) should be enabled at run time. By default

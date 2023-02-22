@@ -2749,7 +2749,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression select = loader.getExpressionWithRole(element, "select");
             Expression terminate = loader.getExpressionWithRole(element, "terminate");
             Expression error = loader.getExpressionWithRole(element, "error");
-            return new Message(select, terminate, error);
+            return new MessageInstr(select, terminate, error);
         });
 
         eMap.put("minus", (loader, element) -> {
