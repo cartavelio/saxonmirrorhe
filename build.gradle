@@ -389,6 +389,12 @@ apply from: "run-samples.gradle"
     }
     doLast {
       copy {
+        into "${buildDir}/releases/${release}j/lib"
+        from resolverDataJar
+      }
+    }
+    doLast {
+      copy {
         into "${buildDir}/releases/${release}j/doc"
         from "${projectDir}/src/docs/doc"
       }
@@ -1019,6 +1025,7 @@ task compile_function_library(dependsOn: ["eejCompile", "processResources"]) {
 // The jar Class-Path allows the jar to find dependent libraries
 // locally. These are for the libraries we ship with the product.
 def heJarClassPath = "lib/xmlresolver-${xmlresolverVersion}.jar lib/xmlresolver.jar "
+heJarClassPath += "lib/xmlresolver-${xmlresolverVersion}-data.jar lib/xmlresolverdata-data.jar "
 heJarClassPath += "lib/jline-${jlineVersion}.jar lib/jline.jar "
 def peeeJarClassPath = heJarClassPath + "lib/icu4j-${icu4jVersion}.jar lib/icu4j.jar lib"
 heJarClassPath += "lib"
@@ -1057,13 +1064,13 @@ if (file("${projectDir}/src/main/java/com/saxonica/xqj").exists()) {
     dependsOn: ["eejCompile"],
     description: "Build the XQJ jar file for HE"
   ) {
-    archiveBaseName = "saxon-xqj-${saxonVersion}"
+    archiveBaseName = "saxon-he-xqj-${saxonVersion}"
     from ("${buildDir}/classes/eej") {
       include "com/saxonica/xqj/**/*.class"
       include "javax/xml/xquery/**/*.class"
     }
     doLast {
-      signJar("${buildDir}/libs/saxon-xqj-${saxonVersion}.jar")
+      signJar("${buildDir}/libs/saxon-he-xqj-${saxonVersion}.jar")
     }
   }
   task pejJarXqj() {
@@ -1364,13 +1371,13 @@ task eejTests(
 
 task hejRelease(
   type: Copy,
-  dependsOn: ["hejJar", "hejJarTests", "hej_extras"],
+  dependsOn: ["hejJar", "hejJarTests", "hej_extras", "hejJarXqj"],
   description: "Build the HE release for Java"
 ) {
   from "${buildDir}/libs"
   into "${buildDir}/releases/hej"
   include "saxon-he-${saxonVersion}.jar"
-  include "saxon-xqj-${saxonVersion}.jar"
+  include "saxon-he-xqj-${saxonVersion}.jar"
   include "saxon-he-test-${saxonVersion}.jar"
   rename { filename ->
     if (filename.startsWith("saxon-he-test")) {
@@ -1381,7 +1388,7 @@ task hejRelease(
 
 task pejRelease(
   type: Copy,
-  dependsOn: ["pejJar", "pejJarSql", "pejJarTests", "pej_extras"],
+  dependsOn: ["pejJar", "pejJarSql", "pejJarTests", "pej_extras", "pejJarXqj"],
   description: "Build the PE release for Java"
 ) {
   from "${buildDir}/libs"
@@ -1400,7 +1407,7 @@ task pejRelease(
 
 task eejRelease(
   type: Copy,
-  dependsOn: ["eejJar", "eejJarSql", "eejJarTests", "eej_extras"],
+  dependsOn: ["eejJar", "eejJarSql", "eejJarTests", "eej_extras", , "eejJarXqj"],
   description: "Build the EE release for Java"
 ) {
   from "${buildDir}/libs"
@@ -1663,11 +1670,17 @@ publishing {
   }
 
   repositories {
-    maven {
-      url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-      credentials {
-        username = project.findProperty("sonatypeUsername") ?: "NOUSER"
-        password = project.findProperty("sonatypePassword") ?: "NOPASS"
+    if (project.findProperty("mavenTestPublish") != null) {
+      maven {
+        url = project.findProperty("mavenTestPublish")
+      }
+    } else {
+      maven {
+        url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+        credentials {
+          username = project.findProperty("sonatypeUsername") ?: "NOUSER"
+          password = project.findProperty("sonatypePassword") ?: "NOPASS"
+        }
       }
     }
   }
