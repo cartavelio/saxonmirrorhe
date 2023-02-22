@@ -215,19 +215,17 @@ void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
 std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
         
         if(saxonResultDocRef > 0) {
-        std::cerr<<"getResultDocuments cp0"<<std::endl;
             allocFn fn = operator new;
             long long * results = j_getResultDocuments(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)saxonResultDocRef);
             int64_t resultUrisRef = j_getResultDocumentURIs(SaxonProcessor::sxn_environ->thread, (void *)saxonResultDocRef);
-              std::cerr<<"getResultDocuments cp1 uriRef="<<resultUrisRef<<std::endl;
             if(results != nullptr) {
                 int sizex = results[0];
-                std::cerr<<"getResultDocuments cp1-1 size="<<sizex<<std::endl;
-                for(int i = 1; i< sizex+1; i++) {
+                //std::cerr<<"getResultDocuments cp0 size= "<<sizex<<std::endl;
+                for(int i = 1; i<= sizex; i++) {
                     XdmValue * value= nullptr;
                     char * str = j_getProcessorDataProperty(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)resultUrisRef, i-1);
-                    std::cerr<<"getResultDocuments cp1-2 str="<<(str == nullptr? "str is null": str)<<std::endl;
-                    std::cerr<<"getResultDocuments cp1-1 result["<<i<<"]"<<results[i]<<std::endl;
+                    //std::cerr<<"getResultDocuments cp1-2 str="<<(str == nullptr? "str is null": str)<<std::endl;
+                    //std::cerr<<"getResultDocuments cp1-1 result["<<i<<"]"<<results[i]<<std::endl;
                     value = SaxonProcessor::makeXdmValueFromRef(results[i]);
                     if(value != nullptr && str != nullptr) {
                         resultDocumentMap[str] = value;
@@ -239,7 +237,6 @@ std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
                 delete results;
                 j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)resultUrisRef);
             } else {
-            std::cerr<<"getResultDocuments cp2"<<std::endl;
                 exceptionFound = true;
             }
 
@@ -287,7 +284,7 @@ XsltExecutable * XsltExecutable::clone() {
 void XsltExecutable::setProperty(const char *name, const char *value) {
 #ifdef DEBUG
     if(value == nullptr) {
-		std::cerr<<"XQueryProc setProperty is nullptr"<<std::endl;
+		std::cerr<<"XsltExecutable setProperty is nullptr"<<std::endl;
 	}
 #endif
     if (name != nullptr) {
