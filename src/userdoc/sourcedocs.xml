@@ -24,16 +24,20 @@
     
     <ul>
       <li>XML documents used as the primary input to a query or transformation, or
-        accessed using a function such as <code>doc()</code> or <code>document()</code>,
-        or an instruction such as <code>xsl:source-document</code> or <code>xsl:merge-source</code>.</li>
+        accessed using a function such as <a class="bodylink code" href="/functions/fn/doc">doc()</a> or
+        <a class="bodylink code" href="/functions/fn/document">document()</a>, or an instruction such as <a
+          class="bodylink code" href="/xsl-elements/source-document">xsl:source-document</a> or
+        <a class="bodylink code" href="/xsl-elements/merge-source">xsl:merge-source</a>.</li>
       <li>JSON documents used as the primary input to a query or transformation,
-        or accessed using the <code>json-doc()</code> function.</li>
-      <li>Text files accessed using the <code>unparsed-text()</code> function.</li>
+        or accessed using the <a class="bodylink code" href="/functions/fn/json-doc">json-doc()</a>
+        function.</li>
+      <li>Text files accessed using the <a class="bodylink code"
+        href="/functions/fn/unparsed-text">unparsed-text()</a> function.</li>
       <li>Source XSLT stylesheet modules, and compiled XSLT packages made available as SEF files.</li>
       <li>Source XSD schema documents, and compiled schemas made available as SCM files.</li>
       <li>Source XQuery queries (main modules and library modules).</li>
-      <li>Binary resources accessed using the <code>saxon:read-binary-resource()</code>
-        function. [TODO: add link]</li>
+      <li>Binary resources accessed using the <a class="bodylink code"
+        href="/functions/saxon/read-binary-resource">saxon:read-binary-resource()</a> function.</li>
     </ul>
     
     <p>This section describes how URIs referring to XML documents (and in some cases, non-XML resources)
@@ -51,7 +55,7 @@
       
       <p>When Saxon (either XSLT or XQuery) is invoked from the command line, the primary source will
         normally be an XML document, and is supplied using the <code>-s</code> option (for example,
-        <code>-s:books.xml</code>. Normally this will be XML 1.0: for XML 1.1, see <a class="bodylink"
+        <code>-s:books.xml</code>). Normally this will be XML 1.0: for XML 1.1, see <a class="bodylink"
           href="/sourcedocs/xml-parsing/xml11">XML 1.1</a>.
       </p>
       
@@ -111,13 +115,14 @@
           <code>setURIResolver()</code>, <code>setSchemaURIResolver()</code>, 
           <code>setUnparsedTextResolver()</code>, <code>setModuleURIResolver()</code>.</p></li>
           <li><p>If the local resolver fails to resolve the URI, it is passed to a resolver registered centrally
-          with the Saxon <code>Configuration</code>. The default resolver at this level is designed
+          with the Saxon <code java="net.sf.saxon.Configuration">Configuration</code>. The default resolver at this level is designed
           to invoke a third-party library called the <emph>catalog resolver</emph>, which looks
           up known URIs in an XML-based catalog. By default there is a single built-in catalog 
           containing local copies of popular W3C-defined resources such as the DTDs for XHTML and
-          SVG. Additional catalog files can be registered using an API (<code>Processor.setCatalogFiles()</code>
-            in Java, <code>Processor.SetCatalogFiles()</code> in C#), or from the command line, or
-          from the Saxon configuration file. </p>
+          SVG. Additional catalog files can be registered using an API (<code
+            java="net.sf.saxon.s9api.Processor#setCatalogFiles">Processor.setCatalogFiles()</code>
+            in Java, <code cs="Saxon.Api.Processor#SetCatalogFiles">Processor.SetCatalogFiles()</code> in C#),
+            or from the command line, or from the Saxon configuration file. </p>
           <p class="javaonly">The catalog resolver for SaxonJ and SaxonC also has built-in support for
           URIs using the <code>classpath</code> and <code>data</code> schemes.</p>
           <p class="csonly">The catalog resolver for SaxonCS also has built-in support for
@@ -167,10 +172,11 @@
         <p>Similarly, when using the Java or C# API, catalog files can be nominated:</p>
       
         <ul>
-          <li class="javaonly">From Java, use the method <code>Processor.setCatalogFiles()</code>
-          with a list of filenames.</li>
-          <li class="csonly">From C#, use the method <code>Processor.SetCatalogFiles()</code>
-            with a list of filenames.</li>
+          <li class="javaonly">From Java, use the method <code
+            java="net.sf.saxon.s9api.Processor#setCatalogFiles">Processor.setCatalogFiles()</code> with a list
+            of filenames.</li>
+          <li class="csonly">From C#, use the method <code
+            cs="Saxon.Api.Processor#SetCatalogFiles">Processor.SetCatalogFiles()</code> with a list of filenames.</li>
         </ul>
         
         <p>
@@ -179,7 +185,9 @@
             not collations or collections). The kind of resource required is generally identified
           by the <code>nature</code> parameter, following the principles of the 
             <a class="bodylink" href="http://www.rddl.org/natures/">RDDL specification</a>.
-          The values used are listed in constants in class <code>ResourceRequest</code>.
+          The values used are listed in constants in class <code
+            java="net.sf.saxon.lib.ResourceRequest">ResourceRequest</code> on Java (or <code
+              cs="Saxon.Api.ResourceRequest">ResourceRequest</code> on C#).
         </p>
       
         <p>Catalog-based resolution is performed using a third-party library:</p>
@@ -196,7 +204,8 @@
         can be configured, for example using system properties or a properties file. Remember
         that such settings are typically global (they may affect more than one Saxon Configuration).
         Settings local to a configuration can be made by getting the <code>ResourceResolver</code>
-          from the <code>Configuration</code>, casting it to class <code>ConfigurableResourceResolver</code>,
+          from the <code>Configuration</code>, casting it to class <code
+            java="net.sf.saxon.lib.ConfigurableResourceResolver">ConfigurableResourceResolver</code>,
         and calling its <code>setFeature()</code> method.</p>
       
     
@@ -242,7 +251,7 @@
       resolution with a SAX parser is controlled by supplying an <code>EntityResolver</code>.
       If no other <code>EntityResolver</code> is supplied, then when Saxon instantiates a SAX
         parser, it constructs an <code>EntityResolver</code> that invokes the configuration-level
-        <code>ResourceResolver</code>, which has the capability to resolve entity references
+        <code java="net.sf.saxon.lib.ResourceResolver">ResourceResolver</code>, which has the capability to resolve entity references
         using catalogs (as well as supporting the <code>classpath</code> and <code>data</code>
         URI schemes).       
       </p>
@@ -258,7 +267,7 @@
         Entity resolution in this parser is controlled using the <code>System.Xml.XmlResolver</code>
           interface. When Saxon instantiates a <code>System.Xml</code>
           parser, it constructs an <code>XmlResolver</code> that invokes the configuration-level
-          <code>ResourceResolver</code>, which has the capability to resolve entity references
+          <code cs="Saxon.Api.ResourceResolver">ResourceResolver</code>, which has the capability to resolve entity references
           using catalogs (as well as supporting the <code>data</code>
           URI schemes).</p>
         <aside>In earlier Saxon releases, the <code>System.Xml.XmlResolver</code>
@@ -283,8 +292,8 @@
         <code>ACCESS_EXTERNAL_SCHEMA</code>, and <code>ACCESS_EXTERNAL_STYLESHEET</code> in its
         implementations of relevant JAXP interfaces.
       </p>
-      <p>Generalizing this mechanism, Saxon also provides a configuration property 
-        <code>Feature.ALLOWED_PROTOCOLS</code> which has the same format as the JAXP properties
+      <p>Generalizing this mechanism, Saxon also provides a configuration property <a class="feature"
+        href="ALLOWED_PROTOCOLS"/> which has the same format as the JAXP properties
       (a comma-separated list of permitted URI schemes), which is enforced by the default
       configuration-level <code>ResourceResolver</code>. Note that not all URIs are processed using
       this mechanism: for example, a URI that is resolved by a local <code>ResourceResolver</code>
@@ -1522,10 +1531,6 @@
     <h1>JAXP Source Types</h1>
 
 
-    <p>
-      <i>This section is relevant to SaxonJ only.</i>
-    </p>
-
     <p>When a user application invokes SaxonJ via the Java API, then a source document is supplied as
       an instance of the JAXP <code>Source</code> class. This is true whether invoking an XSLT
       transformation, an XQuery query, or a free-standing XPath expression. The <code>Source</code>
@@ -1655,7 +1660,7 @@
     
     <p>Saxon processes parsed input through a pipeline of processes that is highly configurable. The
     design concept follows the SAX push model, but Saxon has its own internal interface for event
-    processing called the <code>Receiver</code> API. A similar pipeline,
+    processing called the <code java="net.sf.saxon.event.Receiver">Receiver</code> API. A similar pipeline,
       also based on the <code>Receiver</code> API, is used for serializing result documents.
     This section describes some of the options that can be configured on the input pipeline.</p>
     <nav>
@@ -2029,7 +2034,7 @@
 
     <div class="javaonly">
     <p>
-      <i>The remainder section is relevant to SaxonJ only.</i>
+      <i>The remainder of this section is relevant to SaxonJ only.</i>
     </p>
 
     <p>In the case of DOM, all Saxon editions support DOM access "out of the box", and no special
@@ -2140,11 +2145,11 @@
     updates, so these will generally cause catastrophic failure.</p>
      
   </section>
-      <section id="building-programmatically" title="Building XML Trees Programmatically">
+    <section id="building-programmatically" title="Building XML Trees Programmatically" class="javaonly">
         <h1>Building XML Trees Programmatically</h1>
         <p>There are various ways in Saxon to build an XDM tree programmatically 
           (that is, incrementally one node at a time).</p>
-        <div class="javaonly">
+        
           <h2 class="subtitle">The Sapling Tree API</h2>
           <p>A new API offered from Saxon 10 is the Sapling Tree API. This provides a collection of methods to create
             nodes; for example, to create a document containing a <code>body</code> element with two paragraphs, the expression</p>
@@ -2169,9 +2174,9 @@
             copy operation. Nodes do not have references to their parents in the tree, so a subtree can be shared by multiple trees
             without copying.</p>
           <p>The Sapling Tree API is described in the JavaDoc for class <code java="net.sf.saxon.sapling.SaplingNode">SaplingNode</code>.</p>
-        </div>
         
-        <div class="javaonly">
+        
+        
           <h2 class="subtitle">Event APIs</h2>
           <p>Saxon 10 introduces a new event-based API (called simply "Push") designed explicitly for convenient use by 
             user-written applications.</p>
@@ -2240,7 +2245,7 @@
             interpretation of the specifications found at <a
               href="http://veithen.github.io/2009/11/01/understanding-stax.html" class="bodylink">Understanding StAX:
               How to Correctly Use XMLStreamWriter</a>.</p>
-        </div>
+        
       </section>
       <section id="preloading" title="Preloading shared reference documents">
         <h1>Preloading shared reference documents</h1>
@@ -2267,8 +2272,8 @@
               effect.</p>
           </li>
         </ol>
-        <p>The option is selected by setting the configuration property <a class="feature" href="PRE_EVALUATE_DOC_FUNCTION"/>
-          This option is not available from the
+        <p>The option is selected by setting the configuration property <a class="feature"
+          href="PRE_EVALUATE_DOC_FUNCTION"/>. This option is not available from the
           command line because it has no useful effect with a single-shot compile-and-run interface.</p>
         <p>This option has no effect if the URI supplied to the <code>doc()</code> or
           <code>document()</code> function includes a fragment identifier.</p>
