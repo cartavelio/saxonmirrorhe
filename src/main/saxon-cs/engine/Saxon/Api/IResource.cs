@@ -21,7 +21,7 @@ namespace Saxon.Api {
         /// Get a URI that identifies this resource
         /// </summary>
         /// <returns>a URI identifying the resource</returns>
-        Uri ResourceUri { get; }
+		/**public**/ Uri ResourceUri { get; }
 
         /// <summary>
         /// Get an XDM Item holding the contents of this resource.
@@ -32,13 +32,13 @@ namespace Saxon.Api {
         /// for text resources, a map or array for JSON resources, a base64Binary value
         /// for binary resource. May also return null if the resource cannot be materialized
         /// and this is not to be treated as an error.</returns>
-        XdmItem GetXdmItem(DynamicContext context);
+		/**public**/ XdmItem GetXdmItem(DynamicContext context);
 
         /// <summary> 
         /// Get the media type (MIME type) of the resource if known
         /// </summary>
         /// <returns>the media type if known; otherwise null</returns>
-        string ContentType { get; }
+		/**public**/ string ContentType { get; }
     }
 }
 
