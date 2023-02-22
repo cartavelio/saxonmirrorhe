@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?> 
-<a xmlns="http://a.uri/">
-  <b xmlns="http://b.uri/">
-    <c xmlns="http://c.uri/">
-      <d xmlns="http://d.uri/">42</d>
-    </c>
-  </b>
-</a>

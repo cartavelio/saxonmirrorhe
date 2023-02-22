@@ -1,7 +1,0 @@
-<events>
-  <event name="baptism"/>
-  <event name="birth"/>
-  <event name="marriage"/>
-  <event name="death"/>
-  <event name="burial"/>
-</events>

@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <exceptions>
-    
- 
-   <!--<exception test-set="expath-file" test-case="EXPath-file-exists-010" run="false" report="strange expected result">
-      <created by="Michael Kay" on="2018-09-09"/>
-      <reason>Expected result has no rationale</reason>
-   </exception>
-   <exception test-set="expath-file" test-case="EXPath-file-name1-004" run="false" report="strange expected result">
-      <created by="Michael Kay" on="2018-09-09"/>
-      <reason>Expected result has no rationale</reason>
-   </exception>-->
    
    <exception test-set="UCA-collation" test-case="UCA-reorder-codes-009" run="false" report="Bug in ICU-J">
       <created by="Michael Kay" on="2018-09-09"/>
@@ -19,16 +9,6 @@
    <exception test-set="UCA-collation" test-case="UCA-reorder-codes-010" run="false" report="Bug in ICU-J">
       <created by="Michael Kay" on="2018-09-09"/>
       <reason>Believed to be a bugin ICU-J. (We reported a bug and it was acknowledged, but there's a new bug tracker and I can't find it now)</reason>
-   </exception>
-   
-   <exception test-set="expath-binary" test-case="EXPath-binary-unpack-unsigned-integer-012" run="false" report="Bug reported in test">
-      <created by="Michael Kay" on="2018-09-09"/>
-      <reason>Bug reported at https://github.com/expath/expath-cg/issues/116</reason>
-   </exception>
-   
-   <exception test-set="expath-archive" run="false" report="Not supported">
-      <created by="Michael Kay" on="2021-08-20"/>
-      <reason>EXPath Archive functions not supported in Saxon-CS</reason>
    </exception>
    
    <exception test-set="saxon-parse-dateTime" run="false" report="Not supported">

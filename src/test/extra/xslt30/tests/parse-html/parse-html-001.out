@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<out>
-   <html xmlns="http://www.w3.org/1999/xhtml" xmlns:html="http://www.w3.org/1999/xhtml">
-      <body>
-         <p>Some text <br clear="none"/>second line</p>
-      </body>
-   </html>
-</out>

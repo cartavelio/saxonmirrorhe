@@ -8,6 +8,10 @@ class ManageTestSuitesPluginExtension {
   String w3cXslt30TestSuiteDir = System.getenv("W3C_XSLT30_TEST_SUITE_DIR")
   String w3cXslt40TestSuiteDir = System.getenv("W3C_XSLT40_TEST_SUITE_DIR")
   String w3cXsdTestSuiteDir = System.getenv("W3C_XSD_TEST_SUITE_DIR")
+  // I'm not hugely enamored of the casing in this variable, but it's consistent
+  // with what the EXPath group uses.
+  String w3cEXPathTestSuiteDir = System.getenv("W3C_EXPATH_TEST_SUITE_DIR")
+  String saxonExtraTestSuiteDir = System.getenv("SAXON_EXTRA_TEST_SUITE_DIR")
 }
 
 public class ManageTestSuitesPlugin implements Plugin<Project> {
@@ -31,6 +35,12 @@ public class ManageTestSuitesPlugin implements Plugin<Project> {
 
     extension.w3cXsdTestSuiteDir = project.findProperty("w3cXsdTestSuiteDir") ?:
       System.getenv("W3C_XSD_TEST_SUITE_DIR")
+
+    extension.w3cEXPathTestSuiteDir = project.findProperty("w3cEXPathTestSuiteDir") ?:
+      System.getenv("W3C_EXPATH_TEST_SUITE_DIR")
+
+    extension.saxonExtraTestSuiteDir = project.findProperty("saxonExtraTestSuiteDir") ?:
+      System.getenv("SAXON_EXTRA_TEST_SUITE_DIR")
 
     // ============================================================
     // In an ideal world, I'd make the build process more standalone
@@ -75,6 +85,22 @@ public class ManageTestSuitesPlugin implements Plugin<Project> {
       doLast {
         if (extension.w3cXslt40TestSuiteDir == null) {
           throw new GradleException("The location of the XSLT 4.0 test suite is unknown.")
+        }
+      }
+    }
+
+    project.task("cloneEXPathTestSuite") {
+      doLast {
+        if (extension.w3cEXPathTestSuiteDir == null) {
+          throw new GradleException("The location of the EXPath test suite is unknown.")
+        }
+      }
+    }
+
+    project.task("cloneSaxonExtraTestSuites") {
+      doLast {
+        if (extension.saxonExtraTestSuiteDir == null) {
+          throw new GradleException("The location of the Saxon extra test suites is unknown.")
         }
       }
     }

@@ -17,11 +17,12 @@ testSuite.configure([
 
   // This maps test suites to the directories that contain the tests.
   "directoryMap": ["qt3": testsuites.w3cQT3TestSuiteDir,
-                   "qt3extra": "${projectDir}/src/test/extra/qt3",
+                   "qt3extra": "${buildDir}/tests/extra/suites/qt3",
                    "qt4": testsuites.w3cQT4TestSuiteDir,
                    "xslt30": testsuites.w3cXslt30TestSuiteDir,
-                   "xslt30extra": "${projectDir}/src/test/extra/xslt30",
-                   "xsd": testsuites.w3cXsdTestSuiteDir
+                   "xslt30extra": "${buildDir}/tests/extra/suites/xslt30",
+                   "xsd": testsuites.w3cXsdTestSuiteDir,
+                   "expath": "${buildDir}/tests/expath"
   ]
 ])
 
@@ -86,6 +87,19 @@ def testSuiteMatrix = [
     "qt3extra": [
       "_class": "com.saxonica.testdriver.QT3TestDriverPE",
       "_exceptions": "${projectDir}/src/test/exceptions/qt3extra.xml",
+      "_depends": ["copySaxonExtraTestSuites"],
+
+      "XP31": [
+        "": ["catalog":"j-catalog.xml"]
+      ],
+      "XQ31": [
+        "": ["catalog":"j-catalog.xml"]
+      ]
+    ],
+    "expath": [
+      "_class": "com.saxonica.testdriver.QT3TestDriverPE",
+      "_exceptions": "${projectDir}/src/test/exceptions/expath.xml",
+      "_depends": ["copyEXPathTestSuite"],
 
       "XP31": [
         "": [:]
@@ -135,6 +149,21 @@ def testSuiteMatrix = [
     "qt3extra": [
       "_class": "com.saxonica.testdriver.QT3TestDriverEE",
       "_exceptions": "${projectDir}/src/test/exceptions/qt3extra.xml",
+      "_depends": ["copySaxonExtraTestSuites"],
+
+      "XP31": [
+        "": ["catalog":"j-catalog.xml"],
+        "bc": ["bytecode": "on", "catalog":"j-catalog.xml"]
+      ],
+      "XQ31": [
+        "": ["catalog":"j-catalog.xml"],
+        "bc": ["bytecode": "on", "catalog":"j-catalog.xml"],
+      ]
+    ],
+    "expath": [
+      "_class": "com.saxonica.testdriver.QT3TestDriverEE",
+      "_exceptions": "${projectDir}/src/test/exceptions/expath.xml",
+      "_depends": ["copyEXPathTestSuite"],
 
       "XP31": [
         "": [:],
@@ -181,6 +210,7 @@ def testSuiteMatrix = [
     "xslt30extra": [
       "_class": "com.saxonica.testdriver.Xslt30TestSuiteDriverEE",
       "_exceptions": "${projectDir}/src/test/exceptions/xslt30extra.xml",
+      "_depends": ["copySaxonExtraTestSuites"],
 
       "XT30": [
         "": [:],
@@ -194,7 +224,7 @@ def testSuiteMatrix = [
     "xsd": [
       "_class": "com.saxonica.testdriver.ee.SchemaTestSuiteDriver",
       "_depends": ["cloneXsdTestSuite"],
-      "_summarizeresults": "${projectDir}/src/test/extra/tools/summarize-results.xsl",
+      "_summarizeresults": "${buildDir}/tests/extra/tools/summarize-results.xsl",
 
       "XSD10": [
         "_exceptions": "${projectDir}/src/test/exceptions/xsd.xml",
@@ -232,6 +262,22 @@ def testSuiteMatrix = [
     ],
     "qt3extra": [
       "_exceptions": "${projectDir}/src/test/exceptions/qt3extra-cs.xml",
+      "_depends": ["copySaxonExtraTestSuites"],
+
+      "XP31": [
+        "": ["catalog":"j-catalog.xml"],
+        "bc": ["bytecode": "on", "catalog":"j-catalog.xml"]
+      ],
+      "XQ31": [
+        "": ["catalog":"j-catalog.xml"]
+      ],
+      "XQ40": [
+        "": ["catalog":"j-catalog.xml"]
+      ]
+    ],
+    "expath": [
+      "_exceptions": "${projectDir}/src/test/exceptions/expath-cs.xml",
+      "_depends": ["copyEXPathTestSuite"],
 
       "XP31": [
         "": [:],
@@ -265,6 +311,7 @@ def testSuiteMatrix = [
     ],
     "xslt30extra": [
       "_exceptions": "${projectDir}/src/test/exceptions/xslt30extra-cs.xml",
+      "_depends": ["copySaxonExtraTestSuites"],
 
       "XT30": [
         "": [:],
@@ -368,6 +415,37 @@ testSuiteMatrix.keySet().findAll { !it.startsWith("_") }.each { product ->
 }
 
 // ============================================================
+
+// We copy this one, instead of running it "in place" because it has a
+// "sandpit" directory that it scribbles in.
+task copyEXPathTestSuite(
+  dependsOn: ["cloneEXPathTestSuite", "copySaxonExtraTestSuites"],
+  description: "Copies the EXPath tests into the build directory"
+) {
+  doLast {
+    copy {
+      into "${buildDir}/tests/expath"
+      from "${testsuites.w3cEXPathTestSuiteDir}"
+    }
+  }
+  doLast {
+    // Hack. Where are these supposed to come from?
+    copy {
+      into "${buildDir}/tests/expath/archive/sandpit"
+      from "${buildDir}/tests/extra/data/sandpit"
+      include "*.zip"
+    }
+  }
+}
+
+task copySaxonExtraTestSuites(
+  type: Copy,
+  dependsOn: ["cloneSaxonExtraTestSuites"],
+  description: "Copies the extra tests into the build directory"
+) {
+  into "${buildDir}/tests/extra"
+  from "${testsuites.saxonExtraTestSuiteDir}"
+}
 
 ["he", "pe", "ee"].each { release ->
   def RELEASE = release.toUpperCase()

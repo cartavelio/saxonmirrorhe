@@ -20,7 +20,7 @@ class TestSuite {
   def testOptions = []
   def testReportArchive = null
   def testDriverOutputRedirect = false
-  def debugExec = false
+  def debugExec = true
   def ignoreFailures = false
   def accumulateFailures = null
 
