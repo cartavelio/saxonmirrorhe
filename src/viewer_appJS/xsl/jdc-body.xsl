@@ -1125,11 +1125,23 @@
                     <xsl:apply-templates select="comment/value/body" mode="jdc"/>
                 </div>
             </xsl:if>
-            <xsl:if test="exists(comment/returns)">
+            <xsl:if test="exists(comment/return)">
                 <p class="methodLabel">Returns:</p>
                 <div class="params">
-                    <xsl:apply-templates select="comment/returns/body" mode="jdc"/>
+                    <xsl:apply-templates select="comment/return/body" mode="jdc"/>
                 </div>
+            </xsl:if>
+            <xsl:if test="$isIndexer and exists(params)">
+                <p class="methodLabel">Parameters:</p>
+                <xsl:for-each select="params/param">
+                    <div class="params">
+                        <code><xsl:value-of select="@name"/></code>
+                        <xsl:if test="body/div/node()">
+                            <xsl:text> - </xsl:text>
+                            <xsl:apply-templates select="body" mode="jdc"/>
+                        </xsl:if>
+                    </div>
+                </xsl:for-each>
             </xsl:if>
             <xsl:if test="exceptions">
                 <p class="methodLabel">Throws:</p>
