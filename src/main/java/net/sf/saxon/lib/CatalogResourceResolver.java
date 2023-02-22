@@ -6,6 +6,7 @@ import org.xml.sax.SAXException;
 import org.xmlresolver.Resolver;
 import org.xmlresolver.ResolverFeature;
 import org.xmlresolver.XMLResolverConfiguration;
+import org.xmlresolver.sources.ResolverSAXSource;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
@@ -139,12 +140,17 @@ public class CatalogResourceResolver extends CommonResourceResolver {
     @Override
     public Source resolve(ResourceRequest request) throws XPathException {
         if (catalogBasedResolver != null) {
-
             Source rr = null;
             if (request.uriIsNamespace) {
                 try {
                     rr = catalogBasedResolver.resolveNamespace(
                             request.uri, request.nature, request.purpose);
+                    // TODO: get the underlying ResolvedResource from the CatalogManager, which exposes the
+                    // HTTP content type header.
+                    if (rr instanceof ResolverSAXSource) {
+                        ResolverSAXSource rss = (ResolverSAXSource)rr;
+                        rr = new StreamSource(rss.getInputSource().getByteStream(), rss.getSystemId());
+                    }
                 } catch (TransformerException e) {
                     throw XPathException.makeXPathException(e);
                 }

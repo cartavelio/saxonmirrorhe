@@ -262,12 +262,12 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
             }
         } else {
             if (config != null) {
-                return null; // TODO
-//                try {
-//                    source = config.getResourceResolver().resolve(relativeURI, base);
-//                } catch (Exception ex) {
-//                    throw XPathException.makeXPathException(ex);
-//                }
+                ResourceRequest rr = new ResourceRequest();
+                rr.uri = uriString;
+                rr.relativeUri = relativeURI;
+                rr.baseUri = base;
+                rr.nature = ResourceRequest.XML_NATURE;
+                return rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
             }
             if (source == null) {
                 source = new SAXSource();
