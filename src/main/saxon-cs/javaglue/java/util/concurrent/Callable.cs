@@ -1,5 +1,3 @@
 namespace java.util.concurrent {
-    public interface Callable<V> {
-        V call();
-    }
+    public delegate V Callable<out V>();
 }

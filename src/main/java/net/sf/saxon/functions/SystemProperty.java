@@ -176,8 +176,10 @@ public class SystemProperty extends SystemFunction implements Callable {
             return Double.toString(EXPathBinaryFunctionSet.VERSION);
         } else if (uri.equals(EXPathFileFunctionSet.NAMESPACE) && local.equals("version")) {
             return EXPathFileFunctionSet.VERSION.toString();
+        //#if CSHARP==false
         } else if (uri.equals(Archive.NAMESPACE) && local.equals("version")) {
             return Archive.VERSION.toString();
+        //#endif
 //#endif
         } else {
             return "";

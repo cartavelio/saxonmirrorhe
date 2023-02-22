@@ -30,7 +30,7 @@ namespace java.util
             return dest;
         }
 
-        public static SysCollGen.List<T> asList<T>(params T[] array) {
+        public static SysCollGen.IList<T> asList<T>(params T[] array) {
             return new SysCollGen.List<T>(array);
         }
 

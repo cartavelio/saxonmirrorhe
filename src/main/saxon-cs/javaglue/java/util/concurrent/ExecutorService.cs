@@ -1,5 +1,7 @@
 namespace java.util.concurrent {
-    public interface ExecutorService {
+    public interface ExecutorService : Executor {
+
+        bool awaitTermination();
 
         void shutdown();
 
