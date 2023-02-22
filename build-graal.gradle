@@ -127,15 +127,15 @@ task buildCWrappers (
   ) {
     inputs.file "${buildDir}/c/jars/${edition}c/saxon-${edition}-${saxonVersion}.jar"
     inputs.files fileTree(dir: "${projectDir}/src/graalvm/META-INF")
-    outputs.files fileTree(dir: "${buildDir}/graalvm/META-INF");
+    outputs.files fileTree(dir: "${buildDir}/graalvm/${edition}/META-INF");
 
     doLast {
-      mkdir("${buildDir}/graalvm");
+      mkdir("${buildDir}/graalvm/${edition}");
     }
     doLast {
       copy {
         def zipFile = file("${buildDir}/c/jars/${edition}c/saxon-${edition}-${saxonVersion}.jar")
-        def outputDir = "${buildDir}/graalvm"
+        def outputDir = "${buildDir}/graalvm/${edition}"
         from(zipTree(zipFile)) {
           exclude "META-INF/TE*"
         }
@@ -145,7 +145,7 @@ task buildCWrappers (
     doLast {
       copy {
         from("${projectDir}/src/graalvm/META-INF")
-        into("${buildDir}/graalvm/META-INF")
+        into("${buildDir}/graalvm/${edition}/META-INF")
       }
     }
   }
@@ -155,16 +155,16 @@ task buildCWrappers (
     dependsOn: ["setup_${edition}c_graalJar"],
     description: "Build the ${edition.toUpperCase()} jar file for GraalVM"
   ) {
-    inputs.files fileTree(dir: "${buildDir}/graalvm")
+    inputs.files fileTree(dir: "${buildDir}/graalvm/${edition}")
     outputs.file "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar"
 
-    def prefixLen = "${buildDir}/graalvm".length()
+    def prefixLen = "${buildDir}/graalvm/${edition}".length()
 
     archiveBaseName = "libsaxon-${edition}c-${saxonVersion}"
     manifest {
-      from "${buildDir}/graalvm/META-INF/MANIFEST.MF"
+      from "${buildDir}/graalvm/${edition}/META-INF/MANIFEST.MF"
     }
-    from("${buildDir}/graalvm")
+    from("${buildDir}/graalvm/${edition}")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   }
 
@@ -173,8 +173,7 @@ task buildCWrappers (
     description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
   ) {
     inputs.file "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar"
-    outputs.files fileTree(dir: "${buildDir}/c",
-                           include: "libsaxon-${edition}c-${saxonVersion}.*")
+    outputs.file "libsaxon-${edition}c-${saxonVersion}.o"
 
     doLast {
       def image = nativeImage(graalEdition)
