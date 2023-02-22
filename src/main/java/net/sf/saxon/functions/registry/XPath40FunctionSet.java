@@ -241,7 +241,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(2, compareFnType, ONE, null));
 
-        register("truncate", 1, e -> e.populate(net.sf.saxon.functions.Truncate::new, AnyItemType.getInstance(), STAR, 0)
+        register("trunk", 1, e -> e.populate(Trunk::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
 
         register("unparcel", 1, e -> e.populate(UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)

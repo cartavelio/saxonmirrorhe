@@ -16,10 +16,10 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.LookaheadIteratorImpl;
 
 /**
- * This class implements the function fn:truncate(), which is proposed as a standard function in XPath 4.0
+ * This class implements the function fn:trunk(), which is proposed as a standard function in XPath 4.0
  */
 
-public class Truncate extends SystemFunction {
+public class Trunk extends SystemFunction {
 
     /**
      * Evaluate the expression
