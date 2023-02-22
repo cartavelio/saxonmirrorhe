@@ -296,7 +296,7 @@ public class CommandLineOptions {
             if ((getOptionValue("u") != null) || isImplicitURI(optionValue)) {
                 ResourceRequest request = new ResourceRequest();
                 request.nature = "urn:oasis:names:tc:entity:xmlns:xml:catalog";
-                request.purpose = "catalog";
+                request.purpose = ResourceRequest.ANY_PURPOSE;
                 for (String s : optionValue.split(";")) {
                     Source sourceInput;
                     try {
@@ -737,7 +737,7 @@ public class CommandLineOptions {
                 ResourceRequest request = new ResourceRequest();
                 request.uri = sourceFileName;
                 request.nature = ResourceRequest.XML_NATURE;
-                request.purpose = "source document";
+                request.purpose = ResourceRequest.ANY_PURPOSE;
                 sourceInput = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
             } catch (XPathException e) {
                 throw new SaxonApiException(e);

@@ -786,7 +786,7 @@ public class Query {
             request.baseUri = cwd.toString();
             request.uri = cwd.resolve(sourceFileName).toString();
             request.nature = ResourceRequest.XML_NATURE;
-            request.purpose = "source document";
+            request.purpose = ResourceRequest.ANY_PURPOSE;
             sourceInput = request.resolve(config.getResourceResolver());
         } else if (sourceFileName.equals("-")) {
             // take input from stdin

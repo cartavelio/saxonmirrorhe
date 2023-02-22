@@ -403,7 +403,7 @@ public class TransformFn extends SystemFunction implements Callable {
                         request.relativeUri = stylesheetLocation;
                         request.uri = ResolveURI.makeAbsolute(stylesheetLocation, base).toString();
                         request.nature = ResourceRequest.XSLT_NATURE;
-                        request.purpose = "transformation";
+                        request.purpose = ResourceRequest.ANY_PURPOSE;
                         style = request.resolve(xsltCompiler.getResourceResolver(),
                                                 config.getResourceResolver(),
                                                 new DirectResourceResolver(config));
@@ -772,7 +772,7 @@ public class TransformFn extends SystemFunction implements Callable {
                         rr.relativeUri = sourceLocation;
                         rr.baseUri = base;
                         rr.nature = ResourceRequest.XML_NATURE;
-                        rr.purpose = "source document";
+                        rr.purpose = ResourceRequest.ANY_PURPOSE;
                         try {
                             rr.uri = ResolveURI.makeAbsolute(sourceLocation, base).toString();
                         } catch (URISyntaxException err) {
