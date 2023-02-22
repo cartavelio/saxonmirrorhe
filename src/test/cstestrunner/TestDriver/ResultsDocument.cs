@@ -11,24 +11,36 @@ namespace TestDriver
 {
     public abstract class ResultsDocument
     {
-        private string resultsDir;
+        private String reportFilename = null;
+        private String resultsDir;
         protected Spec spec;
         protected XmlWriter results;
         private StreamWriter writer;
 
-        protected ResultsDocument(string rdir, Spec sp)
+        protected ResultsDocument(String rdir, Spec sp, String fn)
         {
             this.resultsDir = rdir;
             this.spec = sp;
+            this.reportFilename = fn;
         }
 
+        protected ResultsDocument(String rdir, Spec sp)
+        {
+            this.resultsDir = rdir;
+            this.spec = sp;
+            this.reportFilename = null;
+        }
 
         protected void createWriter(Processor processor) {
 
             string fileName = resultsDir + "/results"
                 + "_" + ((SpecAttr)spec.GetAttr()).fname + "_" + processor.ProductVersion + "n.xml";
+
+            if (reportFilename != null) {
+               fileName = resultsDir + "/" + reportFilename;
+            }
+
             // Delete the file if it exists.
-       
             if (System.IO.File.Exists(fileName)) {
                 System.IO.File.Delete(fileName);
             }
