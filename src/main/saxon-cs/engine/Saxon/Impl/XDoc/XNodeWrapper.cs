@@ -196,7 +196,10 @@ namespace Saxon.Impl.XDoc {
                 IList<NodeInfo> attList = new List<NodeInfo>(); 
                 foreach (XAttribute att in element.Attributes()) {
                     if (!att.IsNamespaceDeclaration) {
-                        attList.Add(new XAttributeWrapper(att, this, index++));
+                        var wrapper = new XAttributeWrapper(att, this, index++);
+                        if (nodeTest.test(wrapper)) {
+                            attList.Add(wrapper);
+                        }
                     }
                 }
                 return new NodeListIterator(attList);

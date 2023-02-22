@@ -2,6 +2,7 @@ using System;
 using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
+using System.Xml.Linq;
 using Saxon.Callbacks;
 using Saxon.Ejava.lang;
 using Saxon.Ejavax.xml.transform;
@@ -11,6 +12,7 @@ using Saxon.Hej.lib;
 using Saxon.Hej.pull;
 using Saxon.Hej.trans;
 using Saxon.Impl.Dom;
+using Saxon.Impl.XDoc;
 
 namespace Saxon.Api {
     /// <summary>
@@ -518,6 +520,50 @@ namespace Saxon.Api {
             DomNodeWrapper wrappedNode = tree.wrap(node);
             return new XdmNode(wrappedNode);
         }
+        
+        /// <summary>
+        /// Wrap a Linq document node, supplied as an <c>XDocument</c>, as a Saxon <c>XdmNode</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method must be applied at the level of the Document Node. Unlike the
+        /// <c>Build</c> method, the original tree is not copied. This saves memory and
+        /// time, but it also means that it is not possible to perform operations such as
+        /// whitespace stripping and schema validation.
+        /// </para>
+        /// </remarks>
+        /// <param name="doc">The Linq document node to be wrapped</param>
+        /// <returns>An <c>XdmNode</c>, the Saxon document node at the root of the tree of the resulting
+        /// in-memory document.
+        /// </returns>
+        public XdmNode Wrap(XDocument doc) {
+            string baseu = (baseUri == null ? null : baseUri.ToString());
+            XDocumentTree tree = new XDocumentTree(doc, baseu, config);
+            return (XdmNode) XdmValue.Wrap(tree.getRootNode());
+        }
+        
+        /// <summary>
+        /// Wrap a Linq element node, as a Saxon <c>XdmNode</c>.
+        /// </summary>
+        /// <param name="docWrapper">The wrapper of the containing XDocument node</param>
+        /// <param name="node">The Linq element node containing the node to be wrapped</param>
+        /// <returns>An <c>XdmNode</c>, wrapping the supplied Linq element node
+        /// </returns>
+        public XdmNode Wrap(XdmNode docWrapper, XNode node) {
+            if (!(docWrapper.Implementation is XNodeWrapper && docWrapper.NodeKind == XdmNodeKind.Document)) {
+                throw new IllegalArgumentException("First argument is not a wrapped XDocument node");
+            }
+
+            XNodeWrapper doc = ((XNodeWrapper) docWrapper.Implementation);
+            if (node.Document != doc.getUnderlyingNode()) {
+                throw new IllegalArgumentException(
+                    "The node supplied in the second argument does not belong to the document supplied in the first argument");
+            }
+            XDocumentTree tree = (XDocumentTree)doc.getTreeInfo();
+            XNodeWrapper wrappedNode = tree.wrap(node);
+            return new XdmNode(wrappedNode);
+        }
+        
     }
 }
 
