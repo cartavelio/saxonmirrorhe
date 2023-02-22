@@ -10,11 +10,7 @@
     #include <stdlib.h>
     #include <string.h>
     #include <dlfcn.h>
-    #include <stdio.h>  
-    #define HANDLE void*
-    #define LoadLibrary(x) dlopen(x, RTLD_LAZY)
-//    #define FreeLibrary(x) dlclose(x, RTLD_LAZY)
-    #define GetProcAddress(x,y) dlsym(x,y)
+    #include <stdio.h>
 #else
     #include <windows.h>
 #endif
