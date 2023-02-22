@@ -54,7 +54,9 @@ int main()
 
     //const char *result = xsltApplyStylesheet(environi, &processor, NULL, "../data/cat.xml","../data/test.xsl", 0 ,0, 0, 0);
     int64_t procRef = createSaxonProcessor2((environi->thread), 0);
-    printf("cp1\n");
+
+    char * verCh  = getProductVariantAndVersion(environi, procRef);
+    printf("XSLT Tests\n\nSaxon version: %s \n", verCh);
     printf("%ld", (long)procRef);
 
     const char *result = xsltApplyStylesheet1(environi, procRef, "/home/ond1/work/repository/saxondev-11/src/main/c/samples/cTests", "../data/cat.xml","../data/test.xsl", 0 ,0, 0, 0);
@@ -66,11 +68,6 @@ int main()
     }
       fflush(stdout);
 
-    /*
-     * Finalize JET run-time.
-     */
-    /*finalizeJavaRT (environi->jvm);
-    freeSaxonc(&environi, &processor, &parameters, &properties);*/
 
     graal_tear_down (environi->thread);
     return 0;

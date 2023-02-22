@@ -29,9 +29,9 @@ EXTERN_SAXONC
 /*
  * Get the Saxon version 
  */
-const char * version(sxnc_environment *environi);
+const char * version(sxnc_environment *environi, int64_t proc);
 
-const char * getProductVariantAndVersion(sxnc_environment * environi);
+const char * getProductVariantAndVersion(sxnc_environment * environi, int64_t proc);
 
 void initSaxonc(sxnc_environment ** environi, sxnc_processor ** proc, sxnc_parameter **param, sxnc_property ** prop,int cap, int propCap);
 
