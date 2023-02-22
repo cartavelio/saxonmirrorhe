@@ -85,7 +85,9 @@ public class HTML50Emitter extends HTMLEmitter {
     protected void writeDocType(NodeName name, String displayName, String systemId, String publicId) throws XPathException {
         try {
             if (systemId == null && publicId == null) {
-                writer.writeAscii(DOCTYPE);
+                if (name.getLocalPart().equalsIgnoreCase("html")) {
+                    writer.writeAscii(DOCTYPE);
+                }
             } else {
                 super.writeDocType(name, displayName, systemId, publicId);
             }
@@ -120,7 +122,7 @@ public class HTML50Emitter extends HTMLEmitter {
             if ("".equals(publicId)) {
                 publicId = null;
             }
-            writeDocType(null, "html", systemId, publicId);
+            writeDocType(elemName, "html", systemId, publicId);
             started = true;
         }
         super.startElement(elemName, type, attributes, namespaces, location, properties);
