@@ -243,6 +243,12 @@ public class ForClause extends Clause {
 
         boolean changed = false;
 
+
+        if (positionVariable != null && positionVariable.getNominalReferenceCount() == 0) {
+            // Eliminating an unused position variable opens up optimisation opportunties: bug 4947
+            positionVariable = null;
+        }
+
         // Process each term in the where clause independently
 
         if (positionVariable != null &&
