@@ -35,7 +35,6 @@ zend_class_entry *xdmNode_ce;
 zend_class_entry *xdmAtomicValue_ce;
 zend_class_entry *xsltExecutable_ce;
 
-#include "php7_XsltProcessor.cpp"
 #include "php7_Xslt30Processor.cpp"
 #include "php7_XsltExecutable.cpp"
 #include "php7_XPathProcessor.cpp"
@@ -529,44 +528,6 @@ if (object_init_ex(return_value, xpathProcessor_ce) != SUCCESS) {
     }
 }
 
-PHP_METHOD(SaxonProcessor, newXsltProcessor)
-{
-//std::cerr<<"SaxonProcessor newXsltproc point 1"<<std::endl;
-    //php_error(E_WARNING,"new xsltProc 1");
-    if (ZEND_NUM_ARGS()>0) {
-        WRONG_PARAM_COUNT;
-    }
-    SaxonProcessor * proc;
-    XsltProcessor * xsltProcessor = nullptr;
-
-      zend_object* pobj = Z_OBJ_P(getThis()); 
-   saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
-
-   // saxonProcessor_object *obj = (saxonProcessor_object *)Z_OBJ_P(getThis());
-    assert (obj != nullptr);
-    proc = obj->saxonProcessor;
-
-    assert (proc != nullptr);
-    if (proc != nullptr) {
-    if (object_init_ex(return_value, xsltProcessor_ce) != SUCCESS) {
-            RETURN_NULL();
-        } else {
-	xsltProcessor = proc->newXsltProcessor();
-		    if(xsltProcessor == nullptr) {
-    	        RETURN_NULL();
-    	    }
-	   zend_object* vobj = Z_OBJ_P(return_value);
-	   xsltProcessor_object * xproc_object = (xsltProcessor_object *)((char *)vobj - XtOffsetOf(xsltProcessor_object, std));
-            assert (vobj != nullptr);
-	    
-            xproc_object->xsltProcessor = xsltProcessor;
-
-    }
-    } else {
-       
-        RETURN_NULL();
-    }
-}
 
 
 PHP_METHOD(SaxonProcessor, newXslt30Processor)
@@ -2063,7 +2024,6 @@ zend_function_entry SaxonProcessor_methods[] = {
     PHP_ME(SaxonProcessor,  parseXmlFromUri,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  setcwd,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  newXPathProcessor,     nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(SaxonProcessor,  newXsltProcessor,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  newXslt30Processor,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  newXQueryProcessor,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  newSchemaValidator,     nullptr, ZEND_ACC_PUBLIC)
@@ -2155,14 +2115,6 @@ PHP_MINIT_FUNCTION(saxon)
    
    // saxonProcessor_object_handlers.clone_obj = nullptr;
 
-    INIT_CLASS_ENTRY(ce, "Saxon\\XSLTProcessor", XsltProcessor_methods);
-    xsltProcessor_ce = zend_register_internal_class(&ce);
-    xsltProcessor_ce->create_object = xsltProcessor_create_handler;
-    memcpy(&xsltProcessor_object_handlers, zend_get_std_object_handlers(), sizeof(xsltProcessor_object_handlers));
-    xsltProcessor_object_handlers.offset = XtOffsetOf(xsltProcessor_object, std);
-    xsltProcessor_object_handlers.free_obj = XsltProcessor_free_storage;
-    xsltProcessor_object_handlers.dtor_obj = XsltProcessor_destroy_storage;
-    //xsltProcessor_object_handlers.clone_obj = nullptr;
 
     INIT_CLASS_ENTRY(ce, "Saxon\\XSLT30Processor", Xslt30Processor_methods);
     xslt30Processor_ce = zend_register_internal_class(&ce);
