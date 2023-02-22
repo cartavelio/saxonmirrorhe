@@ -68,6 +68,8 @@ typedef char* (*j_getSystemId_fn_t)(graal_isolatethread_t*, void *);
 
 typedef void (*j_clearException_fn_t)(graal_isolatethread_t*);
 
+typedef char (*j_checkForException_fn_t)(graal_isolatethread_t*);
+
 typedef long long int (*createSaxonCMessageListener_fn_t)(graal_isolatethread_t*, void *, char*, char*);
 
 typedef long long* (*j_getXslMessages_fn_t)(graal_isolatethread_t*, void *, void *);

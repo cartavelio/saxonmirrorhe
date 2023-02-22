@@ -68,6 +68,8 @@ char* j_getSystemId(graal_isolatethread_t*, void *);
 
 void j_clearException(graal_isolatethread_t*);
 
+char j_checkForException(graal_isolatethread_t*);
+
 long long int createSaxonCMessageListener(graal_isolatethread_t*, void *, char*, char*);
 
 long long* j_getXslMessages(graal_isolatethread_t*, void *, void *);

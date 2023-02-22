@@ -405,7 +405,7 @@ std::map<std::string, std::string> &XsltExecutable::getProperties() {
 }
 
 void XsltExecutable::exceptionClear() {
-    SaxonProcessor::attachCurrentThread();
+    j_clearException(SaxonProcessor::sxn_environ->thread);
 }
 
 void XsltExecutable::setcwd(const char *dir) {
@@ -918,7 +918,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
     char * cstylesheet = nullptr;
-    int64_t result = j_transformToValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)-1, (void *)executableRef, (char *)sourcefile, cstylesheet,  (void *)processorDataRef);
+    int64_t result = j_transformToValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *) nullptr, (void *)executableRef, (char *)sourcefile, cstylesheet,  (void *)processorDataRef);
     if (result > 0) {
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,(void *)result);
 
@@ -995,8 +995,10 @@ void XsltExecutable::transformFileToFile(const char *source, const char *outputf
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
     char * cstylesheet = nullptr;
-    j_transformToFile(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)-1, (void *)executableRef,  (char *)source, cstylesheet, (char *)outputfile, (void *)processorDataRef);
-
+    long status = j_transformToFile(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *) nullptr, (void *)executableRef,  (char *)source, cstylesheet, (char *)outputfile, (void *)processorDataRef);
+    if(status == -2) {
+        exceptionFound = true;
+    }
 }
 
 
@@ -1089,7 +1091,7 @@ const char *XsltExecutable::transformFileToString(const char *source) {
     allocFn fn = operator new;
     char *  result = j_transformToString(SaxonProcessor::sxn_environ->thread, (void *)fn,(char *)cwdXE.c_str(), (void *)-1, (void *)executableRef, (char *)source, cstylesheet, (void *)processorDataRef);
     if(result == nullptr) {
-        //TODO create exception
+        exceptionFound = true;
     }
     return result;
 }

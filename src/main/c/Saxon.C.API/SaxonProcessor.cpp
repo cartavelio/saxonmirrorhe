@@ -79,8 +79,7 @@ sxnc_environment *SaxonProcessor::sxn_environ = 0;
 int SaxonProcessor::jvmCreatedCPP = 0;
 
 bool SaxonProcessor::exceptionOccurred() {
-    SaxonProcessor::attachCurrentThread();
-    return false; //SaxonProcessor::sxn_environ->env->ExceptionCheck() || exception != nullptr; - TODO remove comment
+    return (bool)j_checkForException(sxn_environ->thread);
 }
 
 const char *SaxonProcessor::checkException() {
@@ -106,8 +105,7 @@ const char *SaxonProcessor::checkException() {
 const char *SaxonProcessor::getErrorMessage() {
     SaxonProcessor::attachCurrentThread();
     if(exception == nullptr) {
-       // exception =  SaxonProcessor::checkForExceptionCPP(SaxonProcessor::sxn_environ->env,
-         //                                                                   saxonCAPIClass,nullptr);
+       exception =  new SaxonApiException();
     }
     if (exception == nullptr) { return nullptr; }
     return exception->getMessage(); //- TODO remove comment
@@ -116,14 +114,11 @@ const char *SaxonProcessor::getErrorMessage() {
 }
 
 void SaxonProcessor::exceptionClear() {
-    /* SaxonProcessor::attachCurrentThread();
-    if(exceptionOccurred()) {
-        SaxonProcessor::sxn_environ->env->ExceptionClear();
-    }
+
     if (exception != nullptr) {
         delete exception;
         exception = nullptr;
-    } - TODO remove comment*/
+    }
 
 }
 
@@ -136,13 +131,13 @@ void SaxonProcessor::exceptionClear() {
 
 void SaxonProcessor::createException(const char * message) {
 
-    /*exceptionClear();
+    exceptionClear();
 
     if(message == nullptr) {
-        exception = checkAndCreateException(saxonCAPIClass);
+        exception =  new SaxonApiException();
     } else {
         exception = new SaxonApiException(message);
-    }*/
+    }
 
 }
 

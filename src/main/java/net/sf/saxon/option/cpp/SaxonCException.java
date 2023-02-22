@@ -109,4 +109,11 @@ public class SaxonCException  {
     }
 
 
+
+    @CEntryPoint(name = "j_checkForException")
+    public static byte checkForException(IsolateThread thread) {
+        return CTypeConversion.toCBoolean(throwable != null);
+    }
+
+
 }
