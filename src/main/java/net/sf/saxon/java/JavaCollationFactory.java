@@ -58,7 +58,12 @@ public abstract class JavaCollationFactory {
 
         String classAtt = props.getProperty("class");
         if (classAtt != null) {
-            Object comparator = config.getInstance(classAtt);
+            Object comparator;
+            try {
+                comparator = config.getInstance(classAtt);
+            } catch (XPathException e) {
+                throw new XPathException("Failed to load collation class " + classAtt + " (" + e.getMessage() + ")");
+            }
             if (comparator instanceof Collator) {
                 collator = (Collator) comparator;
             } else if (comparator instanceof StringCollator) {
