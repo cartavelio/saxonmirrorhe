@@ -297,7 +297,7 @@ public class IndependentContext extends AbstractStaticContext
 
     @Override
     public XPathVariable declareVariable(NamespaceUri namespaceURI, String localName) {
-        StructuredQName qName = new StructuredQName("", namespaceURI, localName);
+        StructuredQName qName = new StructuredQName("", namespaceURI==null ? NamespaceUri.NULL : namespaceURI, localName);
         return declareVariable(qName);
     }
 

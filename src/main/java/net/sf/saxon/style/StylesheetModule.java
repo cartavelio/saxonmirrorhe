@@ -215,7 +215,7 @@ public class StylesheetModule {
         CheckSumFilter checksummer = new CheckSumFilter(packageBuilder);
         checksummer.setCheckExistingChecksum(true);
 
-        Valve valve = new Valve(NamespaceConstant.SAXON_XSLT_EXPORT, commentStripper, checksummer);
+        Valve valve = new Valve(NamespaceUri.SAXON_XSLT_EXPORT, commentStripper, checksummer);
         sourcePipeline = valve;
 
         // build the stylesheet document

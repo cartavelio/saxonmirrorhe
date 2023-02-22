@@ -32,13 +32,27 @@ public class StructuredQName implements IdentityComparable {
      * Construct a StructuredQName from a prefix, URI, and local name. This method performs no validation.
      *
      * @param prefix    The prefix. Use an empty string to represent the null prefix.
-     * @param uri       The namespace URI. Use an empty string or null to represent the no-namespace
+     * @param uri       The namespace URI. Use {@link NamespaceUri#NULL} to represent the no-namespace
      * @param localName The local part of the name
      */
 
     public StructuredQName(String prefix, NamespaceUri uri, String localName) {
         this.prefix = prefix == null ? "" : prefix;
         this.uri = uri;
+        this.local = localName;
+    }
+
+    /**
+     * Construct a StructuredQName from a prefix, URI, and local name. This method performs no validation.
+     *
+     * @param prefix    The prefix. Use an empty string to represent the null prefix.
+     * @param uri       The namespace URI. Use an empty string or null to represent the no-namespace
+     * @param localName The local part of the name
+     */
+
+    public StructuredQName(String prefix, String uri, String localName) {
+        this.prefix = prefix == null ? "" : prefix;
+        this.uri = NamespaceUri.of(uri);
         this.local = localName;
     }
 
