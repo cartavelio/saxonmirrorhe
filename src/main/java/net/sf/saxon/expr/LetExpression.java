@@ -568,7 +568,11 @@ public class LetExpression extends Assignation
 
     public Sequence eval(XPathContext context) throws XPathException {
         if (evaluator == null) {
-            setEvaluator(getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1));
+            if (needsEagerEvaluation) {
+                setEvaluator(getSequence().makeElaborator().eagerly());
+            } else {
+                setEvaluator(getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1));
+            }
         }
         try {
             int savedOutputState = context.getTemporaryOutputState();
@@ -810,6 +814,14 @@ public class LetExpression extends Assignation
             return let.getNominalReferenceCount() > 1;
         }
 
+        private SequenceEvaluator makeSequenceEvaluator(LetExpression let) {
+            if (let.needsEagerEvaluation) {
+                return let.getSequence().makeElaborator().eagerly();
+            } else {
+                return let.getSequence().makeElaborator().lazily(repeatable(let));
+            }
+        }
+
         /**
          * Return a function that evaluates the local variable in this let expression, and in all
          * immediately-nested let expressions. This is done to reduce Java stack usage and the number
@@ -834,7 +846,7 @@ public class LetExpression extends Assignation
                 // for a small number of local variables, unroll the loop
                 case 1: {
                     LetExpression let = setters.get(0);
-                    SequenceEvaluator evaluator = let.getSequence().makeElaborator().lazily(repeatable(let));
+                    SequenceEvaluator evaluator = makeSequenceEvaluator(let);
                     int slot = setters.get(0).slotNumber;
                     return context -> {
                         context.setLocalVariable(slot, evaluator.evaluate(context));
@@ -842,9 +854,9 @@ public class LetExpression extends Assignation
                     };
                 }
                 case 2: {
-                    SequenceEvaluator evaluator0 = setters.get(0).getSequence().makeElaborator().lazily(repeatable(setters.get(0)));
+                    SequenceEvaluator evaluator0 = makeSequenceEvaluator(setters.get(0));
                     int slot0 = setters.get(0).slotNumber;
-                    SequenceEvaluator evaluator1 = setters.get(1).getSequence().makeElaborator().lazily(repeatable(setters.get(1)));
+                    SequenceEvaluator evaluator1 = makeSequenceEvaluator(setters.get(1));
                     int slot1 = setters.get(1).slotNumber;
                     return context -> {
                         context.setLocalVariable(slot0, evaluator0.evaluate(context));
@@ -853,11 +865,11 @@ public class LetExpression extends Assignation
                     };
                 }
                 case 3: {
-                    SequenceEvaluator evaluator0 = setters.get(0).getSequence().makeElaborator().lazily(repeatable(setters.get(0)));
+                    SequenceEvaluator evaluator0 = makeSequenceEvaluator(setters.get(0));
                     int slot0 = setters.get(0).slotNumber;
-                    SequenceEvaluator evaluator1 = setters.get(1).getSequence().makeElaborator().lazily(repeatable(setters.get(1)));
+                    SequenceEvaluator evaluator1 = makeSequenceEvaluator(setters.get(1));
                     int slot1 = setters.get(1).slotNumber;
-                    SequenceEvaluator evaluator2 = setters.get(2).getSequence().makeElaborator().lazily(repeatable(setters.get(2)));
+                    SequenceEvaluator evaluator2 = makeSequenceEvaluator(setters.get(2));
                     int slot2 = setters.get(2).slotNumber;
                     return context -> {
                         context.setLocalVariable(slot0, evaluator0.evaluate(context));
@@ -867,13 +879,13 @@ public class LetExpression extends Assignation
                     };
                 }
                 case 4: {
-                    SequenceEvaluator evaluator0 = setters.get(0).getSequence().makeElaborator().lazily(repeatable(setters.get(0)));
+                    SequenceEvaluator evaluator0 = makeSequenceEvaluator(setters.get(0));
                     int slot0 = setters.get(0).slotNumber;
-                    SequenceEvaluator evaluator1 = setters.get(1).getSequence().makeElaborator().lazily(repeatable(setters.get(1)));
+                    SequenceEvaluator evaluator1 = makeSequenceEvaluator(setters.get(1));
                     int slot1 = setters.get(1).slotNumber;
-                    SequenceEvaluator evaluator2 = setters.get(2).getSequence().makeElaborator().lazily(repeatable(setters.get(2)));
+                    SequenceEvaluator evaluator2 = makeSequenceEvaluator(setters.get(2));
                     int slot2 = setters.get(2).slotNumber;
-                    SequenceEvaluator evaluator3 = setters.get(3).getSequence().makeElaborator().lazily(repeatable(setters.get(3)));
+                    SequenceEvaluator evaluator3 = makeSequenceEvaluator(setters.get(3));
                     int slot3 = setters.get(3).slotNumber;
                     return context -> {
                         context.setLocalVariable(slot0, evaluator0.evaluate(context));
@@ -887,7 +899,7 @@ public class LetExpression extends Assignation
                     SequenceEvaluator[] evaluators = new SequenceEvaluator[setters.size()];
                     int[] slots = new int[setters.size()];
                     for (int i = 0; i < setters.size(); i++) {
-                        evaluators[i] = setters.get(i).getSequence().makeElaborator().lazily(repeatable(setters.get(i)));
+                        evaluators[i] = makeSequenceEvaluator(setters.get(i));
                         slots[i] = setters.get(i).slotNumber;
                     }
                     return context -> {
