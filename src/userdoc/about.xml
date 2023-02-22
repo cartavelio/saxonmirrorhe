@@ -47,7 +47,7 @@
       <p>For SaxonJ and SaxonC this documentation covers three Saxon editions: home, professional, and enterprise (HE, PE,
       and EE). The Home Edition remains open source (under the Mozilla Public License 2.0). An
       outline of what is present in each edition can be found in the <a class="bodylink"
-         href="http://www.saxonica.com/products/feature-matrix-12.xml">feature matrix</a>. Broadly
+         href="https://www.saxonica.com/products/feature-matrix-12.xml">feature matrix</a>. Broadly
       speaking:</p>
       <ul>
         <li>Saxon-HE includes support for published W3C recommendations at the minimum
@@ -67,23 +67,23 @@
    <h2 class="subtitle">Other documentation</h2>
 
    <p class="conly">Much of this documentation is applicable to the SaxonC product, but you should also check
-      the <a href="http://www.saxonica.com/saxon-c/documentation12" class="bodylink">SaxonC documentation</a>
+      the <a href="https://www.saxonica.com/saxon-c/documentation12" class="bodylink">SaxonC documentation</a>
       for aspects specific to that platform (including full details of the APIs for C/C++, PHP and Python).</p>
    
    <p>The documentation also contains information relevant to SaxonJS (in particular the Reference
       sections on <a class="bodylink" href="/xsl-elements">XSLT elements</a>, <a class="bodylink"
          href="/expressions">XPath syntax</a>, and <a class="bodylink" href="/functions">Functions
             library</a>), but please see the main <a class="bodylink"
-               href="http://www.saxonica.com/saxon-js/documentation">SaxonJS documentation</a> for specific
+               href="https://www.saxonica.com/saxon-js/documentation">SaxonJS documentation</a> for specific
       SaxonJS product information.</p>
    
    <p>See also the <a href="/javadoc" class="bodylink">Java API specifications</a> for SaxonJ and <a
       href="/dotnetdoc" class="bodylink">C# API specifications</a> for SaxonCS.</p>
 
    <aside>This documentation (including full API documentation for both the Java and .NET platforms)
-      is provided on the <a href="http://www.saxonica.com/" class="bodylink">Saxonica</a> website.
+      is provided on the <a href="https://www.saxonica.com/" class="bodylink">Saxonica</a> website.
       It is also included in the <code>saxon-resources-12.zip</code> file available for download
-      from the <a href="http://www.saxonica.com/download/download_page.xml" class="bodylink">Saxonica
+      from the <a href="https://www.saxonica.com/download/download_page.xml" class="bodylink">Saxonica
             download page</a>. The resources file is separate from the software download, and it
       includes sample applications as well as this documentation for all Saxon editions.</aside>
 
@@ -108,7 +108,7 @@
       </nav>
       
       <p class="conly">For information on getting started with SaxonC, please see <a class="bodylink"
-         href="http://www.saxonica.com/saxon-c/documentation12/#!about/gettingstarted">Getting started</a> in
+         href="https://www.saxonica.com/saxon-c/documentation12/#!about/gettingstarted">Getting started</a> in
          the SaxonC documentation.</p>
 
       <section id="gettingstartedjava" title="Getting started with SaxonJ" class="javaonly">
@@ -119,8 +119,8 @@
             system command line.</p>
 
          <p>Alternatively, Saxon is integrated with popular XML development environments such as <a
-               class="bodylink" href="http://www.oxygenxml.com/">Oxygen XML Editor</a> and <a class="bodylink"
-               href="http://www.stylusstudio.com/">Stylus Studio</a>, which will handle all the
+               class="bodylink" href="https://www.oxygenxml.com/">Oxygen XML Editor</a> and <a class="bodylink"
+               href="https://www.stylusstudio.com/">Stylus Studio</a>, which will handle all the
             installation dependencies.</p>
          <ol>
             <li>
@@ -129,7 +129,7 @@
                   while SaxonJ 11 ran with Java 8 or later.
                   To check that Java is installed, try typing <code>java -version</code>
                   at the command prompt. If it is not installed, you can <a
-                     href="http://www.oracle.com/technetwork/java/javase/downloads/index.html"
+                     href="https://www.oracle.com/java/technologies/downloads/"
                      class="bodylink">get the software from Oracle</a>.</p>
             </li>
             <li>
@@ -143,7 +143,7 @@
                  </ul>
                <p>Alternatively, the commercial versions of the
                   product (SaxonJ-PE and SaxonJ-EE) can be downloaded from <a
-                     href="http://www.saxonica.com/" class="bodylink">www.saxonica.com</a>.</p> 
+                     href="https://www.saxonica.com/" class="bodylink">www.saxonica.com</a>.</p> 
                <p>Because
                   the software is pure Java, the same software us used whether you are running on
                   Windows, Linux, or Mac OS/X.</p>
@@ -203,7 +203,7 @@
                <p>If you are using features specific to SaxonJ-PE or SaxonJ-EE (the commercial
                   editions of Saxon), you will need to obtain a file containing a licence key. You
                   can apply for a free 30-day evaluation license key by going to <a
-                     href="http://www.saxonica.com/" class="bodylink">www.saxonica.com</a> and
+                     href="https://www.saxonica.com/" class="bodylink">www.saxonica.com</a> and
                   clicking on "Download / Evaluation License". The license key file will be sent by email
                   within 24 hours. This file, called <code>saxon-license.lic</code>, is best
                   placed in the same directory where the file <code>saxon-pe-12.#.jar</code> or
@@ -276,7 +276,7 @@
             <li>
                <p>You will need to obtain a file containing a licence key. The license key is
                   interchangeable between the Java, .NET, and C/C++ platforms. You can apply for a free
-                  30-day evaluation license key by going to <a href="http://www.saxonica.com/"
+                  30-day evaluation license key by going to <a href="https://www.saxonica.com/"
                      class="bodylink">www.saxonica.com</a> and clicking on "Try Saxon for 30 days".
                   The license key file will be sent by email within 24 hours. This file, called
                   <code>saxon-license.lic</code>, should be placed in a suitable directory,
@@ -435,7 +435,7 @@
       <p>Also available, but not described here in detail, is SaxonJS, the JavaScript edition,
       which runs on Node.js and in all modern browsers. For further information, see the
          <a class="bodylink"
-            href="http://www.saxonica.com/saxon-js/documentation">SaxonJS documentation</a>.</p>
+            href="https://www.saxonica.com/saxon-js/documentation">SaxonJS documentation</a>.</p>
 
       <p>There are also restricted licenses that work with SaxonJ-EE, SaxonCS or SaxonC-EE but restrict its
          capability:</p>
@@ -456,7 +456,7 @@
       </ul>
 
       <p>For a full table showing the features available in each edition and licensing variant, on each
-         platform, see the <a href="http://www.saxonica.com/products/feature-matrix-12.xml" class="bodylink"
+         platform, see the <a href="https://www.saxonica.com/products/feature-matrix-12.xml" class="bodylink"
             >feature matrix</a>.</p>
 
       <p>For information on obtaining and setting up a license key, see the <a class="bodylink"
@@ -465,7 +465,7 @@
 
       <p>For commercial information including prices, terms and conditions, maintenance and upgrade
          offerings, site licensing, and redistribution licensing, see the <a
-            href="http://www.saxonica.com/shop/shop.xml" class="bodylink">online store</a>.</p>
+            href="https://www.saxonica.com/shop/shop.xml" class="bodylink">online store</a>.</p>
    </section>
 
 
@@ -566,7 +566,7 @@
          which were created at various times by third parties and are not maintained by Saxonica).</p>
 
          <p>For the commercial versions of SaxonJ, please follow the download links from <a
-               href="http://www.saxonica.com/" class="bodylink">www.saxonica.com</a>. Historic
+               href="https://www.saxonica.com/" class="bodylink">www.saxonica.com</a>. Historic
             versions of the software are not listed on the website, but are available to existing
             users on request.</p>
 
@@ -1110,7 +1110,7 @@ any version number.</p>
          <p>The open-source Saxon-HE product does not require any license key. For Saxon-PE and
             Saxon-EE (Java and C/C++), and also for SaxonCS, you need to obtain a license key from Saxonica. You can order a free
             license key for a 30-day evaluation, or purchase an unrestricted license key, from the
-               <a href="http://www.saxonica.com/" class="bodylink">Saxonica</a> website.</p>
+               <a href="https://www.saxonica.com/" class="bodylink">Saxonica</a> website.</p>
          
          <p><i>From Saxon 11, license keys have an expiry date, configured according to 
             the terms under which you purchased the product. If the license has expired, Saxon will continue to run,
@@ -1350,7 +1350,7 @@ any version number.</p>
          the executable code. Instead, the samples and documentation are available in a separate
          resources file <code>saxon-resources-12.zip</code>, which can be downloaded from either the
          <a href="https://sourceforge.net/projects/saxon/files/" class="bodylink">SourceForge Saxon
-            project</a> or the <a href="http://www.saxonica.com/"
+            project</a> or the <a href="https://www.saxonica.com/"
                class="bodylink">www.saxonica.com</a> sites. The documentation is also available
          online.</p>
       
@@ -1423,7 +1423,7 @@ any version number.</p>
             href="http://www.softwareag.com" class="bodylink">Software AG</a>, who continued to
          sponsor the development of Saxon as an open source product.</p>
 
-      <p>In March 2004 Michael Kay founded <a href="http://www.saxonica.com/" class="bodylink"
+      <p>In March 2004 Michael Kay founded <a href="https://www.saxonica.com/" class="bodylink"
             >Saxonica Limited</a> to provide ongoing development and support of Saxon as a
          commercial venture. Saxonica continues to develop the open source version of
          Saxon (Saxon-HE), while at the same time delivering 
@@ -1508,31 +1508,31 @@ any version number.</p>
 
 
          <p>If you have a general question about XSLT, XPath, XQuery or XSD coding, that is not specifically
-            related to Saxon, we recommend asking on <a href="http://stackoverflow.com/">StackOverflow</a>.
+            related to Saxon, we recommend asking on <a href="https://stackoverflow.com/">StackOverflow</a>.
             There are suitable tags for categorizing your question, and there is a helpful community of users
             prepared to provide answers.</p>
          
-         <p>You can also use <a href="http://stackoverflow.com/">StackOverflow</a> to ask Saxon-specific questions
+         <p>You can also use <a href="https://stackoverflow.com/">StackOverflow</a> to ask Saxon-specific questions
             (using the <code>saxon</code> tag); Saxonica keeps an eye on such questions and tries to ensure that
             they are properly answered, but a question posted here should not be treated as a formal request
             for Saxonica assistance. Many of the answers here come from other users rather than from Saxonica,
             and Saxonica cannot take responsibility for their accuracy.</p>
          
-         <p>For many years the <a href="http://www.mulberrytech.com/xsl/xsl-list/"
+         <p>For many years the <a href="https://www.mulberrytech.com/xsl/xsl-list/index.html"
                class="bodylink">xsl-list at MulberryTech</a> served the same purpose: 
             these days it is probably more useful for deeper questions about the design principles
             of the various languages, which often lead to interesting discussion among the experts.
             The archives of the list can be searched at <a
-               href="http://xsl-list.markmail.org/" class="bodylink">MarkMail</a>.</p>
+               href="https://xsl-list.markmail.org" class="bodylink">MarkMail</a>.</p>
 
          <p>There used to be a similar help forum for XQuery: <a href="http://www.xquery.com/"
                class="bodylink">talk at xquery.com</a>. However, it has become largely dormant, and
-            <a href="http://stackoverflow.com/">StackOverflow</a> is probably a better bet.</p>
+            <a href="https://stackoverflow.com/">StackOverflow</a> is probably a better bet.</p>
 
 
          <p>The preferred place for Saxon-specific questions and bug reports is the bug database and
             forum on the Saxonica community site at <a class="bodylink"
-               href="http://saxonica.plan.io/">saxonica.plan.io</a>. This is also where you can
+               href="https://saxonica.plan.io/">saxonica.plan.io</a>. This is also where you can
             search for details of known bugs. Saxonica monitors these forums and tries to manage
             issues through to closure (though without any contractual commitment or
             guarantees). </p>
@@ -1550,7 +1550,7 @@ any version number.</p>
 
          <aside>Please do not use the bug tracker or forums on SourceForge. The information on these
             is out of date and we no longer monitor them. Instead use the bug tracker and forums on
-            the <a class="bodylink" href="http://saxonica.plan.io/">Saxonica community site</a> as
+            the <a class="bodylink" href="https://saxonica.plan.io/">Saxonica community site</a> as
             referenced above.</aside>
 
 
@@ -1561,7 +1561,7 @@ any version number.</p>
 
 
          <p>If you hit something that looks like a bug, please check the known errors on the
-            Saxonica community site <a href="http://saxonica.plan.io/" class="bodylink"
+            Saxonica community site <a href="https://saxonica.plan.io/" class="bodylink"
                >saxonica.plan.io</a>.</p>
 
          <p>You're welcome to submit attachments, but please remember that anything you post here will be available to
@@ -1632,24 +1632,24 @@ any version number.</p>
       <ul>
          <li>
             <p>
-               <a href="http://www.stylusstudio.com/" class="bodylink">Stylus Studio</a>: offers
+               <a href="https://www.stylusstudio.com/" class="bodylink">Stylus Studio</a>: offers
                XSLT, XQuery, and XML Schema development and debugging, all using Saxon. It has
                Saxon-EE built-in (but you will need a separate license to run Saxon-EE applications
                outside the IDE).</p>
          </li>
          <li>
             <p>
-               <a href="http://www.oxygenxml.com/" class="bodylink">Oxygen XML Editor</a> offers XSLT and XML
+               <a href="https://www.oxygenxml.com/" class="bodylink">Oxygen XML Editor</a> offers XSLT and XML
                Schema development and debugging for Saxon. It has Saxon-EE built-in (but you will
                need a separate license to run Saxon-EE applications outside the IDE).</p>
          </li>
          <li>
-            <p>A budget XML Editor and Debugger for Saxon is <a href="http://www.editix.com/"
+            <p>A budget XML Editor and Debugger for Saxon is <a href="https://www.editix.com"
                class="bodylink">EditiX</a>.</p>
          </li>
          <li>
             <p>
-               <a href="http://www.altova.com/" class="bodylink">XML Spy from Altova</a> allows you
+               <a href="https://www.altova.com/" class="bodylink">XML Spy from Altova</a> allows you
                to configure Saxon as your XSLT or XQuery processor, but does not provide Saxon
                debugging. If you want to run Saxon-PE or -EE, you will need your own license. There
                is also <a href="https://www.xml-buddy.com/"
@@ -1662,6 +1662,6 @@ any version number.</p>
       <p><strong>xqDoc</strong> is a Javadoc-like documentation tool for XQuery. It works with
          Saxon, and is available either as a free-standing tool from <a href="http://xqdoc.org/"
             class="bodylink">http://xqdoc.org/</a> or as part of <a
-               href="http://www.stylusstudio.com/" class="bodylink">Stylus Studio</a>.</p>
+               href="https://www.stylusstudio.com/" class="bodylink">Stylus Studio</a>.</p>
    </section>
 </article>
