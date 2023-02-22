@@ -437,24 +437,23 @@ public class XdmValue implements Iterable<XdmItem> {
      *     <li><code>select(child("author"))</code> returns a stream containing all element children with
      *     local name "author" (regardless of namespace)</li>
      *     <li><code>select(child("http://my.ns/", "author"))</code> returns a stream containing all element children with
-     *      *     local name "author" and namespace "http://my.ns/"</li>
+     *     local name "author" and namespace "http://my.ns/"</li>
      *     <li><code>select(descendant("author"))</code> returns a stream containing all element descendants with
-     *      *     local name "author" (regardless of namespace)</li>
+     *     local name "author" (regardless of namespace)</li>
      *     <li><code>select(descendant("author").then(attribute("name"))</code> returns a stream containing the "name"
      *     attributes of "author" descendants</li>
      *     <li><code>select(path("//", "author", "@name"))</code> returns a stream containing the "name"
-     *      *     attributes of "author" descendants</li>
+     *     attributes of "author" descendants</li>
      *     <li><code>select(child("author").where(attributeEq("firstName", "Jane"))</code> returns a stream
      *     containing all the "author" children having a "firstName" attribute whose value is "Jane"</li>
      *     <li><code>select(child("author").first())</code> returns a stream containing the first "author" child
      *     (if there is one)</li>
      *     <li><code>select(child("author").where(attributeEq("firstName", "Jane").last())</code> returns a stream
      *     containing the last "author" child having a "firstName" attribute whose value is "Jane" (if there is one)</li>
-     *     <li><code></code></li>
      * </ul>
      *
-     * <p>In each of the above examples, the selected nodes are returned as an {@link XdmStream<XdmNode>}; this
-     * class extends {@link java.util.stream.Stream<XdmNode>}, so all the standard operations on streams are
+     * <p>In each of the above examples, the selected nodes are returned as an {@link XdmStream}&lt;{@link XdmNode}&gt;; this
+     * class extends {@link java.util.stream.Stream}&lt;{@link XdmNode}&gt;, so all the standard operations on streams are
      * available, together with some additional operations specific to node streams.</p>
      *
      * <p>The <code>select</code> method thus has comparable power to simple XPath expressions; but unlike
@@ -463,7 +462,7 @@ public class XdmValue implements Iterable<XdmItem> {
      *
      * @param step the <code>Step</code> to be applied to the items in this value. This will often be one of the standard
      *             steps returned by the static methods of the {@link Steps} class, such as {@link Steps#child},
-     *             or by instance methods (such as {@link Step#where}, {@link Step#cat, or {@link Step#first)
+     *             or by instance methods (such as {@link Step#where}, {@link Step#cat}, or {@link Step#first})
      *             but it is also possible to create user-defined steps.
      * @param <T> the type of items to be returned by the step (often {@link XdmNode})
      * @return a Stream of items obtained by replacing each item X in this value by the items obtained
