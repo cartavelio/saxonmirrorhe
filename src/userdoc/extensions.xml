@@ -64,10 +64,16 @@
     <p>Full details of all extension functions, along with functions in the core library, are found
       in the <a class="bodylink" href="/functions">Function Library</a>.</p>
 
-    <aside>As a general policy, Saxon's extension functions require Saxon-PE or Saxon-EE. The vast
+    <aside>
+      <p>As a general policy, Saxon's extension functions require Saxon-PE or Saxon-EE. The vast
       majority are available in Saxon-PE; a few that are related to schema-aware processing or
       streaming require Saxon-EE. In some cases the source code of these extensions is open source
-      code and can be compiled for use with the open-source Saxon-HE.</aside>
+      code and can be compiled for use with the open-source Saxon-HE.</p>
+      <p>Not all extension functions are available on all platforms. For instance only a selection of the EXSLT and EXPath
+        functions are available on SaxonCS (see <a class="bodylink"
+          href="/saxon-cs/saxon-extensions">SaxonCS built-in extensions</a> and the <a class="bodylink"
+            href="/functions">Function Library</a> for details).</p>
+    </aside>
 
     <p>The extension functions in Saxon fall into three groups, described in the following
       subsections:</p>
@@ -118,7 +124,8 @@
         in the <a class="bodylink" href="/functions">Function Library</a>.</p>
 
       <aside>These extension functions are available in Saxon-PE and Saxon-EE except where otherwise
-        stated. They are not available in Saxon-HE.</aside>
+        stated. They are not available in Saxon-HE. There are some restrictions on the .NET and C/C++
+        platforms.</aside>
 
       <p>The names of these functions are in the Saxon namespace <code>http://saxon.sf.net/</code>,
         conventionally prefixed <code>saxon</code>.</p>
@@ -167,12 +174,16 @@ saxon:evaluate($expression)
         implementation) can be found in the main <a class="bodylink" href="/functions">Function
           Library</a>.</p>
 
-      <aside> These extensions are available in Saxon-PE and Saxon-EE "out of the box". Except for
+      <aside>
+        <p>These extensions are available in Saxon-PE and Saxon-EE "out of the box". Except for
         the Common module functions, they are not available in Saxon-HE. The source code is
         available in the Subversion repository on the
         <a href="http://dev.saxonica.com/" class="bodylink">dev.saxonica.com</a> site, package
           <code>net.sf.saxon.option.exslt</code>. The code is available under the Mozilla Public
-        License version 2.0. </aside>
+        License version 2.0.</p>
+        <p>The extension functions in modules Sets, Math, Date, and Random are not available on SaxonCS; and
+          in the Common module, only the <code>node-set()</code> function is available on SaxonCS.</p>
+      </aside>
 
       <p>Saxon supports the <dfn>EXSLT</dfn> modules Common, Math, Sets, Dates and Times, and
         Random. These functions are available both in XSLT and in XQuery. The full list of EXSLT
@@ -247,7 +258,7 @@ saxon:evaluate($expression)
         system. For the specification of the file module see <a href="http://expath.org/spec/file"
           class="bodylink">EXPath File Module</a>. </p>
       <aside>These extension functions require Saxon-PE or Saxon-EE. Implemented since Saxon
-        9.5.</aside>
+        9.5. Available on all platforms.</aside>
       <p>All functions in the file module are implemented.</p>
       <!-- <p>The variables <code>$file:dir.separator</code> and <code>$file:path.separator</code> are
         not implemented.</p>-->
@@ -295,7 +306,7 @@ saxon:evaluate($expression)
           Module</a>. The specification has been stabilised at a Version 1.0 status so the functions
         can be considered stable.</p>
       <aside>These extension functions require Saxon-PE or Saxon-EE. Implemented since Saxon
-        9.6.</aside>
+        9.6. Available on all platforms.</aside>
       <p>All functions in the binary module are implemented and tested. Note that this module does
         not provide binary file i/o - functions from the EXPath file module should be used for such
         operations.</p>
@@ -308,7 +319,7 @@ saxon:evaluate($expression)
         arranged into archive (ZIP, JAR) collections. For the specification of the archive module
         see <a href="http://expath.org/spec/archive" class="bodylink">EXPath Archive Module</a>. </p>
       <aside>These extension functions require Saxon-PE or Saxon-EE. Implemented since Saxon
-        9.6.</aside>
+        9.6. Not available on SaxonCS.</aside>
       <p>Most functions in the archive module are implemented and tested. Note that this module does
         not provide file i/o of archives directly - functions from the EXPath file module should be
         used for such operations, or are used indirectly by the archive-file system conversion
