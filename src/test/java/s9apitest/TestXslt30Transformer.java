@@ -759,7 +759,7 @@ public class TestXslt30Transformer {
                     new StreamSource(ConfigTest.DATA_DIR + "books.xsd"));
 
             Serializer serializer = processor.newSerializer();
-            serializer.setOutputFile(new File(ConfigTest.DATA_DIR + "out/validationWarnings.xml"));
+            serializer.setOutputFile(new File(ConfigTest.TEMP_DIR + "validationWarnings.xml"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.setSchemaAware(true);
