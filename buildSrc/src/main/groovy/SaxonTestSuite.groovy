@@ -132,7 +132,7 @@ class SaxonTestSuite {
     def optionMap = this.optionMap
 
     Task run = project.task("run__${testTaskName}", type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
+      inputs.files project.fileTree(dir: "${project.projectDir}/src/main/java")
       outputs.file "${options['report']}.xml"
       outputs.upToDateWhen { false }
 
@@ -277,7 +277,7 @@ class SaxonTestSuite {
     errorFn += options['language'] + "-errors.xml"
 
     Task run = project.task("run__${testTaskName}", type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
+      inputs.files project.fileTree(dir: "${project.projectDir}/src/main/java")
       outputs.file resultFn
       outputs.file errorFn
 
@@ -415,6 +415,7 @@ class SaxonTestSuite {
     Task run = project.task("run__${testTaskName}", type: Exec) {
       inputs.files project.fileTree(dir: "${project.projectDir}/src")
       outputs.file "${options['report']}.xml"
+      dependsOn "eecs_featureKeys"
 
       doFirst {
         project.mkdir options["reportDirectory"]
@@ -555,6 +556,7 @@ class SaxonTestSuite {
       inputs.files project.fileTree(dir: "${project.projectDir}/src")
       outputs.file resultFn
       outputs.file errorFn
+      dependsOn "eecs_featureKeys"
 
       doFirst {
         project.mkdir options["reportDirectory"]
