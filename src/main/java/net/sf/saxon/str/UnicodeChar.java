@@ -12,7 +12,7 @@ import java.util.function.IntPredicate;
 
 public class UnicodeChar extends UnicodeString {
 
-    int codepoint;
+    private final int codepoint;
 
     public UnicodeChar(int codepoint) {
         this.codepoint = codepoint;
@@ -30,11 +30,18 @@ public class UnicodeChar extends UnicodeString {
     }
 
     /**
+     * Get the codepoint represented by this {@code UnicodeChar}
+     * @return the relevant codepoint
+     */
+
+    public int getCodepoint() {
+        return codepoint;
+    }
+
+    /**
      * Get the length of the string
      *
      * @return the number of code points in the string
-     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
-     *                                       for codePoint access
      */
     @Override
     public long length() {
@@ -66,8 +73,6 @@ public class UnicodeChar extends UnicodeString {
      * @param codePoint the sought codePoint
      * @param from      the position from which the search should start (0-based)
      * @return the position (0-based) of the first occurrence found, or -1 if not found
-     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
-     *                                       for codePoint access
      */
     @Override
     public long indexOf(int codePoint, long from) {
@@ -78,12 +83,15 @@ public class UnicodeChar extends UnicodeString {
      * Get the code point at a given position in the string
      *
      * @param index the given position (0-based)
-     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
-     *                                       for codePoint access
+     * @throws IndexOutOfBoundsException if index is not zero
      */
     @Override
     public int codePointAt(long index) {
-        return index == 0 ? codepoint : -1;
+        if (index == 0) {
+            return codepoint;
+        } else {
+            throw new IndexOutOfBoundsException("Only valid index for a single-character string is zero");
+        }
     }
 
     /**
@@ -93,8 +101,7 @@ public class UnicodeChar extends UnicodeString {
      *              code point to be included
      * @param end   the end position (0-based): specifically, the position of the first
      *              code point not to be included
-     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
-     *                                       for codePoint access
+     * @throws IndexOutOfBoundsException if the start/end positions are out of range
      */
     @Override
     public UnicodeString substring(long start, long end) {
@@ -113,8 +120,6 @@ public class UnicodeChar extends UnicodeString {
      * @param predicate condition that the codepoint must satisfy
      * @param from      the position from which the search should start (0-based)
      * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
-     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
-     *                                       for codePoint access
      */
     @Override
     public long indexWhere(IntPredicate predicate, long from) {
