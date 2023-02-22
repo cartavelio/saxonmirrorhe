@@ -17,45 +17,43 @@ def commandDir = "${buildDir}/../src/main/c/command"
 def sharedLibDir = "${buildDir}/c"
 
  task buildSaxonGlue(type: Exec) {
+     dependsOn 'graalImage'
      workingDir "${commandDir}"
      commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "-c", "${saxonApiDir}/SaxonCGlue.c", "-o", "${commandDir}/SaxonCGlue.o"
      doLast {
-        println "built SaxonCGlue.o"
+       println "built Saxon glue"
      }
  }
 
  task buildTransform(type: Exec) {
+     dependsOn 'buildSaxonGlue'
      workingDir "${commandDir}"
      commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Transform.c", "-o", "${commandDir}/transform", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
      doLast {
-        println "built transform wrapper"
-     }
-}
-
- task buildQuery(type: Exec) {
-     workingDir "${commandDir}"
-     commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Query.c", "-o", "${commandDir}/query", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
-     doLast {
-        println "built query wrapper"
+       println "built transform wrapper"
      }
  }
 
- task buildValidate(type: Exec) {
+ task buildQuery(type: Exec) {
+     dependsOn 'buildSaxonGlue'
      workingDir "${commandDir}"
-     commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Validate.c", "-o", "${commandDir}/validate", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
+     commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Query.c", "-o", "${commandDir}/query", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
      doLast {
-        println "built validate wrapper"
+       println "built query wrapper"
      } 
 }
 
+ task buildValidate(type: Exec) {
+     dependsOn 'buildSaxonGlue'
+     workingDir "${commandDir}"
+     commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Validate.c", "-o", "${commandDir}/validate", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
+     doLast {
+       println "built validate wrapper"
+     }
+ }
+
  task buildCWrappers {
-    dependsOn 'buildSaxonGlue'
     dependsOn 'buildTransform'
-//    dependsOn 'buildQuery'
-//    dependsOn 'buildValidate'
-    tasks.findByName('buildTransform').mustRunAfter 'buildSaxonGlue'
-//    tasks.findByName('buildQuery').mustRunAfter 'buildSaxonGlue'
-//    tasks.findByName('buildValidate').mustRunAfter 'buildSaxonGlue'
  }
 
 task test_graalHome(
