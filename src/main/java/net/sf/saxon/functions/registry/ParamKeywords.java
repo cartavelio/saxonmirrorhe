@@ -44,8 +44,7 @@ public class ParamKeywords {
         arrayParamNames.put("sort", "array|collation|key");
         arrayParamNames.put("subarray", "array|start|length");
         arrayParamNames.put("tail", "array");
-        fnParamNames.put("QName#2", "uri|qname");
-        fnParamNames.put("QName#1", "eqname");
+        fnParamNames.put("QName", "uri|qname");
         fnParamNames.put("abs", "value");
         fnParamNames.put("adjust-date-to-timezone", "value|timezone");
         fnParamNames.put("adjust-dateTime-to-timezone", "value|timezone");
@@ -171,6 +170,7 @@ public class ParamKeywords {
         fnParamNames.put("parcel", "input");
         fnParamNames.put("parse-ietf-date", "value");
         fnParamNames.put("parse-json", "json|options");
+        fnParamNames.put("parse-QName", "eqname");
         fnParamNames.put("parse-xml", "value");
         fnParamNames.put("parse-xml-fragment", "value");
         fnParamNames.put("parts", "");

@@ -22,10 +22,10 @@ import net.sf.saxon.value.Whitespace;
 
 
 /**
- * This class supports the fn:QName() function
+ * This class supports the fn:parse-QName() function, new in 4.0
  */
 
-public class QNameFn extends SystemFunction {
+public class ParseQNameFn extends SystemFunction {
 
 
     public static QNameValue expandedQName(StringValue namespace, StringValue lexical) throws XPathException {
@@ -62,25 +62,20 @@ public class QNameFn extends SystemFunction {
      * @param context   the dynamic evaluation context
      * @param arguments the values of the arguments, supplied as Sequences
      * @return the result of the evaluation, in the form of a Sequence
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        if (arguments.length == 1) {
-            StringValue argValue = (StringValue) arguments[0].head();
-            if (argValue == null) {
-                return EmptySequence.getInstance();
-            }
-            String input = Whitespace.trim(argValue.getStringValue());
-            StructuredQName qn = StructuredQName.fromLexicalQName(input, false, false, getRetainedStaticContext());
-            return new QNameValue(qn, BuiltInAtomicType.QNAME);
-        } else {
-            return expandedQName(
-                    (StringValue) arguments[0].head(),
-                    (StringValue) arguments[1].head()
-            );
+
+        StringValue argValue = (StringValue) arguments[0].head();
+        if (argValue == null) {
+            return EmptySequence.getInstance();
         }
+        String input = Whitespace.trim(argValue.getStringValue());
+        StructuredQName qn = StructuredQName.fromLexicalQName(input, false, false, getRetainedStaticContext());
+        return new QNameValue(qn, BuiltInAtomicType.QNAME);
+
     }
 
     @Override
