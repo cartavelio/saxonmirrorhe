@@ -480,13 +480,11 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
                         validator.setDocumentElementTypeName(qname);
                     } else if (params[i].equals("report-file")) {
                         if (values[i] != null && values[i] instanceof String) {
-                            thisClass.reporting(true);
                             Serializer serializer = resolveOutputFile(processor, cwd, (String) values[i], ResourceRequest.XML_NATURE);
                             validator.setValidityReporting(serializer);
                         }
 
                     } else if (params[i].equals("report-node")) {
-                        thisClass.reporting(true);
                         thisClass.xdmDestination = new XdmDestination();
                         validator.setValidityReporting(thisClass.xdmDestination);
 
