@@ -9,11 +9,8 @@ package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.NodeListIterator;
-import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,7 +22,7 @@ import java.util.Comparator;
  * not nodes.
  */
 
-public final class DocumentOrderIterator implements SequenceIterator, GroundedIterator {
+public final class DocumentOrderIterator implements SequenceIterator {
 
     private final SequenceIterator iterator;
     private final ArrayList<NodeInfo> sequence; // explicit type ArrayList used so C# List.Sort() is available
@@ -76,49 +73,6 @@ public final class DocumentOrderIterator implements SequenceIterator, GroundedIt
         }
     }
 
-    /**
-     * Ask if the iterator is actually grounded. This method must be called before calling
-     * {@link #materialize()} or {@link #getResidue()}, because the iterator might
-     * be grounded under some conditions and not others (usually when it delegates
-     * to another iterator)
-     *
-     * @return true if this iterator is grounded
-     */
-    @Override
-    public boolean isActuallyGrounded() {
-        return true;
-    }
-
-    /**
-     * Return a GroundedValue containing all the remaining items in the sequence returned by this
-     * SequenceIterator, starting at the current position. This should be an "in-memory" value, not a
-     * Closure. This method does not change the state of the iterator (in particular, it does not
-     * consume the iterator).
-     *
-     * @return the corresponding Value
-     */
-    @Override
-    public GroundedValue getResidue() {
-        return materialize();
-    }
-
-    /**
-     * Create a GroundedValue (a sequence materialized in memory) containing all the values delivered
-     * by this SequenceIterator. The method must only be used when the SequenceIterator is positioned
-     * at the start. If it is not positioned at the start, then it is implementation-dependant whether
-     * the returned sequence contains all the nodes delivered by the SequenceIterator from the beginning,
-     * or only those delivered starting at the current position.
-     * <p>It is implementation-dependant whether this method consumes the SequenceIterator. (More specifically,
-     * in the current implementation: if the iterator is backed by a {@link GroundedValue}, then that
-     * value is returned and the iterator is not consumed; otherwise, the iterator is consumed and the
-     * method returns the remaining items after the current position only).</p>
-     *
-     * @return a sequence containing all the items delivered by this SequenceIterator.
-     * @throws UncheckedXPathException if reading the SequenceIterator throws an error
-     */
-    @Override
-    public GroundedValue materialize() {
-        return new SequenceExtent.Of<NodeInfo>(sequence);
-    }
+ 
 }
 

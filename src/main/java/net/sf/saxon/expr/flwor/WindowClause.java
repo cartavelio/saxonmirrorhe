@@ -11,13 +11,12 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.functions.Count;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.ItemType;
@@ -64,21 +63,42 @@ public class WindowClause extends Clause {
         return WINDOW;
     }
 
+    /**
+     * Say whether this is a sliding or tumbling window
+     * @param sliding true if this is a sliding window, false for a tumbling window
+     */
     public void setIsSlidingWindow(boolean sliding) {
         this.sliding = sliding;
     }
 
+    /**
+     * Ask whether this is a sliding or tumbling window
+     * @return true if this is a sliding window, false for a tumbling window
+     */
     public boolean isSlidingWindow() {
         return sliding;
     }
 
+    /**
+     * Ask whether this is a sliding or tumbling window
+     * @return false if this is a sliding window, true for a tumbling window
+     */
     public boolean isTumblingWindow() {
         return !sliding;
     }
 
+    /**
+     * Say whether windows that are unclosed at the end of the sequence should be included in the result
+     * @param include true if unclosed windows are to be included in the result
+     */
     public void setIncludeUnclosedWindows(boolean include) {
         this.includeUnclosedWindows = include;
     }
+
+    /**
+     * Ask whether windows that are unclosed at the end of the sequence should be included in the result
+     * @return true if unclosed windows are to be included in the result
+     */
 
     public boolean isIncludeUnclosedWindows() {
         return includeUnclosedWindows;
@@ -120,7 +140,6 @@ public class WindowClause extends Clause {
         return endConditionOp == null ? null : endConditionOp.getChildExpression();
     }
 
-    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public void setVariableBinding(int role, LocalVariableBinding binding) throws XPathException {
         for (LocalVariableBinding b : windowVars.valueSet()) {
             if (b.getVariableQName().equals(binding.getVariableQName())) {
@@ -187,7 +206,7 @@ public class WindowClause extends Clause {
             @SuppressWarnings("Convert2Diamond")
             SequenceIterator check =
                     new ItemMappingIterator(new ListIterator.Of<Item>(w.contents), checker);
-            Count.count(check); // a convenient way to consume the iterator and thus perform the checking
+            SequenceTool.supply(check, it -> {}); // a convenient way to consume the iterator and thus perform the checking
         }
     }
 
