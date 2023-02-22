@@ -83,6 +83,7 @@ ext {
   csver = null
   csrid = null
   csplatform = null
+  c_sendria = "sendriasmtp"
 }
 
 // Find dotnet
@@ -1645,19 +1646,19 @@ publishing {
 // ============================================================
 // Docker tasks related to running an SQL server
 
-task dockerup() {
+task "docker-sql-up"() {
   doLast {
     DockerContainer.assertRunning(c_sqlserver)
   }
 }
 
-task dockerdown() {
+task "docker-sql-down"() {
   doLast {
     DockerContainer.assertNotRunning(c_sqlserver)
   }
 }
 
-task sqlServerStart(dependsOn: ["dockerdown"]) {
+task sqlServerStart(dependsOn: ["docker-sql-up"]) {
   doFirst {
     DockerContainer.assertDockerAvailable()
     DockerContainer.assertDockerComposeAvailable()
@@ -1700,7 +1701,7 @@ task sqlServerStart(dependsOn: ["dockerdown"]) {
   }
 }
 
-task sqlServerSetup(dependsOn: ["dockerup"]) {
+task sqlServerSetup(dependsOn: ["docker-sql-up"]) {
   doFirst {
     DockerContainer.assertDockerAvailable()
     DockerContainer.assertDockerComposeAvailable()
@@ -1730,7 +1731,7 @@ task sqlServerSetup(dependsOn: ["dockerup"]) {
   }
 }
 
-task sqlServerLogs(dependsOn: ["dockerup"]) {
+task sqlServerLogs(dependsOn: ["docker-sql-up"]) {
   def id = "NA"
   doFirst {
     id = DockerContainer.containerid(c_sqlserver)
@@ -1742,7 +1743,7 @@ task sqlServerLogs(dependsOn: ["dockerup"]) {
   }
 }
 
-task sqlServerWatch(dependsOn: ["dockerup"]) {
+task sqlServerWatch(dependsOn: ["docker-sql-up"]) {
   def id = "NA"
   doFirst {
     id = DockerContainer.containerid(c_sqlserver)
@@ -1754,7 +1755,7 @@ task sqlServerWatch(dependsOn: ["dockerup"]) {
   }
 }
 
-task sqlServerStop(dependsOn: ["dockerup"]) {
+task sqlServerStop(dependsOn: ["docker-sql-up"]) {
   doLast {
     exec {
       workingDir "tools/docker"
@@ -1762,6 +1763,124 @@ task sqlServerStop(dependsOn: ["dockerup"]) {
     }
   }
 }
+
+// ============================================================
+
+task "docker-sendria-up"() {
+  doLast {
+    DockerContainer.assertRunning(c_sendria)
+  }
+}
+
+task "docker-sendria-down"() {
+  doLast {
+    DockerContainer.assertNotRunning(c_sendria)
+  }
+}
+
+task sendriaServerStart() {
+  def dockerOk = true
+
+  doFirst {
+    try {
+      DockerContainer.assertDockerAvailable()
+      DockerContainer.assertDockerComposeAvailable()
+    } catch (Exception e) {
+      dockerOk = false
+    }
+  }
+
+  doLast {
+    if (dockerOk) {
+      if (!DockerContainer.running(c_sendria)) {
+        try {
+          exec {
+            workingDir "tools/docker"
+            if (DockerContainer.dockerCompose() == "docker") {
+              commandLine DockerContainer.docker(),
+                "compose", "-f", "sendria-compose.yml",
+                "up", "-d", "sendriasmtp"
+            } else {
+              commandLine DockerContainer.dockerCompose(),
+                "-f", "sendria-compose.yml",
+                "up", "-d", "sendriasmtp"
+            }
+          }
+        } catch (Exception e) {
+          println("***************************************************************")
+          println("Failed to start sendriaserver; saxon:send-mail tests will fail.")
+          println("***************************************************************")
+        }
+      }
+      try {
+        exec {
+          commandLine DockerContainer.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
+        }
+      } catch (Exception e) {
+        // nop
+      }
+    } else {
+      println("****************************************************")
+      println("Docker unavailable; saxon:send-mail tests will fail.")
+      println("***************************************************")
+    }      
+  }
+}
+
+task sendriaServerLogs(dependsOn: ["docker-sendria-up"]) {
+  def id = "NA"
+  doFirst {
+    id = DockerContainer.id(c_sendria)
+  }
+  doLast {
+    exec {
+      commandLine DockerContainer.docker(), "logs", id
+    }
+  }
+}
+
+task sendriaServerWatch(dependsOn: ["docker-sendria-up"]) {
+  def id = "NA"
+  doFirst {
+    id = DockerContainer.id(c_sendria)
+  }
+  doLast {
+    exec {
+      commandLine DockerContainer.docker(), "logs", id, "-f"
+    }
+  }
+}
+
+task sendriaServerStop(dependsOn: ["docker-sendria-up"]) {
+  doLast {
+    exec {
+      workingDir "tools/docker"
+      if (DockerContainer.dockerCompose() == "docker") {
+        commandLine DockerContainer.docker(),
+          "compose", "-f", "sendria-compose.yml",
+          "stop", "sendriasmtp"
+      } else {
+        commandLine DockerContainer.dockerCompose(),
+          "-f", "sendria-compose.yml", "stop", "sendriasmtp"
+      }
+    }
+  }
+}
+
+task dockerDown() {
+  doLast {
+    exec {
+      workingDir "tools/docker"
+      if (DockerContainer.dockerCompose() == "docker") {
+        commandLine DockerContainer.docker(), "compose", "down"
+      } else {
+        commandLine DockerContainer.dockerCompose(), "down"
+      }
+    }
+  }
+}
+
+// ============================================================
 
 /* I didn't get this to work. I got them to work by moving
    them under src/test/java, but that's inconvenient...
