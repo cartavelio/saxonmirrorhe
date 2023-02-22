@@ -547,26 +547,23 @@ public class XdmUtils {
         return addr;
     }
 
-    @CEntryPoint(name = "j_getChildren")
+    @CEntryPoint(name = "j_getChildren", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
     public static CLongPointer getChildren(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle nodeRef) {
 
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
 
-        List<XdmNode> children = new ArrayList<XdmNode>();
-        XdmSequenceIterator iter = node.axisIterator(Axis.CHILD);
-        while (iter.hasNext()) {
-            children.add((XdmNode) iter.next());
+
+        XdmSequenceIterator<XdmNode> iter = node.axisIterator(Axis.CHILD);
+        long[] childRefs = null;
+        if(iter.hasNext()) {
+            childRefs = iter.stream().mapToLong(i -> {
+                ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(iter.next());
+                return objectHandle.rawValue();
+            }).toArray();
+        }else {
+            return WordFactory.nullPointer();
         }
-        /*if (children.size() == 0) {
-            return null;
-        }  */
 
-        long[] childRefs= iter.stream().mapToLong( i ->{
-            ObjectHandle objectHandle = SaxonCAPI.objectHandles.create( iter.next());
-            return objectHandle.rawValue();
-        }).toArray();
-
-       // return children.toArray(new XdmNode[0]);
         CLongPointer addr = SaxonCAPI.longArrayToNative(alloc, childRefs);
         return addr;
     }
@@ -608,9 +605,12 @@ public class XdmUtils {
         return -1;
     }
 
-    @CEntryPoint(name = "j_getChildCount")
-    public static int getChildCount(IsolateThread thread, ObjectHandle nodeRef) {
+    @CEntryPoint(name = "j_getChildCount", exceptionHandler = SaxonCExceptionIntHandler.class)
+    public static int getChildCount(IsolateThread thread, ObjectHandle nodeRef) throws SaxonApiException {
         int num = 0;
+        if(nodeRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XdmNode object is null");
+        }
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         XdmSequenceIterator iter = node.axisIterator(Axis.CHILD);
         while (iter.hasNext()) {

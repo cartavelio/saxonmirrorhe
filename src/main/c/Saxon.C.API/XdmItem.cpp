@@ -4,6 +4,7 @@
 
 XdmItem::XdmItem(): XdmValue(){
     value = -1;
+    stringValue = nullptr;
 }
 
 XdmItem::XdmItem(const XdmItem &other): XdmValue(other){
@@ -11,14 +12,15 @@ XdmItem::XdmItem(const XdmItem &other): XdmValue(other){
     xdmSize =1;
     refCount = other.refCount;
     stringValue = other.stringValue;
-    stringValue = nullptr;
+    stringValue = other.stringValue;
 }
 
 
 XdmItem::XdmItem(int64_t objRef){
-value = objRef;
-xdmSize =1;
-refCount =0;
+    value = objRef;
+    xdmSize =1;
+    refCount =0;
+    stringValue = nullptr;
 }
 
 bool XdmItem::isAtomic(){
@@ -78,18 +80,15 @@ int64_t XdmItem::getUnderlyingValue(){
 }
 
 const char * XdmItem:: getStringValue(){
-    std::cerr<<"getstringValue"<<std::endl;
     if(stringValue == nullptr) {
         if(value < 0) {
             return nullptr;
         }
         allocFn fn = operator new;
-        std::cerr<<"getstringValue cp0"<<std::endl;
         stringValue = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
         if(stringValue == nullptr) {
             return nullptr;
         }
-        std::cerr<<"getstringValue = "<<stringValue<<std::endl;
         return stringValue;
 
     } else {
@@ -116,11 +115,13 @@ XDM_TYPE XdmItem::getType(){
 }
 
 XdmItem::~XdmItem() {
+    std::cerr<<"xdmITem destructor"<<std::endl;
     value = -1;
     /*else {
          decrementRefCount();
      }*/
     if(stringValue != nullptr) {
+        std::cerr<<"xdmITem deleting string"<<std::endl;
         delete stringValue;
     }
 }
