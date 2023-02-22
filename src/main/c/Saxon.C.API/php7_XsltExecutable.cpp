@@ -1441,8 +1441,8 @@ if (xsltExecutable != nullptr) {
                 vobj->xsltExecutable = executable;
             }
 
-        } else if(xslt30Processor->exceptionOccurred()){
-            SaxonApiException * exception = xslt30Processor->getException();
+        } else if(xsltExecutable->exceptionOccurred()){
+            SaxonApiException * exception = xsltExecutable->getException();
             if(exception != nullptr) {
                 zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
             }

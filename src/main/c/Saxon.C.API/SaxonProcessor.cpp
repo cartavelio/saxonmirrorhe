@@ -283,6 +283,7 @@ SaxonProcessor::SaxonProcessor(bool l) {
     jobject proci = createSaxonProcessor(SaxonProcessor::sxn_environ->env, procClass, "(Z)V", nullptr, licensei);
     proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(proci);
     if (proc == nullptr) {
+        checkAndCreateException(saxonCAPIClass);
         std::cout << "proc is nullptr in SaxonProcessor constructor" << std::endl;
     }
 
@@ -362,6 +363,7 @@ SaxonProcessor::~SaxonProcessor() {
 
 
 bool SaxonProcessor::isSchemaAwareProcessor() {
+    std::cerr << "SaxonProcessor.isSchemaAware() cp0"  << std::endl;
     if (!licensei) {
         return false;
     } else {
