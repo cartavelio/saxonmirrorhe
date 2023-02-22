@@ -556,6 +556,7 @@ com/saxonica/functions/extfn/NewText.class
 com/saxonica/functions/extfn/ObjectMap.class
 com/saxonica/functions/extfn/Parse.class
 com/saxonica/functions/extfn/ParseHtml.class
+com/saxonica/functions/extfn/ParseHtml.class
 com/saxonica/functions/extfn/ParseXPath.class
 com/saxonica/functions/extfn/PedigreeFn.class
 com/saxonica/functions/extfn/QueryFn.class
@@ -1159,6 +1160,7 @@ net/sf/saxon/functions/BooleanFn.class
 net/sf/saxon/functions/CallableFunction.class
 net/sf/saxon/functions/Ceiling.class
 net/sf/saxon/functions/CharactersFn.class
+net/sf/saxon/functions/CharactersFn.class
 net/sf/saxon/functions/CodepointEqual.class
 net/sf/saxon/functions/CodepointsToString.class
 net/sf/saxon/functions/CollatingFunctionFixed.class
@@ -1240,9 +1242,11 @@ net/sf/saxon/functions/Number_1.class
 net/sf/saxon/functions/OptionsParameter.class
 net/sf/saxon/functions/Outermost.class
 net/sf/saxon/functions/ParcelFn.class
+net/sf/saxon/functions/ParcelFn.class
 net/sf/saxon/functions/ParseIetfDate.class
 net/sf/saxon/functions/ParseXml.class
 net/sf/saxon/functions/ParseXmlFragment.class
+net/sf/saxon/functions/Parts.class
 net/sf/saxon/functions/Parts.class
 net/sf/saxon/functions/Path_1.class
 net/sf/saxon/functions/PositionAndLast.class
@@ -1294,6 +1298,7 @@ net/sf/saxon/functions/TypeAvailable.class
 net/sf/saxon/functions/URIQueryParameters.class
 net/sf/saxon/functions/Unordered.class
 net/sf/saxon/functions/UnparcelFn.class
+net/sf/saxon/functions/UnparcelFn.class
 net/sf/saxon/functions/UnparsedEntity.class
 net/sf/saxon/functions/UnparsedText.class
 net/sf/saxon/functions/UnparsedTextAvailable.class
@@ -1335,6 +1340,7 @@ net/sf/saxon/functions/registry/VendorFunctionSetHE.class
 net/sf/saxon/functions/registry/XPath20FunctionSet.class
 net/sf/saxon/functions/registry/XPath30FunctionSet.class
 net/sf/saxon/functions/registry/XPath31FunctionSet.class
+net/sf/saxon/functions/registry/XPath40FunctionSet.class
 net/sf/saxon/functions/registry/XPath40FunctionSet.class
 net/sf/saxon/functions/registry/XSLT30FunctionSet.class
 net/sf/saxon/gizmo/
@@ -2111,6 +2117,7 @@ net/sf/saxon/transpile/CSharpSimpleEnum.class
 net/sf/saxon/transpile/CSharpSuppressWarnings.class
 net/sf/saxon/transpile/CSharpTypeBounds.class
 net/sf/saxon/transpile/CollectionMaker.class
+net/sf/saxon/transpile/CollectionMaker.class 
 net/sf/saxon/tree/
 net/sf/saxon/tree/AttributeLocation.class
 net/sf/saxon/tree/NamespaceNode.class
