@@ -67,7 +67,7 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
 
     /**
      * Resolve a module URI and associated location hints.
-     * <para>The logic of this is as follows:</para>
+     * <p>The logic of this is as follows:</p>
      * <ol>
      *     <li>First, call the configuration-level ResourceResolver to resolve the module URI
      *     as a namespace (via the method resolveModuleURI, which can be overridden in a subclass).

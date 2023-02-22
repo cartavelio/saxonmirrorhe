@@ -801,7 +801,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param className The fully-qualified name of the URIResolver class
      * @return The newly created URIResolver
      * @throws XPathException if the requested class does not
-     *                              implement the <code>ResourceResolver</code>> interface
+     *                              implement the {@code ResourceResolver} interface
      */
     public ResourceResolver makeResourceResolver(String className) throws XPathException {
         Object obj = dynamicLoader.getInstance(className, null);

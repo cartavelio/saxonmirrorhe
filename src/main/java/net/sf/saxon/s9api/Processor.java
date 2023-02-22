@@ -512,7 +512,7 @@ public class Processor implements Configuration.ApiProvider {
     /**
      * Supply one or more resource catalog files to be used for URI resolution.
      * <p>The call has no effect if the <code>CommonResourceResolver</code> registered with the
-     * <code>Configuration</code> does not use catalog files.</para>
+     * <code>Configuration</code> does not use catalog files.</p>
      * @param fileNames the files to be used. If no files are supplied, the call removes any existing catalog
      *                  files that were previously registered.
      */
