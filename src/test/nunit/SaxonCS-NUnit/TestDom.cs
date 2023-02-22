@@ -1512,8 +1512,8 @@ namespace SaxonCS_NUnit {
 
 
         /**
-     * Test that namespaces are copied OK by an identity transform
-     */
+        * Test that namespaces are copied OK by an identity transform
+        */
 
         [Test]
         public void testNamespaceSerialization4858() {
@@ -1548,7 +1548,8 @@ namespace SaxonCS_NUnit {
 
                 transformer.ApplyTemplates(new StringReader("<a/>"), proc.NewSerializer(sw));
                 Console.Error.WriteLine(sw.ToString());
-                Assert.That(sw.ToString().Contains("<xhtml:body><xhtml:p>Lorem Ipsum</xhtml:p></xhtml:body>"));
+                Assert.That(sw.ToString().Contains("<xhtml:body xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:p>Lorem Ipsum</xhtml:p></xhtml:body>"));
+
             }
             catch (Exception e) {
                 //e.printStackTrace();
@@ -1587,6 +1588,26 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(err.Message);
             }
         }
+        
+        [Test]
+        public void WrapDOMDocumentWithXmlDeclaration() {
+            Processor proc = new();
+            DocumentBuilder docBuilder = proc.NewDocumentBuilder();
+            XPathCompiler xpathCompiler = proc.NewXPathCompiler();
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(@"<?xml version='1.0'?><root>
+  <item>a</item>
+  <item>b</item>
+</root>");
+
+            XdmNode xdmDoc = docBuilder.Wrap(xmlDoc);
+
+            var xdmValue = xpathCompiler.Evaluate("//root | //item", xdmDoc);
+
+            Assert.That(xdmValue.Count, Is.EqualTo(3));
+
+        }
+
 
 
 
