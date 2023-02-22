@@ -327,7 +327,6 @@ public class XQueryCompiler {
      *               a compile-time exception is reported. In streaming mode, the source
      *               document is supplied as a stream, and no tree is built in memory. The default
      *               is false.
-     *               <p>
      *               <p>When setStreaming(true) is specified, this has the additional side-effect of setting the required
      *               context item type to "document-node()"
      * @since 9.6

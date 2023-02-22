@@ -27,10 +27,8 @@ import java.util.*;
  * A data structure to hold the contents of a tree. As the name implies, this implementation
  * of the data model is optimized for size, and for speed of creation: it minimizes the number
  * of Java objects used.
- * <p>
  * <p>It can be used to represent a tree that is rooted at a document node, or one that is rooted
  * at an element node.</p>
- * <p>
  * <p>From Saxon 9.7, as a consequence of bug 2220, it is used only to hold a single tree, whose
  * root is always node number zero.</p>
  */
