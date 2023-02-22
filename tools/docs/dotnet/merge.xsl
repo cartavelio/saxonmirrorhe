@@ -507,6 +507,8 @@
   
   <xsl:template match="obsolete"/>
   
+  <xsl:template match="param"/>
+  
   <xsl:template match="paramtypes">
     <xsl:copy-of select="."/>
   </xsl:template>
@@ -595,7 +597,7 @@
   </xsl:function>
   
   <!-- Types which are known to be interfaces, rather than classes -->
-  <xsl:variable name="knownInterfaces" select="('IEnumerable', 'IInvalidityHandler', 'Configuration.ApiProvider')"/>
+  <xsl:variable name="knownInterfaces" select="('IEnumerable', 'IInvalidityHandler')"/>
   
   <!-- Resolve all known System types. Map from short name to resolved type. 
       This map requires maintenance. -->
@@ -613,11 +615,14 @@
     'ArgumentException':'System.ArgumentException',
     'Boolean':'System.Boolean',
     'Char':'System.Char',
+    'DateTime':'System.DateTime',
+    'DateTimeOffset':'System.DateTimeOffset',
     'Decimal':'System.Decimal',
     'Double':'System.Double',
     'Exception':'System.Exception',
     'Func':'System.Func',
     'Object':'System.Object',
+    'Predicate':'System.Predicate',
     'String':'System.String',
     'Uri':'System.Uri',
     'DictionaryEntry':'System.Collections.DictionaryEntry',
@@ -627,13 +632,16 @@
     'IList':'System.Collections.IList',
     'Dictionary':'System.Collections.Generic.Dictionary',
     'HashSet':'System.Collections.Generic.HashSet',
+    'IDictionary':'System.Collections.Generic.IDictionary',
     'List':'System.Collections.Generic.List',
+    'TextWriter':'System.IO.TextWriter',
+    'Stream':'System.IO.Stream',
+    'Encoding':'System.Text.Encoding',
     'XmlDocument':'System.Xml.XmlDocument',
     'XmlNode':'System.Xml.XmlNode',
     'XmlNodeType':'System.Xml.XmlNodeType',
     'XmlQualifiedName':'System.Xml.XmlQualifiedName',
-    'XmlResolver':'System.Xml.XmlResolver',
-    'TextWriter':'System.IO.TextWriter'
+    'XmlResolver':'System.Xml.XmlResolver'
     }"/>
   
   
