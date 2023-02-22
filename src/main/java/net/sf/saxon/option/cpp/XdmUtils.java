@@ -524,24 +524,19 @@ public class XdmUtils {
     public static CLongPointer getAttributeNodes(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle nodeRef) {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
 
-        List<XdmNode> children = new ArrayList<XdmNode>();
-        List<Long> childrenRefs = new ArrayList<Long>();
         XdmSequenceIterator<XdmNode> iter = node.axisIterator(Axis.ATTRIBUTE);
-        while (iter.hasNext()) {
-            //children.add((XdmNode) iter.next());
-            ObjectHandle objectHandle = SaxonCAPI.objectHandles.create( iter.next());
-            childrenRefs.add(objectHandle.rawValue());
-        }
-        /*if (children.size() == 0) {
-            return -1;
-        }   */
-        long[] childRefs= iter.stream().mapToLong( i ->{
-            ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(i);
-            return objectHandle.rawValue();
-        }).toArray();
-        //SaxonCAPI.DataWrapper wrapper = new SaxonCAPI.DataWrapper(childRefs);
 
-        CLongPointer addr = SaxonCAPI.longArrayToNative(alloc, childRefs);
+        long[] attrRefs = null;
+        if(iter.hasNext()) {
+            attrRefs = iter.stream().mapToLong(i -> {
+                ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(i);
+                return objectHandle.rawValue();
+            }).toArray();
+        }else {
+            return WordFactory.nullPointer();
+        }
+
+        CLongPointer addr = SaxonCAPI.longArrayToNative(alloc, attrRefs);
         return addr;
     }
 
