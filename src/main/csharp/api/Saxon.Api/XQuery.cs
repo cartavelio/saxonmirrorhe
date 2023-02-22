@@ -792,7 +792,7 @@ namespace Saxon.Api
 
 
         /// <summary>
-        /// Escape hatch to the <c>net.sf.saxon.query.DynamicQueryContext</c> object in the underlying Java implementation
+        /// Escape hatch to the <c>net.sf.saxon.s9api.XQueryEvaluator</c> object in the underlying Java implementation
         /// </summary>
 
         public JXQueryEvaluator Implementation
