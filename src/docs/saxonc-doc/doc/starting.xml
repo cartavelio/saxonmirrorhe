@@ -469,23 +469,22 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
        </li>
        <li>
          <p><b>Build the Python extension</b></p>
-         <p>The Python extension is held in the directory <code>Saxon.C.API/python-saxon</code> in
-           the SaxonC download.</p>
+         <p>The Python extension is held in the <code>pypi</code> directory in the SaxonC download.</p>
          
          <p>On <b>Linux or Mac OS</b>, open a shell window and navigate to this directory inside the
            location where you unpacked the zip file, and then build the SaxonC Python extension:</p>
-         <kbd>cd Saxon.C.API/python-saxon</kbd>
-         <kbd>python3 saxon-setup.py build_ext -if</kbd>
+         <kbd>cd pypi</kbd>
+         <kbd>python3 setup.py build_ext -if</kbd>
          
          <p>On <b>Windows</b>, open Powershell for Python 3.X (with administrator rights if you
-           installed in C:\Program Files), navigate to the <code>Saxon.C.API/python-saxon</code>
+           installed in C:\Program Files), navigate to the <code>pypi</code>
            directory, and then build the SaxonC Python extension:</p>
          <kbd>cd C:\Program Files\Saxonica\Saxon[EDITION][VERSION]</kbd>
-         <kbd>cd Saxon.C.API\python-saxon</kbd>
-         <kbd>py saxon-setup.py build_ext -if</kbd>
+         <kbd>cd pypi</kbd>
+         <kbd>py setup.py build_ext -if</kbd>
          <p>For arbitrary Powershell Windows, it is necessary to set: $Env:PYTHONPATH +=
-           ";C:\Program Files\Saxonica\Saxon[EDITION][VERSION]\Saxon.C.API\python-saxon" to
-           ensure that "import saxonc" in any Python program finds the saxonc module.</p>
+           ";C:\Program Files\Saxonica\Saxon[EDITION][VERSION]\pypi" to
+           ensure that "import saxonc[EDITION]" in any Python program finds the saxonc[EDITION] module.</p>
        </li>
      </ol>
 
