@@ -1,3 +1,23 @@
+// Find pydoc
+def pydoc = null
+System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
+  if (pydoc == null) {
+    def fn = new File(dir + "/pydoc3")
+    if (fn.exists() && fn.canExecute()) {
+      pydoc = fn.toString()
+    } else {
+      fn = new File(dir + "/pydoc")
+      if (fn.exists() && fn.canExecute()) {
+        pydoc = fn.toString()
+      }
+    }
+  }
+}
+
+if (pydoc == null) {
+  println("WARNING: Failed to find pydoc!")
+}
+
 task clone_expath_cg(
   type: Exec,
   description: "Clones the expath-cg github repository for doc builds"
@@ -1067,7 +1087,7 @@ task saxonc_pydoc3(dependsOn: ['saxonc_doc_pypi']) {
   doLast {
     exec {
       workingDir "${buildDir}/doc_pypi"
-      commandLine 'pydoc3', '-w', 'saxonc'
+      commandLine pydoc3, '-w', 'saxonc'
     }
   }
 }
