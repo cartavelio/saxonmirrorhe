@@ -412,7 +412,7 @@ namespace TestDriver {
 
                                 queried |= schemaQueried;
 
-                                Console.WriteLine("TEST INSTANCE " + testName + (queried ? " (queried)" : ""));
+                                Console.WriteLine("TEST Instance " + testName + (queried ? " (queried)" : ""));
 
                                 XdmNode instanceDocument = getChildElement(instanceTest, instanceDocumentNT);
 
