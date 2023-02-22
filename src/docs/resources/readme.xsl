@@ -52,8 +52,8 @@ together with batch scripts for running them.
 Provided as a zip. Unzip to access the main Saxon documentation in directory viewer_appJS.
 
 The Saxon documentation supplied in this resources download runs as an interactive application
-driven by Saxon-JS in the browser (a copy of Saxon-JS is included in the download). However, most
-browsers do not allow Saxon-JS to run from a local file system, so the documentation application may
+driven by SaxonJS in the browser (a copy of SaxonJS is included in the download). However, most
+browsers do not allow SaxonJS to run from a local file system, so the documentation application may
 not work directly. It is recommended that the HTTP protocol is used to access the resource files, so
 it may be necessary to host this directory on a localhost web-server.
 
@@ -93,8 +93,8 @@ the Saxon documentation for details.
 Provided as a zip. Unzip to access the main Saxon documentation in directory viewer_appJS.
       
 The Saxon documentation supplied in this resources download runs as an interactive application
-driven by Saxon-JS in the browser (a copy of Saxon-JS is included in the download). However, most
-browsers do not allow Saxon-JS to run from a local file system, so the documentation application may
+driven by SaxonJS in the browser (a copy of SaxonJS is included in the download). However, most
+browsers do not allow SaxonJS to run from a local file system, so the documentation application may
 not work directly. It is recommended that the HTTP protocol is used to access the resource files, so
 it may be necessary to host this directory on a localhost web-server.
 
