@@ -74,8 +74,7 @@ public class Reverse extends SystemFunction {
         if (forwards instanceof ReversibleIterator) {
             return ((ReversibleIterator) forwards).getReverseIterator();
         } else {
-            SequenceExtent extent = new SequenceExtent(forwards);
-            return extent.reverseIterate();
+            return SequenceExtent.from(forwards).reverseIterate();
         }
     }
 

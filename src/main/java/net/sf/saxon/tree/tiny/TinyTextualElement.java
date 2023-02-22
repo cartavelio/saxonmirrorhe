@@ -126,10 +126,7 @@ public class TinyTextualElement extends TinyElementImpl {
                 return SingleNodeIterator.makeIterator(getTextNode());
 
             case AxisInfo.DESCENDANT_OR_SELF:
-                List<NodeInfo> list = new ArrayList<>(2);
-                list.add(this);
-                list.add(getTextNode());
-                return new NodeListIterator(list);
+                return new ArrayIterator.OfNodes<>(new NodeInfo[]{this, getTextNode()});
 
             default:
                 return super.iterateAxis(axisNumber);

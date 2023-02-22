@@ -30,7 +30,7 @@ public class Instantiator<T> implements Maker<T> {
 
     @Override
     public T make() throws XPathException {
-        Object o = config.getInstance(className, null);
+        Object o = config.getInstance(className);
         try {
             return (T)o;
         } catch (ClassCastException e) {

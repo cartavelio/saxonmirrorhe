@@ -14,6 +14,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceMethod;
 import net.sf.saxon.value.*;
 
 import java.util.Arrays;
@@ -49,9 +50,10 @@ public class NumericType extends LocalUnionType implements SimpleType {
         }
     }
 
+    @CSharpReplaceMethod(code="private NumericType() : base (java.util.Arrays.asList<net.sf.saxon.type.AtomicType>(net.sf.saxon.type.BuiltInAtomicType.DOUBLE, net.sf.saxon.type.BuiltInAtomicType.FLOAT, net.sf.saxon.type.BuiltInAtomicType.DECIMAL)) {}")
     private NumericType() {
         super(Arrays.asList(BuiltInAtomicType.DOUBLE, BuiltInAtomicType.FLOAT, BuiltInAtomicType.DECIMAL));
-    }
+   }
 
     @Override
     public StructuredQName getTypeName() {
@@ -485,7 +487,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
 
     /**
      * Returns the value of the 'block' attribute for this type, as a bit-significant
-     * integer with fields such as {@link net.sf.saxon.type.Derivatiion#DERIVATION_LIST} and {@link net.sf.saxon.type.Derivatiion#DERIVATION_EXTENSION}.
+     * integer with fields such as {@link net.sf.saxon.type.Derivation#DERIVATION_LIST} and {@link net.sf.saxon.type.Derivation#DERIVATION_EXTENSION}.
      * This corresponds to the property "prohibited substitutions" in the schema component model.
      *
      * @return the value of the 'block' attribute for this type
@@ -522,7 +524,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * Get the types of derivation that are not permitted, by virtue of the "final" property.
      *
      * @return the types of derivation that are not permitted, as a bit-significant integer
-     *         containing bits such as {@link net.sf.saxon.type.Derivatiion#DERIVATION_EXTENSION}
+     *         containing bits such as {@link net.sf.saxon.type.Derivation#DERIVATION_EXTENSION}
      */
     @Override
     public int getFinalProhibitions() {
@@ -533,7 +535,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * Determines whether derivation (of a particular kind)
      * from this type is allowed, based on the "final" property
      *
-     * @param derivation the kind of derivation, for example {@link net.sf.saxon.type.Derivatiion#DERIVATION_LIST}
+     * @param derivation the kind of derivation, for example {@link net.sf.saxon.type.Derivation#DERIVATION_LIST}
      * @return true if this kind of derivation is allowed
      */
     @Override

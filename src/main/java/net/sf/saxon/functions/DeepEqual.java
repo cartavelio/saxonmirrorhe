@@ -7,7 +7,6 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
@@ -16,12 +15,13 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.SameNameTest;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeBuilder;
-import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.tiny.WhitespaceTextImpl;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.ComplexType;
@@ -558,8 +558,7 @@ public class DeepEqual extends CollatingFunctionFixed {
             textNode.setStringValue(textBuffer.toUnicodeString());
             items.add(textNode);
         }
-        SequenceExtent extent = new SequenceExtent(items);
-        return extent.iterate();
+        return new ListIterator.Of<>(items);
     }
 
     /**

@@ -7,7 +7,6 @@
 
 package net.sf.saxon.resource;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
@@ -16,9 +15,11 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringItem;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLConnection;
 
 /**
  * This class implements th interface Resource. We handle unparded text here.
@@ -64,12 +65,7 @@ public class UnparsedTextResource implements Resource {
         }
     }
 
-    public final static ResourceFactory FACTORY = new ResourceFactory() {
-        @Override
-        public Resource makeResource(Configuration config, AbstractResourceCollection.InputDetails details) throws XPathException {
-            return new UnparsedTextResource(details);
-        }
-    };
+    public final static ResourceFactory FACTORY = (config, details) -> new UnparsedTextResource(details);
 
     @Override
     public String getResourceURI() {

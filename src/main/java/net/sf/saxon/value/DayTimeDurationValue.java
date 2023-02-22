@@ -8,9 +8,10 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 
@@ -27,7 +28,7 @@ import java.util.Objects;
  */
 
 public final class DayTimeDurationValue extends DurationValue
-        implements Comparable<DayTimeDurationValue> {
+        implements XPathComparable, ContextFreeAtomicValue {
 
     /**
      * Private constructor for internal use
@@ -339,6 +340,7 @@ public final class DayTimeDurationValue extends DurationValue
                     0, 0, 0, nanoseconds / 1_000_000_000L, (int) (nanoseconds % 1_000_000_000L));
     }
 
+    //#if CSHARP==false
     /**
      * Factory method taking a Java 8 {@link java.time.Duration} object
      * @param duration a duration as a Java 8 {@code java.time.Duration}
@@ -369,7 +371,7 @@ public final class DayTimeDurationValue extends DurationValue
             return java.time.Duration.ofSeconds(_seconds, _nanoseconds);
         }
     }
-
+    //#endif
 
     /**
      * Multiply a duration by an integer
@@ -498,7 +500,7 @@ public final class DayTimeDurationValue extends DurationValue
     public DurationValue add(DurationValue other) throws XPathException {
         if (other instanceof DayTimeDurationValue) {
             DayTimeDurationValue d2 = (DayTimeDurationValue)other;
-            if (((_seconds | d2._seconds) & 0xffff_ffff_0000_0000L) != 0) {
+            if (((_seconds | d2._seconds) & 0x7fff_ffff_0000_0000L) != 0) {
                 // risk of complications, use BigDecimal arithmetic
                 try {
                     BigDecimal v1 = getTotalSeconds();
@@ -528,7 +530,7 @@ public final class DayTimeDurationValue extends DurationValue
     public DurationValue subtract(DurationValue other) throws XPathException {
         if (other instanceof DayTimeDurationValue) {
             DayTimeDurationValue d2 = (DayTimeDurationValue) other;
-            if (((_seconds | d2._seconds) & 0xffff_ffff_0000_0000L) != 0) {
+            if (((_seconds | d2._seconds) & 0x7fff_ffff_0000_0000L) != 0) {
                 // risk of complications, use BigDecimal arithmetic
                 try {
                     BigDecimal v1 = getTotalSeconds();
@@ -568,6 +570,16 @@ public final class DayTimeDurationValue extends DurationValue
         return d2;
     }
 
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {
+        return this;
+    }
+
+    @Override
+    public XPathComparable getXPathComparable() {
+        return this;
+    }
+
     /**
      * Compare the value to another duration value
      *
@@ -578,14 +590,19 @@ public final class DayTimeDurationValue extends DurationValue
      */
 
     @Override
-    public int compareTo(DayTimeDurationValue other) {
-        Objects.requireNonNull(other);
-        if (this._negative != other._negative) {
-            return this._negative ? -1 : +1;
-        } else if (this._seconds != other._seconds) {
-            return Long.compare(this._seconds, other._seconds) * (this._negative ? -1 : +1);
+    public int compareTo(XPathComparable other) {
+        if (other instanceof DayTimeDurationValue) {
+            Objects.requireNonNull(other);
+            DayTimeDurationValue dtd = (DayTimeDurationValue)other;
+            if (this._negative != dtd._negative) {
+                return this._negative ? -1 : +1;
+            } else if (this._seconds != dtd._seconds) {
+                return Long.compare(this._seconds, dtd._seconds) * (this._negative ? -1 : +1);
+            } else {
+                return Integer.compare(this._nanoseconds, dtd._nanoseconds) * (this._negative ? -1 : +1);
+            }
         } else {
-            return Integer.compare(this._nanoseconds, other._nanoseconds) * (this._negative ? -1 : +1);
+            throw new ClassCastException("Cannot compare xs:dayTimeDuration to " + other);
         }
     }
 
@@ -594,14 +611,12 @@ public final class DayTimeDurationValue extends DurationValue
      * Returns null if the value is not comparable according to XPath rules. The default implementation
      * returns the value itself. This is modified for types such as
      * xs:duration which allow ordering comparisons in XML Schema, but not in XPath.
-     *
-     * @param ordered  true if an ordered comparable is needed
-     * @param collator Collation used for string comparison
+     *  @param collator Collation used for string comparison
      * @param implicitTimezone  XPath dynamic context
      */
 
     @Override
-    public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
         return this;
     }
 

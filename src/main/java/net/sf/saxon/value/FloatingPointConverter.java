@@ -9,6 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.math.BigInteger;
 
@@ -42,6 +43,8 @@ public class FloatingPointConverter {
 
     private FloatingPointConverter() {
     }
+
+    //#if CSHARP==false
 
     /**
      * char array holding the characters for the string "-Infinity".
@@ -454,6 +457,7 @@ public class FloatingPointConverter {
 
     }
 
+    //#endif
     /**
      * Append a string representation of a double value to a string buffer
      *
@@ -461,6 +465,7 @@ public class FloatingPointConverter {
      * @return the original string buffer, now containing the string representation of the supplied double
      */
 
+    @CSharpReplaceBody(code = "return net.sf.saxon.str.BMPString.of(d.ToString(System.Globalization.CultureInfo.InvariantCulture));") // for now...
     public static UnicodeString convertDouble(double d, boolean forceExponential) {
         UnicodeBuilder s = new UnicodeBuilder();
         if (d == Double.NEGATIVE_INFINITY) {
@@ -535,6 +540,7 @@ public class FloatingPointConverter {
      */
 
     /*@NotNull*/
+    @CSharpReplaceBody(code="return s.append(f.ToString(System.Globalization.CultureInfo.InvariantCulture)).toUnicodeString();")  // for now...
     public static UnicodeString appendFloat(UnicodeBuilder s, float f, boolean forceExponential) {
         if (f == Float.NEGATIVE_INFINITY) {
             s.append(NEGATIVE_INFINITY);

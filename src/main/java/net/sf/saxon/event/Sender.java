@@ -91,7 +91,8 @@ public abstract class Sender {
         List<FilterFactory> filters = options.getFilters();
         if (filters != null) {
             for (int i = filters.size() - 1; i >= 0; i--) {
-                Receiver filter = filters.get(i).makeFilter(next);
+                FilterFactory ff = filters.get(i);   // Variable needed for C# type inference
+                Receiver filter = ff.makeFilter(next);
                 filter.setSystemId(source.getSystemId());
                 next = filter;
             }
@@ -157,10 +158,11 @@ public abstract class Sender {
             bridge.setXMLStreamReader(reader);
             sendPullSource(new PullSource(bridge), next, options);
             return;
-//#endif
+
         } else if (source instanceof SaplingDocument) {
             ((SaplingDocument)source).sendTo(next);
             return;
+//#endif
         } else {
             next = makeValidator(next, source.getSystemId(), options);
 
@@ -179,6 +181,7 @@ public abstract class Sender {
             // See if there is a registered external object model that knows about this kind of source
             // (Note, this should pick up the platform-specific DOM model)
 
+            //#if CSHARP==false
             List<ExternalObjectModel> externalObjectModels = config.getExternalObjectModels();
             for (ExternalObjectModel model : externalObjectModels) {
                 boolean done = model.sendSource(source, next);
@@ -186,6 +189,7 @@ public abstract class Sender {
                     return;
                 }
             }
+            //#endif
 
         }
 
@@ -485,11 +489,13 @@ public abstract class Sender {
             config.reuseSourceParser(parser);
         }
     }
-//#endif
+
 
     private static String namedParser(XMLReader parser) {
         return "Selected XML parser " + parser.getClass().getName();
     }
+    
+    //#endif
 
     private static Receiver makeValidator(Receiver receiver, String systemId, ParseOptions options) throws XPathException {
         PipelineConfiguration pipe = receiver.getPipelineConfiguration();
@@ -542,6 +548,7 @@ public abstract class Sender {
         }
     }
 
+    //#if CSHARP==false
     /**
      * Configure a SAX parser to ensure it has the correct namesapce properties set
      *
@@ -580,6 +587,7 @@ public abstract class Sender {
         }
 
     }
+    //#endif
 
 //    public static void main(String[] args) throws Exception {
 //        SAXParserFactory factory = new SAXParserFactoryImpl();

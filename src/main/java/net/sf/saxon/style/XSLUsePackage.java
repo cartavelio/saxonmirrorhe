@@ -209,7 +209,8 @@ public class XSLUsePackage extends StyleElement {
             return; // error already reported
         }
         for (NodeInfo override : children(XSLOverride.class::isInstance)) {
-            for (NodeInfo overridingDeclaration : override.children(StylesheetComponent.class::isInstance)) {
+            //noinspection RedundantCast
+            for (NodeInfo overridingDeclaration : ((XSLOverride)override).children(StylesheetComponent.class::isInstance)) {
                 ComponentDeclaration decl = new ComponentDeclaration(module, (StyleElement) overridingDeclaration);
                 topLevel.add(decl);
                 SymbolicName name = ((StylesheetComponent) overridingDeclaration).getSymbolicName();

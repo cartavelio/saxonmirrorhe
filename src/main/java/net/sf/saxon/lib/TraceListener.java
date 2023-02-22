@@ -13,7 +13,6 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.Mode;
 
-import java.util.EventListener;
 import java.util.Map;
 
 /**
@@ -23,7 +22,7 @@ import java.util.Map;
  * or using the addTraceListener() method of the Controller.
  */
 
-public interface TraceListener extends EventListener {
+public interface TraceListener {
 
     /**
      * Method called to supply the destination for output. The default implementation does nothing.

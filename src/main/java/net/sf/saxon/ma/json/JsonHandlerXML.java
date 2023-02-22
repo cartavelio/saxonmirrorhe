@@ -59,7 +59,6 @@ public class JsonHandlerXML extends JsonHandler {
     private FingerprintedQName escapedQN;
     private FingerprintedQName escapedKeyQN;
 
-    private static final Untyped UNTYPED = Untyped.getInstance();
     private static final SimpleType SIMPLE_TYPE = AnySimpleType.getInstance();
     private static final SimpleType BOOLEAN_TYPE = BuiltInAtomicType.BOOLEAN;
     private static final SimpleType STRING_TYPE = BuiltInAtomicType.STRING;
@@ -147,6 +146,9 @@ public class JsonHandlerXML extends JsonHandler {
             // is valid. Instead, we just set type annotations "on trust", as if we were validating.
             // Currently this means we aren't detecting duplicate keys, which would cause validation to fail.
             // The spec needs clarification in this area.
+
+            //#if CSHARP==false
+            // TODO: reinstate for C#?
             try {
                 Configuration config = context.getConfiguration();
                 //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -169,6 +171,7 @@ public class JsonHandlerXML extends JsonHandler {
             } catch (SchemaException | SAXException e) {
                 throw new XPathException(e);
             }
+            //#endif
         }
     }
 
@@ -244,7 +247,7 @@ public class JsonHandlerXML extends JsonHandler {
      * @throws XPathException if a dynamic error occurs
      */
     private void startElement(FingerprintedQName qn, SchemaType st) throws XPathException {
-        out.startElement(qn, validate && st != null ? st : UNTYPED,
+        out.startElement(qn, validate && st != null ? st : Untyped.getInstance(),
                          Loc.NONE, ReceiverOption.NONE);
         if (isInMap()) {
             String k = keys.pop();

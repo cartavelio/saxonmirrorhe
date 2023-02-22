@@ -17,6 +17,16 @@ public class ReverseList<T> extends AbstractList<T> {
     public ReverseList(List<T> forwardList) {
         this.forwardList = Objects.requireNonNull(forwardList);
     }
+    
+    public static <U> List<U> of(List<U> forwardList) {
+        if (forwardList instanceof ReverseList) {
+            return ((ReverseList<U>)forwardList).getForwardList();
+        } else {
+            return new ReverseList<>(forwardList);
+        }
+    }
+
+
 
     private static void checkElementIndex(int index, int size) {
         if (index < 0 || index >= size) {

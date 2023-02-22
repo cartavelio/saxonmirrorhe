@@ -12,8 +12,6 @@ import net.sf.saxon.Platform;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.event.IDFilter;
-import net.sf.saxon.event.ProxyReceiver;
-import net.sf.saxon.event.Receiver;
 import net.sf.saxon.functions.EncodeForUri;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.functions.URIQueryParameters;
@@ -31,14 +29,11 @@ import org.xml.sax.XMLReader;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 
@@ -124,9 +119,15 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
      */
 
     public Predicate<URI> getAllowedUriTest() {
-        return allowedUriTest == null
-                ? config == null ? uri -> true : config.getAllowedUriTest()
-                : allowedUriTest;
+        if (allowedUriTest == null) {
+            if (config == null) {
+                return uri -> true;
+            } else {
+                return config.getAllowedUriTest();
+            }
+        } else {
+            return allowedUriTest;
+        }
     }
 
     /**
@@ -264,9 +265,9 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
         }
 
         if (params != null) {
-            Maker<XMLReader> parser = params.getXMLReaderMaker();
-            if (parser != null) {
-                ((SAXSource) source).setXMLReader(parser.make());
+            Optional<Maker<XMLReader>> parser = params.getXMLReaderMaker();
+            if (parser.isPresent()) {
+                ((SAXSource) source).setXMLReader(parser.get().make());
             }
         }
 
@@ -284,52 +285,37 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
         }
 
         if (params != null) {
-            SpaceStrippingRule stripSpace = params.getSpaceStrippingRule();
+            Optional<SpaceStrippingRule> stripSpace = params.getSpaceStrippingRule();
             source = AugmentedSource.makeAugmentedSource(source);
-            ((AugmentedSource) source).getParseOptions().setSpaceStrippingRule(stripSpace);
+            if (stripSpace.isPresent()) {
+                ((AugmentedSource) source).getParseOptions().setSpaceStrippingRule(stripSpace.get());
+            }
         }
 
         if (id != null) {
             final String idFinal = id;
-            FilterFactory factory = new FilterFactory() {
-                @Override
-                public ProxyReceiver makeFilter(Receiver next) {
-                    return new IDFilter(next, idFinal);
-                }
-            };
+            FilterFactory factory = next -> new IDFilter(next, idFinal);
             source = AugmentedSource.makeAugmentedSource(source);
             ((AugmentedSource) source).addFilter(factory);
         }
 
         if (params != null) {
-            Integer validation = params.getValidationMode();
-            if (validation != null) {
+            Optional<Integer> validation = params.getValidationMode();
+            if (validation.isPresent()) {
                 source = AugmentedSource.makeAugmentedSource(source);
-                ((AugmentedSource) source).setSchemaValidationMode(validation);
+                ((AugmentedSource) source).setSchemaValidationMode(validation.get());
             }
         }
 
         if (params != null) {
-            Boolean xinclude = params.getXInclude();
-            if (xinclude != null) {
+            Optional<Boolean> xinclude = params.getXInclude();
+            if (xinclude.isPresent()) {
                 source = AugmentedSource.makeAugmentedSource(source);
-                ((AugmentedSource) source).setXIncludeAware(xinclude.booleanValue());
+                ((AugmentedSource) source).setXIncludeAware(xinclude.get());
             }
         }
 
         return source;
-    }
-
-    /**
-     * Handle a PTree source file (Saxon-EE only)
-     *
-     * @param href the relative URI
-     * @param base the base URI
-     * @return the new Source object
-     */
-
-    protected Source getPTreeSource(String href, String base) throws XPathException {
-        throw new XPathException("PTree files can only be read using a Saxon-EE configuration");
     }
 
     /**

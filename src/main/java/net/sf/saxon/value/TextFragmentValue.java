@@ -415,7 +415,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
             case AxisInfo.DESCENDANT_OR_SELF:
                 NodeInfo[] nodes = {this, getTextNode()};
-                return new ArrayIterator.OfNodes(nodes);
+                return new ArrayIterator.OfNodes<>(nodes);
 
             default:
                 throw new IllegalArgumentException("Unknown axis number " + axisNumber);
@@ -461,7 +461,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
                 if (b1) {
                     if (b2) {
                         NodeInfo[] pair = {this, textNode2};
-                        return new ArrayIterator.OfNodes(pair);
+                        return new ArrayIterator.OfNodes<>(pair);
                     } else {
                         return SingleNodeIterator.makeIterator(this);
                     }
@@ -875,7 +875,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
                 case AxisInfo.ANCESTOR_OR_SELF:
                     NodeInfo[] nodes = {this, fragment};
-                    return new ArrayIterator.OfNodes(nodes);
+                    return new ArrayIterator.OfNodes<>(nodes);
 
                 case AxisInfo.ATTRIBUTE:
                 case AxisInfo.CHILD:
@@ -919,7 +919,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
                     boolean matchesText = nodeTest.test(this);
                     if (matchesDoc && matchesText) {
                         NodeInfo[] nodes = {this, fragment};
-                        return new ArrayIterator.OfNodes(nodes);
+                        return new ArrayIterator.OfNodes<>(nodes);
                     } else if (matchesDoc /* && !matchesText */) {
                         return SingleNodeIterator.makeIterator(fragment);
                     } else if (matchesText /* && !matchesDoc */) {

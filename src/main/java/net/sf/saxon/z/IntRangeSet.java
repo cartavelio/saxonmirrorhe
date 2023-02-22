@@ -30,7 +30,7 @@ public class IntRangeSet extends IntSet {
     private int used = 0;
 
     // Hashcode, evaluated lazily
-    private int hashCode = -1;
+    private int _hashCode = -1;
 
     // The number of items in the set
     private int count = 0;
@@ -43,7 +43,7 @@ public class IntRangeSet extends IntSet {
         endPoints = new int[4];
         used = 0;
         count = 0;
-        hashCode = -1;
+        _hashCode = -1;
     }
 
     /**
@@ -58,7 +58,7 @@ public class IntRangeSet extends IntSet {
         used = input.used;
         System.arraycopy(input.startPoints, 0, startPoints, 0, used);
         System.arraycopy(input.endPoints, 0, endPoints, 0, used);
-        hashCode = input.hashCode;
+        _hashCode = input._hashCode;
     }
 
     /**
@@ -89,7 +89,7 @@ public class IntRangeSet extends IntSet {
         startPoints = new int[4];
         endPoints = new int[4];
         used = 0;
-        hashCode = -1;
+        _hashCode = -1;
     }
 
     @Override
@@ -166,7 +166,7 @@ public class IntRangeSet extends IntSet {
 
     @Override
     public boolean add(int value) {
-        hashCode = -1;
+        _hashCode = -1;
         if (used == 0) {
             ensureCapacity(1);
             startPoints[used - 1] = value;
@@ -313,14 +313,14 @@ public class IntRangeSet extends IntSet {
 
     public int hashCode() {
         // Note, hashcodes are NOT the same as those used by IntHashSet and IntArraySet
-        if (hashCode == -1) {
+        if (_hashCode == -1) {
             int h = 0x436a89f1;
             for (int i = 0; i < used; i++) {
                 h ^= startPoints[i] + (endPoints[i] << 3);
             }
-            hashCode = h;
+            _hashCode = h;
         }
-        return hashCode;
+        return _hashCode;
     }
 
     /**
@@ -337,7 +337,7 @@ public class IntRangeSet extends IntSet {
             add(low);
             return;
         }
-        hashCode = -1;
+        _hashCode = -1;
         if (used == 0) {
             ensureCapacity(1);
             startPoints[used - 1] = low;

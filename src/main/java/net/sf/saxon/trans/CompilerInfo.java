@@ -32,7 +32,7 @@ import java.util.Collection;
 
 @CSharpInjectMembers(code = {
         "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-      + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+      + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
       + "    }"
 })
 public class CompilerInfo {
@@ -392,7 +392,7 @@ public class CompilerInfo {
         this.outputURIResolver = outputURIResolver;
     }
 
-
+    //#if CSHARP==false
     /**
      * Set the ErrorListener to be used during this compilation episode
      *
@@ -422,6 +422,7 @@ public class CompilerInfo {
             return null;
         }
     }
+    //#endif
 
     /**
      * Set an error reporter: that is, a used-supplied object that is to receive

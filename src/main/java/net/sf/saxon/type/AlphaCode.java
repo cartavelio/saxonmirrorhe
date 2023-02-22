@@ -114,7 +114,7 @@ public class AlphaCode {
             for (String v : value) {
                 xdmValue.add(new StringItem(v));
             }
-            container.initialPut(key, new SequenceExtent(xdmValue));
+            container.initialPut(key, new SequenceExtent.Of<>(xdmValue));
         }
 
         @Override
@@ -735,6 +735,7 @@ public class AlphaCode {
                         }
                         default:
                             itemType = AnyNodeTest.getInstance();
+                            break;
                     }
                 }
             }
@@ -786,6 +787,7 @@ public class AlphaCode {
             }
         } else if (principal.startsWith("X")) {
             Class<?> theClass = Object.class;
+            //#if CSHARP==false
             if (tree.name != null) {
                 String className = StructuredQName.fromEQName(tree.name).getLocalPart();
                 try {
@@ -794,6 +796,7 @@ public class AlphaCode {
                     theClass = Object.class;
                 }
             }
+            //#endif
             itemType = new JavaExternalObjectType(theClass);
         }
         String indicator = tree.cardinality;

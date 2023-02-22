@@ -69,9 +69,9 @@ public class NotFn extends SystemFunction {
             @Override
             public boolean effectiveBooleanValue(XPathContext c) throws XPathException {
                 try {
-                    return !getArg(0).effectiveBooleanValue(c);
+                    return !this.getArg(0).effectiveBooleanValue(c);
                 } catch (XPathException e) {
-                    e.maybeSetLocation(getLocation());
+                    e.maybeSetLocation(this.getLocation());
                     e.maybeSetContext(c);
                     throw e;
                 }

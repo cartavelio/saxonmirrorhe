@@ -8,6 +8,7 @@
 package net.sf.saxon.expr;
 
 
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
@@ -493,7 +494,8 @@ public class Literal extends Expression {
     @Override
     protected int computeHashCode() {
         if (value instanceof AtomicSequence) {
-            return ((AtomicSequence) value).getSchemaComparable().hashCode();
+            return SimpleTypeComparison.getInstance().hash((AtomicSequence) value);
+            // TODO: why this comparator - what are we using this hash code for?
         } else {
             return super.computeHashCode();
         }
@@ -588,10 +590,10 @@ public class Literal extends Expression {
             out.endElement();
         } else if (value instanceof Function) {
             ((Function) value).export(out);
-        } else if (value instanceof ExternalObject) {
+        } else if (value instanceof Item && ((Item)value).getGenre() == Genre.EXTERNAL) {
             if (((ExpressionPresenter.ExportOptions)out.getOptions()).explaining) {
                 out.startElement("externalObject");
-                out.emitAttribute("class", ((ExternalObject)value).getObject().getClass().getName());
+                out.emitAttribute("class", ((ExternalObject<?>)value).getObject().getClass().getName());
                 out.endElement();
             } else {
                 throw new XPathException("Cannot export a stylesheet containing literal values bound to external Java objects");

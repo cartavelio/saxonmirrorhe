@@ -10,9 +10,9 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.DoubleSortComparer;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ValidationException;
@@ -129,7 +129,7 @@ public final class DoubleValue extends NumericValue {
     @Override
     public BigDecimal getDecimalValue() throws ValidationException {
         try {
-            return new BigDecimal(value);
+            return BigDecimal.valueOf(value);
         } catch (NumberFormatException e) {
             throw new ValidationException(e);
         }
@@ -280,7 +280,7 @@ public final class DoubleValue extends NumericValue {
 
         if (Double.isInfinite(d)) {
             // double arithmetic has overflowed - do it in decimal
-            BigDecimal dec = new BigDecimal(value);
+            BigDecimal dec = BigDecimal.valueOf(value);
             dec = dec.setScale(scale, RoundingMode.HALF_UP);
             return new DoubleValue(dec.doubleValue());
         }
@@ -320,7 +320,7 @@ public final class DoubleValue extends NumericValue {
 
         if (Double.isInfinite(d)) {
             // double arithmetic has overflowed - do it in decimal
-            BigDecimal dec = new BigDecimal(value);
+            BigDecimal dec = BigDecimal.valueOf(value);
             dec = dec.setScale(scale, RoundingMode.HALF_EVEN);
             return new DoubleValue(dec.doubleValue());
         }
@@ -371,6 +371,7 @@ public final class DoubleValue extends NumericValue {
      * @return true if this value is float or double negative zero
      */
     @Override
+    @CSharpReplaceBody(code = "return value == 0.0 && double.IsNegativeInfinity(1.0 / value);") // Better solutions exist but have dependencies
     public boolean isNegativeZero() {
         return value == 0.0 && (Double.doubleToLongBits(value) & FloatingPointConverter.DOUBLE_SIGN_MASK) != 0;
     }
@@ -436,45 +437,6 @@ public final class DoubleValue extends NumericValue {
      * Get an object that implements XML Schema comparison semantics
      * @return a comparable that follows XSD rules
      */
-
-    @Override
-    public SchemaComparable getSchemaComparable() {
-        // Convert negative to positive zero because Double.compareTo() does the wrong thing
-        // Note that for NaN, we return NaN, and rely on the user of the Comparable to use it in a way
-        // that ensures NaN != NaN.
-        return new DoubleComparable(value == 0.0f ? 0.0f : value);
-    }
-
-    /**
-     * A Comparable that performs comparison of xs:double values either with other
-     * BigInteger values or with other representations of XPath numeric values
-     */
-
-    protected static class DoubleComparable implements SchemaComparable {
-
-        protected double value;
-
-        public DoubleComparable(double value) {
-            this.value = value;
-        }
-
-        @Override
-        public int compareTo(SchemaComparable o) {
-            if (o instanceof DoubleComparable) {
-                return Double.compare(value, ((DoubleComparable)o).value);
-            } else {
-                return SequenceTool.INDETERMINATE_ORDERING;
-            }
-        }
-
-        public boolean equals(/*@NotNull*/ Object o) {
-            return o instanceof SchemaComparable && compareTo((SchemaComparable) o) == 0;
-        }
-
-        public int hashCode() {
-            return Double.hashCode(value);
-        }
-    }
 
     /**
      * Get a value whose equals() method follows the "same key" rules for comparing the keys of a map.

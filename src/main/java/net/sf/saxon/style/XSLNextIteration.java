@@ -16,6 +16,7 @@ import net.sf.saxon.expr.instruct.WithParam;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -84,7 +85,7 @@ public class XSLNextIteration extends XSLBreakOrContinue {
     }
 
     public SequenceType getDeclaredParamType(StructuredQName name) {
-        for (NodeInfo param : xslIterate.children(XSLLocalParam.class::isInstance)) {
+        for (NodeInfo param : xslIterate.children(NodeSelector.of(XSLLocalParam.class::isInstance))) {
             if (((XSLLocalParam)param).getVariableQName().equals(name)) {
                 return ((XSLLocalParam) param).getRequiredType();
             }

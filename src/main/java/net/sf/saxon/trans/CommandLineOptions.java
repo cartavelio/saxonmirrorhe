@@ -12,7 +12,6 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
-
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.DayTimeDurationValue;
 import net.sf.saxon.value.NumericValue;
@@ -260,18 +259,22 @@ public class CommandLineOptions {
             String value = configOptions.getProperty(name);
             String fullName = "http://saxon.sf.net/feature/" + name;
             if (!name.startsWith("parserFeature?") && !name.startsWith("parserProperty?")) {
-                Feature<?> f = Feature.byName(fullName);
-                if (f == null) {
-                    throw new XPathException("Unknown configuration feature " + name);
-                }
+                if (FeatureIndex.exists(fullName)) {
+                    FeatureData f = FeatureIndex.getData(fullName);
+                    if (f == null) {
+                        throw new XPathException("Unknown configuration feature " + name);
+                    }
 
-                if (f.type == Boolean.class) {
-                    Configuration.requireBoolean(name, value);
-                } else if (f.type == Integer.class) {
-                    //noinspection ResultOfMethodCallIgnored
-                    Integer.valueOf(value);
-                } else if (f.type != String.class) {
-                    throw new XPathException("Property --" + name + " cannot be supplied as a string");
+                    if (f.type == Boolean.class) {
+                        Configuration.requireBoolean(name, value);
+                    } else if (f.type == Integer.class) {
+                        //noinspection ResultOfMethodCallIgnored
+                        Integer.valueOf(value);
+                    } else if (f.type != String.class) {
+                        throw new XPathException("Property --" + name + " cannot be supplied as a string");
+                    }
+                } else {
+                    throw new XPathException("Unknown configuration property --" + name);
                 }
             }
             try {
@@ -319,7 +322,7 @@ public class CommandLineOptions {
             catalogValue = sb.toString();
 
             try {
-                config.getClass("org.apache.xml.resolver.CatalogManager", false, null);
+                config.getClass("org.apache.xml.resolver.CatalogManager", false);
                 XmlCatalogResolver.setCatalog(catalogValue, config, getOptionValue("t") != null);
             } catch (XPathException err) {
                 throw new XPathException("Failed to load Apache catalog resolver library", err);
@@ -381,7 +384,7 @@ public class CommandLineOptions {
 
         catalogValue = getOptionValue("or");
         if (catalogValue != null) {
-            Object resolver = config.getInstance(catalogValue, null);
+            Object resolver = config.getInstance(catalogValue);
             if (resolver instanceof OutputURIResolver) {
                 config.setConfigurationProperty(Feature.OUTPUT_URI_RESOLVER, (OutputURIResolver) resolver);
             } else {
@@ -477,7 +480,7 @@ public class CommandLineOptions {
 
         catalogValue = getOptionValue("init");
         if (catalogValue != null) {
-            Initializer initializer = (Initializer) config.getInstance(catalogValue, null);
+            Initializer initializer = (Initializer) config.getInstance(catalogValue);
             initializer.initialize(config);
         }
 
@@ -599,6 +602,9 @@ public class CommandLineOptions {
             if (!sourceList.isEmpty()) {
                 List<XdmNode> nodeList = new ArrayList<>(sourceList.size());
                 DocumentBuilder builder = processor.newDocumentBuilder();
+                if (!"off".equals(getOptionValue("l"))) {
+                    builder.setLineNumbering(true);
+                }
                 for (Source s : sourceList) {
                     nodeList.add(builder.build(s));
                 }
@@ -619,13 +625,14 @@ public class CommandLineOptions {
 
     public void setSerializationProperties(Serializer serializer) {
         for (String name : serializationParams.stringPropertyNames()) {
-            String value = serializationParams.getProperty(name);
+            String key = name;
+            String value = serializationParams.getProperty(key);
             // parameters starting with "!" are taken as output properties
             // Allow the prefix "!saxon:" instead of "!{http://saxon.sf.net}"
-            if (name.startsWith("saxon:")) {
-                name = "{" + NamespaceConstant.SAXON + "}" + name.substring(6);
+            if (key.startsWith("saxon:")) {
+                key = "{" + NamespaceConstant.SAXON + "}" + key.substring(6);
             }
-            serializer.setOutputProperty(QName.fromClarkName(name), value);
+            serializer.setOutputProperty(QName.fromClarkName(key), value);
         }
     }
 
@@ -785,7 +792,9 @@ public class CommandLineOptions {
     public static String featureKeys() {
         final int index = "http://saxon.sf.net/feature/".length();
         StringBuilder sb = new StringBuilder();
-        Feature.getNames().forEachRemaining(s -> sb.append("\n  ").append(s.substring(index)));
+        for (String name : FeatureIndex.getNames()) {
+            sb.append("\n  ").append(name.substring(index));
+        }
         return sb.toString();
     }
 

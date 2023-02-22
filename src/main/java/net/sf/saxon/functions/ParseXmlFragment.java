@@ -25,6 +25,7 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.StringItem;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -46,9 +47,13 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringItem input = (StringItem) arguments[0].head();
-        return input == null ? ZeroOrOne.empty() : new ZeroOrOne(evalParseXml(input, context));
+        if (input == null) {
+            return EmptySequence.getInstance();
+        } else {
+            return evalParseXml(input, context);
+        }
     }
 
     private NodeInfo evalParseXml(StringItem inputArg, XPathContext context) throws XPathException {

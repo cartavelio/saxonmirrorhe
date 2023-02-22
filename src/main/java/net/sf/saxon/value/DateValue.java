@@ -8,14 +8,20 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ConversionResult;
+import net.sf.saxon.type.ValidationException;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.WeekFields;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -24,7 +30,7 @@ import java.util.GregorianCalendar;
  * A value of type Date. Note that a Date may include a TimeZone.
  */
 
-public class DateValue extends GDateValue implements Comparable<DateValue> {
+public class DateValue extends GDateValue implements XPathComparable {
 
     /**
      * Private constructor of a skeletal DateValue
@@ -186,26 +192,26 @@ public class DateValue extends GDateValue implements Comparable<DateValue> {
         return setLexicalValue(d, in, rules.isAllowYearZero());
     }
 
-    /**
-     * Factory method: create an xs:date value from a supplied string, in ISO 8601 format, allowing
-     * a year value of 0 to represent the year before year 1 (that is, following the XSD 1.1 rules).
-     * <p>The {@code hasNoYearZero} property in the result is set to false.</p>
-     *
-     * @param s a string in the lexical space of xs:date
-     * @return a DateValue representing the xs:date supplied, including a timezone offset if
-     * present in the lexical representation
-     * @throws DateTimeParseException if the format of the supplied string is invalid.
-     * @since 9.9
-     */
-
-    public static DateValue parse(UnicodeString s) throws DateTimeParseException {
-        ConversionResult result = makeDateValue(s, ConversionRules.DEFAULT);
-        if (result instanceof ValidationFailure) {
-            throw new DateTimeParseException(((ValidationFailure) result).getMessage(), s.toString(), 0);
-        } else {
-            return (DateValue) result;
-        }
-    }
+//    /**
+//     * Factory method: create an xs:date value from a supplied string, in ISO 8601 format, allowing
+//     * a year value of 0 to represent the year before year 1 (that is, following the XSD 1.1 rules).
+//     * <p>The {@code hasNoYearZero} property in the result is set to false.</p>
+//     *
+//     * @param s a string in the lexical space of xs:date
+//     * @return a DateValue representing the xs:date supplied, including a timezone offset if
+//     * present in the lexical representation
+//     * @throws DateTimeParseException if the format of the supplied string is invalid.
+//     * @since 9.9
+//     */
+//
+//    public static DateValue parse(UnicodeString s) throws DateTimeParseException {
+//        ConversionResult result = makeDateValue(s, ConversionRules.DEFAULT);
+//        if (result instanceof ValidationFailure) {
+//            throw new DateTimeParseException(((ValidationFailure) result).getMessage(), s.toString(), 0);
+//        } else {
+//            return (DateValue) result;
+//        }
+//    }
 
     /**
      * Determine the primitive type of the value. This delivers the same answer as
@@ -416,6 +422,16 @@ public class DateValue extends GDateValue implements Comparable<DateValue> {
         return super.subtract(other, context);
     }
 
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+        if (hasTimezone()) {
+            return this;
+        } else if (implicitTimezone == MISSING_TIMEZONE) {
+            throw new NoDynamicContextException("Unknown implicit timezone");
+        } else {
+            return adjustTimezone(implicitTimezone);
+        }
+    }
 
     /**
      * Context-free comparison of two DateValue values. For this to work,
@@ -429,11 +445,15 @@ public class DateValue extends GDateValue implements Comparable<DateValue> {
      */
 
     @Override
-    public int compareTo(DateValue v2) {
-        try {
-            return compareTo(v2, MISSING_TIMEZONE);
-        } catch (Exception err) {
-            throw new ClassCastException("Date comparison requires access to implicit timezone");
+    public int compareTo(XPathComparable v2) {
+        if (v2 instanceof DateValue) {
+            try {
+                return compareTo((DateValue)v2, MISSING_TIMEZONE);
+            } catch (Exception err) {
+                throw new ClassCastException("Date comparison requires access to implicit timezone");
+            }
+        } else {
+            throw new ClassCastException("Cannot compare xs:date to " + v2.toString());
         }
     }
 
@@ -549,6 +569,7 @@ public class DateValue extends GDateValue implements Comparable<DateValue> {
      * @return the ISO week number
      */
 
+    @CSharpReplaceBody(code="return System.Globalization.ISOWeek.GetWeekOfYear(new System.DateTime(year, month, day));")
     public static int getWeekNumber(int year, int month, int day) {
         LocalDate date = LocalDate.of(year, month, day);
         return date.get(WeekFields.ISO.weekOfWeekBasedYear());
@@ -580,6 +601,7 @@ public class DateValue extends GDateValue implements Comparable<DateValue> {
         return ((day + firstDay - 2) / 7) + inc;
     }
 
+    //#if CSHARP==false
     /**
      * Convert the value to a Java {@link LocalDate} value, dropping any timezone information
      * @return the corresponding Java {@link LocalDate}; any timezone information is simply discarded
@@ -588,6 +610,6 @@ public class DateValue extends GDateValue implements Comparable<DateValue> {
     public LocalDate toLocalDate() {
         return LocalDate.of(getYear(), getMonth(), getDay());
     }
-
+    //#endif
 }
 

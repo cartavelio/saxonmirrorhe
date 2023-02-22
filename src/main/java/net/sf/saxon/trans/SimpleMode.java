@@ -1205,8 +1205,7 @@ public class SimpleMode extends Mode {
         // Now sort the rules into ranking order
         final RuleSorter sorter = new RuleSorter(start);
         // add all the rules in this Mode to the sorter
-        //noinspection Convert2MethodRef
-        processRules(r -> sorter.addRule(r));
+        processRules(sorter::addRule);
         // now allocate ranks to all the rules in this Mode
         sorter.allocateRanks();
         highestRank = start + sorter.getNumberOfRules();

@@ -16,7 +16,7 @@ import java.text.CollationKey;
  * A match key for comparing strings under a collation. Wraps a Java CollationKey obtained
  * from the collation.
  */
-public class CollationMatchKey implements AtomicMatchKey, Comparable {
+public class CollationMatchKey implements AtomicMatchKey, Comparable<CollationMatchKey> {
 
     private final CollationKey key;
 
@@ -25,12 +25,8 @@ public class CollationMatchKey implements AtomicMatchKey, Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
-        if (o instanceof CollationMatchKey) {
-            return key.compareTo(((CollationMatchKey) o).key);
-        } else {
-            throw new ClassCastException();
-        }
+    public int compareTo(CollationMatchKey o) {
+        return key.compareTo(o.key);
     }
 
     @Override

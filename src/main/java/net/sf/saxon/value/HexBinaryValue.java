@@ -8,10 +8,10 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -22,7 +22,7 @@ import java.util.Arrays;
  * A value of type xs:hexBinary
  */
 
-public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Comparable<HexBinaryValue> {
+public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPathComparable, ContextFreeAtomicValue {
 
     private final byte[] binaryValue;
 
@@ -150,50 +150,6 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Compa
     }
 
     /**
-     * Support XML Schema comparison semantics
-     * @return
-     */
-
-    /*@NotNull*/
-    @Override
-    public SchemaComparable getSchemaComparable() {
-        return new HexBinaryComparable(this);
-    }
-
-    private static class HexBinaryComparable implements SchemaComparable {
-
-        private final HexBinaryValue value;
-
-        public HexBinaryComparable(HexBinaryValue value) {
-            this.value = value;
-        }
-
-        /*@NotNull*/
-        public HexBinaryValue getHexBinaryValue() {
-            return value;
-        }
-
-        @Override
-        public int compareTo(SchemaComparable o) {
-            if (o instanceof HexBinaryComparable
-                    && Arrays.equals(getHexBinaryValue().binaryValue, ((HexBinaryComparable)o).value.binaryValue)) {
-                return 0;
-            } else {
-                return SequenceTool.INDETERMINATE_ORDERING;
-            }
-        }
-
-        public boolean equals(/*@NotNull*/ Object o) {
-            return o instanceof HexBinaryComparable && compareTo((HexBinaryComparable)o) == 0;
-        }
-
-        public int hashCode() {
-            return value.hashCode();
-        }
-    }
-
-
-    /**
      * Get an object value that implements the XPath equality and ordering comparison semantics for this value.
      * If the ordered parameter is set to true, the result will be a Comparable and will support a compareTo()
      * method with the semantics of the XPath lt/gt operator, provided that the other operand is also obtained
@@ -203,8 +159,6 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Compa
      * semantics are context-sensitive, for example where they depend on the implicit timezone or the default
      * collation.
      *
-     * @param ordered  true if an ordered comparison is required. In this case the result is null if the
-     *                 type is unordered; in other cases the returned value will be a Comparable.
      * @param collator collation to be used for comparing strings
      * @param implicitTimezone to be used for comparing dates/times with no timezone
      * @return a key used for performing the comparison
@@ -212,7 +166,17 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Compa
 
     /*@Nullable*/
     @Override
-    public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
+        return this;
+    }
+
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {
+        return this;
+    }
+
+    @Override
+    public XPathComparable getXPathComparable() {
         return this;
     }
 
@@ -229,19 +193,23 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Compa
     }
 
     @Override
-    public int compareTo(HexBinaryValue o) {
-        byte[] other = o.binaryValue;
-        int len0 = binaryValue.length;
-        int len1 = other.length;
-        int shorter = java.lang.Math.min(len0, len1);
-        for (int i=0; i<shorter; i++) {
-            int a = (int)binaryValue[i] & 0xff;
-            int b = (int)other[i] & 0xff;
-            if (a != b) {
-                return a < b ? -1 : +1;
+    public int compareTo(XPathComparable o) {
+        if (o instanceof HexBinaryValue) {
+            byte[] other = ((HexBinaryValue)o).binaryValue;
+            int len0 = binaryValue.length;
+            int len1 = other.length;
+            int shorter = java.lang.Math.min(len0, len1);
+            for (int i = 0; i < shorter; i++) {
+                int a = (int) binaryValue[i] & 0xff;
+                int b = (int) other[i] & 0xff;
+                if (a != b) {
+                    return a < b ? -1 : +1;
+                }
             }
+            return Integer.signum(len0 - len1);
+        } else {
+            throw new ClassCastException("Cannot compare xs:hexBinary to " + o.toString());
         }
-        return Integer.signum(len0 - len1);
     }
 }
 

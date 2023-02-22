@@ -61,7 +61,7 @@ public class XdmValueForCpp {
 
     public XdmValueForCpp(int i) throws SaxonApiException {
         try {
-            value = XdmValue.wrap(IntegerValue.makeIntegerValue(i).asAtomic());
+            value = XdmValue.wrap(IntegerValue.fromDouble(i).asAtomic());
             type = BuiltInAtomicType.INT;
         } catch (ValidationException e) {
             throw new SaxonApiException(e);

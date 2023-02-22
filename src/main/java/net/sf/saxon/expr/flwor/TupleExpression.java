@@ -17,12 +17,13 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.JavaExternalObjectType;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A tuple expression is an expression that returns a tuple. Specifically,
+ * A tuple expression is an expression that returns a FLWOR tuple. Specifically,
  * it is a list local variables references; it returns a Tuple item
  * containing the current value of these variables.
  */
@@ -90,7 +91,7 @@ public class TupleExpression extends Expression {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return getConfiguration().getJavaExternalObjectType(Object.class);
+        return new JavaExternalObjectType(Tuple.class);
     }
 
     /*@NotNull*/

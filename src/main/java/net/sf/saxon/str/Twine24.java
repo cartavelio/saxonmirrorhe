@@ -8,6 +8,7 @@
 package net.sf.saxon.str;
 
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.z.IntIterator;
@@ -208,6 +209,7 @@ public class Twine24 extends UnicodeString {
             private final IntIterator cp = codePoints();
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public Int64Value next() {
                 return cp.hasNext() ? new Int64Value(cp.next()) : null;
             }
@@ -234,11 +236,13 @@ public class Twine24 extends UnicodeString {
             int i = 0;
 
             @Override
+            @CSharpModifiers(code = {"public"})
             public boolean hasNext() {
                 return i < bytes.length;
             }
 
             @Override
+            @CSharpModifiers(code = {"public"})
             public int next() {
                 int result = ((bytes[i] & 0xff) << 16)
                         | ((bytes[i + 1] & 0xff) << 8)

@@ -35,6 +35,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 
 public class CatalogCollection extends AbstractResourceCollection {
@@ -80,10 +81,10 @@ public class CatalogCollection extends AbstractResourceCollection {
                     return makeResource(context.getConfiguration(), id);
                 }
             } catch (XPathException e) {
-                int onError = params == null ? URIQueryParameters.ON_ERROR_FAIL : params.getOnError();
-                if (onError == URIQueryParameters.ON_ERROR_FAIL) {
+                Optional<Integer> onError = params == null ? Optional.of(URIQueryParameters.ON_ERROR_FAIL) : params.getOnError();
+                if (onError.isPresent() && onError.get() == URIQueryParameters.ON_ERROR_FAIL) {
                     return new FailedResource(in, e);
-                } else if (onError == URIQueryParameters.ON_ERROR_WARNING) {
+                } else if (onError.isPresent() && onError.get() == URIQueryParameters.ON_ERROR_WARNING) {
                     context.getController().warning("collection(): failed to parse " + in + ": " + e.getMessage(), e.getErrorCodeLocalPart(), null);
                     return null;
                 } else {

@@ -14,11 +14,11 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpParameterType;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 /**
  * ElementImpl implements an element node in the Linked tree model. Subclasses of ElementImpl,
@@ -710,7 +709,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             }
         }
         namespaceMap = childNamespaces;
-        for (NodeInfo child : children(ElementImpl.class::isInstance)) {
+        for (NodeInfo child : children(NodeSelector.of(ElementImpl.class::isInstance))) {
             ((ElementImpl)child).deepAddNamespaces(inheritedNamespaces);
         }
     }

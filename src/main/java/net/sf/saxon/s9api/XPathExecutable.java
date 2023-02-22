@@ -13,6 +13,7 @@ import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
+import net.sf.saxon.transpile.CSharpInnerClass;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -129,6 +130,7 @@ public class XPathExecutable {
      * @since 9.2
      */
 
+    @CSharpInnerClass(outer=false, extra="java.util.Iterator<net.sf.saxon.sxpath.XPathVariable> varIterator")
     public Iterator<QName> iterateExternalVariables() {
         final Iterator<XPathVariable> varIterator = env.iterateExternalVariables();
         return new Iterator<QName>() {

@@ -495,6 +495,8 @@ public class DocumentBuilder {
      *                                  object model is not on the class path
      */
 
+    //#if CSHARP==false
+
     public XdmNode wrap(Object node) throws IllegalArgumentException {
         if (node instanceof NodeInfo) {
             NodeInfo nodeInfo = (NodeInfo) node;
@@ -513,6 +515,8 @@ public class DocumentBuilder {
             }
         }
     }
+
+    //#endif
 
     /**
      * Parse a source document, sending it to a supplied {@link Destination}

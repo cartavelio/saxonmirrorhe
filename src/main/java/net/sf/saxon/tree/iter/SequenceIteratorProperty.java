@@ -7,7 +7,7 @@ import net.sf.saxon.transpile.CSharpSimpleEnum;
  * Defines possible properties of a {@link SequenceIterator}
  */
 
-@CSharpSimpleEnum
+@CSharpSimpleEnum(flags=true)
 public enum SequenceIteratorProperty {
 
     /**

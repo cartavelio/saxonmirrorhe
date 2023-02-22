@@ -123,13 +123,13 @@ import java.util.function.Predicate;
 
 @CSharpInjectMembers(code = {
         "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
                 + "    }"
 })
 public class Configuration implements SourceResolver, NotationSet {
 
-    protected static Set<Feature<Boolean>> booleanFeatures = new HashSet<>(40);
-    protected static Set<Feature<String>> stringFeatures = new HashSet<>(40);
+    protected static IntSet booleanFeatures = new IntHashSet(40);
+    protected static IntSet stringFeatures = new IntHashSet(40);
     private transient ApiProvider apiProcessor = null;
     private transient CharacterSetFactory characterSetFactory;
 
@@ -181,8 +181,10 @@ public class Configuration implements SourceResolver, NotationSet {
     protected Optimizer optimizer = null;
 
     private SerializerFactory serializerFactory = new SerializerFactory(this);
+    //#if CSHARP==false
     private volatile ConcurrentLinkedQueue<XMLReader> sourceParserPool = new ConcurrentLinkedQueue<>();
     private volatile ConcurrentLinkedQueue<XMLReader> styleParserPool = new ConcurrentLinkedQueue<>();
+    //#endif
     private String sourceParserClass;
     private transient SourceResolver sourceResolver = this;
     private transient Logger traceOutput = new StandardLogger();
@@ -389,18 +391,21 @@ public class Configuration implements SourceResolver, NotationSet {
     protected void init() {
         Version.platform.initialize(this);
         defaultXsltCompilerInfo.setURIResolver(getSystemURIResolver());
+
+        //#if CSHARP==false
         StandardEntityResolver resolver = new StandardEntityResolver(this);
+        defaultParseOptions.setEntityResolver(resolver);
+        //#endif
 
         // If the call to makeStandardModuleURIResolver during initialization, created
         // a StandardModuleURIResolver without a config, make sure it gets this config.
         if (standardModuleURIResolver instanceof StandardModuleURIResolver) {
             ((StandardModuleURIResolver) standardModuleURIResolver).setConfiguration(this);
         }
-
-        defaultParseOptions.setEntityResolver(resolver);
-        internalSetBooleanProperty(Feature.PREFER_JAXP_PARSER, true);
-        internalSetBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS, true);
-        internalSetBooleanProperty(Feature.DISABLE_XSL_EVALUATE, false);
+        
+        internalSetBooleanProperty(FeatureCode.PREFER_JAXP_PARSER, FeatureKeys.PREFER_JAXP_PARSER, true);
+        internalSetBooleanProperty(FeatureCode.ALLOW_EXTERNAL_FUNCTIONS, FeatureKeys.ALLOW_EXTERNAL_FUNCTIONS, true);
+        internalSetBooleanProperty(FeatureCode.DISABLE_XSL_EVALUATE, FeatureKeys.DISABLE_XSL_EVALUATE, false);
         //internalSetBooleanProperty(FeatureKeys.STABLE_COLLECTION_URI, true);
 
 
@@ -661,15 +666,13 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param className   A string containing the name of the
      *                    class, for example "com.microstar.sax.LarkDriver"
      * @param tracing     true if diagnostic tracing is required
-     * @param classLoader The ClassLoader to be used to load the class, or null to
-     *                    use the ClassLoader selected by the DynamicLoader.
      * @return an instance of the class named, or null if it is not
      * loadable.
      * @throws XPathException if the class cannot be loaded.
      */
 
-    public Class getClass(String className, boolean tracing, /*@Nullable*/ ClassLoader classLoader) throws XPathException {
-        return dynamicLoader.getClass(className, tracing ? traceOutput : null, classLoader);
+    public Class<?> getClass(String className, boolean tracing) throws XPathException {
+        return dynamicLoader.getClass(className, tracing ? traceOutput : null, null);
     }
 
     /**
@@ -682,15 +685,13 @@ public class Configuration implements SourceResolver, NotationSet {
      *
      * @param className   A string containing the name of the
      *                    class, for example "com.microstar.sax.LarkDriver"
-     * @param classLoader The ClassLoader to be used to load the class, or null to
-     *                    use the ClassLoader selected by the DynamicLoader.
      * @return an instance of the class named, or null if it is not
      * loadable.
      * @throws XPathException if the class cannot be loaded.
      */
 
-    public Object getInstance(String className, /*@Nullable*/ ClassLoader classLoader) throws XPathException {
-        return dynamicLoader.getInstance(className, isTiming() ? traceOutput : null, classLoader);
+    public Object getInstance(String className) throws XPathException {
+        return dynamicLoader.getInstance(className, isTiming() ? traceOutput : null, null);
     }
 
     /**
@@ -1178,7 +1179,7 @@ public class Configuration implements SourceResolver, NotationSet {
     public void setTraceListener(/*@Nullable*/ TraceListener traceListener) {
         this.traceListener = traceListener;
         setCompileWithTracing(traceListener != null);
-        internalSetBooleanProperty(Feature.ALLOW_MULTITHREADING, false);
+        internalSetBooleanProperty(FeatureCode.ALLOW_MULTITHREADING, FeatureKeys.ALLOW_MULTITHREADING, false);
     }
 
     /**
@@ -1269,7 +1270,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void setCompileWithTracing(boolean trace) {
-        internalSetBooleanProperty(Feature.COMPILE_WITH_TRACING, trace);
+        internalSetBooleanProperty(FeatureCode.COMPILE_WITH_TRACING, FeatureKeys.COMPILE_WITH_TRACING, trace);
         if (defaultXsltCompilerInfo != null) {
             if (trace) {
                 defaultXsltCompilerInfo.setCodeInjector(new XSLTTraceCodeInjector());
@@ -2676,6 +2677,7 @@ public class Configuration implements SourceResolver, NotationSet {
         return defaultParseOptions.getSpaceStrippingRule() == AllElementsSpaceStrippingRule.getInstance();
     }
 
+    //#if CSHARP==false
     /**
      * Get an XML parser for source documents.
      * <p>This method is intended primarily for internal use.</p>
@@ -2881,6 +2883,7 @@ public class Configuration implements SourceResolver, NotationSet {
             // and not attempt to reuse the parser.
         }
     }
+    //#endif
 
     /**
      * Simple interface to load a schema document
@@ -3315,6 +3318,7 @@ public class Configuration implements SourceResolver, NotationSet {
         return destination;
     }
 
+    //#if CSHARP==false
     /**
      * Create a new SAX XMLReader object using the class name provided.
      * <p>The named class must exist and must implement the
@@ -3351,6 +3355,7 @@ public class Configuration implements SourceResolver, NotationSet {
         throw new TransformerFactoryConfigurationError("Class " + className +
                                                                " is not a SAX2 XMLReader or SAXParserFactory");
     }
+    //#endif
 
     /**
      * Make an expression Parser for a specified version of XPath or XQuery
@@ -3698,7 +3703,7 @@ public class Configuration implements SourceResolver, NotationSet {
         return new AccumulatorRegistry();
     }
 
-
+    //#if CSHARP==false
     /**
      * Register an external object model with this Configuration.
      *
@@ -3713,7 +3718,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     public void registerExternalObjectModel(ExternalObjectModel model) {
         try {
-            getClass(model.getDocumentClassName(), false, null);
+            getClass(model.getDocumentClassName(), false);
         } catch (XPathException e) {
             // If the model can't be loaded, do nothing
             return;
@@ -3803,6 +3808,7 @@ public class Configuration implements SourceResolver, NotationSet {
         throw new UnsupportedOperationException();
     }
 
+    //#endif
     /**
      * Convert a Java object to a map
      *
@@ -4225,8 +4231,9 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void setConfigurationProperty(String name, Object value) {
-        Feature feature = Feature.byName(name);
-        if (feature == null) {
+        if (FeatureIndex.exists(name)) {
+            setFeature(FeatureIndex.getData(name), value);
+        } else {
             if (name.startsWith(FeatureKeys.XML_PARSER_FEATURE)) {
                 String uri = name.substring(FeatureKeys.XML_PARSER_FEATURE.length());
                 try {
@@ -4247,45 +4254,54 @@ public class Configuration implements SourceResolver, NotationSet {
             } else {
                 throw new IllegalArgumentException("Unrecognized configuration feature: " + name);
             }
-        } else {
-            //noinspection unchecked
-            setConfigurationProperty(feature, value);
         }
     }
 
 
     /**
-     * Set a property of the configuration. This method underpins the setAttribute() method of the
-     * TransformerFactory implementation, and is provided
-     * to enable setting of Configuration properties using URIs without instantiating a TransformerFactory:
-     * specifically, this may be useful when running XQuery, and it is also used by the Validator API
+     * Set a property of the configuration.
+     *
+     * <p>This is the preferred way of setting configuration options from application
+     * code where it is known statically which feature is being set. Other methods are
+     * provided for use by wrapper APIs (such as the JAXP API) where the feature name
+     * is supplied dynamically as a string.</p>
      * @param <T> the type of value required for this particular feature
      * @param feature  the property to be set. See the class {@link Feature} for
      *              constants representing the property names that can be set.
-     * @param value the value of the property. Note that boolean values may be supplied either as a Boolean,
-     *              or as one of the strings "0", "1", "true", "false", "yes", "no", "on", or "off".
+     * @param value the value of the property. This must be of the correct type corresponding
+     *              to the chosen {@link Feature}.
      * @throws IllegalArgumentException if the property name is not recognized or if the value is not
      *                                  a valid value for the named property
      */
 
     public <T> void setConfigurationProperty(Feature<T> feature, T value) {
-        String name = feature.name;
-        if (booleanFeatures.contains(feature)) {
-            if (feature == Feature.COMPILE_WITH_TRACING) {
+        setFeature(FeatureIndex.getData(feature.code), value);
+    }
+
+    /**
+     * Internal supporting method for setting configuration properties
+     * @param feature details of the property to be set
+     * @param value value of the property to be set
+     */
+    protected void setFeature(FeatureData feature, Object value) {
+        String name = feature.uri;
+        int code = feature.code;
+        if (booleanFeatures.contains(code)) {
+            if (code == FeatureCode.COMPILE_WITH_TRACING) {
                 boolean b = requireBoolean(name, value);
                 setCompileWithTracing(b);
-            } else if (feature == Feature.DTD_VALIDATION) {
+            } else if (code == FeatureCode.DTD_VALIDATION) {
                 boolean b = requireBoolean(name, value);
                 setValidation(b);
-            } else if (feature == Feature.EXPAND_ATTRIBUTE_DEFAULTS) {
+            } else if (code == FeatureCode.EXPAND_ATTRIBUTE_DEFAULTS) {
                 boolean b = requireBoolean(name, value);
                 setExpandAttributeDefaults(b);
             }
-            internalSetBooleanProperty(feature, value);
-        } else if (stringFeatures.contains(feature)) {
-            stringProperties.put(feature.code, requireString(feature.name, value));
+            internalSetBooleanProperty(code, name, value);
+        } else if (stringFeatures.contains(code)) {
+            stringProperties.put(code, requireString(name, value));
         } else {
-            switch (feature.code) {
+            switch (code) {
                 case FeatureCode.ALLOWED_PROTOCOLS:
                     allowedUriTest = ProtocolRestricter.make((String)value);
                     break;
@@ -4342,9 +4358,10 @@ public class Configuration implements SourceResolver, NotationSet {
                     } else {
                         defaultParseOptions.setDTDValidationMode(isValidation() ? Validation.STRICT : Validation.SKIP);
                     }
-                    internalSetBooleanProperty(Feature.DTD_VALIDATION_RECOVERABLE, b);
+                    internalSetBooleanProperty(code, name, b);
                     break;
                 }
+                //#if CSHARP==false
                 case FeatureCode.ENTITY_RESOLVER_CLASS:
                     if ("".equals(value)) {
                         defaultParseOptions.setEntityResolver(null);
@@ -4353,7 +4370,7 @@ public class Configuration implements SourceResolver, NotationSet {
                                 (EntityResolver) instantiateClassName(name, value, EntityResolver.class));
                     }
                     break;
-
+                //#endif
                 case FeatureCode.ENVIRONMENT_VARIABLE_RESOLVER:
                     if (!(value instanceof EnvironmentVariableResolver)) {
                         throw new IllegalArgumentException(
@@ -4425,7 +4442,7 @@ public class Configuration implements SourceResolver, NotationSet {
                     if (optimizer != null) {
                         optimizer.setOptimizerOptions(optimizerOptions);
                     }
-                    internalSetBooleanProperty(Feature.GENERATE_BYTE_CODE,
+                    internalSetBooleanProperty(FeatureCode.GENERATE_BYTE_CODE, FeatureKeys.GENERATE_BYTE_CODE,
                                                optimizerOptions.isSet(OptimizerOptions.BYTE_CODE));
                     defaultXsltCompilerInfo.setOptimizerOptions(optimizerOptions);
                     break;
@@ -4466,16 +4483,16 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
 
                 case FeatureCode.SCHEMA_VALIDATION: {
-                    setSchemaValidationMode(requireInteger(feature.name, value));
+                    setSchemaValidationMode(requireInteger(name, value));
                     break;
                 }
                 case FeatureCode.SCHEMA_VALIDATION_MODE:
-                    String mode = requireString(feature.name, value);
+                    String mode = requireString(name, value);
                     setSchemaValidationMode(Validation.getCode(mode));
                     break;
 
                 case FeatureCode.SOURCE_PARSER_CLASS:
-                    setSourceParserClass(requireString(feature.name, value));
+                    setSourceParserClass(requireString(name, value));
                     break;
 
                 case FeatureCode.SOURCE_RESOLVER_CLASS:
@@ -4666,10 +4683,12 @@ public class Configuration implements SourceResolver, NotationSet {
                     getDefaultStaticQueryContext().setSchemaAware(requireBoolean(name, value));
                     break;
 
+                //#if CSHARP==false
                 case FeatureCode.XQUERY_STATIC_ERROR_LISTENER_CLASS:
                     getDefaultStaticQueryContext().setErrorListener(
                             (ErrorListener) instantiateClassName(name, value, ErrorListener.class));
                     break;
+                //#endif
 
                 case FeatureCode.XQUERY_VERSION:
                     if (!"3.1".equals(value)) {
@@ -4718,10 +4737,12 @@ public class Configuration implements SourceResolver, NotationSet {
                     getDefaultXsltCompilerInfo().setSchemaAware(requireBoolean(name, value));
                     break;
 
+                //#if CSHARP==false
                 case FeatureCode.XSLT_STATIC_ERROR_LISTENER_CLASS:
                     getDefaultXsltCompilerInfo().setErrorListener(
                             (ErrorListener) instantiateClassName(name, value, ErrorListener.class));
                     break;
+                //#endif
 
                 case FeatureCode.XSLT_STATIC_URI_RESOLVER_CLASS:
                     getDefaultXsltCompilerInfo().setURIResolver(
@@ -4798,19 +4819,20 @@ public class Configuration implements SourceResolver, NotationSet {
     /**
      * Set a boolean property value, without checking that it is a recognized property name
      *
-     * @param property the name of the property to be set
+     * @param code         the numeric code of the property to be set
+     * @param name          the name of the property (used only for diagnostics)
      * @param value        a representation of the boolean value.
      *                     This may be either a java.lang.Boolean, or a string
      *                     taking one of the values on|off, true|false, yes|no, or 1|0 (suited to the conventions of different
      *                     configuration APIs that end up calling this method)
      */
 
-    protected void internalSetBooleanProperty(Feature property, Object value) {
-        boolean b = requireBoolean(property.name, value);
+    protected void internalSetBooleanProperty(int code, String name, Object value) {
+        boolean b = requireBoolean(name, value);
         if (b) {
-            enabledProperties.add(property.code);
+            enabledProperties.add(code);
         } else {
-            enabledProperties.remove(property.code);
+            enabledProperties.remove(code);
         }
     }
 
@@ -4873,7 +4895,7 @@ public class Configuration implements SourceResolver, NotationSet {
                     propertyName + " must be a String");
         }
         try {
-            Object obj = getInstance((String) value, null);
+            Object obj = getInstance((String) value);
             if (!requiredClass.isAssignableFrom(obj.getClass())) {
                 throw new IllegalArgumentException("Error in " + propertyName +
                                                            ": Class " + value + " does not implement " + requiredClass.getName());
@@ -4888,43 +4910,43 @@ public class Configuration implements SourceResolver, NotationSet {
 
 
     static {
-        booleanFeatures.add(Feature.ALLOW_EXTERNAL_FUNCTIONS);
-        booleanFeatures.add(Feature.ALLOW_MULTITHREADING);
-        booleanFeatures.add(Feature.ALLOW_SYNTAX_EXTENSIONS);
-        booleanFeatures.add(Feature.ASSERTIONS_CAN_SEE_COMMENTS);
-        booleanFeatures.add(Feature.COMPILE_WITH_TRACING);
-        booleanFeatures.add(Feature.DEBUG_BYTE_CODE);
-        booleanFeatures.add(Feature.DISABLE_XSL_EVALUATE);
-        booleanFeatures.add(Feature.DISPLAY_BYTE_CODE);
-        booleanFeatures.add(Feature.DTD_VALIDATION);
-        booleanFeatures.add(Feature.EAGER_EVALUATION);
-        booleanFeatures.add(Feature.EXPAND_ATTRIBUTE_DEFAULTS);
-        booleanFeatures.add(Feature.EXPATH_FILE_DELETE_TEMPORARY_FILES);
-        booleanFeatures.add(Feature.GENERATE_BYTE_CODE);
-        booleanFeatures.add(Feature.IGNORE_SAX_SOURCE_PARSER);
-        booleanFeatures.add(Feature.IMPLICIT_SCHEMA_IMPORTS);
-        booleanFeatures.add(Feature.MARK_DEFAULTED_ATTRIBUTES);
-        booleanFeatures.add(Feature.MONITOR_HOT_SPOT_BYTE_CODE);
-        booleanFeatures.add(Feature.MULTIPLE_SCHEMA_IMPORTS);
-        booleanFeatures.add(Feature.PRE_EVALUATE_DOC_FUNCTION);
-        booleanFeatures.add(Feature.PREFER_JAXP_PARSER);
-        booleanFeatures.add(Feature.RETAIN_DTD_ATTRIBUTE_TYPES);
-        booleanFeatures.add(Feature.STABLE_COLLECTION_URI);
-        booleanFeatures.add(Feature.STABLE_UNPARSED_TEXT);
-        booleanFeatures.add(Feature.STREAMING_FALLBACK);
-        booleanFeatures.add(Feature.STRICT_STREAMABILITY);
-        booleanFeatures.add(Feature.SUPPRESS_EVALUATION_EXPIRY_WARNING);
-        booleanFeatures.add(Feature.SUPPRESS_XPATH_WARNINGS);
-        booleanFeatures.add(Feature.SUPPRESS_XSLT_NAMESPACE_CHECK);
-        booleanFeatures.add(Feature.TRACE_EXTERNAL_FUNCTIONS);
-        booleanFeatures.add(Feature.TRACE_OPTIMIZER_DECISIONS);
-        booleanFeatures.add(Feature.USE_PI_DISABLE_OUTPUT_ESCAPING);
-        booleanFeatures.add(Feature.USE_TYPED_VALUE_CACHE);
-        booleanFeatures.add(Feature.XQUERY_MULTIPLE_MODULE_IMPORTS);
-        booleanFeatures.add(Feature.RETAIN_NODE_FOR_DIAGNOSTICS);
-        booleanFeatures.add(Feature.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS);
+        booleanFeatures.add(FeatureCode.ALLOW_EXTERNAL_FUNCTIONS);
+        booleanFeatures.add(FeatureCode.ALLOW_MULTITHREADING);
+        booleanFeatures.add(FeatureCode.ALLOW_SYNTAX_EXTENSIONS);
+        booleanFeatures.add(FeatureCode.ASSERTIONS_CAN_SEE_COMMENTS);
+        booleanFeatures.add(FeatureCode.COMPILE_WITH_TRACING);
+        booleanFeatures.add(FeatureCode.DEBUG_BYTE_CODE);
+        booleanFeatures.add(FeatureCode.DISABLE_XSL_EVALUATE);
+        booleanFeatures.add(FeatureCode.DISPLAY_BYTE_CODE);
+        booleanFeatures.add(FeatureCode.DTD_VALIDATION);
+        booleanFeatures.add(FeatureCode.EAGER_EVALUATION);
+        booleanFeatures.add(FeatureCode.EXPAND_ATTRIBUTE_DEFAULTS);
+        booleanFeatures.add(FeatureCode.EXPATH_FILE_DELETE_TEMPORARY_FILES);
+        booleanFeatures.add(FeatureCode.GENERATE_BYTE_CODE);
+        booleanFeatures.add(FeatureCode.IGNORE_SAX_SOURCE_PARSER);
+        booleanFeatures.add(FeatureCode.IMPLICIT_SCHEMA_IMPORTS);
+        booleanFeatures.add(FeatureCode.MARK_DEFAULTED_ATTRIBUTES);
+        booleanFeatures.add(FeatureCode.MONITOR_HOT_SPOT_BYTE_CODE);
+        booleanFeatures.add(FeatureCode.MULTIPLE_SCHEMA_IMPORTS);
+        booleanFeatures.add(FeatureCode.PRE_EVALUATE_DOC_FUNCTION);
+        booleanFeatures.add(FeatureCode.PREFER_JAXP_PARSER);
+        booleanFeatures.add(FeatureCode.RETAIN_DTD_ATTRIBUTE_TYPES);
+        booleanFeatures.add(FeatureCode.STABLE_COLLECTION_URI);
+        booleanFeatures.add(FeatureCode.STABLE_UNPARSED_TEXT);
+        booleanFeatures.add(FeatureCode.STREAMING_FALLBACK);
+        booleanFeatures.add(FeatureCode.STRICT_STREAMABILITY);
+        booleanFeatures.add(FeatureCode.SUPPRESS_EVALUATION_EXPIRY_WARNING);
+        booleanFeatures.add(FeatureCode.SUPPRESS_XPATH_WARNINGS);
+        booleanFeatures.add(FeatureCode.SUPPRESS_XSLT_NAMESPACE_CHECK);
+        booleanFeatures.add(FeatureCode.TRACE_EXTERNAL_FUNCTIONS);
+        booleanFeatures.add(FeatureCode.TRACE_OPTIMIZER_DECISIONS);
+        booleanFeatures.add(FeatureCode.USE_PI_DISABLE_OUTPUT_ESCAPING);
+        booleanFeatures.add(FeatureCode.USE_TYPED_VALUE_CACHE);
+        booleanFeatures.add(FeatureCode.XQUERY_MULTIPLE_MODULE_IMPORTS);
+        booleanFeatures.add(FeatureCode.RETAIN_NODE_FOR_DIAGNOSTICS);
+        booleanFeatures.add(FeatureCode.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS);
 
-        stringFeatures.add(Feature.ZIP_URI_PATTERN);
+        stringFeatures.add(FeatureCode.ZIP_URI_PATTERN);
     }
 
 
@@ -4940,282 +4962,295 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /*@NotNull*/
     public Object getConfigurationProperty(String name) {
-        Feature<?> feature = Feature.byName(name);
-        if (feature == null) {
-            throw new IllegalArgumentException("Unknown configuration property " + name);
+        if (FeatureIndex.exists(name)) {
+            return getFeature(FeatureIndex.getData(name));
         } else {
-            return getConfigurationProperty(feature);
+            throw new IllegalArgumentException("Unknown configuration property " + name);
         }
     }
 
     /**
-     * Get a property of the configuration
+     * Get a property of the configuration.
+     *
+     * <p>This is the preferred way of getting configuration options from application
+     * code where it is known statically which feature is being set. Other methods are
+     * provided for use by wrapper APIs (such as the JAXP API) where the feature name
+     * is supplied dynamically as a string.</p>
      * @param <T> the type of value returned for this particular feature
      * @param feature the required property. See the class {@link Feature} for
      *                constants representing the properties that can be requested.
-     * @return the value of the property. Note that boolean values are returned as a Boolean,
-     * even if the value was supplied as a string (for example "true" or "on").
-     * @throws IllegalArgumentException thrown if the property is not one that Saxon recognizes.
+     * @return the value of the property; the type of the result depends on the chosen
+     * {@link Feature}.
      * @since 9.9
      */
 
     /*@NotNull*/
     @SuppressWarnings("unchecked")
     public <T> T getConfigurationProperty(Feature<T> feature) {
-        if (booleanFeatures.contains(feature)) {
-            return (T) Boolean.valueOf(getBooleanProperty((Feature<Boolean>)feature));
+        FeatureData data = FeatureIndex.getData(feature.code);
+        return (T)getFeature(data);
+    }
+
+    protected Object getFeature(FeatureData feature) {
+        int code = feature.code;
+        if (booleanFeatures.contains(code)) {
+            return enabledProperties.contains(code);
         }
-        if (stringFeatures.contains(feature)) {
-            String value = stringProperties.get(feature.code);
+        if (stringFeatures.contains(code)) {
+            String value = stringProperties.get(code);
             if (value == null) {
-                return (T)feature.defaultValue;
+                return feature.defaultValue;
             } else {
-                return (T)value;
+                return value;
             }
         }
-        switch (feature.code) {
+        switch (code) {
 
             case FeatureCode.ALLOWED_PROTOCOLS:
                 if (allowedUriTest instanceof ProtocolRestricter) {
-                    return (T)allowedUriTest.toString();
+                    return allowedUriTest.toString();
                 } else {
-                    return (T)"all";
+                    return "all";
                 }
 
             case FeatureCode.COLLATION_URI_RESOLVER:
-                return (T) getCollationURIResolver();
+                return getCollationURIResolver();
 
             case FeatureCode.COLLATION_URI_RESOLVER_CLASS:
-                return (T) getCollationURIResolver().getClass().getName();
+                return getCollationURIResolver().getClass().getName();
 
             case FeatureCode.CONFIGURATION:
-                return (T)this;
+                return this;
 
             case FeatureCode.DEFAULT_COLLATION:
-                return (T) defaultCollationName;
+                return defaultCollationName;
 
             case FeatureCode.DEFAULT_COLLECTION:
-                return (T) getDefaultCollection();
+                return getDefaultCollection();
 
             case FeatureCode.DEFAULT_COUNTRY:
-                return (T) getDefaultCountry();
+                return getDefaultCountry();
 
             case FeatureCode.DEFAULT_LANGUAGE:
-                return (T) getDefaultLanguage();
+                return getDefaultLanguage();
 
             case FeatureCode.DTD_VALIDATION:
-                return (T) Boolean.valueOf(isValidation());
+                return isValidation();
 
             case FeatureCode.DTD_VALIDATION_RECOVERABLE:
-                return (T) Boolean.valueOf(defaultParseOptions.getDTDValidationMode() == Validation.LAX);
+                return defaultParseOptions.getDTDValidationMode() == Validation.LAX;
 
             case FeatureCode.ERROR_LISTENER_CLASS:
                 // Obsolete
                 return null;
 
+            //#if CSHARP==false
             case FeatureCode.ENTITY_RESOLVER_CLASS:
                 EntityResolver er = defaultParseOptions.getEntityResolver();
                 if (er == null) {
-                    return (T) "";
+                    return "";
                 } else {
-                    return (T) er.getClass().getName();
+                    return er.getClass().getName();
                 }
-
+            //#endif
             case FeatureCode.ENVIRONMENT_VARIABLE_RESOLVER:
-                return (T) environmentVariableResolver;
+                return environmentVariableResolver;
 
             case FeatureCode.ENVIRONMENT_VARIABLE_RESOLVER_CLASS:
-                return (T) environmentVariableResolver.getClass().getName();
+                return environmentVariableResolver.getClass().getName();
 
             case FeatureCode.EXPAND_ATTRIBUTE_DEFAULTS:
-                return (T) Boolean.valueOf(isExpandAttributeDefaults());
+                return isExpandAttributeDefaults();
 
             case FeatureCode.LINE_NUMBERING:
-                return (T) Boolean.valueOf(isLineNumbering());
+                return isLineNumbering();
 
             case FeatureCode.MESSAGE_EMITTER_CLASS:
-                return (T) getMessageEmitterClass();
+                return getMessageEmitterClass();
 
             case FeatureCode.MODULE_URI_RESOLVER:
-                return (T) getModuleURIResolver();
+                return getModuleURIResolver();
 
             case FeatureCode.MODULE_URI_RESOLVER_CLASS:
-                return (T) getModuleURIResolver().getClass().getName();
+                return getModuleURIResolver().getClass().getName();
 
             case FeatureCode.NAME_POOL:
-                return (T) getNamePool();
+                return getNamePool();
 
             case FeatureCode.OPTIMIZATION_LEVEL:
-                return (T) optimizerOptions.toString();
+                return optimizerOptions.toString();
 
             case FeatureCode.OUTPUT_URI_RESOLVER:
-                return (T) getOutputURIResolver();
+                return getOutputURIResolver();
 
             case FeatureCode.OUTPUT_URI_RESOLVER_CLASS:
-                return (T) getOutputURIResolver().getClass().getName();
+                return getOutputURIResolver().getClass().getName();
 
             case FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS:
-                return (T) Boolean.valueOf(getSystemURIResolver().queryParametersAreRecognized());
+                return getSystemURIResolver().queryParametersAreRecognized();
 
             case FeatureCode.RECOVERY_POLICY:
-                return (T) Integer.valueOf(0);
+                return 0;
 
             case FeatureCode.RECOVERY_POLICY_NAME:
-                return (T) "recoverWithWarnings";
+                return "recoverWithWarnings";
 
             case FeatureCode.REGEX_BACKTRACKING_LIMIT:
-                return (T) Integer.valueOf(regexBacktrackingLimit);
+                return regexBacktrackingLimit;
 
             case FeatureCode.SCHEMA_VALIDATION:
-                return (T) Integer.valueOf(getSchemaValidationMode());
+                return getSchemaValidationMode();
 
             case FeatureCode.SCHEMA_VALIDATION_MODE:
-                return (T) Validation.describe(getSchemaValidationMode());
+                return Validation.describe(getSchemaValidationMode());
 
             case FeatureCode.SERIALIZER_FACTORY_CLASS:
-                return (T) getSerializerFactory().getClass().getName();
+                return getSerializerFactory().getClass().getName();
 
             case FeatureCode.SOURCE_PARSER_CLASS:
-                return (T) getSourceParserClass();
+                return getSourceParserClass();
 
             case FeatureCode.SOURCE_RESOLVER_CLASS:
-                return (T) getSourceResolver().getClass().getName();
+                return getSourceResolver().getClass().getName();
 
             case FeatureCode.STRIP_WHITESPACE:
                 SpaceStrippingRule rule = getParseOptions().getSpaceStrippingRule();
                 if (rule == AllElementsSpaceStrippingRule.getInstance()) {
-                    return (T) "all";
+                    return "all";
                 } else if (rule == null || rule == IgnorableSpaceStrippingRule.getInstance()) {
-                    return (T) "ignorable";
+                    return "ignorable";
                 } else {
-                    return (T) "none";
+                    return "none";
                 }
 
             case FeatureCode.STYLE_PARSER_CLASS:
-                return (T) getStyleParserClass();
+                return getStyleParserClass();
 
             case FeatureCode.TIMING:
-                return (T) Boolean.valueOf(isTiming());
+                return isTiming();
 
             case FeatureCode.TRACE_LISTENER:
-                return (T) traceListener;
+                return traceListener;
 
             case FeatureCode.TRACE_LISTENER_CLASS:
-                return (T) traceListenerClass;
+                return traceListenerClass;
 
             case FeatureCode.TRACE_LISTENER_OUTPUT_FILE:
-                return (T) traceListenerOutput;
+                return traceListenerOutput;
 
             case FeatureCode.TREE_MODEL:
-                return (T) Integer.valueOf(getTreeModel());
+                return getTreeModel();
 
             case FeatureCode.TREE_MODEL_NAME:
                 switch (getTreeModel()) {
                     case Builder.TINY_TREE:
                     default:
-                        return (T) "tinyTree";
+                        return "tinyTree";
                     case Builder.TINY_TREE_CONDENSED:
-                        return (T) "tinyTreeCondensed";
+                        return "tinyTreeCondensed";
                     case Builder.LINKED_TREE:
-                        return (T) "linkedTree";
+                        return "linkedTree";
                 }
 
             case FeatureCode.UNPARSED_TEXT_URI_RESOLVER:
-                return (T) getUnparsedTextURIResolver();
+                return getUnparsedTextURIResolver();
 
             case FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS:
-                return (T) getUnparsedTextURIResolver().getClass().getName();
+                return getUnparsedTextURIResolver().getClass().getName();
 
             case FeatureCode.URI_RESOLVER_CLASS:
-                return (T) getURIResolver().getClass().getName();
+                return getURIResolver().getClass().getName();
 
             case FeatureCode.USE_XSI_SCHEMA_LOCATION:
-                return (T) Boolean.valueOf(defaultParseOptions.isUseXsiSchemaLocation());
+                return defaultParseOptions.isUseXsiSchemaLocation();
 
             case FeatureCode.VALIDATION_COMMENTS:
-                return (T) Boolean.valueOf(defaultParseOptions.isAddCommentsAfterValidationErrors());
+                return defaultParseOptions.isAddCommentsAfterValidationErrors();
 
             case FeatureCode.VALIDATION_WARNINGS:
-                return (T) Boolean.valueOf(isValidationWarnings());
+                return isValidationWarnings();
 
             case FeatureCode.VERSION_WARNING:
-                return (T) Boolean.valueOf(false);
+                return false;
 
             case FeatureCode.XINCLUDE:
-                return (T) Boolean.valueOf(isXIncludeAware());
+                return isXIncludeAware();
 
             case FeatureCode.XML_VERSION:
-                return (T) (getXMLVersion() == XML10 ? "1.0" : "1.1");
-
+                return getXMLVersion() == XML10 ? "1.0" : "1.1";
 
             case FeatureCode.XQUERY_ALLOW_UPDATE:
-                return (T)Boolean.valueOf(getDefaultStaticQueryContext().isUpdatingEnabled());
+                return getDefaultStaticQueryContext().isUpdatingEnabled();
 
             case FeatureCode.XQUERY_CONSTRUCTION_MODE:
-                return (T)Integer.valueOf(getDefaultStaticQueryContext().getConstructionMode());
+                return getDefaultStaticQueryContext().getConstructionMode();
 
             case FeatureCode.XQUERY_DEFAULT_ELEMENT_NAMESPACE:
-                return (T)getDefaultStaticQueryContext().getDefaultElementNamespace();
+                return getDefaultStaticQueryContext().getDefaultElementNamespace();
 
             case FeatureCode.XQUERY_DEFAULT_FUNCTION_NAMESPACE:
-                return (T)getDefaultStaticQueryContext().getDefaultFunctionNamespace();
+                return getDefaultStaticQueryContext().getDefaultFunctionNamespace();
 
             case FeatureCode.XQUERY_EMPTY_LEAST:
-                return (T) Boolean.valueOf(getDefaultStaticQueryContext().isEmptyLeast());
+                return getDefaultStaticQueryContext().isEmptyLeast();
 
             case FeatureCode.XQUERY_INHERIT_NAMESPACES:
-                return (T) Boolean.valueOf(getDefaultStaticQueryContext().isInheritNamespaces());
+                return getDefaultStaticQueryContext().isInheritNamespaces();
 
             case FeatureCode.XQUERY_PRESERVE_BOUNDARY_SPACE:
-                return (T) Boolean.valueOf(getDefaultStaticQueryContext().isPreserveBoundarySpace());
+                return getDefaultStaticQueryContext().isPreserveBoundarySpace();
 
             case FeatureCode.XQUERY_PRESERVE_NAMESPACES:
-                return (T) Boolean.valueOf(getDefaultStaticQueryContext().isPreserveNamespaces());
+                return getDefaultStaticQueryContext().isPreserveNamespaces();
 
             case FeatureCode.XQUERY_REQUIRED_CONTEXT_ITEM_TYPE:
-                return (T) getDefaultStaticQueryContext().getRequiredContextItemType();
+                return getDefaultStaticQueryContext().getRequiredContextItemType();
 
             case FeatureCode.XQUERY_SCHEMA_AWARE:
-                return (T) Boolean.valueOf(getDefaultStaticQueryContext().isSchemaAware());
+                return getDefaultStaticQueryContext().isSchemaAware();
 
+            //#if CSHARP==false
             case FeatureCode.XQUERY_STATIC_ERROR_LISTENER_CLASS:
-                return (T)getDefaultStaticQueryContext().getErrorListener().getClass().getName();
+                return getDefaultStaticQueryContext().getErrorListener().getClass().getName();
+            //#endif
 
             case FeatureCode.XQUERY_VERSION:
-                return (T)"3.1";
+                return "3.1";
 
             case FeatureCode.XPATH_VERSION_FOR_XSD:
-                return (T)(Integer)xpathVersionForXsd;
+                return xpathVersionForXsd;
 
             case FeatureCode.XPATH_VERSION_FOR_XSLT:
-                return (T)(Integer)xpathVersionForXslt;
+                return xpathVersionForXslt;
 
             case FeatureCode.XSD_VERSION:
-                return (T) (xsdVersion == XSD10 ? "1.0" : "1.1");
+                return xsdVersion == XSD10 ? "1.0" : "1.1";
 
             case FeatureCode.XSLT_ENABLE_ASSERTIONS:
-                return (T)Boolean.valueOf(getDefaultXsltCompilerInfo().isAssertionsEnabled());
+                return getDefaultXsltCompilerInfo().isAssertionsEnabled();
 
             case FeatureCode.XSLT_INITIAL_MODE:
-                return (T) getDefaultXsltCompilerInfo().getDefaultInitialMode().getClarkName();
+                return getDefaultXsltCompilerInfo().getDefaultInitialMode().getClarkName();
 
             case FeatureCode.XSLT_INITIAL_TEMPLATE:
-                return (T) getDefaultXsltCompilerInfo().getDefaultInitialTemplate().getClarkName();
+                return getDefaultXsltCompilerInfo().getDefaultInitialTemplate().getClarkName();
 
             case FeatureCode.XSLT_SCHEMA_AWARE:
-                return (T) Boolean.valueOf(getDefaultXsltCompilerInfo().isSchemaAware());
+                return getDefaultXsltCompilerInfo().isSchemaAware();
 
+            //#if CSHARP==false
             case FeatureCode.XSLT_STATIC_ERROR_LISTENER_CLASS:
-                return (T) getDefaultXsltCompilerInfo().getErrorListener().getClass().getName();
+                return getDefaultXsltCompilerInfo().getErrorListener().getClass().getName();
+            //#endif
 
             case FeatureCode.XSLT_STATIC_URI_RESOLVER_CLASS:
-                return (T) getDefaultXsltCompilerInfo().getURIResolver().getClass().getName();
+                return getDefaultXsltCompilerInfo().getURIResolver().getClass().getName();
 
             case FeatureCode.XSLT_VERSION:
-                return (T) Integer.valueOf(30);
+                return 30;
 
         }
-        throw new IllegalArgumentException("Unknown configuration property " + feature.name);
+        throw new IllegalArgumentException("Unknown configuration property " );
     }
 
 

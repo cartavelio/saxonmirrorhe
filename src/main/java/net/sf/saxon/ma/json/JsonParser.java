@@ -196,6 +196,7 @@ public class JsonParser {
 
             default:
                 invalidJSON("Unexpected symbol: " + tokenizer.currentTokenValue, ERR_GRAMMAR, tokenizer.lineNumber);
+                break;
         }
     }
 

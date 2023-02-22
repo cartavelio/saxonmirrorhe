@@ -16,8 +16,10 @@ public class StringConstants {
     public static final UnicodeString FALSE = new Twine8(bytes("false"));
     public static final UnicodeString ONE = new Twine8(bytes("1"));
     public static final UnicodeString ZERO = new Twine8(bytes("0"));
+    public static final UnicodeString ZERO_TO_NINE = new Twine8(bytes("0123456789"));
 
     public static final UnicodeString MIN_LONG = new Twine8(bytes("-9223372036854775808"));
+    public static final UnicodeString POINT_ZERO = new Twine8(bytes(".0"));
 
     public static final byte[] COMMENT_START = bytes("<!--");
     public static final byte[] COMMENT_END = bytes("-->");

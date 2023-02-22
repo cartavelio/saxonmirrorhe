@@ -19,6 +19,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.wrapper.SpaceStrippedDocument;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.ExternalObject;
@@ -142,9 +143,10 @@ public class CollectionFn extends SystemFunction implements Callable {
 
         final Iterator<? extends Resource> sources = collection.getResources(context);
 
-        return new SequenceIterator() {
+        return new AbstractSequenceIterator() {
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public Item next() throws XPathException {
                 try {
                     if (sources.hasNext()) {
@@ -158,6 +160,7 @@ public class CollectionFn extends SystemFunction implements Callable {
             }
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public void close() {
                 if (sources instanceof Closeable) {
                     try {
@@ -247,7 +250,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         // Get an iterator over the items representing the resources
         SequenceIterator result = context.getConfiguration()
                 .getMultithreadedItemMappingIterator(sourceSeq,
-                                                     item1 -> ((ExternalObject<Resource>)item1).getObject().getItem(context));
+                           ItemMapper.of(it -> ((ExternalObject<Resource>)it).getObject().getItem(context)));
 
         // In XSLT, apply space-stripping to document nodes in the collection
         if (whitespaceRule != null) {

@@ -8,6 +8,7 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.str.*;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
@@ -89,6 +90,7 @@ public final class AnyURIValue extends StringItem {
 
 
     /*@Nullable*/
+    @CSharpReplaceBody(code="return System.Uri.UnescapeDataString(s);")
     public static String decode(/*@Nullable*/ String s) {
         // Evaluates all escapes in s, applying UTF-8 decoding if needed.  Assumes
         // that escapes are well-formed syntactically, i.e., of the form %XX.  If a

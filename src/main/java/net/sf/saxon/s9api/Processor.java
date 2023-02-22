@@ -20,6 +20,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.SequenceType;
 
 import javax.xml.transform.Source;
@@ -240,6 +241,7 @@ public class Processor implements Configuration.ApiProvider {
         return new PushToReceiver(destination.getReceiver(pipe, props));
     }
 
+    //#if CSHARP==false
     /**
      * Register a simple external/extension function that is to be made available within any stylesheet, query,
      * or XPath expression compiled under the control of this processor.
@@ -276,6 +278,8 @@ public class Processor implements Configuration.ApiProvider {
             throw new IllegalArgumentException(err);
         }
     }
+
+    //#endif
 
     /**
      * Get the associated SchemaManager. The SchemaManager provides capabilities to load and cache
@@ -411,6 +415,12 @@ public class Processor implements Configuration.ApiProvider {
      * {@link #setConfigurationProperty(String, Object)}
      */
 
+    @CSharpReplaceBody(code=""
+            + "    if ((feature.code==net.sf.saxon.lib.FeatureCode.CONFIGURATION)) {"
+            + "        config = (net.sf.saxon.Configuration)(object)value;"
+            + "    } else {\n"
+            + "        config.setConfigurationProperty(feature, value);"
+            + "    }")
     public <T> void setConfigurationProperty(Feature<T> feature, T value) {
         if (feature == Feature.CONFIGURATION) {
             config = (Configuration) value;
@@ -447,20 +457,24 @@ public class Processor implements Configuration.ApiProvider {
      * @since 9.6. Changed in 9.8 to allow any Comparator to be supplied as a collation
      */
 
-    public void declareCollation(String uri, final Comparator collation) {
+    public void  declareCollation(String uri, final Comparator<? super String> collation) {
         if (uri.equals(NamespaceConstant.CODEPOINT_COLLATION_URI)) {
             throw new IllegalArgumentException("Cannot redeclare the Unicode codepoint collation URI");
         }
         if (uri.equals(NamespaceConstant.HTML5_CASE_BLIND_COLLATION_URI)) {
             throw new IllegalArgumentException("Cannot redeclare the HTML5 caseblind collation URI");
         }
-        StringCollator saxonCollation;
-        if (collation instanceof RuleBasedCollator) {
-            saxonCollation = new RuleBasedSubstringMatcher(uri, (RuleBasedCollator) collation);
-        } else {
-            saxonCollation = new SimpleCollation(uri, collation);
-        }
+        StringCollator saxonCollation = makeStringCollator(uri, collation);
         config.registerCollation(uri, saxonCollation);
+    }
+
+    @CSharpReplaceBody(code="return new net.sf.saxon.expr.sort.SimpleCollation(uri, collation);")
+    private static StringCollator makeStringCollator(String uri, Comparator<? super String> collation) {
+        if (collation instanceof RuleBasedCollator) {
+            return new RuleBasedSubstringMatcher(uri, (RuleBasedCollator) collation);
+        } else {
+            return new SimpleCollation(uri, collation);
+        }
     }
 
 
@@ -517,7 +531,7 @@ public class Processor implements Configuration.ApiProvider {
         }
     }
 
-
+    //#if CSHARP==false
     private static class ExtensionFunctionDefinitionWrapper extends ExtensionFunctionDefinition {
 
         private final ExtensionFunction function;
@@ -671,9 +685,8 @@ public class Processor implements Configuration.ApiProvider {
                 }
             };
         }
-
-
     }
+    //#endif
 
     private SchemaManager makeSchemaManager() {
         SchemaManager manager = null;

@@ -96,7 +96,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
     private Location startElementLocationId = Loc.NONE;
     private HostLanguage hostLanguage = HostLanguage.XSLT;
 
-    private RegularSequenceChecker.State state = Initial;
+    private RegularSequenceChecker.State state = INITIAL;
     private boolean previousAtomic = false;
     /**
      * Create a ComplexContentOutputter
@@ -193,7 +193,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
     public void open() throws XPathException {
         nextReceiver.open();
         previousAtomic = false;
-        state = Open;
+        state = OPEN;
     }
 
     /**
@@ -206,7 +206,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         level++;
         if (level == 0) {
             nextReceiver.startDocument(properties);
-        } else if (state == StartTag) {
+        } else if (state == START_TAG) {
             startContent();
         }
         previousAtomic = false;
@@ -214,7 +214,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
             currentLevelIsDocument = Arrays.copyOf(currentLevelIsDocument, level * 2);
         }
         currentLevelIsDocument[level] = true;
-        state = Content;
+        state = CONTENT;
     }
 
     /**
@@ -228,7 +228,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         }
         previousAtomic = false;
         level--;
-        state = level < 0 ? Open : Content;
+        state = level < 0 ? OPEN : CONTENT;
     }
 
     /**
@@ -264,7 +264,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
             if (s.isEmpty()) {
                 return;
             }
-            if (state == StartTag) {
+            if (state == START_TAG) {
                 startContent();
             }
         }
@@ -284,7 +284,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
     public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
         //System.err.println("Start element " + elemName);
         level++;
-        if (state == StartTag) {
+        if (state == START_TAG) {
             startContent();
         }
         startElementProperties = properties;
@@ -299,7 +299,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         }
 
         currentLevelIsDocument[level] = false;
-        state = StartTag;
+        state = START_TAG;
     }
 
 
@@ -315,7 +315,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         if (ReceiverOption.contains(properties, ReceiverOption.NAMESPACE_OK)) {
             pendingNSMap = pendingNSMap.put(prefix, namespaceUri);
         } else if (level >= 0) {
-            if (state != StartTag) {
+            if (state != START_TAG) {
                 throw NoOpenStartTagException.makeNoOpenStartTagException(
                         Type.NAMESPACE,
                         prefix,
@@ -403,7 +403,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
     @Override
     public void attribute(NodeName attName, SimpleType typeCode, String value, Location locationId, int properties) throws XPathException {
         //System.err.println("Write attribute " + attName + "=" + value + " to Outputter " + this);
-        if (level >= 0 && state != StartTag) {
+        if (level >= 0 && state != START_TAG) {
             // The complexity here is in identifying the right error message and error code
 
             XPathException err = NoOpenStartTagException.makeNoOpenStartTagException(
@@ -492,7 +492,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
     @Override
     public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
         //System.err.println("Start element " + elemName + " with " + attributes.getLength() + " attributes");
-        if (state == StartTag) {
+        if (state == START_TAG) {
             startContent();
         }
 
@@ -529,7 +529,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         NamespaceMap ns3 = refuseInheritedNamespaces ? namespaces : ns2;
 
         nextReceiver.startElement(elemName, type, attributes, ns3, location, properties);
-        state = Content;
+        state = CONTENT;
     }
 
     /**
@@ -594,7 +594,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
     @Override
     public void endElement() throws XPathException {
         //System.err.println("Write end tag ");
-        if (state == StartTag) {
+        if (state == START_TAG) {
             startContent();
         } else {
             //pendingStartTagDepth = -2;
@@ -606,7 +606,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         nextReceiver.endElement();
         level--;
         previousAtomic = false;
-        state = level < 0 ? Open : Content;
+        state = level < 0 ? OPEN : CONTENT;
         inheritedNamespaces.pop();
     }
 
@@ -617,7 +617,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
     @Override
     public void comment(CodePoints comment, Location locationId, int properties) throws XPathException {
         if (level >= 0) {
-            if (state == StartTag) {
+            if (state == START_TAG) {
                 startContent();
             }
             previousAtomic = false;
@@ -632,7 +632,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
     @Override
     public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         if (level >= 0) {
-            if (state == StartTag) {
+            if (state == START_TAG) {
                 startContent();
             }
             previousAtomic = false;
@@ -684,6 +684,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
 
     private static class UnicodeStringReceiver implements UniStringConsumer {
         // Implemented as a static inner class for ease of C# conversion
+        // (This class is tricky to convert because the close() method makes a state change to the outer class)
         private final ComplexContentOutputter cco;
         private final boolean previousAtomic;
         private final boolean asTextNode;
@@ -730,7 +731,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         // System.err.println("Close " + this + " using emitter " + emitter.getClass());
         nextReceiver.close();
         previousAtomic = false;
-        state = Final;
+        state = FINAL;
     }
 
     /**
@@ -740,7 +741,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
     @Override
     public void startContent() throws XPathException {
 
-        if (state != StartTag) {
+        if (state != START_TAG) {
             // this can happen if the method is called from outside,
             // e.g. from a SequenceOutputter earlier in the pipeline
             return;
@@ -779,7 +780,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         pendingAttributes.clear();
         pendingNSMap = NamespaceMap.emptyMap();
         previousAtomic = false;
-        state = Content;
+        state = CONTENT;
     }
 
     /**

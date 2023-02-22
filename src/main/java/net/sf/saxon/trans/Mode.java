@@ -22,7 +22,7 @@ import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.ModeTraceListener;
+import net.sf.saxon.trace.TemplateRuleTraceListener;
 import net.sf.saxon.trans.rules.*;
 import net.sf.saxon.transpile.CSharpDelegate;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -51,6 +51,7 @@ public abstract class Mode extends Actor {
             new StructuredQName("xsl", NamespaceConstant.XSLT, "unnamed");
     public static final StructuredQName DEFAULT_MODE_NAME =
         new StructuredQName("xsl", NamespaceConstant.XSLT, "default");
+
 
     protected StructuredQName modeName;
     private boolean streamable;
@@ -429,18 +430,13 @@ public abstract class Mode extends Actor {
             Location locationId)
             throws XPathException {
         Controller controller = context.getController();
-        boolean tracing = modeTracing || controller.isTracing();
         SequenceIterator iterator = context.getCurrentIterator();
         TailCall tc = null;
         TraceListener traceListener = null;
-        if (tracing) {
+        if (controller.isTracing()) {
             traceListener = controller.getTraceListener();
-            if (traceListener == null) {
-                traceListener = new ModeTraceListener();
-                controller.setTraceListener(traceListener);
-                traceListener.open(controller);
-            }
         }
+
 
         // Iterate over this sequence
 
@@ -502,13 +498,26 @@ public abstract class Mode extends Actor {
 
             // find the template rule for this node
 
-            if (tracing) {
+            if (traceListener != null) {
                 traceListener.startRuleSearch();
             }
 
             Rule rule = getRule(item, context);
-            if (tracing) {
-                traceListener.endRuleSearch((rule != null) ? rule : getBuiltInRuleSet(), this, item);
+            if (traceListener != null) {
+                if (rule == null) {
+                    traceListener.endRuleSearch(getBuiltInRuleSet(), this, item);
+                } else {
+                    traceListener.endRuleSearch(rule, this, item);
+                }
+            }
+            TemplateRuleTraceListener ruleTraceListener = null;
+            if (modeTracing) {
+                ruleTraceListener = ((XsltController)controller).getTemplateRuleTraceListener();
+                if (ruleTraceListener == null) {
+                    ruleTraceListener = new TemplateRuleTraceListener(controller.getConfiguration().getLogger());
+                    ((XsltController) controller).setTemplateRuleTraceListener(ruleTraceListener);
+                }
+                ruleTraceListener.enter("apply-templates", locationId, item, rule==null ? null : (TemplateRule)rule.getAction());
             }
 
             if (rule == null) {             // Use the default action for the node
@@ -518,12 +527,6 @@ public abstract class Mode extends Actor {
             } else {
 
                 TemplateRule template = (TemplateRule) rule.getAction();
-//                if (modeTracing) {
-//                    controller.getConfiguration().getLogger().info(
-//                            getModeTitle() + " processing " + Err.depict(item) + " using template rule with match=\"" +
-//                                    rule.getPattern().toShortString() + "\" on line " + template.getLineNumber() + " of " + template.getSystemId()
-//                    );
-//                }
                 if (template != previousTemplate) {
                     // Reuse the previous stackframe unless it's a different template rule
                     previousTemplate = template;
@@ -534,11 +537,8 @@ public abstract class Mode extends Actor {
                     context.setCurrentMergeGroupIterator(null);
                 }
                 context.setCurrentTemplateRule(rule);
-                if (tracing) {
+                if (traceListener != null) {
                     traceListener.startCurrentItem(item);
-                    if (modeTracing) {
-                        traceListener.enter(template, Collections.emptyMap(), context);
-                    }
                     tc = template.applyLeavingTail(output, context);
                     if (tc != null) {
                         // disable tail call optimization while tracing
@@ -546,13 +546,14 @@ public abstract class Mode extends Actor {
                             tc = tc.processLeavingTail();
                         } while (tc != null);
                     }
-                    if (modeTracing) {
-                        traceListener.leave(template);
-                    }
+
                     traceListener.endCurrentItem(item);
                 } else {
                     tc = template.applyLeavingTail(output, context);
                 }
+            }
+            if (modeTracing) {
+                ruleTraceListener.leave();
             }
         }
 

@@ -16,6 +16,8 @@ import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntPredicateProxy;
 
 import java.io.IOException;
@@ -119,6 +121,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
         return e;
     }
 
+    @CSharpReplaceBody(code="return \"FOUT1170\";")
     private static String getErrorCode(IOException ioErr) {
         // FOUT1200 should be used when the encoding was inferred, FOUT1190 when it was explicit. We rely on the
         // caller to change FOUT1200 to FOUT1190 when necessary
@@ -143,9 +146,10 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      * @throws XPathException if the file contains illegal characters
      */
 
+    @CSharpInnerClass(outer=false, extra="net.sf.saxon.str.UnicodeBuilder buffer")
     public static UnicodeString readFile(IntPredicateProxy checker, Reader reader) throws IOException, XPathException {
         UnicodeBuilder buffer = new UnicodeBuilder();
-        readFile(checker, reader, new UniStringConsumer() {
+        readFile(checker, reader, new AbstractUniStringConsumer() {
             @Override
             public UniStringConsumer accept(CodePoints chars) {
                 return buffer.accept(chars);

@@ -86,6 +86,9 @@ public class XSLCallTemplate extends StyleElement {
                         " is not allowed as a child of xsl:call-template", "XTSE0010");
             }
         }
+        if (calledTemplateName == null) {
+            calledTemplateName = ERROR_TEMPLATE_NAME;
+        }
         if (!calledTemplateName.equals(ERROR_TEMPLATE_NAME)) {
             template = findTemplate(calledTemplateName);
         }

@@ -1345,9 +1345,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 if (value.equals("Q{http://relaxng.org/ns/structure/1.0}schema-report#1")) {
                     try {
                         Configuration config = env.processor.getUnderlyingConfiguration();
-                        Object sf = config.getInstance("net.cfoster.saxonjing.SchemaFunction", null);
+                        Object sf = config.getInstance("net.cfoster.saxonjing.SchemaFunction");
                         env.processor.registerExtensionFunction((ExtensionFunctionDefinition) sf);
-                        Object sfd = config.getInstance("net.cfoster.saxonjing.SchemaReportFunction", null);
+                        Object sfd = config.getInstance("net.cfoster.saxonjing.SchemaReportFunction");
                         env.processor.registerExtensionFunction((ExtensionFunctionDefinition) sfd);
                         return true;
                     } catch (XPathException err) {

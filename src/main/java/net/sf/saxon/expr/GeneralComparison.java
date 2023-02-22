@@ -865,7 +865,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 } else if (a1 instanceof StringItem) {
                     // no conversion needed
                 } else {
-                    AtomicType prim = a1.getItemType().getPrimitiveItemType();
+                    AtomicType prim = a1.getPrimitiveType();
                     StringConverter sc = prim.getStringConverter(rules);
                     if (a1 instanceof QualifiedNameValue) {
                         sc = (StringConverter) sc.setNamespaceResolver(nsResolver);
@@ -879,7 +879,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 } else if (a0 instanceof StringItem) {
                     // no conversion needed
                 } else {
-                    AtomicType prim = a0.getItemType().getPrimitiveItemType();
+                    AtomicType prim = a0.getPrimitiveType();
                     StringConverter sc = prim.getStringConverter(rules);
                     if (a0 instanceof QualifiedNameValue) {
                         sc = (StringConverter) sc.setNamespaceResolver(nsResolver);

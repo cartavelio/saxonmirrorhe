@@ -8,8 +8,9 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
@@ -19,6 +20,7 @@ import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -28,7 +30,7 @@ import java.util.*;
  * A value of type xs:time
  */
 
-public final class TimeValue extends CalendarValue implements Comparable<TimeValue> {
+public final class TimeValue extends CalendarValue implements XPathComparable {
 
     private byte hour;
     private byte minute;
@@ -537,10 +539,21 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
         }
     }
 
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+        if (hasTimezone()) {
+            return this;
+        } else if (implicitTimezone == MISSING_TIMEZONE) {
+            throw new NoDynamicContextException("Unknown implicit timezone");
+        } else {
+            return adjustTimezone(implicitTimezone);
+        }
+    }
+
     /**
      * Compare the value to another dateTime value
      *
-     * @param otherTime The other dateTime value
+     * @param other The other dateTime value
      * @return negative value if this one is the earler, 0 if they are chronologically equal,
      *         positive value if this one is the later. For this purpose, dateTime values with an unknown
      *         timezone are considered to be UTC values (the Comparable interface requires
@@ -549,22 +562,26 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
      *                            is declared as Object to satisfy the Comparable interface)
      */
 
-    @Override
-    public int compareTo(TimeValue otherTime) {
-        if (getTimezoneInMinutes() == otherTime.getTimezoneInMinutes()) {
-            if (hour != otherTime.hour) {
-                return IntegerValue.signum(hour - otherTime.hour);
-            } else if (minute != otherTime.minute) {
-                return IntegerValue.signum(minute - otherTime.minute);
-            } else if (second != otherTime.second) {
-                return IntegerValue.signum(second - otherTime.second);
-            } else if (nanosecond != otherTime.nanosecond) {
-                return IntegerValue.signum(nanosecond - otherTime.nanosecond);
+    public int compareTo(XPathComparable other) {
+        if (other instanceof TimeValue) {
+            TimeValue otherTime = (TimeValue) other;
+            if (getTimezoneInMinutes() == otherTime.getTimezoneInMinutes()) {
+                if (hour != otherTime.hour) {
+                    return IntegerValue.signum(hour - otherTime.hour);
+                } else if (minute != otherTime.minute) {
+                    return IntegerValue.signum(minute - otherTime.minute);
+                } else if (second != otherTime.second) {
+                    return IntegerValue.signum(second - otherTime.second);
+                } else if (nanosecond != otherTime.nanosecond) {
+                    return IntegerValue.signum(nanosecond - otherTime.nanosecond);
+                } else {
+                    return 0;
+                }
             } else {
-                return 0;
+                return toDateTime().compareTo(otherTime.toDateTime());
             }
         } else {
-            return toDateTime().compareTo(otherTime.toDateTime());
+            throw new ClassCastException("Cannot compare xs:time to " + other);
         }
     }
 
@@ -599,12 +616,11 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
 
 
     /*@NotNull*/
-    @Override
-    public SchemaComparable getSchemaComparable() {
+    public TimeComparable getSchemaComparable() {
         return new TimeComparable(this);
     }
 
-    private static class TimeComparable implements SchemaComparable {
+    public static class TimeComparable implements Comparable<TimeComparable> {
 
         private final TimeValue value;
         public TimeComparable(TimeValue value) {
@@ -617,14 +633,10 @@ public final class TimeValue extends CalendarValue implements Comparable<TimeVal
         }
 
         @Override
-        public int compareTo(SchemaComparable o) {
-            if (o instanceof TimeComparable) {
-                DateTimeValue dt0 = asTimeValue().toDateTime();
-                DateTimeValue dt1 = ((TimeComparable) o).asTimeValue().toDateTime();
-                return dt0.getSchemaComparable().compareTo(dt1.getSchemaComparable());
-            } else {
-                return SequenceTool.INDETERMINATE_ORDERING;
-            }
+        public int compareTo(@NotNull TimeComparable o) {
+            DateTimeValue dt0 = asTimeValue().toDateTime();
+            DateTimeValue dt1 = o.asTimeValue().toDateTime();
+            return dt0.getSchemaComparable().compareTo(dt1.getSchemaComparable());
         }
 
         public boolean equals(/*@NotNull*/ Object o) {

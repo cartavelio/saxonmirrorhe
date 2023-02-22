@@ -82,6 +82,7 @@ public class Whitespace {
                             break;
                         default:
                             sb.append(c);
+                            break;
                     }
                 }
                 return sb.toUnicodeString();
@@ -404,7 +405,9 @@ public class Whitespace {
     public static UnicodeString collapse(UnicodeString in) {
         UnicodeBuilder builder = new UnicodeBuilder();
         tokenize(in.codePoints(), (s, e, cat) -> {
-            switch (cat) {
+            @SuppressWarnings("UnnecessaryLocalVariable")
+            TokenCategory category = cat; // redeclared to assist C# conversion
+            switch (category) {
                 case CONTENT:
                     builder.accept(in.substring(s, e));
                     break;
@@ -413,6 +416,7 @@ public class Whitespace {
                     break;
                 default:
                     // no action
+                    break;
             }
         });
         return builder.toUnicodeString();
@@ -421,7 +425,9 @@ public class Whitespace {
     public static String collapse(CharSequence in) {
         StringBuilder builder = new StringBuilder(in.length());
         tokenize(StringTool.codePoints(in), (s, e, cat) -> {
-            switch (cat) {
+            @SuppressWarnings("UnnecessaryLocalVariable")
+            TokenCategory category = cat; // redeclared to assist C# conversion
+            switch (category) {
                 case CONTENT:
                     builder.append(in.subSequence(s, e));
                     break;
@@ -429,7 +435,8 @@ public class Whitespace {
                     builder.append(' ');
                     break;
                 default:
-                    // no actoni
+                    // no action
+                    break;
             }
         });
         return builder.toString();
@@ -438,7 +445,9 @@ public class Whitespace {
     public static UnicodeString normalize(UnicodeString in) {
         UnicodeBuilder builder = new UnicodeBuilder();
         tokenize(in.codePoints(), (s, e, cat) -> {
-            switch (cat) {
+            @SuppressWarnings("UnnecessaryLocalVariable")
+            TokenCategory category = cat; // redeclared to assist C# conversion
+            switch (category) {
                 case CONTENT:
                     builder.accept(in.substring(s, e));
                     break;
@@ -448,7 +457,8 @@ public class Whitespace {
                     }
                     break;
                 default:
-                    // no actoni
+                    // no action
+                    break;
             }
         });
         return builder.toUnicodeString();
@@ -457,7 +467,9 @@ public class Whitespace {
     public static String normalize(CharSequence in) {
         StringBuilder builder = new StringBuilder(in.length());
         tokenize(StringTool.codePoints(in), (s, e, cat) -> {
-            switch (cat) {
+            @SuppressWarnings("UnnecessaryLocalVariable")
+            TokenCategory category = cat; // redeclared to assist C# conversion
+            switch (category) {
                 case CONTENT:
                     builder.append(in.subSequence(s, e));
                     break;

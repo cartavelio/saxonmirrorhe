@@ -60,6 +60,7 @@ public abstract class SchemaValidator extends AbstractDestination {
 
     public abstract boolean isLax();
 
+    //#if CSHARP==false
     /**
      * Set the ErrorListener to be used while validating instance documents.
      * The setErrorReporter, setInvalidityHandler, and setValidityReporting
@@ -83,6 +84,7 @@ public abstract class SchemaValidator extends AbstractDestination {
      */
 
     public abstract ErrorListener getErrorListener();
+    //#endif
 
     /**
      * Set the InvalidityHandler to be used when validating instance documents.

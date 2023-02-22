@@ -58,7 +58,7 @@ public abstract class DotNetCollationFactory {
 
         String classAtt = props.getProperty("class");
         if (classAtt != null) {
-            java.lang.Object comparator = config.getInstance(classAtt, null);
+            java.lang.Object comparator = config.getInstance(classAtt);
             if (comparator instanceof Comparator) {
                 stringCollator = new SimpleCollation(uri, (Comparator) comparator);
             } else if (comparator instanceof StringCollator) {

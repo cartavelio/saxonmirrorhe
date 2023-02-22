@@ -422,10 +422,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapMerge extends SystemFunction {
 
-        final static String finalKey = "Q{" + NamespaceConstant.SAXON + "}final";
-        final static String keyTypeKey ="Q{"+NamespaceConstant.SAXON +"}key-type";
-        final static String onDuplicatesKey = "Q{" + NamespaceConstant.SAXON + "}on-duplicates";
-        final static String errorCodeKey = "Q{" + NamespaceConstant.SAXON + "}duplicates-error-code";
+        public final static String finalKey = "Q{" + NamespaceConstant.SAXON + "}final";
+        public final static String keyTypeKey ="Q{"+NamespaceConstant.SAXON +"}key-type";
+        public final static String onDuplicatesKey = "Q{" + NamespaceConstant.SAXON + "}on-duplicates";
+        public final static String errorCodeKey = "Q{" + NamespaceConstant.SAXON + "}duplicates-error-code";
 
         private String duplicates = "use-first";
         private String duplicatesErrorCode = "FOJS0003";
@@ -546,6 +546,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                                 baseMap.initialPut(pair.key.getStringValue(), pair.value);
                             }
                         }
+                        return baseMap;
                     default:
                         while ((next = (MapItem) iter.next()) != null) {
                             for (KeyValuePair pair : next.keyValuePairs()) {
@@ -556,12 +557,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                                 if (existing != null) {
                                     switch (duplicates) {
                                         case "use-first":
-                                        case "unspecified":
-                                        case "use-any":
                                             // no action
-                                            break;
-                                        case "use-last":
-                                            baseMap.initialPut(pair.key.getStringValue(), pair.value);
                                             break;
                                         case "combine":
                                             InsertBefore.InsertIterator combinedIter =

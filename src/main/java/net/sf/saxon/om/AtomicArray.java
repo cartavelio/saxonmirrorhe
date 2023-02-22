@@ -12,11 +12,9 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.iter.AtomicListIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.SchemaComparable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,7 +66,8 @@ public class AtomicArray implements AtomicSequence {
 
     @Override
     public AtomicIterator iterate() {
-        return new AtomicListIterator(content);
+        //noinspection Convert2Diamond
+        return new ListIterator.OfAtomic<AtomicValue>(content);
     }
 
     /**
@@ -182,88 +181,6 @@ public class AtomicArray implements AtomicSequence {
     @Override
     public boolean effectiveBooleanValue() throws XPathException {
         return ExpressionTool.effectiveBooleanValue(iterate());
-    }
-
-    /**
-     * Get a Comparable value that implements the XML Schema ordering comparison semantics for this value.
-     * The default implementation is written to compare sequences of atomic values.
-     * This method is overridden for AtomicValue and its subclasses.
-     * <p>In the case of data types that are partially ordered, the returned Comparable extends the standard
-     * semantics of the compareTo() method by returning the value {@link SequenceTool#INDETERMINATE_ORDERING} when there
-     * is no defined order relationship between two given values.</p>
-     * <p>For comparing key/keyref values, XSD 1.1 defines that a singleton list is equal to its only member. To
-     * achieve this, this method returns the schema comparable of the singleton member if the list has length one.
-     * This won't give the correct ordering semantics, but we rely on lists never taking part in ordering comparisons.</p>
-     *
-     * @return a Comparable that follows XML Schema comparison rules
-     */
-
-    @Override
-    public SchemaComparable getSchemaComparable() {
-        if (content.size() == 1) {
-            return content.get(0).getSchemaComparable();
-        } else {
-            return new ValueSchemaComparable(this);
-        }
-    }
-
-    private static class ValueSchemaComparable implements SchemaComparable {
-
-        private final AtomicArray value;
-
-        public ValueSchemaComparable(AtomicArray value) {
-            this.value = value;
-        }
-        public AtomicArray getValue() {
-            return value;
-        }
-
-        @Override
-        public int compareTo(SchemaComparable obj) {
-            if (obj instanceof ValueSchemaComparable) {
-                UnfailingIterator iter1 = getValue().iterate();
-                UnfailingIterator iter2 = ((ValueSchemaComparable)obj).getValue().iterate();
-                while (true) {
-                    AtomicValue item1 = (AtomicValue) iter1.next();
-                    AtomicValue item2 = (AtomicValue) iter2.next();
-                    if (item1 == null && item2 == null) {
-                        return 0;
-                    }
-                    if (item1 == null) {
-                        return -1;
-                    } else if (item2 == null) {
-                        return +1;
-                    }
-                    int c = item1.getSchemaComparable().compareTo(item2.getSchemaComparable());
-                    if (c != 0) {
-                        return c;
-                    }
-                }
-            } else {
-                return SequenceTool.INDETERMINATE_ORDERING;
-            }
-        }
-
-        public boolean equals(/*@NotNull*/ Object obj) {
-            return ValueSchemaComparable.class.isAssignableFrom(obj.getClass())
-                    && compareTo((ValueSchemaComparable) obj) == 0;
-        }
-
-        public int hashCode() {
-            try {
-                int hash = 0x06639662;  // arbitrary seed                     a
-                SequenceIterator iter = getValue().iterate();
-                while (true) {
-                    Item item = iter.next();
-                    if (item == null) {
-                        return hash;
-                    }
-                    hash ^= ((AtomicValue) item).getSchemaComparable().hashCode();
-                }
-            } catch (XPathException e) {
-                return 0;
-            }
-        }
     }
 
     /**

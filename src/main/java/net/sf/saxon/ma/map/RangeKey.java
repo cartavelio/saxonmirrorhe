@@ -65,7 +65,7 @@ public class RangeKey extends MapItem {
                 return ((NodeInfo)value);
             } else {
                 List<NodeInfo> nodes = (List<NodeInfo>)value;
-                return new NodeSequenceExtent(nodes);
+                return new SequenceExtent.Of<>(nodes);
             }
         }
         return EmptySequence.getInstance();

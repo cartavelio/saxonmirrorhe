@@ -71,7 +71,7 @@ public class HomogeneityCheckerIterator implements SequenceIterator {
                         nodes.add(item);
                     }
                 }
-                base = new DocumentOrderIterator(new ListIterator(nodes), GlobalOrderComparer.getInstance());
+                base = new DocumentOrderIterator(new ListIterator.Of<>(nodes), GlobalOrderComparer.getInstance());
                 state = 1; // first item is a node
                 return base.next();
             } else {

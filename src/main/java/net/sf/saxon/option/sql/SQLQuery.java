@@ -23,7 +23,7 @@ import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.NodeSequenceExtent;
+import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.StringItem;
 
 import java.sql.*;
@@ -304,7 +304,7 @@ public class SQLQuery extends ExtensionInstruction {
                 if (!connection.getAutoCommit()) {
                     connection.commit();
                 }
-                return new NodeSequenceExtent(resultElements);
+                return new SequenceExtent.Of<>(resultElements);
 
             } catch (SQLException ex) {
                 de = new XPathException("(SQL) " + ex.getMessage());

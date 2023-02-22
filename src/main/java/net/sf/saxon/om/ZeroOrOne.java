@@ -11,17 +11,23 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.str.EmptyUniString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ConstrainedIterator;
+import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.tree.iter.SingletonIterator;
+import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.EmptySequence;
 
 /**
  * A value that is a sequence containing zero or one items.
  */
 
+@CSharpInjectMembers(code=
+          "public static net.sf.saxon.om.ZeroOrOne<U> empty<U>() where U : net.sf.saxon.om.Item { return new ZeroOrOne<U>(default(U)); }")
+
 public class ZeroOrOne<T extends Item> implements GroundedValue {
 
     private final T item; // may be null, to represent an empty sequence
 
+    //#if CSHARP==false
     @SuppressWarnings("rawtypes")
     private static final ZeroOrOne EMPTY = new ZeroOrOne<>(null);
 
@@ -34,6 +40,7 @@ public class ZeroOrOne<T extends Item> implements GroundedValue {
     public static <T extends Item> ZeroOrOne<T> empty() {
         return EMPTY;
     }
+    //#endif
 
     /**
      * Create a sequence containing zero or one items
@@ -131,45 +138,8 @@ public class ZeroOrOne<T extends Item> implements GroundedValue {
      * Return an iterator over this value.
      */
     @Override
-    public ConstrainedIterator<T> iterate() {
-        return new ConstrainedIterator<T>() {
-            boolean gone = false;
-
-            @Override
-            public boolean hasNext() {
-                return item != null && !gone;
-            }
-
-            @Override
-            public T next() {
-                if (gone) {
-                    return null;
-                } else {
-                    gone = true;
-                    return item;
-                }
-            }
-
-            @Override
-            public int getLength() {
-                return item == null ? 0 : 1;
-            }
-
-            @Override
-            public GroundedValue materialize() {
-                return item == null ? EmptySequence.getInstance() : item;
-            }
-
-            @Override
-            public GroundedValue getResidue() {
-                return gone ? EmptySequence.getInstance() : item;
-            }
-
-            @Override
-            public SequenceIterator getReverseIterator() {
-                return iterate();
-            }
-        };
+    public UnfailingIterator iterate() {
+        return SingletonIterator.makeIterator(item);
     }
 
     /**

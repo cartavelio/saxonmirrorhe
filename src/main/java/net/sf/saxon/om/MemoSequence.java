@@ -85,7 +85,7 @@ public class MemoSequence implements Sequence {
                         assert reservoir != null;
                         return SingletonIterator.makeIterator(reservoir[0]);
                     default:
-                        return new ArrayIterator(reservoir, 0, used);
+                        return new ArrayIterator.Of<>(reservoir, 0, used);
                 }
 
             case BUSY:
@@ -301,7 +301,7 @@ public class MemoSequence implements Sequence {
                 } else if (container.used == 1) {
                     return container.reservoir[0];
                 } else {
-                    return new SequenceExtent(container.reservoir);
+                    return new SequenceExtent.Of<>(container.reservoir);
                 }
             } else {
                 return SequenceExtent.makeSequenceExtent(

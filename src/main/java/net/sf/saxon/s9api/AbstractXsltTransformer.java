@@ -22,7 +22,9 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.tree.tiny.TinyBuilder;
+import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -42,10 +44,10 @@ import java.util.Objects;
 
 @CSharpInjectMembers(code = {
         "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
                 + "    }"
 })
-abstract class AbstractXsltTransformer {
+public abstract class AbstractXsltTransformer {
     protected Processor processor;
     protected XsltController controller;
     protected boolean baseOutputUriWasSet = false;
@@ -114,6 +116,7 @@ abstract class AbstractXsltTransformer {
         return controller.getURIResolver();
     }
 
+    //#if CSHARP==false
     /**
      * Set the ErrorListener to be used during this transformation
      *
@@ -143,6 +146,7 @@ abstract class AbstractXsltTransformer {
             return null;
         }
     }
+    //#endif
 
     /**
      * Set a callback that will be used when reporting a dynamic error or warning
@@ -183,6 +187,10 @@ abstract class AbstractXsltTransformer {
      *                instruction is evaluated.
      */
 
+    @CSharpInnerClass(
+            outer=false,
+            extra={"java.util.function.Function<java.net.URI, net.sf.saxon.s9api.Destination> handler"})
+    
     public void setResultDocumentHandler(java.util.function.Function<URI, Destination> handler) {
         controller.setResultDocumentResolver(new ResultDocumentResolver() {
             @Override
@@ -530,33 +538,43 @@ abstract class AbstractXsltTransformer {
             if (controller.isStylesheetStrippingTypeAnnotations()) {
                 stripper = controller.getConfiguration().getAnnotationStripper(stripper);
             }
-            return new TreeReceiver(stripper) {
-                boolean closed = false;
-
-                @Override
-                public void close() throws XPathException {
-                    if (!closed) {
-                        try {
-                            NodeInfo doc = sourceTreeBuilder.getCurrentRoot();
-                            if (doc != null) {
-                                doc.getTreeInfo().setSpaceStrippingRule(controller.getSpaceStrippingRule());
-                                Receiver result = getDestinationReceiver(controller, finalDestination);
-                                try {
-                                    controller.setGlobalContextItem(doc);
-                                    controller.initializeController(parameters);
-                                    controller.applyTemplates(doc, result);
-                                } catch (TransformerException e) {
-                                    throw new SaxonApiException(e);
-                                }
-                            }
-                        } catch (SaxonApiException e) {
-                            throw XPathException.makeXPathException(e);
-                        }
-                        closed = true;
-                    }
-                }
-            };
+            return makeTreeReceiver(controller, parameters, finalDestination, sourceTreeBuilder, stripper);
         }
+    }
+
+    @NotNull
+    @CSharpInnerClass(outer=true,
+            extra={ "net.sf.saxon.@event.Builder sourceTreeBuilder",
+                    "net.sf.saxon.trans.XsltController controller",
+                    "net.sf.saxon.s9api.Destination finalDestination",
+                    "net.sf.saxon.expr.instruct.GlobalParameterSet parameters"})
+    private TreeReceiver makeTreeReceiver(XsltController controller, GlobalParameterSet parameters, Destination finalDestination, Builder sourceTreeBuilder, Receiver stripper) {
+        return new TreeReceiver(stripper) {
+            boolean closed = false;
+
+            @Override
+            public void close() throws XPathException {
+                if (!closed) {
+                    try {
+                        NodeInfo doc = sourceTreeBuilder.getCurrentRoot();
+                        if (doc != null) {
+                            doc.getTreeInfo().setSpaceStrippingRule(controller.getSpaceStrippingRule());
+                            Receiver result = getDestinationReceiver(controller, finalDestination);
+                            try {
+                                controller.setGlobalContextItem(doc);
+                                controller.initializeController(parameters);
+                                controller.applyTemplates(doc, result);
+                            } catch (TransformerException e) {
+                                throw new SaxonApiException(e);
+                            }
+                        }
+                    } catch (SaxonApiException e) {
+                        throw XPathException.makeXPathException(e);
+                    }
+                    closed = true;
+                }
+            }
+        };
     }
 
 }

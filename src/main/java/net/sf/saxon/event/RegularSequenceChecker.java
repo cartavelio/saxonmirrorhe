@@ -81,7 +81,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
     private final Stack<Short> stack = new Stack<>();
 
     @CSharpSimpleEnum
-    public enum State {Initial, Open, StartTag, Content, Final, Failed}
+    public enum State {INITIAL, OPEN, START_TAG, CONTENT, FINAL, FAILED}
     // StartTag is used only in an incremental Receiver where attributes and namespaces are notified separately
 
     @CSharpSimpleEnum
@@ -100,21 +100,21 @@ public class RegularSequenceChecker extends ProxyReceiver {
     }
 
     static {
-        edge(State.Initial, Transition.OPEN, State.Open);
-        edge(State.Open, Transition.APPEND, State.Open);
-        edge(State.Open, Transition.TEXT, State.Open);
-        edge(State.Open, Transition.COMMENT, State.Open);
-        edge(State.Open, Transition.PI, State.Open);
-        edge(State.Open, Transition.START_DOCUMENT, State.Content);
-        edge(State.Open, Transition.START_ELEMENT, State.Content);
-        edge(State.Content, Transition.TEXT, State.Content);
-        edge(State.Content, Transition.COMMENT, State.Content);
-        edge(State.Content, Transition.PI, State.Content);
-        edge(State.Content, Transition.START_ELEMENT, State.Content);
-        edge(State.Content, Transition.END_ELEMENT, State.Content); // or Open if the stack is empty
-        edge(State.Content, Transition.END_DOCUMENT, State.Open);
-        edge(State.Open, Transition.CLOSE, State.Final);
-        edge(State.Failed, Transition.CLOSE, State.Failed);
+        edge(State.INITIAL, Transition.OPEN, State.OPEN);
+        edge(State.OPEN, Transition.APPEND, State.OPEN);
+        edge(State.OPEN, Transition.TEXT, State.OPEN);
+        edge(State.OPEN, Transition.COMMENT, State.OPEN);
+        edge(State.OPEN, Transition.PI, State.OPEN);
+        edge(State.OPEN, Transition.START_DOCUMENT, State.CONTENT);
+        edge(State.OPEN, Transition.START_ELEMENT, State.CONTENT);
+        edge(State.CONTENT, Transition.TEXT, State.CONTENT);
+        edge(State.CONTENT, Transition.COMMENT, State.CONTENT);
+        edge(State.CONTENT, Transition.PI, State.CONTENT);
+        edge(State.CONTENT, Transition.START_ELEMENT, State.CONTENT);
+        edge(State.CONTENT, Transition.END_ELEMENT, State.CONTENT); // or Open if the stack is empty
+        edge(State.CONTENT, Transition.END_DOCUMENT, State.OPEN);
+        edge(State.OPEN, Transition.CLOSE, State.FINAL);
+        edge(State.FAILED, Transition.CLOSE, State.FAILED);
         //edge(State.Final, "close", State.Final);  // This was a concession to poor practice, but apparently no longer needed
     }
 
@@ -141,7 +141,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
 
     public RegularSequenceChecker(Receiver nextReceiver, boolean fullChecking) {
         super(nextReceiver);
-        state = State.Initial;
+        state = State.INITIAL;
         this.fullChecking = fullChecking;
     }
 
@@ -160,7 +160,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
             transition(Transition.APPEND);
             nextReceiver.append(item, locationId, copyNamespaces);
         } catch (XPathException e) {
-            state = State.Failed;
+            state = State.FAILED;
             throw e;
         }
     }
@@ -180,7 +180,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
         try {
             nextReceiver.characters(chars, locationId, properties);
         } catch (XPathException e) {
-            state = State.Failed;
+            state = State.FAILED;
             throw e;
         }
     }
@@ -191,12 +191,12 @@ public class RegularSequenceChecker extends ProxyReceiver {
 
     @Override
     public void close() throws XPathException {
-        if (state != State.Final && state != State.Failed) {
+        if (state != State.FINAL && state != State.FAILED) {
             if (!stack.isEmpty()) {
                 throw new IllegalStateException("Unclosed element or document nodes at end of stream");
             }
             nextReceiver.close();
-            state = State.Final;
+            state = State.FINAL;
         }
     }
 
@@ -210,7 +210,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
         try {
             nextReceiver.comment(chars, locationId, properties);
         } catch (XPathException e) {
-            state = State.Failed;
+            state = State.FAILED;
             throw e;
         }
     }
@@ -228,7 +228,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
         try {
             nextReceiver.endDocument();
         } catch (XPathException e) {
-            state = State.Failed;
+            state = State.FAILED;
             throw e;
         }
     }
@@ -244,12 +244,12 @@ public class RegularSequenceChecker extends ProxyReceiver {
             throw new IllegalStateException("Unmatched endElement() call");
         }
         if (stack.isEmpty()) {
-            state = State.Open;
+            state = State.OPEN;
         }
         try {
             nextReceiver.endElement();
         } catch (XPathException e) {
-            state = State.Failed;
+            state = State.FAILED;
             throw e;
         }
     }
@@ -264,7 +264,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
         try {
             nextReceiver.open();
         } catch (XPathException e) {
-            state = State.Failed;
+            state = State.FAILED;
             throw e;
         }
     }
@@ -279,7 +279,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
         try {
             nextReceiver.processingInstruction(target, data, locationId, properties);
         } catch (XPathException e) {
-            state = State.Failed;
+            state = State.FAILED;
             throw e;
         }
     }
@@ -296,7 +296,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
         try {
             nextReceiver.startDocument(properties);
         } catch (XPathException e) {
-            state = State.Failed;
+            state = State.FAILED;
             throw e;
         }
     }
@@ -378,7 +378,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
         try {
             nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
         } catch (XPathException e) {
-            state = State.Failed;
+            state = State.FAILED;
             throw e;
         }
 

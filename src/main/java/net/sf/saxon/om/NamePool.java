@@ -10,7 +10,6 @@ package net.sf.saxon.om;
 import net.sf.saxon.lib.NamespaceConstant;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -71,11 +70,13 @@ public final class NamePool {
     // Next fingerprint available to be allocated. Starts at 1024 as low-end fingerprints are statically allocated to system-defined
     // names
 
-    private final AtomicInteger unique = new AtomicInteger(1024);
+    private final AtomicCounter unique = new AtomicCounter(1024);
 
     // A map containing suggested prefixes for particular URIs
 
     private final ConcurrentHashMap<String, String> suggestedPrefixes = new ConcurrentHashMap<>();
+
+
 
 
 
@@ -170,16 +171,16 @@ public final class NamePool {
             }
         }
         StructuredQName qName = new StructuredQName("", uri, local);
-        Integer existing = qNameToInteger.get(qName);
-        if (existing != null) {
+        int existing = qNameToInteger.getOrDefault(qName, -1);
+        if (existing >= 0) {
             return existing;
         }
         int next = unique.getAndIncrement();
         if (next > MAX_FINGERPRINT) {
             throw new NamePoolLimitException("Too many distinct names in NamePool");
         }
-        existing = qNameToInteger.putIfAbsent(qName, next);
-        if (existing == null) {
+        Integer existing2 = qNameToInteger.putIfAbsent(qName, next);
+        if (existing2 == null) {
             integerToQName.put(next, qName);
             return next;
         } else {

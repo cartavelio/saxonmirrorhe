@@ -184,8 +184,9 @@ public class WindowClause extends Clause {
         }
         ItemTypeCheckingFunction checker = getItemTypeChecker();
         if (checker != null) {
+            @SuppressWarnings("Convert2Diamond")
             SequenceIterator check =
-                    new ItemMappingIterator(new ListIterator(w.contents), checker);
+                    new ItemMappingIterator(new ListIterator.Of<Item>(w.contents), checker);
             Count.count(check); // a convenient way to consume the iterator and thus perform the checking
         }
     }

@@ -310,23 +310,23 @@ public class SelectedElementsSpaceStrippingRule implements SpaceStrippingRule {
         presenter.endElement();
     }
 
-    private static void exportRuleJS(Rule rule, StringBuilder fsb) {
-        String which = rule.getAction() == Stripper.STRIP ? "true" : "false";
-        NodeTest test = (NodeTest)rule.getPattern().getItemType();
-        if (test instanceof NodeKindTest) {
-            // elements="*"
-            fsb.append("return " + which + ";");
-        } else if (test instanceof NameTest) {
-            fsb.append("if (uri=='" + test.getMatchingNodeName().getURI() +
-                               "' && local=='" + test.getMatchingNodeName().getLocalPart() +
-                               "') return " + which + ";" );
-        } else if (test instanceof NamespaceTest) {
-            fsb.append("if (uri=='" + ((NamespaceTest)test).getNamespaceURI() + "') return " + which + ";");
-        } else if (test instanceof LocalNameTest) {
-            fsb.append("if (local=='" + ((LocalNameTest) test).getLocalName() + "') return " + which + ";");
-        } else {
-            throw new IllegalStateException("Cannot export " + test.getClass());
-        }
-    }
+//    private static void exportRuleJS(Rule rule, StringBuilder fsb) {
+//        String which = rule.getAction() == Stripper.STRIP ? "true" : "false";
+//        NodeTest test = (NodeTest)rule.getPattern().getItemType();
+//        if (test instanceof NodeKindTest) {
+//            // elements="*"
+//            fsb.append("return " + which + ";");
+//        } else if (test instanceof NameTest) {
+//            fsb.append("if (uri=='" + test.getMatchingNodeName().getURI() +
+//                               "' && local=='" + test.getMatchingNodeName().getLocalPart() +
+//                               "') return " + which + ";" );
+//        } else if (test instanceof NamespaceTest) {
+//            fsb.append("if (uri=='" + ((NamespaceTest)test).getNamespaceURI() + "') return " + which + ";");
+//        } else if (test instanceof LocalNameTest) {
+//            fsb.append("if (local=='" + ((LocalNameTest) test).getLocalName() + "') return " + which + ";");
+//        } else {
+//            throw new IllegalStateException("Cannot export " + test.getClass());
+//        }
+//    }
 }
 

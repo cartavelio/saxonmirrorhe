@@ -128,8 +128,10 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
     public void setSource(Source source) throws SaxonApiException {
         if (source instanceof NodeInfo) {
             setContextItem(new XdmNode((NodeInfo) source));
+        //#if CSHARP==false
         } else if (source instanceof DOMSource) {
             setContextItem(processor.newDocumentBuilder().wrap(source));
+        //#endif
         } else {
             setContextItem(processor.newDocumentBuilder().build(source));
         }
@@ -224,6 +226,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
         return context.getURIResolver();
     }
 
+    //#if CSHARP==false
     /**
      * Set the error listener. The error listener receives reports of all run-time
      * errors and can decide how to report them.
@@ -245,7 +248,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
     public ErrorListener getErrorListener() {
         return context.getErrorListener();
     }
-
+    //#endif
     /**
      * Set a TraceListener which will receive messages relating to the evaluation of all expressions.
      * This option has no effect unless the query was compiled to enable tracing.
@@ -488,6 +491,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
         }
     }
 
+    //#if CSHARP==false
     /**
      * Evaluate the query, returning the result as an <code>Stream</code>.
      *
@@ -503,6 +507,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
     public XdmStream<XdmItem> stream() throws SaxonApiUncheckedException {
         return iterator().stream();
     }
+    //#endif
 
     private Receiver getDestinationReceiver(Destination destination) throws SaxonApiException {
         Executable exec = expression.getExecutable();

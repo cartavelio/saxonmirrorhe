@@ -10,6 +10,7 @@ package net.sf.saxon.expr.sort;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.ContextFreeAtomicValue;
 
 
 /**
@@ -17,9 +18,9 @@ import net.sf.saxon.value.AtomicValue;
  * interface and the equals() method with the appropriate XPath semantics. This rules out use of
  * collations, conversion of untyped atomic values, and context dependencies such as implicit timezone.
  */
-public class ComparableAtomicValueComparer implements AtomicComparer {
+public class ContextFreeAtomicComparer implements AtomicComparer {
 
-    private static final ComparableAtomicValueComparer THE_INSTANCE = new ComparableAtomicValueComparer();
+    private static final ContextFreeAtomicComparer THE_INSTANCE = new ContextFreeAtomicComparer();
 
     /**
      * Get the singleton instance of this class
@@ -27,11 +28,11 @@ public class ComparableAtomicValueComparer implements AtomicComparer {
      * @return the singleton instance of this class
      */
 
-    public static ComparableAtomicValueComparer getInstance() {
+    public static ContextFreeAtomicComparer getInstance() {
         return THE_INSTANCE;
     }
 
-    protected ComparableAtomicValueComparer() {
+    protected ContextFreeAtomicComparer() {
     }
 
     /*@Nullable*/
@@ -73,7 +74,8 @@ public class ComparableAtomicValueComparer implements AtomicComparer {
         } else if (b == null) {
             return +1;
         }
-        return ((Comparable) a).compareTo(b);
+        return ((ContextFreeAtomicValue) a).getXPathComparable()
+                .compareTo(((ContextFreeAtomicValue) b).getXPathComparable());
     }
 
     /**

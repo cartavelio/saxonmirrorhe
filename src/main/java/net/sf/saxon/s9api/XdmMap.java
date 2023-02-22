@@ -377,11 +377,11 @@ public class XdmMap extends XdmFunctionItem {
      * to a corresponding XDM value.
      */
 
-    public static XdmMap makeMap(Map input) throws IllegalArgumentException {
+    public static <K, V> XdmMap makeMap(Map<K, V> input) throws IllegalArgumentException {
         HashTrieMap result = new HashTrieMap();
-        for (Object entry : input.entrySet()) {
-            Object key = ((Map.Entry)entry).getKey();
-            Object value = ((Map.Entry)entry).getValue();
+        for (Map.Entry<K, V> entry : input.entrySet()) {
+            K key = entry.getKey();
+            V value = entry.getValue();
             XdmAtomicValue xKey = XdmAtomicValue.makeAtomicValue(key);
             XdmValue xValue = XdmValue.makeValue(value);
             result.initialPut(xKey.getUnderlyingValue(), xValue.getUnderlyingValue());

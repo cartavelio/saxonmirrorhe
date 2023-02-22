@@ -10,12 +10,14 @@ package net.sf.saxon.expr;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -639,7 +641,7 @@ public abstract class Calculator {
             if (Double.isNaN(B)) {
                 throw new XPathException("Second operand of idiv is NaN", "FOAR0002", c);
             }
-            return IntegerValue.makeIntegerValue(new DoubleValue(A / B)).asAtomic();
+            return IntegerValue.fromDouble(A / B).asAtomic();
         }
 
         @Override
@@ -842,16 +844,13 @@ public abstract class Calculator {
             return BuiltInAtomicType.DECIMAL;
         }
     }
-
+    
     public static BigDecimalValue decimalDivide(NumericValue a, NumericValue b) throws XPathException {
         final BigDecimal A = a.getDecimalValue();
         final BigDecimal B = b.getDecimalValue();
-//        int scale = Math.max(DecimalValue.DIVIDE_PRECISION,
-//                Math.max(A.scale(), B.scale()));
-        int scale = Math.max(BigDecimalValue.DIVIDE_PRECISION, A.scale() - B.scale() + BigDecimalValue.DIVIDE_PRECISION);
 
         try {
-            BigDecimal result = A.divide(B, scale, RoundingMode.HALF_DOWN);
+            BigDecimal result = internalDecimalDivide(A, B);
             return new BigDecimalValue(result);
         } catch (ArithmeticException err) {
             if (b.compareTo(0) == 0) {
@@ -860,6 +859,13 @@ public abstract class Calculator {
                 throw err;
             }
         }
+    }
+
+    @NotNull
+    @CSharpReplaceBody(code="return A/B;")
+    private static BigDecimal internalDecimalDivide(BigDecimal A, BigDecimal B) {
+        int scale = Math.max(BigDecimalValue.DIVIDE_PRECISION, A.scale() - B.scale() + BigDecimalValue.DIVIDE_PRECISION);
+        return A.divide(B, scale, RoundingMode.HALF_DOWN);
     }
 
     /**
@@ -876,8 +882,6 @@ public abstract class Calculator {
             final BigDecimal A = ((NumericValue) a).getDecimalValue();
             final BigDecimal B = ((NumericValue) b).getDecimalValue();
             try {
-                //BigDecimal quotient = A.divide(B, 0, BigDecimal.ROUND_DOWN);
-                //BigDecimal remainder = A.subtract(quotient.multiply(B));
                 return new BigDecimalValue(A.remainder(B));
             } catch (ArithmeticException err) {
                 if (((NumericValue) b).compareTo(0) == 0) {

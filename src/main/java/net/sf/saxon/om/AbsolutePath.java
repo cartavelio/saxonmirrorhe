@@ -79,7 +79,7 @@ public class AbsolutePath {
         StringBuilder fsb = new StringBuilder(256);
         for (AbsolutePath.PathElement pe : path) {
             fsb.append('/');
-            pe.toString(fsb, 'p');
+            pe.addToString(fsb, 'p');
         }
         return fsb.toString();
     }
@@ -94,7 +94,7 @@ public class AbsolutePath {
         StringBuilder fsb = new StringBuilder(256);
         for (AbsolutePath.PathElement pe : path) {
             fsb.append('/');
-            pe.toString(fsb, 'u');
+            pe.addToString(fsb, 'u');
         }
         return fsb.toString();
     }
@@ -109,7 +109,7 @@ public class AbsolutePath {
         StringBuilder fsb = new StringBuilder(256);
         for (AbsolutePath.PathElement pe : path) {
             fsb.append('/');
-            pe.toString(fsb, 's');
+            pe.addToString(fsb, 's');
         }
         return fsb.toString();
     }
@@ -199,7 +199,7 @@ public class AbsolutePath {
          *               'p': use namepace prefix. 'u': use full URI. 's': use abbreviated URI
          */
 
-        public void toString(StringBuilder fsb, char option) {
+        public void addToString(StringBuilder fsb, char option) {
             switch (nodeKind) {
                 case Type.DOCUMENT:
                     fsb.append("(/)");

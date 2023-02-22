@@ -154,7 +154,7 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
                     for (int i = 0; i < len; i++) {
                         nodes[i] = wrapOrUnwrapNode(list.item(i), config);
                     }
-                    return new SequenceExtent(nodes);
+                    return new SequenceExtent.Of<>(nodes);
                 }
 
                 @Override

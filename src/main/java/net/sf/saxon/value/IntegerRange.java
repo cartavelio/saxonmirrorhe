@@ -10,7 +10,6 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.AscendingRangeIterator;
 import net.sf.saxon.expr.DescendingRangeIterator;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.om.AtomicArray;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
@@ -180,25 +179,6 @@ public class IntegerRange implements AtomicSequence {
         return getUnicodeStringValue();
     }
 
-    /**
-     * Get a Comparable value that implements the XML Schema ordering comparison semantics for this value.
-     * The default implementation is written to compare sequences of atomic values.
-     * This method is overridden for AtomicValue and its subclasses.
-     * <p>In the case of data types that are partially ordered, the returned Comparable extends the standard
-     * semantics of the compareTo() method by returning the value {@link net.sf.saxon.om.SequenceTool#INDETERMINATE_ORDERING} when there
-     * is no defined order relationship between two given values.</p>
-     *
-     * @return a Comparable that follows XML Schema comparison rules
-     */
-    @Override
-    public SchemaComparable getSchemaComparable() {
-        try {
-            return new AtomicArray(iterate()).getSchemaComparable();
-        } catch (XPathException err) {
-            throw new AssertionError(err);
-        }
-    }
-
     @Override
     public UnicodeString getUnicodeStringValue() {
         try {
@@ -257,7 +237,7 @@ public class IntegerRange implements AtomicSequence {
         private IntegerRange range;
         private long current;
 
-        private IntegerRangeIterator(IntegerRange range) {
+        public IntegerRangeIterator(IntegerRange range) {
             this.range = range;
             current = range.start;
         }

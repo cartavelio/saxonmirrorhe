@@ -11,7 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.expr.sort.LRUCache;
+import net.sf.saxon.expr.sort.LFUCache;
 import net.sf.saxon.functions.ExecutableFunctionLibrary;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
@@ -31,6 +31,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
+import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
@@ -325,12 +326,12 @@ public final class EvaluateInstr extends Expression {
         Collection<XPathVariable> declaredVars = null;
 
         Controller controller = context.getController();
-        LRUCache<String, Object[]> cache;
+        LFUCache<String, Object[]> cache;
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (controller) {
-            cache = (LRUCache<String, Object[]>) controller.getUserData(this.getLocation(), "xsl:evaluate");
+            cache = (LFUCache<String, Object[]>) controller.getUserData(this.getLocation(), "xsl:evaluate");
             if (cache == null) {
-                cache = new LRUCache<>(100);
+                cache = new LFUCache<>(100);
                 controller.setUserData(this.getLocation(), "xsl:evaluate", cache);
             } else {
                 Object[] o = cache.get(cacheKey);
@@ -402,9 +403,10 @@ public final class EvaluateInstr extends Expression {
             if (dynamicParams != null) {
                 dynamicParams.keys().forEachOrFail(paramName -> {
                     if (!(paramName instanceof QNameValue)) {
+                        final AtomicType primitiveItemType =((AtomicValue) paramName).getPrimitiveType();
                         XPathException err = new XPathException(
                                 "Parameter names supplied to xsl:evaluate must have type xs:QName, not " +
-                                        ((AtomicValue)paramName).getItemType().getPrimitiveItemType().getDisplayName(), "XTTE3165");
+                                        primitiveItemType.getDisplayName(), "XTTE3165");
                         err.setIsTypeError(true);
                         throw err;
                     }

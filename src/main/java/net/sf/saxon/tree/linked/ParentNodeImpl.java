@@ -146,7 +146,7 @@ public abstract class ParentNodeImpl extends NodeImpl {
             }
         } else {
             if (test == null || test == AnyNodeTest.getInstance()) {
-                return new ArrayIterator.OfNodes((NodeImpl[]) _children);
+                return new ArrayIterator.OfNodes<>((NodeImpl[]) _children);
             } else {
                 return new ChildEnumeration(this, test);
             }
@@ -385,7 +385,7 @@ public abstract class ParentNodeImpl extends NodeImpl {
      *                new parent; false if such namespaces should be undeclared on the _children
      */
 
-    synchronized void insertChildrenAt(/*@NotNull*/ NodeInfo[] source, int index, boolean inherit) {
+    synchronized protected void insertChildrenAt(/*@NotNull*/ NodeInfo[] source, int index, boolean inherit) {
         if (source.length == 0) {
             return;
         }

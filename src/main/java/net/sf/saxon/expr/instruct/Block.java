@@ -10,7 +10,9 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -585,7 +587,8 @@ public class Block extends Instruction {
             for (int c = 0; c < size(); c++) {
                 values[c] = (AtomicValue) ((Literal) child(c)).getGroundedValue();
             }
-            Expression result = Literal.makeLiteral(new SequenceExtent(values), this);
+            @SuppressWarnings("Convert2Diamond")
+            Expression result = Literal.makeLiteral(new SequenceExtent.Of<AtomicValue>(values), this);
             result.setParentExpression(getParentExpression());
             return result;
         } else {
@@ -633,7 +636,7 @@ public class Block extends Instruction {
 
     private void flushCurrentLiteralList(List<Item> currentLiteralList, List<Expression> list) {
         if (currentLiteralList != null) {
-            ListIterator iter = new ListIterator(currentLiteralList);
+            ListIterator.Of<Item> iter = new ListIterator.Of<>(currentLiteralList);
             Literal lit = Literal.makeLiteral(iter.materialize(), this);
             list.add(lit);
         }

@@ -16,7 +16,7 @@ import java.util.List;
  * Class ListIterator, iterates over a sequence of items held in a Java List.
  */
 
-public class NodeListIterator extends GenericListIterator<NodeInfo> implements AxisIterator {
+public class NodeListIterator extends ListIterator.Of<NodeInfo> implements AxisIterator {
 
     /**
      * Create a ListIterator over a given List

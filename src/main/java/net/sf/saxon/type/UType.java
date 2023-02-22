@@ -11,9 +11,7 @@ package net.sf.saxon.type;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.tree.iter.UnfailingIterator;
-
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.ObjectValue;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -318,7 +316,7 @@ public class UType {
         if (p.isEmpty()) {
             return ErrorType.getInstance();
         } else if (p.size() == 1) {
-            return p.toArray(new PrimitiveUType[1])[0].toItemType();
+            return p.iterator().next().toItemType();
         } else if (ANY_NODE.subsumes(this)) {
             return AnyNodeTest.getInstance();
         } else if (equals(NUMERIC)) {
@@ -353,7 +351,7 @@ public class UType {
             return ((AtomicValue)item).getUType();
         } else if (item instanceof Function) {
             return UType.FUNCTION;
-        } else if (item instanceof ObjectValue) {
+        } else if (item.getGenre() == Genre.EXTERNAL) {
             return UType.EXTENSION;
         } else {
             return UType.VOID;

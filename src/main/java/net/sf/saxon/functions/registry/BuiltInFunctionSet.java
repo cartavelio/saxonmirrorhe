@@ -27,6 +27,7 @@ import net.sf.saxon.type.PlainType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -249,15 +250,22 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         }
 
         Class<? extends SystemFunction> functionClass = entry.implementationClass;
+        SystemFunction f = instantiate(name, functionClass);
+        f.setDetails(entry);
+        f.setArity(arity);
+        return f;
+    }
+
+    @NotNull
+    private SystemFunction instantiate(String name, Class<? extends SystemFunction> functionClass) {
         SystemFunction f;
         try {
-            f = functionClass.newInstance();
+            //noinspection RedundantCast
+            f = (SystemFunction)functionClass.newInstance();
         } catch (Exception err) {
             err.printStackTrace();
             throw new AssertionError("Failed to instantiate system function " + name + " - " + err.getMessage());
         }
-        f.setDetails(entry);
-        f.setArity(arity);
         return f;
     }
 

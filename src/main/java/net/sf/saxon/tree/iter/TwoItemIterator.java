@@ -74,7 +74,7 @@ public class TwoItemIterator implements UnfailingIterator, LookaheadIterator, Gr
     public GroundedValue getResidue() throws XPathException {
         switch (pos) {
             case 0:
-                return new SequenceExtent(new Item[]{one, two});
+                return new SequenceExtent.Of<>(new Item[]{one, two});
             case 1:
                 return two;
             default:
