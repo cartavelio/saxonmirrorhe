@@ -778,6 +778,7 @@ task graal_eec_jar(
         include "config.m4"
         include "config.w32"
         exclude "readme.md"
+        exclude "PHP7"
         filter { line ->
           line.replaceAll('@@VERSION@@', saxonVersion)
                   .replace('@@edition@@', edition)
