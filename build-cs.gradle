@@ -326,9 +326,10 @@ task eecs_refine_digest(
 
 task eecs_generateCSharp(
   type: JavaExec,
-  dependsOn: ["eecs_refine_digest", "build_transpiler"],
+  dependsOn: ["eecs_refine_digest", "build_transpiler", "eecs_transpile_to_xml"],
   description: "Create the CS files for EE"
 ) {
+  inputs.files fileTree(dir: "${buildDir}/ee_xmlout")
   inputs.file "${buildDir}/ee_refined-digest.xml"
   inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
   outputs.files fileTree(dir: "${buildDir}/cs")
