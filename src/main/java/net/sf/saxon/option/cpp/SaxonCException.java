@@ -45,7 +45,7 @@ public class SaxonCException  {
         }
         if(throwable instanceof SaxonApiException) {
            exception = (SaxonApiException)throwable;
-        } if(throwable instanceof NullPointerException) {
+        } else if(throwable instanceof NullPointerException) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             throwable.printStackTrace(pw);
@@ -70,7 +70,7 @@ public class SaxonCException  {
         }
         if(throwable instanceof SaxonApiException) {
            exception = (SaxonApiException)throwable;
-        } if(throwable instanceof NullPointerException) {
+        } else if(throwable instanceof NullPointerException) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             throwable.printStackTrace(pw);
