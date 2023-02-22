@@ -28,7 +28,7 @@ public abstract class OutputterEvent {
      * Send the event to a receiver
      *
      * @param out the receiver to which the event is to be sent
-     * @throws XPathException the the receiver reports an error
+     * @throws XPathException if the receiver reports an error
      */
 
     public void replay(Outputter out) throws XPathException {

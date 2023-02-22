@@ -537,7 +537,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
      *
      *
      * @param type   the type annotation of the node
-     * @param nodeNr the the node number of the elemente
+     * @param nodeNr the node number of the element
      * @throws XPathException if an error occurs
      */
 
@@ -564,7 +564,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
      *
      *
      * @param type   the type annotation of the node
-     * @param nodeNr the the node number of the elemente
+     * @param nodeNr the node number of the element
      * @throws XPathException  if an error occurs
      */
 

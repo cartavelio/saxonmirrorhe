@@ -13,7 +13,7 @@ import net.sf.saxon.trans.XPathException;
 
 /* Interface implemented by operations that compute the value of an expression using
  * a "fold" operation: that is, by applying a function to each item in the input sequence
- * in turn, maintaining working data as the the items are processed, and finally computing
+ * in turn, maintaining working data as the items are processed, and finally computing
  * the final result of the expression from the value of the working data.
  */
 public interface Fold {

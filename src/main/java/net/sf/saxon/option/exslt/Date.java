@@ -26,7 +26,7 @@ import java.util.GregorianCalendar;
 
 /**
  * This class implements extension functions in the
- * http://exslt.org/dates-and-times namespace.
+ * {@code http://exslt.org/dates-and-times} namespace.
  */
 
 public final class Date {
@@ -501,7 +501,7 @@ public final class Date {
      *
      * @param context  the XPath dynamic context
      * @param dateTime must start with CCYY-MM-DD
-     * @return the the day-of-the-week in a month of a date as a number
+     * @return the day-of-the-week in a month of a date as a number
      *         (for example 3 for the 3rd Tuesday in May).
      */
 
@@ -519,7 +519,7 @@ public final class Date {
      * (for example 3 for the 3rd Tuesday in May).
      *
      * @param context the XPath dynamic context
-     * @return the the day-of-the-week in a month of the current date as a number
+     * @return the day-of-the-week in a month of the current date as a number
      *         (for example 3 for the 3rd Tuesday in May).
      * @throws XPathException if the context does not allow a date/time to be established
      */

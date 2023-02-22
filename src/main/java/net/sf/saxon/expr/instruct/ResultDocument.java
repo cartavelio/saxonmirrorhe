@@ -208,7 +208,7 @@ public class ResultDocument extends Instruction
     }
 
     /**
-     * Set whether the the instruction should resolve the href relative URI against the static
+     * Set whether the instruction should resolve the href relative URI against the static
      * base URI (rather than the dynamic base output URI)
      *
      * @param staticBase set to true by fn:put(), to resolve against the static base URI of the query.

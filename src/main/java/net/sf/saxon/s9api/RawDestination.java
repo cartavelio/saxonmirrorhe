@@ -76,7 +76,7 @@ public class RawDestination extends AbstractDestination {
      * Return the result sequence, after it has been constructed.
      * <p>This method should not be called until the destination has been closed.</p>
      *
-     * @return the the result sequence
+     * @return the result sequence
      * @throws IllegalStateException if called during the execution of the process that
      *                               is writing the tree.
      */
