@@ -59,6 +59,10 @@
    
    <xsl:variable name="specialTypes" as="map(xs:string, xs:string)" select="map{
       'boolean': 'bool',
+      'com.saxonica.ee.parallel.MultithreadedContextMappingIterator': 'Saxon.Impl.Parallel.MultithreadedContextMappingIterator',
+      'com.saxonica.ee.parallel.MultithreadedItemMappingIterator': 'Saxon.Impl.Parallel.MultithreadedItemMappingIterator',
+      'com.saxonica.ee.parallel.MultithreadedFocusTrackingIterator': 'Saxon.Impl.Parallel.MultithreadedFocusTrackingIterator',
+      'com.saxonica.functions.extfn.ParseHtml': 'Saxon.Impl.Helpers.ParseHtml',
       'java.io.BufferedInputStream': 'System.IO.BufferedStream',
       'java.io.BufferedOutputStream': 'System.IO.BufferedStream',
       'java.io.BufferedReader': 'Saxon.Impl.Helpers.BufferedReader',
@@ -108,6 +112,7 @@
       'java.util.Collection': 'System.Collections.Generic.ICollection',
       'java.util.Comparator': 'System.Collections.Generic.Comparer',
       'java.util.concurrent.ConcurrentHashMap': 'System.Collections.Concurrent.ConcurrentDictionary',
+      'java.util.function.BiFunction': 'System.Func',
       'java.util.function.Function': 'System.Func',
       'java.util.function.Predicate': 'System.Predicate',
       'java.util.HashMap': 'System.Collections.Generic.Dictionary',
@@ -133,6 +138,9 @@
       'net.sf.saxon.ma.arrays.ImmutableArrayItem': 'Saxon.Impl.DataModel.ImmArray',
       'net.sf.saxon.ma.map.HashTrieMap': 'Saxon.Impl.DataModel.ImmMap',
       'net.sf.saxon.ma.trie.ImmutableHashTrieMap': 'System.Collections.Immutable.ImmutableDictionary',
+      'net.sf.saxon.ma.trie.ImmutableMap': 'System.Collections.Immutable.ImmutableDictionary',
+      'net.sf.saxon.ma.trie.ImmutableList': 'System.Collections.Immutable.ImmutableList',
+      'net.sf.saxon.ma.trie.TrieKVP': 'System.Collections.Generic.KeyValuePair',
       'net.sf.saxon.s9api.ExtensionFunction': 'Saxon.Api.ExtensionFunction',
       'net.sf.saxon.s9api.HostLanguage': 'Saxon.Api.HostLanguage',
       'net.sf.saxon.s9api.ItemType': 'Saxon.Api.XdmItemType',
@@ -209,8 +217,11 @@
          <xsl:when test="$expr/@nodeType='ObjectCreationExpr'">
             <xsl:sequence select="$expr/type/@RESOLVED_TYPE"/>
          </xsl:when>
-         <xsl:when test="$expr/@nodeType='NameExpr'">
+         <xsl:when test="$expr[@RESOLVED_TYPE]/@nodeType='NameExpr'">
             <xsl:sequence select="$expr/@RESOLVED_TYPE"/>
+         </xsl:when>
+         <xsl:when test="$expr[@UNRESOLVED][self::initializer][parent::variable]/@nodeType='NameExpr'">
+            <xsl:sequence select="$expr/../type/@RESOLVED_TYPE"/>
          </xsl:when>
          <xsl:when test="$expr/@nodeType='FieldAccessExpr'">
             <xsl:sequence select="$expr/@RETURN"/>
@@ -240,6 +251,22 @@
             <xsl:text>java.lang.Object /* unknown type for {$expr/@nodeType} */</xsl:text>
          </xsl:otherwise>        
       </xsl:choose>
+   </xsl:function>
+   
+   <xsl:function name="f:extract-type-arguments" as="xs:string?">
+      <xsl:param name="type-name" as="xs:string"/>
+      <!-- If we start with "List<A, B<C, D>>", we want to extract "A, B<C, D>"-->
+      <xsl:variable name="type-param" select="$type-name => replace('^[^&lt;]+&lt;', '') => replace('>$', '')"/>   
+      <xsl:value-of>
+         <xsl:analyze-string select="$type-param" regex="[a-zA-Z0-9\._]+">
+            <xsl:matching-substring>
+               <xsl:value-of select="f:renameType(.)"/>
+            </xsl:matching-substring>
+            <xsl:non-matching-substring>
+               <xsl:value-of select="."/>
+            </xsl:non-matching-substring>
+         </xsl:analyze-string>
+      </xsl:value-of>
    </xsl:function>
    
    <xsl:function name="f:fullClassName" as="xs:string">
@@ -403,14 +430,14 @@
  
    
    <xsl:variable name="operators" as="map(xs:string, xs:string)"
-      select="map{'AND': '&amp;&amp;',
-                  'OR': '||',
+      select="map{'AND': ' &amp;&amp; ',
+                  'OR': ' || ',
                   'BINARY_AND': '&amp;',
                   'BINARY_OR': '|',
                   'BITWISE_COMPLEMENT': '~',
                   'XOR': '^',
-                  'EQUALS': '==',
-                  'NOT_EQUALS': '!=',
+                  'EQUALS': ' == ',
+                  'NOT_EQUALS': ' != ',
                   'LESS': '&lt;',
                   'GREATER': '>',
                   'LESS_EQUALS': '&lt;=',

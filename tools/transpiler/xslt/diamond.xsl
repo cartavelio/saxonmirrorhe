@@ -23,21 +23,7 @@
         The type inference rules here are also used for constructs such as Collections.emptyList().
    -->
    
-   <xsl:function name="f:extract-type-arguments" as="xs:string?">
-      <xsl:param name="type-name" as="xs:string"/>
-      <!-- If we start with "List<A, B<C, D>>", we want to extract "A, B<C, D>"-->
-      <xsl:variable name="type-param" select="$type-name => replace('^[^&lt;]+&lt;', '') => replace('>$', '')"/>   
-      <xsl:value-of>
-         <xsl:analyze-string select="$type-param" regex="[a-zA-Z0-9\._]+">
-            <xsl:matching-substring>
-               <xsl:value-of select="f:renameType(.)"/>
-            </xsl:matching-substring>
-            <xsl:non-matching-substring>
-               <xsl:value-of select="."/>
-            </xsl:non-matching-substring>
-         </xsl:analyze-string>
-      </xsl:value-of>
-   </xsl:function>
+   
    
    <xsl:function name="f:candidateMethods" as="element(method)*">
       <xsl:param name="targetTypeOfCall" as="xs:string?"/>
@@ -149,7 +135,7 @@
    <!-- argument to a constructor for a user-defined class, as in `new MyClass(new ArrayList<>())`.
         We only solve this if there is a single constructor of the right arity -->
    <xsl:template match="*[@nodeType='ObjectCreationExpr']/arguments/argument">
-      <xsl:variable name="typeBeingCreated" select="../../type/@RESOLVED_TYPE" as="xs:string"/>
+      <xsl:variable name="typeBeingCreated" select="../../type/(@RESOLVED_TYPE, @UNRESOLVED)[1]" as="xs:string"/>
       <xsl:variable name="constructorArity" select="count(parent::arguments/child::argument)"/>
       <xsl:variable name="targetClassDigest" select="key('digestClassKey', $typeBeingCreated, $digest)"/>
       <xsl:variable name="constructors" select="$targetClassDigest/constructor[count(tokenize(@params, '\|')) = $constructorArity]" 
@@ -163,6 +149,14 @@
          <xsl:otherwise>/*NO UNIQUE CONSTRUCTOR FOUND*/</xsl:otherwise>
       </xsl:choose>
    </xsl:template> 
+   
+   <!-- Special-case `new ObjectValue<>(X)` -->
+   
+   <xsl:template match="*[type/@RESOLVED_TYPE='net.sf.saxon.value.ObjectValue']
+                         [arguments/argument[1]/@RESOLVED_TYPE]" 
+      priority="50">
+      <xsl:value-of select="arguments/argument[1]/@RESOLVED_TYPE"/>
+   </xsl:template>
    
    <!-- Special-case `new SequenceExtent.Of<>(List<X>)` -->
    
