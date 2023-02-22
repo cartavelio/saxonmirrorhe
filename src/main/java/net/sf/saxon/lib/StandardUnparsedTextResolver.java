@@ -28,7 +28,11 @@ import java.util.zip.GZIPInputStream;
  *  * RFC 2397.
  */
 
-public class StandardUnparsedTextResolver implements UnparsedTextURIResolver {
+public class StandardUnparsedTextResolver
+        //#if CSHARP==false
+        implements UnparsedTextURIResolver
+        //#endif
+{
 
     private boolean debug = false;
 

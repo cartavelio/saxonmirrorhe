@@ -21,6 +21,7 @@ import net.sf.saxon.trace.TimingTraceListener;
 import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.LicenseException;
+import net.sf.saxon.trans.Timer;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
@@ -796,7 +797,7 @@ public class Transform {
                         sheet = compiler.compile(styleSource);
                         if (showTime) {
                             long endTime = now();
-                            config.getLogger().info("Stylesheet compilation time: " + CommandLineOptions.showExecutionTimeNano(endTime - startTime));
+                            config.getLogger().info("Stylesheet compilation time: " + Timer.showExecutionTimeNano(endTime - startTime));
                         }
                     } else {
                         startTime = now();
@@ -821,13 +822,13 @@ public class Transform {
                             if (showTime && j >= 0) {
                                 long endTime = now();
                                 long elapsed = endTime - startTime;
-                                config.getLogger().info("Stylesheet compilation time: " + CommandLineOptions.showExecutionTimeNano(elapsed));
+                                config.getLogger().info("Stylesheet compilation time: " + Timer.showExecutionTimeNano(elapsed));
                                 startTime = endTime;
                                 totalTime += elapsed;
                             }
                         }
                         if (showTime) {
-                            config.getLogger().info("Average compilation time: " + CommandLineOptions.showExecutionTimeNano(totalTime / repeatComp));
+                            config.getLogger().info("Average compilation time: " + Timer.showExecutionTimeNano(totalTime / repeatComp));
                         }
                     }
                     if (schemaAware) {
@@ -1146,7 +1147,7 @@ public class Transform {
 
         if (showTime) {
             long endTime = now();
-            getConfiguration().getLogger().info("Execution time: " + CommandLineOptions.showExecutionTimeNano(endTime - startTime));
+            getConfiguration().getLogger().info("Execution time: " + Timer.showExecutionTimeNano(endTime - startTime));
         }
     }
     //#endif
@@ -1410,8 +1411,8 @@ public class Transform {
             long endTime = now();
             totalTime += endTime - startTime;
             if (showTime) {
-                getConfiguration().getLogger().info("Execution time: " + CommandLineOptions.showExecutionTimeNano(endTime - startTime));
-                CommandLineOptions.showMemoryUsed();
+                getConfiguration().getLogger().info("Execution time: " + Timer.showExecutionTimeNano(endTime - startTime));
+                getConfiguration().getLogger().info(Timer.showMemoryUsed());
                 if (repeat > 1) {
                     getConfiguration().getLogger().info("-------------------------------");
                     //#if CSHARP==false
@@ -1431,7 +1432,7 @@ public class Transform {
         }
         if (repeat > 1) {
             getConfiguration().getLogger().info("*** Average execution time over last " + runs + " runs: " +
-                                       CommandLineOptions.showExecutionTimeNano(totalTime / runs));
+                                       Timer.showExecutionTimeNano(totalTime / runs));
         }
     }
 

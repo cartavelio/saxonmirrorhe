@@ -12,7 +12,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
-import net.sf.saxon.trans.CommandLineOptions;
+import net.sf.saxon.trans.Timer;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.type.SchemaType;
@@ -260,7 +260,7 @@ public abstract class Builder implements Receiver {
         if (timing && opened) {
             long endTime = System.nanoTime();
             getConfiguration().getLogger().info(
-                    "Tree built in " + CommandLineOptions.showExecutionTimeNano(endTime - startTime));
+                    "Tree built in " + Timer.showExecutionTimeNano(endTime - startTime));
             if (currentRoot instanceof TinyDocumentImpl) {
                 ((TinyDocumentImpl) currentRoot).showSize();
             }

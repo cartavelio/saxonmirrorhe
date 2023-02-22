@@ -21,6 +21,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.trace.*;
 import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.LicenseException;
+import net.sf.saxon.trans.Timer;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -468,8 +469,8 @@ public class Query {
                         totalTime += endTime - startTime;
                     }
                     if (repeat < 100) {
-                        config.getLogger().info("Execution time: " + CommandLineOptions.showExecutionTimeNano(endTime - startTime));
-                        CommandLineOptions.showMemoryUsed();
+                        config.getLogger().info("Execution time: " + Timer.showExecutionTimeNano(endTime - startTime));
+                        config.getLogger().info(Timer.showMemoryUsed());
                         Instrumentation.report();
                     } else if (totalTime > 1000000000000L) {
                         // quit after 1000 seconds
@@ -481,7 +482,7 @@ public class Query {
 
             if (repeat > 3) {
                 config.getLogger().info("Average execution time: " +
-                                           CommandLineOptions.showExecutionTimeNano(totalTime / (r - 3)));
+                                           Timer.showExecutionTimeNano(totalTime / (r - 3)));
             }
             if (options.getOptionValue("TB") != null) {
                 // report on hotspot bytecode generation

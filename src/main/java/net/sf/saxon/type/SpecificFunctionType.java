@@ -363,6 +363,7 @@ public class SpecificFunctionType extends AnyFunctionType {
      * @return optionally, a message explaining why the item does not match the type
      */
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         if (!(item instanceof Function)) {
             return Optional.empty();
