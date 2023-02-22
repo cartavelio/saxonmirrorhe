@@ -134,6 +134,20 @@ public abstract class Minimax extends CollatingFunctionFixed {
                 }
             }
         }
+        if (arguments[0] instanceof RangeExpression) {
+            // typically the min/max is the start/end of the range. But we need to be careful about handling
+            // an empty sequence (A to B where A > B)
+            if (isMaxFunction()) {
+                Expression start = ((RangeExpression) arguments[0]).getStartExpression();
+                Expression end = ((RangeExpression) arguments[0]).getEndExpression();
+                if (start instanceof Literal && end instanceof Literal) {
+                    return end;
+                }
+                return new LastItemExpression(arguments[0]);
+            } else {
+                return FirstItemExpression.makeFirstItemExpression(arguments[0]);
+            }
+        }
         return null;
     }
 
