@@ -3,7 +3,6 @@ package net.sf.saxon.expr.elab;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Closure;
 
@@ -36,7 +35,6 @@ public class LearningEvaluator implements SequenceEvaluator {
      *             themselves eagerly all the time.
      */
     public LearningEvaluator(Expression expr, SequenceEvaluator lazy) {
-        Instrumentation.count("LearningEvaluator");
         this.expression = expr;
         this.evaluator = lazy;
     }
@@ -50,15 +48,11 @@ public class LearningEvaluator implements SequenceEvaluator {
      */
     @Override
     public Sequence evaluate(XPathContext context) throws XPathException {
-        Instrumentation.count("LearningEvaluator.evaluate()");
         if (count > EVAL_LIMIT) {
-            Instrumentation.count("LearningEvaluator.evaluate() " + (flipped ? "eager" : "lazy"));
             return evaluator.evaluate(context);
         } else {
             Sequence result = evaluator.evaluate(context);
-            Instrumentation.count("LearningEvaluator.evaluate() uncommitted");
             if (result instanceof Closure) {
-                Instrumentation.count("LearningEvaluator.evaluate() returned Closure");
                 ((Closure)result).setLearningEvaluator(this, count);
             } else {
                 flipped = true;
@@ -74,7 +68,6 @@ public class LearningEvaluator implements SequenceEvaluator {
      */
 
     public void reportCompletion(int serialNumber) {
-        Instrumentation.count("LearningEvaluator.reportCompletion()");
         // Note, does thread-unsafe updates to the statistics
         // Note: three things might happen to a MemoClosure: it might be read to completion, it might
         // be partially read, and it might never be accessed at all. In the final case we will get no
@@ -83,7 +76,6 @@ public class LearningEvaluator implements SequenceEvaluator {
         //System.err.println("Completion " + expression.toShortString() + " " + serialNumber);
         if (completed++ >= EVAL_LIMIT && completed == count) {
             //System.err.println("Switch " + expression.toShortString() + " to eager evaluation");
-            Instrumentation.count("LearningEvaluator.switchToEager()");
             evaluator = (expression.makeElaborator().eagerly());
             count = Integer.MAX_VALUE;
             flipped = true;
