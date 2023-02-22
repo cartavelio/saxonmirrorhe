@@ -2035,8 +2035,12 @@
     <result>
       <all-of>
         <assert-empty/>
-        <assert>xs:hexBinary(Q{http://expath.org/ns/file}read-binary("sandpit/test3.txt")) eq
-          xs:hexBinary("FFFE610062006300")</assert>
+        <any-of>
+          <assert>xs:hexBinary(Q{http://expath.org/ns/file}read-binary("sandpit/test3.txt")) eq
+            xs:hexBinary("FFFE610062006300")</assert>
+          <assert>xs:hexBinary(Q{http://expath.org/ns/file}read-binary("sandpit/test3.txt")) eq
+            xs:hexBinary("FEFF006100620063")</assert>
+        </any-of>
       </all-of>
     </result>
   </test-case>
