@@ -45,7 +45,7 @@ public class ResolverConfigurationTest {
 
         config.setConfigurationProperty(Feature.SAXON_RESOURCE_RESOLVER, resolver);
         assertNotNull(config.getCommonResourceResolver());
-        assertEquals("resolvers.ResolverConfiguration$MyResolver", config.getCommonResourceResolver().getClass().getName());
+        assertEquals("resolvers.ResolverConfigurationTest$MyResolver", config.getCommonResourceResolver().getClass().getName());
     }
 
     @Test
