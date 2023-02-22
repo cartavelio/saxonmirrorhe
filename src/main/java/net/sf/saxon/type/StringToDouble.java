@@ -178,11 +178,6 @@ public class StringToDouble extends StringConverter {
                 return Double.parseDouble(n);
             } catch (NumberFormatException nfe) {
                 throw nfe;
-            //#if CSHARP==true
-            } catch (Throwable err) {
-                // C# throws a different exception
-                throw new NumberFormatException(err.getMessage());
-            //#endif
             }
         }
     }

@@ -36,7 +36,7 @@ namespace Saxon.Api {
     /// <para>Note that more than one result document can be open at the same time,
     /// and that the order of opening, writing, and closing result documents chosen
     /// by the processor does not necessarily bear any direct resemblance to the way
-    /// that the XSLT source code is written. Saxon-CS processes <c>xsl:result-document</c>
+    /// that the XSLT source code is written. SaxonCS processes <c>xsl:result-document</c>
     /// instructions asynchronously, in multiple threads, unless this is suppressed using
     /// the configuration property <c>Feature.ALLOW_MULTITHREADING</c>.</para>
     /// <para>Note also that in the event of a dynamic error occurring in the transformation,
