@@ -8166,7 +8166,7 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.2.</p>
+        <p>Available since Saxon 9.2. Reimplemented in SaxonJ 12.</p>
       </status>
       <saxon-edition>PE/EE</saxon-edition>
       <details>
@@ -8175,11 +8175,10 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
             document. It returns the document node (root node) that results from parsing this text
             using the TagSoup parser. </p>
 
-          <p class="javaonly">On the Java platform, the TagSoup jar file must be on the classpath. It may be
-            downloaded from <a href="https://mvnrepository.com/artifact/org.ccil.cowan.tagsoup/tagsoup/1.2"
-              >https://mvnrepository.com/artifact/org.ccil.cowan.tagsoup/tagsoup/1.2</a>.</p>
+          <p class="javaonly">On the Java platform, the validator.nu jar file must be on the classpath. It may be
+            downloaded from Maven.</p>
 
-          <p class="csonly">On SaxonCS platform, the HTML is parsed using HTMLAgilityPack, which
+          <p class="csonly">On SaxonCS platform, the HTML is parsed using HtmlAgilityPack, which
           is registered as a dependency and will normally be installed automatically by <b>nuget</b>.</p>
 
           <p>This function is useful where an HTML document is embedded inside another using CDATA.
