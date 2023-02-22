@@ -195,7 +195,8 @@ namespace TestDriver {
                     return ("true".Equals(value) != inverse);
                 }
                 case "language": {
-                    return ("en".Equals(value) || "de".Equals(value)) != inverse;
+                    string[] supported = {"en", "de", "fr", "it", "xib"};
+                    return supported.Contains(value) != inverse;
                 }
                 case "calendar": {
                     return (("AD".Equals(value) || "ISO".Equals(value)) != inverse);
@@ -444,15 +445,12 @@ namespace TestDriver {
                     throw new Exception("Failed to find module entry for " + moduleUri);
                 }
 
-                XQueryModuleSource[] sources = new XQueryModuleSource[files.Count];
+                TextResource[] sources = new TextResource[files.Count];
                 int u = 0;
                 foreach (XdmItem file in files) {
                     string filename = file.StringValue;
                     Uri abs = new Uri(testCase.BaseUri, filename);
-                    sources[u++] = new XQueryModuleSource() {
-                        BaseUri = abs,
-                        Content = new WebClient().DownloadString(abs)
-                    };
+                    sources[u++] = new TextResource(new WebClient().DownloadString(abs), abs);
                 }
 
                 return sources;
@@ -611,7 +609,7 @@ namespace TestDriver {
                                     selector.ContextItem = env.contextItem;
                                 }
 
-                                selector.InputXmlResolver = env;
+                                selector.XmlDocumentResolver = env.GetXmlDocumentResolver();
 
                                 if (env.unparsedTextResolver != null) {
                                     selector.Implementation.setUnparsedTextURIResolver(
@@ -624,7 +622,7 @@ namespace TestDriver {
                                                 throw new XPathException("Unknown encoding " + enc, "FOUT1170");
                                             }
 
-                                            return env.unparsedTextResolver(uri, encoding);
+                                            return new StringReader(env.unparsedTextResolver.Invoke(uri, encoding).Content);
                                         });
                                 }
 
@@ -713,7 +711,7 @@ namespace TestDriver {
                                     selector.ContextItem = env.contextItem;
                                 }
 
-                                selector.XmlResolver = env;
+                                selector.XmlDocumentResolver = env.GetXmlDocumentResolver();
                                 if (env.unparsedTextResolver != null) {
                                     selector.TextResolver = env.unparsedTextResolver;
                                 }
