@@ -9,6 +9,7 @@ using JFeatureKeys = net.sf.saxon.lib.FeatureKeys;
 using javax.xml.transform.stream;
 using System.Diagnostics;
 using ICU4N.Text;
+using Singulink.Numerics;
 
 namespace TestRunner {
     public abstract class TestDriver {
@@ -634,19 +635,10 @@ namespace TestRunner {
         public abstract bool EnsureDependencySatisfied(XdmNode dependency, Environment env);
         
         public static void experiment() {
-            // ICU4N.Text.RuleBasedCollator uca = (ICU4N.Text.RuleBasedCollator)ICU4N.Text.Collator.GetInstance();
-            // uca.Strength = CollationStrength.Primary;
-            // Console.Error.WriteLine("Comparison: " +  uca.Compare("A", "a"));
-            // string aKey = "";
-            // foreach (byte b in uca.GetCollationKey("A").ToByteArray()) {
-            //     aKey = aKey + b + " ";
-            // }
-            // Console.Error.WriteLine("Collation Key (A): " + aKey);
-            // aKey = "";
-            // foreach (byte b in uca.GetCollationKey("a").ToByteArray()) {
-            //     aKey = aKey + b + " ";
-            // }
-            // Console.Error.WriteLine("Collation Key (a): " + aKey);
+            double d = 1e100 / 3;
+            Console.WriteLine(d);
+            BigDecimal dec = BigDecimal.FromDouble(d, false);
+            Console.WriteLine((double)dec);
         }
 
     }

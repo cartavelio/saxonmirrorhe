@@ -29,6 +29,7 @@ using net.sf.saxon.lib;
 using net.sf.saxon.om;
 using net.sf.saxon.resource;
 using net.sf.saxon.style;
+using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
 using TestRunner;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
@@ -87,11 +88,11 @@ namespace TestRunner {
 
             //environment.processor.SetProperty(JFeatureKeys.TRACE_EXTERNAL_FUNCTIONS, "true");
             environment.xpathCompiler = environment.processor.NewXPathCompiler();
-            environment.xpathCompiler.BaseUri = baseURI.ToString(); 
+            environment.xpathCompiler.BaseUri = baseURI; 
             environment.xqueryCompiler = environment.processor.NewXQueryCompiler();
-            environment.xqueryCompiler.BaseUri = baseURI.ToString();
+            environment.xqueryCompiler.BaseUri = baseURI;
             environment.xsltCompiler = environment.processor.NewXsltCompiler();
-            environment.xsltCompiler.BaseUri = new Uri(baseURI.ToString());
+            environment.xsltCompiler.BaseUri = baseURI;
             environment.xsltCompiler.XsltLanguageVersion = spec.Equals(Spec.XT30) ? "3.0" : "2.0";
 
             if (unfolded) {
@@ -138,9 +139,9 @@ namespace TestRunner {
             // AutoActivate.activate(environment.processor);
 
             environment.xpathCompiler = environment.processor.NewXPathCompiler();
-            environment.xpathCompiler.BaseUri = ((XdmNode) env).BaseUri.ToString();
+            environment.xpathCompiler.BaseUri = env.BaseUri;
             environment.xqueryCompiler = environment.processor.NewXQueryCompiler();
-            environment.xqueryCompiler.BaseUri = ((XdmNode) env).BaseUri.ToString();
+            environment.xqueryCompiler.BaseUri = env.BaseUri;
             if (driver.Spec.ToString().Contains("XT")) {
                 environment.xsltCompiler = environment.processor.NewXsltCompiler();
                 environment.xsltCompiler.XsltLanguageVersion = ((SpecAttr) (driver.Spec.GetAttr())).version;
@@ -161,7 +162,7 @@ namespace TestRunner {
                 }
             }
 
-            foreach (XdmItem dependency in xpc.Evaluate("dependency", env)) {
+            foreach (XdmItem dependency in xpc.Evaluate("(dependency, ../dependencies/*)", env)) {
                 if (!driver.EnsureDependencySatisfied((XdmNode) dependency, environment)) {
                     environment.usable = false;
                 }
@@ -240,11 +241,14 @@ namespace TestRunner {
                 }
 
                 string fileName = ((XdmNode) stylesheet).GetAttributeValue(new QName("file"));
-                Uri uri = res.ResolveUri(((XdmNode) env).BaseUri, fileName);
+                Uri uri = res.ResolveUri(env.BaseUri, fileName);
                 FileStream file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
                 try {
-                    XsltPackage pkg = environment.xsltCompiler.CompilePackage(file);
+                    XsltPackage pkg = environment.xsltCompiler.CompilePackage(file, uri);
                     environment.xsltCompiler.ImportPackage(pkg);
+                    // Make the package available for use from fn:transform
+                    environment.processor.Implementation.getDefaultXsltCompilerInfo().getPackageLibrary().addPackage(pkg.getUnderlyingPreparedPackage());
+
                 }
                 catch (Exception e) {
                     //e.printStackTrace();
@@ -267,8 +271,8 @@ namespace TestRunner {
                 }
                 else {
                     try {
-                        environment.xpathCompiler.BaseUri = uri;
-                        environment.xqueryCompiler.BaseUri = uri;
+                        environment.xpathCompiler.BaseUri = new Uri(uri, UriKind.RelativeOrAbsolute);
+                        environment.xqueryCompiler.BaseUri = new Uri(uri, UriKind.RelativeOrAbsolute);
                     }
                     catch (Exception e) {
                         driver.println("**** invalid base URI " + uri);
@@ -330,10 +334,10 @@ namespace TestRunner {
         }
 
         private static bool LoadSchemaDocuments(TestDriver driver, XPathCompiler xpc, XdmNode env,
-            Environment environment, Saxon.Api.SchemaManager manager) {
+                Environment environment, Saxon.Api.SchemaManager manager) {
             bool validateSources = false;
             Configuration config = environment.processor.Implementation;
-            XmlUrlResolver res = new XmlUrlResolver();
+            XmlUrlResolver res = new TracingXmlResolver(env.BaseUri);
             foreach (XdmNode schema in env.Children("schema")) {
                 String role = schema.GetAttributeValue(new QName("role"));
                 String xsdVersion = schema.GetAttributeValue(new QName("xsd-version"));
@@ -607,39 +611,37 @@ namespace TestRunner {
 
 
             public TextReader resolve(Uri absoluteURI, string encoding, Configuration config) {
-                if (encoding == null) {
-                    encodings.TryGetValue(new Uri(absoluteURI.ToString()), out encoding);
+                if (resources.ContainsKey(absoluteURI)) {
+                    if (encoding == null) {
+                        encodings.TryGetValue(new Uri(absoluteURI.ToString()), out encoding);
+                    }
+                    else {
+                        try {
+                            Encoding.GetEncoding(encoding);
+                        }
+                        catch (ArgumentException err) {
+                            throw new net.sf.saxon.trans.XPathException("Unknown encoding " + encoding, "FOUT1190");
+                        }
+                    }
+
+                    if (encoding == null) {
+                        encoding = "utf-8";
+                    }
+
+                    try {
+                        return resources[absoluteURI].Invoke();
+                    }
+                    catch (Exception ioe) {
+                        net.sf.saxon.trans.XPathException xpe =
+                            new net.sf.saxon.trans.XPathException("Unknown URI " + absoluteURI, ioe);
+                        xpe.setErrorCode("FOUT1170");
+                        throw xpe;
+                    }
                 }
                 else {
-                    try {
-                        Encoding.GetEncoding(encoding);
-                    }
-                    catch (ArgumentException err) {
-                        throw new net.sf.saxon.trans.XPathException("Unknown encoding " + encoding, "FOUT1190");
-                    }
+                    return new StandardUnparsedTextResolver().resolve(absoluteURI, encoding, config);
                 }
 
-                if (encoding == null) {
-                    encoding = "utf-8";
-                }
-
-                try {
-                    return resources[absoluteURI].Invoke();
-                }
-                catch (Exception ioe) {
-                    net.sf.saxon.trans.XPathException xpe = new net.sf.saxon.trans.XPathException("Unknown URI " + absoluteURI, ioe);
-                    xpe.setErrorCode("FOUT1170");
-                    throw xpe;
-                }
-
-                /*catch (IllegalCharsetNameException icne)
-                {
-                    throw new XPathException("Invalid encoding name: " + encoding, "FOUT1190");
-                }
-                catch (UnsupportedCharsetException uce)
-                {
-                    throw new XPathException("Invalid encoding name: " + encoding, "FOUT1190");
-                }*/
             }
         }
 
@@ -661,7 +663,7 @@ namespace TestRunner {
                 }
         
                 if (collectionURI.Equals("")) {
-                    collectionURI = "http://www.w.org/qt3-test-suite/default.collection.uri";
+                    collectionURI = "http://www.w3.org/qt3-test-suite/default.collection.uri";
                     config.setDefaultCollection(collectionURI);
                 }
 
@@ -723,7 +725,7 @@ namespace TestRunner {
                     XdmValue result = evaluator.Evaluate();
 
                     foreach (XdmItem itemi in result) {
-                        resourceList.Add(new AtomicResource(null, (XdmAtomicValue)itemi));
+                        resourceList.Add(new AtomicResource(null, itemi));
                     }
                 }
                 
@@ -785,11 +787,12 @@ namespace TestRunner {
             
         }
 
+        // Misleading name, it can also be a map or array
         public class AtomicResource : IResource {
             private readonly string uri;
-            private readonly XdmAtomicValue value;
+            private readonly XdmItem value;
 
-            public AtomicResource(string uri, XdmAtomicValue value) {
+            public AtomicResource(string uri, XdmItem value) {
                 this.uri = uri;
                 this.value = value;
             }
@@ -929,10 +932,6 @@ namespace TestRunner {
                     }
                 }
                 else {
-                    Stream ss;
-                    /*if (uri != null) {
-                        uri = res.ResolveUri(((XdmNode)env).BaseUri, uri).AbsoluteUri;
-                    }*/
                     if (href != null) {
                         try {
                             Uri fileLoc = res.ResolveUri(((XdmNode) env).BaseUri, href);
@@ -945,11 +944,19 @@ namespace TestRunner {
                                 }
                             }
 
-                            ss = (file == null
+                            Stream ss = (file == null
                                 ? new FileStream(fileLoc.ToString(), FileMode.Open, FileAccess.Read)
                                 : file);
 
-                            builder.BaseUri = ((XdmNode) env).BaseUri;
+                            builder.BaseUri = new Uri(res.ResolveUri(((XdmNode) env).BaseUri, uri).AbsoluteUri);
+                            try {
+                                doc = builder.Build(ss);
+                                environment.sourceDocs.Add(uri, doc);
+                            }
+                            catch (Exception e) {
+                                Console.Error.WriteLine(e);
+                                driver.println("*** failed to build source document " + href + ", Exception:" + e.Message);
+                            }
                         }
                         catch (Exception e) {
                             driver.println("*** failed to find source document " + href + ", Exception:" + e.Message);
@@ -963,20 +970,15 @@ namespace TestRunner {
                         }
 
                         string content = xpc.Evaluate("string(content)", source).ToString();
-                        byte[] byteArray = Encoding.ASCII.GetBytes(content);
-                        ss = new MemoryStream(byteArray);
-                        builder.BaseUri = ((XdmNode) env).BaseUri;
-                    }
-
-
-                    try {
                         builder.BaseUri = new Uri(res.ResolveUri(((XdmNode) env).BaseUri, uri).AbsoluteUri);
-                        doc = builder.Build(ss);
-                        environment.sourceDocs.Add(uri, doc);
-                    }
-                    catch (Exception e) {
-                        Console.Error.WriteLine(e);
-                        driver.println("*** failed to build source document " + href + ", Exception:" + e.Message);
+                        try {
+                            doc = builder.Build(new StringReader(content));
+                            environment.sourceDocs.Add(uri, doc);
+                        } catch (Exception e) {
+                            driver.println("*** failed to parse inline source document, Exception:" + e.Message);
+                            continue;
+                        }
+                        
                     }
 
                     XdmItem selectedItem = doc;
