@@ -24,7 +24,6 @@ import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.tiny.TinyBuilder;
-import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -527,7 +526,6 @@ public abstract class AbstractXsltTransformer {
         }
     }
 
-    @NotNull
     @CSharpInnerClass(outer=true,
             extra={ "net.sf.saxon.@event.Builder sourceTreeBuilder",
                     "net.sf.saxon.trans.XsltController controller",

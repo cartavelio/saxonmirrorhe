@@ -17,7 +17,6 @@ import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.z.IntIterator;
-import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -345,7 +344,7 @@ public class StringValue extends AtomicValue {
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
         return new XPathComparable() {
             @Override
-            public int compareTo(@NotNull XPathComparable o) {
+            public int compareTo(XPathComparable o) {
                 if (o instanceof StringValue) {
                     return collator.compareStrings(getContent(), ((StringValue)o).content);
                 } else {

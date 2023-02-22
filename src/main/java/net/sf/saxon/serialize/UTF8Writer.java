@@ -10,7 +10,6 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.str.*;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.z.IntIterator;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -458,13 +457,13 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
     }
 
     @Override
-    public void write(@NotNull String str)
+    public void write(String str)
             throws IOException {
         write(str, 0, str.length());
     }
 
     @Override
-    public void write(@NotNull String str, int off, int len)
+    public void write(String str, int off, int len)
             throws IOException {
         if (len < 2) {
             if (len == 1) {

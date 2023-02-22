@@ -10,7 +10,6 @@ package net.sf.saxon.om;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -446,7 +445,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
      */
 
     @Override
-    public @NotNull Iterator<NamespaceBinding> iterator() {
+    public Iterator<NamespaceBinding> iterator() {
         return new Iterator<NamespaceBinding>() {
             int i = 0;
             @Override

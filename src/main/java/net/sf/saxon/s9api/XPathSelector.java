@@ -15,7 +15,6 @@ import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.URIResolver;
 import java.util.Map;
@@ -222,7 +221,7 @@ public class XPathSelector implements Iterable<XdmItem> {
      */
 
     @Override
-    public @NotNull XdmSequenceIterator<XdmItem> iterator() throws SaxonApiUncheckedException {
+    public XdmSequenceIterator<XdmItem> iterator() throws SaxonApiUncheckedException {
         try {
             return new XdmSequenceIterator<>(exp.iterate(dynamicContext));
         } catch (XPathException e) {

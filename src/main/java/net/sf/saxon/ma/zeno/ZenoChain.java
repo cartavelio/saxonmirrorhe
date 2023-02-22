@@ -1,7 +1,5 @@
 package net.sf.saxon.ma.zeno;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -264,7 +262,7 @@ public class ZenoChain<T> implements Iterable<T> {
      * @return an iterator over the items
      */
 
-    public @NotNull Iterator<T> iterator() {
+    public Iterator<T> iterator() {
         return new ZenoChainIterator<T>(masterList);
     }
 

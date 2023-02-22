@@ -17,7 +17,6 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.StringValue;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * An AtomicComparer used for comparing atomic values of arbitrary item types. It encapsulates
@@ -234,7 +233,7 @@ public class AtomicSortComparer implements AtomicComparer {
         }
 
         //@Override
-        public int compareTo(@NotNull AtomicMatchKey o) {
+        public int compareTo(AtomicMatchKey o) {
             return SequenceTool.INDETERMINATE_ORDERING;
         }
     };
