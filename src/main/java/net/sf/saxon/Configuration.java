@@ -2076,7 +2076,7 @@ public class Configuration implements SourceResolver, NotationSet {
      *
      * @param messageReceiverClassName the full class name of the message receiver. This
      *                                 must implement net.sf.saxon.event.Receiver.
-     * @since 8.4
+     * @since 8.4. From 11.1 this method has no effect.
      */
 
     public void setMessageEmitterClass(String messageReceiverClassName) {

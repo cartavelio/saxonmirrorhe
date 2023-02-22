@@ -136,8 +136,8 @@ public class Transform {
         //#if CSHARP==false
         options.addRecognizedOption("license", CommandLineOptions.TYPE_BOOLEAN,
                                     "Check for local license file");
-        options.addRecognizedOption("m", CommandLineOptions.TYPE_CLASSNAME,
-                                    "Use named class to handle xsl:message output");
+//        options.addRecognizedOption("m", CommandLineOptions.TYPE_CLASSNAME,
+//                                    "Use named class to handle xsl:message output");
         //#endif
         options.addRecognizedOption("nogo", CommandLineOptions.TYPE_BOOLEAN,
                                     "Compile only, no evaluation");
