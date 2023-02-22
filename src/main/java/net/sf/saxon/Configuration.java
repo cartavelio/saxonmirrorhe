@@ -3509,6 +3509,15 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
+     * Get the optimization options permitted in this configuration
+     * @return the permitted optimization options
+     */
+
+    public OptimizerOptions getPermittedOptimizerOptions() {
+        return OptimizerOptions.FULL_HE_OPTIMIZATION;
+    }
+
+    /**
      * Factory method to get an Optimizer.
      * <p>This method is intended for internal use only.</p>
      *
@@ -4426,17 +4435,20 @@ public class Configuration implements SourceResolver, NotationSet {
                         // See Saxon bug 2076. It seems Ant passes an integer value as an integer, not as a string. Not tested.
                         // Integer values retained for compatibility: 0=none, 10 = all
                         int v = (Integer) value;
-                        optimizerOptions = v == 0 ? new OptimizerOptions(0) : OptimizerOptions.FULL_EE_OPTIMIZATION;
+                        optimizerOptions = v == 0
+                                ? new OptimizerOptions(0)
+                                : OptimizerOptions.FULL_EE_OPTIMIZATION.intersect(getPermittedOptimizerOptions());
                     } else {
                         String s = requireString(name, value);
                         if (s.matches("[0-9]+")) {
                             // For backwards compatibility
-                            optimizerOptions = "0".equals(s) ? new OptimizerOptions(0) : OptimizerOptions.FULL_EE_OPTIMIZATION;
+                            optimizerOptions = "0".equals(s)
+                                    ? new OptimizerOptions(0)
+                                    : OptimizerOptions.FULL_EE_OPTIMIZATION.intersect(getPermittedOptimizerOptions());
                         } else {
-                            optimizerOptions = new OptimizerOptions(s);
+                            optimizerOptions = new OptimizerOptions(s).intersect(getPermittedOptimizerOptions());
                         }
                     }
-
                     if (optimizer != null) {
                         optimizer.setOptimizerOptions(optimizerOptions);
                     }
