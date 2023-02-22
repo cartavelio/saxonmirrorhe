@@ -160,7 +160,7 @@ def test_version2():
 def test_schema_aware1(saxonproc):
     assert saxonproc.is_schema_aware == False
 
-
+@pytest.mark.skip('Error: icu currently not supported')
 def test_icu_lib():
     saxonproc = PySaxonProcessor(license=True)
     print(saxonproc.version)
