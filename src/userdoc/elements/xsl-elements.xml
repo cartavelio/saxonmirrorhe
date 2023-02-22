@@ -10,8 +10,7 @@
             <code>http://www.w3.org/1999/XSL/Transform</code> namespace, providing brief
         descriptions of their function, details about their structure and usage, and any information
         specific to the Saxon implementation. Many also have further detailed descriptions and
-        examples. Almost all of the elements are supported in Saxon stylesheets, and any that are
-        not supported are clearly labelled as such.</p>
+        examples.</p>
 
     <p>For information about the additional extension elements provided with the Saxon product, see
             <a class="bodylink" href="/extensions/instructions">Extension instructions</a>.</p>
@@ -23,6 +22,10 @@
             href="/conformance/xslt30">XSLT 3.0 Conformance</a>. The information here is designed to
         give a comprehensive summary of the features, but for the full specification, consult the
         official standard.</p>
+    
+    <p>Also included in this section are descriptions of experimental additions being considered
+    for a possible XSLT version 4.0. These are all clearly marked as being experimental. They are
+    available only if explicitly enabled, and they are very likely to change in later versions.</p>
 
    
     <h3 class="subtitle">XSLT Patterns</h3>
@@ -566,6 +569,77 @@
             <see-also name="sort" type="xsl-elements"/>
             <see-also name="template" type="xsl-elements"/>
             <see-also name="with-param" type="xsl-elements"/>
+        </xsl-element>
+    </section>
+    
+    <section id="array" title="xsl:array">
+        <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
+            <name>array</name>
+            <description>
+                <p>Experimental: proposed new instruction for XSLT 4.0. It constructs an array, whose
+                content is established using the contained sequence constructor.</p>
+            </description>
+            <attributes>
+                <attribute name="composite" use="optional">If this attribute is present with the
+                value "yes", then the contained sequence constructor must deliver a sequence of <i>parcels</i> 
+                (items of type <code>record(value, *)</code>) and each parcel becomes one member of the constructed
+                array. If the attribute is absent or has the value "no", then the sequence returned by the
+                sequence constructor is converted to an array, one item per array member.</attribute>
+            </attributes>
+            <details>
+                <p>If every member of the array is to be a singleton item, then it is simplest to use
+                    the default value <code>composite="no"</code>. The setting <code>composite="yes"</code>
+                    is needed if any of the members is to be an empty sequence, or a sequence containing
+                multiple items.  (Note that when constructing an array destined for serialization as JSON,
+                the members of the array will always contain either a single item, or be empty. Empty members
+                translate to the JSON value <code>null</code>.)</p>
+                <p>With <code>composite="yes"</code>, the array members can conveniently be constructed
+                    using the <code>xsl:array-member</code> instruction. However, <code>&lt;xsl:array-member select="1 to 3"/></code>
+                can equally well be written as <code>&lt;xsl:sequence select="parcel(1 to 3)"/></code>, or as
+                    <code>&lt;xsl:sequence select="map{'value': 1 to 3}"/></code>, or <code>&lt;xsl:map key="'value'" select="1 to 3"/></code>.</p>
+                <p>A type error occurs if <code>composite="yes"</code> is used and there are items in the sequence that
+                do not match the item type <code>record(value, *)</code> (that is, a map having an entry whose key is the 
+                    string "value"). Any other entries in the map are ignored.</p>
+                
+                
+            </details>
+            <in-spec>xslt40</in-spec>
+    
+            <saxon-edition>PE</saxon-edition>
+            <status>Present in Saxon 11. Also available in earlier releases under the synonym <code>saxon:array</code>.</status>
+            <see-also name="array-member" type="xsl-elements"/>
+
+        </xsl-element>
+    </section>
+    
+    <section id="array-member" title="xsl:array-member">
+        <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
+            <name>array-member</name>
+            <description>
+                <p>Experimental: proposed new instruction for XSLT 4.0. It constructs a parcel, typically
+                    for use as a member of an array being constructed using <code>&lt;xsl:array composite="yes"></code>.</p>
+            </description>
+            <attributes>
+                <attribute name="select" use="optional">The <code>select</code> attribute, or the
+                    contained sequence constructor if there is no <code>select</code> attribute, may
+                    deliver any sequence. This sequence is wrapped into a <i>parcel</i>, which is an
+                    item of type <code>record(value)</code>: that is, a map with a single entry, whose
+                key is the string "value", and whose corresponding value is the wrapped sequence.</attribute>
+            </attributes>
+            <details>
+                <p>The intended usage is to deliver a single member of an array being constructed using 
+                    <code>&lt;xsl:array composite="yes"></code>. However, the result of the instruction
+                is well-defined whether or not it is used in this way.</p>
+                
+                
+                
+            </details>
+            <in-spec>xslt40</in-spec>
+            
+            <saxon-edition>PE</saxon-edition>
+            <status>Present in Saxon 11. Also available in earlier releases under the synonym <code>saxon:array-member</code>.</status>
+            <see-also name="array-member" type="xsl-elements"/>
+            
         </xsl-element>
     </section>
 
@@ -1726,6 +1800,14 @@
                     matches a specified pattern. This is useful when matching a sequence of items in
                     which the last item in the group carries some distinguishing attribute such as
                         <code>continued="no"</code>.</attribute>
+                <attribute name="break-when" use="optional">Experimental addition in 4.0; available
+                    only if syntax extensions are enabled. The value of the attribute is an expression,
+                    which must return a function; the function is supplied with two arguments, being
+                (a) the contents of the current group, and (b) the next item. The function returns false
+                if the new item is to be added to the end of the current group, or true if the current
+                group is complete and the new item is to become the first item in a new current group.
+                For example <code>break-when="->($group, $next){sum($group/@page-count) gt 100}"</code> starts
+                a new group when the size of the current group passes some threshold.</attribute>
                 <attribute name="composite" use="optional">Can be used when grouping using either
                         <code>group-by</code> or <code>group-adjacent</code>. If set to
                         <code>yes</code>, then the <code>group-by</code> and

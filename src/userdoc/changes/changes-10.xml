@@ -703,7 +703,7 @@
         
         <h3>Processing all Members of an Array</h3>
         
-        <p>A new <a class="bodylink" href="/extensions/syntax-extensions/for-member-expression">For-Member</a> expression is available to 
+        <p>A new <a class="bodylink" href="/v4extensions/other-xpath-extensions/for-member-expression">For-Member</a> expression is available to 
             process all the members of an array:</p>
         
         <p><code>for member $x in EXPR (, $y in EXPR)* return EXPR</code></p>
