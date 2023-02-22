@@ -234,14 +234,14 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestExport() {
             try {
-                var p = new Processor(true);
-                var c = p.NewXsltCompiler();
-                var testXSLTP = c.Compile(new Uri(ConfigTest.NUNIT_DATA_DIR + "booksWithMain.sef"));
+                Processor p = new Processor(true);
+                XsltCompiler c = p.NewXsltCompiler();
+                XsltExecutable testXSLTP = c.Compile(new Uri(ConfigTest.NUNIT_DATA_DIR + "booksWithMain.sef"));
 
-                var exec = testXSLTP.Load30();
+                Xslt30Transformer exec = testXSLTP.Load30();
 
 
-                var dest = p.NewSerializer();
+                Serializer dest = p.NewSerializer();
                 dest.SetOutputFile(ConfigTest.DATA_DIR + "OutputStep2.xml");
                 // exec.Run(dest);
                 exec.CallTemplate(new QName("main"), dest);
@@ -254,8 +254,8 @@ namespace SaxonCS_NUnit {
 
 
         /**
-     * Test for the case where the context item is not the root
-     */
+         * Test for the case where the context item is not the root
+         */
         [Test]
         public void TestContextNotRoot() {
             try {
