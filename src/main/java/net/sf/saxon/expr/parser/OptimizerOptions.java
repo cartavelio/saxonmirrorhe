@@ -29,6 +29,7 @@ public class OptimizerOptions {
     public static final int VOID_EXPRESSIONS = 8192;
     public static final int TAIL_CALLS = 16384;
     public static final int CONSTANT_FOLDING = 32768;
+    public static final int REORDER_PREDICATES = 65536;
 
     private final int options;
 
@@ -78,6 +79,8 @@ public class OptimizerOptions {
                 return MISCELLANEOUS;
             case 'n':
                 return CONSTANT_FOLDING;
+            case 'p':
+                return REORDER_PREDICATES;
             case 'r':
                 return RULE_SET;
             case 's':
@@ -138,6 +141,9 @@ public class OptimizerOptions {
         }
         if (isSet(CONSTANT_FOLDING)) {
             result += "n";
+        }
+        if (isSet(REORDER_PREDICATES)) {
+            result += "p";
         }
         if (isSet(RULE_SET)) {
             result += "r";

@@ -9,6 +9,7 @@ package net.sf.saxon.functions.registry;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
@@ -218,7 +219,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                 staticArgs = newArgs;
 
             } else if ((keywords != null && !keywords.isEmpty()) || staticArgs.length < entry.maxArity) {
-                staticArgs = DeclaredFunction.makeExpandedArgumentArray(staticArgs, keywords, entry);
+                staticArgs = UserFunction.makeExpandedArgumentArray(staticArgs, keywords, entry);
             }
             RetainedStaticContext rsc = new RetainedStaticContext(env);
             try {
@@ -465,7 +466,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     /**
      * An entry in the table describing the properties of a function
      */
-    public static class Entry extends DeclaredFunction {
+    public static class Entry implements FunctionDefinition {
         /**
          * The name of the function as a QName
          */

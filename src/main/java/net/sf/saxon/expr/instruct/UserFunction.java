@@ -13,6 +13,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.query.AnnotationList;
@@ -26,6 +27,8 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -41,7 +44,8 @@ import java.util.function.Supplier;
  * convert the supplied arguments.</p>
  */
 
-public class UserFunction extends Actor implements Function, ContextOriginator, TraceableComponent {
+public class UserFunction extends Actor implements Function, FunctionDefinition, ContextOriginator, TraceableComponent {
+
 
     @CSharpSimpleEnum
     public enum Determinism {DETERMINISTIC, PROACTIVE, ELIDABLE}
@@ -358,7 +362,8 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
     }
 
     /**
-     * Set the definitions of the declared parameters for this function
+     * Set the definitions of the declared parameters for this function.
+     * Note that at the time this is called, full analysis of the xsl:param element is yet to be done.
      *
      * @param params an array of parameter definitions
      */
@@ -367,10 +372,19 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
         parameterDefinitions = params;
         minimumArity = 0;
         for (UserFunctionParameter param : params) {
-            if (param.getDefaultValueExpression() == null) {
+            if (param.isRequired()) {
                 minimumArity++;
             }
         }
+    }
+
+    public void setMinimumArity(int minimumArity) {
+        this.minimumArity = minimumArity;
+    }
+
+    public void setArityRange(int min, int max) {
+        this.minimumArity = min;
+        this.parameterDefinitions = new UserFunctionParameter[max];
     }
 
     /**
@@ -981,6 +995,106 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
 
     public void prepareForStreaming() throws XPathException {
         // method is defined in streamable subclass
+    }
+
+    /**
+     * Get the number of declared parameters (the upper bound of the arity range)
+     *
+     * @return the number of declared parameters
+     */
+    @Override
+    public int getNumberOfParameters() {
+        return getArity();
+    }
+
+    /**
+     * Get the name (keyword) of the Nth parameter
+     *
+     * @param i
+     * @return the expression for computing the value of the Nth parameter
+     */
+    @Override
+    public StructuredQName getParameterName(int i) {
+        return getParameterDefinitions()[i].getVariableQName();
+    }
+
+    /**
+     * Get the default value expression of the Nth parameter, if any
+     *
+     * @param i the 0
+     * @return the expression for computing the value of the Nth parameter, or null if there is none
+     */
+    @Override
+    public Expression getDefaultValueExpression(int i) {
+        return getParameterDefinitions()[i].getDefaultValueExpression();
+    }
+
+    /**
+     * Get the position in the parameter list of a given parameter name
+     *
+     * @param name the name of the required parameter
+     * @return the position of the parameter in the parameter list, or -1 if absent
+     */
+    @Override
+    public int getPositionOfParameter(StructuredQName name) {
+        for (int i=0; i<parameterDefinitions.length; i++) {
+            if (parameterDefinitions[i].getVariableQName().equals(name)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Combine supplied positional and keyword arguments into a single array of positional arguments,
+     * completing the array using the default value expression for any unsupplied arguments
+     *
+     * @param arguments the expressions supplied in the function call, including both positional and keyword arguments,
+     *                  in the order supplied
+     * @param keywords  a list of keywords used in the function call, with the 0-based position at which each keyword was used;
+     *                  or null if no keywords were used
+     * @param fd        the XQuery function definition, used to identify the position in the list of declared parameters
+     *                  at which a particular parameter name appears
+     * @return the expanded list of positional parameters
+     * @throws XPathException in the event of duplicate or undeclared keywords, or keywords that duplicate positional
+     *                        arguments
+     */
+
+    public static Expression[] makeExpandedArgumentArray(
+            Expression[] arguments, Map<StructuredQName, Integer> keywords, FunctionDefinition fd) throws XPathException {
+        // 4.0: handle keyword arguments and default arguments
+        Expression[] expandedArgs;
+        int maxArity = fd.getNumberOfParameters();
+        // If there are keyword arguments, reposition them to the correct position in the argument sequence
+        if (keywords != null) {
+            expandedArgs = new Expression[maxArity];
+            int positionalArgs = arguments.length - keywords.size();
+            System.arraycopy(arguments, 0, expandedArgs, 0, positionalArgs);
+            for (Map.Entry<StructuredQName, Integer> entry : keywords.entrySet()) {
+                StructuredQName key = entry.getKey();
+                int argPos = entry.getValue();
+                int paramPos = fd.getPositionOfParameter(key);
+                if (paramPos < 0) {
+                    throw new XPathException("Keyword " + key +
+                                                     " does not match the name of any declared parameter of function " + fd.getFunctionName());
+                }
+                if (paramPos < positionalArgs) {
+                    throw new XPathException("Parameter " + key + " of function " + fd.getFunctionName() +
+                                                     " is supplied both by position and by keyword");
+                }
+                Expression supplied = arguments[argPos];
+                expandedArgs[paramPos] = supplied;
+            }
+        } else {
+            expandedArgs = Arrays.copyOf(arguments, maxArity);
+        }
+        for (int a = 0; a < maxArity; a++) {
+            if (expandedArgs[a] == null) {
+                expandedArgs[a] = fd.getDefaultValueExpression(a);
+                //expandedArgs[a] = new ErrorExpression("UseDefault", "UseDefault", false); // for now
+            }
+        }
+        return expandedArgs;
     }
 
 }

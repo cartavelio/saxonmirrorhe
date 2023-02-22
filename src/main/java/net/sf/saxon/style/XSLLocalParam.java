@@ -8,12 +8,17 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.SuppliedParameterReference;
 import net.sf.saxon.expr.instruct.LocalParam;
 import net.sf.saxon.expr.instruct.SlotManager;
+import net.sf.saxon.expr.instruct.UserFunction;
+import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.FunctionStreamability;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
@@ -72,23 +77,61 @@ public class XSLLocalParam extends XSLGeneralVariable {
         if (!prepared) {
             prepared = true;
             sourceBinding.setProperty(SourceBinding.BindingProperty.PARAM, true);
-            if (getParent() instanceof XSLFunction && getCompilation().getCompilerInfo().getXsltVersion() != 40) {
-                permittedAttributes.remove(SourceBinding.BindingProperty.SELECT);
-                sourceBinding.setProperty(SourceBinding.BindingProperty.DISALLOWS_CONTENT, true);
+            if (getParent() instanceof XSLFunction) {
+                sourceBinding.setProperty(SourceBinding.BindingProperty.REQUIRED, true);
+                if (getCompilation().getCompilerInfo().getXsltVersion() != 40) {
+                    permittedAttributes.remove(SourceBinding.BindingProperty.SELECT);
+                    sourceBinding.setProperty(SourceBinding.BindingProperty.DISALLOWS_CONTENT, true);
+                }
             }
             sourceBinding.prepareAttributes(permittedAttributes);
             if (sourceBinding.hasProperty(SourceBinding.BindingProperty.TUNNEL) && !(getParent() instanceof XSLTemplate)) {
                 compileError("For attribute 'tunnel' within an " + getParent().getDisplayName() +
                         " parameter, the only permitted value is 'no'", "XTSE0020");
             }
-            if (getParent() instanceof XSLFunction && getAttributeValue(NamespaceUri.NULL, "required") != null
-                    && getCompilation().getCompilerInfo().getXsltVersion() != 40) {
-                if (!sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
-                    compileError("For attribute 'required' within an " + getParent().getDisplayName() +
-                        " parameter, the only permitted value is 'yes'", "XTSE0020");
+            if (getParent() instanceof XSLFunction) {
+                int pos = getParameterPosition();
+                if (getCompilation().getCompilerInfo().getXsltVersion() >= 40) {
+                    UserFunction uf = ((XSLFunction)getParent()).getCompiledFunction();
+                    if (pos < uf.getParameterDefinitions().length) {
+                        // (if not, something is wrong; it will be reported later)
+                        UserFunctionParameter ufp = new UserFunctionParameter();
+                        uf.getParameterDefinitions()[pos] = ufp;
+                        ufp.setRequiredType(getRequiredType());
+                        ufp.setVariableQName(getVariableQName());
+                        ufp.setSlotNumber(getSlotNumber());
+                        ufp.setRequired(isRequiredParam());
+                        if (pos == 0 && uf.getDeclaredStreamability() != FunctionStreamability.UNCLASSIFIED) {
+                            ufp.setFunctionStreamability(uf.getDeclaredStreamability());
+                        }
+                        Expression defaultVal = sourceBinding.getSelectExpression();
+                        if (defaultVal == null && !sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
+                            defaultVal = Literal.makeEmptySequence();
+                        }
+                        ufp.setDefaultValueExpression(defaultVal);
+                    }
+                } else {
+                    if (!sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
+                        compileError("For attribute 'required' within an " + getParent().getDisplayName() +
+                                             " parameter, the only permitted value is 'yes'", "XTSE0020");
+                    }
                 }
             }
         }
+    }
+
+    private int getParameterPosition() {
+        return Navigator.getNumberSimple(this, null) - 1;
+    }
+
+    public Supplier<Expression> getDefaultValueExpressionSupplier() {
+        if (!prepared) {
+            prepareAttributes();
+        }
+        return () -> {
+            Expression select = sourceBinding.getSelectExpression();
+            return select == null ? Literal.makeEmptySequence() : select;
+        };
     }
 
     public void prepareTemplateSignatureAttributes() throws XPathException {
@@ -171,7 +214,12 @@ public class XSLLocalParam extends XSLGeneralVariable {
 //            return null;
 //        }
         if (getParent() instanceof XSLFunction) {
-            // Do nothing. We did everything necessary while compiling the XSLFunction element.
+            if (getCompilation().getCompilerInfo().getXsltVersion() >= 40 && !isRequiredParam()) {
+                sourceBinding.handleSequenceConstructor(exec, decl);
+                int pos = getParameterPosition();
+                ((XSLFunction)getParent()).getCompiledFunction().getParameterDefinitions()[pos]
+                        .setDefaultValueExpression(sourceBinding.getSelectExpression());
+            }
             return null;
         } else {
             SequenceType declaredType = getRequiredType();
