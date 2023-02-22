@@ -618,6 +618,13 @@ task xslt30ExtraTestsJava() {
                                 testargs += ["-bytecode:${bytecode}"]
                             }
 
+                            if (export != "") {
+                                testargs += [export]
+                            }
+                            if (jit != "") {
+                                testargs += [jit]
+                            }
+
                             qt3OptionMap.keySet().each { key ->
                                 def opt = project.findProperty(key)
                                 if (opt != null) {
