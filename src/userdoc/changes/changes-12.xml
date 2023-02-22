@@ -178,7 +178,7 @@
     
     
     
-    <category name="xquery-update" class="csonly">
+    <category name="xquery-update" class="javaonly">
         
        
     </category>
@@ -200,6 +200,15 @@
         <p>TODO: there's potentially a problem because we force lazy evaluation (using both MemoClosure and SingletonClosure)
         for variables created by loop-lifting or common subexpression elimination. The idea here is (a) to avoid the cost of evaluating
         the expression if the loop is empty, and (b) to avoid triggering a dynamic error unnecessarily.</p>
+        
+        <p>Internally, a number of code paths have been changed to avoid use of <code>Class.newInstance()</code>, which is
+        deprecated since Java 9, and which causes operational difficulties under GraalVM. For example, system functions
+        were previously registered with a <code>Class&lt;? extends SystemFunction></code> object such as <code>Replace.class</code>,
+            and were instantiated 
+            using <code>newInstance()</code>; they are now registered as a <code>Supplier&lt;? extends SystemFunction></code>,
+        with a lambda function of the form <code>() -> new Replace()</code>, and are instantiated by invoking this factory
+        method. (A consequence is that the same class can now implement several closely-related functions, such as <code>fn:true</code>
+            and <code>fn:false</code>, or <code>fn:exists</code> and <code>fn:empty</code>).</p>
         
         
         
