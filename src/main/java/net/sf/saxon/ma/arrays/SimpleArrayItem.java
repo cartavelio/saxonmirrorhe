@@ -8,7 +8,7 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.OperandRole;
-import net.sf.saxon.expr.freq.Ping;
+import net.sf.saxon.expr.elab.Ping;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;

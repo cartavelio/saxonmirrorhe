@@ -11,7 +11,6 @@ import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
-import net.sf.saxon.expr.freq.Experience;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -168,13 +167,9 @@ public class MemoClosure extends Closure implements ContextOriginator {
         return this;
     }
 
-    public static class MemoClosureStatistics extends Experience {
+    public static class MemoClosureStatistics {
         public boolean allRead;
         public int size;
-    }
-
-    public interface MemoClosureStatisticsGatherer {
-        void supplyFeedback(MemoClosureStatistics statistics);
     }
 
 

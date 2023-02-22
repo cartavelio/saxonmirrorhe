@@ -1,4 +1,4 @@
-package net.sf.saxon.expr.freq;
+package net.sf.saxon.expr.elab;
 
 /**
  * A {@code Ping} represents an event with no associated information.
