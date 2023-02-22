@@ -216,7 +216,7 @@
                       '{get;}','get;','set;','{set;}','init;','}'))][contains(., '&lt;')][last()], '&lt;')"/>
                   </xsl:when>
                   <xsl:otherwise>
-                    <xsl:sequence select="$tokens[not(. = ('{', '{get;}','get;','set;','{set;}','init;','}'))][last()]"/>
+                    <xsl:sequence select="$tokens[not(. = ('{', '{get;}','get;','set;','{set;}','init;','}', 'private'))][last()]"/>
                   </xsl:otherwise>
                 </xsl:choose>
               </xsl:variable>
@@ -406,13 +406,14 @@
                       <xsl:sequence select="f:getTypeParamTypes($type)"/>
                     </xsl:if>
                   </property>
-                  <xsl:if test="$tokens = 'get;' or $is-property-with-getter">
+                  <xsl:if test="$is-property-with-getter or ($tokens = 'get;' and
+                    not($tokens[index-of($tokens, 'get;')-1] eq 'private'))">
                     <get />
                   </xsl:if>
-                  <xsl:if test="$tokens = 'set;'">
+                  <xsl:if test="$tokens = 'set;' and not($tokens[index-of($tokens, 'set;')-1] eq 'private')">
                     <set />
                   </xsl:if>
-                  <xsl:if test="$tokens = 'init;' or $is-property-with-getter">
+                  <xsl:if test="$tokens = 'init;'">
                     <init />
                   </xsl:if>
                 </xsl:otherwise>
