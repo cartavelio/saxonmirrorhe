@@ -59,6 +59,18 @@ public class UserFunctionReference extends Expression
         this.nominalTarget = function;
     }
 
+    @Override
+    public Expression simplify() throws XPathException {
+        // if this is an inline function, simplify the body of that function now
+        if (nominalTarget.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS) && typeCheckCounter == 0) {
+            // Prevent recursive simplification
+            typeCheckCounter++;
+            nominalTarget.setBody(nominalTarget.getBody().simplify());
+            typeCheckCounter--;
+        }
+        return this;
+    }
+
     /**
      * Perform type checking of an expression and its subexpressions. This is the second phase of
      * static optimization.
