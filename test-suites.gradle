@@ -405,7 +405,8 @@ testSuiteMatrix.keySet().findAll { !it.startsWith("_") }.each { product ->
 
   task "${release}j_compileTestDrivers"(
     type: JavaCompile,
-    dependsOn: ["${release}j_copyTestDrivers", "${release}jCompile"],
+    dependsOn: ["${release}j_copyTestDrivers", "${release}jCompile",
+                'asm_jarjar'],
     description: "Compile the test classes for ${RELEASE}"
   ) {
     classpath = configurations.testDrivers + files("${buildDir}/classes/${release}j")

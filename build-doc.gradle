@@ -32,7 +32,8 @@ task website(
 // ============================================================
 
 task filter_sources_for_javadoc(
-  description: "Copy the Java source files for making JavaDoc (excludes some classes)"
+  description: "Copy the Java source files for making JavaDoc (excludes some classes)",
+  dependsOn: ["hej_featureKeys"]
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/main/java")
   outputs.files fileTree(dir: "${buildDir}/javadoc_src")
@@ -1011,7 +1012,10 @@ task saxonc_doc_setup(dependsOn: ["saxonc_docbuild_container"]) {
   }
 }
 
-task saxonc_doxygen(type: Exec, dependsOn: ['saxonc_doc_setup']) {
+task saxonc_doxygen(
+  type: Exec,
+  dependsOn: ['saxonc_doc_setup', 'saxonc_pydoc3', 'saxonc_pydoc3_setup']
+) {
   inputs.files fileTree(dir: "${buildDir}/docbuild/Saxon.C.API")
   outputs.files fileTree(dir: "${buildDir}/docbuild/documentation")
   commandLine 'docker', 'run', '-i', '--rm',

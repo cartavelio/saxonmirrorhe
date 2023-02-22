@@ -156,7 +156,8 @@ task check_codesign_dylib(
   }
 
   task "${release}c_jet"(
-    dependsOn: ["${release}c_setupJet", "${release}c_copyLibs", "test_jetHome"],
+    dependsOn: ["${release}c_setupJet", "${release}c_copyLibs", "test_jetHome",
+                'hec_copyJet', 'pec_copyJet', 'eec_copyJet'],
     description: "Run JET on ${RELEASE}"
   ) {
     inputs.file("${buildDir}/jet/libsaxon${release}c.prj")
