@@ -1238,6 +1238,9 @@ public class Transform {
         } else if ("off".equals(options.getOptionValue("ea"))) {
             transformer.getUnderlyingController().setAssertionsEnabled(true);
         }
+
+        transformer.getUnderlyingController().freezeParseOptions();
+
         return transformer;
     }
 
@@ -1349,6 +1352,9 @@ public class Transform {
             if (r < halfway) {
                 traceDestination = null;
             }
+
+
+
             Xslt30Transformer transformer = newTransformer(sheet, options);
             Serializer serializer;
             if (outputFile == null) {

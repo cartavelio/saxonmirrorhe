@@ -27,6 +27,23 @@ public class ExitCounter
 		count(threeBack.getClassName() + "." + threeBack.getMethodName() + ":" + threeBack.getLineNumber());
 	}
 
+	public static void countTrace(int count)
+	{
+		StackTraceElement[] traceElements = Thread.currentThread().getStackTrace();
+
+		StringBuilder builder = new StringBuilder();
+
+		for (int pos = 3; pos < 3+count; pos++)
+		{
+			StackTraceElement element = traceElements[pos];
+
+			builder.append(
+					element.getClassName()).append(".").append(element.getMethodName()).append(":").append(element.getLineNumber()).append(" ====> ");
+		}
+
+		count(builder.toString());
+	}
+
 	static
 	{
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
