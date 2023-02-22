@@ -12,6 +12,10 @@
   <test-set name="expath-binary" file="expath/binary/binary.xml"/>
   <test-set name="expath-binary2" file="expath/binary/binary2.xml"/>
   <test-set name="expath-archive" file="expath/archive/archive.xml"/>
+  
+  <!-- SAXON-SPECIFIC FUNCTIONALITY IN EXPATH -->
+  
+  <test-set name="expath-binary-extra" file="expath/binary/binary-extra.xml"/>
 
   <!-- UCA Collations -->
   <test-set name="UCA-collation" file="UCA/UCA-collation.xml"/>
