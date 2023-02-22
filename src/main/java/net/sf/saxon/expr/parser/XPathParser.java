@@ -921,63 +921,56 @@ public class XPathParser {
 
     public static int operatorPrecedence(int operator) {
         switch (operator) {
-            case Token.QMARK_QMARK:
-            case Token.BANG_BANG:
+            case Token.QMARK_QMARK://48
+            case Token.BANG_BANG://49
                 return 3;
-            case Token.OR:
-            case Token.OR_ELSE:
+            case Token.OR://9
                 return 4;
-            case Token.AND:
-            case Token.AND_ALSO:
+            case Token.AND://10
                 return 5;
-            case Token.FEQ:
-            case Token.FNE:
-            case Token.FLE:
-            case Token.FLT:
-            case Token.FGE:
-            case Token.FGT:
-            case Token.EQUALS:
-            case Token.NE:
-            case Token.LE:
-            case Token.LT:
-            case Token.GE:
-            case Token.GT:
-            case Token.IS:
-            case Token.PRECEDES:
-            case Token.FOLLOWS:
+            case Token.FEQ://50
+            case Token.FNE://51
+            case Token.FLE://55
+            case Token.FLT://53
+            case Token.FGE://54
+            case Token.FGT://52
+            case Token.EQUALS://6
+            case Token.NE://22
+            case Token.LE://14
+            case Token.LT://12
+            case Token.GE://13
+            case Token.GT://11
+            case Token.IS://20
+            case Token.PRECEDES://38
+            case Token.FOLLOWS://39
                 return 6;
-            case Token.CONCAT:
+            case Token.CONCAT://30
                 return 7;
-            case Token.BY:
-                // parse (A BY B TO C) as (A BY (B TO C)) though this doesn't reflect the semantics
-                return 8;
-            case Token.TO:
+            case Token.TO://29
                 return 9;
-            case Token.PLUS:
-            case Token.MINUS:
+            case Token.PLUS://15
+            case Token.MINUS://16
                 return 10;
-            case Token.MULT:
-            case Token.DIV:
-            case Token.IDIV:
-            case Token.MOD:
+            case Token.MULT://17
+            case Token.DIV://18
+            case Token.IDIV://56
+            case Token.MOD://19
                 return 11;
-            case Token.OTHERWISE:
-                return 12;
-            case Token.UNION:
+
+            case Token.UNION://1
                 return 13;
-            case Token.INTERSECT:
-            case Token.EXCEPT:
+            case Token.INTERSECT://23
+            case Token.EXCEPT://24
                 return 14;
-            case Token.INSTANCE_OF:
+            case Token.INSTANCE_OF://45
                 return 15;
-            case Token.TREAT_AS:
+            case Token.TREAT_AS://47
                 return 16;
-            case Token.CASTABLE_AS:
+            case Token.CASTABLE_AS://57
                 return 17;
-            case Token.CAST_AS:
+            case Token.CAST_AS://46
                 return 18;
-            case Token.FAT_ARROW:
-                return 19;
+
             // remainder commented out because not used in precedence parsing (but perhaps they could be)
 //            case Token.BANG:
 //                return 20;
@@ -988,11 +981,31 @@ public class XPathParser {
 //            case Token.QMARK:
 //                return 23;
             default:
-                return -1;
+                return operatorPrecedence2(operator);
         }
     }
 
-    /*@NotNull*/
+    private static int operatorPrecedence2(int operator) {
+        switch(operator)
+        {
+        case Token.OR_ELSE://81
+            return 4;
+        case Token.AND_ALSO://80
+            return 5;
+        case Token.BY://82
+            // parse (A BY B TO C) as (A BY (B TO C)) though this doesn't reflect the semantics
+            return 8;
+        case Token.FAT_ARROW://77
+            return 19;
+        case Token.OTHERWISE://79
+            return 12;
+        default:
+            return -1;
+        }
+    }
+
+
+        /*@NotNull*/
     private Expression makeBinaryExpression(Expression lhs, int operator, Expression rhs) throws XPathException {
         switch (operator) {
             case Token.OR:
