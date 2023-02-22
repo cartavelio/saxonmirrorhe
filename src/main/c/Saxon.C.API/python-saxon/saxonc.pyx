@@ -30,11 +30,12 @@ def create_xdm_dict(proc, mmap):
     Args:
         proc (PySaxonProcessor): PySaxonProcessor object required to create PyXdmValue objects from primitive types
         mmap (dict): The dict of key-value pairs to convert
-    Example: with saxonc.PySaxonProcessor(license=False) as proc:
-        mymap = {"a":saxonproc.make_integer_value(1), "b":saxonproc.make_integer_value(2),
-                 "c":saxonproc.make_integer_value(3)}
-        xdmdict = create_xdm_dict(saxonproc, mymap)
-        map = saxonproc.make_map(xdmdict)
+    Example:
+        with saxonc.PySaxonProcessor(license=False) as proc:
+            mymap = {"a":saxonproc.make_integer_value(1), "b":saxonproc.make_integer_value(2),
+                    "c":saxonproc.make_integer_value(3)}
+            xdmdict = create_xdm_dict(saxonproc, mymap)
+            map = saxonproc.make_map(xdmdict)
     """
     xdmMap = {}
     xdmValue_ = None
@@ -116,11 +117,11 @@ cdef class PySaxonProcessor:
     """A PySaxonProcessor acts as a factory for generating XQuery, XPath, Schema and XSLT compilers.
     This class is itself the context that needs to be managed (i.e. allocation & release)
     Example:
-          with saxonc.PySaxonProcessor(license=False) as proc:
-             print("Test SaxonC on Python")
-             print(proc.version)
-             xdmAtomicval = proc.make_boolean_value(False)
-             xslt30proc = proc.new_xslt30_processor()
+        with saxonc.PySaxonProcessor(license=False) as proc:
+            print("Test SaxonC on Python")
+            print(proc.version)
+            xdmAtomicval = proc.make_boolean_value(False)
+            xslt30proc = proc.new_xslt30_processor()
     """
     cdef saxoncClasses.SaxonProcessor *thisptr      # hold a C++ instance which we're wrapping
     cdef bool _release  #  flag to indicate if this PySaxonProcessor should call release
@@ -247,7 +248,7 @@ cdef class PySaxonProcessor:
             name (str): The name of the property
             value (str): The value of the property
         Example:
-          'l': 'on' or 'off' - to enable the line number
+            'l': 'on' or 'off' - to enable the line number
         """
         cdef char * c_str_ = NULL
         '''make_c_str(name)'''
@@ -983,14 +984,14 @@ cdef class PyXslt30Processor:
             PyXsltExecutable: which represents the compiled stylesheet. The PyXsltExecutable is immutable
             and thread-safe; it may be used to run multiple transformations, in series or concurrently.
         Example:
-            1. executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>
+            1) executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>
                                              <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' />
                                              <xsl:template match='*'><output><xsl:value-of select='//person[1]'/>
                                              <xsl:for-each select='$values' >
                                                <out><xsl:value-of select='. * 3'/></out>
                                              </xsl:for-each></output></xsl:template></xsl:stylesheet>")
-            2. executable = xsltproc.compile_stylesheet(stylesheet_file="test1.xsl", save=True, output_file="test1.sef")
-            3. executable = xsltproc.compile(associated_file="foo.xml")
+            2) executable = xsltproc.compile_stylesheet(stylesheet_file="test1.xsl", save=True, output_file="test1.sef")
+            3) executable = xsltproc.compile(associated_file="foo.xml")
         """
         py_error_message = "Error: compile_stylesheet should only contain one of the following keyword arguments: (associated_file|stylesheet_text|stylesheet_file|stylesheet_node) (with optional additional arguments: save, output_file)"
         if len(kwds) >3:
@@ -1102,11 +1103,11 @@ cdef class PyXslt30Processor:
      def transform_to_string(self, **kwds):
         """
         transform_to_string(self, **kwds)
-        Execute a transformation and return the result as a string.  For a more elaborate API for transformation
-                recommend using the PyXsltExecutable class by compiling the stylesheeet first.
+        Execute a transformation and return the result as a string. For a more elaborate API for transformation use the
+        compile_stylesheet method to compile the stylesheet to a PyXsltExecutable, and use the methods of that class.
         Args:
-            **kwds: Possible keyword arguments: source_file (str), stylesheet_file (str),
-                and base_output_uri (str) which is used for resolving relative URIs in the href
+            **kwds: Required keyword arguments: source_file (str) and stylesheet_file (str).
+                Possible argument: base_output_uri (str) which is used for resolving relative URIs in the href
                 attribute of the xsl:result-document instruction.
         Example:
             result = xsltproc.transform_to_string(source_file="cat.xml", stylesheet_file="test1.xsl")
@@ -1117,7 +1118,7 @@ cdef class PyXslt30Processor:
         cdef py_value = None
         cdef py_value2 = None
         if len(kwds) == 0:
-            raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (base_output_uri, source_file, stylesheet_file)")
+            raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file, stylesheet_file, base_output_uri)")
 
         if "source_file" in kwds:
             py_value2 = kwds["source_file"]
@@ -1147,14 +1148,14 @@ cdef class PyXslt30Processor:
      def transform_to_file(self, **kwds):
         """
         transform_to_file(self, **kwds)
-        A one shot method to execute a transformation with the result saved to file. For a more elaborate API for transformation
-        recommend using the PyXsltExecutable class by compiling the stylesheeet first.
+        Execute a transformation with the result saved to file. For a more elaborate API for transformation use the
+        compile_stylesheet method to compile the stylesheet to a PyXsltExecutable, and use the methods of that class.
         Args:
-            **kwds: Possible keyword arguments: source_file (str), stylesheet_file (str), output_file (str),
-                and base_output_uri (str) which is used for resolving relative URIs in the href attribute of
-                the xsl:result-document instruction.   The leyword output_file is required
+            **kwds: Required keyword arguments: source_file (str), stylesheet_file (str) and output_file (str).
+                Possible argument: base_output_uri (str) which is used for resolving relative URIs in the href
+                attribute of the xsl:result-document instruction.
         Example:
-            1) xsltproc.transform_to_file(source_file="cat.xml", stylesheet_file="test1.xsl", output_file="result.xml")
+            xsltproc.transform_to_file(source_file="cat.xml", stylesheet_file="test1.xsl", output_file="result.xml")
         """
         cdef char * c_sourcefile = NULL
         cdef char * c_outputfile = NULL
@@ -1184,16 +1185,17 @@ cdef class PyXslt30Processor:
      def transform_to_value(self, **kwds):
         """
         transform_to_value(self, **kwds)
-        Execute a transformation and return the result as a PyXdmValue object.  For a more elaborate API for transformation
-                recommend using the PyXsltExecutable class by compiling the stylesheeet first.
+        Execute a transformation and return the result as a PyXdmValue object. For a more elaborate API for
+        transformation use the compile_stylesheet method to compile the stylesheet to a PyXsltExecutable, and use
+        the methods of that class.
         Args:
-            **kwds: Possible keyword arguments: source_file (str), stylesheet_file (str),
-                and base_output_uri (str) which is used for resolving relative URIs in the href attribute
-                of the xsl:result-document instruction.
+            **kwds: Required keyword arguments: source_file (str) and stylesheet_file (str).
+                Possible argument: base_output_uri (str) which is used for resolving relative URIs in the href
+                attribute of the xsl:result-document instruction.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
-            1) node = xsltproc.transform_to_value(source_file="cat.xml", stylesheet_file="test1.xsl")
+            result = xsltproc.transform_to_value(source_file="cat.xml", stylesheet_file="test1.xsl")
         """
         cdef const char * c_sourcefile = NULL
         cdef char * c_stylesheet = NULL
@@ -1648,8 +1650,8 @@ cdef class PyXsltExecutable:
         	    False if they are to be used for non-tunnel parameters. The default is false.
             parameters (dict): the parameters to be used for the initial template supplied as key-value pairs.
         Example:
-        	1) paramArr = {'a':saxonproc.make_integer_value(12), 'b':saxonproc.make_integer_value(5)}
-               xsltproc.set_initial_template_parameters(False, paramArr)
+        	paramArr = {'a':saxonproc.make_integer_value(12), 'b':saxonproc.make_integer_value(5)}
+            xsltproc.set_initial_template_parameters(False, paramArr)
         """
         cdef map[string, saxoncClasses.XdmValue * ] parameters
         cdef bool c_tunnel
@@ -1709,15 +1711,15 @@ cdef class PyXsltExecutable:
                 and base_output_uri (str) which is used for resolving relative URIs
                 in the href attribute of the xsl:result-document instruction.
         Example:
+            executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) result = executable.transform_to_string(source_file="cat.xml")
             2) executable.set_initial_match_selection(file_name="cat.xml")\r
-               result = executable.transform_to_string(stylesheet_file="test1.xsl", xdm_node= node)
+               result = executable.transform_to_string()
             3) node = saxon_proc.parse_xml(xml_text="<in/>")\r
                result = executable.transform_to_string(xdm_node= node)
         """
         cdef char * c_sourcefile = NULL
-        cdef char * c_stylesheet = NULL
-        cdef const char* c_string = NULL
+        cdef const char * c_string = NULL
         cdef const char * c_base_output_uri = NULL
         cdef PyXdmNode xdm_node = None
         cdef saxoncClasses.XdmNode * derivednptr = NULL
@@ -1743,7 +1745,7 @@ cdef class PyXsltExecutable:
             if isinstance(value, PyXdmNode):
                 xdm_node = value
           else:
-            raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, stylesheet_file)")
+            raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, base_output_uri)")
         if xdm_node is not None:
           c_string = self.thisxptr.transformToString(xdm_node.derivednptr)
           return make_py_str(c_string)
@@ -1761,13 +1763,12 @@ cdef class PyXsltExecutable:
                 and base_output_uri (str) which is used for resolving relative URIs in the href attribute of the
                 xsl:result-document instruction.
         Example:
-            1) executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
-               executable.transform_to_file(source_file="cat.xml", output_file="result.xml")
+            executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
+            1) executable.transform_to_file(source_file="cat.xml", output_file="result.xml")
             2) executable.set_initial_match_selection("cat.xml")\r
                executable.set_output_file("result.xml")\r
-               executable.transform_to_file(stylesheet_file="test1.xsl")
+               executable.transform_to_file()
             3) node = saxon_proc.parse_xml(xml_text="<in/>")\r
-               executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
                executable.transform_to_file(output_file="result.xml", xdm_node= node)
         """
         cdef char * c_sourcefile = NULL
@@ -1817,13 +1818,13 @@ cdef class PyXsltExecutable:
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
-              xslt30_proc = saxon_proc.new_xsl30_processor()
-              executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
-            1) node = executable.transform_to_value(source_file="cat.xml")
+            xslt30_proc = saxon_proc.new_xsl30_processor()
+            executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
+            1) result = executable.transform_to_value(source_file="cat.xml")
             2) executable.set_initial_match_selection("cat.xml")\r
-               node = executable.transform_to_value()
+               result = executable.transform_to_value()
             3) node = saxon_proc.parse_xml(xml_text="<in/>")\r
-               node = executable.transform_to_value(xdm_node= node)
+               result = executable.transform_to_value(xdm_node= node)
         """
         cdef const char * c_sourcefile = NULL
         cdef char * c_stylesheet = NULL
@@ -1904,11 +1905,11 @@ cdef class PyXsltExecutable:
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
-              xslt30_proc = saxon_proc.new_xsl30_processor()
-              executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")            
+            xslt30_proc = saxon_proc.new_xsl30_processor()
+            executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.set_initial_match_selection(file_name="cat.xml")\r
-               node = executable.apply_templates_returning_value()
-            2) node = executable.apply_templates_returning_value(source_file="cat.xml")
+               result = executable.apply_templates_returning_value()
+            2) result = executable.apply_templates_returning_value(source_file="cat.xml")
         """
         cdef const char * c_sourcefile = NULL
         cdef PyXdmValue value_ = None
@@ -2005,8 +2006,8 @@ cdef class PyXsltExecutable:
         Returns:
             str: Result of the transformation as a str value
         Example:
-               xslt30_proc = saxon_proc.new_xsl30_processor()
-               executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
+            xslt30_proc = saxon_proc.new_xsl30_processor()
+            executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.set_initial_match_selection(file_name="cat.xml")\r
                content = executable.apply_templates_returning_string()
 			   print(content)
@@ -2065,17 +2066,16 @@ cdef class PyXsltExecutable:
         """
         apply_templates_returning_file(self, **kwds)
         Invoke the stylesheet by applying templates to a supplied input sequence, saving the results to file.
+        It is possible to specify the output file as an argument or using the set_output_file method.
         Args:
-            **kwds: Required argument: output_file (str).
-                Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
+            **kwds: Possible arguments: source_file (str) or xdm_value (PyXdmValue); output_file (str), and
                 base_output_uri (str) which is used for resolving relative URIs in the href attribute of
                 the xsl:result-document instruction.
 
         Example:
-            1) executable = trans.compile_stylesheet(stylesheet_file="test1.xsl")
-               executable.set_initial_match_selection(file_name="cat.xml")
-               content = executable.apply_templates_returning_file(output_file="result.xml")
-			   print(content)
+            executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
+            executable.set_initial_match_selection(file_name="cat.xml")
+            executable.apply_templates_returning_file(output_file="result.xml")
         """
         cdef const char * c_sourcefile = NULL
         cdef const char * c_outputfile = NULL
@@ -2141,11 +2141,11 @@ cdef class PyXsltExecutable:
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
-               xslt30_proc = saxon_proc.new_xsl30_processor()
-               executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
-            1) node = executable.call_template_returning_value("main")\r
+            xslt30_proc = saxon_proc.new_xsl30_processor()
+            executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
+            1) result = executable.call_template_returning_value("main")\r
             2) executable.set_initial_match_selection(file_name="cat.xml")\r
-               node = executable.call_template_returning_value("main")
+               result = executable.call_template_returning_value("main")
         """
         cdef const char * c_templateName = NULL
         cdef const char * c_sourcefile = NULL
@@ -2246,15 +2246,11 @@ cdef class PyXsltExecutable:
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
-            1) executable = trans.compile_stylesheet(stylesheet_file="test1.xsl")
+            executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
+            1) result = executable.call_template_returning_string("main")
+            2) executable.set_initial_match_selection(file_name="cat.xml")\r
                result = executable.call_template_returning_string("main")
-
-            2) executable = trans.compile_stylesheet(stylesheet_file="test1.xsl")
-               executable.set_initial_match_selection(file_name="cat.xml")\r
-               result = executable.call_template_returning_string("main")
-
-            3) executable = trans.compile_stylesheet(stylesheet_file="test2.xsl")
-			   executable.set_initial_match_selection(file_name="cat.xml")\r
+            3) executable.set_initial_match_selection(file_name="cat.xml")\r
                result = executable.call_template_returning_string()
 			   print(result)
         """
@@ -2312,14 +2308,15 @@ cdef class PyXsltExecutable:
      def call_template_returning_file(self, str template_name=None, **kwds):
         """
         call_template_returning_file(self, str template_name, **kwds)
-        Invoke a transformation by calling a named template and save the result to a specified file.
+        Invoke a transformation by calling a named template with the result saved to file. It is possible to specify
+        the output file as an argument or using the set_output_file method.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template
             **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode); output_file (str), and
                 base_output_uri (str) which is used for resolving relative URIs in the href attribute
                 of the xsl:result-document instruction.
         Example:
-              executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
+            executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.call_template_returning_file("main", output_file="result.xml")
             2) executable.set_initial_match_selection(file_name="cat.xml")\r
                executable.call_template_returning_file("main", output_file="result.xml")
@@ -2393,11 +2390,11 @@ cdef class PyXsltExecutable:
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
-              executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
-            1) node = executable.call_function_returning_value("{http://localhost/example}func")
-            2) xsltproc.set_initial_match_selection(file_name="cat.xml")\r
-               value = executable.call_function_returning_value("{http://localhost/test}add")
-            3) value = executable.call_function_returning_value(source_file="cat.xml", "{http://exmaple.com}func1")
+            executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
+            1) result = executable.call_function_returning_value("{http://localhost/example}func")
+            2) executable.set_initial_match_selection(file_name="cat.xml")\r
+               result = executable.call_function_returning_value("{http://localhost/test}add")
+            3) result = executable.call_function_returning_value("{http://example.com}func1", source_file="cat.xml")
             
         """
         cdef const char * c_functionName = NULL
@@ -2506,12 +2503,11 @@ cdef class PyXsltExecutable:
         Returns:
             str: Result of the transformation as a str value
         Example:
-               executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
+            executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) result = executable.call_function_returning_string("{http://localhost/example}func")
             2) executable.set_initial_match_selection(file_name="cat.xml")\r
                result = executable.call_function_returning_string("{http://localhost/test}add")
-            3) executable.set_initial_match_selection(file_name="cat.xml")\r
-               result = executable.call_function_returning_string("{http://exmaple.com}func1")
+            3) result = executable.call_function_returning_string("{http://example.com}func1", source_file="cat.xml")
         """
         cdef const char * c_functionName = NULL
         cdef const char * c_sourcefile = NULL
@@ -2587,7 +2583,8 @@ cdef class PyXsltExecutable:
      def call_function_returning_file(self, str function_name, list args, **kwds):
         """
         call_function_returning_file(self, str function_name, list args, **kwds)
-        Invoke a transformation by calling a named function and save the result to a specified file.
+        Invoke a transformation by calling a named function with the result saved to file. It is possible to specify
+        the output file as an argument or using the set_output_file method.
         Args:
 			function_name(str): The name of the function to invoke, in clark notation {uri}local
 			args (list): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
@@ -2595,13 +2592,12 @@ cdef class PyXsltExecutable:
             **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); stylesheet_file (str),
                 and output_file (str)
         Example:
-               executable = xslt30_proc.compile_stylesheet(stylesheet_file="test2.xsl")
+            executable = xslt30_proc.compile_stylesheet(stylesheet_file="test2.xsl")
             1) executable.set_output_file("result.xml")
 			   executable.call_function_returning_file("{http://localhost/example}func")
             2) executable.set_initial_match_selection(file_name="cat.xml")\r
                executable.call_function_returning_file("{http://localhost/test}add", output_file="result.xml")
-            3) executable.set_initial_match_selection(file_name="cat.xml")\r
-               executable.call_function_returning_file("{http://exmaple.com}func1", output_file="result.xml")
+            3) executable.call_function_returning_file("{http://example.com}func1", output_file="result.xml", source_file="cat.xml")
         """
         cdef const char * c_functionName = NULL
         cdef const char * c_sourcefile = NULL
@@ -2946,8 +2942,8 @@ cdef class PyXQueryProcessor:
         run_query_to_file(self, **kwds)
         Execute a query with the result saved to file.
         Args:
-            **kwds: Required argument: output_file_name (str) to specify the output file.
-                Possible keyword arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
+            **kwds: Required keyword argument: output_file_name (str) to specify the output file.
+                Possible arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
                 supply the input; query_file (str) or query_text (str) can be used to supply the query.
         """
         if len(kwds) == 0:
