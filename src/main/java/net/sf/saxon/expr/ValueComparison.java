@@ -541,10 +541,10 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             }
 
             GenericAtomicComparer.AtomicComparisonFunction comparer = GenericAtomicComparer.makeAtomicComparisonFunction(
-                        (BuiltInAtomicType) expr.getLhsExpression().getItemType().getPrimitiveItemType(),
-                        (BuiltInAtomicType) expr.getRhsExpression().getItemType().getPrimitiveItemType(),
-                        defaultCollation,
-                        operator, true);
+                    (BuiltInAtomicType) expr.getLhsExpression().getItemType().getPrimitiveItemType(),
+                    (BuiltInAtomicType) expr.getRhsExpression().getItemType().getPrimitiveItemType(),
+                    defaultCollation,
+                    operator, true);
 
 
             final boolean nullable0 = Cardinality.allowsZero(card0);
@@ -599,7 +599,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                 t1 = BuiltInAtomicType.ANY_ATOMIC;
             }
             final GenericAtomicComparer.AtomicComparisonFunction comparer = GenericAtomicComparer.makeAtomicComparisonFunction(
-                        (BuiltInAtomicType) t0, (BuiltInAtomicType) t1, defaultCollation, operator, true);
+                    (BuiltInAtomicType) t0, (BuiltInAtomicType) t1, defaultCollation, operator, true);
 
             final boolean nullable0 = Cardinality.allowsZero(card0);
             final boolean nullable1 = Cardinality.allowsZero(card1);
