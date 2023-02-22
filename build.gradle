@@ -59,6 +59,7 @@ configurations {
   jeldoclet.extendsFrom(implementation)
   samples.extendsFrom(implementation)
   pomDependencies
+  pePomDependencies
 }
 
 sourceSets {
@@ -272,6 +273,9 @@ dependencies {
     [group: 'org.apache.ws.commons.axiom', name: 'axiom', version: '1.2.15'],
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.2.15'],
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: '1.2.15']
+  )
+  pePomDependencies (
+    [group: 'nu.validator', name: 'htmlparser', version: '1.4.16']
   )
 }
 
@@ -1561,6 +1565,15 @@ def pomXml(String release) {
         dependencyNode.appendNode('version', xmlresolverVersion)
         dependencyNode.appendNode('classifier', 'data')
       } else {
+        dependencyNode.appendNode('optional', 'true')
+      }
+    }
+    if (release != "he") {
+      configurations.pePomDependencies.allDependencies.each {
+        def dependencyNode = dependenciesNode.appendNode('dependency')
+        dependencyNode.appendNode('groupId', it.group)
+        dependencyNode.appendNode('artifactId', it.name)
+        dependencyNode.appendNode('version', it.version)
         dependencyNode.appendNode('optional', 'true')
       }
     }
