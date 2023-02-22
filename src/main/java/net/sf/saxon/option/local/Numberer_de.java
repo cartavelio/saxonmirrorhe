@@ -72,11 +72,11 @@ public class Numberer_de extends AbstractNumberer {
             String s = (n == 1 ? "Ein" : toWords(n));
             return s + "hundert" + (rem == 0 ? "" : toWords(rem, LOWER_CASE));
         } else {
-            if (number < 20) return (number == 1 ? "Eins" : germanUnits[(int) number]);
+            if (number < 20) return number == 0 ? "Null" : (number == 1 ? "Eins" : germanUnits[(int) number]);
             int rem = (int) (number % 10);
             int tens = (int) number / 10;
             return (germanUnits[rem]) +
-                    (tens == 0 ? "" : (rem == 0 ? "" : "und") + germanTens[tens]);
+                    (rem == 0 ? "" : "und") + germanTens[tens];
 
         }
     }
