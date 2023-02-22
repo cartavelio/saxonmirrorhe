@@ -142,7 +142,7 @@
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 conformance"/>
     <products>
-      <product J="HE" CS="HE" C="PE" JS="HE"/>
+      <product J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
   </feature>
   
@@ -193,7 +193,7 @@
     <details link="conformance/xpath31" name="XPath 3.1 conformance"/>
     <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 conformance"/>
     <products>
-      <product J="HE" CS="HE" C="PE" JS="HE"/>
+      <product J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
   </feature>
   
@@ -299,7 +299,7 @@
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product J="HE" CS="HE" C="PE"/>
+      <product J="HE" CS="HE" C="HE"/>
     </products>
   </feature>
 
