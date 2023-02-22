@@ -198,7 +198,7 @@ public class TestXQueryNative {
                         new StructuredQName("hello", NamespaceUri.of("http://my.hello.com/"), "world"), 0);
 
                 @Override
-                public Function getFunctionItem(SymbolicName.F functionName, StaticContext env) {
+                public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext env) {
                     if (functionName.equals(fn)) {
                         return null;
                     } else {
