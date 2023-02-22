@@ -242,6 +242,7 @@ namespace SaxonCS_NUnit {
 
 
                 Serializer dest = p.NewSerializer();
+                dest.SetOutputProperty(Serializer.INDENT, "yes");
                 dest.SetOutputFile(ConfigTest.DATA_DIR + "OutputStep2.xml");
                 // exec.Run(dest);
                 exec.CallTemplate(new QName("main"), dest);
