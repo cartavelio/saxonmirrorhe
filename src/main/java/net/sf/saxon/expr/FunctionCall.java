@@ -23,7 +23,7 @@ import net.sf.saxon.value.SequenceType;
 import java.util.Collections;
 import java.util.function.Supplier;
 
-import static net.sf.saxon.expr.parser.RoleDiagnostic.ordinal;
+
 
 /**
  * Abstract superclass for calls to system-defined and user-defined functions
@@ -242,7 +242,7 @@ public abstract class FunctionCall extends Expression {
                 if (arg instanceof DefaultedArgumentExpression && fd != null) {
                     if (i <= fd.getMinimumArity()) {
                         // This argument cannot be omitted
-                        throw new XPathException("No value supplied for " + ordinal(i + 1) +
+                        throw new XPathException("No value supplied for " + RoleDiagnostic.ordinal(i + 1) +
                                                          " parameter of function " +
                                                          (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
                                                  "XPST0141");

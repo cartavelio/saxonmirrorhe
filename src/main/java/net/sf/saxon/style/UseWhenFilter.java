@@ -197,8 +197,6 @@ public class UseWhenFilter extends ProxyReceiver {
     private boolean checkUseEvaluateWhen(ParsedAttributes pa, int fp, Location location, URI baseUri, NamespaceMap namespaces,
             NodeName elemName, NamespaceUri stdAttUri) throws XPathException
     {
-        boolean ignore = false;
-
         if (pa.useWhenAtt != null)
         {
             AttributeLocation attLoc = new AttributeLocation(elemName.getStructuredQName(),
