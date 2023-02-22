@@ -25,6 +25,7 @@
   <test-set name="saxon-characters" file="saxonfn/characters.xml"/>
   <test-set name="saxon-doc" file="saxonfn/doc.xml"/>
   <test-set name="saxon-EQName" file="saxonfn/EQName.xml"/>
+  <test-set name="saxon-escape-NCName" file="saxonfn/escape-NCName.xml"/>
   <test-set name="saxon-ext-fn" file="saxonfn/ext-fn.xml"/>
   <test-set name="saxon-function-annotations" file="saxonfn/function-annotations.xml"/>
   <test-set name="saxon-get-pseudo-attribute" file="saxonfn/get-pseudo-attribute.xml"/>
@@ -52,6 +53,7 @@
   <test-set name="saxon-schema" file="saxonfn/schema.xml"/>
   <test-set name="saxon-timestamp" file="saxonfn/timestamp.xml"/>
   <test-set name="saxon-type" file="saxonfn/type.xml"/>
+  <test-set name="saxon-unescape-NCName" file="saxonfn/unescape-NCName.xml"/>
   <test-set name="saxon-validate" file="saxonfn/validate.xml"/>
   <test-set name="saxon-sendmail" file="saxonfn/sendmail.xml"/>
 
