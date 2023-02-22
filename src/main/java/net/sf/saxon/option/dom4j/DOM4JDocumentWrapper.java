@@ -34,6 +34,7 @@ public class DOM4JDocumentWrapper extends GenericTreeInfo {
 
     public DOM4JDocumentWrapper(Document doc, String baseURI, Configuration config) {
         super(config);
+        config.requireProfessionalLicense("DOM4J");
         setRootNode(wrap(doc));
         setSystemId(baseURI);
     }

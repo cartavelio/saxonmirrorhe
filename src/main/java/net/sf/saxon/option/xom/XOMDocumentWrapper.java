@@ -45,6 +45,7 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
      */
     public XOMDocumentWrapper(Node root, Configuration config) {
         super(root, null, 0);
+        config.requireProfessionalLicense("XOM");
         if (root.getParent() != null) {
             throw new IllegalArgumentException("root node must not have a parent node");
         }
