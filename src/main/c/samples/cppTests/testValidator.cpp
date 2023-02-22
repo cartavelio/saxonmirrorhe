@@ -1,6 +1,8 @@
 #include "../../Saxon.C.API/SaxonProcessor.h"
 #include "../../Saxon.C.API/XdmValue.h"
 #include "../../Saxon.C.API/XdmNode.h"
+#include "CppTestUtils.h"
+
 #include <string>
 
 using namespace std;
@@ -30,6 +32,16 @@ void testValidator2(){
         string doc1 = "<Family xmlns='http://myexample/family'><Parent>John</Parent><Child>Alice</Child></Family>";
 
 	 XdmNode * input = processor->parseXmlFromString(doc1.c_str());
+
+	 if(input == nullptr) {
+	     if(val->exceptionOccurred()) {
+
+
+	     }
+	     val->exceptionClear();
+	     return;
+
+	 }
 
 	val->setSourceNode(input);
 

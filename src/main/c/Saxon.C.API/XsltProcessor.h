@@ -51,10 +51,7 @@ public:
     XsltProcessor * clone();
 
 
-     ~XsltProcessor(){
-	clearProperties();
-	clearParameters();
-     }
+     ~XsltProcessor();
 
 	//! Get the SaxonProcessor object
 	/**
@@ -124,7 +121,7 @@ public:
      * Set the value of a stylesheet parameter
      *
      * @param name  the name of the stylesheet parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name"
-     * @param value the value of the stylesheet parameter, or null to clear a previously set value
+     * @param value the value of the stylesheet parameter, or nullptr to clear a previously set value
      */
     void setParameter(const char* name, XdmValue*value);
 
@@ -195,7 +192,7 @@ public:
      * @param  filename - If the filename argument is present then the xsl:message output is appended to the given
      *                    filename with location cwd+filename
      */
-    void setupXslMessage(bool show, const char* filename=NULL);
+    void setSaveXslMessage(bool show, const char* filename=nullptr);
 
 
       //!Perform a one shot transformation.
@@ -203,7 +200,7 @@ public:
      * The result is stored in the supplied outputfile.
      *
      * @param sourcefile - The file name of the source document
-     * @param stylesheetfile - The file name of the stylesheet document. If NULL the most recently compiled stylesheet is used
+     * @param stylesheetfile - The file name of the stylesheet document. If nullptr the most recently compiled stylesheet is used
      * @param outputfile - The file name where results will be stored
      */
     void transformFileToFile(const char* sourcefile, const char* stylesheetfile, const char* outputfile); 
@@ -213,7 +210,7 @@ public:
      * The result is returned as a string
      *
      * @param sourcefile - The file name of the source document
-     * @param stylesheetfile - The file name of the stylesheet document. If NULL the most recently compiled stylesheet is used
+     * @param stylesheetfile - The file name of the stylesheet document. If nullptr the most recently compiled stylesheet is used
      * @return char array - result of the transformation
      */
     const char * transformFileToString(const char* sourcefile, const char* stylesheetfile);
@@ -222,7 +219,7 @@ public:
      * Perform a one shot transformation. The result is returned as an XdmValue
      *
      * @param sourcefile - The file name of the source document
-     * @param stylesheetfile - The file name of the stylesheet document. If NULL the most recently compiled stylesheet is used
+     * @param stylesheetfile - The file name of the stylesheet document. If nullptr the most recently compiled stylesheet is used
      * @return XdmValue - result of the transformation
      */
     XdmValue * transformFileToValue(const char* sourcefile, const char* stylesheetfile);
@@ -321,15 +318,24 @@ public:
     bool exceptionOccurred();
 
 
-     //! Check for exception thrown.
-	/**
-	* @return cha*. Returns the exception message if thrown otherwise return NULL
-	*/
-    const char* checkException();
+    //! Get the SaxonApiException object created when we have an error
+    /**
+     * After the execution of the processor if there is an error, then a SaxonApiException is created.
+     * NULL returned if there is no error.
+     * @return SaxonApiException object of the exception thrown.
+     */
+    SaxonApiException * getException();
 
 
      //! Clear any exception thrown
     void exceptionClear();
+
+
+    //! Check for exception thrown.
+    /**
+    * @return char*. Returns the exception message if thrown otherwise return nullptr
+    */
+    const char* checkException();
 
 
      //! Get the ith error message if there are any error

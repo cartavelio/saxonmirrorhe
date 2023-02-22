@@ -2,7 +2,7 @@
 #define SAXON_API_EXCEPTION_H
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2020 Saxonica Limited.
+// Copyright (c) 2021 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <exception>
+
 
 
 /*! <code>SaxonApiException</code>. An exception thrown by the Saxon s9api API (Java). This is always a C++ wrapper for some other underlying exception in Java
@@ -29,7 +30,7 @@ public:
           * A constructor. Create a SaxonApiException
           * @param message - The detail message string of this throwable.
           */
-     explicit SaxonApiException(const char * message);
+     SaxonApiException(const char * message);
 
     /**
      * A Copy constructor. Create a SaxonApiException
@@ -59,7 +60,12 @@ public:
     /**
      * A destructor.
      */
-	virtual ~SaxonApiException() throw ();
+	virtual ~SaxonApiException() throw() {
+	          message.clear();
+              errorCode.clear();
+              systemId.clear();
+	
+	}
 
 
 

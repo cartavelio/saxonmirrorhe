@@ -144,7 +144,7 @@ struct xdmAtomicValue_object {
 };
 
 
-#define PHP_SAXON_EXTNAME  "saxonc"
+#define PHP_SAXON_EXTNAME  "Saxon/C"
 #define PHP_SAXON_EXTVER   "1.2.0"
 
 /*
@@ -159,7 +159,6 @@ jobject JNICALL phpNativeCall
 	PHP_MSHUTDOWN_FUNCTION(saxon);
 	PHP_MINFO_FUNCTION(saxon);
 	PHP_MINIT_FUNCTION(saxon);
-PHP_RINIT_FUNCTION(saxon);
 
     PHP_METHOD(SaxonProcessor,  __construct);
     PHP_METHOD(SaxonProcessor,  __destruct);
@@ -200,7 +199,6 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XsltProcessor, compileFromStringAndSave);
     PHP_METHOD(XsltProcessor, compileFromFileAndSave);
     PHP_METHOD(XsltProcessor,  setOutputFile);
-    PHP_METHOD(XsltProcessor, setBaseOutputURI);
     PHP_METHOD(XsltProcessor,  setSourceFromFile);
     PHP_METHOD(XsltProcessor,  setSourceFromXdmValue);
     PHP_METHOD(XsltProcessor,  setJustInTimeCompilation);
@@ -213,7 +211,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XsltProcessor,  getErrorCode);
     PHP_METHOD(XsltProcessor,  getErrorMessage);
     PHP_METHOD(XsltProcessor,  getExceptionCount);
-    PHP_METHOD(XsltProcessor,  setupXslMessage);
+    PHP_METHOD(XsltProcessor,  getXslMessages);
 
 
     PHP_METHOD(Xslt30Processor,  __destruct);
@@ -226,7 +224,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(Xslt30Processor, applyTemplatesReturningValue);
     PHP_METHOD(Xslt30Processor, applyTemplatesReturningString);
     PHP_METHOD(Xslt30Processor, applyTemplatesReturningFile);
-    PHP_METHOD(Xslt30Processor, setBaseOutputURI);
+    PHP_METHOD(Xslt30Processor, addPackages);
     PHP_METHOD(Xslt30Processor, setInitialTemplateParameters);
     PHP_METHOD(Xslt30Processor, setInitialMatchSelection);
     PHP_METHOD(Xslt30Processor, setInitialMatchSelectionAsFile);
@@ -256,7 +254,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(Xslt30Processor,  getErrorCode);
     PHP_METHOD(Xslt30Processor,  getErrorMessage);
     PHP_METHOD(Xslt30Processor,  getExceptionCount);
-    PHP_METHOD(Xslt30Processor,  setupXslMessage);
+    PHP_METHOD(Xslt30Processor,  getXslMessages);
 
 
 
@@ -309,7 +307,6 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(SchemaValidator,  __destruct);
     PHP_METHOD(SchemaValidator,  setSourceNode);
     PHP_METHOD(SchemaValidator,  setOutputFile);
-    PHP_METHOD(SchemaValidator,  exportSchema);
     PHP_METHOD(SchemaValidator, registerSchemaFromFile);
     PHP_METHOD(SchemaValidator, registerSchemaFromString);
     PHP_METHOD(SchemaValidator, validate); 

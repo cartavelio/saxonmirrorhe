@@ -19,39 +19,37 @@ public:
 
      XdmItem();
 
-     XdmItem(jobject);
+     explicit XdmItem(jobject);
 
     XdmItem(const XdmItem &item);
 
 	
-    virtual ~XdmItem(){
-	//std::cerr<<std::endl<<"XdmItem destructor called, refCount"<<getRefCount()<<std::endl;
-	if(getRefCount()<1){
-	  if(value !=NULL && proc != NULL && SaxonProcessor::jvmCreatedCPP>0) {
-			SaxonProcessor::sxn_environ->env->DeleteGlobalRef(value->xdmvalue);
-	  }
-	  free(value);
-	  if(stringValue.empty()) {
-	    stringValue.clear();
-	  }
-        }
-    }
+    virtual ~XdmItem();
 
-virtual void incrementRefCount() {
-		refCount++;
-		//std::cerr<<"refCount-inc-xdmItem="<<refCount<<" ob ref="<<(this)<<std::endl;
-	}
+    virtual void incrementRefCount();
 
-virtual void decrementRefCount() {
-		if (refCount > 0)
-			refCount--;
-		//std::cerr<<"refCount-dec-xdmItem="<<refCount<<" ob ref="<<(this)<<std::endl;
-	}
-    
+    virtual void decrementRefCount();
+
+    /**
+     * Determine whether the item is an atomic value or some other type of item
+     *
+     * @return true if the item is an atomic value, false if it is a node or a function (including maps and arrays)
+     */
     virtual bool isAtomic();
 
+
+    /**
+     * Determine whether the item is a node or some other type of item
+     *
+     * @return true if the item is a node, false if it is an atomic value or a function (including maps and arrays)
+     */
     virtual bool isNode();
 
+    /**
+     * Determine whether the item is a function or some other type of item
+     *
+     * @return true if the item is a Xdm function item, false if it is an atomic value or a function (including maps and arrays)
+     */
     virtual bool isFunction();
 
     /**
@@ -78,7 +76,7 @@ virtual void decrementRefCount() {
 
  /**
      * Get the first item in the sequence
-     * @return XdmItem or null if sequence is empty
+     * @return XdmItem or nullptr if sequence is empty
      */
 	XdmItem * getHead();
 
@@ -87,9 +85,9 @@ virtual void decrementRefCount() {
      *
      * @param n the item that is required, counting the first item in the sequence as item zero
      * @return the n'th item in the sequence making up the value, counting from zero
-     * return NULL  if n is less than zero or greater than or equal to the number
+     * return nullptr  if n is less than zero or greater than or equal to the number
      *                                    of items in the value
-     * return NULL if the value is lazily evaluated and the delayed
+     * return nullptr if the value is lazily evaluated and the delayed
      *                                    evaluation fails with a dynamic error.
      */
 	XdmItem * itemAt(int n);

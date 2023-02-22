@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2020 Saxonica Limited.
+// Copyright (c) 2021 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 #ifndef SAXON_PROCESSOR_H
 #define SAXON_PROCESSOR_H
+
 
 #if defined __linux__ || defined __APPLE__
 
@@ -25,6 +26,9 @@
 #define CVERSION "1.3.0"
 #define CVERSION_API_NO 130
 
+
+
+
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -36,12 +40,36 @@
 #include "SaxonCXPath.h"
 #include "XsltProcessor.h"
 #include "Xslt30Processor.h"
+#include "XsltExecutable.h"
+#include "DocumentBuilder.h"
 #include "XQueryProcessor.h"
 #include "XPathProcessor.h"
 #include "SchemaValidator.h"
 #include "SaxonApiException.h"
 //#include "com_saxonica_functions_extfn_PhpCall.h"
 //#include "com_saxonica_functions_extfn_PhpCall_PhpFunctionCall.h"
+//#define MEM_DEBUG
+#if defined MEM_DEBUG
+
+
+#include <algorithm>
+#include <cstdlib>
+#include <new>
+
+static std::vector<void*> myAlloc;
+
+void* newImpl(std::size_t sz,char const* file, int line);
+
+void* operator new(std::size_t sz,char const* file, int line);
+
+void* operator new [](std::size_t sz,char const* file, int line);
+
+void operator delete(void* ptr) noexcept;
+
+void operator delete(void*, std::size_t) noexcept;
+
+#endif
+
 
 class XsltProcessor;
 
@@ -69,11 +97,12 @@ class XdmMap;
 
 class XsltExecutable;
 
+class DocumentBuilder;
+
+class SaxonApiException;
+
 
 // The Saxon XSLT interface class
-
-//std::mutex mtx;
-
 
 typedef struct {
     jobjectArray stringArray;
@@ -91,6 +120,8 @@ typedef struct {
  */
 class SaxonProcessor {
 
+    friend class DocumentBuilder;
+
     friend class XsltProcessor;
 
     friend class Xslt30Processor;
@@ -106,6 +137,14 @@ class SaxonProcessor {
     friend class XdmValue;
 
     friend class XdmAtomicValue;
+
+    friend class XdmFunctionItem;
+
+    friend class XdmNode;
+
+    friend class XdmMap;
+
+    friend class XdmArray;
 
 public:
 
@@ -147,10 +186,14 @@ public:
     ~SaxonProcessor();
 
 
-    //! Get the Processor object. Method used in Python
-    /* SaxonProcessor * getProcessor(){
-     return this;
-     }*/
+    const char * getErrorMessage();
+
+    /**
+     * Create a DocumentBuilder. A DocumentBuilder is used to load source XML documents.
+     *
+     * @return a newly created DocumentBuilder
+     */
+    DocumentBuilder * newDocumentBuilder();
 
     /*!
 
@@ -267,8 +310,6 @@ public:
     */
     XdmAtomicValue *makeAtomicValue(const char *type, const char *value);
 
-#if CVERSION_API_NO >= 123
-
     /**
         * Make an XdmArray whose members are from string representation
         * @param input the input array of booleans
@@ -310,8 +351,6 @@ public:
     XdmMap *makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap);
 
 
-#endif
-
     /**
     * Get the string representation of the XdmValue.
     * @return char array
@@ -320,18 +359,21 @@ public:
 
     /**
      * Parse a lexical representation of the source document and return it as an XdmNode
+     TODO - parser options need adding. Make validator part of the options.
     */
-    XdmNode *parseXmlFromString(const char *source);
+    XdmNode *parseXmlFromString(const char *source, SchemaValidator * validator = nullptr);
 
     /**
      * Parse a source document file and return it as an XdmNode.
+     TODO - parser options need adding
     */
-    XdmNode *parseXmlFromFile(const char *source);
+    XdmNode *parseXmlFromFile(const char *source, SchemaValidator * validator = nullptr);
 
     /**
      * Parse a source document available by URI and return it as an XdmNode.
+     TODO - parser options need adding
     */
-    XdmNode *parseXmlFromUri(const char *source);
+    XdmNode *parseXmlFromUri(const char *source, SchemaValidator * validator = nullptr);
 
     int getNodeKind(jobject);
 
@@ -378,21 +420,21 @@ public:
 
 
     /**
-     * set saxon resources directory
-     * @deprecated - It is no longer required to explicitly specifiy the resource directory
+     * get saxon resources directory
     */
-    void setResourcesDirectory(const char *dir){}
+   const char * getResourcesDirectory();
+
+
+    /**
+     * set saxon resources directory
+    */
+   void setResourcesDirectory(const char* dir);
 
     /**
      * set catalog to be used in Saxon
     */
     void setCatalog(const char *catalogFile, bool isTracing);
 
-    /**
-     * get saxon resources directory
-     * @deprecated - It is no longer required to explicitly specifiy the resource directory
-    */
-    const char * getResourcesDirectory(){}
 
     /**
      * Set a configuration property specific to the processor in use. 
@@ -454,7 +496,7 @@ public:
                 gMethods = new JNINativeMethod[nativeMethodVect.size()];
             }
             return registerNativeMethods(sxn_environ->env, "com/saxonica/functions/extfn/CppCall$PhpFunctionCall",
-                                         gMethods, sizeof(gMethods) / sizeof(gMethods[0]));
+                                         gMethods, nativeMethodVect.size());
 
 
         }
@@ -485,6 +527,8 @@ public:
 
 
 
+
+
 //	XPathEngine
 //	XQueryEngine
 //	SchemaManager
@@ -494,6 +538,10 @@ public:
     static sxnc_environment *sxn_environ;
     std::string cwd; /*!< current working directory */
     jobject proc; /*!< Java Processor object */
+
+
+
+    static void getInfo();
 
     /*static JavaVM *jvm;*/
 
@@ -520,20 +568,25 @@ protected:
 
 private:
 
+    void createException(const char * message=nullptr);
+
 
     void applyConfigurationProperties();
 
     // Saxon/C method for internal use
     static JParameters
-    createParameterJArray(std::map<std::string, XdmValue *> parameters, std::map<std::string, std::string> properties);
+    createParameterJArray(std::map<std::string, XdmValue *> parameters, std::map<std::string, std::string> properties, int additions = 0);
 
     static JParameters createParameterJArray2(std::map<std::string, XdmValue *> parameters);
 
     static jobjectArray createJArray(XdmValue **values, int length);
 
-    static const char *checkException(jobject cpp);
+    static const char *checkException();
 };
 
+
 //===============================================================================================
+
+
 
 #endif /* SAXON_PROCESSOR_H */

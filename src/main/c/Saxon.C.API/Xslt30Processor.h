@@ -25,6 +25,8 @@ class XdmNode;
  */
 class Xslt30Processor {
 
+    friend class XsltExecutable;
+
 public:
 
     //! Default constructor.
@@ -90,10 +92,7 @@ public:
      * to another.
      *
      * @param name  the name of the stylesheet parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name"
-     * @param value the value of the stylesheet parameter, or null to clear a previously set value
-     * @param _static For static (compile-time) parameters we set this flag to true, which means the parameter is
-     * must be set on the XsltCompiler object, prior to stylesheet compilation. The default is false. Non-static parameters
-     * may also be provided.
+     * @param value the value of the stylesheet parameter, or nullptr to clear a previously set value
      */
     void setParameter(const char* name, XdmValue*value);
 
@@ -155,15 +154,6 @@ public:
 	delete [] arr;
     }
 
-    /**
-     * This method gives users the option to switch on or off the <code>xsl:message</code> feature. It is also possible
-     * to send the <code>xsl:message</code> outputs to file given by file name.
-     * @param show - boolean to indicate if xsl:message should be outputted. Default is on.
-     * @param  filename - If the filename argument is present then the xsl:message output is appended to the given
-     *                    filename with location cwd+filename
-     */
-    void setupXslMessage(bool show, const char* filename=NULL);
-
 
 
       //!Perform a one shot transformation.
@@ -171,7 +161,7 @@ public:
      * The result is stored in the supplied outputfile.
      *
      * @param sourcefile - The file name of the source document
-     * @param stylesheetfile - The file name of the stylesheet document. If NULL the most recently compiled stylesheet is used
+     * @param stylesheetfile - The file name of the stylesheet document. If nullptr the most recently compiled stylesheet is used
      * @param outputfile - The file name where results will be stored
      */
     void transformFileToFile(const char* sourcefile, const char* stylesheetfile, const char* outputfile); 
@@ -181,7 +171,7 @@ public:
      * The result is returned as a string
      *
      * @param sourcefile - The file name of the source document
-     * @param stylesheetfile - The file name of the stylesheet document. If NULL the most recently compiled stylesheet is used
+     * @param stylesheetfile - The file name of the stylesheet document. If nullptr the most recently compiled stylesheet is used
      * @return char array - result of the transformation
      */
     const char * transformFileToString(const char* sourcefile, const char* stylesheetfile);
@@ -190,7 +180,7 @@ public:
      * Perform a one shot transformation. The result is returned as an XdmValue
      *
      * @param sourcefile - The file name of the source document
-     * @param stylesheetfile - The file name of the stylesheet document. If NULL the most recently compiled stylesheet is used
+     * @param stylesheetfile - The file name of the stylesheet document. If nullptr the most recently compiled stylesheet is used
      * @return XdmValue - result of the transformation
      */
     XdmValue * transformFileToValue(const char* sourcefile, const char* stylesheetfile);
@@ -279,11 +269,13 @@ public:
     bool exceptionOccurred();
 
 
-     //! Check for exception thrown.
-	/**
-	* @return cha*. Returns the exception message if thrown otherwise return NULL
-	*/
-    const char* checkException();
+    //! Get the SaxonApiException object created when we have an error
+    /**
+     * After the execution of the processor if there is an error, then a SaxonApiException is created.
+     * NULL returned if there is no error.
+     * @return SaxomApiException object of the exception thrown.
+     */
+    SaxonApiException * getException();
 
 
      //! Clear any exception thrown
@@ -306,14 +298,22 @@ public:
 
 
 
+
+
+
 private:
+
+    void createException(const char * message=nullptr);
+
 	SaxonProcessor* proc;/*! */
 	jclass  cppClass;
 	jobject cppXT;
     std::string cwdXT; /*!< current working directory */
-	bool tunnel, jitCompilation;
+	bool jitCompilation;
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
     SaxonApiException * exception;
+
+
 };
 
 

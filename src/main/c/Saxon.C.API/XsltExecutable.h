@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Saxonica Limited.
+// Copyright (c) 2021 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -29,7 +29,8 @@ class XdmArray;
  */
 class XsltExecutable {
 
-friend class XsltProcessor;
+friend class Xslt30Processor;
+
 
 public:
 
@@ -76,12 +77,25 @@ public:
     void setGlobalContextFromFile(const char * filename);
 
 
-    //! Create a clone object of this Xslt30Processor object
+    //! Create a clone object of this XsltExecutable object
     /**
      *
      * @return
      */
     XsltExecutable *clone();
+
+
+    //!Set the initial mode for the transformation
+    /**
+     *
+     * @param modeName the EQName of the initial mode. Two special values are recognized, in the
+     *                 reserved XSLT namespace:
+     *                 xsl:unnamed to indicate the mode with no name, and xsl:default to indicate the
+     *                 mode defined in the stylesheet header as the default mode.
+     *                 The value null also indicates the default mode (which defaults to the unnamed
+     *                 mode, but can be set differently in an XSLT 3.0 stylesheet).
+     */
+    void setInitialMode(const char * modeName);
 
 
     //!The initial value to which templates are to be applied (equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>)
@@ -122,6 +136,14 @@ public:
     void setParameter(const char* name, XdmValue * value);
 
 
+    /**
+    *   Return the result-documents resulting from the execution of the stylesheet.
+    *   Null is returned if the user has not enabled this feature via the method setupResultDocumentHandler
+    *   @return map of result-document as a document uri, XdmNode value pair.
+    */
+    std::map<std::string,XdmNode*>& getResultDocuments();
+
+
 
     /**
      * Get a parameter value by name
@@ -138,6 +160,17 @@ public:
      * @return bool - outcome of the romoval
      */
     bool removeParameter(const char* name);
+
+
+
+
+    /**
+     * Remove a property (name, value) pair from the executable
+     *
+     * @param name  the name of the property to be removed
+     * @return bool - outcome of the romoval
+     */
+    bool removeProperty(const char* name);
 
     /**
      * Set a property specific to the processor in use.
@@ -241,15 +274,15 @@ public:
      * @param  filename - If the filename argument is present then the xsl:message output is appended to the given
      *                    filename with location cwd+filename
      */
-    void setupXslMessage(bool show, const char* filename=nullptr);
+    void setSaveXslMessage(bool show, const char* filename=nullptr);
 
-
-
-    /**
-    * Get the messages written using the <code>xsl:message</code> instruction
-    * @return XdmValue - Messages returned as a sequence of XdmNode objects within an XdmValue object.
+   /*
+     * When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
+     * via a user defined std::map object where we have the pair document URI and XdmNode object.
+     * @param 
+     * @param resultMap - User defined map object which is used to save the result documents from the transformation
     */
-    XdmValue * getXslMessages();
+    void setSaveResultDocument(bool flag);
 
 
     /**
@@ -377,8 +410,7 @@ public:
     * @param arguments - Pointer array of XdmValue object - he values of the arguments to be supplied to the function. These
     *                    will be converted if necessary to the type as defined in the function signature, using
     *                    the function conversion rules.
-    * @param argument_length - the Coutn of arguments objects in the array
-    * @param outputfile - The file name where results will be stored,
+    * @param argument_length - the Count of arguments objects in the array
     */
     XdmValue * callFunctionReturningValue(const char* functionName, XdmValue ** arguments, int argument_length);
 
@@ -392,7 +424,7 @@ public:
      * @return char*. Pointer to Array of chars. Result returned as a string.
      *
      */
-    const char * transformToString(XdmNode * source);
+    const char * transformToString(XdmNode * source=nullptr);
 
     //! Execute transformation to Xdm Value. Properties supplied in advance.
     /**
@@ -401,7 +433,7 @@ public:
      * @return as an XdmValue.
      *
      */
-    XdmValue * transformToValue(XdmNode * source);
+    XdmValue * transformToValue(XdmNode * source=nullptr);
 
     //! Execute transformation to file. Properties supplied in advance.
     /**
@@ -412,7 +444,7 @@ public:
      *
 
      */
-    void transformToFile(XdmNode * source);
+    void transformToFile(XdmNode * source=nullptr);
 
     /**
      * Checks for pending exceptions without creating a local reference to the exception object
@@ -423,36 +455,15 @@ public:
 
 
 
-    //! Check for exception thrown.
+    //! Check for exception thrown and return the SaxonApiException object.
     /**
-    * @return cha*. Returns the exception message if thrown otherwise return nullptr
+    * @return SaxonApiException. Returns the exception message if thrown otherwise return nullptr
     */
     SaxonApiException* getException();
 
 
      //! Clear any exception thrown
     void exceptionClear();
-
-     //!Get number of errors reported during execution or evaluate of stylesheet
-    /**
-     * A transformation may have a number of errors reported against it.
-     * @return int - Count of the exceptions recorded against the transformation
-    */
-    //int exceptionCount();
-
-     //! Get the ith error message if there are any error
-    /**
-     * A transformation may have a number of errors reported against it.
-     * @return char* - The message of the i'th exception
-    */
-    const char * getErrorMessage();
-
-     //! Get the ith error code if there are any error
-    /**
-     * A transformation may have a number of errors reported against it.
-     * @return char* - The error code of the i'th exception. The error code are related to the specific specification
-    */
-    const char * getErrorCode();
 
 
 
@@ -468,7 +479,7 @@ private:
       @param proc - Supplied pointer to the SaxonProcessor object
       cwd - The current working directory
     */
-    XsltExecutable(jobject exObject, std::string cwd="");
+    XsltExecutable(jobject exObject, std::string cwd, std::string resources);
 
 	/**
 	 * Xslt30Processor copy constructor.
@@ -478,15 +489,15 @@ private:
 
 
     jclass  cppClass;
-    jclass messageListenerClass;
-	jobject executableObject, selection, saxonMessageListenerObj;
+    jclass messageListenerClass, resultDocumentClass;
+	jobject executableObject, selection, saxonMessageListenerObj, saxonResultDocObj;
 	XdmValue * selectionV;
     std::string cwdXE; /*!< current working directory */
+    std::string resources_dir; /*!< current Saxon resources directory */
 	bool tunnel, jitCompilation;
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
-
 	std::map<std::string,std::string> properties; /*!< map of properties used for the transformation as (string, string) pairs */
-
+    std::map<std::string,XdmNode*> resultDocumentMap;
 };
 
 

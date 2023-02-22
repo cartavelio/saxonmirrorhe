@@ -2,6 +2,10 @@
 #include "XdmAtomicValue.h"
 #include <map>
 
+#ifdef MEM_DEBUG
+#define new new(__FILE__, __LINE__)
+#endif
+
 
 XdmMap::XdmMap(): XdmFunctionItem() {
 
@@ -37,7 +41,7 @@ XdmMap::XdmMap(jobject obj): XdmFunctionItem(obj) {}
     } else {
     			jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbmapID, ((XdmItem *)key)->getUnderlyingValue()));
     			if(valueObj) {
-    				XdmValue * newValue = new XdmValue((proc == nullptr ? nullptr : proc));
+    				XdmValue * newValue = new XdmValue();
     				newValue->addUnderlyingValue(valueObj);
     				return newValue;
     			}
@@ -63,7 +67,7 @@ XdmMap::XdmMap(jobject obj): XdmFunctionItem(obj) {}
                 jobject strObj = getJavaStringValue(SaxonProcessor::sxn_environ, key);
         		jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbsmapID, strObj));
         		if(valueObj) {
-        			XdmValue * newValue = new XdmValue((proc == nullptr ? nullptr : proc));
+        			XdmValue * newValue = new XdmValue();
        				newValue->addUnderlyingValue(valueObj);
        				return newValue;
        			}
@@ -89,7 +93,7 @@ XdmMap::XdmMap(jobject obj): XdmFunctionItem(obj) {}
         } else {
         		jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbimapID, key));
         		if(valueObj) {
-        			XdmValue * newValue = new XdmValue((proc == nullptr ? nullptr : proc));
+        			XdmValue * newValue = new XdmValue();
        				newValue->addUnderlyingValue(valueObj);
        				return newValue;
        			}
@@ -115,7 +119,7 @@ XdmMap::XdmMap(jobject obj): XdmFunctionItem(obj) {}
         } else {
         		jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbdmapID, key));
         		if(valueObj) {
-        			XdmValue * newValue = new XdmValue((proc == nullptr ? nullptr : proc));
+        			XdmValue * newValue = new XdmValue();
        				newValue->addUnderlyingValue(valueObj);
        				return newValue;
        			}
@@ -141,7 +145,7 @@ XdmMap::XdmMap(jobject obj): XdmFunctionItem(obj) {}
         } else {
         		jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbdmapID, key));
         		if(valueObj) {
-        			XdmValue * newValue = new XdmValue((proc == nullptr ? nullptr : proc));
+        			XdmValue * newValue = new XdmValue();
        				newValue->addUnderlyingValue(valueObj);
        				return newValue;
        			}
