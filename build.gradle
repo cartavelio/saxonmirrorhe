@@ -90,6 +90,7 @@ ext {
   csrid = null
   csplatform = null
   c_sendria = "sendriasmtp"
+  codesign_dylib = false
 }
 
 // Find dotnet

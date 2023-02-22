@@ -99,6 +99,26 @@ task rejar_Xerces(
 
 // ============================================================
 
+task check_codesign_dylib(
+  type: Exec,
+  description: "Check to see if we can and should sign the .dylib file"
+) {
+  def identities = new ByteArrayOutputStream();
+
+  if (systemOs.isMacOsX()) {
+    commandLine "security", "find-identity", "-p", "codesigning", "-v"
+  } else {
+    commandLine "echo", "Code signing only applies to macOS"
+  }
+
+  standardOutput = identities
+
+  doLast {
+    // 2RW84ZZ739 is the ID of the Saxonica Limited signing certificate
+    codesign_dylib = identities.toString("utf-8").contains('2RW84ZZ739')
+  }
+}
+
 ["h", "p", "e"].each { initial ->
   def release = initial + "e"
   def Release = initial.toUpperCase() + "e"
@@ -314,13 +334,35 @@ task rejar_Xerces(
     }
 
     task "${release}c_releaseSetup"(
-      type: Exec,
-      dependsOn: ["${release}c_jet", "${release}c_copyAncillary"],
+      dependsOn: ["${release}c_jet", "${release}c_copyAncillary", "check_codesign_dylib"],
       description: "Make the ${RELEASE} release package for SaxonC"
     ) {
-      commandLine "${excelsiorJetHome}/bin/xpack",
-        "-source", "${buildDir}/c/${release}c",
-        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}"
+      inputs.dir "${buildDir}/c/${release}c"
+      outputs.dir "${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}"
+
+      doLast {
+        exec {
+          commandLine "${excelsiorJetHome}/bin/xpack",
+            "-source", "${buildDir}/c/${release}c",
+            "-target", "${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}"
+        }
+      }
+
+      if (systemOs.isMacOsX()) {
+        doLast {
+          exec {
+            workingDir "${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}"
+            if (codesign_dylib) {
+              commandLine 'codesign', '--force', '--options', 'runtime',
+                '--entitlements', '../../../tools/saxon-cs/entitlements.plist',
+                '--deep', '--sign', 'Developer ID Application: Saxonica Limited',
+                '--timestamp', "libsaxon${release}c.dylib"
+            } else {
+              commandLine 'echo', 'Code signing is not available'
+            }
+          }
+        }
+      }
     }
 
     task "${release}cRelease"(
