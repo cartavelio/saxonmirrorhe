@@ -646,7 +646,7 @@ public class GlobalVariable extends Actor
                 if (_indexed) {
                     result = c2.getConfiguration().makeSequenceExtent(select, FilterExpression.FILTERED, c2);
                 } else {
-                    result = SequenceTool.toGroundedValue(select.iterate(c2));
+                    result = ExpressionTool.eagerEvaluate(select, c2);
                 }
                 c2.setTemporaryOutputState(savedOutputState);
                 return result;
