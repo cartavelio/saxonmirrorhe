@@ -79,12 +79,14 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption("version", SequenceType.SINGLE_STRING);
 
         op.addAllowedOption(sx("attribute-order"), SequenceType.ATOMIC_SEQUENCE);
+        op.addAllowedOption(sx("canonical"), SequenceType.SINGLE_BOOLEAN);
         //eqnames
         op.addAllowedOption(sx("character-representation"), SequenceType.SINGLE_STRING); //string
         op.addAllowedOption(sx("double-space"), listOfQNames);
         //eqnames
         op.addAllowedOption(sx("indent-spaces"), SequenceType.SINGLE_INTEGER); //integer
         op.addAllowedOption(sx("line-length"), SequenceType.SINGLE_INTEGER); //integer
+        op.addAllowedOption(sx("newline"), SequenceType.SINGLE_STRING); //integer
         //requiredTypes.put("next-in-chain", SequenceType.SINGLE_STRING); //uri
         op.addAllowedOption(sx("property-order"), SequenceType.STRING_SEQUENCE);
         op.addAllowedOption(sx("recognize-binary"), SequenceType.SINGLE_BOOLEAN); //boolean
