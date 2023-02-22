@@ -7,7 +7,7 @@
 
 package net.sf.saxon.ma.arrays;
 
-import net.sf.saxon.ma.parray.ImmList;
+import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
@@ -21,13 +21,13 @@ import java.util.Arrays;
 
 public class ImmutableArrayItem extends AbstractArrayItem {
 
-    private final ImmList<GroundedValue> vector;
+    private final ZenoChain<GroundedValue> vector;
 
     public ImmutableArrayItem(SimpleArrayItem other) {
-        this.vector = ImmList.fromList(other.getMembers());
+        this.vector = new ZenoChain<GroundedValue>().addAll(other.getMembers());
     }
 
-    private ImmutableArrayItem(ImmList<GroundedValue> vector) {
+    private ImmutableArrayItem(ZenoChain<GroundedValue> vector) {
         this.vector = vector;
     }
     
@@ -53,7 +53,7 @@ public class ImmutableArrayItem extends AbstractArrayItem {
      */
     @Override
     public ArrayItem put(int index, GroundedValue newValue)  {
-        ImmList<GroundedValue> v2 = vector.replace(index, newValue);
+        ZenoChain<GroundedValue> v2 = vector.replace(index, newValue);
         return v2 == vector ? this : new ImmutableArrayItem(v2);
     }
 
@@ -67,7 +67,7 @@ public class ImmutableArrayItem extends AbstractArrayItem {
      */
     @Override
     public ArrayItem insert(int position, GroundedValue member) {
-        ImmList<GroundedValue> v2 = vector.insert(position, member);
+        ZenoChain<GroundedValue> v2 = vector.insert(position, member);
         return new ImmutableArrayItem(v2);
     }
 
@@ -127,13 +127,13 @@ public class ImmutableArrayItem extends AbstractArrayItem {
         if (other.arrayLength() == 0) {
             return this;
         }
-        ImmList<GroundedValue> v1;
+        ZenoChain<GroundedValue> otherChain;
         if (other instanceof ImmutableArrayItem) {
-            v1 = ((ImmutableArrayItem)other).vector;
+            otherChain = ((ImmutableArrayItem) other).vector;
         } else {
-            v1 = new ImmutableArrayItem((SimpleArrayItem)other).vector;
+            otherChain = new ImmutableArrayItem((SimpleArrayItem) other).vector;
         }
-        ImmList<GroundedValue> v2 = vector.appendList(v1);
+        ZenoChain<GroundedValue> v2 = vector.addAll(otherChain);
         return new ImmutableArrayItem(v2);
     }
 
@@ -146,7 +146,7 @@ public class ImmutableArrayItem extends AbstractArrayItem {
      */
     @Override
     public ArrayItem remove(int index) {
-        ImmList<GroundedValue> v2 = vector.remove(index);
+        ZenoChain<GroundedValue> v2 = vector.remove(index);
         return v2 == vector ? this : new ImmutableArrayItem(v2);
     }
 
@@ -166,7 +166,7 @@ public class ImmutableArrayItem extends AbstractArrayItem {
             p[i++] = ii.next();
         }
         Arrays.sort(p);
-        ImmList<GroundedValue> v2 = vector;
+        ZenoChain<GroundedValue> v2 = vector;
         for (int j=p.length-1; j>=0; j--) {
             v2 = v2.remove(p[j]);
         }
