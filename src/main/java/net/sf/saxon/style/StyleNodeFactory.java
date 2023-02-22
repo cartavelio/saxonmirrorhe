@@ -314,6 +314,10 @@ public class StyleNodeFactory implements NodeFactory {
                 return new XSLApplyImports();
             case StandardNames.XSL_APPLY_TEMPLATES:
                 return new XSLApplyTemplates();
+            case StandardNames.XSL_ARRAY:
+                return new XSLArray();
+            case StandardNames.XSL_ARRAY_MEMBER:
+                return new XSLArrayMember();
             case StandardNames.XSL_ASSERT:
                 return new XSLAssert();
             case StandardNames.XSL_ATTRIBUTE:
