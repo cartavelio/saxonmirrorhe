@@ -24,6 +24,7 @@ public final class LocalOrderComparer implements Comparator<NodeInfo> {
     /**
      * Get an instance of a LocalOrderComparer. The class maintains no state
      * so this returns the same instance every time.
+     * @return an instance of a LocalOrderComparer
      */
 
     /*@NotNull*/

@@ -103,7 +103,7 @@ public class DocumentInstr extends ParentNodeConstructor {
      * on the content of the node
      *
      * @param env the static context
-     * @throws XPathException
+     * @throws XPathException if the check fails
      */
 
     @Override
@@ -210,7 +210,7 @@ public class DocumentInstr extends ParentNodeConstructor {
     /**
      * Copy an expression. This makes a deep copy.
      *
-     * @param rebindings
+     * @param rebindings the rebinding map
      * @return the copy of the original expression
      */
 

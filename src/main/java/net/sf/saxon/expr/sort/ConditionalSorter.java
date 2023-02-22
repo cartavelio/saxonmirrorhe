@@ -211,7 +211,7 @@ public class ConditionalSorter extends Expression {
     /**
      * Copy an expression. This makes a deep copy.
      *
-     * @param rebindings
+     * @param rebindings the rebinding map
      * @return the copy of the original expression
      */
 

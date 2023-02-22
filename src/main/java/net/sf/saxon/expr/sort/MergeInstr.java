@@ -79,6 +79,7 @@ public class MergeInstr extends Instruction {
         /**
          * Create a MergeSource object
          *
+         * @param instruction   the xsl:merge-source instruction
          * @param forEachItem   the expression that selects anchor nodes, one per input sequence
          * @param forEachStream the expression that selects URIs of anchor nodes, one per input sequence
          * @param rSelect       the select expression that selects items for the merge inputs, evaluated one per anchor node

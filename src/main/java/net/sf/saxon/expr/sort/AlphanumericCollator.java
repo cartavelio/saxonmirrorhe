@@ -61,8 +61,8 @@ public class AlphanumericCollator implements StringCollator {
      * Compare two objects.
      *
      * @return &lt;0 if a&lt;b, 0 if a=b, &gt;0 if a&gt;b
-     * @param cs1
-     * @param cs2
+     * @param cs1 the first string
+     * @param cs2 the second string
      */
 
     @Override
@@ -126,9 +126,9 @@ public class AlphanumericCollator implements StringCollator {
     }
 
     /**
-     * Get a collation key for comparing two Strings. The essential property of collation keys
-     * is that if two values are equal under the collation, then the collation keys are
-     * compare correctly under the equals() method.
+     * Get a collation key for a String. The essential property of collation keys
+     * is that if (and only if) two strings are equal under the collation, then
+     * comparing the collation keys using the equals() method must return true.
      * @param cs the string whose collation key is required
      */
 

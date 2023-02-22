@@ -96,7 +96,7 @@ public class SortKeyDefinitionList extends PseudoExpression implements Iterable<
     /**
      * Copy this pseudo-expression
      * @return a deep copy
-     * @param rebindings
+     * @param rebindings the rebinding map
      */
 
     @Override

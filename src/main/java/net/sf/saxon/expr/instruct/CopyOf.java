@@ -521,7 +521,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
      * Process this xsl:copy-of instruction
      *
      *
-     * @param out
+     * @param out     the destination for the result
      * @param context the dynamic context for the transformation
      * @return null - this implementation of the method never returns a TailCall
      */

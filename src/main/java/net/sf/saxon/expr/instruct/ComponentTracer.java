@@ -144,7 +144,7 @@ public class ComponentTracer extends Instruction {
      * @param output the destination for the result
      * @param context the dynamic execution context
      * @return either null, or a tail call that the caller must invoke on return
-     * @throws XPathException
+     * @throws XPathException if any failure occurs
      *
      */
     @Override

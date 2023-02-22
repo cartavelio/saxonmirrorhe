@@ -88,6 +88,8 @@ public class OriginalFunction extends AbstractFunction implements Function, Cont
 
     /**
      * Get the name of the package containing the function
+     *
+     * @return the name of the package containing the function
      */
 
     public String getContainingPackageName() {
