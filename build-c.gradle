@@ -213,7 +213,7 @@ task test_jetHome(
       description: "Make the ${RELEASE} release ZIP file for Saxon/C"
     ) {
       from("${buildDir}/releases/libsaxon-${RELEASE}C")
-      archiveFileName = "libsaxon-${RELEASE}C-mac-setup-v${saxonCversion}.zip"
+      archiveFileName = "libsaxon-${RELEASE}C-mac-setup-v${saxonVersion}.zip"
     }
   } else {
     task "${release}c_copyAncillary"(
