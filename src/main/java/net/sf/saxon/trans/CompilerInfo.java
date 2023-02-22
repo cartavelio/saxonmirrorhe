@@ -97,7 +97,7 @@ public class CompilerInfo {
     public void copyFrom(CompilerInfo info) {
         config = info.config;
         uriResolver = info.uriResolver;
-        saxonResourceResolver = info.saxonResourceResolver;
+        commonResourceResolver = info.commonResourceResolver;
         errorReporter = info.errorReporter;
         codeInjector = info.codeInjector;
         recoveryPolicy = info.recoveryPolicy;
@@ -171,13 +171,13 @@ public class CompilerInfo {
     /**
      * Set the resource resolver to be used when resolving external identifiers and URIs.
      *
-     * @param resolver The {@link SaxonResourceResolver} to be used. This is used to resolve external identifiers
+     * @param resolver The {@link CommonResourceResolver} to be used. This is used to resolve external identifiers
      *                 and URIs.
      * @since 11.0
      */
 
-    public void setSaxonResourceResolver(SaxonResourceResolver resolver) {
-        saxonResourceResolver = resolver;
+    public void setSaxonResourceResolver(CommonResourceResolver resolver) {
+        commonResourceResolver = resolver;
     }
 
     /**
@@ -382,11 +382,11 @@ public class CompilerInfo {
     /**
      * Get the resource resolver being used.
      *
-     * @return resolver The {@link SaxonResourceResolver} in use.
+     * @return resolver The {@link CommonResourceResolver} in use.
      * @since 11.0
      */
-    public SaxonResourceResolver getSaxonResourceResolver() {
-        return saxonResourceResolver;
+    public CommonResourceResolver getSaxonResourceResolver() {
+        return commonResourceResolver;
     }
 
     //#if CSHARP==false

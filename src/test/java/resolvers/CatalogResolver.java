@@ -1,8 +1,7 @@
 package resolvers;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.SaxonResourceResolver;
+import net.sf.saxon.lib.CommonResourceResolver;
 import net.sf.saxon.s9api.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,7 +14,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -54,7 +52,7 @@ public class CatalogResolver {
     @Test
     public void xmlResolverParse() {
         Configuration config = new Configuration();
-        SaxonResourceResolver resolver = config.getSaxonResourceResolver();
+        CommonResourceResolver resolver = config.getSaxonResourceResolver();
         try {
             resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
             Processor processor = new Processor(config);
@@ -70,7 +68,7 @@ public class CatalogResolver {
     @Test
     public void xmlResolverUriResolver() {
         Configuration config = new Configuration();
-        SaxonResourceResolver resolver = config.getSaxonResourceResolver();
+        CommonResourceResolver resolver = config.getSaxonResourceResolver();
         try {
             resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
             Processor processor = new Processor(config);
@@ -100,7 +98,7 @@ public class CatalogResolver {
     @Test
     public void xmlResolverStylesheetUriResolver() {
         Configuration config = new Configuration();
-        SaxonResourceResolver resolver = config.getSaxonResourceResolver();
+        CommonResourceResolver resolver = config.getSaxonResourceResolver();
         try {
             resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
             Processor processor = new Processor(config);
@@ -130,7 +128,7 @@ public class CatalogResolver {
     @Test
     public void xmlResolverUnparsedTextUriResolver() {
         Configuration config = new Configuration();
-        SaxonResourceResolver resolver = config.getSaxonResourceResolver();
+        CommonResourceResolver resolver = config.getSaxonResourceResolver();
         try {
             resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
             Processor processor = new Processor(config);
@@ -160,7 +158,7 @@ public class CatalogResolver {
     @Test
     public void xmlResolverModuleUriResolver() {
         Configuration config = new Configuration();
-        SaxonResourceResolver resolver = config.getSaxonResourceResolver();
+        CommonResourceResolver resolver = config.getSaxonResourceResolver();
         try {
             resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
             Processor processor = new Processor(config);
