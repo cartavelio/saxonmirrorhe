@@ -363,11 +363,11 @@ public class XsltCompiler {
     }
 
     /**
-     * Set the XSLT (and XPath) language level to be supported by the processor. This has no effect
-     * from Saxon 9.8: the processor is an XSLT 3.0 processor regardless of the language level
-     * requested.
+     * Set the XSLT (and XPath) language level to be supported by the processor. Set the value to "4.0"
+     * to enable support for experimental features defined in the XSLT 4.0 proposal (which is likely to change
+     * before it stabilizes).
      *
-     * @param version the language level to be supported. The value is ignored.
+     * @param version the language level to be supported. The values "3.0" and "4.0" are recognized
      * @throws IllegalArgumentException if the value is not equal to 3.0 or 4.0
      * @since 9.3. From 11.0, accepts the values "3.0" and "4.0"
      */
