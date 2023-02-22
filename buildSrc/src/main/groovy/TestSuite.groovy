@@ -167,6 +167,8 @@ class TestSuite {
         }
       }
 
+      testargs += testOptions
+
       doFirst {
         if (this.debugExec) {
           println("Running ${options['class']} ${testargs.join(' ')}")
