@@ -876,8 +876,9 @@ task copy_prod_desc_pdf(
 // ============================================================
 
 task saxonc_documentation(
-        dependsOn: ["copy_saxonc_doc", "copy_saxonc_css", "saxonc_doc_sef"],
-        description: "Build the SaxonC documentation for website"
+  dependsOn: ["copy_saxonc_doc", "copy_saxonc_css", "saxonc_doc_sef",
+              "saxonc_api_doc"],
+  description: "Build the SaxonC documentation for website"
 ) {
   // Just a place to hang dependencies
 }
@@ -894,8 +895,8 @@ task copy_saxonc_doc(
 }
 
 task copy_saxonc_css(
-        type: Copy,
-        description: "Copy SaxonC documentation CSS"
+  type: Copy,
+  description: "Copy SaxonC documentation CSS"
 ) {
   into "${buildDir}/website/saxon-c/documentation11"
   from "${projectDir}/src/docs/saxonc-doc/jstree.css"
@@ -918,6 +919,31 @@ task saxonc_doc_sef(
           "-export:${buildDir}/website/saxon-c/documentation11/xsl/jstree.sef.json",
           "-target:JS", "-nogo", "-relocate:on", "-ns:##html5",
           "--generateByteCode:off"
+}
+
+task saxonc_api_doc(
+        dependsOn: ["copy_saxonc_api_doc", "copy_saxonc_python_api_doc"],
+        description: "Build the SaxonC API documentation for website"
+) {
+  // Just a place to hang dependencies
+}
+
+task copy_saxonc_api_doc(
+  type: Copy,
+  dependsOn: ["saxonc_doxygen"],
+  description: "Copy generated SaxonC API documentation"
+) {
+  into "${buildDir}/website/saxon-c/doc11"
+  from "${buildDir}/docbuild/documentation"
+}
+
+task copy_saxonc_python_api_doc(
+        type: Copy,
+        dependsOn: ["saxonc_pydoc3"],
+        description: "Copy generated SaxonC python API documentation"
+) {
+  into "${buildDir}/website/saxon-c/doc11/html"
+  from "${buildDir}/docbuild/Saxon.C.API/python-saxon/saxonc.html"
 }
 
 // ============================================================
