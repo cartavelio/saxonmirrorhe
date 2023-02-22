@@ -389,15 +389,15 @@ PHP_METHOD(SchemaValidator, exceptionOccurred)
 PHP_METHOD(SchemaValidator, getErrorCode)
 {
     SchemaValidator *schemaValidator;
-    long index;
+    /*long index;
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "l", &index) == FAILURE) {
         RETURN_NULL();
-    }
+    } */
     zend_object* pobj = Z_OBJ_P(getThis());
    schemaValidator_object * obj = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
     schemaValidator = obj->schemaValidator;
     if (schemaValidator != nullptr) {
-        const char * errCode = schemaValidator->getErrorCode((int)index);
+        const char * errCode = schemaValidator->getErrorCode();
         if(errCode != nullptr) {
             //char *str = estrdup(errCode);
             _RETURN_STRING(errCode);
@@ -409,15 +409,15 @@ PHP_METHOD(SchemaValidator, getErrorCode)
 PHP_METHOD(SchemaValidator, getErrorMessage)
 {
     SchemaValidator *schemaValidator;
-    long index;
+    /*long index;
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "l", &index) == FAILURE) {
         RETURN_NULL();
-    }
+    } */
     zend_object* pobj = Z_OBJ_P(getThis());
    schemaValidator_object * obj = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
     schemaValidator = obj->schemaValidator;
     if (schemaValidator != nullptr) {
-        const char * errStr = schemaValidator->getErrorMessage(index);
+        const char * errStr = schemaValidator->getErrorMessage();
         if(errStr != nullptr) {
             //char *str = estrdup(errStr);
             _RETURN_STRING(errStr);

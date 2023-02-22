@@ -215,12 +215,12 @@ void SchemaValidator::exceptionClear(){
 
  }
 
-const char * SchemaValidator::getErrorCode(int i) {
+const char * SchemaValidator::getErrorCode() {
 	if(proc->exception == nullptr) {return nullptr;}
 	return proc->exception->getErrorCode();
 }
 
-const char * SchemaValidator::getErrorMessage(int i ){
+const char * SchemaValidator::getErrorMessage(){
  if(exception == nullptr) {return nullptr;}
  return exception->getMessage();
  }
