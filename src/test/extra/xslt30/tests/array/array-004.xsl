@@ -10,7 +10,7 @@
 
 <xsl:template name="xsl:initial-template">
   <xsl:variable name="a" as="array(*)">
-    <saxon:array>
+    <saxon:array composite="yes">
       <xsl:for-each select="1 to 10">
         <saxon:array-member select=". to .+1"/>
       </xsl:for-each>

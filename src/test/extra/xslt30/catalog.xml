@@ -25,7 +25,6 @@
       <test-set name="optimizer" file="tests/optimizer/_optimizer-test-set.xml"/>
       <test-set name="output-properties" file="tests/output-properties/_output-properties-test-set.xml"/>
       <test-set name="parse-html" file="tests/parse-html/_parse-html-test-set.xml"/>
-      <test-set name="path" file="tests/path/_path-test-set.xml"/>
       <test-set name="query" file="tests/query/_query-test-set.xml"/>
       <test-set name="reflexion" file="tests/reflexion/_reflexion-test-set.xml"/>
       <test-set name="send-mail" file="tests/send-mail/_send-mail-test-set.xml"/>
@@ -40,7 +39,6 @@
       <test-set name="transform" file="tests/transform/_transform-test-set.xml"/>
       <test-set name="tunnel-params" file="tests/tunnel-params/_tunnel-params-test-set.xml"/>
       <test-set name="tuple" file="tests/tuple/_tuple-test-set.xml"/>
-      <test-set name="type-alias" file="tests/type-alias/_type-alias-test-set.xml"/>
       <test-set name="type-annotation" file="tests/type-annotation/_type-annotation-test-set.xml"/>
       <test-set name="union" file="tests/union/_union-test-set.xml"/>
       <test-set name="unparsed-entities" file="tests/unparsed-entities/_unparsed-entities-test-set.xml"/>

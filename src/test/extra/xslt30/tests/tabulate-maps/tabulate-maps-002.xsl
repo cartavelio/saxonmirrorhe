@@ -18,7 +18,7 @@
                <xsl:map>
                   <xsl:map-entry key="'product'" select="current-grouping-key()"/>
                   <xsl:map-entry key="'customers'">
-                     <saxon:array>
+                     <saxon:array composite="yes">
                         <xsl:for-each select="current-group()">
                            <saxon:array-member>
                               <xsl:map>

@@ -8,6 +8,7 @@
       <description>test last-modified() on a relative file URI</description>
       <created by="Michael Kay" on="2014-04-13"/>
       <modified by="Debbie Lockett" on="2016-04-14" change="add alternative result that works for me"/>
+      <modified by="Michael Kay" on="2021-07-27" change="file was touched during repository move"/>
       <dependencies>
          <spec value="XSLT20+"/>
          <feature value="Saxon-PE"/>
@@ -17,7 +18,7 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <assert-xml><![CDATA[<out>2016-08-24T18:06:26+01:00</out>]]></assert-xml>
+         <assert-xml><![CDATA[<out>2021-03-31T18:28:07.555Z</out>]]></assert-xml>
       </result>
    </test-case>
    
