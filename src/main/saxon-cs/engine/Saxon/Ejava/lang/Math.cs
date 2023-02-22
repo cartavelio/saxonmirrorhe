@@ -67,7 +67,19 @@ namespace Saxon.Ejava.lang {
             return SysMath.Asin(x);
         }
         public static double acos(double x) {
+            return SysMath.Acos(x);
+        }
+        public static double atan(double x) {
             return SysMath.Atan(x);
+        }
+        public static double log(double x) {
+            return SysMath.Log(x);
+        }
+        public static double log10(double x) {
+            return SysMath.Log10(x);
+        }
+        public static double exp(double x) {
+            return SysMath.Exp(x);
         }
         public static double sqrt(double x) {
             return SysMath.Sqrt(x);
