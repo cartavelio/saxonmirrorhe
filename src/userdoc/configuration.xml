@@ -96,13 +96,40 @@
             <code>getDefaultStaticQueryContext().setLanguageVersion()</code>.</p>
      
       
-      <p>On command line interfaces such as <code>net.sf.saxon.Transform</code>, configuration
-         options can be supplied using the form <code>--name:value</code>. Here <code>name</code> is
-         the part of the URI after the final "/", for example <code>allowExternalFunctions</code>,
-         and the <code>value</code> must be supplied as a string. In such cases, and in other cases
-         where values must be supplied as strings (for example the
-         <code>xslt/factory/attribute</code> element in Ant), Saxon accepts the strings "true", "1",
-         "yes", "on", or "false", "0", "no", "off", to represent booleans.</p>
+      <p>On command line interfaces such as <code>net.sf.saxon.Transform</code>, there are several ways
+         of setting configuration options:</p>
+         
+         <ul>
+            <li><p>Some options have dedicated command-line arguments, for example <code>-t</code>
+            to switch on high-level progress messages.</p></li>
+            <li><p>Many options can be supplied using the form <code>--name:value</code>. Here <code>name</code> is
+               the part of the URI after the final "/", for example <code>allowExternalFunctions</code>,
+               and the <code>value</code> must be supplied as a string. In such cases, and in other cases
+               where values must be supplied as strings (for example the
+               <code>xslt/factory/attribute</code> element in Ant), Saxon accepts the strings "true", "1",
+               "yes", "on", or "false", "0", "no", "off", to represent booleans.</p></li>
+            <li><p>Options can be included in a configuration file, referenced on the command line using
+               the option <code>-config:filename</code>: for details see 
+               <a class="bodylink" href="/configuration/configuration-file">Configuration file</a>.</p></li>
+            <li><p>The option <code>-init:callback</code> allows reference to user-written code that
+               is called to initialize the configuration programatically.</p>
+                <p class="javaonly">For SaxonJ, the value is the name of a user-written class
+                that implements the interface <code>net.sf.saxon.lib.Initializer</code>.</p>
+               <p class="csonly">For SaxonCS, the value is the filename of an assembly that
+               contains a class that implements the interface <code>Saxon.Api.IProcessorInitializer</code>.</p>
+            </li>
+         </ul>
+         
+         <p class="javaonly">Sometimes Saxon is deeply embedded in some third-party application that
+         does not expose configuration interfaces, for example interfaces needed to enable the use
+         of Saxon extensions in a stylesheet or query. For this scenario, Saxon recognizes the
+         Java system property <code>SAXON_INITIALIZER</code>: this may be set to the name of a user-written class
+            that implements the interface <code>net.sf.saxon.lib.Initializer</code>, which is called when
+         a Saxon <code>Configuration</code> is created. </p>
+      
+      <aside class="javaonly">Some applications that embed Saxon might wish to suppress this mechanism, to ensure that
+      configuration settings cannot be subverted in this way. This is easily achieved by calling
+      <code>System.clearProperty("SAXON_INITIALIZER")</code>.</aside>
 
       
 
