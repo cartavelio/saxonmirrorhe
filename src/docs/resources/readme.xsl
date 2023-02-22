@@ -26,7 +26,7 @@ Directories
 
 1. doc
 ------
-Contains the Saxon documentation. Open index.html in a browser as a starting point.
+Contains the Saxon API documentation. Open index.html in a browser as a starting point.
 
 2. drivers
 ----------
@@ -77,7 +77,7 @@ Directories
 
 1. doc
 ------
-Contains the Saxon documentation. Open index.html in a browser as a starting point.
+Contains the Saxon API documentation. Open index.html in a browser as a starting point.
       
 2. notices
 ----------
