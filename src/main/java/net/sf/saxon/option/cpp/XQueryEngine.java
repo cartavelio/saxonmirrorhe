@@ -83,7 +83,7 @@ public class XQueryEngine extends SaxonCAPI {
 
 
 
-    Map<String, Object> convertArraysToMap(XQueryCompiler compiler, Serializer serializer, String[] params, Object[] values, Map<QName, XdmValue> parameters, Properties props) throws SaxonApiException {
+    Map<String, Object> convertArraysToMap(XQueryCompiler compiler, String[] params, Object[] values, Map<QName, XdmValue> parameters, Properties props) throws SaxonApiException {
             Map<String, Object> map = new HashMap();
 
             if (params == null || values == null) {
@@ -183,7 +183,8 @@ public class XQueryEngine extends SaxonCAPI {
         XQueryCompiler compiler = processor.newXQueryCompiler();
         Map<QName, XdmValue> parameters = new HashMap<>();
         Properties props = new Properties();
-        Map<String, Object> optionsMap = convertArraysToMap(compiler, serializer, params, values, parameters, props);
+
+        Map<String, Object> optionsMap = convertArraysToMap(compiler, params, values, parameters, props);
         //compiler.setErrorListener(errorListener);
         String query = null;
         if (params != null && params.length != values.length) {
@@ -263,20 +264,19 @@ public class XQueryEngine extends SaxonCAPI {
     }
 
     public void executeQueryToFile(String cwd, String outFilename, String[] params, Object[] values) throws SaxonApiException {
-        try {
-            Serializer serializer = resolveOutputFile(processor, cwd, outFilename);
+            Serializer serializer = null;
+            if(outFilename != null) {
+                serializer = resolveOutputFile(processor, cwd, outFilename);
+            }
             XQueryEvaluator eval = xqueryEvaluator(cwd, params, values,  serializer);
-            if (outFilename != null) {
+            if (serializer != null) {
 
                 eval.run(serializer);
                 return;
+            } else {
+                eval.run();
             }
-            eval.run();
-        } catch (SaxonApiException ex) {
-            SaxonCException saxonException = new SaxonCException(ex);
-            throw ex;
 
-        }
     }
 
     public static void applyXQueryProperties(SaxonCAPI api, String cwd, Serializer serializer, Processor processor, XQueryEvaluator eval, Map<String, Object> optionsMap, Map<QName, XdmValue> parameters, Properties props) throws SaxonApiException {
@@ -293,31 +293,13 @@ public class XQueryEngine extends SaxonCAPI {
         DocumentBuilder builder = processor.newDocumentBuilder();
         if (optionsMap.size() > 0) {
 
-                /*if (params[i].startsWith("!")) {
-                    String name = params[i].substring(1);
-
-                    if(!(values[i] instanceof String)) {
-                        throw new SaxonApiException("Property with name " + name + " has value which is not a string");
-                    }
-
-
-                    Serializer.Property prop = Serializer.Property.get(name);
-                    if (prop == null) {
-                        System.err.println("Property name " + name + " not found");
-                        continue;
-
-                    }
-
-                    props.put(prop.getQName().getClarkName(), values[i]);
-                    if(serializer != null) {
-                        serializer.setOutputProperty(prop, (String) values[i]);
-                    }
-                } else */
 
                 if (optionsMap.containsKey("o")) {
                     serializer = api.resolveOutputFile(processor, cwd, (String) optionsMap.get("o"));
                     eval.setDestination(serializer);
-                } else if (optionsMap.containsKey("dtd")) {
+                }
+
+                if (optionsMap.containsKey("dtd")) {
                     String option = (String) optionsMap.get("dtd");
                     if (option.equals("on")) {
                         builder.setDTDValidation(true);
@@ -325,23 +307,31 @@ public class XQueryEngine extends SaxonCAPI {
                         builder.setDTDValidation(false);
                     }
 
-                } else if (optionsMap.containsKey("s")) {
+                }
+
+                if (optionsMap.containsKey("s")) {
                     source = api.resolveFileToSource(cwd, (String) optionsMap.get("s"));
                     eval.setSource(source);
 
-                } else if (optionsMap.containsKey("extc")) {
+                }
+
+                if (optionsMap.containsKey("extc")) {
                     //extension function library path
                     String libName = (String) optionsMap.get("extc");
                     SaxonCAPI.setLibrary(cwd, libName);
 
 
-                } else if (optionsMap.containsKey("item") ) {
+                }
+
+                if (optionsMap.containsKey("item") ) {
                     Object value = optionsMap.get("item");
                     if (value instanceof XdmItem) {
                         item = (XdmItem) value;
                     }
                     eval.setContextItem(item);
-                } else if (optionsMap.containsKey("node")) {
+                }
+
+                if (optionsMap.containsKey("node")) {
                     Object value = optionsMap.get("node");
                     if (value instanceof XdmItem) {
                         item = (XdmItem) value;

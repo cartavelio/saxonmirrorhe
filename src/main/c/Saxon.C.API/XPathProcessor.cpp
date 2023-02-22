@@ -459,7 +459,6 @@ void XPathProcessor::setParameter(const char * name, XdmValue*value, bool withPa
 	if(value != nullptr){
 		//value->incrementRefCount();
 		int s = parameters.size();
-		std::string skey = (withParam ? "param:" : "")+std::string(name);
 		parameters[skey] = value;
 		if(s == parameters.size()) {
             std::map<std::string, XdmValue*>::iterator it;
@@ -477,8 +476,7 @@ void XPathProcessor::setParameter(const char * name, XdmValue*value, bool withPa
                 }
             }
 		}
-	}
-
+	} 
 }
 
 

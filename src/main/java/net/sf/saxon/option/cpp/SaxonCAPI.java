@@ -746,7 +746,7 @@ public class SaxonCAPI {
             try {
                 return new File(filename);
             }catch(NullPointerException ex) {
-                throw new SaxonApiException("Failed to create file - File name is null");
+                throw new SaxonApiException("Failed to create file");
             }
         };
         char separatorChar = '/';
@@ -762,7 +762,7 @@ public class SaxonCAPI {
         try {
             absFile = new File(filename);
         }catch(NullPointerException ex) {
-            throw new SaxonApiException("Failed to create file - File name is null");
+            throw new SaxonApiException("Failed to create file");
         }
         String fullpath;
         if (!absFile.isAbsolute()) {

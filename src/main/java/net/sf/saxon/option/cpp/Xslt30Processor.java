@@ -824,13 +824,13 @@ public class Xslt30Processor extends SaxonCAPI {
 
         transformer.callTemplate(qname, serializer);
         byte [] result = bStream.toByteArray();
-        if(SaxonCAPI.debug) {
+        /*if(SaxonCAPI.debug) {
             System.err.println("Java callTemplateReturningString output = " + new String(result) + " len=" + result.length);
             for (int j=0; j<result.length; j++) {
                   System.err.format("0x%02X", result[j]);
                }
             System.out.println();
-        }
+        }  */
 
         return result;
     }
