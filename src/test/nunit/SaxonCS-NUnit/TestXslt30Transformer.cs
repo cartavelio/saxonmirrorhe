@@ -480,14 +480,13 @@ namespace SaxonCS_NUnit {
                     "<xsl:sequence select='$p'/>\n" +
                     "</xsl:template>\n" +
                     "</xsl:stylesheet>");
-                builder.BaseUri = new Uri("http://imported/");
-                XdmNode style1 = builder.Build(sr);
 
-                XmlResolver resolver = new TestUriResolver(style1);
-                xqcomp.XmlResolver = resolver;
-                var shouldBeTrue = ReferenceEquals(xqcomp.XmlResolver, resolver);
-
-                Assert.True(shouldBeTrue, "XmlResolver setter should match");
+                xqcomp.StylesheetModuleResolver = (request) => new TextResource(sr, request.Uri);
+                XsltExecutable exec = xqcomp.Compile(new Uri("http://random-stylesheet.org/"));
+                Xslt30Transformer trans = exec.Load30();
+                RawDestination dest = new RawDestination();
+                trans.ApplyTemplates(source, new Uri("http://random-source.org/"));
+                Assert.True(dest.XdmValue.Empty);
             }
             catch (Exception exc) {
                 Assert.Fail(exc.Message);
@@ -630,7 +629,7 @@ namespace SaxonCS_NUnit {
                 builder.BaseUri = new Uri("http://imported/");
                 XdmNode style1 = builder.Build(sr);
 
-                xqcomp.XmlResolver = new TestUriResolver(style1);
+                //xqcomp.XmlResolver = new TestUriResolver(style1);
 
                 Xslt30Transformer trans = xqcomp.Compile(style2.BaseUri).Load30();
 
