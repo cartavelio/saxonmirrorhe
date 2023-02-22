@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections;
 using SysCollGen = System.Collections.Generic;
-using System.Text;
 using System.Xml;
 using System.IO;
-using System.Text.RegularExpressions;
-using System.Globalization;
 using Saxon.Api;
-using TestRunner;
 using static Saxon.Api.Steps;
 using static Saxon.Api.Predicates;
 
