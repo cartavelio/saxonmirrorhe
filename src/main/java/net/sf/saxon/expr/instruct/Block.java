@@ -873,11 +873,11 @@ public class Block extends Instruction {
                 // Unroll loop for small sequence constructors
                 case 2: {
                     PushEvaluator act0 = actions[0];
+                    PushEvaluator act1 = actions[1];
                     return (out, context) -> {
                         TailCall tail = act0.processLeavingTail(out, context);
                         Expression.dispatchTailCall(tail);
-
-                        return actions[1].processLeavingTail(out, context);
+                        return act1.processLeavingTail(out, context);
                     };
                 }
                 case 3: {

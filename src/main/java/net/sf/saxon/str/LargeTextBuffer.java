@@ -29,11 +29,17 @@ public final class LargeTextBuffer {
     private final static int SEGLEN = 1 << BITS;
     private final static int MASK = SEGLEN - 1;
 
+    private final static Segment EMPTY_SEGMENT = new Segment8(new byte[]{});
 
     private final List<Segment> completeSegments;
     private Segment lastSegment;
     private int lastSegmentLength;
+    private int initialSize;
 
+    /**
+     * The LargeTextBuffer comprises a number of segments. This interface defines
+     * each segment.
+     */
 
     private interface Segment {
         /**
@@ -99,9 +105,6 @@ public final class LargeTextBuffer {
                 return this;
             } else if (newWidth == 16) {
                 char[] array16 = new char[newLength];
-//                if (Configuration.isAssertionsEnabled()) {
-//                    new Slice8(bytes, 0, oldLength).verifyCharacters();
-//                }
                 StringTool.copy8to16(bytes, 0, array16, 0, oldLength);
                 return new Segment16(array16);
             } else {
@@ -217,13 +220,15 @@ public final class LargeTextBuffer {
     }
 
     /**
-     * Create an empty LargeTextBuffer with default space allocation
+     * Create an empty LargeTextBuffer
+     * @param initialSize an estimate of the number of characters needed in the first segment
      */
 
-    public LargeTextBuffer() {
+    public LargeTextBuffer(int initialSize) {
         completeSegments = new ArrayList<>(4);
-        lastSegment = new Segment8(new byte[0]);
+        lastSegment = EMPTY_SEGMENT;
         lastSegmentLength = 0;
+        this.initialSize = Math.max(initialSize, 65536);
     }
 
     /**
@@ -257,6 +262,21 @@ public final class LargeTextBuffer {
      */
 
     public void appendUnicodeString(UnicodeString chars) {
+        if (chars.isEmpty()) {
+            return;
+        }
+        if (lastSegment == EMPTY_SEGMENT) {
+            // indicates this is the first string being added
+            int newWidth = chars.getWidth();
+            int newLength = Math.max(initialSize, chars.length32()) & 65535;
+            if (newWidth <= 8) {
+                lastSegment = new Segment8(new byte[newLength]);
+            } else if (newWidth == 16) {
+                lastSegment = new Segment16(new char[newLength]);
+            } else {
+                lastSegment = new Segment24(new byte[newLength * 3]);
+            }
+        }
         int spaceAvailableInLastSegment = SEGLEN - lastSegmentLength;
         //System.err.println("appendUnicodeString " + chars.length() + " " + lastSegmentLength);
         long charsSupplied = chars.length();
@@ -367,8 +387,16 @@ public final class LargeTextBuffer {
         lastSegment = null;
     }
 
+    /**
+     * Get the number of characters in the LargeTextBuffer
+     * @return the number of characters present
+     */
     public int length() {
-        return completeSegments.size()*SEGLEN + (lastSegment == null ? 0 : lastSegmentLength);
+        if (lastSegment == null) {
+            return (completeSegments.size()-1) * SEGLEN + lastSegmentLength;
+        } else {
+            return completeSegments.size() * SEGLEN + lastSegmentLength;
+        }
     }
 
     /**

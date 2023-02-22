@@ -556,6 +556,7 @@ public class TransformFn extends SystemFunction implements Callable {
 
         Configuration targetConfig = context.getConfiguration();
         boolean allowTypedNodes = true;
+        boolean tracing = targetConfig.isTiming();
         int schemaValidation = Validation.DEFAULT;
         
         if (vendorOptions != null) {
@@ -802,6 +803,10 @@ public class TransformFn extends SystemFunction implements Callable {
             if (globalContextItem != null) {
                 transformer.setGlobalContextItem(globalContextItem);
             }
+            if (tracing) {
+                Object stylesheetId = options.get(styleOption);
+                targetConfig.getLogger().info("Calling fn:transform(" + (stylesheetId == null ? "" : stylesheetId.toString()) + ")");
+            }
             if (initialTemplate != null) {
                 transformer.callTemplate(initialTemplate, destination);
                 result = deliverer.getPrimaryResult();
@@ -827,6 +832,9 @@ public class TransformFn extends SystemFunction implements Callable {
                     transformer.applyTemplates(initialMatchSelection, destination);
                     result = deliverer.getPrimaryResult();
                 }
+            }
+            if (tracing) {
+                targetConfig.getLogger().info("Returning from fn:transform()");
             }
         } catch (SaxonApiException e) {
             XPathException e2;

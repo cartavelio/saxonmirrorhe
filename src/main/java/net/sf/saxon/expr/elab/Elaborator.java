@@ -129,8 +129,7 @@ public abstract class Elaborator {
 
     public SequenceEvaluator lazily(boolean repeatable) {
         Expression expr = getExpression();
-        if (!Cardinality.allowsMany(expr.getCardinality())
-                || (expr.getDependencies() &
+        if ((expr.getDependencies() &
                      (StaticProperty.DEPENDS_ON_POSITION |
                               StaticProperty.DEPENDS_ON_LAST |
                               StaticProperty.DEPENDS_ON_CURRENT_ITEM |
@@ -140,6 +139,12 @@ public abstract class Elaborator {
             // the expression now if they are needed
             SequenceEvaluator eagerEvaluator = eagerly();
             return context -> eagerEvaluator.evaluate(context);
+        } else if (!Cardinality.allowsMany(expr.getCardinality())) {
+            ItemEvaluator itemEvaluator = elaborateForItem();
+            return context -> {
+                Item item = itemEvaluator.eval(context);
+                return item == null ? EmptySequence.getInstance() : item;
+            };
         } else if (repeatable) {
             // TODO: supply a PullEvaluator to the MemoClosure, not the original expression
             return context -> new MemoClosure(expr, context);

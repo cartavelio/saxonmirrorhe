@@ -17,7 +17,10 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.linked.SystemIdMap;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AnyURIValue;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.*;
 
 import java.util.*;
@@ -178,12 +181,11 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
     public TinyTree(/*@NotNull*/ Configuration config, Statistics statistics) {
         super(config);
-        //Instrumentation.count("TinyTree instances");
 
-        int nodes = (int) statistics.getAverageNodes() + 1;
-        int attributes = (int) statistics.getAverageAttributes() + 1;
-        int namespaces = (int) statistics.getAverageNamespaces() + 1;
-        int characters = (int) statistics.getAverageCharacters() + 1;
+        int nodes = statistics.getAverageNodes() + 1;
+        int attributes = statistics.getAverageAttributes() + 1;
+        int namespaces = statistics.getAverageNamespaces() + 1;
+        int characters = Math.min(statistics.getAverageCharacters() + 10, 65536);
 
         nodeKind = new byte[nodes];
         depth = new short[nodes];
@@ -200,10 +202,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         numberOfNamespaces = 0;
         namespaceMaps = new NamespaceMap[namespaces];
 
-        //charBuffer = characters > 65000 ? new LargeStringBuffer() : new StringBuilder(characters);
-        textBuffer = new LargeTextBuffer();
-        //textChunks = new UnicodeString[16]; // TODO: use the stats
-        //textChunksUsed = 0;
+        textBuffer = new LargeTextBuffer(characters);
 
         setConfiguration(config);
     }
@@ -251,6 +250,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
     private void ensureAttributeCapacity(int needed) {
         if (attParent.length < numberOfAttributes + needed) {
+
             int k = Math.max(numberOfAttributes + needed, numberOfAttributes * 2);
             if (k == 0) {
                 k = 10 + needed;
@@ -413,6 +413,8 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     void condense(Statistics statistics) {
         //System.err.println("TinyTree.condense() " + this + " roots " + rootIndexUsed + " nodes " + numberOfNodes + " capacity " + nodeKind.length);
 
+        int unused = Math.round(((nodeKind.length - numberOfNodes) * 100) / nodeKind.length);
+        //Instrumentation.count("Unused node entries % " + Math.round(((nodeKind.length - numberOfNodes)*100) / nodeKind.length));
         if (numberOfNodes * 3 < nodeKind.length ||
                 (nodeKind.length - numberOfNodes > 20000)) {
 
@@ -463,7 +465,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
         prefixPool.condense();
 
-        statistics.updateStatistics(numberOfNodes, numberOfAttributes, numberOfNamespaces, textBuffer.length());
+        statistics.updateStatistics(numberOfNodes, numberOfAttributes, numberOfNamespaces, textBuffer);
 //        System.err.println("STATS: " + averageNodes + ", " + averageAttributes + ", "
 //                + averageNamespaces + ", " + averageCharacters);
 
