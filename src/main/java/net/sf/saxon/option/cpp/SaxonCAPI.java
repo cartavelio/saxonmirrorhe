@@ -281,7 +281,7 @@ public class SaxonCAPI {
         return holder.get();
     }
 
-    @CEntryPoint(name = "setCatalogFile", exceptionHandler = SaxonCExceptionHandler.class)
+    @CEntryPoint(name = "setCatalogFile")
     public static void setCatalog(IsolateThread thread, ObjectHandle processorRef, CCharPointer catalogFile){
         Processor processor = objectHandles.get(processorRef);
         if(catalogFile == WordFactory.nullPointer()) {
