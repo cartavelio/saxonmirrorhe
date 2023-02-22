@@ -9,7 +9,9 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.functions.Count;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -141,12 +143,18 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public String getRegexGroup(int number) {
-        if (!isMatching()) return null;
-        if (number > matcher.groupCount() || number < 0) return "";
+    public UnicodeString getRegexGroup(int number) {
+        if (!isMatching()) {
+            return null;
+        }
+        if (number > matcher.groupCount() || number < 0) {
+            return EmptyUnicodeString.getInstance();
+        }
         String s = matcher.group(number);
-        if (s == null) return "";
-        return s;
+        if (s == null) {
+            return EmptyUnicodeString.getInstance();
+        }
+        return StringView.of(s).tidy();
     }
 
     /**

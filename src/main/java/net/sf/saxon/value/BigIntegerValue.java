@@ -510,20 +510,13 @@ public final class BigIntegerValue extends IntegerValue {
 
     @Override
     public IntegerValue mod(/*@NotNull*/ IntegerValue other) throws XPathException {
-        try {
-            if (other instanceof BigIntegerValue) {
-                return makeIntegerValue(value.remainder(((BigIntegerValue) other).value));
-            } else {
-                return makeIntegerValue(value.remainder(BigInteger.valueOf(other.longValue())));
-            }
-        } catch (ArithmeticException err) {
-            XPathException e;
-            if (BigInteger.valueOf(other.longValue()).signum() == 0) {
-                e = new XPathException("Integer modulo zero", "FOAR0001");
-            } else {
-                e = new XPathException("Integer mod operation failure", err);
-            }
-            throw e;
+        if (other.signum() == 0) {
+            throw new XPathException("Integer modulo zero", "FOAR0001");
+        }
+        if (other instanceof BigIntegerValue) {
+            return makeIntegerValue(value.remainder(((BigIntegerValue) other).value));
+        } else {
+            return makeIntegerValue(value.remainder(BigInteger.valueOf(other.longValue())));
         }
     }
 
@@ -536,23 +529,16 @@ public final class BigIntegerValue extends IntegerValue {
 
     @Override
     public IntegerValue idiv(/*@NotNull*/ IntegerValue other) throws XPathException {
+        if (other.signum() == 0) {
+            throw new XPathException("Integer division by zero", "FOAR0001");
+        }
         BigInteger oi;
         if (other instanceof BigIntegerValue) {
             oi = ((BigIntegerValue) other).value;
         } else {
             oi = BigInteger.valueOf(other.longValue());
         }
-        try {
-            return makeIntegerValue(value.divide(oi));
-        } catch (ArithmeticException err) {
-            XPathException e;
-            if ("/ by zero".equals(err.getMessage())) {
-                e = new XPathException("Integer division by zero", "FOAR0001");
-            } else {
-                e = new XPathException("Integer division failure", err);
-            }
-            throw e;
-        }
+        return makeIntegerValue(value.divide(oi));
     }
 
     /**

@@ -7,7 +7,7 @@
 
 package net.sf.saxon.s9api;
 
-import net.sf.saxon.value.ExternalObject;
+import net.sf.saxon.value.AnyExternalObject;
 import net.sf.saxon.value.ObjectValue;
 
 /**
@@ -27,7 +27,7 @@ public class XdmExternalObject extends XdmItem {
      */
 
     public XdmExternalObject(Object value) {
-        super(value instanceof ObjectValue ? (ObjectValue)value : new ObjectValue<>(value));
+        super(value instanceof AnyExternalObject ? (AnyExternalObject)value : new ObjectValue<>(value));
     }
 
     /**
@@ -37,7 +37,7 @@ public class XdmExternalObject extends XdmItem {
      */
 
     public Object getExternalObject() {
-        return ((ExternalObject) getUnderlyingValue()).getObject();
+        return ((AnyExternalObject) getUnderlyingValue()).getWrappedObject();
     }
 
     /**

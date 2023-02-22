@@ -12,7 +12,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.ExternalObject;
+import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class SimpleArrayItem extends AbstractArrayItem {
         SequenceTool.supply(input, (ItemConsumer<? super Item>) item -> {
             //#if CSHARP==false
             if (item.getClass().getName().equals("com.saxonica.functions.extfn.ArrayMemberValue")) {
-                members.add((GroundedValue) ((ExternalObject<GroundedValue>) item).getObject());
+                members.add((GroundedValue) ((ObjectValue<GroundedValue>) item).getObject());
             } else {
                 //#endif
                 members.add(item);

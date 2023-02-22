@@ -282,7 +282,7 @@ public abstract class NumericValue extends AtomicValue
 
     /**
      * The equals() function compares numeric equality among integers, decimals, floats, doubles, and
-     * their subtypes
+     * their subtypes. 
      *
      * @param other the value to be compared with this one
      * @return true if the two values are numerically equal

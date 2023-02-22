@@ -93,7 +93,7 @@ public class IntToIntHashMap implements IntToIntMap {
      * @return true if the key is mapped
      */
     @Override
-    public boolean find(int key) {
+    public boolean contains(int key) {
         return _filled[indexOf(key)];
     }
 

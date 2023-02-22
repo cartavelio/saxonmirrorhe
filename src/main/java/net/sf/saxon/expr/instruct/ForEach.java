@@ -16,6 +16,7 @@ import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.PrependSequenceIterator;
 import net.sf.saxon.tree.util.Orphan;
@@ -524,7 +525,11 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
                     }
                 }
             } else {
-                SequenceTool.supply(iter, (ItemConsumer<? super Item>) item -> action.process(output, c2));
+                try {
+                    SequenceTool.supply(iter, (ItemConsumer<? super Item>) item -> action.process(output, c2));
+                } catch (UncheckedXPathException err) {
+                    throw err.getXPathException();
+                }
             }
             pipe.setXPathContext(context);
         }

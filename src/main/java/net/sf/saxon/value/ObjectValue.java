@@ -39,7 +39,7 @@ import java.util.Objects;
  * Java object.</p>
  */
 
-public class ObjectValue<T> implements ExternalObject<T> {
+public class ObjectValue<T> implements AnyExternalObject {
 
     /*@NotNull*/ private final T value;
 
@@ -132,9 +132,20 @@ public class ObjectValue<T> implements ExternalObject<T> {
      *
      * @return the Java object that this external object wraps
      */
+    
+    public T getObject() {
+        return value;
+    }
+
+    /**
+     * Get the encapsulated object. This version of the method does not use generics,
+     * enabling it to work the same way in Java and C#.
+     *
+     * @return the Java object that this external object wraps
+     */
 
     @Override
-    public T getObject() {
+    public Object getWrappedObject() {
         return value;
     }
 

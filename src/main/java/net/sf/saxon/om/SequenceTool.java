@@ -300,7 +300,7 @@ public class SequenceTool {
             case MAP:
                 return item;
             case EXTERNAL:
-                return ((ExternalObject<?>) item).getObject();
+                return ((AnyExternalObject) item).getWrappedObject();
             case ATOMIC:
                 AtomicValue value = (AtomicValue) item;
                 switch (value.getItemType().getPrimitiveType()) {

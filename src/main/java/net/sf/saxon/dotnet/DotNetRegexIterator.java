@@ -16,9 +16,11 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.regex.RegexMatchHandler;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.regex.ARegexIterator;
 import net.sf.saxon.regex.RegexIterator;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 
 import net.sf.saxon.value.StringValue;
@@ -157,13 +159,13 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public String getRegexGroup(int number) {
+    public UnicodeString getRegexGroup(int number) {
         if (!isMatching()) return null;
         GroupCollection groups = match.get_Groups();
-        if (number > groups.get_Count() || number < 0) return "";
+        if (number > groups.get_Count() || number < 0) return EmptyUnicodeString.getInstance();
         String s = groups.get_Item(number).get_Value();
-        if (s == null) return "";
-        return s;
+        if (s == null) return EmptyUnicodeString.getInstance();
+        return StringView.of(s).tidy();
     }
 
     /**

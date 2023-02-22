@@ -845,19 +845,14 @@ public abstract class Calculator {
     }
     
     public static BigDecimalValue decimalDivide(NumericValue a, NumericValue b) throws XPathException {
+        if (b.signum() == 0) {
+            throw new XPathException("Decimal divide by zero", "FOAR0001");
+        }
         final BigDecimal A = a.getDecimalValue();
         final BigDecimal B = b.getDecimalValue();
+        BigDecimal result = internalDecimalDivide(A, B);
+        return new BigDecimalValue(result);
 
-        try {
-            BigDecimal result = internalDecimalDivide(A, B);
-            return new BigDecimalValue(result);
-        } catch (ArithmeticException err) {
-            if (b.compareTo(0) == 0) {
-                throw new XPathException("Decimal divide by zero", "FOAR0001");
-            } else {
-                throw err;
-            }
-        }
     }
 
     @CSharpReplaceBody(code="return A/B;")
@@ -876,18 +871,12 @@ public abstract class Calculator {
             if (a instanceof IntegerValue && b instanceof IntegerValue) {
                 return ((IntegerValue) a).mod((IntegerValue) b);
             }
-
+            if (((NumericValue)b).signum() == 0) {
+                throw new XPathException("Decimal modulo zero", "FOAR0001", c);
+            }
             final BigDecimal A = ((NumericValue) a).getDecimalValue();
             final BigDecimal B = ((NumericValue) b).getDecimalValue();
-            try {
-                return new BigDecimalValue(A.remainder(B));
-            } catch (ArithmeticException err) {
-                if (((NumericValue) b).compareTo(0) == 0) {
-                    throw new XPathException("Decimal modulo zero", "FOAR0001", c);
-                } else {
-                    throw err;
-                }
-            }
+            return new BigDecimalValue(A.remainder(B));
         }
 
         @Override

@@ -193,8 +193,8 @@ public class FormatDate extends SystemFunction implements Callable {
             error.setXPathContext(context);
             throw error;
         }
-        UnicodeString component = matcher.getRegexGroupUnicode(1);
-        UnicodeString format = matcher.getRegexGroupUnicode(2);
+        UnicodeString component = matcher.getRegexGroup(1);
+        UnicodeString format = matcher.getRegexGroup(2);
         boolean defaultFormat = false;
         if (format.isEmpty() || format.codePointAt(0) == ',') {
             defaultFormat = true;
@@ -656,17 +656,17 @@ public class FormatDate extends SystemFunction implements Callable {
                 RegexIterator widthIter = widthPattern.analyze(widths);
                 StringValue firstMatch = widthIter.next();
                 if (firstMatch != null && firstMatch.length() == widths.length() && widthIter.isMatching()) {
-                    String smin = widthIter.getRegexGroup(1);
-                    if (smin == null || "".equals(smin) || "*".equals(smin)) {
+                    UnicodeString smin = widthIter.getRegexGroup(1);
+                    if (smin == null || smin.isEmpty() || StringConstants.ASTERISK.equals(smin)) {
                         min = 1;
                     } else {
-                        min = Integer.parseInt(smin);
+                        min = Integer.parseInt(smin.toString());
                     }
-                    String smax = widthIter.getRegexGroup(3);
-                    if (smax == null || "".equals(smax) || "*".equals(smax)) {
+                    UnicodeString smax = widthIter.getRegexGroup(3);
+                    if (smax == null || smax.isEmpty() || StringConstants.ASTERISK.equals(smax)) {
                         max = Integer.MAX_VALUE;
                     } else {
-                        max = Integer.parseInt(smax);
+                        max = Integer.parseInt(smax.toString());
                     }
                     if (min < 1) {
                         throw new XPathException("Invalid min value in format picture " + Err.wrap(widths, Err.VALUE), "FOFD1340");

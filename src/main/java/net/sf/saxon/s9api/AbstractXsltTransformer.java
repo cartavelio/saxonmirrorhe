@@ -167,7 +167,8 @@ public abstract class AbstractXsltTransformer {
      * and returns a {@link Destination}, which will be used as the destination for the result document.
      * <p>If the {@code href} argument of the {@code xsl:result-document} instruction is absent or if
      * it is set to a zero length string, then the callback function is not normally called; instead
-     * a {@code Receiver} for the secondary output is obtained by making a second call on {@link Destination#getReceiver(PipelineConfiguration, SerializationProperties)}
+     * a {@code Receiver} for the secondary output is obtained by making a second call on
+     * {@link Destination#getReceiver(PipelineConfiguration, SerializationProperties)}
      * for the principal destination of the transformation. In that situation, this result document handler
      * is invoked only if the call on {@link Destination#getReceiver(PipelineConfiguration, SerializationProperties)}
      * returns null. </p>

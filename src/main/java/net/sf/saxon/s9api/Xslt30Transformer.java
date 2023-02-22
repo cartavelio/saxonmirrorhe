@@ -25,6 +25,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
@@ -652,19 +653,21 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
     public Destination asDocumentDestination(Destination finalDestination) {
         return new AbstractDestination() {
 
-            Receiver r;
+            private Receiver receiver;
             @Override
+            @CSharpModifiers(code={"public", "override"})
             public Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties params) throws SaxonApiException {
                 Receiver rt = getReceivingTransformer(controller, globalParameterSet, finalDestination);
                 rt = new SequenceNormalizerWithSpaceSeparator(rt);
                 rt.setPipelineConfiguration(pipe);
-                return r = rt;
+                return receiver = rt;
             }
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public void close() throws SaxonApiException {
                 try {
-                    r.close();
+                    receiver.close();
                 } catch (XPathException e) {
                     throw new SaxonApiException(e);
                 }

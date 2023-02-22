@@ -26,7 +26,7 @@ public class ExpressionVisitor  {
     private final Configuration config;
     private Optimizer optimizer;
     private int depth = 0;
-
+    private boolean inliningFunctions = false;
     private boolean suppressWarnings = false;
 
     private final static int MAX_DEPTH = 500;
@@ -205,6 +205,15 @@ public class ExpressionVisitor  {
 
     public void setSuppressWarnings(boolean suppressWarnings) {
         this.suppressWarnings = suppressWarnings;
+    }
+
+
+    public boolean isInliningFunctions() {
+        return inliningFunctions;
+    }
+
+    public void setInliningFunctions(boolean inliningFunctions) {
+        this.inliningFunctions = inliningFunctions;
     }
 
 }
