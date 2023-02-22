@@ -35,6 +35,7 @@ public class ToXml {
 
     private File singleInputFile = null;
     private File inputDir = null;
+    private File srcDir = null;
     private File xmlDir = null;
     private File digest = null;
     private File csDir = null;
@@ -53,6 +54,11 @@ public class ToXml {
                 inputDir = new File(arg.substring(3));
                 if (!inputDir.isDirectory()) {
                     throw new IllegalArgumentException(inputDir + " is not a directory");
+                }
+            } else if (arg.startsWith("-src:")) {
+                srcDir = new File(arg.substring(5));
+                if (!srcDir.isDirectory()) {
+                    throw new IllegalArgumentException(srcDir + " is not a directory");
                 }
             } else if (arg.startsWith("-xml:")) {
                 xmlDir = new File(arg.substring(5));
@@ -76,7 +82,6 @@ public class ToXml {
             }
         }
 
-
         if (inputDir == null && singleInputFile == null && xmlDir == null) {
             throw new IllegalArgumentException("No input supplied (-f, -xml, -j)");
         }
@@ -91,7 +96,7 @@ public class ToXml {
                 if (xmlDir == null) {
                     throw new IllegalArgumentException("No -xml directory supplied");
                 }
-                processJavaDirToXml(inputDir, xmlDir);
+                processJavaDirToXml(inputDir, xmlDir, srcDir);
             }
             if (xmlDir != null && digest != null && csDir == null) {
                 processXmlToDigest(xmlDir, digest);
@@ -113,7 +118,7 @@ public class ToXml {
 
     public void processSingleFile(File filename, File digest) throws Exception {
 
-        xmlToCSharp = compiler.compile(new StreamSource(new File("/Users/mike/GitHub/saxon2020/tools/transpiler/xslt/xml-to-cs.xsl")));
+        xmlToCSharp = compiler.compile(new StreamSource(new File("tools/transpiler/xslt/xml-to-cs.xsl")));
 
 //        // Generate XML representation
 //        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
@@ -163,48 +168,47 @@ public class ToXml {
 //        trans.applyTemplates(new StreamSource(new StringReader(xmlOut.toString())), xmlToCSharp.getProcessor().newSerializer(System.out));
     }
 
-    public void processJavaDirToXml(File inputDir, File xmlDir) throws Exception {
+    public void processJavaDirToXml(File inputDir, File xmlDir, File srcDir) throws Exception {
         String[] files = inputDir.list();
         if (files != null) {
             for (String file : files) {
-                processJavaFileToXml(inputDir, file, xmlDir);
+                processJavaFileToXml(inputDir, file, xmlDir, srcDir);
             }
         }
     }
 
-    public void processJavaFileToXml(File directory, String filename, File xmlDir) throws Exception {
+    public void processJavaFileToXml(File directory, String filename, File xmlDir, File srcDir) throws Exception {
         File file = new File(directory, filename);
         if (file.isDirectory()) {
-            processJavaDirToXml(file, new File(xmlDir, filename));
+            processJavaDirToXml(file, new File(xmlDir, filename), srcDir);
         } else if (filename.endsWith(".java") && file.canRead()) {
             try {
-
-                System.err.println("Processing " + filename);
-                CompilationUnit cu;
-                try {
-                    cu = StaticJavaParser.parse(file);
-                } catch (ParseProblemException pe) {
-                    System.err.println("Failed to parse " + filename +  " - " + pe.getMessage());
-                    pe.printStackTrace();
-                    return;
-                }
-                // Generate XML representation
-
-                XmlPrinterMHK printer = new XmlPrinterMHK(symbolSolver, true);
-                File xmlOut = new File(xmlDir, filename.replace(".java", ".xml"));
                 xmlDir.mkdirs();
-                PrintWriter writer = new PrintWriter(new FileWriter(xmlOut));
-                writer.write(printer.output(cu));
-                writer.close();
-//
-////                // Now convert back to Java
-////                File javaOut = new File(outDir, filename);
-////                Xslt30Transformer trans = xmlToJava.load30();
-////                trans.applyTemplates(new StreamSource(xmlOut), xmlToJava.getProcessor().newSerializer(javaOut));
-//                // Now convert to C#
-//                File csOut = new File(outDir, filename.replace(".java", ".cs"));
-//                Xslt30Transformer trans = xmlToCSharp.load30();
-//                trans.applyTemplates(new StreamSource(xmlOut), xmlToCSharp.getProcessor().newSerializer(csOut));
+                boolean skip = false;
+                File xmlOut = new File(xmlDir, filename.replace(".java", ".xml"));
+                if (xmlOut.exists() && srcDir != null) {
+                    File srcFile = new File(srcDir, filename);
+                    skip = xmlOut.lastModified() > srcFile.lastModified();
+                }
+                if (skip) {
+                    System.err.println("Unchanged " + filename);
+                } else {
+                    System.err.println("Processing " + filename);
+                    CompilationUnit cu;
+                    try {
+                        cu = StaticJavaParser.parse(file);
+                    } catch (ParseProblemException pe) {
+                        System.err.println("Failed to parse " + filename +  " - " + pe.getMessage());
+                        pe.printStackTrace();
+                        return;
+                    }
+                    // Generate XML representation
+
+                    XmlPrinterMHK printer = new XmlPrinterMHK(symbolSolver, true);
+                    PrintWriter writer = new PrintWriter(new FileWriter(xmlOut));
+                    writer.write(printer.output(cu));
+                    writer.close();
+                }
             } catch (IOException e) {
                 System.err.println(e.getMessage());
             }
@@ -224,7 +228,7 @@ public class ToXml {
                 }
             });
             // This tells the JavaParser to use the Saxon 10.3 JAR file to resolve references to classes and methods
-            combinedTypeSolver.add(new JarTypeSolver("/Users/mike/GitHub/saxon2020/build/libs/saxon-he-11.0.jar"));
+            combinedTypeSolver.add(new JarTypeSolver("build/libs/saxon-he-11.0.jar"));
             JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
             StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
             StaticJavaParser.getConfiguration().setAttributeComments(false);
@@ -235,7 +239,7 @@ public class ToXml {
     }
 
     public void processXmlToDigest(File xmlDir, File digest) throws Exception {
-        XsltExecutable digester = compiler.compile(new StreamSource(new File("/Users/mike/GitHub/saxon2020/tools/transpiler/xslt/xml-to-digest.xsl")));
+        XsltExecutable digester = compiler.compile(new StreamSource(new File("tools/transpiler/xslt/xml-to-digest.xsl")));
         Xslt30Transformer trans = digester.load30();
         Map<QName, XdmValue> params = new HashMap<>();
         params.put(new QName("xmlDir"), new XdmAtomicValue(xmlDir.toURI()));
@@ -245,7 +249,7 @@ public class ToXml {
 
     public void processXmlDirToCSharp(File xmlDir, File digestFile, File csDir) throws Exception {
         XdmNode digest = parseDigest(digestFile);
-        xmlToCSharp = compiler.compile(new StreamSource(new File("/Users/mike/GitHub/saxon2020/tools/transpiler/xslt/xml-to-cs.xsl")));
+        xmlToCSharp = compiler.compile(new StreamSource(new File("tools/transpiler/xslt/xml-to-cs.xsl")));
         processXmlFileToCSharp(xmlDir, csDir, digest, xmlToCSharp);
     }
 
