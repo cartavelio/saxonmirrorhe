@@ -318,6 +318,23 @@ namespace Saxon.Api {
                 }
             }
         }
+        
+        /// <summary>
+        /// Get the outermost element of the tree containing this node.
+        /// </summary>
+        /// <remarks>
+        /// <para>If this node is a document node, the property returns the first element child
+        /// of the document node. Any subsequent element children are ignored. If there are no element
+        /// children, the method returns null.</para>
+        /// <para>In all other cases, the property returns the value of <c>ancestor-or-self::*[last()]</c>,
+        /// that is the outermost element ancestor of the starting node if there is one, or null otherwise.</para>
+        /// </remarks>
+
+        public XdmNode OutermostElement => 
+            NodeKind.Equals(XdmNodeKind.Document) 
+                ? Select(Steps.Child("*")).First() 
+                : Select(Steps.AncestorOrSelf("*")).Last();
+
 
         /// <summary>
         /// Get a the string value of a named attribute of this element. 
