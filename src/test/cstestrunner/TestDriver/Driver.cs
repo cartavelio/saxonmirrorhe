@@ -272,7 +272,7 @@ namespace TestDriver {
         }
 
 
-        private void processCatalog(String catalogFile) {
+        private void processCatalog(string catalogFile) {
             DocumentBuilder catBuilder = driverProc.NewDocumentBuilder();
             catBuilder.TreeModel = treeModel;
             XdmNode catalog = catBuilder.Build(new Uri(Path.GetFullPath(catalogFile)));

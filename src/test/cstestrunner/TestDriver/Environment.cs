@@ -810,7 +810,7 @@ namespace TestDriver {
                     // Some tests, notably catalog tests, don't declare the documents they use
                     try {
                         Stream stream = new FileStream(uri.LocalPath, FileMode.Open);
-                        return new TextResource(stream, Encoding.UTF8, uri);
+                        return new TextResource(stream, uri);
                     }
                     catch (FileNotFoundException) {
                         return null;
@@ -823,7 +823,7 @@ namespace TestDriver {
         }
         
         public ResourceResolver GetXmlDocumentResolver() {
-            return (uri, properties) => GetDocument(uri);
+            return (request) => GetDocument(request.Uri);
         }
 
         // public override Uri ResolveUri(Uri basei, string href) {
