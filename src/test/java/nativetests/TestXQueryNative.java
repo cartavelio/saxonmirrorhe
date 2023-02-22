@@ -206,7 +206,7 @@ public class TestXQueryNative {
                 }
 
                 @Override
-                public boolean isAvailable(SymbolicName.F functionName) {
+                public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
                     return functionName.equals(fn);
                 }
 
