@@ -41,8 +41,9 @@
            cwdDB = cwd;
            proc = p;
            exception = nullptr;
-           setBaseUri(cwd.c_str());
-
+           if(!cwd.empty()) {
+                setBaseUri(cwd.c_str());
+           }
     }
 
 
