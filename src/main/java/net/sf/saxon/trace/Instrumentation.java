@@ -18,7 +18,7 @@ import java.util.Map;
 public class Instrumentation {
 
     // Set this flag to true to enable counters to be maintained
-    public static final boolean ACTIVE = false;
+    public static final boolean ACTIVE = true;
 
     public static HashMap<String, Long> counters = new HashMap<>();
 
