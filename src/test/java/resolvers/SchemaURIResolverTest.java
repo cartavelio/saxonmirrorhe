@@ -18,7 +18,7 @@ public class SchemaURIResolverTest {
         EnterpriseConfiguration config = new EnterpriseConfiguration();
         SchemaURIResolver resolver = new StandardSchemaResolver(config);
 
-        String cwd = System.getProperty("user.dir").replaceAll("\\\\", "/"); // Windows
+        String cwd = System.getProperty("user.dir").replace("\\", "/"); // Windows
         if (!cwd.endsWith("/")) {
             cwd += "/";
         }
@@ -36,7 +36,7 @@ public class SchemaURIResolverTest {
         EnterpriseConfiguration config = new EnterpriseConfiguration();
         SchemaURIResolver resolver = new StandardSchemaResolver(config);
 
-        String cwd = System.getProperty("user.dir").replaceAll("\\\\", "/"); // Windows
+        String cwd = System.getProperty("user.dir").replace("\\", "/"); // Windows
         if (!cwd.endsWith("/")) {
             cwd += "/";
         }
