@@ -827,13 +827,12 @@ public class Literal extends Expression {
         @Override
         public SequenceEvaluator eagerly() {
             GroundedValue value = ((Literal) getExpression()).getGroundedValue();
-            return context -> value;
+            return new LiteralEvaluator(value);
         }
 
         @Override
         public SequenceEvaluator lazily(boolean repeatable) {
-            GroundedValue value = ((Literal) getExpression()).getGroundedValue();
-            return context -> value;
+            return eagerly();
         }
 
 

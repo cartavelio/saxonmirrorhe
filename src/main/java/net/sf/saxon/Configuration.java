@@ -44,6 +44,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.*;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trace.XQueryTraceCodeInjector;
 import net.sf.saxon.trace.XSLTTraceCodeInjector;
 import net.sf.saxon.trans.*;
@@ -3623,6 +3624,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public Sequence makeClosure(Expression expression, int ref, XPathContext context) throws XPathException {
+        Instrumentation.count("makeClosure()");
         if (getBooleanProperty(Feature.EAGER_EVALUATION)) {
             // Using eager evaluation can make for easier debugging
             SequenceIterator iter = expression.iterate(context);

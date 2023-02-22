@@ -184,11 +184,11 @@ public class JAXPVariableReference extends Expression implements Callable {
 
     public static class CallableElaborator extends PullElaborator {
 
-        @Override
-        public SequenceEvaluator eagerly() {
-            Callable expr = (Callable)getExpression();
-            return context -> expr.call(context, null).materialize();
-        }
+//        @Override
+//        public SequenceEvaluator eagerly() {
+//            Callable expr = (Callable)getExpression();
+//            return context -> expr.call(context, null).materialize();
+//        }
 
         @Override
         public PullEvaluator elaborateForPull() {

@@ -190,14 +190,12 @@ public class LocalVariableReference extends VariableReference {
         public SequenceEvaluator eagerly() {
             LocalVariableReference varRef = (LocalVariableReference) getExpression();
             int slot = varRef.getSlotNumber();
-            return context -> context.evaluateLocalVariable(slot).materialize();
+            return new LocalVariableEvaluator(slot);
         }
 
         @Override
         public SequenceEvaluator lazily(boolean repeatable) {
-            LocalVariableReference varRef = (LocalVariableReference) getExpression();
-            int slot = varRef.getSlotNumber();
-            return context -> context.evaluateLocalVariable(slot);
+            return eagerly();
         }
 
         @Override

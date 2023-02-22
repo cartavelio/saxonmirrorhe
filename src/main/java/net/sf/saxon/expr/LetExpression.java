@@ -409,9 +409,8 @@ public class LetExpression extends Assignation
         if (needsEagerEvaluation) {
             setEvaluator(getSequence().makeElaborator().eagerly());
         } else if (isIndexedVariable()) {
-            Optimizer opt = getConfiguration().obtainOptimizer();
             PullEvaluator pullEval = getSequence().makeElaborator().elaborateForPull();
-            setEvaluator(context -> opt.makeIndexedValue(pullEval.iterate(context)));
+            setEvaluator(new IndexedVariableEvaluator(pullEval));
         } else if (evaluator == null) {
             setEvaluator(getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1));
         }
@@ -909,13 +908,32 @@ public class LetExpression extends Assignation
             final SequenceEvaluator selectEval = expr.getSequence().makeElaborator().eagerly();
             final SequenceEvaluator actionPull = expr.getAction().makeElaborator().eagerly();
             final int slot = expr.getLocalSlotNumber();
-            return context -> {
-                int savedOutputState = context.getTemporaryOutputState();
-                context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
-                Sequence value = selectEval.evaluate(context);
-                context.setLocalVariable(slot, value);
-                context.setTemporaryOutputState(savedOutputState);
-                return actionPull.evaluate(context);
+            return new SequenceEvaluator() {
+                /**
+                 * Evaluate a construct to produce a value (which might be a lazily evaluated Sequence)
+                 *
+                 * @param context the evaluation context
+                 * @return a Sequence (not necessarily grounded)
+                 * @throws XPathException if a dynamic error occurs during the evaluation.
+                 */
+                @Override
+                public Sequence evaluate(XPathContext context) throws XPathException {
+                    int savedOutputState = context.getTemporaryOutputState();
+                    context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
+                    Sequence value = selectEval.evaluate(context);
+                    context.setLocalVariable(slot, value);
+                    context.setTemporaryOutputState(savedOutputState);
+                    return actionPull.evaluate(context);
+                }
+
+                /**
+                 * Get a code identifying the evaluator. Note that the codes are held in SEF files
+                 * so they should be stable.
+                 */
+                @Override
+                public int getEvaluationMethodCode() {
+                    return 0;
+                }
             };
         }
 

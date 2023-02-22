@@ -1,20 +1,16 @@
 package net.sf.saxon.expr.elab;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.Controller;
-import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.Outputter;
-import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.instruct.TailCall;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.MemoClosure;
 
 /**
  * This class is at the heart of the mechanism for elaborating expressions.
@@ -81,42 +77,14 @@ public abstract class Elaborator {
         Expression expr = getExpression();
         int m = expr.getImplementationMethod();
         if ((m & Expression.EVALUATE_METHOD) != 0 && !Cardinality.allowsMany(expr.getCardinality())) {
-            if (Cardinality.allowsZero(expr.getCardinality())) {
-                ItemEvaluator itemEvaluator = elaborateForItem();
-                return context -> {
-                    Item item = itemEvaluator.eval(context);
-                    return item == null ? EmptySequence.getInstance() : item;
-                };
-            } else {
-                ItemEvaluator itemEvaluator = expr.makeElaborator().elaborateForItem();
-                //noinspection Convert2MethodRef
-                return context -> itemEvaluator.eval(context);
-            }
-
+            ItemEvaluator itemEvaluator = elaborateForItem();
+            return new SingleItemEvaluator(itemEvaluator);
         } else if ((m & Expression.ITERATE_METHOD) != 0) {
             PullEvaluator pullEvaluator = elaborateForPull();
-            return context -> {
-                try {
-                    SequenceIterator iter = pullEvaluator.iterate(context);
-                    return SequenceTool.toGroundedValue(iter);
-                } catch (UncheckedXPathException e) {
-                    throw e.getXPathException();
-                }
-            };
+            return new EagerPullEvaluator(pullEvaluator);
         } else {
             PushEvaluator pushEvaluator = elaborateForPush();
-            return context -> {
-                Controller controller = context.getController();
-                SequenceCollector seq = controller.allocateSequenceOutputter();
-                ComplexContentOutputter out = new ComplexContentOutputter(seq);
-                out.open();
-                TailCall tail = pushEvaluator.processLeavingTail(out, context);
-                Expression.dispatchTailCall(tail);
-                out.close();
-                GroundedValue val = seq.getSequence();
-                seq.reset();
-                return val;
-            };
+            return new EagerPushEvaluator(pushEvaluator);
         }
     }
 
@@ -129,6 +97,7 @@ public abstract class Elaborator {
 
     public SequenceEvaluator lazily(boolean repeatable) {
         Expression expr = getExpression();
+        int card = expr.getCardinality();
         if ((expr.getDependencies() &
                      (StaticProperty.DEPENDS_ON_POSITION |
                               StaticProperty.DEPENDS_ON_LAST |
@@ -137,20 +106,17 @@ public abstract class Elaborator {
                               StaticProperty.DEPENDS_ON_REGEX_GROUP)) != 0) {
             // we can't save these values in the closure, so we evaluate
             // the expression now if they are needed
-            SequenceEvaluator eagerEvaluator = eagerly();
-            return context -> eagerEvaluator.evaluate(context);
-        } else if (!Cardinality.allowsMany(expr.getCardinality())) {
+            return eagerly();
+        } else if (!Cardinality.allowsMany(card)) {
             ItemEvaluator itemEvaluator = elaborateForItem();
-            return context -> {
-                Item item = itemEvaluator.eval(context);
-                return item == null ? EmptySequence.getInstance() : item;
-            };
+            return Cardinality.allowsZero(card)
+                    ? new OptionalItemEvaluator(itemEvaluator)
+                    : new SingleItemEvaluator(itemEvaluator);
         } else if (repeatable) {
-            // TODO: supply a PullEvaluator to the MemoClosure, not the original expression
-            return context -> new MemoClosure(expr, context);
+            return new MemoClosureEvaluator(expr);
         } else {
             PullEvaluator pullEvaluator = elaborateForPull();
-            return context -> new LazySequence(pullEvaluator.iterate(context));
+            return new LazyPullEvaluator(pullEvaluator);
         }
     }
 

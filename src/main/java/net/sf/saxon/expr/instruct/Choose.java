@@ -7,15 +7,12 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.BooleanFn;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
@@ -24,9 +21,12 @@ import net.sf.saxon.tree.jiter.ConcatenatingIterable;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Supplier;
 
 
@@ -1047,6 +1047,17 @@ public class Choose extends Instruction implements ConditionalInstruction {
             return conditions;
         }
 
+        public SequenceEvaluator eagerly() {
+            final Choose expr = (Choose) getExpression();
+            final int count = expr.size();
+            makeConditionEvaluators(expr);
+            final SequenceEvaluator[] actions = new SequenceEvaluator[count];
+            for (int i = 0; i < count; i++) {
+                actions[i] = expr.getAction(i).makeElaborator().eagerly();
+            }
+            return new EagerChooseEvaluator(conditions, actions);
+        }
+
         public PullEvaluator elaborateForPull() {
             final Choose expr = (Choose) getExpression();
             final int count = expr.size();
@@ -1209,6 +1220,45 @@ public class Choose extends Instruction implements ConditionalInstruction {
                 }
             };
 
+        }
+    }
+
+    private static class EagerChooseEvaluator implements SequenceEvaluator {
+
+        private final BooleanEvaluator[] conditions;
+        private final SequenceEvaluator[] actions;
+        private final int count;
+
+        public EagerChooseEvaluator(BooleanEvaluator[] conditions, SequenceEvaluator[] actions) {
+            this.conditions = conditions;
+            this.actions = actions;
+            this.count = conditions.length;
+        }
+
+        /**
+         * Evaluate a construct to produce a value (which might be a lazily evaluated Sequence)
+         *
+         * @param context the evaluation context
+         * @return a Sequence (not necessarily grounded)
+         * @throws XPathException if a dynamic error occurs during the evaluation.
+         */
+        @Override
+        public Sequence evaluate(XPathContext context) throws XPathException {
+            for (int i = 0; i < count; i++) {
+                if (conditions[i].eval(context)) {
+                    return actions[i].evaluate(context);
+                }
+            }
+            return EmptySequence.getInstance();
+        }
+
+        /**
+         * Get a code identifying the evaluator. Note that the codes are held in SEF files
+         * so they should be stable.
+         */
+        @Override
+        public int getEvaluationMethodCode() {
+            return 0;
         }
     }
 }

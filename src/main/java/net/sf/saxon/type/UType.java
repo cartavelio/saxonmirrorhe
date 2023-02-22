@@ -10,6 +10,7 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.HashSet;
@@ -274,12 +275,7 @@ public class UType {
     }
 
     public String toStringWithIndefiniteArticle() {
-        String s = toString();
-        if ("aeiouxy".indexOf(s.charAt(0)) >= 0) {
-            return "an " + s + " node";
-        } else {
-            return "a " + s + " node";
-        }
+        return Err.indefiniteArticleFor(toString(), false) + " " + this + " node";
     }
     
 

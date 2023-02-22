@@ -291,4 +291,12 @@ public class Err {
     public static String show(Location loc) {
         return abbreviateURI(loc.getSystemId()) + "#" + loc.getLineNumber();
     }
+
+    public static String indefiniteArticleFor(String s, boolean caps) {
+        if ("aeioux".indexOf(s.charAt(0)) >= 0) {
+            return (caps ? "An" : "an");
+        } else {
+            return (caps ? "A" : "a");
+        }
+    }
 }

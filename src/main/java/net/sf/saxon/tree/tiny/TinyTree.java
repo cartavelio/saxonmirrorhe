@@ -413,7 +413,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     void condense(Statistics statistics) {
         //System.err.println("TinyTree.condense() " + this + " roots " + rootIndexUsed + " nodes " + numberOfNodes + " capacity " + nodeKind.length);
 
-        int unused = Math.round(((nodeKind.length - numberOfNodes) * 100) / nodeKind.length);
+        //int unused = Math.round(((nodeKind.length - numberOfNodes) * 100) / nodeKind.length);
         //Instrumentation.count("Unused node entries % " + Math.round(((nodeKind.length - numberOfNodes)*100) / nodeKind.length));
         if (numberOfNodes * 3 < nodeKind.length ||
                 (nodeKind.length - numberOfNodes > 20000)) {

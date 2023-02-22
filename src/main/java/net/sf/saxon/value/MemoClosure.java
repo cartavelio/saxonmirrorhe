@@ -12,11 +12,10 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
-
-import java.util.function.Consumer;
 
 /**
  * A MemoClosure represents a value that has not yet been evaluated: the value is represented
@@ -61,12 +60,12 @@ public class MemoClosure extends Closure implements ContextOriginator {
      * Constructor should not be called directly, instances should be made using the make() method.
      */
 
-    //private static int closureCount = 0;
     public MemoClosure() {
+        Instrumentation.count("MemoClosure()");
     }
-    //private static int closureCount = 0;
 
     public MemoClosure(Expression expr, XPathContext context) throws XPathException {
+        Instrumentation.count("MemoClosure(X)");
         setExpression(expr);
         XPathContextMajor c2 = context.newContext();
         c2.setOrigin(this);

@@ -14,7 +14,9 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.SequenceType;
 
 /**
  * This class implements the function fn:all(), which is a proposed function for XPath 4.0
@@ -34,7 +36,12 @@ public class AllFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         SequenceIterator iter = arguments[0].iterate();
-        Function predicate = (Function) arguments[1].head();
+        Function predicate = arguments.length > 1
+                ? (Function) arguments[1].head()
+                : new CoercedFunction(SystemFunction.makeFunction("identity", getRetainedStaticContext(), 1),
+                                      new SpecificFunctionType(
+                                              new SequenceType[]{SequenceType.SINGLE_ITEM},
+                                              SequenceType.SINGLE_BOOLEAN));
         for (Item item; (item = iter.next()) != null; ) {
             boolean condition = ((BooleanValue) dynamicCall(predicate, context, new Sequence[]{item}).head()).getBooleanValue();
             if (!condition) {

@@ -54,6 +54,7 @@ public class CaseVariants {
         ParseOptions options = new ParseOptions();
         options.setSchemaValidationMode(Validation.SKIP);
         options.setDTDValidationMode(Validation.SKIP);
+        options.setPleaseCloseAfterUse(true);
         NodeInfo doc;
         try {
             doc = config.buildDocumentTree(new StreamSource(in, "casevariants.xml"), options).getRootNode();
