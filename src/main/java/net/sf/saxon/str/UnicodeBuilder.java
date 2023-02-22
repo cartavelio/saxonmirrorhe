@@ -14,6 +14,7 @@ import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Builder class to construct a UnicodeString by appending text incrementally
@@ -21,31 +22,33 @@ import java.io.IOException;
 
 public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
-    ZenoString content = ZenoString.of(EmptyUnicodeString.getInstance());
+    private int[] codepoints;
+    private int used;
+    private int bits;
 
     /**
-     * Create a Unicode builder
+     * Create a Unicode builder with an initial allocation of 256 codepoints
      */
     public UnicodeBuilder() {
-
+        this(256);
     }
 
     /**
      * Create a Unicode builder with an initial space allocation
-     * @param allocate the initial space allocation (currently ignored)
+     * @param allocate the initial space allocation, in codepoints (32-bit integers) 
      */
-    public UnicodeBuilder(int allocate) {  // used by bytecode, for compatibility with StringBuilder
-
+    public UnicodeBuilder(int allocate) {  
+        codepoints = new int[allocate];
     }
 
     /**
      * Append a character (which must not be a surrogate. (Method needed for C#, because implicit
      * conversion of char to int isn't supported)
      * @param ch the character
-     * @return the builder, with the new character added
+     * @return this builder, with the new character added
      */
     public UnicodeBuilder append(char ch) {
-        content = content.concat(new UnicodeChar(ch));
+        append((int) ch);
         return this;
     }
 
@@ -53,14 +56,13 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * Append a single unicode character to the content
      * @param codePoint the unicode codepoint. The caller is responsible for ensuring that this
      *                  is not a surrogate
-     * @return the builder, with the new character added
+     * @return this builder, with the new character added
      */
 
     public UnicodeBuilder append(int codePoint) {
-        content = content.concat(new UnicodeChar(codePoint));
-//        if (content.length() % 100 == 0) {
-//            System.err.println("Length = " + content.length());
-//        }
+        ensureCapacity(1);
+        codepoints[used++] = codePoint;
+        bits |= codePoint;
         return this;
     }
 
@@ -76,7 +78,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * consists entirely of characters in the Latin-1 character set
      *
      * @param str the string to be appended
-     * @return the builder, with the new string added
+     * @return this builder, with the new string added
      */
 
     public UnicodeBuilder appendLatin(String str) {
@@ -103,14 +105,10 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * well formed surrogate pairs
      *
      * @param str the string to be appended
-     * @return the builder, with the new string added
+     * @return this builder, with the new string added
      */
 
     public UnicodeBuilder append(CharSequence str) {
-//        int uLength = StringTool.getStringLength(str);
-//        if (uLength == str.length()) {
-//            // No surrogate pairs
-//        }
         return append(StringTool.codePoints(str));
     }
 
@@ -118,11 +116,27 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * Append a UnicodeString object to the content.
      *
      * @param str the string to be appended. The length is currently restricted to 2^31.
-     * @return the builder, with the new string added
+     * @return this builder, with the new string added
      */
 
     public UnicodeBuilder append(UnicodeString str) {
-        content = content.concat(str);
+        int len = str.length32();
+        if (len == 0) {
+            return this;
+        }
+        ensureCapacity(len);
+        IntIterator iter = str.codePoints();
+        while (iter.hasNext()) {
+            codepoints[used++] = iter.next();
+        }
+        int width = str.getWidth();
+        if (width > 8) {
+            if (width > 16) {
+                bits |= 0xffffff;
+            } else {
+                bits |= 0xffff;
+            }
+        }
         return this;
     }
 
@@ -131,7 +145,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return the size in codepoints
      */
     public long length() {
-        return content.length();
+        return used;
     }
 
     /**
@@ -139,8 +153,21 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return true if the size is zero
      */
     public boolean isEmpty() {
-        return content.isEmpty();
+        return used == 0;
     }
+
+    /**
+     * Ensure the buffer has enough capacity for a string of a given length
+     *
+     * @param required the number of codepoints that need to be added to the buffer
+     */
+
+    private void ensureCapacity(int required) {
+        while (used + required > codepoints.length) {
+            codepoints = Arrays.copyOf(codepoints, codepoints.length * 2);
+        }
+    }
+
 
     /**
      * Construct a UnicodeString whose value is formed from the contents of this builder
@@ -148,7 +175,23 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public UnicodeString toUnicodeString() {
-        return content.economize();
+        if ((bits & 0xff0000) != 0) {
+            // use 24-bit codes
+            return new Twine24(codepoints, used);
+        } else if ((bits & 0xffff) != 0) {
+            // use 16-bit codes
+            char[] chars = new char[used];
+            for (int i = 0; i < used; i++) {
+                chars[i] = (char) (codepoints[i] & 0xffff);
+            }
+            return new Twine16(chars);
+        } else {
+            byte[] bytes = new byte[used];
+            for (int i = 0; i < used; i++) {
+                bytes[i] = (byte) (codepoints[i] & 0xff);
+            }
+            return new Twine8(bytes);
+        }
     }
 
     /**
@@ -170,9 +213,8 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public String toString() {
-        return content.toString();
+        return toUnicodeString().toString();
     }
-
 
 
     /**
@@ -180,9 +222,11 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public void clear() {
-        content = ZenoString.of(EmptyUnicodeString.getInstance());
+        codepoints = new int[256];
+        used = 0;
+        bits = 0;
     }
-
+    
     /**
      * Expand a byte array from 1-byte-per-character to 2-bytes-per-character
      * @param in the input byte array
@@ -323,7 +367,8 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     }
 
     public void trimToSize() {
-        // Used from bytecode: currently has no effect
+        // used from bytecode
+        codepoints = Arrays.copyOf(codepoints, used);
     }
 
     /**

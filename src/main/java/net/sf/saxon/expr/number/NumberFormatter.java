@@ -137,7 +137,7 @@ public class NumberFormatter {
     public UnicodeString format(List<Object> numbers, int groupSize, String groupSeparator,
                                 String letterValue, String ordinal, /*@NotNull*/ Numberer numberer) {
 
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(32);
         int num = 0;
         int tok = 0;
         // output first punctuation token

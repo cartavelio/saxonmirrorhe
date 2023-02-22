@@ -66,7 +66,7 @@ public class IriToUri extends ScalarSystemFunction {
             // it's worth doing a prescan to avoid the cost of copying in the common all-ASCII case
             return s;
         }
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(s.length32() + 20);
         IntIterator iter = s.codePoints();
         while (iter.hasNext()) {
             final int c = iter.next();

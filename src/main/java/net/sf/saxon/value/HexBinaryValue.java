@@ -130,7 +130,7 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
     @Override
     public UnicodeString getPrimitiveStringValue() {
         String digits = "0123456789ABCDEF";
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(binaryValue.length*2);
         for (byte aBinaryValue : binaryValue) {
             sb.append(digits.charAt((aBinaryValue >> 4) & 0xf));
             sb.append(digits.charAt(aBinaryValue & 0xf));

@@ -329,7 +329,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
      */
     private static UnicodeString extractSeparators(UnicodeString arr, IntSet excludePositions) {
         // TODO: this doesn't do what the documentation says: it ignores the supplied positions entirely
-        UnicodeBuilder ub = new UnicodeBuilder();
+        UnicodeBuilder ub = new UnicodeBuilder(arr.length32());
         IntIterator iter = arr.codePoints();
         while (iter.hasNext()) {
             int c = iter.next();

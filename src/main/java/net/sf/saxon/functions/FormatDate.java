@@ -498,7 +498,7 @@ public class FormatDate extends SystemFunction implements Callable {
             //max = Integer.MAX_VALUE;
 
             String roman = numberer.format(value, primary, null, letterValue, ordinal);
-            UnicodeBuilder s = new UnicodeBuilder();
+            UnicodeBuilder s = new UnicodeBuilder(32);
             s.append(roman);
             int len = StringTool.getStringLength(roman);
             while (len < min) {
@@ -640,8 +640,7 @@ public class FormatDate extends SystemFunction implements Callable {
     }
 
     private static UnicodeString reverse(UnicodeString in) {
-        in = in.tidy();
-        UnicodeBuilder builder = new UnicodeBuilder();
+        UnicodeBuilder builder = new UnicodeBuilder(in.length32());
         for (long i = in.length() - 1; i >= 0; i--) {
             builder.append(in.codePointAt(i));
         }
@@ -826,7 +825,7 @@ public class FormatDate extends SystemFunction implements Callable {
                 return NamedTimeZone.getOlsonTimeZoneName(value, country);
             }
         }
-        UnicodeBuilder sbz = new UnicodeBuilder();
+        UnicodeBuilder sbz = new UnicodeBuilder(16);
         value.appendTimezone(sbz);
         return sbz.toString();
     }

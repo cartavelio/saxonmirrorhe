@@ -583,7 +583,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
             return BMPString.of("PT0S");
         }
 
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(16);
         if (_negative) {
             sb.append('-');
         }

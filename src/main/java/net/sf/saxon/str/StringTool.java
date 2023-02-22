@@ -53,6 +53,21 @@ public class StringTool {
     }
 
     /**
+     * Ask whether a string contains astral characters (represented as surrogate pairs)
+     * @param str the string to be tested
+     * @return true if the string contains surrogate characters
+     */
+
+    public static boolean containsSurrogates(String str) {
+        for (int i=0; i<str.length(); i++) {
+            if (UTF16CharacterSet.isSurrogate(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Contract an array of integers containing Unicode codepoints into a string
      *
      * @param codes an array of integers representing the Unicode code points
