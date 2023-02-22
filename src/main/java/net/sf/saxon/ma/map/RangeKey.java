@@ -24,9 +24,8 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.*;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -102,7 +101,7 @@ public class RangeKey extends MapItem {
      */
     @Override
     public AtomicIterator keys() {
-        return new RangeKeyIterator();
+        return new RangeKeyIterator(min, max, index);
     }
 
     /**
@@ -112,33 +111,13 @@ public class RangeKey extends MapItem {
      */
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
-        // For C#- don't use a lambda expression here
-        //noinspection Convert2Lambda
-        return new Iterable<KeyValuePair>() {
-            @Override
-            public @NotNull Iterator<KeyValuePair> iterator() {
-                return new Iterator<KeyValuePair>() {
-                    final AtomicIterator keyIter = keys();
-                    AtomicValue nextItem = keyIter.next();
-
-                    @Override
-                    public boolean hasNext() {
-                        return nextItem != null;
-                    }
-
-                    @Override
-                    public KeyValuePair next() {
-                        if (nextItem == null) {
-                            return null;
-                        } else {
-                            KeyValuePair kvp = new KeyValuePair(nextItem, get(nextItem));
-                            nextItem = keyIter.next();
-                            return kvp;
-                        }
-                    }
-                };
-            }
-        };
+        List<KeyValuePair> kvpList = new ArrayList<>();
+        final AtomicIterator keyIter = keys();
+        AtomicValue key;
+        while ((key = keyIter.next()) != null) {
+            kvpList.add(new KeyValuePair(key, get(key)));
+        }
+        return kvpList;
     }
 
     /**
@@ -272,18 +251,21 @@ public class RangeKey extends MapItem {
         return MapItem.mapToString(this);
     }
 
-    private class RangeKeyIterator implements AtomicIterator {
+    private static class RangeKeyIterator implements AtomicIterator {
 
-        int pos = 0;
-        StringValue curr = null;
-        StringValue top;
+        private int pos = 0;
+        private StringValue curr = null;
+        private final StringValue top;
+        private final UnicodeString min;
+        private final UnicodeString max;
+        private final TreeMap<AtomicMatchKey, Object> index;
 
-        public RangeKeyIterator() {
+        public RangeKeyIterator(UnicodeString min, UnicodeString max, TreeMap<AtomicMatchKey, Object> index) {
             top = new StringValue((UnicodeString) (max == null ? index.lastKey() : index.floorKey(max)));
-        }
+            this.min = min;
+            this.max = max;
+            this.index = index;
 
-        private StringValue toStringItem(UnicodeString s) {
-            return new StringValue(s);
         }
 
         /**
@@ -324,4 +306,4 @@ public class RangeKey extends MapItem {
     }
 }
 
-// Copyright (c) 2012-2020 Saxonica Limited
+// Copyright (c) 2012-2021 Saxonica Limited

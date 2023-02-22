@@ -6,7 +6,7 @@ import net.sf.saxon.z.IntHashMap;
  * A set implementation using a custom equality matcher, to avoid having to wrap
  * each entry in a wrapper object to achieve customised equality testing.
  *
- * <p>Note: this doesn't implement {@code Set<T>} to save the effort of implemented
+ * <p>Note: this doesn't implement {@code java.util.Set<T>} to save the effort of implementing
  * methods like size() and iterator() that aren't required for our use cases. These
  * methods could easily be added without changing the basic design.
  * </p>
@@ -14,20 +14,11 @@ import net.sf.saxon.z.IntHashMap;
 
 public class CustomSet<T>  {
 
-    private static class EntryChain<T> {
-        public T value;
-        public EntryChain<T> next;
-        public EntryChain(T value) {
-            this.value = value;
-            this.next = null;
-        }
-    }
-
-    private final IntHashMap<EntryChain<T>> buckets;
+    private final IntHashMap<CustomSetEntryChain<T>> buckets;
     private final EqualityMatcher<T> equalityMatcher;
 
     public CustomSet(EqualityMatcher<T> matcher) {
-        buckets = new IntHashMap<EntryChain<T>>();
+        buckets = new IntHashMap<>();
         equalityMatcher = matcher;
     }
 
@@ -38,9 +29,9 @@ public class CustomSet<T>  {
      */
     public boolean add(T value) {
         int h = equalityMatcher.hash(value);
-        EntryChain<T> bucket = buckets.get(h);
+        CustomSetEntryChain<T> bucket = buckets.get(h);
         if (bucket == null) {
-            EntryChain<T> entry = new EntryChain<>(value);
+            CustomSetEntryChain<T> entry = new CustomSetEntryChain<>(value);
             buckets.put(h, entry);
             return true;
         } else {
@@ -48,7 +39,9 @@ public class CustomSet<T>  {
                 if (equalityMatcher.equal(bucket.value, value)) {
                     return false;
                 } else if (bucket.next == null) {
-                    bucket.next = new EntryChain<>(value);
+                    @SuppressWarnings("UnnecessaryLocalVariable")
+                    CustomSetEntryChain<T> entry = new CustomSetEntryChain<>(value);
+                    bucket.next = entry;
                     return true;
                 } else {
                     bucket = bucket.next;
@@ -64,7 +57,7 @@ public class CustomSet<T>  {
 
     public boolean contains(T value) {
         int h = equalityMatcher.hash(value);
-        EntryChain<T> bucket = buckets.get(h);
+        CustomSetEntryChain<T> bucket = buckets.get(h);
         if (bucket == null) {
             return false;
         } else {

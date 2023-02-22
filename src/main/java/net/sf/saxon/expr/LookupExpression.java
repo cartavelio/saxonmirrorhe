@@ -138,11 +138,13 @@ public class LookupExpression extends BinaryExpression {
         isArrayLookup = containerType instanceof ArrayItemType;
         boolean isTupleLookup = containerType instanceof TupleType || originalType instanceof TupleType;
         isMapLookup = containerType instanceof MapType || isTupleLookup;
+        //#if CSHARP==false
         if (th.isSubType(containerType, AnyExternalObjectType.THE_INSTANCE)) {
             config.checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION, "use of lookup expressions on external objects", -1);
             return config.makeObjectLookupExpression(getLhsExpression(), getRhsExpression())
                     .typeCheck(visitor, contextInfo);
         }
+        //#endif
         isSingleContainer = getLhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE;
 
         if (!isArrayLookup && !isMapLookup) {

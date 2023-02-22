@@ -8,7 +8,7 @@
 package net.sf.saxon.resource;
 
 import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.CallableLambda;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.Resource;
@@ -62,7 +62,7 @@ public class MetadataResource implements Resource {
         map.initialPut("name", StringValue.makeStringValue(resourceURI));
 
         // Add a fetch() function, which can be used to fetch the resource
-        Callable fetcher = new CallableLambda((context1, arguments) -> content.getItem(context1));
+        Callable fetcher = new CallableDelegate((context1, arguments) -> content.getItem(context1));
 
         FunctionItemType fetcherType = new SpecificFunctionType(new SequenceType[0], SequenceType.SINGLE_ITEM);
         CallableFunction fetcherFunction = new CallableFunction(0, fetcher, fetcherType);

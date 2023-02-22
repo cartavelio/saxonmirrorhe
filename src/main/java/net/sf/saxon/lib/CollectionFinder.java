@@ -10,7 +10,6 @@ package net.sf.saxon.lib;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpDelegate;
-import net.sf.saxon.transpile.CSharpReplaceMethod;
 
 /**
  * An instance of CollectionFinder can be registered with the Saxon configuration; it is called in response
@@ -28,7 +27,7 @@ import net.sf.saxon.transpile.CSharpReplaceMethod;
  */
 
 @FunctionalInterface
-@CSharpDelegate(false)
+@CSharpDelegate(true)
 public interface CollectionFinder {
 
     /**
@@ -41,7 +40,7 @@ public interface CollectionFinder {
      * by this collection URI. Result should not be null.
      * @throws XPathException if the collection was not found
      */
-    @CSharpReplaceMethod(code="object findCollection(net.sf.saxon.expr.XPathContext context, string collectionURI);")
+    //@CSharpReplaceMethod(code="object findCollection(net.sf.saxon.expr.XPathContext context, string collectionURI);")
     ResourceCollection findCollection(XPathContext context, String collectionURI) throws XPathException;
 
 }

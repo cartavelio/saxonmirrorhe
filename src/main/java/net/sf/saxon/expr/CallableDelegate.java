@@ -10,7 +10,7 @@ import net.sf.saxon.trans.XPathException;
  * isn't a delegate, so lambda expressions can't be used directly; instead, this class is provided as a proxy.</p>
  */
 
-public class CallableLambda implements Callable {
+public class CallableDelegate implements Callable {
 
     @FunctionalInterface
     public interface Lambda {
@@ -19,7 +19,7 @@ public class CallableLambda implements Callable {
 
     private final Lambda expression;
 
-    public CallableLambda (Lambda expression) {
+    public CallableDelegate(Lambda expression) {
         this.expression = expression;
     }
 

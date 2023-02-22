@@ -8,11 +8,14 @@
 package net.sf.saxon.functions;
 
 import com.saxonica.functions.extfn.EXPathArchive.Archive;
-import com.saxonica.functions.extfn.EXPathBinary;
-import com.saxonica.functions.extfn.EXPathFile;
+import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
+import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StringLiteral;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
@@ -169,10 +172,10 @@ public class SystemProperty extends SystemFunction implements Callable {
             String val = System.getProperty(local);
             return val == null ? "" : val;
 //#if EE==true || PE==true
-        } else if (uri.equals(EXPathBinary.NAMESPACE) && local.equals("version")) {
-            return Double.toString(EXPathBinary.VERSION);
-        } else if (uri.equals(EXPathFile.NAMESPACE) && local.equals("version")) {
-            return EXPathFile.VERSION.toString();
+        } else if (uri.equals(EXPathBinaryFunctionSet.NAMESPACE) && local.equals("version")) {
+            return Double.toString(EXPathBinaryFunctionSet.VERSION);
+        } else if (uri.equals(EXPathFileFunctionSet.NAMESPACE) && local.equals("version")) {
+            return EXPathFileFunctionSet.VERSION.toString();
         } else if (uri.equals(Archive.NAMESPACE) && local.equals("version")) {
             return Archive.VERSION.toString();
 //#endif

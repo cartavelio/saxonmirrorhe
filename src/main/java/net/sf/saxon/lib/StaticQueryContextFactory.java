@@ -9,6 +9,7 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.query.StaticQueryContext;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 /**
  * Factory class for creating a customized instance of StaticQueryContext
@@ -31,7 +32,8 @@ public class StaticQueryContextFactory {
      *                        in the Configuration
      * @return the new {@code StaticQueryContext} instance
      */
-    
+
+    @CSharpModifiers(code={"public", "virtual"})
     public StaticQueryContext newStaticQueryContext(Configuration config, boolean copyFromDefault) {
         return new StaticQueryContext(config, copyFromDefault);
     }

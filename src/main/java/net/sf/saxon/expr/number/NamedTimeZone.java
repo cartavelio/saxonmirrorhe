@@ -455,13 +455,13 @@ public class NamedTimeZone {
      *                  to be in GMT.
      * @param olsenName the Olsen name of the timezone, for example Europe/Lisbon
      * @return the civil time offset, in milliseconds, to be applied to the given
-     * date/time
+     * date/time. Returns zero if the timezone is not recognized.
      */
 
     @CSharpReplaceBody(code="return 0;")
     public static int civilTimeOffset(DateTimeValue date, String olsenName) {
         TimeZone zone = TimeZone.getTimeZone(olsenName);
-        return zone.getOffset(date.getCalendar().getTime().getTime());
+        return zone.getOffset(date.secondsSinceEpoch().longValue()*1000); // doesn't need millisecond precision
     }
 
     /**

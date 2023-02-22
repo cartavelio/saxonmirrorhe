@@ -10,7 +10,7 @@ package net.sf.saxon.ma.map;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
 import net.sf.saxon.ma.trie.ImmutableMap;
-import net.sf.saxon.ma.trie.Tuple2;
+import net.sf.saxon.ma.trie.TrieKVP;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
@@ -34,7 +34,7 @@ public class HashTrieMap extends MapItem {
     // equals method (to take account of collations, etc). The value in the trie is
     // actually a tuple holding both the real key, and the value.
 
-    private ImmutableMap<AtomicMatchKey, KeyValuePair> imap;
+    private ImmutableMap<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair> imap;
 
     // The following values are maintained incrementally when
     // entries are added to the map. They are not changed when entries are removed,
@@ -89,7 +89,7 @@ public class HashTrieMap extends MapItem {
      * @param imap the map to be copied
      */
 
-    public HashTrieMap(ImmutableMap<AtomicMatchKey, KeyValuePair> imap) {
+    public HashTrieMap(ImmutableMap<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair> imap) {
         this.imap = imap;
         entries = -1;
     }
@@ -106,7 +106,7 @@ public class HashTrieMap extends MapItem {
             return (HashTrieMap)map;
         }
         HashTrieMap m2 = new HashTrieMap();
-        for (KeyValuePair pair : map.keyValuePairs()) {
+        for (net.sf.saxon.ma.map.KeyValuePair pair : map.keyValuePairs()) {
             m2 = m2.addEntry(pair.key, pair.value);
         }
         return m2;
@@ -153,7 +153,7 @@ public class HashTrieMap extends MapItem {
         }
         int count = 0;
         //noinspection UnusedDeclaration
-        for (KeyValuePair entry: keyValuePairs()) {
+        for (net.sf.saxon.ma.map.KeyValuePair entry: keyValuePairs()) {
             count++;
         }
         return entries = count;
@@ -303,7 +303,7 @@ public class HashTrieMap extends MapItem {
 
         boolean isNew = imap.get(amk) == null;
         boolean empty = isEmpty();
-        ImmutableMap<AtomicMatchKey, KeyValuePair> imap2 = imap.put(amk, new KeyValuePair(key, value));
+        ImmutableMap<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair> imap2 = imap.put(amk, new net.sf.saxon.ma.map.KeyValuePair(key, value));
         HashTrieMap t2 = new HashTrieMap(imap2);
         t2.valueCardinality = this.valueCardinality;
         t2.keyUType = keyUType;
@@ -333,7 +333,7 @@ public class HashTrieMap extends MapItem {
 //        }
         boolean empty = isEmpty();
         boolean exists = get(key) != null;
-        imap = imap.put(makeKey(key), new KeyValuePair(key, value));
+        imap = imap.put(makeKey(key), new net.sf.saxon.ma.map.KeyValuePair(key, value));
         updateTypeInformation(key, value, empty);
         entries = -1;
         return exists;
@@ -354,7 +354,7 @@ public class HashTrieMap extends MapItem {
 
     @Override
     public HashTrieMap remove(AtomicValue key) {
-        ImmutableMap<AtomicMatchKey, KeyValuePair> m2 = imap.remove(makeKey(key));
+        ImmutableMap<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair> m2 = imap.remove(makeKey(key));
         if (m2 == imap) {
             // The key is not present; the map is unchanged
             return this;
@@ -376,7 +376,7 @@ public class HashTrieMap extends MapItem {
 
     @Override
     public GroundedValue get(AtomicValue key)  {
-        KeyValuePair o = imap.get(makeKey(key));
+        net.sf.saxon.ma.map.KeyValuePair o = imap.get(makeKey(key));
         return o==null ? null : o.value;
     }
 
@@ -387,7 +387,7 @@ public class HashTrieMap extends MapItem {
      * @return the key-value-pair associated with the given key, or null if the key is not present in the map
      */
 
-    public KeyValuePair getKeyValuePair(AtomicValue key) {
+    public net.sf.saxon.ma.map.KeyValuePair getKeyValuePair(AtomicValue key) {
         return imap.get(makeKey(key));
     }
 
@@ -400,13 +400,13 @@ public class HashTrieMap extends MapItem {
     public AtomicIterator keys() {
         return new AtomicIterator() {
 
-            final Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> baseIter = imap.iterator();
+            final Iterator<TrieKVP<AtomicMatchKey, KeyValuePair>> baseIter = imap.iterator();
 
             @Override
             @CSharpSuppressWarnings("UnsafeIteratorConversion")
             public AtomicValue next() {
                 if (baseIter.hasNext()) {
-                    return baseIter.next()._2.key;
+                    return baseIter.next().value.key;
                 } else {
                     return null;
                 }
@@ -421,15 +421,15 @@ public class HashTrieMap extends MapItem {
      * @return an iterator over the key-value pairs
      */
     @Override
-    public Iterable<KeyValuePair> keyValuePairs() {
+    public Iterable<net.sf.saxon.ma.map.KeyValuePair> keyValuePairs() {
         // For C# - don't use a lambda expression here
         //noinspection Convert2Lambda
-        return new Iterable<KeyValuePair>() {
+        return new Iterable<net.sf.saxon.ma.map.KeyValuePair>() {
             @Override
             @CSharpSuppressWarnings("UnsafeIteratorConversion")
-            public Iterator<KeyValuePair> iterator() {
-                return new Iterator<KeyValuePair>() {
-                    final Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> baseIter = imap.iterator();
+            public Iterator<net.sf.saxon.ma.map.KeyValuePair> iterator() {
+                return new Iterator<net.sf.saxon.ma.map.KeyValuePair>() {
+                    final Iterator<TrieKVP<AtomicMatchKey, KeyValuePair>> baseIter = imap.iterator();
 
                     @Override
                     public boolean hasNext() {
@@ -437,8 +437,8 @@ public class HashTrieMap extends MapItem {
                     }
 
                     @Override
-                    public KeyValuePair next() {
-                        return baseIter.next()._2;
+                    public net.sf.saxon.ma.map.KeyValuePair next() {
+                        return baseIter.next().value;
                     }
 
                     @Override
@@ -453,10 +453,10 @@ public class HashTrieMap extends MapItem {
 
     public void diagnosticDump() {
         System.err.println("Map details:");
-        for (Tuple2<AtomicMatchKey, KeyValuePair> entry : imap) {
-            AtomicMatchKey k1 = entry._1;
-            AtomicValue k2 = entry._2.key;
-            Sequence v = entry._2.value;
+        for (TrieKVP<AtomicMatchKey, KeyValuePair> entry : imap) {
+            AtomicMatchKey k1 = entry.key;
+            AtomicValue k2 = entry.value.key;
+            Sequence v = entry.value.value;
             System.err.println(k1.getClass() + " " + k1 +
                                        " #:" + k1.hashCode() +
                                        " = (" + k2.getClass() + " " + k2 + " : " + v + ")");

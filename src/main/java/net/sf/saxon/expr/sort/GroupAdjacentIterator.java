@@ -194,23 +194,31 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
 
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
-        return new ManualGroupAdjacentIterator();
+        return new ManualGroupAdjacentIterator(current, position,
+                                               currentMembers, currentKey,
+                                               runningContext.newMinorContext());
     }
 
-    private class ManualGroupAdjacentIterator extends ManualGroupIterator {
+    private static class ManualGroupAdjacentIterator extends ManualGroupIterator {
 
-        List<Item> cMembers = currentMembers;
-        XPathContext savedcontext = runningContext.newMinorContext();
+        private final List<Item> currentMembers;
+        private final XPathContext savedcontext;
 
-        ManualGroupAdjacentIterator() {
+        ManualGroupAdjacentIterator(Item current,
+                                    int position,
+                                    List<Item> currentMembers,
+                                    AtomicSequence currentKey,
+                                    XPathContext savedContext) {
             super(current, position);
+            this.currentMembers = currentMembers;
+            this.savedcontext = savedContext;
             setCurrentGroupingKey(currentKey);
-            setLengthFinder(savedcontext::getLast);
+            setLengthFinder(() -> savedcontext.getLast());
         }
 
         @Override
         public SequenceIterator iterateCurrentGroup() {
-            return new ListIterator.Of<>(cMembers);
+            return new ListIterator.Of<>(currentMembers);
         }
 
     }

@@ -633,12 +633,12 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 PipelineConfiguration pipe = out.getPipelineConfiguration();
                 if (copyLineNumbers) {
                     LocationCopier copier = new LocationCopier(false);
-                    pipe.setComponent(CopyInformee.class.getName(), copier);
+                    pipe.setComponent("net.sf.saxon.event.CopyInformee", copier);
                 }
                 item.copy(eval, copyOptions, getLocation());
                 //Navigator.copy(item, eval, copyOptions, getLocation());
                 if (copyLineNumbers) {
-                    pipe.setComponent(CopyInformee.class.getName(), null);
+                    pipe.setComponent("net.sf.saxon.event.CopyInformee", null);
                 }
                 break;
             }
@@ -702,7 +702,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 if (copyLineNumbers) {
                     savedPipe = new PipelineConfiguration(val.getPipelineConfiguration());
                     LocationCopier copier = new LocationCopier(true);
-                    val.getPipelineConfiguration().setComponent(CopyInformee.class.getName(), copier);
+                    val.getPipelineConfiguration().setComponent("net.sf.saxon.event.CopyInformee", copier);
 
                 }
                 item.copy(val, copyOptions, getLocation());

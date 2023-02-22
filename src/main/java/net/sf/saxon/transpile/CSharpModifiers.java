@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  */
 
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.METHOD, ElementType.FIELD, ElementType.CONSTRUCTOR})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.CONSTRUCTOR})
 public @interface CSharpModifiers {
     String[] code() default {};
 }

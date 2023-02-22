@@ -96,8 +96,8 @@ public class SingletonAttributeMap extends AttributeInfo implements AttributeMap
     }
 
     @Override
-    public List<AttributeInfo> asList() {
-        List<AttributeInfo> list = new ArrayList<>(1);
+    public ArrayList<AttributeInfo> asList() {
+        ArrayList<AttributeInfo> list = new ArrayList<>(1);
         list.add(this);
         return list;
     }

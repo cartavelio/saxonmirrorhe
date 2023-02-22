@@ -76,7 +76,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         } else if (type instanceof ListType) {
             return new ListConstructorFunction((ListType)type, resolver, true);
         } else {
-            Callable callable = new CallableLambda((context, arguments) -> {
+            Callable callable = new CallableDelegate((context, arguments) -> {
                 AtomicValue value = (AtomicValue) arguments[0].head();
                 if (value == null) {
                     return EmptySequence.getInstance();

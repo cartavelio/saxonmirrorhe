@@ -7,13 +7,21 @@
 
 package net.sf.saxon.ma.trie;
 
-public final class Tuple2<T1, T2> {
-    public final T1 _1;
-    public final T2 _2;
+public final class TrieKVP<K, V> {
+    public final K key;
+    public final V value;
 
-    public Tuple2(final T1 v1, final T2 v2) {
-        _1 = v1;
-        _2 = v2;
+    public TrieKVP(final K v1, final V v2) {
+        key = v1;
+        value = v2;
+    }
+
+    public K getKey() {
+        return key;
+    }
+
+    public V getValue() {
+        return value;
     }
 
     @Override
@@ -21,25 +29,25 @@ public final class Tuple2<T1, T2> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Tuple2 tuple = (Tuple2) o;
+        TrieKVP tuple = (TrieKVP) o;
 
-        if (_1 != null ? !_1.equals(tuple._1) : tuple._1 != null)
+        if (key != null ? !key.equals(tuple.key) : tuple.key != null)
             return false;
-        return _2 != null ? _2.equals(tuple._2) : tuple._2 == null;
+        return value != null ? value.equals(tuple.value) : tuple.value == null;
     }
 
     @Override
     public int hashCode() {
-        int result = _1 != null ? _1.hashCode() : 0;
-        result = 31 * result + (_2 != null ? _2.hashCode() : 0);
+        int result = key != null ? key.hashCode() : 0;
+        result = 31 * result + (value != null ? value.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "(" +
-            _1 + ',' +
-            _2 +
+                key + ',' +
+                value +
         ')';
     }
 

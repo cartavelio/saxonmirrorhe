@@ -107,6 +107,19 @@ public class IndexedStack<T> implements Iterable<T>{
     }
 
     /**
+     * Overwrite the item at position N in the stack
+     *
+     * @param i the position of the required item, where the first item counting from
+     *          the bottom of the stack is position 0 (zero)
+     * @param value the item to be put at the specified position
+     * @throws IndexOutOfBoundsException if {code i} is negative, or greater than or equal to the stack size
+     */
+
+    public void set(int i, T value) {
+        items.set(i, value);
+    }
+
+    /**
      * Search for an item on the stack
      *
      * @param value the item being sought

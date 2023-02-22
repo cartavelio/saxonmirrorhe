@@ -12,8 +12,11 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.NoNamespaceName;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.push.Container;
+import net.sf.saxon.s9api.push.Document;
+import net.sf.saxon.s9api.push.Element;
 import net.sf.saxon.str.StringView;
-import net.sf.saxon.s9api.Push;
+import net.sf.saxon.s9api.push.Push;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.trans.XPathException;
@@ -22,32 +25,33 @@ import net.sf.saxon.type.Untyped;
 
 public class PushToReceiver implements Push {
 
-    private final ComplexContentOutputter out;
+    private final ComplexContentOutputter cco;
     private final Configuration config;
 
-    public PushToReceiver(Receiver out) {
-        this.out = new ComplexContentOutputter(new RegularSequenceChecker(out, false));
-        config = out.getPipelineConfiguration().getConfiguration();
+    public PushToReceiver(Receiver cco) {
+        this.cco = new ComplexContentOutputter(new RegularSequenceChecker(cco, false));
+        config = cco.getPipelineConfiguration().getConfiguration();
     }
 
     @Override
     public Document document(boolean wellFormed) throws SaxonApiException {
         try {
-            out.open();
+            cco.open();
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
-        return new DocImpl(wellFormed);
+        return new DocImpl(cco, wellFormed);
     }
 
-    private abstract class ContainerImpl implements Push.Container {
+    private abstract class ContainerImpl implements Container {
 
+        private ComplexContentOutputter cco;
         private String defaultNamespace;
         private ElemImpl elementAwaitingClosure;
         private boolean closed;
 
 
-        public ContainerImpl(String defaultNamespace) {
+        public ContainerImpl(ComplexContentOutputter cco, String defaultNamespace) {
             this.defaultNamespace = defaultNamespace;
         }
 
@@ -60,12 +64,13 @@ public class PushToReceiver implements Push {
         public Element element(QName name) throws SaxonApiException {
             try {
                 implicitClose();
-                final FingerprintedQName fp = new FingerprintedQName(name.getStructuredQName(), config.getNamePool());
-                out.startElement(fp, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
+                final FingerprintedQName fp = new FingerprintedQName(
+                        name.getStructuredQName(), getConfiguration().getNamePool());
+                getOutputter().startElement(fp, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             } catch (XPathException e) {
                 throw new SaxonApiException(e);
             }
-            return elementAwaitingClosure = new ElemImpl(defaultNamespace);
+            return elementAwaitingClosure = new ElemImpl(getOutputter(), defaultNamespace);
         }
 
         @Override
@@ -75,11 +80,11 @@ public class PushToReceiver implements Push {
                 final NodeName fp = defaultNamespace.isEmpty()
                         ? new NoNamespaceName(name)
                         : new FingerprintedQName("", defaultNamespace, name);
-                out.startElement(fp, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
+                cco.startElement(fp, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             } catch (XPathException e) {
                 throw new SaxonApiException(e);
             }
-            return elementAwaitingClosure = new ElemImpl(defaultNamespace);
+            return elementAwaitingClosure = new ElemImpl(getOutputter(), defaultNamespace);
         }
 
         @Override
@@ -87,7 +92,7 @@ public class PushToReceiver implements Push {
             try {
                 implicitClose();
                 if (value != null && value.length() > 0) {
-                    out.characters(StringView.of(value.toString()), Loc.NONE, ReceiverOption.NONE);
+                    getOutputter().characters(StringView.of(value.toString()), Loc.NONE, ReceiverOption.NONE);
                 }
                 return this;
             } catch (XPathException e) {
@@ -100,7 +105,7 @@ public class PushToReceiver implements Push {
             try {
                 implicitClose();
                 if (value != null) {
-                    out.comment(StringView.of(value.toString()), Loc.NONE, ReceiverOption.NONE);
+                    getOutputter().comment(StringView.of(value.toString()), Loc.NONE, ReceiverOption.NONE);
                 }
                 return this;
             } catch (XPathException e) {
@@ -113,7 +118,7 @@ public class PushToReceiver implements Push {
             try {
                 implicitClose();
                 if (value != null) {
-                    out.processingInstruction(name, StringView.of(value.toString()), Loc.NONE, ReceiverOption.NONE);
+                    getOutputter().processingInstruction(name, StringView.of(value.toString()), Loc.NONE, ReceiverOption.NONE);
                 }
                 return this;
             } catch (XPathException e) {
@@ -141,7 +146,15 @@ public class PushToReceiver implements Push {
             }
         }
 
-        abstract void sendEndEvent() throws SaxonApiException;
+        abstract protected void sendEndEvent() throws SaxonApiException;
+
+        protected ComplexContentOutputter getOutputter() {
+            return cco;
+        }
+
+        protected Configuration getConfiguration() {
+            return cco.getConfiguration();
+        }
     }
 
     private class DocImpl extends ContainerImpl implements Document {
@@ -149,11 +162,11 @@ public class PushToReceiver implements Push {
         private final boolean wellFormed;
         private boolean foundElement = false;
 
-        DocImpl(boolean wellFormed) throws SaxonApiException {
-            super("");
+        DocImpl(ComplexContentOutputter cco, boolean wellFormed) throws SaxonApiException {
+            super(cco, "");
             try {
                 this.wellFormed = wellFormed;
-                out.startDocument(ReceiverOption.NONE);
+                cco.startDocument(ReceiverOption.NONE);
             } catch (XPathException e) {
                 throw new SaxonApiException(e);
             }
@@ -196,13 +209,13 @@ public class PushToReceiver implements Push {
         }
 
         @Override
-        void sendEndEvent() throws SaxonApiException {
+        protected void sendEndEvent() throws SaxonApiException {
             try {
                 if (wellFormed && !foundElement) {
                     throw new SaxonApiException("A well-formed document must contain an element node");
                 }
-                out.endDocument();
-                out.close();
+                getOutputter().endDocument();
+                getOutputter().close();
             } catch (XPathException e) {
                 throw new SaxonApiException(e);
             }
@@ -213,8 +226,8 @@ public class PushToReceiver implements Push {
 
         private boolean foundChild;
 
-        ElemImpl(String defaultNamespace) {
-            super(defaultNamespace);
+        ElemImpl(ComplexContentOutputter cco, String defaultNamespace) {
+            super(cco, defaultNamespace);
         }
 
         @Override
@@ -222,8 +235,9 @@ public class PushToReceiver implements Push {
             checkChildNotFound();
             try {
                 if (value != null) {
-                    final FingerprintedQName fp = new FingerprintedQName(name.getStructuredQName(), config.getNamePool());
-                    out.attribute(fp, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, ReceiverOption.NONE);
+                    final FingerprintedQName fp =
+                            new FingerprintedQName(name.getStructuredQName(), getConfiguration().getNamePool());
+                    getOutputter().attribute(fp, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, ReceiverOption.NONE);
                 }
                 return this;
             } catch (XPathException e) {
@@ -237,7 +251,7 @@ public class PushToReceiver implements Push {
             try {
                 if (value != null) {
                     final NodeName fp = new NoNamespaceName(name);
-                    out.attribute(fp, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, ReceiverOption.NONE);
+                    getOutputter().attribute(fp, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, ReceiverOption.NONE);
                 }
                 return this;
             } catch (XPathException e) {
@@ -249,7 +263,7 @@ public class PushToReceiver implements Push {
         public Element namespace(String prefix, String uri) throws SaxonApiException {
             checkChildNotFound();
             try {
-                out.namespace(prefix, uri, ReceiverOption.NONE);
+                getOutputter().namespace(prefix, uri, ReceiverOption.NONE);
                 return this;
             } catch (XPathException e) {
                 throw new SaxonApiException(e);
@@ -293,9 +307,9 @@ public class PushToReceiver implements Push {
         }
 
         @Override
-        void sendEndEvent() throws SaxonApiException {
+        protected void sendEndEvent() throws SaxonApiException {
             try {
-                out.endElement();
+                getOutputter().endElement();
             } catch (XPathException e) {
                 throw new SaxonApiException(e);
             }

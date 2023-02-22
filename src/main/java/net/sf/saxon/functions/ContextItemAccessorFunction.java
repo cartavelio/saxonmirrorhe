@@ -39,7 +39,7 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
     public Function bindContext(XPathContext context) throws XPathException {
         final Item ci = context.getContextItem();
         if (ci == null) {
-            Callable callable = new CallableLambda((context1, arguments) -> {
+            Callable callable = new CallableDelegate((context1, arguments) -> {
                 throw new XPathException("Context item for " +
                     getFunctionName().getDisplayName() + " is absent", "XPDY0002");
             });

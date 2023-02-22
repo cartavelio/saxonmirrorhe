@@ -39,14 +39,14 @@ import javax.xml.transform.Source;
 public class SaplingDocument extends SaplingNode implements ActiveSource {
 
     private String baseUri;
-    private ImmutableList<SaplingNode> reversedChildren = ImmutableList.empty();
+    private ImmutableList<SaplingNode> reversedChildren;
 
     /**
      * Create a sapling document node with no children and no base URI
      */
 
     public SaplingDocument() {
-
+        this.reversedChildren = emptyNodeList();
     }
 
     /**
@@ -55,6 +55,7 @@ public class SaplingDocument extends SaplingNode implements ActiveSource {
      */
 
     public SaplingDocument(String baseUri) {
+        this.reversedChildren = emptyNodeList();
         this.baseUri = baseUri;
     }
 

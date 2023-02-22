@@ -88,13 +88,16 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
 
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) throws XPathException {
-        return new ManualSortedGroupIterator();
+        return new ManualSortedGroupIterator(values, position);
     }
 
-    private class ManualSortedGroupIterator extends ManualGroupIterator {
+    private static class ManualSortedGroupIterator extends ManualGroupIterator {
 
-        ManualSortedGroupIterator() {
-            super((Item) values[position - 1].value, position);
+        private final ObjectToBeSorted[] values;
+
+        public ManualSortedGroupIterator(ObjectToBeSorted[] values, int position) {
+            super(values[position - 1].value, position);
+            this.values = values;
             setLengthFinder(() -> values.length);
         }
 

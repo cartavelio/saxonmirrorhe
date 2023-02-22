@@ -55,7 +55,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     //#if EE==true
     @Override
     public ManualMergeGroupingIterator getSnapShot(XPathContext context) {
-        return new ManualMergeGroupingIterator();
+        return new ManualMergeGroupingIterator(currentMembers, getCurrentGroupingKey(), position, currenti);
     }
 //#endif
 
@@ -177,14 +177,21 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     }
 
     //#if EE==true
-    public class ManualMergeGroupingIterator extends ManualGroupIterator {
+    public static class ManualMergeGroupingIterator extends ManualGroupIterator {
 
-        List<Item> currentGroup = currentMembers;
-        AtomicSequence currentGroupingKey = getCurrentGroupingKey();
+        List<Item> currentGroup;
+        AtomicSequence currentGroupingKey;
+        ObjectValue<ItemWithMergeKeys> currenti;
 
-        public ManualMergeGroupingIterator() {
+        public ManualMergeGroupingIterator(List<Item> currentGroup,
+                                           AtomicSequence currentGroupingKey,
+                                           int position,
+                                           ObjectValue<ItemWithMergeKeys> currenti) {
             super(currenti.getObject().baseItem, position);
-            setLengthFinder(() -> currentMembers.size());
+            this.currentGroup = currentGroup;
+            this.currentGroupingKey = currentGroupingKey;
+            this.currenti = currenti;
+            setLengthFinder(() -> currentGroup.size());
         }
 
         @Override
@@ -200,7 +207,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
 
         @Override
         public int getLength() {
-            return currentMembers.size();
+            return currentGroup.size();
         }
 
 
