@@ -1,11 +1,6 @@
 package commands;
 
 import jaxptest.ConfigTest;
-/*
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.ProjectHelper;
-
- */
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +10,10 @@ import java.io.File;
  * Tests invocation of Saxon via Ant
  */
 public class AntTests {
+
+    public static void main(String[] args) {
+        org.apache.tools.ant.launch.Launcher.main(args);
+    }
 
     @BeforeAll
     public static void setUp() {
