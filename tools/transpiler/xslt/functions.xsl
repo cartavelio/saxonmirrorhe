@@ -190,7 +190,7 @@
       'net.sf.saxon.s9api.XdmMap': 'Saxon.Api.XdmMap',
       'net.sf.saxon.s9api.XdmNode': 'Saxon.Api.XdmNode',
       'net.sf.saxon.s9api.XdmValue': 'Saxon.Api.XdmValue',
-      'net.sf.saxon.resource.Loader': 'Saxon.Impl.Overrides.ResourceLoader',
+      'net.sf.saxon.resource.ResourceLoader': 'Saxon.Impl.Overrides.ResourceLoader',
       (:'net.sf.saxon.s9api.XmlProcessingError': 'Saxon.Api.XmlProcessingError':)
       'net.sf.saxon.tree.util.ProcInstParser': 'Saxon.Impl.Helpers.ProcInstParser',
       'net.sf.saxon.tree.jiter.MappingJavaIterator': 'Saxon.Impl.Overrides.MappingEnumerator',
