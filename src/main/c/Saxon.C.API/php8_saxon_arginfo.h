@@ -61,6 +61,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_setCatalog,  0, 0, 1)
 ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_clarkNameToEQName,  0, 0, 1)
+ZEND_ARG_INFO(0, clarkname)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_EQNameToClarkName,  0, 0, 1)
+ZEND_ARG_INFO(0, eqname)
+ZEND_END_ARG_INFO()
+
 //ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_registerPHPFunctions,   0, 0, 1??)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_version,  0, 0, 0)
 ZEND_END_ARG_INFO()

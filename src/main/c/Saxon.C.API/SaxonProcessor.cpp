@@ -900,6 +900,18 @@ XdmAtomicValue *SaxonProcessor::makeAtomicValue(const char *typei, const char *s
     return value;*/
 }
 
+
+    const char * SaxonProcessor::clarkNameToEQName(const char * name){
+        const char *result = j_clarkNameToEQName(SaxonProcessor::sxn_environ->thread, (char *)name);
+        return result;
+    }
+
+
+    const char * SaxonProcessor::EQNameToClarkName(const char * name){
+            const char *result = j_EQNameToClarkName(SaxonProcessor::sxn_environ->thread, (char *)name);
+            return result;
+    }
+
 const char *SaxonProcessor::getStringValue(XdmItem *item) {
     const char *result = j_getStringValue(SaxonProcessor::sxn_environ->thread, (void *)item->getUnderlyingValue());
 #ifdef DEBUG
@@ -917,47 +929,16 @@ const char *SaxonProcessor::getStringValue(XdmItem *item) {
 #if CVERSION_API_NO >= 123
 
 XdmArray *SaxonProcessor::makeArray(short *input, int length) {
-    /*
-     * TODO make C++ array as Java array - It might be possible to use CShortPointer
-     * SaxonProcessor::attachCurrentThread();
     if (input == nullptr) {
-        std::cerr << "Error found when converting string to XdmArray" << std::endl;
+        std::cerr << "Error found when converting pointer array of short values to XdmArray";
         return nullptr;
     }
-    jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
-    static jmethodID mmssID = nullptr;
-    if (mmssID == nullptr) {
-        mmssID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmArrayClass, "makeArray",
-                                                                                 "([S)Lnet/sf/saxon/s9api/XdmArray;");
-    }
-    if (!mmssID) {
-        std::cerr << "\nError: Saxonc.Dll " << "makeArray([S)" << " not found" << std::endl;
-        return nullptr;
-    }
+    int64_t  xdmArrayRef = j_makeXdmArrayFromShort(sxn_environ->thread, input, length);
+
+    XdmArray * newArray = new XdmArray(xdmArrayRef, length);
+    return newArray;
 
 
-    jshortArray sArray = nullptr;
-
-    sArray = SaxonProcessor::sxn_environ->env->NewShortArray((jint) length);
-    jshort * fill = new jshort[length];
-    for (int i = 0; i < length; i++) {
-        fill[i] = input[i];
-    }
-    SaxonProcessor::sxn_environ->env->SetShortArrayRegion(sArray, 0, length, fill);
-
-    jobject xdmArrayi = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmArrayClass, mmssID, sArray);
-    if (!xdmArrayi) {
-        std::cerr << "Error found when converting string to XdmArray";
-        return nullptr;
-    }
-
-    if (exceptionOccurred()) {
-        createException();
-    } else {
-        XdmArray *value = new XdmArray(xdmArrayi, length);
-        return value;
-    }*/
-    return nullptr;
 }
 
 
@@ -999,7 +980,7 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
 XdmArray *SaxonProcessor::makeArray(int *input, int length) {
     //SaxonProcessor::attachCurrentThread();
     if (input == nullptr) {
-        std::cerr << "Error found when converting string to XdmArray";
+        std::cerr << "Error found when converting pointer array of int values to XdmArray";
         return nullptr;
     }
     int64_t  xdmArrayRef = j_makeXdmArrayFromInt(sxn_environ->thread, input, length);
@@ -1013,7 +994,7 @@ XdmArray *SaxonProcessor::makeArray(int *input, int length) {
 XdmArray *SaxonProcessor::makeArray(long long *input, int length) {
     //SaxonProcessor::attachCurrentThread();
     if (input == nullptr) {
-        std::cerr << "Error found when converting string to XdmArray";
+        std::cerr << "Error found when converting pointer array of long values to XdmArray";
         return nullptr;
     }
     int64_t  xdmArrayRef = j_makeXdmArrayFromLong(sxn_environ->thread, input, length);
@@ -1026,7 +1007,7 @@ XdmArray *SaxonProcessor::makeArray(long long *input, int length) {
 XdmArray *SaxonProcessor::makeArray(bool *input, int length) {
 
     if (input == nullptr) {
-        std::cerr << "Error found when converting string to XdmArray";
+        std::cerr << "Error found when converting pointer array of bool values to XdmArray";
         return nullptr;
     }
     int * inputAsInts = new int[length];
@@ -1046,7 +1027,7 @@ XdmArray *SaxonProcessor::makeArray(bool *input, int length) {
 XdmArray *SaxonProcessor::makeArray(const char **input, int length) {
     //SaxonProcessor::attachCurrentThread();
     if (input == nullptr) {
-        std::cerr << "Error found when converting string to XdmArray";
+        std::cerr << "Error found when converting array of strings to XdmArray";
         return nullptr;
     }
   /*  int64_t  xdmArrayRef = j_makeXdmArrayFromStrings(sxn_environ->thread, input, length);

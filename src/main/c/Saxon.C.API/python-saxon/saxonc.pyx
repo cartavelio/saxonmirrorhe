@@ -332,6 +332,46 @@ cdef class PySaxonProcessor:
         if val.thissvptr is NULL:
             raise Exception("Error: Saxon Processor is not licensed for schema processing!")
         return val
+
+
+
+    def eqname_to_clark_name(self, name):
+        """
+        eqname_to_clark_name(self, name)
+        Convert EQName string to clark name notation.
+        Args:
+            name (str): The URI in EQName notation: <code>Q{uri}local</code> if the name is in a namespace.
+            For a name in no namespace, either of the forms <code>Q{}local</code> or simply <code>local</code> are accepted.
+        Returns:
+            str: the URI inb clark notation
+        """
+        cdef char * c_str_
+        py_name_string = name.encode('utf-8') if name is not None else None
+        c_str_ = py_value_string if name is not None else ""
+        cdef const char* c_string = self.thisptr.EQNameToClarkName(c_str_)
+        ustring = make_py_str(c_string)
+        return ustring
+
+    def clark_name_to_eqname(self, name):
+        """
+        clark_name_to_eqname(self, name)
+        Convert clark name string to EQName notation. The expanded name, as a string using the notation defined by the EQName production in XPath 3.0.
+        If the name is in a namespace, the resulting string takes the form <code>Q{uri}local</code>.
+        Otherwise, the value is the local part of the name.
+        Args:
+            name (str): The URI in Clark notation: <code>{uri}local</code> if the
+            name is in a namespace, or simply <code>local</code> if not.
+        Returns:
+            str: the expanded name, as a string using the notation defined by the EQName production in XPath 3.0.
+        """
+        cdef char * c_str_
+        py_name_string = name.encode('utf-8') if name is not None else None
+        c_str_ = py_value_string if name is not None else ""
+        cdef const char* c_string = self.thisptr.clarkNameToEQName(c_str_)
+        ustring = make_py_str(c_string)
+        return ustring
+
+
     def make_string_value(self, value):
         """
         make_string_value(self, value)

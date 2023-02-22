@@ -230,6 +230,8 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(SaxonProcessor,  exceptionClear);
     PHP_METHOD(SaxonProcessor,  exceptionOccurred);
     PHP_METHOD(SaxonProcessor,  getErrorMessage);
+    PHP_METHOD(SaxonProcessor,  EQNameToClarkName);
+    PHP_METHOD(SaxonProcessor,  clarkNameToEQName);
 
 
 
