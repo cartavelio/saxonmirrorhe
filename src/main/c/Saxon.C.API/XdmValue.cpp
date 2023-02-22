@@ -25,7 +25,6 @@ XdmValue::XdmValue(const XdmValue & other) {
     jValues = other.jValues;
     toStringValue = other.toStringValue;
     values.resize(0);
-    std::cerr << "xdmValue compy constructor called YYYYYYYYYYYYY" << std::endl;
     for (int i = 0; i < xdmSize; i++) {
         addXdmItem(other.values[i]);
     }
@@ -97,32 +96,24 @@ std::cerr << "Exception thrown while creating XdmValue from array" << std::endl;
 return;
 }
 std::cerr << "DEBUG C++ - after j_getXdmObjectType typeRef=" << typeRef << std::endl;
-XdmItem * itemi = nullptr;
 if (typeRef == 1) {
 
-itemi = new XdmAtomicValue(results[p]);
+addXdmItem(new XdmAtomicValue(results[p]));
 
 } else if (typeRef == 2) {
 
-itemi = new XdmAtomicValue(results[p]);
+addXdmItem(new XdmAtomicValue(results[p]));
 
 } else if (typeRef == 4) {
-itemi = new XdmAtomicValue(results[p]);
+addXdmItem(new XdmAtomicValue(results[p]));
 } else if (typeRef == 3) {
-itemi = new XdmAtomicValue(results[p]);
+addXdmItem(new XdmAtomicValue(results[p]));
 
 } else if (typeRef == 5) {
-itemi = new XdmAtomicValue(results[p]);
+addXdmItem(new XdmAtomicValue(results[p]));
 } else {
 std::cerr << "Error creating XdmValue from array" << std::endl;
-break;
-}
 
-values.push_back(itemi);
-itemi -> incrementRefCount();
-xdmSize++;
-if (jValues) {
-jValues = -1;
 }
 
 }
