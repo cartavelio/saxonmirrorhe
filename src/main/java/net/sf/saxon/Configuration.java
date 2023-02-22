@@ -3718,12 +3718,13 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void registerExternalObjectModel(ExternalObjectModel model) {
-        try {
-            getClass(model.getDocumentClassName(), false);
-        } catch (XPathException e) {
-            // If the model can't be loaded, do nothing
-            return;
-        }
+//        code removed by bug 5725
+//        try {
+//            getClass(model.getDocumentClassName(), false);
+//        } catch (XPathException e) {
+//            // If the model can't be loaded, do nothing
+//            return;
+//        }
         if (externalObjectModels == null) {
             externalObjectModels = new ArrayList<>(4);
         }
