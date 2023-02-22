@@ -6738,7 +6738,7 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></samp>
         <p>Determines whether a given date/time is in summer-time (daylight savings time).</p>
       </description>
       <signatures>
-        <proto return-type="xs:boolean">
+        <proto return-type="xs:boolean?">
           <arg name="date" type="xs:dateTime" desc="The input date/time"/>
           <arg name="region" type="xs:string" desc="The country code or Olson timezone name"/>
         </proto>
@@ -6754,7 +6754,7 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></samp>
               <code>America/New_York</code> or <code>Europe/Lisbon</code>). The function returns
             true if the given date/time is in summer time (daylight savings time) in that country or
             timezone, as far as can be determined from the Java timezone database. If the
-            information is not available the function either returns false or an empty sequence.</p>
+            information is not available the function returns an empty sequence.</p>
 
           <p>If a country code is specified for a country that spans different timezones with
             different daylight savings rules (for example, the US), then one timezone in that
