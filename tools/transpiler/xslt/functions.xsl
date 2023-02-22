@@ -148,6 +148,8 @@
       (: 'net.sf.saxon.lib.ExtensionFunctionCall': 'Saxon.Api.ExtensionFunctionCall', :)
       (: 'net.sf.saxon.lib.ExtensionFunctionDefinition': 'Saxon.Api.ExtensionFunctionDefinition', :)
       'net.sf.saxon.functions.ParseXmlFragment': 'Saxon.Impl.Helpers.ParseXmlFragment',
+      'net.sf.saxon.lib.CatalogResourceResolver': 'Saxon.Callbacks.CatalogResourceResolver',
+      'net.sf.saxon.lib.CommonResourceResolver': 'Saxon.Callbacks.CommonResourceResolver',
       'net.sf.saxon.lib.StandardLogger': 'Saxon.Callbacks.StandardLogger',
       'net.sf.saxon.lib.StandardModuleURIResolver': 'Saxon.Callbacks.StandardModuleURIResolver',
       'net.sf.saxon.lib.StandardUnparsedTextResolver': 'Saxon.Callbacks.StandardUnparsedTextResolver',

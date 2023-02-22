@@ -285,9 +285,7 @@ public class CommandLineOptions {
             }
         }
 
-        String optionValue;
-        //#if CSHARP==false
-        optionValue = getOptionValue("catalog");
+        String optionValue = getOptionValue("catalog");
         if (optionValue != null) {
             ArrayList<String> catalogs = new ArrayList<>();
             if ((getOptionValue("u") != null) || isImplicitURI(optionValue)) {
@@ -313,9 +311,8 @@ public class CommandLineOptions {
                 }
             }
 
-            config.getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogs);
+            setCatalogFiles(config, catalogs);
         }
-        //#endif
 
         optionValue = getOptionValue("dtd");
         if (optionValue != null) {
@@ -474,6 +471,11 @@ public class CommandLineOptions {
             initializer.initialize(config);
         }
 
+    }
+
+    @CSharpReplaceBody(code="config.getCommonResourceResolver().SetFeature(Org.XmlResolver.Features.ResolverFeature.CATALOG_FILES, catalogs);")
+    private void setCatalogFiles(Configuration config, ArrayList<String> catalogs) throws XPathException {
+        config.getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogs);
     }
 
     /**
