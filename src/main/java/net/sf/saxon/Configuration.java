@@ -5446,6 +5446,10 @@ public class Configuration implements SourceResolver, NotationSet {
         return null;
     }
 
+    public IElaborationService makeElaborationService() {
+        return null;
+    }
+
     /**
      * Generate a report on byte code instrumentation to a specified file
      *
