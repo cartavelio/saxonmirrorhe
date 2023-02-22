@@ -10,6 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.DoubleValue;
@@ -90,6 +91,7 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
      */
 
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public Expression makeFunctionCall(Expression[] arguments) {
         Expression arg = new ContextItemExpression();
         return SystemFunction.makeCall(getFunctionName().getLocalPart(), getRetainedStaticContext(), arg);
