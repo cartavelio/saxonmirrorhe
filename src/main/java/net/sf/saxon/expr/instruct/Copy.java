@@ -435,7 +435,7 @@ public class Copy extends ElementCreator {
 
             case Type.ELEMENT:
                 // use the generic code for creating new elements
-                specificProcess(out, context, new CopyElementDetails((NodeInfo) item));
+                specificProcess(out, context, makeElementCreationDetails((NodeInfo) item));
                 return null;
 
             case Type.ATTRIBUTE:
@@ -565,14 +565,16 @@ public class Copy extends ElementCreator {
     }
 
     public CopyElementDetails makeElementCreationDetails(NodeInfo copiedNode) {
-        return new CopyElementDetails(copiedNode);
+        return new CopyElementDetails(this, copiedNode);
     }
 
-    private class CopyElementDetails extends ElementCreationDetails {
+    public static class CopyElementDetails extends ElementCreationDetails {
 
+        private Copy instruction;
         private NodeInfo copiedNode;
 
-        public CopyElementDetails(NodeInfo copiedNode) {
+        public CopyElementDetails(Copy instruction, NodeInfo copiedNode) {
+            this.instruction = instruction;
             this.copiedNode = copiedNode;
         }
 
@@ -592,7 +594,7 @@ public class Copy extends ElementCreator {
 
         @Override
         public void processContent(Outputter out, XPathContext context) throws XPathException {
-            getContentExpression().process(out, context);
+            instruction.getContentExpression().process(out, context);
         }
     }
 

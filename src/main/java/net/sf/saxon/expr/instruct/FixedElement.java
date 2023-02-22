@@ -551,8 +551,8 @@ public class FixedElement extends ElementCreator {
             }
 
             @Override
-            public void processContent(Outputter out, XPathContext context) throws XPathException {
-                getContentExpression().process(out, context);
+            public void processContent(Outputter output, XPathContext context) throws XPathException {
+                getContentExpression().process(output, context);
             }
         };
     }
