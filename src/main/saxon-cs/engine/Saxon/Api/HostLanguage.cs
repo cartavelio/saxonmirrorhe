@@ -5,6 +5,7 @@ namespace Saxon.Api {
     /// </summary>
     public enum HostLanguage
     {
+        UNKNOWN,
         XSLT,
         XQUERY,
         XML_SCHEMA,
