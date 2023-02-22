@@ -493,6 +493,7 @@ public final class SequenceType {
      *
      * @param value the value which has been found not to match this sequence type
      * @param th the TypeHierarchy cache
+     * @return any extra information
      */
 
     public Optional<String> explainMismatch(GroundedValue value, TypeHierarchy th) {
