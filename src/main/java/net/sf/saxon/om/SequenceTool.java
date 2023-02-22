@@ -209,11 +209,9 @@ public class SequenceTool {
      * @throws XPathException if an error is detected
      */
 
-    public static boolean sameLength(SequenceIterator a, SequenceIterator b) throws XPathException {
-        if (SequenceTool.supportsGetLength(a)) {
-            return hasLength(b, ((LastPositionFinder) a).getLength());
-        } else if (SequenceTool.supportsGetLength(b)) {
-            return hasLength(a, ((LastPositionFinder) b).getLength());
+    public static boolean sameLength(SequenceIterator a, SequenceIterator b) {
+        if (SequenceTool.supportsGetLength(a) && SequenceTool.supportsGetLength(b)) {
+            return ((LastPositionFinder) a).getLength() == ((LastPositionFinder) b).getLength();
         } else {
             while (true) {
                 Item itA = a.next();
