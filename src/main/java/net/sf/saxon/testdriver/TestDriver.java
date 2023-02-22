@@ -435,6 +435,7 @@ public abstract class TestDriver {
         QName edition = new QName("", "edition");
         QName platform = new QName("", "platform");
         QName compiler = new QName("", "compiler");
+        QName relocate = new QName("", "relocatable");
         String saxonEdition = driverProc.getSaxonEdition();
         try {
             String suppliedName = getNameOfExceptionsFile();
@@ -480,6 +481,11 @@ public abstract class TestDriver {
                     if (compilerVal == null) {
                         compilerVal = "";
                     }
+                    String relocateVal = entry.getAttributeValue(relocate);
+                    if (relocateVal == null) {
+                        relocateVal = "";
+                    }
+                    relocateVal = relocateVal.trim();
                     // If exception/@compiler is not specified, then exception is relevant to all compilers
                     if (!compilerVal.equals("")) {
                         String[] exceptedCompilers = compilerVal.trim().split("\\s+");
@@ -514,6 +520,9 @@ public abstract class TestDriver {
                                 break;
                             }
                         }
+                    }
+                    if ((relocateVal.equals("on") && !relocatable) || (relocateVal.equals("off") && relocatable))  {
+                        appliesThisEdition = false;
                     }
                 }
                 if (appliesThisEdition) {
