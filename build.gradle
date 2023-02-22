@@ -943,6 +943,12 @@ task asm_jarjar(
 }
 
 task asm_unzip(dependsOn: ["asm_jarjar"]) {
+  inputs.file "lib/asm-${asmVersion}/asm-xml-${asmVersion}.jar"
+  ["asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util"].each { asm ->
+    inputs.file "${buildDir}/lib/asm/${asm}-${asmVersion}.jar"
+  }
+  outputs.files fileTree("${buildDir}/classes/eej")
+
   doLast {
     copy {
       // This one is from the original ASM
