@@ -206,7 +206,7 @@ namespace Saxon.Api {
         /// If the method does not wrap a DOM <c>XmlNode</c> then null is returned
         /// </summary>
         /// <returns>The underlying <c>XmlNode</c></returns>
-        public XmlNode getUnderlyingXmlNode() {
+        public XmlNode GetUnderlyingXmlNode() {
             NodeInfo localNode = (NodeInfo)value;
             if (localNode is VirtualNode virtualNode) {
                 object realNode = virtualNode.getRealNode();
@@ -219,6 +219,16 @@ namespace Saxon.Api {
             }
 
             return null;
+        }
+        
+        /// <summary>
+        /// Incorrectly-named synonym of GetUnderlyingXmlNode, retained temporarily for compatibility with 11.0 and 11.1
+        /// </summary>
+        /// <returns>The underlying <c>XmlNode</c> if there is one</returns>
+    
+        [Obsolete("This is an obsolete synonym of GetUnderlyingXmlNode")]
+        public XmlNode getUnderlyingXmlNode() {
+            return GetUnderlyingXmlNode();
         }
 
         /// <summary>
