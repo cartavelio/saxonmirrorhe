@@ -65,7 +65,7 @@ it may be necessary to host this directory on a localhost web-server.
 
 <xsl:value-of select="$genDate"/>
 
-This saxon-resources download contains Saxon-CS documentation, and sample applications. 
+This saxon-resources download contains SaxonCS documentation, and sample applications. 
 
 To access the documentation, open doc/index.html in a browser and follow the instructions and links
 
@@ -85,7 +85,7 @@ Notices for components redistributed with Saxon.
 
 3. samples
 ----------
-Sample applications relevant for Saxon-CS on .NET. See the "Sample Saxon Applications" section of
+Sample applications relevant for SaxonCS on .NET. See the "Sample Saxon Applications" section of
 the Saxon documentation for details.
 
 4. source-userdoc
