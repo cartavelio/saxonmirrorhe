@@ -1741,16 +1741,47 @@
       <xsl:text>)</xsl:text>
    </xsl:template>
    
-   <!-- Try converting a static method reference (MyClass::toExportString) to (a => a.toExportString()) -->
+   <!-- Convert a method reference (MyClass::toExportString).
+        The problem here is distinguishing static method references (Math::sin becomes Math.sin)
+        from instance-level method references (AtomicType::isIdRef becomes (a => a.isIdRef()).
+        The convention we adopt is that static method references are recognised only if explicitly
+        listed below -->
+   
+   <xsl:variable name="staticMethodReferences">
+      <class name="java.lang.Math">
+         <method name="sin"/>
+         <method name="cos"/>
+         <method name="tan"/>
+         <method name="asin"/>
+         <method name="acos"/>
+         <method name="atan"/>
+         <method name="sqrt"/>
+         <method name="log"/>
+         <method name="log10"/>
+         <method name="exp"/>
+         <method name="exp10"/>
+      </class>
+   </xsl:variable>
+   
    <xsl:template match="*[@nodeType='MethodReferenceExpr'][scope/type/@RESOLVED_TYPE]" priority="15">
-      <xsl:text>x => x.{f:renameMethod(@identifier, .)}() /* converted from static method reference */</xsl:text>
+      <xsl:choose>
+         <xsl:when test="some $c in $staticMethodReferences/class
+                         satisfies ($c/@name = scope/type/@RESOLVED_TYPE
+                               and $c/method/@name = @identifier)">
+            <xsl:apply-templates select="scope"/>
+            <xsl:text>.{f:renameMethod(@identifier, .)} /* known method reference */</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:text>x => x.{f:renameMethod(@identifier, .)}() /* method reference */</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>      
    </xsl:template>
    
    <!-- Try converting a non static method reference (out::append) to (it => out.append(it)) -->
    <xsl:template match="*[@nodeType='MethodReferenceExpr'][scope/type/@UNRESOLVED]" priority="16">
       <xsl:text>it => </xsl:text>
       <xsl:apply-templates select="scope"/>
-      <xsl:text>.{f:renameMethod(@identifier, .)}(it) /* converted from instance method reference */</xsl:text>
+      <xsl:text>.{f:renameMethod(@identifier, .)}(it) /* instance method reference */</xsl:text>
    </xsl:template>
    
    <xsl:template match="*[@nodeType='MethodReferenceExpr']" priority="10">
@@ -1761,8 +1792,7 @@
    
    
    <xsl:template match="*[@nodeType='MethodReferenceExpr'][@identifier='new']" priority="20">
-      <!-- Problem with this is identifying the params to the constructor. Have removed ::new
-           construct from the Java code so it doesn't arise -->
+      <!-- Used for classname::new - always invokes zero-argument constructor -->
       <xsl:text>() => new </xsl:text>
       <xsl:apply-templates select="scope"/>
       <xsl:text>()</xsl:text>
@@ -1772,14 +1802,7 @@
       <xsl:text>x => (x is {scope/type/@RESOLVED_TYPE => f:adjustTypeNamespace()})</xsl:text>
    </xsl:template>
    
-   <!--<argument nodeType="MethodReferenceExpr" identifier="isInstance">
-      <scope nodeType="ClassExpr">
-         <type nodeType="ClassOrInterfaceType"
-            RESOLVED_TYPE="net.sf.saxon.style.StyleElement">
-            <name nodeType="SimpleName" identifier="StyleElement"/>
-         </type>
-      </scope>
-   </argument>-->
+   <!-- String and character literals -->
    
    <xsl:template match="*[@nodeType='StringLiteralExpr']">
       <xsl:text>"{@value}"</xsl:text>
