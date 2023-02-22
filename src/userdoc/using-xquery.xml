@@ -749,10 +749,9 @@
          supported by Saxon, see <a class="bodylink" href="/extensions/output-extras">Additional
             serialization parameters</a>.</p>
    </section>
-   <section id="api-query" title="From a Java Application">
+   <section id="api-query" title="From a Java Application" class="javaonly">
       
       <h1>Running Queries from a Java Application</h1>
-      <div  class="javaonly">
 
       <p>Saxon offers two different APIs allowing queries to be run from Java:</p>
       <ul>
@@ -769,12 +768,12 @@
                   XQuery</a>.</p>
          </li>
       </ul>
-      </div>
+      
 
-      <section id="s9api-query" title="Using s9api for XQuery">
+      <section id="s9api-query" title="Using s9api for XQuery" class="javaonly">
          
          <h1>Using s9api for XQuery</h1>
-         <div class="javaonly">
+         
          <p>You can perform a query using the s9api interface as follows:</p>
          <ol>
             <li>
@@ -850,12 +849,11 @@
             use <code>import module</code> specifying the module URI in the normal way. It is not
             necessary to supply a module location hint (<code>at "URI"</code>), and if any is
             supplied, it will be ignored.</p>
-         </div>
+         
       </section>
 
       <section id="xqj" title="Invoking XQuery using the XQJ API" class="javaonly">
          <h1>Invoking XQuery using the XQJ API</h1>
-         <div class="javaonly">
 
          <p>XQJ (XQuery API for Java, also known as JSR 225) is a vendor-neutral API for invoking
             XQuery from Java applications. The Final Release (1.0) is published at <a
@@ -906,13 +904,13 @@
             position. The result of <code>getItem()</code> is an <code>XQItem</code> object, and
             this has methods allowing you to determine the item type, and to convert the item into a
             suitable Java object or value.</p>
-         </div>
+         <!--</div>-->
       </section>
    </section>
    
-   <section id="saxon-api-query" title="From a C# Application">
+   <section id="saxon-api-query" title="From a C# Application" class="csonly">
       <h1>Using XQuery from C#</h1>
-      <div class="csonly">
+      
       <aside>The same classes and methods can be used from .NET languages other than C#, but
       all the examples here are written in C# terms.</aside>
       
@@ -998,7 +996,7 @@
          use <code>import module</code> specifying the module URI in the normal way. It is not
          necessary to supply a module location hint (<code>at "URI"</code>), and if any is
          supplied, it will be ignored.</p>
-      </div>
+      
    </section>
    
    <section id="update" title="Using XQuery Update">
@@ -1176,10 +1174,9 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
             <code>result:element</code> or <code>result:atomic-value</code>) according to its type.
          The sequence as a whole is wrapped in a <code>result:sequence</code> element.</p>
    </section>
-   <section id="querycompilation" title="Compiling Queries to ByteCode">
+   <section id="querycompilation" title="Compiling Queries to ByteCode" class="javaonly">
       <h1>Compiling Queries to ByteCode</h1>
 
-      <div class="javaonly">
       <aside>Bytecode generation requires Saxon-EE on the Java platform.</aside>
 
       <p>Since Saxon 9.4, Saxon-EE automatically (and selectively) compiles queries to Java
@@ -1207,11 +1204,11 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
          bytecode (<a class="feature" href="DISPLAY_BYTE_CODE"/>). See <a class="bodylink"
             href="/configuration/config-features">Configuration Features</a> for more
          information.</p>
-      </div>
+      
    </section>
-   <section id="performanceanalysis" title="Performance Analysis">
-      <div class="javaonly">
+   <section id="performanceanalysis" title="Performance Analysis" class="javaonly">
       <h1>Performance Analysis</h1>
+      
       <p>Saxon comes with a simple tool allowing profiling of the execution time in a
          query.</p>
       <p>To run this tool, first execute the query with the <code>-TP:filename</code>
@@ -1230,20 +1227,22 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
          top. These will not necessarily be those with the greatest time, which tend to be
          instructions that were only executed once but remained active for the duration of the
          query.</p>
-      </div>
+      
    </section>
    <section id="extensibility" title="Extensibility">
       <h1>Extensibility</h1>
 
 
-      <p class="javaonly">The Saxon XQuery implementation allows you to call Java methods as external functions. The
+      <div class="javaonly">
+      <p>The Saxon XQuery implementation allows you to call Java methods as external functions. The
          function does not need to be declared. Use a namespace declaration such as <code>declare
             namespace math="java:java.lang.Math"</code>, and invoke the method as
             <code>math:sqrt(2)</code>.</p>
 
-      <p class="javaonly">More details of this mechanism are found in <a class="bodylink"
+      <p>More details of this mechanism are found in <a class="bodylink"
          href="/extensibility/extension-functions-J/reflexive-functions">Extension Functions</a>.</p>
-
+      </div>
+      
       <p>Saxon recognizes the XQuery pragma syntax, but it currently defines only one pragma of its
          own, the <code>saxon:validate-type</code> pragma (see <a class="bodylink"
             href="../extensions">Extensions</a>), and this is now redundant since the equivalent

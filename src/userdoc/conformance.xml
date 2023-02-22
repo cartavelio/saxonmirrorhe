@@ -2134,27 +2134,29 @@
             <code>NCName</code>. Saxon's schema processor imposes the constraint that an
             <code>xml:id</code> attribute, if allowed at all, must be declared as being of type
             <code>xs:ID</code>.</p>
-
-      <p class="javaonly">Saxon on the Java platform works with any SAX2-conformant XML parser that is configured to
+      
+      <div class="javaonly">
+      <p>Saxon on the Java platform works with any SAX2-conformant XML parser that is configured to
          enable namespace processing. There is one limitation: on the <code>startElement()</code>
          call from the <code>XMLReader</code> to the <code>ContentHandler</code>, the QName (that
          is, the third argument) must be present. According to the SAX2 specification,
          namespace-aware parsers are not obliged to supply this argument. However, all commonly-used
          parsers appear to do so.</p>
 
-      <p class="javaonly">Saxon on the Java platform should work with any DOM-conformant XML parser, however, Saxon's
+      <p>Saxon on the Java platform should work with any DOM-conformant XML parser, however, Saxon's
          DOM interface is tested only with the DOM implementation included in the Oracle JDK, and
          other DOM implementations are known to vary. Saxon has been used successfully with the
          Oracle XDK DOM implementation, though this is not included in the standard test suite and
          problems have occasionally been reported with this combination.</p>
 
-      <p class="javaonly">When a XOM tree is supplied as the transformation input, Saxon does not combine adjacent
+      <p>When a XOM tree is supplied as the transformation input, Saxon does not combine adjacent
          text nodes into a single node. Adjacent text nodes can occur as the result of user
          modifications to the tree, or as a result of the presence of CDATA sections or entity
          references, depending on the options in force when the tree was constructed. <i>This
             restriction no longer applies to DOM and JDOM2 trees: in these cases, the virtual XPath
             view that is created maps one XPath text node to a sequence of adjacent DOM or JDOM2
             nodes.</i></p>
+      </div>
    </section>
    <section id="encodings" title="Character Encodings Supported">
       <h1>Character Encodings Supported</h1>

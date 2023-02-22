@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="saxon-cs" title="Saxon-CS">
+<article id="saxon-cs" title="Saxon-CS" class="csonly">
    <h1>Saxon-CS</h1>
       
       <p>Saxon-CS is a new product that implements nearly all the functionality of the Java
@@ -48,7 +48,7 @@ as their Java counterparts, with some exceptions. They are described in the foll
       <p>An introduction to the API for Saxon on .NET is provided at <a class="bodylink" href="dotnetapi">Saxon API for .NET</a>;
 full specifications are available in the <a href="/dotnetdoc" class="apilink">.NET API</a>.</p>
          
-   <section id="dotnetapi" title="Saxon API for .NET">
+   <section id="dotnetapi" title="Saxon API for .NET" class="csonly">
       <h1>Saxon API for .NET</h1>
       
 
@@ -217,7 +217,7 @@ The places where such escape hatches are provided are shown below:</p>
          </tbody>
       </table>
    </section>
-   <section id="xmlparsing" title="XML Parsing in Saxon-CS">
+   <section id="xmlparsing" title="XML Parsing in Saxon-CS" class="csonly">
       <h1>XML Parsing in Saxon-CS</h1>
       
 
@@ -296,11 +296,11 @@ supplied with the .NET platform.</p>
       <p>Normal HTML elements (such as <code>&lt;p&gt;</code>, <code>&lt;div&gt;</code>, etc) are delivered
       as element nodes whose local name is in lower-case, with the XHTML namespace URI.</p>
    </section>
-   <section id="saxon-cs-extension-functions" title="Writing Extension Functions">
+   <section id="saxon-cs-extension-functions" title="Writing Extension Functions" class="csonly">
       <h1>Writing Extension Functions</h1>
       <p>Reflexive extension functions are not available in Saxon-CS.</p>
    </section>
-   <section id="saxon-extensions" title="Built-in Extensions">
+   <section id="saxon-extensions" title="Built-in Extensions" class="csonly">
       <h1>Built-in Extensions</h1>
       <p>All the extension functions in the <code>saxon</code> namespace are available with the
       exception of <code>saxon:send-mail()</code>, <code>saxon:parse-dateTime()</code>, saxon:object-map...</p>
@@ -322,7 +322,7 @@ supplied with the .NET platform.</p>
       
       <p>The SQL extension is NOT available in Saxon-CS.</p>
    </section>
-   <section id="localization" title="Localization">
+   <section id="localization" title="Localization" class="csonly">
       <h1>Localization</h1>
       <p>Collation URIs for the Unicode Collation Algorithm are implemented using the ICU4N library, which is not as complete
       as its Java counterpart, ICU4J.</p>
@@ -331,7 +331,7 @@ supplied with the .NET platform.</p>
       
       <p>Localization of numbers and dates is not currently available for languages other than English.</p>
    </section>
-   <section id="restrictions" title="Restrictions">
+   <section id="restrictions" title="Restrictions" class="csonly">
       <h1>Restrictions</h1>
       
       <p>Absolute URIs with single-character scheme names (for example, <code>a:/x/y/z</code>) are not handled correctly. 
