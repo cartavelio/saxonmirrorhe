@@ -296,7 +296,8 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
                     new AtomicSequenceMappingFunction();
             mapper.setConverter(converter);
             if (expr.getRoleSupplier() != null) {
-                mapper.setErrorCode(expr.getRoleSupplier().get().getErrorCode());
+                String errorCode = expr.getRoleSupplier().get().getErrorCode();
+                mapper.setErrorCode("XPTY0004".equals(errorCode) ? "FORG0001" : "XPTY0004");
             }
             final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
             return context -> {

@@ -334,7 +334,10 @@ public class AtomicSequenceConverter extends UnaryExpression {
             AtomicSequenceMappingFunction mapper = new AtomicSequenceMappingFunction();
             mapper.setConverter(conv);
             if (roleSupplier != null) {
-                mapper.setErrorCode(roleSupplier.get().getErrorCode());
+                String errorCode = roleSupplier.get().getErrorCode();
+                if (!"XPTY0004".equals(errorCode)) {
+                    mapper.setErrorCode(errorCode);
+                }
             }
             return new ItemMappingIterator(base, mapper, true);
         }
