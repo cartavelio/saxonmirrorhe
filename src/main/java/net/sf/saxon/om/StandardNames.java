@@ -65,7 +65,6 @@ public abstract class StandardNames {
     public static final int XSL_FALLBACK = XSL + 26;
     public static final int XSL_FOR_EACH = XSL + 27;
     public static final int XSL_FOR_EACH_GROUP = XSL + 28;
-    public static final int XSL_FOR_EACH_MEMBER = XSL + 30;
     public static final int XSL_FORK = XSL + 31;
     public static final int XSL_FUNCTION = XSL + 32;
     public static final int XSL_GLOBAL_CONTEXT_ITEM = XSL + 33;
@@ -366,7 +365,6 @@ public abstract class StandardNames {
         bindXSLTName(XSL_FALLBACK, "fallback");
         bindXSLTName(XSL_FOR_EACH, "for-each");
         bindXSLTName(XSL_FOR_EACH_GROUP, "for-each-group");
-        bindXSLTName(XSL_FOR_EACH_MEMBER, "for-each-member");
         bindXSLTName(XSL_FORK, "fork");
         bindXSLTName(XSL_FUNCTION, "function");
         bindXSLTName(XSL_GLOBAL_CONTEXT_ITEM, "global-context-item");

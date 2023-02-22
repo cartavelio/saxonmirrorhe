@@ -39,6 +39,16 @@ public class DictionaryMap implements MapItem {
     }
 
     /**
+     * Create an empty dictionary, to which entries can be added using {@link #initialPut(String, GroundedValue)},
+     * provided this is done before the map is exposed to the outside world.
+     * @param size estimated final size of the dictionary
+     */
+
+    public DictionaryMap(int size) {
+        hashMap = new HashMap<>(size);
+    }
+
+    /**
      * During initial construction of the map, add a key-value pair
      */
 

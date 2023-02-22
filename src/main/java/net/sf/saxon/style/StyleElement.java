@@ -14,6 +14,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.SortKeyDefinition;
 import net.sf.saxon.expr.sort.SortKeyDefinitionList;
 import net.sf.saxon.functions.Current;
+import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
@@ -1449,6 +1450,42 @@ public abstract class StyleElement extends ElementImpl {
 
     public SimpleType getTypeAnnotation(SchemaType schemaType) {
         return (SimpleType) schemaType;
+    }
+
+    /**
+     * Adapt an expression that returns an array to one that returns a representation of
+     * the array as a sequence of single-entry maps, as required for the proposed XSLT 4.0
+     * xsl:for-each/iterate instructions with an "array" attribute
+     * @param arrayExpr the expression in the array attribute
+     * @return a call on a function that converts the array to a sequence of single-entry maps
+     */
+    protected Expression arrayToSequence(Expression arrayExpr) {
+        try {
+            return VendorFunctionSetHE.getInstance()
+                    .makeFunction("array-as-sequence-of-maps", 1)
+                    .makeFunctionCall(arrayExpr);
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
+    }
+
+    /**
+     * Adapt an expression that returns a map to one that returns a representation of
+     * the map as a sequence of two-entry maps containing the "key" and "value" fields,
+     * as required for the proposed XSLT 4.0 xsl:for-each/iterate instructions with a "map" attribute
+     *
+     * @param mapExpr the expression in the map attribute
+     * @return a call on a function that converts the map to a sequence of key-value maps
+     */
+
+    protected Expression mapToSequence(Expression mapExpr) {
+        try {
+            return VendorFunctionSetHE.getInstance()
+                    .makeFunction("map-as-sequence-of-maps", 1)
+                    .makeFunctionCall(mapExpr);
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
     }
 
     /**
