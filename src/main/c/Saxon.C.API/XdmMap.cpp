@@ -23,419 +23,75 @@ XdmMap::XdmMap(int64_t obj): XdmFunctionItem(obj) {
 }
 
 const char * XdmMap::toString(){
-   return "";//xdmMapToString(SaxonProcessor::sxn_environ->thread, (void *)value);
+  allocFn fn = operator new;
+  const char * str = xdmMapToString(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
+
+  return str;
 }
 
 
 
     int XdmMap::mapSize(){
-      /* if(map_size == -1) {
-        jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
-        static jmethodID tbiimapID = nullptr;
-
-        if(tbiimapID == nullptr) {
-        tbiimapID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmMapClass, "mapSize",
-        					"()I");
-
-        }
-        if (!tbiimapID) {
-        			std::cerr << "Error: Saxonc.XdmMap." << "mapSize"
-        				<< " not found\n" << std::endl;
-        			return 0;
-        } else {
-        		jint result = (jint)(SaxonProcessor::sxn_environ->env->CallIntMethod(value, tbiimapID));
-        		map_size =(int)result;
-        }
-      }*/
-
-        return map_size;
+      if(map_size == -1) {
+        return j_xdmMap_size(SaxonProcessor::sxn_environ->thread, (void *)value);
+      }
+      return map_size;
     }
 
     XdmValue * XdmMap::get(XdmAtomicValue* key) {
-   /* jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
-    static jmethodID tbmapID = nullptr;
+        int64_t result = j_xdmMap_get(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)key->getUnderlyingValue());
 
-    if(tbmapID == nullptr) {
-    tbmapID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmMapClass, "get",
-    					"(Lnet/sf/saxon/s9api/XdmAtomicValue;)Lnet/sf/saxon/s9api/XdmValue;");
-
-    }
-    if (tbmapID == nullptr) {
-    			std::cerr << "Error: Saxonc.XdmMap." << "get(XdmAtomicValue)"
-    				<< " not found\n" << std::endl;
-    			return nullptr;
-    } else {
-    			jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbmapID, ((XdmItem *)key)->getUnderlyingValue()));
-        		if(valueObj) {
-                    jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                           "net/sf/saxon/s9api/XdmAtomicValue");
-                    jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
-                    jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                            "net/sf/saxon/s9api/XdmFunctionItem");
-                    jclass mapItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                            "net/sf/saxon/s9api/XdmMap");
-                    jclass arrayItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                       "net/sf/saxon/s9api/XdmArray");
-
-                    XdmValue * tempValue = new XdmValue();
-                    
-                    XdmItem *xdmItem = nullptr;
-
-
-                      if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, atomicValueClass) == JNI_TRUE) {
-                            xdmItem = new XdmAtomicValue(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, nodeClass) == JNI_TRUE) {
-                            xdmItem = new XdmNode(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, functionItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmFunctionItem(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, mapItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmMap(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, arrayItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmArray(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else {
-                            tempValue = new XdmValue();
-                            tempValue->addUnderlyingValue(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            return tempValue;
-                        }
-       			}
-       			return nullptr;
-    }*/
-        return nullptr;
+        return getXdmValueSubClass(result);
     }
 
     XdmValue * XdmMap::get(const char * key) {
-        /*jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
-        static jmethodID tbsmapID = nullptr;
-
-        if(tbsmapID == nullptr) {
-        tbsmapID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmMapClass, "get",
-        					"(Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmValue;");
-
+        if(key == nullptr) {
+            return nullptr;
         }
-        if (!tbsmapID) {
-        			std::cerr << "Error: Saxonc.XdmMap." << "get(String)"
-        				<< " not found\n" << std::endl;
-        			return nullptr;
-        } else {
-                jobject strObj = getJavaStringValue(SaxonProcessor::sxn_environ, key);
-        		jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbsmapID, strObj));
-        		if(valueObj) {
-                    jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                           "net/sf/saxon/s9api/XdmAtomicValue");
-                    jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
-                    jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                            "net/sf/saxon/s9api/XdmFunctionItem");
-                    jclass mapItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                            "net/sf/saxon/s9api/XdmMap");
-                    jclass arrayItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                       "net/sf/saxon/s9api/XdmArray");
-
-                    XdmValue * tempValue = new XdmValue();
-                    XdmItem *xdmItem = nullptr;
-
-
-                      if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, atomicValueClass) == JNI_TRUE) {
-                            xdmItem = new XdmAtomicValue(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, nodeClass) == JNI_TRUE) {
-                            xdmItem = new XdmNode(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, functionItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmFunctionItem(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, mapItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmMap(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, arrayItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmArray(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else {
-                            tempValue = new XdmValue();
-                            tempValue->addUnderlyingValue(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            return tempValue;
-                        }
-       			}
-       			return nullptr;
-        }*/
-
-        return nullptr;
-
+       int64_t result = j_xdmMap_get_with_key_as_string(SaxonProcessor::sxn_environ->thread, (void *)value, (char *)key);
+       return getXdmValueSubClass(result);
 
     }
 
     XdmValue * XdmMap::get(int key) {
-        /*jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
-        static jmethodID tbimapID = nullptr;
-
-        if(tbimapID == nullptr) {
-        tbimapID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmMapClass, "get",
-        					"(J)Lnet/sf/saxon/s9api/XdmValue;");
-
+        if(key<0) {
+            return nullptr;
         }
-        if (tbimapID == nullptr) {
-        			std::cerr << "Error: Saxonc.XdmMap." << "get(int)"
-        				<< " not found\n" << std::endl;
-        			return nullptr;
-        } else {
-        		jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbimapID, (long)key));
-        		if(valueObj) {
-                    jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                           "net/sf/saxon/s9api/XdmAtomicValue");
-                    jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
-                    jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                            "net/sf/saxon/s9api/XdmFunctionItem");
-                    jclass mapItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                            "net/sf/saxon/s9api/XdmMap");
-                    jclass arrayItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                       "net/sf/saxon/s9api/XdmArray");
-
-                    XdmValue * tempValue = new XdmValue();
-                    XdmItem *xdmItem = nullptr;
-
-
-                      if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, atomicValueClass) == JNI_TRUE) {
-                            xdmItem = new XdmAtomicValue(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, nodeClass) == JNI_TRUE) {
-                            xdmItem = new XdmNode(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, functionItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmFunctionItem(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, mapItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmMap(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, arrayItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmArray(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else {
-                            tempValue = new XdmValue();
-                            tempValue->addUnderlyingValue(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            return tempValue;
-                        }
-       			}
-       			return nullptr;
-        }*/
-
-        return nullptr;
+       int64_t result = j_xdmMap_get_with_key_as_int(SaxonProcessor::sxn_environ->thread, (void *)value, key);
+       return getXdmValueSubClass(result);
 
 
     }
 
     XdmValue *  XdmMap::get(double key) {
-        /*jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
-        static jmethodID tbdmapID = nullptr;
-
-        if(tbdmapID == nullptr) {
-            tbdmapID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmMapClass, "get",
-        					"(D)Lnet/sf/saxon/s9api/XdmValue;");
-
+        if(key<0) {
+            return nullptr;
         }
-        if (!tbdmapID) {
-        			std::cerr << "Error: Saxonc.XdmMap." << "get(double)"
-        				<< " not found\n" << std::endl;
-        			return nullptr;
-        } else {
-        		jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbdmapID, key));
-        		if(valueObj) {
-                    jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                           "net/sf/saxon/s9api/XdmAtomicValue");
-                    jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
-                    jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                            "net/sf/saxon/s9api/XdmFunctionItem");
-                    jclass mapItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                            "net/sf/saxon/s9api/XdmMap");
-                    jclass arrayItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                       "net/sf/saxon/s9api/XdmArray");
-
-                    XdmValue * tempValue = new XdmValue();
-                    XdmItem *xdmItem = nullptr;
-
-
-                      if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, atomicValueClass) == JNI_TRUE) {
-                            xdmItem = new XdmAtomicValue(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, nodeClass) == JNI_TRUE) {
-                            xdmItem = new XdmNode(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, functionItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmFunctionItem(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, mapItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmMap(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, arrayItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmArray(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else {
-                            tempValue = new XdmValue();
-                            tempValue->addUnderlyingValue(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            return tempValue;
-                        }
-       			}
-       			return nullptr;
-        }*/
-        return nullptr;
+       int64_t result = j_xdmMap_get_with_key_as_double(SaxonProcessor::sxn_environ->thread, (void *)value, key);
+       return getXdmValueSubClass(result);
 
 
     }
 
     XdmValue * XdmMap::get(long key) {
-        /*jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
-        static jmethodID tbdmapID = nullptr;
-
-        if(tbdmapID == nullptr) {
-            tbdmapID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmMapClass, "get",
-        					"(J)Lnet/sf/saxon/s9api/XdmValue;");
-
+        if(key<0) {
+            return nullptr;
         }
-        if (!tbdmapID) {
-        			std::cerr << "Error: Saxonc.XdmMap." << "get(long)"
-        				<< " not found\n" << std::endl;
-        			return nullptr;
-        } else {
-        		jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbdmapID, key));
-        		if(valueObj) {
-                    jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                           "net/sf/saxon/s9api/XdmAtomicValue");
-                    jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
-                    jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                            "net/sf/saxon/s9api/XdmFunctionItem");
-                    jclass mapItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                            "net/sf/saxon/s9api/XdmMap");
-                    jclass arrayItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                       "net/sf/saxon/s9api/XdmArray");
-
-                    XdmValue * tempValue = new XdmValue();
-                    XdmItem *xdmItem = nullptr;
-
-
-                      if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, atomicValueClass) == JNI_TRUE) {
-                            xdmItem = new XdmAtomicValue(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, nodeClass) == JNI_TRUE) {
-                            xdmItem = new XdmNode(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, functionItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmFunctionItem(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, mapItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmMap(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(valueObj, arrayItemClass) == JNI_TRUE) {
-                            xdmItem = new XdmArray(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            tempValue->addXdmItem(xdmItem);
-                            return tempValue;
-                        } else {
-                            tempValue = new XdmValue();
-                            tempValue->addUnderlyingValue(valueObj);
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueObj);
-                            return tempValue;
-                        }
-       			}
-       			return nullptr;
-        }*/
-
-        return nullptr;
+       int64_t result = j_xdmMap_get_with_key_as_long(SaxonProcessor::sxn_environ->thread, (void *)value, key);
+       return getXdmValueSubClass(result);
 
     }
 
 //TODO test this method
     XdmMap * XdmMap::put(XdmAtomicValue* key, XdmValue * valuei) {
-       /* if(key == nullptr || valuei == nullptr) {
-            std::cerr << "Error: Saxonc.XdmMap." << "key or value is nullptr" << std::endl;
+         if(key == nullptr || valuei == nullptr) {
+             return nullptr;
+         }
+        int64_t result = j_xdmMap_put(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)key->getUnderlyingValue(), (void *)valuei->getUnderlyingValue());
+        if(result <= 0) {
             return nullptr;
         }
-        jclass xdmMapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
-        static jmethodID putmapID = nullptr;
-
-        if(putmapID == nullptr) {
-                    putmapID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmMapClass, "put",
-                					"(Lnet/sf/saxon/s9api/XdmAtomicValue;Lnet/sf/saxon/s9api/XdmValue;)Lnet/sf/saxon/s9api/XdmMap;");
-
-        }
-        if (!putmapID) {
-            std::cerr << "Error: Saxonc.XdmMap." << "put"
-                	  << " not found\n" << std::endl;
-            return nullptr;
-        } else {
-                		jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, putmapID, ((XdmItem *)key)->getUnderlyingValue(), valuei->getUnderlyingValue()));
-                		if(valueObj) {
-                			XdmMap * newValue = new XdmMap(valueObj);
-               				return newValue;
-               			}
-               			return nullptr;
-                }*/
-
-    return nullptr;
+        return new XdmMap(result);
 
     }
 
