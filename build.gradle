@@ -6,9 +6,9 @@ buildscript {
 }
 
 plugins {
-  id "java"
-  id "maven-publish"
-  id "signing"
+  id 'java'
+  id 'maven-publish'
+  id 'signing'
   id 'com.nwalsh.gradle.docker.container' version '0.0.3'
 }
 
@@ -37,6 +37,7 @@ configurations.all {
   resolutionStrategy {
     force 'xml-apis:xml-apis:1.4.01'
   }
+  exclude group: 'junit', module: 'junit'
 }
 
 configurations {
@@ -50,6 +51,7 @@ configurations {
   documentation.extendsFrom(implementation)
   jeldoclet.extendsFrom(implementation)
   samples.extendsFrom(implementation)
+  //xqjtck.extendsFrom(testImplementation)
 }
 
 sourceSets {
@@ -163,7 +165,6 @@ dependencies {
     fileTree(dir: "lib/asm-${asmVersion}")
   )
   testImplementation (
-    [group: 'junit', name: 'junit', version: '4.12'],
     [group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.2'],
     [group: 'org.junit.platform', name: 'junit-platform-console-standalone', version: '1.7.1'],
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
@@ -176,6 +177,7 @@ dependencies {
   testRuntimeOnly (
     [group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.4.2'],
     [group: 'org.junit.vintage', name: 'junit-vintage-engine', version: '5.4.2'],
+    [group: 'org.junit.platform', name: 'junit-platform-runner', version: '1.8.2'],
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
     files("${buildDir}/classes/${saxonEdition}j")
   )
@@ -199,6 +201,12 @@ dependencies {
     [group: 'javax.servlet', name: 'servlet-api', version: '2.5'],
     [group: sqlDriverGroup, name: sqlDriverName, version: sqlDriverVersion],
   )
+  /* ??? not working yet
+  xqjtck (
+    files("${projectDir}/tools/xqj/ri/src"),
+    files("${projectDir}/tools/xqj/tck/src")
+  )
+  */
 }
 
 javadoc {
@@ -1731,12 +1739,27 @@ task sqlServerStop(dependsOn: ["dockerup"]) {
   }
 }
 
+/* I didn't get this to work. I got them to work by moving
+   them under src/test/java, but that's inconvenient...
+task compileXqjTck(
+  dependsOn: ['eejCompile'],
+  type: JavaCompile,
+  description: "Compile XQJ TCK"
+) {
+  classpath = configurations.compileClasspath + files("${projectDir}/tools/xqj/ri/src") + files("${projectDir}/tools/xqj/tck/src") + files("${buildDir}/classes/eej")
+
+
+  source "tools/xqj/tck/src"
+  destinationDirectory = new File("${buildDir}/xjqtck")
+}
+*/
+
 // ============================================================
 
 // Testing task for various Gradle debugging efforts
 task helloWorld() {
   doLast {
-    println("Hello, world. ${junitExcludeTagList.join('|')}")
+    println("Hello, world.")
 /*
     project.properties.keySet().each { key ->
       if (key.startsWith("td")) {
