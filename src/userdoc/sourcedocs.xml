@@ -1586,22 +1586,21 @@ using Saxon from the command line, it is possible to specify a catalog to be use
           <li>The DOM is not thread-safe, even when used in read-only mode. Saxon therefore synchronizes all its access to DOM methods.
           However, that's no protection if there are application threads accessing the DOM that aren't using Saxon.</li>
           <li>Saxon can only handle a DOM that is namespace-aware. If you are building the DOM using JAXP interfaces, be
-            sure to set <code>DocumentBuilderFactory.setNamespaceAware(true)</code> (this is not the default!).
-            Saxon cannot reliably detect whether the DOM is namespace aware (it gives a warning for some common problems,
-            but not all) and in general, the results of using a non-namespace aware DOM are unpredictable.</li>
+          sure to set <code>DocumentBuilderFactory.setNamespaceAware(true)</code> (this is not the default!).
+          Saxon cannot reliably detect whether the DOM is namespace aware (it gives a warning for some common problems,
+          but not all) and in general, the results of using a non-namespace aware DOM are unpredictable.</li>
           <li>If the DOM is created programmatically (rather than being built by parsing lexical XML), then the DOM
-            APIs perform very little checking: for example it is possible to have elements and attributes with invalid
-            names. Saxon makes no attempt to check for such conditions, and may produce unpredictable results.</li>
+          APIs perform very little checking: for example it is possible to have elements and attributes with invalid
+          names. Saxon makes no attempt to check for such conditions, and may produce unpredictable results.</li>
           <li>The base URI
             of the document is taken from the <code>SystemID</code> property of the <code>DOMSource</code>. If this is not set,
             then the base URI is unknown, which may cause constructs that require a known base URI to fail.</li>
           <li>Saxon's native TinyTree model is faster than DOM by a factor of 5 to 10 in typical XPath searches. Don't
             use the DOM with Saxon unless you have a very good reason.</li>
           <li>From Saxon 9.8, Saxon-EE uses a new mechanism for processing DOM trees, called the Domino model. This involves creating
-            an index of all the nodes in the DOM, providing for faster navigation. Saxon-PE and Saxon-HE continue to use the DOM <code>NodeWrapper</code>
-            model, where DOM methods are used to navigate the tree. A transformation using the Domino model is still slower
-            than Saxon's native TinyTree, but only by a factor of two. It also uses a lot more memory.</li>
-          
+          an index of all the nodes in the DOM, providing for faster navigation. Saxon-PE and Saxon-HE continue to use the DOM <code>NodeWrapper</code>
+          model, where DOM methods are used to navigate the tree. A transformation using the Domino model is still slower
+          than Saxon's native TinyTree, but only by a factor of two. It also uses a lot more memory.</li>
         </ul>
       </li>
     </ul>
