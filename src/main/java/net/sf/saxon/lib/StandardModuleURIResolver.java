@@ -13,6 +13,7 @@ import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -148,9 +149,21 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
         return null;
     }
 
-    private StreamSource toStreamSource(Source src) {
-        return (StreamSource)src; // TODO: handle SAXSource.
+    private StreamSource toStreamSource(Source src) throws XPathException {
+        if (src instanceof StreamSource) {
+            return (StreamSource) src;
+        //#if CSHARP==false
+        } else if (src instanceof SAXSource) {
+            // not recommended but it can happen
+            return ResourceResolverWrappingURIResolver.convertToStreamSource((SAXSource) src);
+        //#endif
+        } else {
+            XPathException se = new XPathException("Resource resolver returned non-StreamSource for XQuery module", "XQST0059");
+            se.setIsStaticError(true);
+            throw se;
+        }
     }
+
 
     /**
      * Resolve a location hint appearing in an "import module" declaration
@@ -168,7 +181,8 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
         rr.nature = ResourceRequest.XQUERY_NATURE;
         try {
             rr.uri = ResolveURI.makeAbsolute(rr.relativeUri, baseURI).toString();
-            return (StreamSource) rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+            Source src = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+            return src == null ? null : toStreamSource(src);
         } catch (URISyntaxException err) {
             XPathException se = new XPathException("Cannot resolve relative URI " + rr.relativeUri, err);
             se.setErrorCode("XQST0059");
