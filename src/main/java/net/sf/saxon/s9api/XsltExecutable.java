@@ -98,6 +98,9 @@ public class XsltExecutable {
     /**
      * Produce a diagnostic representation of the compiled stylesheet, in XML form.
      * <p><i>The detailed form of this representation is not stable (or even documented).</i></p>
+     * <p>Note that although the format of the output is similar to the format of a stylesheet
+     * exported in SEF format, it is not identical, and the diagnostic explain output cannot
+     * be re-imported to reconstitute the stylesheet. For that purpose, use {@link #export(OutputStream, String)}.</p>
      *
      * @param destination the destination for the XML document containing the diagnostic representation
      *                    of the compiled stylesheet
