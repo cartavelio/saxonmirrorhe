@@ -10,14 +10,8 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.instruct.Actor;
-import net.sf.saxon.expr.instruct.GlobalParam;
-import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.expr.instruct.SlotManager;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.Optimizer;
-import net.sf.saxon.expr.parser.RetainedStaticContext;
+import net.sf.saxon.expr.instruct.*;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
@@ -25,7 +19,6 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 
@@ -335,7 +328,11 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
         if (exp2 != null) {
             try {
                 ExpressionVisitor visitor = makeExpressionVisitor();
-                exp2 = select.simplify().typeCheck(visitor, getConfiguration().makeContextItemStaticInfo(Type.ITEM_TYPE, true));
+                GlobalContextRequirement gcr = getPackageData().getContextItemRequirements();
+                ContextItemStaticInfo cisi = gcr == null
+                        ? getConfiguration().getDefaultContextItemStaticInfo()
+                        : gcr.makeGlobalContextInfo(getConfiguration());
+                exp2 = select.simplify().typeCheck(visitor, cisi);
             } catch (XPathException err) {
                 compileError(err);
             }
