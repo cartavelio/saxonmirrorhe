@@ -31,7 +31,7 @@ namespace Saxon.Api {
     [Serializable]
     public class XsltTransformer : IDestination {
         private IDestination xmlDestination;
-        private StandardLogger traceFunctionDestination;
+        private TextWriter traceFunctionDestination;
         private ResultDocumentHandler resultDocumentHandler;
         private QName initialTemplateName;
         private Saxon.Hej.s9api.XsltTransformer transformer;
@@ -246,15 +246,16 @@ namespace Saxon.Api {
         /// Destination for output of messages using the <c>trace()</c> function.
         /// </summary>
         /// <remarks> 
-        /// <para>If no message listener is supplied by the caller, message information will be written to
+        /// <para>If no value is supplied by the caller, trace information will be written to
         /// the standard error stream.</para>
         /// <para>The supplied destination is ignored if a <c>TraceListener</c> is in use.</para>
+        /// <para>The <c>TextWriter</c> should be closed by the caller after use.</para>
         /// </remarks>
 
-		public StandardLogger TraceFunctionDestination {
+		public TextWriter TraceFunctionDestination {
             set {
                 traceFunctionDestination = value;
-                transformer.setTraceFunctionDestination(value);
+                transformer.setTraceFunctionDestination(new StandardLogger(value));
             }
             get => traceFunctionDestination;
         }

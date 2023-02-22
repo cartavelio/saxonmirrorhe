@@ -24,7 +24,7 @@ namespace Saxon.Api {
     [Serializable]
     public class XQueryEvaluator : IEnumerable<XdmItem> {
         private Saxon.Hej.s9api.XQueryEvaluator evaluator;
-        private StandardLogger traceFunctionDestination;
+        private TextWriter traceFunctionDestination;
         private TextResolver textResolver;
         private System.Action closeAction;
 
@@ -161,12 +161,13 @@ namespace Saxon.Api {
         /// <para>If no specific destination is supplied by the caller, message information will be written to
         /// the standard error stream.</para>
         /// <para>The supplied destination is ignored if a <c>TraceListener</c> is in use.</para>
+        /// <para>The <c>TextWriter</c> should be closed by the caller after use.</para>
         /// </remarks>
 
-		public StandardLogger TraceFunctionDestination {
+		public TextWriter TraceFunctionDestination {
             set {
                 traceFunctionDestination = value;
-                evaluator.setTraceFunctionDestination(value);
+                evaluator.setTraceFunctionDestination(new StandardLogger(value));
             }
             get => traceFunctionDestination;
         }

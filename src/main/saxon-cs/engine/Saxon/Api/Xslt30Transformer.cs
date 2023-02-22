@@ -69,7 +69,7 @@ namespace Saxon.Api {
     [Serializable]
     public class Xslt30Transformer {
         private ResultDocumentHandler resultDocumentHandler;
-        private StandardLogger traceFunctionDestination;
+        private TextWriter traceFunctionDestination;
         private Saxon.Hej.s9api.Xslt30Transformer s9Transformer;
         private readonly StandardMessageHandler _standardMessageHandler;
         private TextResolver textResolver;
@@ -341,12 +341,13 @@ namespace Saxon.Api {
         /// <para>If no message listener is supplied by the caller, message information will be written to
         /// the standard error stream.</para>
         /// <para>The supplied destination is ignored if a <code>TraceListener</code> is in use.</para>
+        /// <para>The <c>TextWriter</c> should be closed by the caller after use.</para>
         /// </remarks>
 
-		public StandardLogger TraceFunctionDestination {
+		public TextWriter TraceFunctionDestination {
             set {
                 traceFunctionDestination = value;
-                s9Transformer.setTraceFunctionDestination(value);
+                s9Transformer.setTraceFunctionDestination(new StandardLogger(value));
             }
             get => traceFunctionDestination;
         }
