@@ -39,7 +39,7 @@ with PySaxonProcessor(license=False) as proc:
 It will print the version like below if your installation is successful.
 
 ```bash
-SaxonC-@@edition@@ 12.1 from Saxonica
+SaxonC-@@edition@@ @@VERSION@@ from Saxonica
 ```
 Please **note** that `license=False` indicates the open-source version of Saxon, whereas  `license=True` indicates to use the commercial product. A license is file is required for this to work. You can use the SAXONC_HOME environment variable to locate the license file or install the file next to the SaxonC library. 
 

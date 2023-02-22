@@ -18,7 +18,7 @@ gcc -m64 -fPIC  -I../../Saxon.C.API/graalvm -c ../../Saxon.C.API/SaxonCXPath.c -
 
 
 #g++  -std=c++14 -fPIC -m64 -c cppExtensionFunction.cpp -o bin/cppExtensionFunction.o $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
-g++ -std=c++14 -m64 -fPIC -I../../Saxon.C.API/graalvm  -c ../../Saxon.C.API/XdmValue.cpp -o bin/XdmValue.o -ldl -lc -lsaxon-@@edition@@c-12.1 $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
+g++ -std=c++14 -m64 -fPIC -I../../Saxon.C.API/graalvm  -c ../../Saxon.C.API/XdmValue.cpp -o bin/XdmValue.o -ldl -lc -lsaxon-@@edition@@c-@@VERSION@@ $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
 g++ -std=c++14 -m64 -fPIC -I../../Saxon.C.API/graalvm  -c ../../Saxon.C.API/XdmItem.cpp -o bin/XdmItem.o -ldl -lc -lsaxon-@@edition@@c-@@VERSION@@ $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
