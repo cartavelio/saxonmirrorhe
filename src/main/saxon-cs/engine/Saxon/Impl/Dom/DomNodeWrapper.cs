@@ -603,6 +603,9 @@ namespace Saxon.Impl.Dom {
 
             public void close() {
             }
+
+            public void discharge() {
+            }
             
         }
 
@@ -770,6 +773,9 @@ namespace Saxon.Impl.Dom {
             }
 
             public void close() {
+            }
+
+            public void discharge() {
             }
         }
     }
