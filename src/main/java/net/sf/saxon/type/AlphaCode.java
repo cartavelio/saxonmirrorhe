@@ -9,9 +9,7 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Token;
-import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
@@ -19,8 +17,6 @@ import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
-import net.sf.saxon.sxpath.IndependentContext;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
@@ -587,6 +583,12 @@ public class AlphaCode {
         return parser.parseType(null);
     }
 
+    /**
+     * Serialize the XDM map representation of an alphacode
+     * @param map the alphacode represented as an XDM map
+     * @return the corresponding alphacode as a string
+     */
+
     public static String fromXdmMap(MapItem map) {
         // TODO: may need updating. Used when running the XX compiler under Saxon/J
         StringBuilder out = new StringBuilder();
@@ -979,7 +981,7 @@ public class AlphaCode {
                 }
             }
             //#endif
-            itemType = new JavaExternalObjectType(theClass);
+            itemType = JavaExternalObjectType.of(theClass);
         }
         String indicator = tree.cardinality;
         int cardinality = Cardinality.fromOccurrenceIndicator(indicator);
@@ -1222,7 +1224,16 @@ public class AlphaCode {
         }
     }
 
-    public static String escapeNCName(String ncName) {
+    /**
+     * Escape a supplied name by prefixing any characters not allowed in an NCName
+     * with a backslash
+     * @param ncName a name (which may or may not be a valid NCName)
+     * @return the supplied name unchanged if it is a valid NCName; otherwise, the
+     * name with all invalid ASCII characters backslash-escaped. Invalid non-ASCII
+     * character are left unchanged.
+     */
+
+    private static String escapeNCName(String ncName) {
         if (NameChecker.isValidNCName(ncName)) {
             return ncName;
         } else {
@@ -1239,12 +1250,25 @@ public class AlphaCode {
         }
     }
 
+    /**
+     * Convert an item type to an alphacode
+     * @param type the item type to be converted
+     * @return the corresponding alphacode. Note that this will have no occurrence indicator.
+     */
+
     public static String fromItemType(ItemType type) {
         AlphaCodeTree tree = makeTree(type);
         StringBuilder sb = new StringBuilder();
         alphaCodeFromTree(tree, false, sb);
         return sb.toString().trim();
     }
+
+    /**
+     * Convert a sequence type to an alphacode
+     *
+     * @param type the sequence type to be converted
+     * @return the corresponding alphacode (including occurrence indicator as the first character)
+     */
 
     public static String fromSequenceType(SequenceType type) {
         if (type == SequenceType.EMPTY_SEQUENCE) {
@@ -1258,13 +1282,5 @@ public class AlphaCode {
         }
     }
 
-    public static String fromLexicalSequenceType(XPathContext context, String input) throws XPathException {
-        XPathParser parser = context.getConfiguration().newExpressionParser("XP", false);
-        IndependentContext env = new IndependentContext(context.getConfiguration());
-        env.declareNamespace("xs", NamespaceUri.SCHEMA);
-        env.declareNamespace("fn", NamespaceUri.FN);
-        SequenceType st = parser.parseSequenceType(input, env);
-        return fromSequenceType(st);
-    }
 }
 
