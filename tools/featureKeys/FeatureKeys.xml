@@ -566,12 +566,14 @@
             <p>The supplied class is instantiated and the resulting <code>EntityResolver</code> is
                 used whenever Saxon itself creates an <code>XMLReader</code> for parsing source
                 documents. It is not used with a user-supplied <code>XMLReader</code>.</p>
-            <p>The default value is <link>net.sf.saxon.lib.StandardEntityResolver</link>. This is an entity
-                resolver that recognizes the names of many standard W3C DTDs and external entity
-                files, and resolves them against local copies issued with the Saxon software, to
+            <p>By default Saxon uses an <code>EntityResolver</code> that invokes the
+                <code>ResourceResolver</code> registered with the <code>Configuration</code>.
+                Unless overridden by a user-supplied <code>ResourceResolver</code>, this invokes
+                the <code>org.xml.resolver</code> library, which attempts to look up the resource URI
+                in a catalog. The default catalog recognizes the names of many standard W3C DTDs and external entity
+                files, and resolves them against local copies issued with the resolver library, to
                 avoid the need to fetch them from the web.</p>
-            <p>The property can be set to a zero-length string, in which case no
-                    <code>EntityResolver</code> will be used.</p>
+            <p>The property can be set to a zero-length string, which resets the property to its default setting.</p>
 
         </desc>
     </feature>
