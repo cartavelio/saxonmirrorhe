@@ -206,7 +206,7 @@
             <p>A new tree model called the Domino model is introduced for handling DOM documents. This is available
             in Saxon-EE only. It offers substantial performance improvements when the input to a query or transformation
             is supplied in the form of a DOM, and is therefore the default way of handled DOM input in Saxon-EE.
-            Further details are available at <a class="bodylink code" href="/sourcedocs/domino">The Domino Tree Model</a>.</p>
+            Further details are available at <a class="bodylink code" href="/sourcedocs/tree-models/domino">The Domino Tree Model</a>.</p>
         </category>
 
     <category name="serialization">

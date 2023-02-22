@@ -97,7 +97,7 @@
                   semicolons; the files are OASIS XML catalogs used to define how public identifiers
                   and system identifiers (URIs) used in a source document, stylesheet, or schema are
                   to be redirected, typically to resources available locally. For more details see
-                     <a class="bodylink" href="/sourcedocs/xml-catalogs">Using XML Catalogs</a>.
+                  <a class="bodylink" href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML Catalogs</a>.
                </p>
             </td>
          </tr>
@@ -724,7 +724,7 @@
                <p>Selects the implementation of the internal tree model: <code>tiny</code> selects
                   the "tiny tree" model (the default), <code>linked</code> selects the linked tree
                   model, <code>tinyc</code> selects the "condensed tiny tree" model. See <a
-                     class="bodylink" href="/sourcedocs/choosingmodel"> Choosing a tree
+                     class="bodylink" href="/sourcedocs/tree-models/choosingmodel"> Choosing a tree
                   model</a>.</p>
             </td>
          </tr>
@@ -1071,7 +1071,7 @@
       in its power and expressiveness, while being much better integrated with the Java host language.</p>
      
       <p>Saxon 10 introduced further enhancements to provide programmatic tree construction (see
-      <a class="bodylink" href="/sourcedocs/builder-api">Building XML Trees Programmatically</a>).</p>
+         <a class="bodylink" href="/sourcedocs/xml-parsing/builder-api">Building XML Trees Programmatically</a>).</p>
 
       <p>For more information on using this API to invoke the Saxon XSLT processor, see <a
             href="s9api-transformation" class="bodylink">Using s9api for Transformations</a>.</p>
@@ -2130,7 +2130,7 @@
          </li>
          <li>
             <p>
-               <a class="bodylink" href="/sourcedocs/streaming">Streaming of Large Documents</a>
+               <a class="bodylink" href="/streaming">Streaming XML Documents</a>
             </p>
          </li>
          <li>
