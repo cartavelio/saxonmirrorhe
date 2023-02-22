@@ -8,10 +8,11 @@
 
 package net.sf.saxon.serialize;
 
-import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 
@@ -54,9 +55,9 @@ public class XHTML5Emitter extends XMLEmitter {
             "wbr"
     };
 
-    static Set<String> html5Elements = new HashSet<String>(128);
+    static Set<String> html5Elements = new HashSet<>(128);
 
-    static Set<String> emptyTags5 = new HashSet<String>(31);
+    static Set<String> emptyTags5 = new HashSet<>(31);
 
     private static final String[] emptyTagNames5 = {
             "area", "base", "br", "col", /*"command",*/ "embed", "hr", "img", "input", "keygen", "link", "meta", "param",
@@ -91,7 +92,9 @@ public class XHTML5Emitter extends XMLEmitter {
         if (systemId == null &&
                 isRecognizedHtmlElement(name) && name.getLocalPart().toLowerCase().equals("html")) {
             try {
-                writer.write("<!DOCTYPE " + displayName + ">");
+                writer.writeAscii(DOCTYPE);
+                writer.write(displayName);
+                writer.writeCodePoint('>');
             } catch (IOException e) {
                 throw new XPathException(e);
             }
@@ -110,11 +113,13 @@ public class XHTML5Emitter extends XMLEmitter {
      */
 
     @Override
-    protected String emptyElementTagCloser(String displayName, /*@NotNull*/ NodeName name) {
+    protected void writeEmptyElementTagCloser(String displayName, /*@NotNull*/ NodeName name) throws IOException {
         if (isRecognizedHtmlElement(name) && emptyTags5.contains(name.getLocalPart())) {
-            return "/>";
+            writer.writeAscii(StringConstants.EMPTY_TAG_END);
         } else {
-            return "></" + displayName + '>';
+            writer.writeAscii(StringConstants.EMPTY_TAG_MIDDLE);
+            writer.write(displayName);
+            writer.writeCodePoint('>');
         }
     }
 
@@ -123,6 +128,7 @@ public class XHTML5Emitter extends XMLEmitter {
      */
     @Override
     public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        //noinspection StatementWithEmptyBody
         if (!started && Whitespace.isAllWhite(chars)) {
             // Ignore whitespace before the first start tag. This isn't explicit in the spec, but
             // we would otherwise need to buffer such whitespace, because we need to output a DOCTYPE

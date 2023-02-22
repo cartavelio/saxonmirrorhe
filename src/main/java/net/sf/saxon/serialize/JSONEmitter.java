@@ -7,12 +7,15 @@
 
 package net.sf.saxon.serialize;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.json.JsonReceiver;
 import net.sf.saxon.serialize.charcode.CharacterSet;
+import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
 import net.sf.saxon.serialize.codenorm.Normalizer;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeWriter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
@@ -20,9 +23,7 @@ import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.NumericValue;
 
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Properties;
 import java.util.Stack;
 
@@ -36,9 +37,10 @@ import java.util.Stack;
 
 public class JSONEmitter {
 
-    private final ExpandedStreamResult result;
+    //private final ExpandedStreamResult result;
 
-    private Writer writer;
+    private Configuration config;
+    private UnicodeWriter writer;
     private Normalizer normalizer;
     private CharacterMap characterMap;
     private Properties outputProperties;
@@ -53,9 +55,10 @@ public class JSONEmitter {
 
     private boolean unfailing = false;
 
-    public JSONEmitter(PipelineConfiguration pipe, StreamResult result, Properties outputProperties) throws XPathException {
+    public JSONEmitter(PipelineConfiguration pipe, UnicodeWriter writer, Properties outputProperties)  {
+        config = pipe.getConfiguration();
         setOutputProperties(outputProperties);
-        this.result = new ExpandedStreamResult(pipe.getConfiguration(), result, outputProperties);
+        this.writer = writer;
     }
 
     /**
@@ -88,6 +91,13 @@ public class JSONEmitter {
                 // ignore the error.
             }
         }
+        String encoding = details.getProperty(OutputKeys.ENCODING);
+        try {
+            characterSet = config.getCharacterSetFactory().getCharacterSet(encoding);
+        } catch (XPathException e) {
+            characterSet = UTF8CharacterSet.getInstance();
+        }
+
     }
 
     /**
@@ -293,7 +303,7 @@ public class JSONEmitter {
                 }
             }
         } else {
-            return simpleEscape(cs).toString();
+            return simpleEscape(cs);
         }
     }
 
@@ -305,20 +315,22 @@ public class JSONEmitter {
                                    c -> c < 31 || (c >= 127 && c <= 159) || !characterSet.inCharset(c));
     }
 
-    private void emit(CharSequence s) throws XPathException {
-        if (writer == null) {
-            writer = result.obtainWriter();
-            characterSet = result.getCharacterSet();
-        }
+    private void emit(String s) throws XPathException {
+        assert writer != null;
         try {
-            writer.append(s);
+            writer.write(s);
         } catch (IOException e) {
             throw new XPathException(e);
         }
     }
 
     private void emit(char c) throws XPathException {
-        emit(c + "");
+        assert writer != null;
+        try {
+            writer.writeCodePoint(c);
+        } catch (IOException e) {
+            throw new XPathException(e);
+        }
     }
 
 

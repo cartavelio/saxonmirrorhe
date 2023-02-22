@@ -5,12 +5,10 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.z.IntIterator;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.function.IntPredicate;
 
 /**
- * A UnicodeString is a UniString (a sequence of Unicode codepoints) that supports codepoint addressing.
+ * A UnicodeString is a sequence of Unicode codepoints that supports codepoint addressing.
  * <p>The interface is future-proofed to support code points in the range 0 to 2^31, and string lengths of
  * up to 2^63 characters. Implementations may (and do) impose lower limits.</p>
  */
@@ -30,8 +28,6 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
     /**
      * Get the length of the string
      * @return the number of code points in the string
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
-     * for codePoint access
      */
 
     public abstract long length();
@@ -100,6 +96,29 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
      */
 
     public abstract long indexOf(int codePoint, long from);
+
+    /**
+     * Get the position of the first occurrence of a codepoint that matches a supplied predicate,
+     * starting the search at a given position in the string
+     *
+     * @param predicate condition that the codepoint must satisfy
+     * @param from      the position from which the search should start (0-based)
+     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
+     */
+
+    public long indexWhere(IntPredicate predicate, long from) {
+        IntIterator iter = codePoints();
+        long i = 0;
+        while (iter.hasNext()) {
+            if (i >= from && predicate.test(iter.next())) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
 
     /**
      * Get the first position, at or beyond start, where another string appears as a substring
@@ -172,7 +191,8 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
     public abstract int codePointAt(long index);
 
     /**
-     * Get a substring of this codepoint sequence, with a given start position
+     * Get a substring of this codepoint sequence, with a given start position,
+     * finishing at the end of the string
      *
      * @param start the start position (0-based): that is, the position of the first
      *              code point to be included
@@ -204,8 +224,6 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
 
     public UnicodeString concat(UnicodeString other) {
         return Rope.makeRope(this, other);
-//        UnicodeBuilder ub = new UnicodeBuilder();
-//        return ub.append(this).append(other).toUnicodeString();
     }
 
     @Override
@@ -262,37 +280,6 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
     public abstract void supplyContent(LargeTextBuffer consumer, long start, long length);
 
     /**
-     * Write the content of this string to a Writer
-     * @param writer the writer to which the string should be written
-     */
-
-    @Override
-    public abstract void write(Writer writer) throws IOException;
-
-    /**
-     * Write part of this string to a Writer
-     * @param writer the writer to which the string should be written
-     * @param start the offset of the first codepoint to be written
-     * @param len the number of codepoints to be written
-     */
-
-    public abstract void write(Writer writer, long start, long len) throws IOException;
-
-    /**
-     * Write a substring of this string to a supplied Writer, ending the substring
-     * where a specified ccondition is encountered
-     * @param writer the destination to which the substring is written
-     * @param start  the offset of the first codepoint to be considered
-     * @param limit  the offset of the first codepoint not to be considered.
-     * @param stop   Predicate to match codepoints. The substring that is written includes
-     *               all characters up to, but excluding, the first character to match
-     *               this predicate
-     * @return the offset of the first character that that matches the predicate, or -1 if not found
-     */
-
-    public abstract long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException;
-
-    /**
      * Utility method for use where strings longer than 2^31 characters cannot yet be handled.
      * @param value the actual value of a character position within a string, or the length of
      *              a string
@@ -301,9 +288,9 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
      */
 
     public static int requireInt(long value) {
-//        if (value > Integer.MAX_VALUE) {
-//            throw new UnsupportedOperationException("String offset exceeds 2^31 characters");
-//        }
+        if (value > Integer.MAX_VALUE) {
+            throw new UnsupportedOperationException("String offset exceeds 2^31 characters");
+        }
         return (int) value;
     }
 }

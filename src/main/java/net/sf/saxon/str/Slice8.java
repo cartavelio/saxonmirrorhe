@@ -13,11 +13,11 @@ import java.util.function.IntPredicate;
  * of an underlying byte array
  */
 
-class Slice8 extends UnicodeString {
+public class Slice8 extends UnicodeString {
 
-    private byte[] bytes;
-    private int start;
-    private int end;
+    private final byte[] bytes;
+    private final int start;
+    private final int end;
     private int cachedHash;
 
     /**
@@ -44,17 +44,26 @@ class Slice8 extends UnicodeString {
         return 8;
     }
 
+    public byte[] getByteArray() {
+        return bytes;
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public int getEnd() {
+        return end;
+    }
+
     @Override
     public long indexOf(int codePoint, long from) {
         if (codePoint > 255) {
             return -1;
         }
-        ;
         byte b = (byte) (codePoint & 0xff);
-        byte[] array = bytes;
-        int limit = end;
-        for (int i = start + requireInt(from); i < limit; i++) {
-            if (array[i] == b) {
+        for (int i = start + requireInt(from); i < end; i++) {
+            if (bytes[i] == b) {
                 return i - start;
             }
         }
@@ -84,17 +93,7 @@ class Slice8 extends UnicodeString {
         consumer.append8(bytes, requireInt(start) + this.start, requireInt(len));
     }
 
-    @Override
-    public void write(Writer writer) throws IOException {
-        if (writer instanceof UTF8Writer) {
-            ((UTF8Writer) writer).writeLatin1(bytes, start, end - start);
-        } else {
-            writer.write(toString());
-        }
-    }
-
-    @Override
-    public void write(Writer writer, long start, long len) throws IOException {
+    private void write(Writer writer, long start, long len) throws IOException {
         if (writer instanceof UTF8Writer) {
             ((UTF8Writer) writer).writeLatin1(bytes, this.start + requireInt(start), requireInt(len));
         } else {
@@ -102,16 +101,23 @@ class Slice8 extends UnicodeString {
         }
     }
 
+    /**
+     * Get the position of the first occurrence of the specified codepoint,
+     * starting the search at a given position in the string
+     *
+     * @param predicate condition that the codepoint must satisfy
+     * @param from      the position from which the search should start (0-based)
+     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
+     */
     @Override
-    public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException {
-        int end = this.start + requireInt(limit);
-        for (int i = this.start + requireInt(start); i < end; i++) {
-            if (stop.test((int) (bytes[i] & 0xff))) {
-                write(writer, start, i - this.start - start);
-                return i - this.start;
+    public long indexWhere(IntPredicate predicate, long from) {
+        for (int i = requireInt(from) + start; i < end; i++) {
+            if (predicate.test(bytes[i] & 0xff)) {
+                return i - start;
             }
         }
-        write(writer, start, limit - start);
         return -1;
     }
 

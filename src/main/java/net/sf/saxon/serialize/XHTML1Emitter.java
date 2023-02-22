@@ -9,7 +9,9 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.str.StringConstants;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,7 +30,7 @@ public class XHTML1Emitter extends XMLEmitter {
      * Table of XHTML tags that have no closing tag
      */
 
-    static Set<String> emptyTags1 = new HashSet<String>(31);
+    static Set<String> emptyTags1 = new HashSet<>(31);
 
     private static final String[] emptyTagNames1 = {
             "area", "base", "basefont", "br", "col", "embed", "frame", "hr", "img", "input", "isindex", "link", "meta", "param"
@@ -51,11 +53,13 @@ public class XHTML1Emitter extends XMLEmitter {
      */
 
     @Override
-    protected String emptyElementTagCloser(String displayName, /*@NotNull*/ NodeName name) {
+    protected void writeEmptyElementTagCloser(String displayName, /*@NotNull*/ NodeName name) throws IOException {
         if (isRecognizedHtmlElement(name) && emptyTags1.contains(name.getLocalPart())) {
-            return " />";
+            writer.writeAscii(StringConstants.EMPTY_TAG_END);
         } else {
-            return "></" + displayName + '>';
+            writer.writeAscii(StringConstants.EMPTY_TAG_MIDDLE);
+            writer.write(displayName);
+            writer.writeCodePoint('>');
         }
     }
 

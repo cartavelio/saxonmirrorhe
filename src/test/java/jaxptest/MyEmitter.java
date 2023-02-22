@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * User-written emitted used by SerializerTest.
+ * User-written emitter used by SerializerTest.
  */
 public class MyEmitter extends XMLEmitter {
 

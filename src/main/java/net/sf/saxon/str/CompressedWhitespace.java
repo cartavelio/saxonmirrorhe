@@ -7,11 +7,8 @@
 
 package net.sf.saxon.str;
 
-import net.sf.saxon.serialize.UTF8Writer;
 import net.sf.saxon.z.IntIterator;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.function.IntPredicate;
 
 /**
@@ -71,7 +68,7 @@ public class CompressedWhitespace extends UnicodeString {
         for (int i = 0; i < outlength; i++) {
             value = (value << 8) | out[i];
         }
-        value <<= 8 * (8 - outlength);
+        value <<= 8L * (8 - outlength);
         return new CompressedWhitespace(value);
     }
 
@@ -100,7 +97,7 @@ public class CompressedWhitespace extends UnicodeString {
             spaces -= run;
             outlength++;
         }
-        result <<= 8 * (8 - outlength);
+        result <<= 8L * (8 - outlength);
         return new CompressedWhitespace(result);
     }
 
@@ -261,47 +258,38 @@ public class CompressedWhitespace extends UnicodeString {
      * @throws java.io.IOException if an error occurs downstream
      */
 
-    @Override
-    public void write(/*@NotNull*/ Writer writer) throws java.io.IOException {
-        if (writer instanceof UTF8Writer) {
-            UTF8Writer uw = (UTF8Writer)writer;
-            for (int s = 56; s >= 0; s -= 8) {
-                final byte b = (byte) ((value >>> s) & 0xff);
-                if (b == 0) {
-                    break;
-                }
-                final char c = WHITE_CHARS[b >>> 6 & 0x3];
-                final int len = b & 0x3f;
-                uw.writeRepeatedAscii((byte) c, len);
+    public void write(/*@NotNull*/ UnicodeWriter writer) throws java.io.IOException {
+        for (int s = 56; s >= 0; s -= 8) {
+            final byte b = (byte) ((value >>> s) & 0xff);
+            if (b == 0) {
+                break;
             }
-        } else {
-            for (int s = 56; s >= 0; s -= 8) {
-                final byte b = (byte) ((value >>> s) & 0xff);
-                if (b == 0) {
-                    break;
-                }
-                final char c = WHITE_CHARS[b >>> 6 & 0x3];
-                final int len = b & 0x3f;
-                for (int j = 0; j < len; j++) {
-                    writer.write(c);
-                }
-            }
+            final char c = WHITE_CHARS[b >>> 6 & 0x3];
+            final int len = b & 0x3f;
+            writer.writeRepeatedAscii((byte) c, len);
         }
+
     }
+
 
     @Override
     public void supplyContent(LargeTextBuffer consumer, long start, long length) {
         uncompress().supplyContent(consumer, start, length);
     }
 
+    /**
+     * Get the position of the first occurrence of the specified codepoint,
+     * starting the search at a given position in the string
+     *
+     * @param predicate condition that the codepoint must satisfy
+     * @param from      the position from which the search should start (0-based)
+     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
+     */
     @Override
-    public void write(Writer writer, long start, long len) throws IOException {
-        uncompress().write(writer, start, len);
-    }
-
-    @Override
-    public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException {
-        return uncompress().writeUntil(writer, start, limit, stop);
+    public long indexWhere(IntPredicate predicate, long from) {
+        return uncompress().indexWhere(predicate, from);
     }
 
     /**
@@ -312,7 +300,7 @@ public class CompressedWhitespace extends UnicodeString {
      * @throws java.io.IOException if an error occurs downstream
      */
 
-    public void writeEscape(boolean[] specialChars, Writer writer) throws java.io.IOException {
+    public void writeEscape(boolean[] specialChars, UnicodeWriter writer) throws java.io.IOException {
         for (int s = 56; s >= 0; s -= 8) {
             final byte b = (byte) ((value >>> s) & 0xff);
             if (b == 0) {
@@ -321,21 +309,20 @@ public class CompressedWhitespace extends UnicodeString {
             final char c = WHITE_CHARS[b >>> 6 & 0x3];
             final int len = b & 0x3f;
             if (specialChars[c]) {
-                String e = "";
+                byte[] e = null;
                 if (c == '\n') {
-                    e = "&#xA;";
+                    e = StringConstants.ESCAPE_NL; //"&#xA;";
                 } else if (c == '\r') {
-                    e = "&#xD;";
+                    e = StringConstants.ESCAPE_CR; //"&#xD;";
                 } else if (c == '\t') {
-                    e = "&#x9;";
+                    e = StringConstants.ESCAPE_TAB; //"&#x9;";
                 }
+                assert e != null;
                 for (int j = 0; j < len; j++) {
-                    writer.write(e);
+                    writer.writeAscii(e);
                 }
             } else {
-                for (int j = 0; j < len; j++) {
-                    writer.write(c);
-                }
+                writer.writeRepeatedAscii((byte)c, len);
             }
         }
     }

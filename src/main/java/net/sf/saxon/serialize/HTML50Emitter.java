@@ -12,6 +12,7 @@ import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -83,7 +84,7 @@ public class HTML50Emitter extends HTMLEmitter {
     protected void writeDocType(NodeName name, String displayName, String systemId, String publicId) throws XPathException {
         try {
             if (systemId == null && publicId == null) {
-                writer.write("<!DOCTYPE HTML>");
+                writer.writeAscii(DOCTYPE);
             } else {
                 super.writeDocType(name, displayName, systemId, publicId);
             }
@@ -93,6 +94,8 @@ public class HTML50Emitter extends HTMLEmitter {
 
     }
 
+    private final static byte[] DOCTYPE = StringConstants.bytes("<!DOCTYPE HTML>");
+
     @Override
     protected boolean writeDocTypeWithNullSystemId() {
         return true;
@@ -100,13 +103,6 @@ public class HTML50Emitter extends HTMLEmitter {
 
     /**
      * Output element start tag
-     *
-     * @param elemName
-     * @param type
-     * @param attributes
-     * @param namespaces
-     * @param location
-     * @param properties
      */
     @Override
     public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {

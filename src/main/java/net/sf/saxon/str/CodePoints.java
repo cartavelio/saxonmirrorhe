@@ -3,9 +3,6 @@ package net.sf.saxon.str;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.z.IntIterator;
 
-import java.io.IOException;
-import java.io.Writer;
-
 /**
  * This class is analogous to the Java CharSequence interface, but it provides access to Unicode codepoints
  * rather than UCS-2 characters. Except where otherwise stated, "character" means a Unicode codepoint,
@@ -170,13 +167,6 @@ public abstract class CodePoints implements Comparable<CodePoints> {
             }
         }
     }
-
-    /**
-     * Write the content of this string to a Writer
-     * @param writer the writer to which the string should be written
-     */
-
-    public abstract void write(Writer writer) throws IOException;
 
 }
 

@@ -7,7 +7,7 @@
 
 package net.sf.saxon.serialize;
 
-import java.io.Writer;
+import net.sf.saxon.str.UnicodeWriter;
 
 /**
  * A class that expands a character to a character reference, entity reference, etc,
@@ -23,6 +23,6 @@ public interface CharacterReferenceGenerator {
      * @param writer  the Writer to which the character reference is to be written
      * @throws java.io.IOException if the Writer reports an error
      */
-    void outputCharacterReference(int charval, Writer writer) throws java.io.IOException;
+    void outputCharacterReference(int charval, UnicodeWriter writer) throws java.io.IOException;
 }
 
