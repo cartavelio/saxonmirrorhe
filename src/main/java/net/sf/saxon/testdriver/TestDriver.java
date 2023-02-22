@@ -59,9 +59,8 @@ public abstract class TestDriver {
     protected boolean debug = false;
     protected boolean export = false;
     protected boolean runWithJS = false;
-    protected boolean runWithNodeJS = false;
     protected boolean relocatable = false;
-    protected String jsBase = null;
+    protected String[] jsPlatforms = null;
     protected Pattern testPattern = null;
     protected String requestedTestSet = null;
     protected String testSuiteDir;
@@ -151,15 +150,7 @@ public abstract class TestDriver {
                 export = true;
                 runWithJS = true;
                 treeModel = DOMObjectModel.getInstance();
-                if (args[i].startsWith("-js:")) {
-                    jsBase = argValue;
-                }
-            }
-            if (args[i].startsWith("-nodeJS")) {
-                export = true;
-                runWithJS = true;
-                runWithNodeJS = true;
-                treeModel = DOMObjectModel.getInstance();
+                jsPlatforms = new String[]{"browser", "nodejs"};
             }
             if (args[i].equals("-unfolded")) {
                 unfolded = true;
@@ -442,6 +433,8 @@ public abstract class TestDriver {
         QName testCase = new QName("", "test-case");
         QName run = new QName("", "run");
         QName edition = new QName("", "edition");
+        QName platform = new QName("", "platform");
+        QName compiler = new QName("", "compiler");
         String saxonEdition = driverProc.getSaxonEdition();
         try {
             String suppliedName = getNameOfExceptionsFile();
@@ -477,6 +470,51 @@ public abstract class TestDriver {
                 }
                 if ("no".equals(entry.attribute("strict"))) {
                     laxTests.add(testName);
+                }
+                if (runWithJS) {
+                    String platformVal = entry.getAttributeValue(platform);
+                    if (platformVal == null) {
+                        platformVal = "";
+                    }
+                    String compilerVal = entry.getAttributeValue(compiler);
+                    if (compilerVal == null) {
+                        compilerVal = "";
+                    }
+                    // If exception/@compiler is not specified, then exception is relevant to all compilers
+                    if (!compilerVal.equals("")) {
+                        String[] exceptedCompilers = compilerVal.trim().split("\\s+");
+                        boolean exceptionCoversThisCompiler = false;
+                        // If exception/@compiler is specified but doesn't include "XJ",
+                        // then set appliesThisEdition = false, to ignore the exception at compile time
+                        for (String c : exceptedCompilers) {
+                            if (c.equals("XJ")) {
+                                exceptionCoversThisCompiler = true;
+                                break;
+                            }
+                        }
+                        if (!exceptionCoversThisCompiler) {
+                            appliesThisEdition = false;
+                        }
+                    }
+                    // If exception/@platform is not specified, then exception is relevant to all platforms
+                    if (!platformVal.equals("")) {
+                        String[] exceptedPlatforms = platformVal.trim().split("\\s+");
+                        // If there is some platform (member of jsPlatforms) not in exceptedPlatforms,
+                        // then set appliesThisEdition = false, to ignore the exception at compile time
+                        for (String plt : jsPlatforms) {
+                            boolean exceptionCoversThisPlatform = false;
+                            for (String p : exceptedPlatforms) {
+                                if (p.equals(plt)) {
+                                    exceptionCoversThisPlatform = true;
+                                    break;
+                                }
+                            }
+                            if (!exceptionCoversThisPlatform) {
+                                appliesThisEdition = false;
+                                break;
+                            }
+                        }
+                    }
                 }
                 if (appliesThisEdition) {
                     if (runVal.equals("false")) {

@@ -440,7 +440,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             sheet = exportImport(testName, testSetName, outcome, compiler, sheet, collector, styleSource);
 
         }
-        if (runWithNodeJS && !outcome.isException()) {
+        if (runWithJS && !outcome.isException()) {
             /* TODO - add case where expecting a static error but compiled OK */
             URI r = new File(resultsDir).toURI();
             if (env.exportedStylesheet != null) {
