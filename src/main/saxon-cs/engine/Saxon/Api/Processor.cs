@@ -32,7 +32,7 @@ namespace Saxon.Api {
         private SchemaManager schemaManager = null;
         private TextWriter textWriter = Console.Error;
         private IQueryResolver moduleResolver;
-        private ICollectionFinder collectionFinder = (cxt, uri) => new ResourceCollectionWrapper(
+        private CollectionFinder collectionFinder = (cxt, uri) => new ResourceCollectionWrapper(
             new StandardCollectionFinder().findCollection(cxt.context, uri));
 
         internal Processor(net.sf.saxon.s9api.Processor p) {
@@ -46,7 +46,7 @@ namespace Saxon.Api {
         /// of the software that has been loaded, and on the features that have been licensed.
         /// </summary>
         public Processor() {
-            jProcessor = new net.sf.saxon.s9api.Processor(false);
+            jProcessor = new net.sf.saxon.s9api.Processor(true);
             jProcessor.getUnderlyingConfiguration().setProcessor(this);
         }
 
@@ -58,23 +58,8 @@ namespace Saxon.Api {
         /// of the licensed edition of Saxon, according to the version of the software that is loaded, and will
         /// verify the license key. If false, the <c>Processor</c> will load a default <c>Configuration</c> that gives restricted
         /// capability and does not require a license, regardless of which version of the software is actually being run.</param>
-        public Processor(bool licensedEdition)
-            // newline needed by documentation stylesheet
-            : this(licensedEdition, false) {
-        }
-
-        /// <summary>
-        /// Create a <c>Processor</c>.
-        /// </summary>
-        /// <param name="licensedEdition">Set to true if the <c>Processor</c> is to use a licensed edition of Saxon
-        /// (that is, Saxon-PE or Saxon-EE). If true, the <c>Processor</c> will attempt to enable the capabilities
-        /// of the licensed edition of Saxon, according to the version of the software that is loaded, and will
-        /// verify the license key. If false, the <c>Processor</c> will load a default <c>Configuration</c> that gives restricted
-        /// capability and does not require a license, regardless of which version of the software is actually being run.</param>
-        /// <param name="loadLocally">This option has no effect at this release.</param>
-        public Processor(bool licensedEdition, bool loadLocally) {
+        public Processor(bool licensedEdition) {
             jProcessor = new net.sf.saxon.s9api.Processor(licensedEdition);
-            //jProcessor.getUnderlyingConfiguration().registerExternalObjectModel(new DotNetObjectModelDefinition());
         }
 
         /// <summary>
@@ -129,26 +114,20 @@ namespace Saxon.Api {
         /// Get the full name of the Saxon product version implemented by this <c>Processor</c>
         /// </summary>
 
-        public string ProductTitle {
-            get { return Version.getProductTitle(); }
-        }
+        public string ProductTitle => Version.getProductTitle();
 
         /// <summary>
         /// Get the Saxon product version number (for example, "9.2.0.2")
         /// </summary>
 
-        public string ProductVersion {
-            get { return Version.getProductVersion(); }
-        }
+        public string ProductVersion => Version.getProductVersion();
 
         /// <summary>
         /// Get the Saxon product edition (for example, "EE" for Enterprise Edition)
         /// </summary>
         /// 
 
-        public string Edition {
-            get { return jProcessor.getUnderlyingConfiguration().getEditionCode(); }
-        }
+        public string Edition => jProcessor.getUnderlyingConfiguration().getEditionCode();
 
 
         // /// <summary>
@@ -375,7 +354,7 @@ namespace Saxon.Api {
         /// for a user-defined collection finder to delegate to this system collection finder.</para>
         /// </remarks>
         
-        public ICollectionFinder CollectionFinder {
+        public CollectionFinder CollectionFinder {
             set {
                 if (value != null) {
                     this.collectionFinder = value;
@@ -409,12 +388,28 @@ namespace Saxon.Api {
         /// or XPath expression compiled under the control of this <c>Processor</c>
         /// </summary>
         /// <param name="function">
-        /// This interface provides only for simple extensions that have no side-effects and no
-        /// dependencies on the static or dynamic context.
+        /// This interface provides only for extensions that have no side-effects and no
+        /// dependencies on the static or dynamic context. It does however allow the type signature
+        /// of the function to be defined.
         /// </param>
         public void RegisterExtensionFunction(ExtensionFunction function) {
             Configuration config = jProcessor.getUnderlyingConfiguration();
             config.registerExtensionFunction(new SimpleExtensionFunctionWrapper(function));
+        }
+        
+        /// <summary>
+        /// Register a simple external/extension function that is to be made available within any stylesheet, query
+        /// or XPath expression compiled under the control of this <c>Processor</c>
+        /// </summary>
+        /// <param name="name">The name of the function, as a QName</para>
+        /// <param name="function">
+        /// This interface provides only for extensions that have no side-effects and no
+        /// dependencies on the static or dynamic context. It does however allow the type signature
+        /// of the function to be defined.
+        /// </param>
+
+        public void RegisterExtensionFunction(QName name, int arity, Func<XdmValue[], XdmValue> function) {
+            RegisterExtensionFunction(new LambdaExtensionFunction(name, arity, function));
         }
 
         /// <summary>
@@ -468,7 +463,7 @@ namespace Saxon.Api {
         /// <param name="sequence">The value to be written</param>
         /// <param name="destination">The destination to which the value should be written</param>
         /// 
-        public void WriteXdmValue(XdmValue sequence, XmlDestination destination) {
+        public void WriteXdmValue(XdmValue sequence, IDestination destination) {
             try {
                 PipelineConfiguration pipe = jProcessor.getUnderlyingConfiguration().makePipelineConfiguration();
                 Receiver r = destination.GetUnderlyingDestination().getReceiver(pipe,
@@ -481,7 +476,7 @@ namespace Saxon.Api {
                 r.close();
             }
             catch (XPathException err) {
-                throw new DynamicError(err);
+                throw new SaxonApiException(err);
             }
         }
 

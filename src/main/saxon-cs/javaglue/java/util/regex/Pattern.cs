@@ -22,8 +22,25 @@ namespace java.util.regex {
             return new Pattern(new Regex(pattern));
         }
         public static Pattern compile(string pattern, int flags) {
-            return new Pattern(new Regex(pattern)); // TODO: use the flags
+            RegexOptions options = RegexOptions.None;
+            if ((flags & java.util.regex.Pattern.UNIX_LINES) != 0) {
+                options |= RegexOptions.Multiline;
+            }
+            if ((flags & java.util.regex.Pattern.MULTILINE) != 0) {
+                options |= RegexOptions.Multiline;
+            }
+            if ((flags & java.util.regex.Pattern.CASE_INSENSITIVE) != 0) {
+                options |= RegexOptions.IgnoreCase;
+            }
+            if ((flags & java.util.regex.Pattern.DOTALL) != 0) {
+                options |= RegexOptions.Singleline;
+            }
+            if ((flags & java.util.regex.Pattern.COMMENTS) != 0) {
+                options |= RegexOptions.IgnorePatternWhitespace;
+            }
+            return new Pattern(new Regex(pattern, options)); 
         }
+ 
 
         public string pattern() {
             return regex.ToString();

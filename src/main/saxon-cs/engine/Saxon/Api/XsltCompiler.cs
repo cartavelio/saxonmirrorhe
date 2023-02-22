@@ -70,7 +70,6 @@ namespace Saxon.Api {
         /// does not have its own base URI.
         /// </remarks>
 
-
         public Uri BaseUri {
             get => baseUri;
             set => baseUri = value;
@@ -81,7 +80,7 @@ namespace Saxon.Api {
         /// This must be the name of a collation that is known to the <c>Processor</c>.
         /// </summary>
 
-        public String DefaultCollationName {
+        public string DefaultCollationName {
             get => jXsltCompiler.getDefaultCollation();
             set => jXsltCompiler.declareDefaultCollation(value);
         }
@@ -97,9 +96,14 @@ namespace Saxon.Api {
         /// a stylesheet.
         /// </summary>
         /// <remarks>
-        /// If no <c>XmlResolver</c> is set for the <c>XsltCompiler</c>, the <c>XmlResolver</c>
+        /// <para>If no <c>XmlResolver</c> is set for the <c>XsltCompiler</c>, the <c>XmlResolver</c>
         /// that is used is the one that was set on the <c>Processor</c> at the time <c>NewXsltCompiler</c>
         /// was called.
+        /// </para>
+        /// <para>Note the existence of the class <c>SimpleUriResolver</c>, which allows an <c>XmlResolver</c>
+        /// to be implemented as a simple lambda expression in the form <c>compiler.XmlResolver =
+        /// new SimpleUriResolver(uri => stream)</c>.
+        /// </para>
         /// </remarks>
 
         public XmlResolver XmlResolver {
@@ -107,8 +111,8 @@ namespace Saxon.Api {
                 if (xmlResolver == null) {
                     javax.xml.transform.URIResolver resolver =
                         jXsltCompiler.getUnderlyingCompilerInfo().getURIResolver();
-                    if (resolver is StandardURIResolver) {
-                        return ((StandardURIResolver) resolver).getXmlResolver();
+                    if (resolver is StandardURIResolver standardUriResolver) {
+                        return standardUriResolver.getXmlResolver();
                     }
                     else {
                         xmlResolver = new StandardXmlResolver();
@@ -256,20 +260,20 @@ namespace Saxon.Api {
         /// exhausted; if compilation failed, the current position of the stream on exit is
         /// undefined.</para>
         /// </remarks>
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the stylesheet. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception> 
         public XsltExecutable Compile(Stream input) {
-            try {
-                StreamSource ss = new StreamSource(input);
-                if (baseUri != null) {
-                    ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
-                }
+            StreamSource ss = new StreamSource(input);
+            if (baseUri != null) {
+                ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
+            }
 
-                XsltExecutable executable = new XsltExecutable(jXsltCompiler.compile(ss));
-                executable.InternalProcessor = processor;
-                return executable;
-            }
-            catch (SaxonApiException err) {
-                throw new StaticError(err);
-            }
+            XsltExecutable executable = new XsltExecutable(jXsltCompiler.compile(ss));
+            executable.InternalProcessor = processor;
+            return executable;
         }
         
         /// <summary>
@@ -298,16 +302,17 @@ namespace Saxon.Api {
         /// exhausted; if compilation failed, the current position of the stream on exit is
         /// undefined.</para>
         /// </remarks>
+        /// /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the stylesheet. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception> 
         public XsltExecutable Compile(Stream input, Uri baseUri) {
-            try {
-                StreamSource ss = new StreamSource(input, baseUri.OriginalString);
-                XsltExecutable executable = new XsltExecutable(jXsltCompiler.compile(ss));
-                executable.InternalProcessor = processor;
-                return executable;
-            }
-            catch (SaxonApiException err) {
-                throw new StaticError(err);
-            }
+            StreamSource ss = new (input, baseUri.OriginalString);
+            XsltExecutable executable = new(jXsltCompiler.compile(ss)) {
+                InternalProcessor = processor
+            };
+            return executable;
         }
 
         // internal method: Compile a stylesheet supplied as a Stream.
@@ -331,33 +336,35 @@ namespace Saxon.Api {
         // stream after use. If the compilation succeeded, then on exit the stream will be 
         // exhausted; if compilation failed, the current position of the stream on exit is
         // undefined.</para>
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the stylesheet. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception> 
 
         internal XsltExecutable Compile(Stream input, String theBaseUri, bool closeStream) {
             //See bug 2306
-            try {
-                StreamSource ss = new StreamSource(input);
-                if (theBaseUri != null) {
-                    ss.setSystemId(Uri.EscapeUriString(theBaseUri.ToString()));
-                }
-                else {
-                    if (baseUri != null) {
-                        ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
-                    }
-                }
 
-                net.sf.saxon.s9api.XsltExecutable jexecutable = jXsltCompiler.compile(ss);
-
-                if (closeStream) {
-                    input.Close();
-                }
-
-                XsltExecutable executable = new XsltExecutable(jexecutable);
-                executable.InternalProcessor = processor;
-                return executable;
+            StreamSource ss = new StreamSource(input);
+            if (theBaseUri != null) {
+                ss.setSystemId(Uri.EscapeUriString(theBaseUri.ToString()));
             }
-            catch (SaxonApiException err) {
-                throw new StaticError(err);
+            else {
+                if (baseUri != null) {
+                    ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
+                }
             }
+
+            net.sf.saxon.s9api.XsltExecutable jexecutable = jXsltCompiler.compile(ss);
+
+            if (closeStream) {
+                input.Close();
+            }
+
+            XsltExecutable executable = new(jexecutable) {
+                InternalProcessor = processor
+            };
+            return executable;
         }
 
 
@@ -376,17 +383,11 @@ namespace Saxon.Api {
         /// is not automatically imported to this <c>XsltCompiler</c>; if the package is required
         /// for use in subsequent compilations then it must be explicitly imported.</returns>
         public XsltPackage CompilePackage(Stream input) {
-            try {
-                StreamSource ss = new StreamSource(input);
-                if (baseUri != null) {
-                    ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
-                }
-
-                return new XsltPackage(processor, jXsltCompiler.compilePackage(ss));
+            StreamSource ss = new (input);
+            if (baseUri != null) {
+                ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
             }
-            catch (SaxonApiException err) {
-                throw new StaticError(err);
-            }
+            return new XsltPackage(processor, jXsltCompiler.compilePackage(ss));
         }
         
         /// <summary>Compile a library package, supplying a stream and a base URI</summary>
@@ -403,13 +404,8 @@ namespace Saxon.Api {
         /// for use in subsequent compilations then it must be explicitly imported.</returns>
 
         public XsltPackage CompilePackage(Stream input, Uri baseUri) {
-            try {
-                StreamSource ss = new StreamSource(input, baseUri.OriginalString);
-                return new XsltPackage(processor, jXsltCompiler.compilePackage(ss));
-            }
-            catch (SaxonApiException err) {
-                throw new StaticError(err);
-            }
+            StreamSource ss = new (input, baseUri.OriginalString);
+            return new XsltPackage(processor, jXsltCompiler.compilePackage(ss));
         }
 
 
@@ -420,9 +416,8 @@ namespace Saxon.Api {
         /// <remarks>since 9.6</remarks>
         public void ImportPackage(XsltPackage thePackage) {
             if (thePackage.Processor != this.processor) {
-                throw new StaticError(
-                    new TransformerException(
-                        "The imported package and the XsltCompiler must belong to the same Processor"));
+                throw new Saxon.Api.SaxonApiException(
+                        "The imported package and the XsltCompiler must belong to the same Processor");
             }
 
             GetUnderlyingCompilerInfo().getPackageLibrary().addPackage(thePackage.getUnderlyingPreparedPackage());
@@ -438,9 +433,8 @@ namespace Saxon.Api {
         /// <remarks>since 9.8</remarks>
         public void ImportPackage(XsltPackage thePackage, string packageName, string version) {
             if (thePackage.Processor != this.processor) {
-                throw new StaticError(
-                    new TransformerException(
-                        "The imported package and the XsltCompiler must belong to the same Processor"));
+                throw new Saxon.Api.SaxonApiException(
+                        "The imported package and the XsltCompiler must belong to the same Processor");
             }
 
             try {
@@ -457,8 +451,11 @@ namespace Saxon.Api {
                 details.loadedPackage = thePackage.getUnderlyingPreparedPackage();
                 jXsltCompiler.getUnderlyingCompilerInfo().getPackageLibrary().addPackage(details);
             }
-            catch (TransformerException ex) {
-                throw new StaticError(ex);
+            catch (Saxon.Api.SaxonApiException) {
+                throw;
+            }
+            catch (Exception ex) {
+                throw new Saxon.Api.SaxonApiException(ex);
             }
         }
 
@@ -477,14 +474,8 @@ namespace Saxon.Api {
         /// <param name="location">the location from which the package is to be loaded, as a URI</param>
         /// <returns>the compiled package loaded from the supplied file or remote location</returns>
         public XsltPackage LoadLibraryPackage(Uri location) {
-            try {
-                net.sf.saxon.s9api.XsltPackage package =
-                    jXsltCompiler.loadLibraryPackage(location);
-                return new XsltPackage(processor, package);
-            }
-            catch (net.sf.saxon.trans.XPathException e) {
-                throw new StaticError(e);
-            }
+            net.sf.saxon.s9api.XsltPackage package = jXsltCompiler.loadLibraryPackage(location);
+            return new XsltPackage(processor, package);
         }
 
         /// <summary>
@@ -520,9 +511,7 @@ namespace Saxon.Api {
         /// Escape hatch to the underlying Java-derived implementation of the <c>XsltCompiler</c>
         /// </summary>
 
-        public net.sf.saxon.s9api.XsltCompiler Implementation {
-            get { return jXsltCompiler; }
-        }
+        public net.sf.saxon.s9api.XsltCompiler Implementation => jXsltCompiler;
 
 
         /// <summary>
@@ -595,6 +584,9 @@ namespace Saxon.Api {
         /// The <c>XsltExecutable</c> may be loaded as many times as required, in the same or a different
         /// thread. The <c>XsltExecutable</c> is not affected by any changes made to the <c>XsltCompiler</c>
         /// once it has been compiled.</returns>
+        /// <exception cref="Saxon.Api.SaxonApiException">If compilation fails, a <code>SaxonApiException</code> is thrown.
+        /// Note that this will not contain useful error information; to capture details of
+        /// specific errors, nominate an <code>ErrorReporter</code> to receive notifications.</exception>
         /// <remarks>
         /// <para>If the stylesheet contains any <c>xsl:include</c> or <c>xsl:import</c> declarations,
         /// then the <c>BaseUri</c> property must be set to allow these to be resolved.</para>
@@ -604,20 +596,21 @@ namespace Saxon.Api {
         /// exhausted; if compilation failed, the current position of the stream on exit is
         /// undefined.</para>
         /// </remarks>
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the stylesheet. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception> 
         public XsltExecutable Compile(TextReader input) {
-            try {
-                StreamSource ss = new StreamSource(input);
-                if (baseUri != null) {
-                    ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
-                }
+            StreamSource ss = new StreamSource(input);
+            if (baseUri != null) {
+                ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
+            }
 
-                XsltExecutable executable =
-                    new XsltExecutable(jXsltCompiler.compile(ss)) {InternalProcessor = processor};
-                return executable;
-            }
-            catch (SaxonApiException ex) {
-                throw new StaticError(ex);
-            }
+            XsltExecutable executable = new(jXsltCompiler.compile(ss)) {
+                InternalProcessor = processor
+            };
+            return executable;
         }
 
         /// <summary>
@@ -634,17 +627,20 @@ namespace Saxon.Api {
         /// The <c>XsltExecutable</c> may be run as many times as required, in the same or a different
         /// thread. The <c>XsltExecutable</c> is not affected by any changes made to the <c>XsltCompiler</c>
         /// once it has been compiled.</returns>
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the stylesheet. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception> 
         public XsltExecutable Compile(Uri uri) {
-            Object obj = XmlResolver.GetEntity(uri, "application/xml", Type.GetType("System.IO.Stream"));
-            if (obj is Stream) {
+            object obj = XmlResolver.GetEntity(uri, "application/xml", Type.GetType("System.IO.Stream"));
+            if (obj is Stream stream) {
                 // See bug issue #2306
-                XsltExecutable executable = Compile((Stream) obj, uri.ToString(), true);
+                XsltExecutable executable = Compile(stream, uri.ToString(), true);
                 executable.InternalProcessor = processor;
                 return executable;
             }
-            else {
-                throw new ArgumentException("Invalid type of result from XmlResolver.GetEntity: " + obj);
-            }
+            throw new ArgumentException("Invalid type of result from XmlResolver.GetEntity: " + obj);
         }
 
         /// <summary>
@@ -673,14 +669,23 @@ namespace Saxon.Api {
         /// The <c>XsltExecutable</c> may be run as many times as required, in the same or a different
         /// thread. The <c>XsltExecutable</c> is not affected by any changes made to the <c>XsltCompiler</c>
         /// once it has been compiled.</returns>
-        /// 
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the stylesheet. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception>
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the stylesheet. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception>  
         public XsltExecutable Compile(XmlReader reader) {
-            DotNetPullProvider pp = new DotNetPullProvider(reader);
+            DotNetPullProvider pp = new(reader);
             PipelineConfiguration pipe = processor.Implementation.makePipelineConfiguration();
             pp.setPipelineConfiguration(pipe);
             PullSource source = new PullSource(pp);
-            String baseu = reader.BaseURI;
-            if (baseu == null || baseu == String.Empty) {
+            string baseu = reader.BaseURI;
+            if (string.IsNullOrEmpty(baseu)) {
                 // if no baseURI is supplied by the XmlReader, use the one supplied to this Compiler
                 if (baseUri == null) {
                     throw new ArgumentNullException("BaseUri");
@@ -691,14 +696,13 @@ namespace Saxon.Api {
             }
 
             source.setSystemId(baseu);
-            try {
-                XsltExecutable executable = new XsltExecutable(jXsltCompiler.compile(source));
-                executable.InternalProcessor = processor;
-                return executable;
-            }
-            catch (SaxonApiException e) {
-                throw new StaticError(e);
-            }
+
+            XsltExecutable executable = new(jXsltCompiler.compile(source)) {
+                InternalProcessor = processor
+            };
+            return executable;
+            
+            
         }
 
         /// <summary>
@@ -712,6 +716,16 @@ namespace Saxon.Api {
         /// The <c>XsltExecutable</c> may be run as many times as required, in the same or a different
         /// thread. The <c>XsltExecutable</c> is not affected by any changes made to the <c>XsltCompiler</c>
         /// once it has been compiled.</returns>
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the stylesheet. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception>
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the stylesheet. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception> 
         public XsltExecutable Compile(XdmNode node) {
             XsltExecutable executable = new XsltExecutable(jXsltCompiler.compile(node.Implementation.asActiveSource()));
             executable.InternalProcessor = processor;
@@ -729,26 +743,26 @@ namespace Saxon.Api {
         /// instruction other than the media type, are ignored. The
         /// <c>href</c> attribute must either reference an embedded stylesheet within the same
         /// document or a non-embedded external stylesheet.</remarks>
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the stylesheet. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception>
+        
         public XsltExecutable CompileAssociatedStylesheet(Uri uri, String media) {
-            Object obj = XmlResolver.GetEntity(uri, media == null ? "application/xml" : media,
+            object obj = XmlResolver.GetEntity(uri, media == null ? "application/xml" : media,
                 Type.GetType("System.IO.Stream"));
-            if (obj is Stream) {
-                StreamSource ss = new StreamSource((Stream) obj, uri.OriginalString);
-                try {
-                    // See bug issue #2306
-                    XsltExecutable executable =
-                        new XsltExecutable(
-                            jXsltCompiler.compile(jXsltCompiler.getAssociatedStylesheet(ss, media, null, null)));
-                    executable.InternalProcessor = processor;
-                    return executable;
-                }
-                catch (SaxonApiException e) {
-                    throw new StaticError(e);
-                }
+            if (obj is Stream stream) {
+                StreamSource ss = new (stream, uri.OriginalString);
+                // See bug issue #2306
+                XsltExecutable executable =
+                    new(jXsltCompiler.compile(jXsltCompiler.getAssociatedStylesheet(ss, media, null, null))) {
+                        InternalProcessor = processor
+                    };
+                return executable;
+                
             }
-            else {
-                throw new ArgumentException("Invalid type of result from XmlResolver.GetEntity: " + obj);
-            }
+            throw new ArgumentException("Invalid type of result from XmlResolver.GetEntity: " + obj);
         }
 
         /// <summary>Locate and compile a stylesheet identified by an <c>&lt;?xml-stylesheet?&gt;</c>
@@ -761,8 +775,13 @@ namespace Saxon.Api {
         /// is ignored, as are the other parameters of the xml-stylesheet instruction. The
         /// <c>href</c> attribute must either reference an embedded stylesheet within the same
         /// document or a non-embedded external stylesheet.</remarks>
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the stylesheet. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception>
         public XsltExecutable CompileAssociatedStylesheet(XdmNode source) {
-            if (source == null || source.NodeKind != XmlNodeType.Document) {
+            if (source == null || source.NodeKind != XdmNodeKind.Document) {
                 throw new ArgumentException("Source must be a document node");
             }
             
@@ -773,17 +792,16 @@ namespace Saxon.Api {
                 // TODO: check the media type
                 String href = ProcInstParser.getPseudoAttribute(n.StringValue, "href");
                 if (href == null) {
-                    throw new DynamicError("xml-stylesheet processing instruction has no @href attribute");
+                    throw new SaxonApiException("xml-stylesheet processing instruction has no @href attribute");
                 }
-            
-                String fragment = null;
+
                 int hash = href.LastIndexOf('#');
                 if (hash == 0) {
                     if (href.Length == 1) {
-                        throw new DynamicError("Relative URI of '#' is invalid");
+                        throw new SaxonApiException("Relative URI of '#' is invalid");
                     }
             
-                    fragment = href.Substring(1);
+                    string fragment = href.Substring(1);
                     NodeInfo target = ((NodeInfo)source.value).getTreeInfo().selectID(fragment, true);
                     XdmNode targetWrapper = null;
                     if (target == null) {
@@ -795,7 +813,7 @@ namespace Saxon.Api {
                         IEnumerator en = source.EnumerateAxis(XdmAxis.Descendant);
                         while (en.MoveNext()) {
                             XdmNode x = (XdmNode) en.Current;
-                            if (x.NodeKind == XmlNodeType.Element &&
+                            if (x.NodeKind == XdmNodeKind.Element &&
                                 x.NodeName.Uri == "http://www.w3.org/1999/XSL/Transform" &&
                                 (x.NodeName.LocalName == "stylesheet" || x.NodeName.LocalName == "transform" &&
                                     x.GetAttributeValue(qid) == fragment)) {
@@ -809,22 +827,22 @@ namespace Saxon.Api {
                     }
             
                     if (targetWrapper == null) {
-                        throw new DynamicError("No element with id='" + fragment + "' found");
+                        throw new SaxonApiException("No element with id='" + fragment + "' found");
                     }
             
                     return Compile(targetWrapper);
                 }
-                else if (hash > 0) {
+
+                if (hash > 0) {
                     throw new NotImplementedException(
                         "href cannot identify an embedded stylesheet in a different document");
                 }
-                else {
-                    Uri uri = new Uri(n.BaseUri, href);
-                    return Compile(uri);
-                }
+
+                Uri uri = new (n.BaseUri, href);
+                return Compile(uri);
             }
             
-            throw new DynamicError("xml-stylesheet processing instruction not found");
+            throw new SaxonApiException("xml-stylesheet processing instruction not found");
         }
     }
 }

@@ -78,7 +78,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="destination">The destination for the diagnostic output</param>
 
-        public void Explain(XmlDestination destination)
+        public void Explain(IDestination destination)
         {
             jExecutable.explain(destination.GetUnderlyingDestination());
         }

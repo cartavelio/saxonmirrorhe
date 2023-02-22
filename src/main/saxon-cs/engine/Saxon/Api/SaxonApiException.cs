@@ -1,57 +1,35 @@
 using System;
 using javax.xml.transform;
-using net.sf.saxon.s9api;
 using net.sf.saxon.trans;
 
 namespace Saxon.Api {
     /// <summary>
-    /// The <c>DynamicError</c> class contains information about a dynamic error detected during
-    /// execution of a stylesheet, query, or XPath expression.
+    /// The <c>SaxonApiException</c> class contains information about a static or dynamic error detected during
+    /// compilation or evaluation of a stylesheet, query, or XPath expression, or other errors that occur
+    /// when using the Saxon API.
     /// </summary>
 
     [Serializable]
-    public class DynamicError : Exception
+    public class SaxonApiException : Exception
     {
 
         private XPathException exception;
         internal bool isWarning;
 
-        /// <summary>
-        /// Create a new <c>DynamicError</c>, specifying the error message.
-        /// </summary>
-        /// <param name="message">The error message</param>
+        // internal constructor: Create a new SaxonApiException, wrapping a Saxon XPathException
 
-        public DynamicError(string message)
-        {
-            exception = new XPathException(message);
+        public SaxonApiException(Exception err) {
+            this.exception = (err is XPathException xPathException
+                                ? xPathException
+                                : XPathException.makeXPathException(err));
         }
 
-        // internal constructor: Create a new DynamicError, wrapping a Saxon XPathException
-
-        internal DynamicError(TransformerException err)
-        {
-            if (err is XPathException)
-            {
-                this.exception = (XPathException)err;
-            }
-            else
-            {
-                this.exception = XPathException.makeXPathException(err);
-            }
+        public SaxonApiException(string message) : this(new java.lang.Exception(message)) {
+            
         }
-
-        // internal constructor: Create a new DynamicError, wrapping an SaxonApiException
-
-        internal DynamicError(SaxonApiException err)
-        {
-            if (err.getCause() is XPathException)
-            {   
-                this.exception = (XPathException)err.getCause();
-            }
-            else
-            {
-                this.exception = XPathException.makeXPathException(err);
-            }
+        
+        public SaxonApiException(string message, Exception err) : this(new java.lang.Exception(message, err)) {
+            
         }
 
         /// <summary>
@@ -62,14 +40,13 @@ namespace Saxon.Api {
         {
             get
             {
-
-                String errorCode = exception.getErrorCodeLocalPart();
-                if (errorCode == null) {
+                if (exception.getErrorCodeLocalPart() != null) {
+                    return new QName("err",
+                        exception.getErrorCodeNamespace(),
+                        exception.getErrorCodeLocalPart());
+                } else {
                     return null;
                 }
-                return new QName("err",
-                    exception.getErrorCodeNamespace(),
-                    errorCode);
             }
         }
 
@@ -78,6 +55,13 @@ namespace Saxon.Api {
         /// </summary>
 
         public override string Message => exception.getMessage();
+
+
+        /// <summary>
+        /// Return the message associated with this error concatenated with the message from the causing exception.
+        /// </summary>
+        ///  
+        public string InnerMessage => exception.getMessage() + ": " + exception.getCause().Message;
 
         /// <summary>
         /// The URI of the query or stylesheet module in which the error was detected
@@ -119,6 +103,35 @@ namespace Saxon.Api {
             }
         }
 
+
+        /// <summary>
+        /// The column number locating the error (typically within a query or stylesheet module).
+        /// </summary>
+        /// <remarks>
+        /// May be set to -1 if the location of the error is unknown.
+        /// </remarks>        
+
+        public int ColumnNumber
+        {
+            get
+            {
+                SourceLocator loc = exception.getLocator();
+                if (loc == null)
+                {
+                    if (exception.getException() is TransformerException)
+                    {
+                        loc = ((TransformerException)exception.getException()).getLocator();
+                        if (loc != null)
+                        {
+                            return loc.getColumnNumber();
+                        }
+                    }
+                    return -1;
+                }
+                return loc.getColumnNumber();
+            }
+        }
+
         /// <summary>
         /// Indicate whether this error is being reported as a warning condition. If so, applications
         /// may ignore the condition, though the results may not be as intended.
@@ -137,16 +150,19 @@ namespace Saxon.Api {
         public bool IsTypeError => exception.isTypeError();
 
         /// <summary>
-        /// Return the error message.
-        /// </summary>
-
-        public override string ToString() => exception.getMessage();
-
-        /// <summary>
         /// Return the underlying exception. This is unstable as this is an internal object.
         /// </summary>
         /// <returns>The underlying <c>XPathException</c></returns>
         
         public XPathException UnderlyingException => exception;
+
+        /// <summary>
+        /// Return the error message.
+        /// </summary>
+
+        public override string ToString()
+        {
+            return exception.getMessage();
+        }
     }
 }

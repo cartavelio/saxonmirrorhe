@@ -24,6 +24,7 @@
       <PackageReference Include="ICU4N.LanguageData" Version="60.1.0-alpha.354" />
       <PackageReference Include="ICU4N.RegionData" Version="60.1.0-alpha.354" />
       <PackageReference Include="ICU4N.Transliterator" Version="60.1.0-alpha.354" />
+      <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
       <PackageReference Include="Singulink.Numerics.BigDecimal" Version="2.0.0" />
       <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.0.1" />
       <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />

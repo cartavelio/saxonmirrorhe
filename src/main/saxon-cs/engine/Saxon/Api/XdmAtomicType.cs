@@ -414,8 +414,8 @@ namespace Saxon.Api {
                     return null;
 
                 default:
-                    throw new StaticError(new net.sf.saxon.s9api.SaxonApiException("Unknown atomic type " +
-                        StandardNames.getClarkName(fingerprint)));
+                    throw new SaxonApiException(
+                        "Unknown atomic type " + StandardNames.getClarkName(fingerprint));
             }
         }
 
@@ -446,6 +446,9 @@ namespace Saxon.Api {
                    && ((AtomicType)underlyingType).matches((AtomicValue)theItem, null);
         }
 
+        public override string ToString() {
+            return Name.EQName;
+        }
 
         /// <summary>
         /// Determine whether this ItemType subsumes another ItemType. Specifically

@@ -76,7 +76,6 @@ namespace java.io {
         }
 
         public bool exists() {
-            string name = SysIO.Path.GetFileName(this.fullPath);
             return SysIOFile.Exists(this.fullPath) || SysIODirectory.Exists(this.fullPath);
         }
 

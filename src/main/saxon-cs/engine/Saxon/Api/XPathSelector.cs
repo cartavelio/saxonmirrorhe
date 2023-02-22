@@ -50,7 +50,7 @@ namespace Saxon.Api {
                     selector.setContextItem(value);
                 }
                 catch (net.sf.saxon.trans.XPathException err) {
-                    throw new StaticError(err);
+                    throw new Saxon.Api.SaxonApiException(err);
                 }
             }
         }
@@ -73,7 +73,7 @@ namespace Saxon.Api {
                 selector.setVariable(name, value);
             }
             catch (XPathException err) {
-                throw new StaticError(err);
+                throw new Saxon.Api.SaxonApiException(err);
             }
         }
 
@@ -103,17 +103,12 @@ namespace Saxon.Api {
         /// <returns>
         /// An <c>XdmValue</c> representing the results of the expression. 
         /// </returns>
-        /// <exception cref="DynamicError">
-        /// Throws <c>Saxon.Api.DynamicError</c> if the evaluation of the XPath expression fails
+        /// <exception cref="SaxonApiException">
+        /// Throws <c>Saxon.Api.SaxonApiException</c> if the evaluation of the XPath expression fails
         /// with a dynamic error.
         /// </exception>
         public XdmValue Evaluate() {
-            try {
-                return selector.evaluate();
-            }
-            catch (SaxonApiException err) {
-                throw new DynamicError(err);
-            }
+            return selector.evaluate();
         }
 
         /// <summary>
@@ -125,17 +120,12 @@ namespace Saxon.Api {
         /// returns an empty sequence. If the expression returns a sequence of more than one item,
         /// any items after the first are ignored.
         /// </returns>
-        /// <exception cref="DynamicError">
+        /// <exception cref="SaxonApiException">
         /// Throws <c>Saxon.Api.DynamicError</c> if the evaluation of the XPath expression fails
         /// with a dynamic error.
         /// </exception>
         public XdmItem EvaluateSingle() {
-            try {
-                return selector.evaluateSingle();
-            }
-            catch (SaxonApiException err) {
-                throw new DynamicError(err);
-            }
+            return selector.evaluateSingle();
         }
 
         /// <summary>
@@ -145,17 +135,12 @@ namespace Saxon.Api {
         /// A <c>Boolean</c> representing the result of the expression, converted to its
         /// effective boolean value as if by applying the XPath <c>boolean()</c> function
         /// </returns>
-        /// <exception cref="DynamicError">
+        /// <exception cref="SaxonApiException">
         /// Throws <c>Saxon.Api.DynamicError</c> if the evaluation of the XPath expression fails
         /// with a dynamic error.
         /// </exception>
-        public Boolean EffectiveBooleanValue() {
-            try {
-                return selector.effectiveBooleanValue();
-            }
-            catch (SaxonApiException err) {
-                throw new DynamicError(err);
-            }
+        public bool EffectiveBooleanValue() {
+            return selector.effectiveBooleanValue();
         }
 
 
@@ -170,18 +155,13 @@ namespace Saxon.Api {
         /// from this method does not imply that the expression has executed successfully: failures
         /// may be reported later while retrieving items from the iterator. 
         /// </returns>
-        /// <exception cref="DynamicError">
+        /// <exception cref="SaxonApiException">
         /// May throw a <c>Saxon.Api.DynamicError</c> if the evaluation of the XPath expression fails
         /// with a dynamic error. However, some errors will not be detected during the invocation of this
         /// method, but only when stepping through the returned <c>SequenceEnumerator</c>.
         /// </exception>
         public IEnumerator GetEnumerator() {
-            try {
-                return selector.GetEnumerator();
-            }
-            catch (net.sf.saxon.s9api.SaxonApiUncheckedException err) {
-                throw new DynamicError(XPathException.makeXPathException(err));
-            }
+            return selector.GetEnumerator();
         }
     }
 }

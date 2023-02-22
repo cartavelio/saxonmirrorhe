@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
 using javax.xml.transform.stream;
 using net.sf.saxon;
-
+using net.sf.saxon.pull;
 using net.sf.saxon.s9api;
 using net.sf.saxon.type;
+using Saxon.Api.Support;
 
 
 namespace Saxon.Api {
@@ -36,10 +38,8 @@ namespace Saxon.Api {
     {
         private net.sf.saxon.s9api.SchemaManager s9schemaManager;
         private Configuration config;
-        private IList<StaticError> errorList = null;
         private Processor processor;
-        private ErrorReporter reporter;
-
+        
         // internal constructor
 
         internal SchemaManager(Processor processor)
@@ -47,7 +47,6 @@ namespace Saxon.Api {
             this.processor = processor;
             this.s9schemaManager = processor.JProcessor.getSchemaManager();
             this.config = processor.Implementation;
-            reporter = null;
         }
 
         /// <summary>
@@ -60,7 +59,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// 
-        public String XsdVersion {
+        public string XsdVersion {
             get => s9schemaManager.getXsdVersion();
             set => s9schemaManager.setXsdVersion(value);
         }
@@ -71,7 +70,7 @@ namespace Saxon.Api {
         /// Not supported in Saxon-CS.
         /// </summary>
         
-        public String Catalog
+        public string Catalog
         {
             set {
                 throw new NotSupportedException("Saxon-CS does not support catalogs");
@@ -95,40 +94,25 @@ namespace Saxon.Api {
             set => throw new SaxonApiException("Schema processing requires Saxon-EE");
         }
 
-        /// <summary>
-        /// List of errors. The caller may supply an empty list before calling <c>Compile</c>;
-        /// the processor will then populate the list with error information obtained during
-        /// the schema compilation. Each error will be included as an object of type <c>StaticError</c>.
-        /// If no error list is supplied by the caller, error information will be written to
-        /// the standard error stream.
-        /// </summary>
-        /// <remarks>
-        /// <para>By supplying a custom <c>List</c> with a user-written <c>add()</c> method, it is possible to
-        /// intercept error conditions as they occur.</para>
-        /// <para>Note that this error list is used only for errors detected during the compilation
-        /// of the schema. It is not used for errors detected when using the schema to validate
-        /// a source document.</para>
-        /// </remarks>
-        [Obsolete("IList<StaticError> ErrorList is deprecated, please use the method SetErrorList and GetErrorList.")]
-        public IList<StaticError> ErrorList
-        {
-            set
-            {
-                errorList = value;
-                reporter = null;
-                //schemaManager.setErrorReporter(new ErrorReporterToStaticError(errorList));
-            }
-            get => errorList;
-        }
-
         /// <summary>Set the <c>ErrorReporter</c> to be used when validating instance documents as a user defined ErrorReporter.
         /// If this property is used then the ErrorList property and SetErrorList method is overriden </summary>
         /// <remarks>The <c>IErrorReporter</c> to be used</remarks>
         public ErrorReporter ErrorReporter {
             set {
-                //schemaManager.setErrorReporter(new ErrorReporterWrapper(value));                
+                s9schemaManager.setErrorReporter(new ErrorReporterWrapper(value));
             }
-           
+        }
+        
+        /// <summary>
+        /// Compile a schema supplied as a <c>Stream</c>. The resulting schema components are added
+        /// to the cache. The base URI of the schema document is taken as the current working directory.
+        /// </summary>
+        /// <param name="input">A stream containing the source text of the schema. This method
+        /// will consume the supplied stream. It is the caller's responsibility to close the stream
+        /// after use.</param>
+
+        public void Compile(Stream input) {
+            Compile (input, new Uri(Environment.CurrentDirectory));
         }
 
         /// <summary>
@@ -142,7 +126,34 @@ namespace Saxon.Api {
         /// schema documents</param>        
 
         public void Compile(Stream input, Uri baseUri) {
-            StreamSource source = new StreamSource(input, baseUri.ToString());
+            StreamSource source = new (input, baseUri.ToString());
+            s9schemaManager.load(source);
+        }
+        
+        /// <summary>
+        /// Compile a schema supplied as a <c>TextReader</c>. The resulting schema components are added
+        /// to the cache. The base URI of the schema document is taken as the current working directory.
+        /// </summary>
+        /// <param name="input">A <c>TextReader</c> that supplies the source text of the schema. This method
+        /// will consume the supplied stream. It is the caller's responsibility to close the reader
+        /// after use.</param>
+
+        public void Compile(TextReader input) {
+            Compile (input, new Uri(Environment.CurrentDirectory));
+        }
+        
+        /// <summary>
+        /// Compile a schema supplied as a <c>TextReader</c>. The resulting schema components are added
+        /// to the cache.
+        /// </summary>
+        /// <param name="input">A <c>TextReader</c> that supplies the source text of the schema. This method
+        /// will consume the supplied stream. It is the caller's responsibility to close the reader
+        /// after use.</param>
+        /// <param name="baseUri">The base URI of the schema document, for resolving any references to other
+        /// schema documents</param>        
+
+        public void Compile(TextReader input, Uri baseUri) {
+            StreamSource source = new (input, baseUri.ToString());
             s9schemaManager.load(source);
         }
 
@@ -158,7 +169,8 @@ namespace Saxon.Api {
 
         public void Compile(Uri uri)
         {
-            throw new SaxonApiException("Schema processing requires Saxon-EE");
+            StreamSource source = new (uri.ToString());
+            s9schemaManager.load(source);
         }
 
         /// <summary>
@@ -176,7 +188,8 @@ namespace Saxon.Api {
 
         public void Compile(XmlReader reader)
         {
-            throw new SaxonApiException("Schema processing requires Saxon-EE");
+            DotNetPullProvider source = new (reader);
+            s9schemaManager.load(new PullSource(source));
         }
 
         /// <summary>
@@ -189,13 +202,32 @@ namespace Saxon.Api {
 
         public void Compile(XdmNode node)
         {
-            javax.xml.transform.Source source = node.Implementation.asActiveSource();
-            try {
-                s9schemaManager.load(source);
-            }
-            catch (net.sf.saxon.s9api.SaxonApiException e) {
-                throw new StaticError(e);
-            }
+            s9schemaManager.load(node.Implementation.asActiveSource());
+        }
+
+        /// <summary>
+        /// Import schema components from an SCM file, produced using a previous call on
+        /// <c>ExportComponents</c>.
+        /// </summary>
+        /// <param name="schemaComponentModel">The XML representation of the SCM.</param>
+        public void ImportComponents(XdmNode schemaComponentModel) {
+            s9schemaManager.importComponents(schemaComponentModel.Implementation.asActiveSource());
+        }
+        
+        /// <summary>
+        /// Export schema components to an SCM file, available using a subsequent call on
+        /// <c>ImportComponents</c>.
+        /// </summary>
+        /// <remarks>
+        /// The returned SCM tree will typically be serialized to a file, so that it can be reused
+        /// whenever a schema is required. Most Saxon APIs that accept a source XSD schema will also
+        /// accept a lexical SCM file in its place.
+        /// </remarks>
+        /// <return>The XML representation of the SCM.</return>
+        public XdmNode ExportComponents() {
+            XdmDestination destination = new XdmDestination();
+            s9schemaManager.exportComponents(destination.GetUnderlyingDestination());
+            return destination.XdmNode;
         }
 
         /// <summary>
@@ -216,7 +248,7 @@ namespace Saxon.Api {
         /// </remarks>
 
         public SchemaValidator NewSchemaValidator() {
-            return new SchemaValidator(s9schemaManager.newSchemaValidator(), processor);
+            return new (s9schemaManager.newSchemaValidator(), processor);
         }
 
         /// <summary>

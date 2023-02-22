@@ -45,7 +45,7 @@ namespace Saxon.Api {
         /// default namespace for elements and types).</param>
         /// <param name="uri">The namespace URI. It is possible to specify
         /// a zero-length string to "undeclare" a namespace.</param>
-        public void DeclareNamespace(String prefix, String uri) {
+        public void DeclareNamespace(string prefix, string uri) {
             Implementation.declareNamespace(prefix, uri);
         }
 
@@ -116,14 +116,16 @@ namespace Saxon.Api {
 
         /// <summary>
         /// This property indicates which version of XQuery language syntax is accepted. The values
-        /// accepted are "3.1" and "4.0"
+        /// accepted are "3.1" and "4.0". The default is "3.1".
         /// </summary>
+        /// <remarks>
+        /// <para>XQuery 4.0 is work in progress, and the specification is not yet stable.</para>
+        /// </remarks>
 
         public string XQueryLanguageVersion {
             get => Implementation.getLanguageVersion();
             set => Implementation.setLanguageVersion(value);
         }
-
 
         /// <summary>
         /// A user-supplied <c>IQueryResolver</c> used to resolve location hints appearing in an
@@ -182,23 +184,18 @@ namespace Saxon.Api {
         /// The <c>XQueryExecutable</c> may be run as many times as required, in the same or a different
         /// thread. The <c>XQueryExecutable</c> is not affected by any changes made to the <c>XQueryCompiler</c>
         /// once it has been compiled.</returns>
-        /// <exception cref="StaticError">Throws a <c>StaticError</c> if errors were detected
-        /// during static analysis of the query. Details of the errors will be added as <c>StaticError</c>
-        /// objects to the <c>ErrorList</c> if supplied; otherwise they will be written to the standard
-        /// error stream. The exception that is returned is merely a summary indicating the
-        /// status.</exception>
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the query. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception>
         public XQueryExecutable Compile(Stream query) {
-            try {
-                net.sf.saxon.s9api.XQueryExecutable exec = Implementation.compile(query);
-                return new XQueryExecutable(exec);
-            }
-            catch (SaxonApiException e) {
-                throw new StaticError(e);
-            }
+            net.sf.saxon.s9api.XQueryExecutable exec = Implementation.compile(query);
+            return new XQueryExecutable(exec);
         }
 
         /// <summary>
-        /// Compile a query supplied as a <c>String</c>.
+        /// Compile a query supplied as a <c>string</c>.
         /// </summary>
         /// <remarks>
         /// Using this method the query processor is provided with a string of Unicode
@@ -215,23 +212,20 @@ namespace Saxon.Api {
         /// The <c>XQueryExecutable</c> may be run as many times as required, in the same or a different
         /// thread. The <c>XQueryExecutable</c> is not affected by any changes made to the <c>XQueryCompiler</c>
         /// once it has been compiled.</returns>
-        /// <exception cref="StaticError">Throws a <c>StaticError</c> if errors were detected
-        /// during static analysis of the query. Details of the errors will be added as <c>StaticError</c>
-        /// objects to the <c>ErrorList</c> if supplied; otherwise they will be written to the standard
-        /// error stream. The exception that is returned is merely a summary indicating the
-        /// status.</exception>        
-        public XQueryExecutable Compile(String query) {
-            try {
-                net.sf.saxon.s9api.XQueryExecutable exec = Implementation.compile(query);
-                return new XQueryExecutable(exec);
-            }
-            catch (SaxonApiException e) {
-                throw new StaticError(e);
-            }
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// during static analysis of the query. Details of the errors will be reported to the
+        /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
+        /// error stream. The exception that is returned from this method is merely a summary indicating the
+        /// status, and is not useful for diagnosing the actual error.</exception>
+         
+        public XQueryExecutable Compile(string query) {
+            net.sf.saxon.s9api.XQueryExecutable exec = Implementation.compile(query);
+            return new XQueryExecutable(exec);
         }
 
         /// <summary>
-        /// Escape hatch to the underlying Java implementation
+        /// Escape hatch to the underlying Java implementation. The result gives access to internal
+        /// methods that are likely to vary from release to release.
         /// </summary>
 
         public net.sf.saxon.s9api.XQueryCompiler Implementation { get; }

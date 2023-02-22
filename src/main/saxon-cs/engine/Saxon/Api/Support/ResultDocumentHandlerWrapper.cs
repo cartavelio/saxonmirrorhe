@@ -9,7 +9,7 @@ namespace Saxon.Api.Support {
     internal class ResultDocumentHandlerWrapper : ResultDocumentResolver
     {
 
-        private IResultDocumentHandler handler;
+        private ResultDocumentHandler handler;
         private ArrayList resultList = new ArrayList();
         private ArrayList destinationList = new ArrayList();
         private PipelineConfiguration pipe;
@@ -19,7 +19,7 @@ namespace Saxon.Api.Support {
         /// </summary>
         /// <param name="handler">Handler.</param>
         /// <param name="pipe">Pipe.</param>
-        public ResultDocumentHandlerWrapper(IResultDocumentHandler handler, PipelineConfiguration pipe)
+        public ResultDocumentHandlerWrapper(ResultDocumentHandler handler, PipelineConfiguration pipe)
         {
             this.handler = handler;
             this.pipe = pipe;
@@ -38,7 +38,7 @@ namespace Saxon.Api.Support {
             {
                 if (Object.ReferenceEquals(resultList[i], result))
                 {
-                    ((XmlDestination)destinationList[i]).GetUnderlyingDestination().close();
+                    ((IDestination)destinationList[i]).GetUnderlyingDestination().close();
                     resultList.RemoveAt(i);
                     destinationList.RemoveAt(i);
                     return;
@@ -62,7 +62,7 @@ namespace Saxon.Api.Support {
             {
                 throw new TransformerException("Invalid base output URI " + baseString, err);
             }
-            XmlDestination destination = handler.HandleResultDocument(href, baseUri);
+            IDestination destination = handler(href, baseUri);
             Receiver result = destination.GetUnderlyingDestination().getReceiver(pipe, sp);
             resultList.Add(result);
             destinationList.Add(destination);

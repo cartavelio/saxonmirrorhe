@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using net.sf.saxon.ma.arrays;
 using net.sf.saxon.om;
 
@@ -19,39 +20,33 @@ namespace Saxon.Api {
         ///<summary>Create an <c>XdmArray</c> whose members are single items, corresponding
         ///one-to-one with the items making up a supplied sequence.</summary>
         ///<param name="value">A sequence of items; each item becomes a member of the array.</param>
-        public XdmArray(XdmValue value) {
+        public XdmArray(XdmValue value) : base(_init(value)) {
+        }
+
+        private static SimpleArrayItem _init(XdmValue value) {
             int length = value.Count;
             List<GroundedValue> list = new List<GroundedValue>(length);
             foreach (XdmItem item in value.GetList()) {
                 list.Add(item.Unwrap());
             }
 
-            this.value = new SimpleArrayItem(list);
+            return new SimpleArrayItem(list);
         }
 
         ///<summary> Create an <c>XdmArray</c> supplying the members as an array of <c>XdmValue</c> objects.</summary>
         /// <param name="members">An array of <c>XdmValue</c> objects. Note that subsequent changes 
         /// to the array will have no effect on the <c>XdmArray</c>.</param>
-        public XdmArray(XdmValue[] members) {
-            List<GroundedValue> list = new List<GroundedValue>(members.Length);
-            foreach (XdmValue v in members) {
-                list.Add(v.value);
-            }
-
-            this.value = new SimpleArrayItem(list);
+        public XdmArray(XdmValue[] members) : base(_init(members)) {
         }
 
-        // Internal constructor
+        private static SimpleArrayItem _init(XdmValue[] members) {
+            List<GroundedValue> list = new List<GroundedValue>(members.Length);
+            list.AddRange(members.Select(v => v.value));
+            return new SimpleArrayItem(list);
+        }
+        
 
-        // internal XdmArray(ArrayList list)
-        // {
-        //     this.value = new SimpleArrayItem(list);
-        // }
-
-        // Internal constructor
-
-        internal XdmArray(ArrayItem array) {
-            this.value = array;
+        internal XdmArray(ArrayItem array) : base(array) {
         }
 
 
@@ -61,13 +56,16 @@ namespace Saxon.Api {
         /// the <c>XdmValue</c>.</param>
         /// <remarks>Note that the argument can be a single <c>XdmValue</c> representing a sequence, in which case the
         ///  constructed array will have one member for each item in the supplied sequence.</remarks>
-        public XdmArray(List<XdmValue> members) {
+        public XdmArray(List<XdmValue> members) : base(_init(members)) {
+        }
+
+        private static SimpleArrayItem _init(List<XdmValue> members) {
             List<GroundedValue> list = new List<GroundedValue>(members.Count);
             foreach (XdmValue v in members) {
                 list.Add(v.Unwrap());
             }
 
-            this.value = new SimpleArrayItem(list);
+            return new SimpleArrayItem(list);
         }
 
         /// <summary>
@@ -127,7 +125,7 @@ namespace Saxon.Api {
                 return (XdmArray) Wrap(newArray);
             }
             catch (net.sf.saxon.trans.XPathException e) {
-                throw new StaticError(e);
+                throw new Saxon.Api.SaxonApiException(e);
             }
         }
 
@@ -144,7 +142,7 @@ namespace Saxon.Api {
                 return (XdmArray) Wrap(newArray);
             }
             catch (net.sf.saxon.trans.XPathException e) {
-                throw new StaticError(e);
+                throw new Saxon.Api.SaxonApiException(e);
             }
         }
 

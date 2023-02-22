@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using java.util;
 using net.sf.saxon;
 using net.sf.saxon.@event;
 using net.sf.saxon.expr.parser;
 using net.sf.saxon.om;
 using net.sf.saxon.pattern;
+using net.sf.saxon.tree.wrapper;
 using Saxon.Api.Support;
 using Saxon.Impl.Helpers;
 using Type = net.sf.saxon.type.Type;
@@ -51,17 +53,46 @@ namespace Saxon.Api {
         public QName NodeName {
             get {
                 NodeInfo node = (NodeInfo) value;
-                String local = node.getLocalPart();
+                string local = node.getLocalPart();
                 if (local == "") {
                     return null;
                 }
 
-                String prefix = node.getPrefix();
-                String uri = node.getURI();
+                string prefix = node.getPrefix();
+                string uri = node.getURI();
                 return new QName(prefix, uri, local);
             }
         }
+        
+        /// <summary>
+        /// The kind of node, as an instance of <c>Saxon.Api.XdmNodeKind</c>.
+        /// </summary>
 
+        public XdmNodeKind NodeKind {
+            get {
+                NodeInfo node = (NodeInfo) value;
+                int kind = node.getNodeKind();
+                switch (kind) {
+                    case Type.DOCUMENT:
+                        return XdmNodeKind.Document;
+                    case Type.ELEMENT:
+                        return XdmNodeKind.Element;
+                    case Type.ATTRIBUTE:
+                        return XdmNodeKind.Attribute;
+                    case Type.TEXT:
+                        return XdmNodeKind.Text;
+                    case Type.COMMENT:
+                        return XdmNodeKind.Comment;
+                    case Type.PROCESSING_INSTRUCTION:
+                        return XdmNodeKind.ProcessingInstruction;
+                    case Type.NAMESPACE:
+                        return XdmNodeKind.Namespace;
+                    default:
+                        throw new ArgumentException("Unknown node kind");
+                }
+            }
+        }
+        
         /// <summary>
         /// The kind of node, as an instance of <c>System.Xml.XmlNodeType</c>.
         /// </summary>
@@ -69,7 +100,7 @@ namespace Saxon.Api {
         /// is returned.
         /// </remarks>
 
-        public XmlNodeType NodeKind {
+        public XmlNodeType NodeType {
             get {
                 NodeInfo node = (NodeInfo) value;
                 int kind = node.getNodeKind();
@@ -150,8 +181,8 @@ namespace Saxon.Api {
             get {
                 Configuration config = Implementation.getConfiguration();
                 object originator = config.getProcessor();
-                if (originator is Processor) {
-                    return (Processor) originator;
+                if (originator is Processor processor) {
+                    return processor;
                 }
                 else {
                     return new Processor(new net.sf.saxon.s9api.Processor(config));
@@ -160,13 +191,20 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Unwraps the underlying <c>XmlNode</c> object from the <c>XdmValue</c>.
-        /// If the method does not wrap a <c>XmlNode</c> then a null is returned
+        /// Unwraps the underlying DOM <c>XmlNode</c> object from the <c>XdmValue</c>.
+        /// If the method does not wrap a DOM <c>XmlNode</c> then null is returned
         /// </summary>
         /// <returns>The underlying <c>XmlNode</c></returns>
         public XmlNode getUnderlyingXmlNode() {
-            if (value is Saxon.Impl.Dom.DomNodeWrapper) {
-                return (XmlNode) ((Saxon.Impl.Dom.DomNodeWrapper) value).getRealNode();
+            NodeInfo localNode = (NodeInfo)value;
+            if (localNode is VirtualNode virtualNode) {
+                object realNode = virtualNode.getRealNode();
+                if (realNode is XmlNode xmlNode) {
+                    return xmlNode;
+                }
+            }
+            if (value is Saxon.Impl.Dom.DomNodeWrapper wrapper) {
+                return (XmlNode) wrapper.getRealNode();
             }
 
             return null;
@@ -223,8 +261,7 @@ namespace Saxon.Api {
         public string GetAttributeValue(QName name) {
             return ((NodeInfo) value).getAttributeValue(name.Uri, name.LocalName);
         }
-
-
+        
         /// <summary>
         /// Get a the string value of a named attribute (in no namespace) of this element. 
         /// </summary>
@@ -270,7 +307,7 @@ namespace Saxon.Api {
         /// <param name="localName">the local name of the child elements to be selected, or "*" to select all children that are element nodes</param>
         /// <returns> an <c>Iterable</c> containing the element children of this node that have the required local name.</returns>
         
-        public IEnumerable<XdmNode> Children(String localName) {
+        public IEnumerable<XdmNode> Children(string localName) {
             Step<XdmNode, XdmNode> localNameStep = Steps.Child(localName);
             return localNameStep.Invoke(this);
         }
@@ -283,8 +320,8 @@ namespace Saxon.Api {
         /// <param name="localName">the local name of the child elements to be selected</param>
         /// <returns> an <c>Iterable</c> containing the element children of this node that have the required local name and namespace URI.</returns>
         
-        public IEnumerable<XdmNode> Children(String uri, String localName) {
-            return Children().SelectMany(Steps.Child(uri, localName).Func);
+        public IEnumerable<XdmNode> Children(string uri, string localName) {
+            return Steps.Child(uri, localName).Invoke(this);
         }
 
         /// <summary>
@@ -381,11 +418,7 @@ namespace Saxon.Api {
         public Uri BaseUri {
             get {
                 string baseUriStr = ((NodeInfo) value).getBaseURI();
-                if (baseUriStr == null || baseUriStr.Equals("")) {
-                    return null;
-                }
-
-                return new Uri(baseUriStr);
+                return baseUriStr is null or "" ? null : new Uri(baseUriStr);
             }
         }
 
@@ -395,12 +428,8 @@ namespace Saxon.Api {
 
         public Uri DocumentUri {
             get {
-                String s = ((NodeInfo) value).getSystemId();
-                if (s == null || s.Length == 0) {
-                    return null;
-                }
-
-                return new Uri(s);
+                string s = ((NodeInfo) value).getSystemId();
+                return string.IsNullOrEmpty(s) ? null : new Uri(s);
             }
         }
 
@@ -418,10 +447,11 @@ namespace Saxon.Api {
         public void WriteTo(XmlWriter writer) {
             NodeInfo node = ((NodeInfo) value);
             PipelineConfiguration pipe = node.getConfiguration().makePipelineConfiguration();
-            XmlWriterReceiver receiver = new XmlWriterReceiver(writer, pipe);
-            receiver.open();
-            node.copy(receiver, net.sf.saxon.om.CopyOptions.ALL_NAMESPACES, Loc.NONE);
-            receiver.close();
+            XmlWriterReceiver receiver = new (writer, pipe);
+            NamespaceDifferencer differencer = new (receiver, new Properties());
+            differencer.open();
+            node.copy(differencer, net.sf.saxon.om.CopyOptions.ALL_NAMESPACES, Loc.NONE);
+            differencer.close();
         }
 
         /// <summary>
@@ -441,21 +471,21 @@ namespace Saxon.Api {
         /// represented as they would appear in lexical XML.</para>
         /// </remarks>
 
-        public String OuterXml {
+        public string OuterXml {
             get {
                 NodeInfo node = ((NodeInfo) value);
 
                 if (node.getNodeKind() == Type.ATTRIBUTE) {
-                    String val = node.getStringValue().Replace("\"", "&quot;");
+                    string val = node.getStringValue().Replace("\"", "&quot;");
                     val = val.Replace("<", "&lt;");
                     val = val.Replace("&", "&amp;");
                     return node.getDisplayName() + "=\"" + val + '"';
                 }
                 else if (node.getNodeKind() == Type.NAMESPACE) {
-                    String val = node.getStringValue().Replace("\"", "&quot;");
+                    string val = node.getStringValue().Replace("\"", "&quot;");
                     val = val.Replace("<", "&lt;");
                     val = val.Replace("&", "&amp;");
-                    String name = node.getDisplayName();
+                    string name = node.getDisplayName();
                     name = (name.Equals("") ? "xmlns" : "xmlns:" + name);
                     return name + "=\"" + val + '"';
                 }
@@ -488,7 +518,7 @@ namespace Saxon.Api {
         /// This method returns the value of the <see cref="OuterXml"/> property.
         /// To get the string value of a node as defined in XPath, use the <see cref="StringValue"/> property.
         /// </remarks>
-        public override String ToString() {
+        public override string ToString() {
             return OuterXml;
         }
 
@@ -500,8 +530,6 @@ namespace Saxon.Api {
         /// Escape hatch to the underlying class in the Java implementation
         /// </summary>
 
-        public NodeInfo Implementation {
-            get { return ((NodeInfo) value); }
-        }
+        public NodeInfo Implementation => ((NodeInfo) value);
     }
 }

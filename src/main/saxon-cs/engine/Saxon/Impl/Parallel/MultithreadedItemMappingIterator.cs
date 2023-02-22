@@ -52,7 +52,7 @@ namespace Saxon.Impl.Parallel {
             return ((maxThreads>0) ? maxThreads : 1);
         }
 
-        public net.sf.saxon.om.Item next() {
+        public override net.sf.saxon.om.Item next() {
             if (allDone) {
                 return null;
             }
