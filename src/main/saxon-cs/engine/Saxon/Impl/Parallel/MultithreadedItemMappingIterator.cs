@@ -65,4 +65,4 @@ namespace Saxon.Impl.Parallel {
     
 }
 
-// Copyright (c) 2022 Saxonica Limited
+// Copyright (c) 2022 - 2023 Saxonica Limited
