@@ -80,7 +80,7 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
                     if (options.getErrorReporter() != null) {
                         errorHandler = new StandardErrorHandler(options.getErrorReporter());
                     } else {
-                        errorHandler = new StandardErrorHandler(new StandardErrorReporter());
+                        errorHandler = new StandardErrorHandler(receiver.getPipelineConfiguration().getConfiguration().makeErrorReporter());
                     }
                 }
                 parser.setErrorHandler(errorHandler);

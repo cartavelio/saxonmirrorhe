@@ -107,8 +107,7 @@ public class Controller implements ContextOriginator {
     protected String principalResultURI;
     private UnparsedTextURIResolver unparsedTextResolver;
     private String defaultCollectionURI;
-    private ErrorReporter errorReporter = new StandardErrorReporter();
-    //protected UnfailingErrorListener errorListener;
+    private ErrorReporter errorReporter;
     private TreeModel treeModel = TreeModel.TINY_TREE;
     private DocumentPool sourceDocumentPool;
     private IntHashMap<Map<Long, KeyIndex>> localIndexes;
@@ -192,7 +191,7 @@ public class Controller implements ContextOriginator {
         userURIResolver = config.getURIResolver();
         unparsedTextResolver = config.getUnparsedTextURIResolver();
         validationMode = config.getSchemaValidationMode();
-        errorReporter = new StandardErrorReporter();
+        errorReporter = config.makeErrorReporter();
 
         traceListener = null;
         traceFunctionDestination = config.getLogger();
