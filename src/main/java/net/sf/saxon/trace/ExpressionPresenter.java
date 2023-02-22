@@ -333,9 +333,7 @@ public class ExpressionPresenter {
     }
 
     private String truncatedModuleName(String module) {
-        if (!relocatable) {
-            return module;
-        } else {
+        if (relocatable) {
             // If not exporting the base URI, cut the filename used for diagnostic location of errors down to its last component
             String[] parts = module.split("/");
             for (int p = parts.length - 1; p >= 0; p--) {
@@ -343,8 +341,8 @@ public class ExpressionPresenter {
                     return parts[p];
                 }
             }
-            return module;
         }
+        return module;
     }
 
     public void emitRetainedStaticContext(RetainedStaticContext sc, RetainedStaticContext parentSC) {
@@ -360,8 +358,9 @@ public class ExpressionPresenter {
                     (parentSC == null || !sc.getDefaultElementNamespace().equals(parentSC.getDefaultElementNamespace()))) {
                 emitAttribute("defaultElementNS", sc.getDefaultElementNamespace().toString());
             }
-            if (!NamespaceConstant.FN.equals(sc.getDefaultFunctionNamespace())) {
-                emitAttribute("defaultFunctionNS", sc.getDefaultFunctionNamespace().toString());
+            String defaultFnNs = sc.getDefaultFunctionNamespace().toString();
+            if (!NamespaceConstant.FN.equals(defaultFnNs)) {
+                emitAttribute("defaultFunctionNS", defaultFnNs);
             }
             if (!((ExportOptions)options).suppressStaticContext && (parentSC == null || !sc.declaresSameNamespaces(parentSC))) {
                 UnicodeBuilder ub = new UnicodeBuilder();
@@ -632,7 +631,7 @@ public class ExpressionPresenter {
                         while (hex.length() < 4) {
                             hex.insert(0, "0");
                         }
-                        out.append(hex.toString());
+                        out.append(hex);
                     } else {
                         out.append(c);
                     }

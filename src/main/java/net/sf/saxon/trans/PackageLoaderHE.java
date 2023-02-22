@@ -225,7 +225,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 int target = Integer.parseInt(token);
                 Component targetComponent = componentIdMap.get(target);
                 if (targetComponent == null) {
-                    throw new XPathException("Unresolved external reference to component " + target);
+                    throw new XPathException("Unresolved reference to component " + target, SaxonErrorCode.SXPK0005);
                 }
                 comp.getComponentBindings().add(new ComponentBinding(targetComponent.getActor().getSymbolicName(), targetComponent));
             }
@@ -339,11 +339,7 @@ public class PackageLoaderHE implements IPackageLoader {
         }
 
         StructuredQName defaultModeName = getQNameAttribute(packageElement, "defaultMode");
-        if (defaultModeName == null) {
-            pack.setDefaultMode(Mode.UNNAMED_MODE_NAME);
-        } else {
-            pack.setDefaultMode(defaultModeName);
-        }
+        pack.setDefaultMode(defaultModeName == null ? Mode.UNNAMED_MODE_NAME : defaultModeName);
     }
 
     protected void addVendorFunctionLibrary(FunctionLibraryList targetList, Configuration config) {
@@ -1148,11 +1144,7 @@ public class PackageLoaderHE implements IPackageLoader {
         ) {
             RetainedStaticContext rsc = new RetainedStaticContext(config);
             rsc.setPackageData(pack);
-            if (defaultCollAtt != null) {
-                rsc.setDefaultCollationName(defaultCollAtt);
-            } else {
-                rsc.setDefaultCollationName(NamespaceConstant.CODEPOINT_COLLATION_URI);
-            }
+            rsc.setDefaultCollationName(defaultCollAtt == null ? NamespaceConstant.CODEPOINT_COLLATION_URI : defaultCollAtt);
             if (baseURIAtt != null) {
                 rsc.setStaticBaseUriString(baseURIAtt);
             } else if (relocatableBase != null) {
@@ -2137,6 +2129,11 @@ public class PackageLoaderHE implements IPackageLoader {
             return cie;
         });
 
+        eMap.put("dynCall", (loader, element) -> {
+            List<Expression> children = getChildExpressionList(loader, element);
+            return new DynamicFunctionCall(children.get(0), children.subList(1, children.size()));
+        });
+
         eMap.put("elem", (loader, element) -> {
             String displayName = element.getAttributeValue(NamespaceUri.NULL,"name");
             String[] parts;
@@ -2810,10 +2807,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("nextMatch", (loader, element) -> {
             String flags = element.getAttributeValue(NamespaceUri.NULL,"flags");
-            boolean useTailRecursion = false;
-            if (flags != null && flags.contains("t")) {
-                useTailRecursion = true;
-            }
+            boolean useTailRecursion = flags != null && flags.contains("t");
             NextMatch inst = new NextMatch(useTailRecursion);
 
             WithParam[] actuals = loader.loadWithParams(element, inst, false);

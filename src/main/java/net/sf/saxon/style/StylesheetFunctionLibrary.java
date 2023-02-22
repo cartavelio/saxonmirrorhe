@@ -97,6 +97,7 @@ public class StylesheetFunctionLibrary implements FunctionLibrary {
             return null;
         }
         UserFunction fn = (UserFunction)c.getActor();
+        fn.incrementReferenceCount();
         if (fn.isOverrideExtensionFunction() != this.overrideExtensionFunction) {
             return null;
         }

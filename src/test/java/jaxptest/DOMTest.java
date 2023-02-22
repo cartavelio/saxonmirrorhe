@@ -3,6 +3,7 @@ package jaxptest;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.EnterpriseTransformerFactory;
 import com.saxonica.config.ProfessionalTransformerFactory;
+import com.saxonica.ee.domino.DominoNode;
 import com.saxonica.ee.domino.DominoTree;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
 import net.sf.saxon.Configuration;
@@ -17,14 +18,15 @@ import net.sf.saxon.lib.AugmentedSource;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
-import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XdmNode;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
+import net.sf.saxon.tree.tiny.TinyBuilder;
+import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.tree.util.SteppingNode;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -1789,6 +1791,64 @@ public class DOMTest {
         } catch (SAXException | TransformerException | ParserConfigurationException | IOException e) {
             e.printStackTrace();
             fail();
+        }
+    }
+
+    @Test
+    public void testBug5727() {
+        try {
+            EnterpriseConfiguration pc = new EnterpriseConfiguration();
+            Processor saxon = new Processor(pc);
+            XQueryCompiler compiler = saxon.newXQueryCompiler();
+            compiler.declareNamespace("htd", "http://www.example.org/WS-HT");
+            compiler.declareNamespace("trt", "http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd");
+            compiler.declareNamespace("tlc", "http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-lifecycle-wsdl.xsd");
+            compiler.declareNamespace("sf", "http://schemas.active-endpoints.com/appmodules/screenflow/2010/10/avosScreenflow.xsd");
+
+            XQueryExecutable exec = compiler.compile("<a>{(.)/htd:task}</a>");
+            XQueryEvaluator query = exec.load();
+
+            //load document
+            String input = "<t><htd:task xmlns:htd='http://www.example.org/WS-HT'><x htd:att='abc'/></htd:task></t>";
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = factory.newDocumentBuilder();
+            InputSource inputSource = new InputSource(new StringReader(input));
+            Document doc = documentBuilder.parse(inputSource);
+            boolean useDomino = true;
+            if (useDomino) {
+                DominoTree domTree = DominoTree.makeTree(doc.getDocumentElement().getOwnerDocument(), pc, "systemID");
+                SequenceIterator next = domTree.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+                GroundedValue gv = SequenceTool.toGroundedValue(next);
+                DominoNode elNode = (DominoNode) gv.itemAt(0);
+
+                query.setContextItem((XdmNode) XdmValue.wrap(gv));
+            } else {
+                TransformerFactory tfactory = new EnterpriseTransformerFactory(pc);
+                final Transformer transformer = tfactory.newTransformer();
+                PipelineConfiguration pipeconfig = pc.makePipelineConfiguration();
+                // set up holder for the output
+                final TinyBuilder outputTarget = new TinyBuilder(
+                        pipeconfig);
+
+                transformer.transform(new DOMSource(doc), outputTarget);
+
+                TinyTree tt = outputTarget.getTree();
+                NodeInfo nodeInfo = tt.getRootNode();
+                query.setContextItem(new XdmNode(nodeInfo));
+            }
+
+            XdmValue result = query.evaluate();
+            System.err.println(result.toString());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            e.printStackTrace();
         }
     }
 
