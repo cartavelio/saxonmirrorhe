@@ -1080,6 +1080,13 @@ task saxonc_pydoc3(dependsOn: ['saxonc_doc_pypi']) {
   doLast {
     exec {
       workingDir "${buildDir}/doc_pypi"
+      commandLine 'python3', '-m', 'pip', 'install', '-r', 'requirements.txt'
+    }
+  }
+
+  doLast {
+    exec {
+      workingDir "${buildDir}/doc_pypi"
       commandLine 'python3', 'setup.py', 'build_ext', '-if'
     }
   }
