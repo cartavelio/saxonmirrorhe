@@ -18,6 +18,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
@@ -779,10 +780,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         @Override
         public PushEvaluator elaborateForPush() {
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
-            return (out, context) -> {
-                //noinspection Convert2MethodRef
-                return expr.processLeavingTail(out, context);
-            };
+            return CSharp.methodRef(expr::processLeavingTail);
         }
 
         /**

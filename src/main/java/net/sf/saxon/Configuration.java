@@ -47,6 +47,7 @@ import net.sf.saxon.trace.XQueryTraceCodeInjector;
 import net.sf.saxon.trace.XSLTTraceCodeInjector;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.packages.IPackageLoader;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -1044,12 +1045,11 @@ public class Configuration implements SourceResolver, NotationSet {
      * the version of XML (1.0 or 1.1) selected by this configuration
      */
 
-    @SuppressWarnings("Convert2MethodRef")
     public IntPredicateProxy getValidCharacterChecker() {
         if (xmlVersion == XML10) {
-            return IntPredicateLambda.of(ch -> XMLCharacterData.isValid10(ch));
+            return IntPredicateLambda.of(CSharp.staticRef(XMLCharacterData::isValid10));
         } else {
-            return IntPredicateLambda.of(ch -> XMLCharacterData.isValid11(ch));
+            return IntPredicateLambda.of(CSharp.staticRef(XMLCharacterData::isValid11));
         }
     }
 
@@ -3481,9 +3481,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     public java.util.function.Function<SequenceIterator, FocusTrackingIterator> getFocusTrackerFactory(
             Executable exec, boolean multithreaded) {
-        //noinspection Convert2MethodRef
-        //Written this way for Java-C# conversion
-        return iter -> new FocusTrackingIterator(iter);
+        return CSharp.constructorRef(FocusTrackingIterator::new, 1);
     }
 
     /**

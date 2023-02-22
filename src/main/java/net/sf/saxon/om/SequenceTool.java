@@ -141,9 +141,8 @@ public class SequenceTool {
      */
 
     public static void supply(SequenceIterator iter, ItemConsumer<? super Item> consumer) {
-        Item item;
         try {
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 consumer.accept(item);
             }
         } catch (XPathException e) {
@@ -417,8 +416,7 @@ public class SequenceTool {
             try {
                 ItemType type = null;
                 SequenceIterator iter = sequence.iterate();
-                Item item;
-                while ((item = iter.next()) != null) {
+                for (Item item; (item = iter.next()) != null; ) {
                     if (type == null) {
                         type = Type.getItemType(item, th);
                     } else {
@@ -451,9 +449,8 @@ public class SequenceTool {
             return UType.getUType((Item) sequence);
         } else if (sequence instanceof GroundedValue) {
             UType type = UType.VOID;
-            SequenceIterator iter = ((GroundedValue) sequence).iterate();
-            Item item;
-            while ((item = iter.next()) != null) {
+            SequenceIterator iter = sequence.iterate();
+            for (Item item; (item = iter.next()) != null; ) {
                 type = type.union(UType.getUType(item));
                 if (type == UType.ANY) {
                     break;

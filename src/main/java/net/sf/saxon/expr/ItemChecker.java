@@ -468,7 +468,7 @@ public final class ItemChecker extends UnaryExpression {
             Expression arg = exp.getBaseExpression();
             PullEvaluator argEval = Elaborator.makeElaborator(arg).elaborateForPull();
 
-            return context -> exp.checkSequence(argEval.eval(context), context);
+            return context -> exp.checkSequence(argEval.iterate(context), context);
         }
 
         @Override

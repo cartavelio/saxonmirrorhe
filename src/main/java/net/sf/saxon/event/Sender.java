@@ -16,6 +16,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.Type;
 
 import javax.xml.transform.Source;
@@ -168,8 +169,7 @@ public abstract class Sender {
         }
         LocationCopier copier = new LocationCopier(top.getNodeKind() == Type.DOCUMENT, location.getSystemId());
         pipe.setComponent(CopyInformee.class.getName(), copier);
-        //noinspection Convert2MethodRef
-        pipe.setCopyInformee(element -> copier.notifyElementNode(element));
+        pipe.setCopyInformee(CSharp.methodRef(copier::notifyElementNode));
 
         // start event stream
         receiver.open();

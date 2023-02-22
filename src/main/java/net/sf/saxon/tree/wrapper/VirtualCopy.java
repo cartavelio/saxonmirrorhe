@@ -14,6 +14,7 @@ import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -41,8 +42,8 @@ public class VirtualCopy implements NodeInfo {
     protected Supplier<String> systemIdSupplier;
     protected NodeInfo original;
     protected VirtualCopy parent;
-    protected NodeInfo root;        // the node forming the root of the subtree that was copied
     protected VirtualTreeInfo tree;
+    protected NodeInfo root;        // the node forming the root of the subtree that was copied
     private boolean dropNamespaces = false;
 
     /**
@@ -55,8 +56,8 @@ public class VirtualCopy implements NodeInfo {
 
     protected VirtualCopy(NodeInfo base, NodeInfo root) {
         original = base;
-        //noinspection Convert2MethodRef
-        systemIdSupplier = () -> base.getBaseURI(); // computing the base URI can be expensive, so do it lazily
+        systemIdSupplier = CSharp.methodRef(base::getBaseURI);
+            // computing the base URI can be expensive, so do it lazily
         this.root = root;
     }
 

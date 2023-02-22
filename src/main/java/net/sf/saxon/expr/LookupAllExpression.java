@@ -277,7 +277,7 @@ public class LookupAllExpression extends UnaryExpression {
         public PullEvaluator elaborateForPull() {
             LookupAllExpression expr = (LookupAllExpression) getExpression();
             PullEvaluator baseEval = Elaborator.makeElaborator(expr.getBaseExpression()).elaborateForPull();
-            return (context) -> new LookupAllIterator(expr, baseEval.eval(context));
+            return (context) -> new LookupAllIterator(expr, baseEval.iterate(context));
         }
     }
 

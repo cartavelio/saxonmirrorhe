@@ -3,6 +3,8 @@ package net.sf.saxon.expr.elab;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.trans.UncheckedXPathException;
 
 public abstract class PullElaborator extends Elaborator {
 
@@ -10,27 +12,55 @@ public abstract class PullElaborator extends Elaborator {
     public abstract PullEvaluator elaborateForPull();
 
     @Override
+    public EagerEvaluator eagerly() {
+        PullEvaluator pull = elaborateForPull();
+        return context -> {
+            try {
+                return SequenceTool.toGroundedValue(pull.iterate(context));
+            } catch (UncheckedXPathException err) {
+                throw err.getXPathException();
+            }
+        };
+    }
+
+    @Override
     public PushEvaluator elaborateForPush() {
         PullEvaluator pull = elaborateForPull();
         return (out, context) -> {
-            SequenceIterator iter = pull.eval(context);
-            Item it;
-            while ((it = iter.next()) != null) {
-                out.append(it);
+            try {
+                SequenceIterator iter = pull.iterate(context);
+                Item it;
+                while ((it = iter.next()) != null) {
+                    out.append(it);
+                }
+                return null;
+            } catch (UncheckedXPathException err) {
+                throw err.getXPathException();
             }
-            return null;
         };
     }
 
     @Override
     public ItemEvaluator elaborateForItem() {
         PullEvaluator pull = elaborateForPull();
-        return context -> pull.eval(context).next();
+        return context -> {
+            try {
+                return pull.iterate(context).next();
+            } catch (UncheckedXPathException err) {
+                throw err.getXPathException();
+            }
+        };
     }
 
     public BooleanEvaluator elaborateForBoolean() {
         PullEvaluator pull = elaborateForPull();
-        return context -> ExpressionTool.effectiveBooleanValue(pull.eval(context));
+        return context -> {
+            try {
+                return ExpressionTool.effectiveBooleanValue(pull.iterate(context));
+            } catch (UncheckedXPathException err) {
+                throw err.getXPathException();
+            }
+        };
     }
 
     @Override

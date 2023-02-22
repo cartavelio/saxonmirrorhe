@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.GroundedValue;
@@ -21,12 +20,12 @@ import net.sf.saxon.value.Int64Value;
 public class ForMemberClausePush extends TuplePush {
 
     protected TuplePush destination;
-    protected ForClause forClause;
+    protected ForMemberClause forMemberClause;
 
-    public ForMemberClausePush(Outputter outputter, TuplePush destination, ForClause forClause) {
+    public ForMemberClausePush(Outputter outputter, TuplePush destination, ForMemberClause forClause) {
         super(outputter);
         this.destination = destination;
-        this.forClause = forClause;
+        this.forMemberClause = forClause;
     }
 
     /*
@@ -34,14 +33,13 @@ public class ForMemberClausePush extends TuplePush {
      */
     @Override
     public void processTuple(XPathContext context) throws XPathException {
-        Expression sequence = forClause.getSequence();
-        ArrayItem arrayItem = (ArrayItem) sequence.evaluateItem(context);
+        ArrayItem arrayItem = forMemberClause.evaluateArrayExpression(context);
         int pos = 0;
         for (GroundedValue member : arrayItem.members()) {
-            context.setLocalVariable(forClause.getRangeVariable().getLocalSlotNumber(), member);
-            if (forClause.getPositionVariable() != null) {
+            context.setLocalVariable(forMemberClause.getRangeVariable().getLocalSlotNumber(), member);
+            if (forMemberClause.getPositionVariable() != null) {
                 context.setLocalVariable(
-                        forClause.getPositionVariable().getLocalSlotNumber(),
+                        forMemberClause.getPositionVariable().getLocalSlotNumber(),
                         new Int64Value(++pos));
             }
             destination.processTuple(context);

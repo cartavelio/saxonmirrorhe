@@ -424,9 +424,8 @@ public class DocumentInstr extends ParentNodeConstructor {
                     PullEvaluator contentEval = makeElaborator(expr.getContentExpression()).elaborateForPull();
                     return context -> {
                         UnicodeBuilder sb = new UnicodeBuilder();
-                        SequenceIterator iter = contentEval.eval(context);
-                        Item item;
-                        while ((item = iter.next()) != null) {
+                        SequenceIterator iter = contentEval.iterate(context);
+                        for (Item item; (item = iter.next()) != null; ) {
                             sb.accept(item.getUnicodeStringValue());
                         }
                         return TextFragmentValue.makeTextFragment(

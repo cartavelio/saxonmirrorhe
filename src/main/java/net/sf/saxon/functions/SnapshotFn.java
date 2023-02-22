@@ -16,6 +16,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -57,8 +58,7 @@ public class SnapshotFn extends SystemFunction {
     }
 
     public static SequenceIterator snapshotSequence(SequenceIterator nodes) {
-        //noinspection Convert2MethodRef
-        return ItemMappingIterator.map(nodes, it -> snapshotSingle(it));
+        return ItemMappingIterator.map(nodes, CSharp.staticRef(SnapshotFn::snapshotSingle));
     }
 
     /**
@@ -85,8 +85,7 @@ public class SnapshotFn extends SystemFunction {
     public static List<NodeInfo> makeAncestorList(NodeInfo origin) {
         List<NodeInfo> ancestors = new ArrayList<>(20);
         AxisIterator iter = origin.iterateAxis(AxisInfo.ANCESTOR);
-        NodeInfo item;
-        while ((item = iter.next()) != null) {
+        for (NodeInfo item; (item = iter.next()) != null; ) {
             ancestors.add(item);
         }
         return ancestors;

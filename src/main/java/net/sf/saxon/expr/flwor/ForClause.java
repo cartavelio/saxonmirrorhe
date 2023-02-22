@@ -10,10 +10,13 @@ package net.sf.saxon.expr.flwor;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.KeyFn;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -35,6 +38,7 @@ public class ForClause extends Clause {
     /*@Nullable*/
     protected LocalVariableBinding positionVariable;
     protected Operand sequenceOp;
+    protected PullEvaluator sequenceOperandEvaluator;
     protected boolean allowsEmpty;
 
     public ForClause() {
@@ -73,6 +77,21 @@ public class ForClause extends Clause {
 
     public Operand getSequenceOp() {
         return this.sequenceOp;
+    }
+
+    /**
+     * Get an iterator over the items or members in the input sequence.
+     *
+     * @param context dynamic evaluation context
+     * @return for a simple "for $x" clause, the sequence of items to which $x will be bound.
+     * For a "for member ¢x" clause, the sequence of array members, each wrapped as an object value
+     * @throws XPathException if evaluation fails
+     */
+    protected SequenceIterator getIterator(XPathContext context) throws XPathException {
+        if (sequenceOperandEvaluator == null) {
+            sequenceOperandEvaluator = Elaborator.makeElaborator(getSequence()).elaborateForPull();
+        }
+        return sequenceOperandEvaluator.iterate(context);
     }
 
     /**
@@ -117,9 +136,9 @@ public class ForClause extends Clause {
     }
 
     /**
-     * Get the number of variables bound by this clause
+     * Get the variables bound by this clause
      *
-     * @return the number of variable bindings (1 or 2 depending on whether there is a position variable)
+     * @return the variable bindings (1 or 2 depending on whether there is a position variable)
      */
     @Override
     public LocalVariableBinding[] getRangeVariables() {
@@ -334,7 +353,6 @@ public class ForClause extends Clause {
                     if (rel != Affinity.DISJOINT) {
                         RetainedStaticContext rsc = new RetainedStaticContext(visitor.getStaticContext());
                         predicate = SystemFunction.makeCall("boolean", rsc, predicate);
-                        assert predicate != null;
                     }
                     selection = new FilterExpression(selection, predicate);
                     ExpressionTool.copyLocationInfo(predicate, selection);
@@ -356,11 +374,7 @@ public class ForClause extends Clause {
                 if (path instanceof SlashExpression) {
                     ExpressionTool.copyLocationInfo(condition, path);
                     Expression k = visitor.obtainOptimizer().convertPathExpressionToKey((SlashExpression) path, visitor);
-                    if (k == null) {
-                        setSequence(path);
-                    } else {
-                        setSequence(k);
-                    }
+                    setSequence(k == null ? path : k);
                     sequenceOp.typeCheck(visitor, contextItemType);
                     sequenceOp.optimize(visitor, contextItemType);
                 }
@@ -425,23 +439,14 @@ public class ForClause extends Clause {
 
     @Override
     public String toShortString() {
-        StringBuilder fsb = new StringBuilder(64);
-        fsb.append(getClauseKey().toString().toLowerCase());
-        fsb.append(" $");
-        fsb.append(rangeVariable.getVariableQName().getDisplayName());
-        fsb.append(' ');
-        LocalVariableBinding posVar = getPositionVariable();
-        if (posVar != null) {
-            fsb.append("at $");
-            fsb.append(posVar.getVariableQName().getDisplayName());
-            fsb.append(' ');
-        }
-        fsb.append("in ");
-        fsb.append(getSequence().toShortString());
-        return fsb.toString();
+        return stringify(true);
     }
 
     public String toString() {
+        return stringify(false);
+    }
+
+    private String stringify(boolean abbreviate) {
         StringBuilder fsb = new StringBuilder(64);
         fsb.append(getClauseKey().toString().toLowerCase());
         fsb.append(" $");
@@ -454,7 +459,7 @@ public class ForClause extends Clause {
             fsb.append(' ');
         }
         fsb.append("in ");
-        fsb.append(getSequence().toString());
+        fsb.append(abbreviate ? getSequence().toShortString() : getSequence().toString());
         return fsb.toString();
     }
 }

@@ -517,7 +517,7 @@ public final class CardinalityChecker extends UnaryExpression {
             Expression arg = exp.getBaseExpression();
             PullEvaluator argEval = Elaborator.makeElaborator(arg).elaborateForPull();
 
-            return context -> exp.checkCardinality(argEval.eval(context), context);
+            return context -> exp.checkCardinality(argEval.iterate(context), context);
         }
 
         @Override

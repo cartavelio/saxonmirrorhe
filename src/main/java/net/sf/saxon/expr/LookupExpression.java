@@ -318,7 +318,7 @@ public class LookupExpression extends BinaryExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
-        return Elaborator.makeElaborator(this).elaborateForPull().eval(context);
+        return Elaborator.makeElaborator(this).elaborateForPull().iterate(context);
     }
 //        Configuration config = context.getConfiguration();
 //        if (isArrayLookup) {
@@ -511,7 +511,7 @@ public class LookupExpression extends BinaryExpression {
                     return context -> {
                         IntegerValue subscriptValue = (IntegerValue) rhs.eval(context);
                         int subscript = subscriptValue.asSubscript() - 1;
-                        return MappingIterator.map(lhs.eval(context), baseItem -> {
+                        return MappingIterator.map(lhs.iterate(context), baseItem -> {
                             ArrayItem array = (ArrayItem) baseItem;
                             if (subscript >= 0 && subscript < array.arrayLength()) {
                                 return array.get(subscript).iterate();
@@ -527,8 +527,8 @@ public class LookupExpression extends BinaryExpression {
                     PullEvaluator lhs = Elaborator.makeElaborator(expr.getLhsExpression()).elaborateForPull();
                     PullEvaluator rhs = Elaborator.makeElaborator(expr.getRhsExpression()).elaborateForPull();
                     return context -> {
-                        SequenceIterator baseIterator = lhs.eval(context);
-                        GroundedValue rhsValue = SequenceTool.toGroundedValue(rhs.eval(context));
+                        SequenceIterator baseIterator = lhs.iterate(context);
+                        GroundedValue rhsValue = SequenceTool.toGroundedValue(rhs.iterate(context));
                         return MappingIterator.map(baseIterator, baseItem ->
                                 MappingIterator.map(rhsValue.iterate(), index -> {
                                     ArrayItem array = (ArrayItem) baseItem;
@@ -554,7 +554,7 @@ public class LookupExpression extends BinaryExpression {
                     PullEvaluator lhs = Elaborator.makeElaborator(expr.getLhsExpression()).elaborateForPull();
                     ItemEvaluator rhs = Elaborator.makeElaborator(expr.getRhsExpression()).elaborateForItem();
                     return context -> {
-                        SequenceIterator baseIterator = lhs.eval(context);
+                        SequenceIterator baseIterator = lhs.iterate(context);
                         AtomicValue key = (AtomicValue) rhs.eval(context);
                         return MappingIterator.map(baseIterator, baseItem ->
                                 optionalGroundedValueIterator(((MapItem) baseItem).get(key)));
@@ -564,8 +564,8 @@ public class LookupExpression extends BinaryExpression {
                     PullEvaluator lhs = Elaborator.makeElaborator(expr.getLhsExpression()).elaborateForPull();
                     PullEvaluator rhs = Elaborator.makeElaborator(expr.getRhsExpression()).elaborateForPull();
                     return context -> {
-                        SequenceIterator baseIterator = lhs.eval(context);
-                        GroundedValue rhsVal = SequenceTool.toGroundedValue(rhs.eval(context));
+                        SequenceIterator baseIterator = lhs.iterate(context);
+                        GroundedValue rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
                         return MappingIterator.map(baseIterator, baseItem ->
                                 MappingIterator.map(rhsVal.iterate(), index ->
                                         optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) index))
@@ -578,8 +578,8 @@ public class LookupExpression extends BinaryExpression {
                 PullEvaluator lhs = Elaborator.makeElaborator(expr.getLhsExpression()).elaborateForPull();
                 PullEvaluator rhs = Elaborator.makeElaborator(expr.getRhsExpression()).elaborateForPull();
                 return context -> {
-                    SequenceIterator baseIterator = lhs.eval(context);
-                    GroundedValue rhsVal = SequenceTool.toGroundedValue(rhs.eval(context));
+                    SequenceIterator baseIterator = lhs.iterate(context);
+                    GroundedValue rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
                     MappingFunction mappingFunction = SequenceMapper.of(baseItem -> {
                         switch (baseItem.getGenre()) {
                             case ARRAY: {

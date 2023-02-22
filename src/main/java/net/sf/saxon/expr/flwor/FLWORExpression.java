@@ -9,12 +9,15 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
 
@@ -29,6 +32,7 @@ public class FLWORExpression extends Expression {
 
     public List<Clause> clauses;
     public Operand returnClauseOp;
+    public PushEvaluator returnClausePush; // needed if generating push bytecode
 
     public FLWORExpression() {}
 
@@ -814,11 +818,7 @@ public class FLWORExpression extends Expression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        TuplePull stream = new SingularityPull();
-        for (Clause c : clauses) {
-            stream = c.getPullStream(stream, context);
-        }
-        return new ReturnClauseIterator(stream, this, context);
+        return Elaborator.makeElaborator(this).elaborateForPull().iterate(context);
     }
 
 
@@ -833,13 +833,7 @@ public class FLWORExpression extends Expression {
      */
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        TuplePush destination = new ReturnClausePush(output, getReturnClause());
-        for (int i = clauses.size() - 1; i >= 0; i--) {
-            Clause c = clauses.get(i);
-            destination = c.getPushStream(destination, output, context);
-        }
-        destination.processTuple(context);
-        destination.close();
+        Elaborator.makeElaborator(this).elaborateForPush().process(output, context);
     }
 
     /**
@@ -976,5 +970,45 @@ public class FLWORExpression extends Expression {
         return false;
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new FLWORElaborator();
+    }
+
+    private static class FLWORElaborator extends PullElaborator {
+        @Override
+        public PullEvaluator elaborateForPull() {
+            FLWORExpression expr = (FLWORExpression)getExpression();
+            PullEvaluator returnPull = Elaborator.makeElaborator(expr.getReturnClause()).elaborateForPull();
+            return context -> {
+                TuplePull stream = new SingularityPull();
+                for (Clause c : expr.clauses) {
+                    stream = c.getPullStream(stream, context);
+                }
+                return new ReturnClauseIterator(stream, returnPull, context);
+            };
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            FLWORExpression expr = (FLWORExpression) getExpression();
+            expr.returnClausePush = Elaborator.makeElaborator(expr.getReturnClause()).elaborateForPush();
+            return (output, context) -> {
+                TuplePush destination = new ReturnClausePush(output, expr.returnClausePush);
+                for (int i = expr.clauses.size() - 1; i >= 0; i--) {
+                    Clause c = expr.clauses.get(i);
+                    destination = c.getPushStream(destination, output, context);
+                }
+                destination.processTuple(context);
+                destination.close();
+                return null;
+            };
+        }
+    }
 }
 

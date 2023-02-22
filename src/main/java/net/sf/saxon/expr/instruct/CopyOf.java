@@ -26,6 +26,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
@@ -635,8 +636,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 PipelineConfiguration pipe = out.getPipelineConfiguration();
                 if (copyLineNumbers) {
                     LocationCopier copier = new LocationCopier(false, out.getSystemId());
-                    //noinspection Convert2MethodRef
-                    pipe.setCopyInformee(element -> copier.notifyElementNode(element));
+                    pipe.setCopyInformee(CSharp.methodRef(copier::notifyElementNode));
                 }
                 item.copy(eval, copyOptions, getLocation());
                 //Navigator.copy(item, eval, copyOptions, getLocation());
@@ -705,8 +705,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 if (copyLineNumbers) {
                     savedPipe = new PipelineConfiguration(val.getPipelineConfiguration());
                     LocationCopier copier = new LocationCopier(true, item.getBaseURI());
-                    //noinspection Convert2MethodRef
-                    val.getPipelineConfiguration().setCopyInformee(element -> copier.notifyElementNode(element));
+                    val.getPipelineConfiguration().setCopyInformee(CSharp.methodRef(copier::notifyElementNode));
 
                 }
                 item.copy(val, copyOptions, getLocation());

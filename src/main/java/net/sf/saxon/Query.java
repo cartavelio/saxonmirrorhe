@@ -23,6 +23,7 @@ import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.Timer;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.ConversionResult;
@@ -423,8 +424,7 @@ public class Query {
 
             // Supply query parameters
 
-            //noinspection Convert2MethodRef
-            options.setParams(processor, (name, value) -> evaluator.setExternalVariable(name, value));
+            options.setParams(processor, CSharp.methodRef(evaluator::setExternalVariable));
 
             // Run the query (repeatedly, if the -repeat option was set)
 

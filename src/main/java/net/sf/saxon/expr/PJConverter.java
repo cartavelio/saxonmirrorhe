@@ -617,8 +617,7 @@ public abstract class PJConverter {
             Class<?> componentClass = targetClass.getComponentType();
             List<Object> list = new ArrayList<>(20);
             SequenceIterator iter = value.iterate();
-            Item item;
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 Object obj = itemConverter.convert(item, componentClass, context);
                 if (obj != null) {
                     list.add(obj);

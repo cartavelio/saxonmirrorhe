@@ -198,7 +198,7 @@ public class SingletonIntersectExpression extends VennExpression {
                 if (node == null) {
                     return null;
                 }
-                SequenceIterator nodeSet = rhs.eval(context);
+                SequenceIterator nodeSet = rhs.iterate(context);
                 return containsNode(nodeSet, node) ? node : null;
             };
 

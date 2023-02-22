@@ -401,7 +401,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             if (pullEvaluator == null) {
                 pullEvaluator = Elaborator.makeElaborator(expression).elaborateForPull();
             }
-            return pullEvaluator.eval(context);
+            return pullEvaluator.iterate(context);
         }
         return expression.iterate(context);
     }

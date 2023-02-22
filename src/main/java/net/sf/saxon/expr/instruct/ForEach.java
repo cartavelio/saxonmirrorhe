@@ -511,9 +511,8 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             }
             if (controller.isTracing() || separator != null) {
                 TraceListener listener = controller.getTraceListener();
-                Item item;
                 boolean first = true;
-                while ((item = iter.next()) != null) {
+                for (Item item; (item = iter.next()) != null; ) {
                     if (controller.isTracing()) {
                         assert listener != null;
                         listener.startCurrentItem(item);
@@ -598,8 +597,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
         XPathContextMinor c2 = context.newMinorContext();
         c2.trackFocus(getSelect().iterate(context));
         SequenceIterator iter = c2.getCurrentIterator();
-        Item item;
-        while ((item = iter.next()) != null) {
+        while (iter.next() != null) {
             getAction().evaluatePendingUpdates(c2, pul);
         }
     }
@@ -685,10 +683,10 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             ForEach forEach = (ForEach) getExpression();
             PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
             PullEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPull();
-            ContextMappingFunction mapper = context -> action.eval(context);
+            ContextMappingFunction mapper = context -> action.iterate(context);
             return context -> {
                 XPathContextMinor c2 = context.newMinorContext();
-                c2.trackFocus(select.eval(context));
+                c2.trackFocus(select.iterate(context));
                 return new ContextMappingIterator(mapper, c2);
             };
         }
@@ -700,7 +698,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             PushEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPush();
             return (out, context) -> {
                 XPathContextMinor c2 = context.newMinorContext();
-                FocusIterator iter = c2.trackFocus(select.eval(context));
+                FocusIterator iter = c2.trackFocus(select.iterate(context));
                 TailCall tc = null;
                 while (iter.next() != null) {
                     dispatchTailCall(tc);

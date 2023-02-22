@@ -181,7 +181,7 @@ public class Exists extends Aggregate {
             Expression arg = fnc.getArg(0);
             PullEvaluator puller = makeElaborator(arg).elaborateForPull();
             return context -> {
-                SequenceIterator iter = puller.eval(context);
+                SequenceIterator iter = puller.iterate(context);
                 Item nextItem = iter.next();
                 iter.close();
                 return nextItem != null;

@@ -271,7 +271,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
             final AdjacentTextNodeMerger expr = (AdjacentTextNodeMerger) getExpression();
             final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
 
-            return context -> new AdjacentTextNodeMergingIterator(baseEval.eval(context));
+            return context -> new AdjacentTextNodeMergingIterator(baseEval.iterate(context));
         }
 
     }

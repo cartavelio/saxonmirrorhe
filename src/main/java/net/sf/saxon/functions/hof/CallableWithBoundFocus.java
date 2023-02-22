@@ -11,6 +11,7 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.ManualIterator;
 
 /**
@@ -30,8 +31,7 @@ public class CallableWithBoundFocus implements Callable {
         } else {
             ManualIterator iter =
                     new ManualIterator(context.getContextItem(), context.getCurrentIterator().position());
-            //noinspection Convert2MethodRef
-            iter.setLengthFinder(() -> context.getLast());
+            iter.setLengthFinder(CSharp.methodRef(context::getLast));
             boundContext.setCurrentIterator(iter);
         }
     }

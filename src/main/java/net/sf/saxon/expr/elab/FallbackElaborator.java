@@ -2,6 +2,7 @@ package net.sf.saxon.expr.elab;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceTool;
 
 /**
  * The FallbackElaborator performs elaboration of expressions for which no more specific
@@ -20,6 +21,11 @@ public class FallbackElaborator extends Elaborator {
     public FallbackElaborator(Expression expr) {
         super();
         setExpression(expr);
+    }
+
+    @Override
+    public EagerEvaluator eagerly() {
+        return context -> SequenceTool.toGroundedValue(getExpression().iterate(context));
     }
 
 

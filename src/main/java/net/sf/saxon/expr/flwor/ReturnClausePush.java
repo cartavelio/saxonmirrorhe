@@ -8,8 +8,8 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -20,9 +20,9 @@ import net.sf.saxon.trans.XPathException;
  */
 public class ReturnClausePush extends TuplePush {
 
-    private final Expression returnExpr;
+    private final PushEvaluator returnExpr;
 
-    public ReturnClausePush(Outputter outputter, Expression returnExpr) {
+    public ReturnClausePush(Outputter outputter, PushEvaluator returnExpr) {
         super(outputter);
         this.returnExpr = returnExpr;
     }

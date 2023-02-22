@@ -8,7 +8,7 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.oper.OperandEvaluator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -19,9 +19,9 @@ import net.sf.saxon.trans.XPathException;
 public class WhereClausePull extends TuplePull {
 
     TuplePull base;
-    OperandEvaluator predicate;
+    BooleanEvaluator predicate;
 
-    public WhereClausePull(TuplePull base, OperandEvaluator predicate) {
+    public WhereClausePull(TuplePull base, BooleanEvaluator predicate) {
         this.base = base;
         this.predicate = predicate;
     }
@@ -38,7 +38,7 @@ public class WhereClausePull extends TuplePull {
     @Override
     public boolean nextTuple(XPathContext context) throws XPathException {
         while (base.nextTuple(context)) {
-            if (predicate.effectiveBooleanValue(context)) {
+            if (predicate.eval(context)) {
                 return true;
             }
         }

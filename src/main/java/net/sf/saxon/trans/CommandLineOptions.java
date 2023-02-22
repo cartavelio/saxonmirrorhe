@@ -683,7 +683,7 @@ public class CommandLineOptions {
         if (!paramFiles.isEmpty()) {
             Map<QName, XdmValue> params = new HashMap<>();
             //noinspection Convert2MethodRef
-            applyFileParameters(processor, (k, v) -> params.put(k, v));
+            applyFileParameters(processor, (name, value) -> params.put(name, value));
             transformer.setStylesheetParameters(params);
         }
     }

@@ -9,6 +9,7 @@
 package net.sf.saxon.s9api.streams;
 
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.transpile.CSharp;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -61,8 +62,7 @@ public class XdmCollectors {
 
         @Override
         public Supplier<List<I>> supplier() {
-            //noinspection Convert2MethodRef
-            return () -> new ArrayList<I>();   // done this way for Java-C# conversion
+            return CSharp.methodRef(ArrayList::new);
         }
 
         @Override

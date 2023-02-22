@@ -318,7 +318,7 @@ public class ForMemberExpression extends Assignation {
                 return MappingIterator.map(base, index -> {
                     Sequence member = theArray.get((int) ((IntegerValue) index).longValue());
                     context.setLocalVariable(slot, member);
-                    return actionEval.eval(context);
+                    return actionEval.iterate(context);
                 });
             };
         }

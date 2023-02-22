@@ -214,7 +214,7 @@ public class IntegerRangeTest extends Expression {
         IntegerValue minVal = null;
         IntegerValue maxVal = null;
         StringConverter toDouble = null;
-        SequenceIterator iter = valueEval.eval(c);
+        SequenceIterator iter = valueEval.iterate(c);
         AtomicValue atom;
         while ((atom = (AtomicValue) iter.next()) != null) {
             if (minVal == null) {

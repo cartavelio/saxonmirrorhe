@@ -279,7 +279,7 @@ public class SubscriptExpression extends SingleItemFilter {
                 }
                 int intIndex = index.asSubscript();
                 if (intIndex != -1) {
-                    SequenceIterator iter = baseEval.eval(context);
+                    SequenceIterator iter = baseEval.iterate(context);
                     return getItemAt(iter, intIndex);
                 } else {
                     // there is no item at the required position

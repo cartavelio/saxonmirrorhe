@@ -117,8 +117,7 @@ public class AnalyzeStringFn extends RegexFunction {
         out.open();
         out.startElement(vocab.resultName, vocab.resultType, Loc.NONE, ReceiverOption.NONE);
         out.startContent();
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             if (iter.isMatching()) {
                 out.startElement(vocab.matchName, vocab.matchType, Loc.NONE, ReceiverOption.NONE);
                 out.startContent();

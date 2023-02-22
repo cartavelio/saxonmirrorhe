@@ -3,6 +3,7 @@ package net.sf.saxon.expr.elab;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.EmptyUnicodeString;
@@ -71,6 +72,14 @@ public abstract class Elaborator {
         elab.setExpression(expression);
         return elab;
     }
+
+    /**
+     * Get a function that evaluates the underlying expression eagerly
+     *
+     * @return an evaluator for the expression that returns a {@link GroundedValue}
+     */
+
+    public abstract EagerEvaluator eagerly();
 
     /**
      * Get a function that evaluates the underlying expression in the form of

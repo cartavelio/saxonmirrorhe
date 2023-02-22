@@ -49,8 +49,7 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
 
     public static <T extends Item> ZeroOrMore<T> fromSequenceIterator(SequenceIterator iter) throws XPathException {
         List<T> list = new ArrayList<>();
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             list.add((T)item);
         }
         return new ZeroOrMore<>(list);

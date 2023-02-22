@@ -269,8 +269,7 @@ public final class InstanceOfExpression extends UnaryExpression {
     private boolean isInstance(SequenceIterator iter, XPathContext context) throws XPathException {
         try {
             int count = 0;
-            Item item;
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 count++;
                 if (!targetType.matches(item, context.getConfiguration().getTypeHierarchy())) {
                     iter.close();
@@ -386,10 +385,9 @@ public final class InstanceOfExpression extends UnaryExpression {
                 final PullEvaluator argPull = makeElaborator(arg).elaborateForPull();
                 final boolean itemTypeOK = th.isSubType(arg.getItemType(), requiredType);
                 return context -> {
-                    Item item;
-                    SequenceIterator iter = argPull.eval(context);
+                    SequenceIterator iter = argPull.iterate(context);
                     int count = 0;
-                    while ((item = iter.next()) != null) {
+                    for (Item item; (item = iter.next()) != null; ) {
                         count++;
                         if (!itemTypeOK && !requiredType.matches(item, th)) {
                             iter.close();

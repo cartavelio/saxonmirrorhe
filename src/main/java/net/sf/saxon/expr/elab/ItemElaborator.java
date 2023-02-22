@@ -3,8 +3,25 @@ package net.sf.saxon.expr.elab;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.tree.iter.SingletonIterator;
+import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.EmptySequence;
 
 public abstract class ItemElaborator extends Elaborator {
+
+    @Override
+    public EagerEvaluator eagerly() {
+        boolean maybeEmpty = Cardinality.allowsZero(getExpression().getCardinality());
+        ItemEvaluator ie = elaborateForItem();
+        if (maybeEmpty) {
+            return context -> {
+                Item it = ie.eval(context);
+                return it == null ? EmptySequence.getInstance() : it;
+            };
+        } else {
+            //noinspection Convert2MethodRef
+            return context -> ie.eval(context);
+        }
+    }
 
     @Override
     public PullEvaluator elaborateForPull() {

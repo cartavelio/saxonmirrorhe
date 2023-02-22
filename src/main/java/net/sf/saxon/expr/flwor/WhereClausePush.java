@@ -9,7 +9,7 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.oper.OperandEvaluator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -19,10 +19,10 @@ import net.sf.saxon.trans.XPathException;
  */
 public class WhereClausePush extends TuplePush {
 
-    TuplePush destination;
-    OperandEvaluator predicate;
+    private final TuplePush destination;
+    private final BooleanEvaluator predicate;
 
-    public WhereClausePush(Outputter outputter, TuplePush destination, OperandEvaluator predicate) {
+    public WhereClausePush(Outputter outputter, TuplePush destination, BooleanEvaluator predicate) {
         super(outputter);
         this.destination = destination;
         this.predicate = predicate;
@@ -33,7 +33,7 @@ public class WhereClausePush extends TuplePush {
      */
     @Override
     public void processTuple(XPathContext context) throws XPathException {
-        if (predicate.effectiveBooleanValue(context)) {
+        if (predicate.eval(context)) {
             destination.processTuple(context);
         }
     }

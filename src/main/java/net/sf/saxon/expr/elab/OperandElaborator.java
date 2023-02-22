@@ -44,7 +44,7 @@ public class OperandElaborator implements OperandEvaluator {
         if (pullEvaluator == null) {
             pullEvaluator = Elaborator.makeElaborator(expression).elaborateForPull();
         }
-        return pullEvaluator.eval(context);
+        return pullEvaluator.iterate(context);
     }
 
     public Item evaluateItem(XPathContext context) throws XPathException {

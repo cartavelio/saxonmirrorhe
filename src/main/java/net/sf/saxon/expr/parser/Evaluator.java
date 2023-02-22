@@ -412,8 +412,7 @@ public abstract class Evaluator {
                             chain = chain.appendSequence(seq);
                         } else {
                             SequenceIterator iter = child.iterate(context);
-                            Item item;
-                            while ((item = iter.next()) != null) {
+                            for (Item item; (item = iter.next()) != null; ) {
                                 chain = chain.append(item);
                             }
                         }
@@ -443,8 +442,7 @@ public abstract class Evaluator {
                                 chain = chain.appendSequence(seq);
                             } else {
                                 SequenceIterator iter = child.iterate(context);
-                                Item item;
-                                while ((item = iter.next()) != null) {
+                                for (Item item; (item = iter.next()) != null; ) {
                                     chain = chain.append(item);
                                 }
                             }

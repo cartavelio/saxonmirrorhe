@@ -23,6 +23,20 @@ public abstract class PushElaborator extends Elaborator {
     }
 
     @Override
+    public EagerEvaluator eagerly() {
+        PushEvaluator pushEval = elaborateForPush();
+        return context -> {
+            Controller controller = context.getController();
+            assert controller != null;
+            SequenceCollector seq = controller.allocateSequenceOutputter();
+            pushEval.process(new ComplexContentOutputter(seq), context);
+            seq.close();
+            return seq.getSequence();
+        };
+    }
+
+
+    @Override
     public PushEvaluator elaborateForPush() {
         // Must be implemented in a subclass
         throw new UnsupportedOperationException();
@@ -44,7 +58,7 @@ public abstract class PushElaborator extends Elaborator {
     public BooleanEvaluator elaborateForBoolean() {
         PullEvaluator pullEval = elaborateForPull();
         return context -> {
-            SequenceIterator iter = pullEval.eval(context);
+            SequenceIterator iter = pullEval.iterate(context);
             return ExpressionTool.effectiveBooleanValue(iter);
         };
     }

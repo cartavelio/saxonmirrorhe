@@ -36,11 +36,9 @@ public class ContainsToken extends CollatingFunctionFixed  {
         if (search.isEmpty()) {
             return false;
         }
-        Item item;
-        while ((item = arg0.next()) != null) {
+        for (Item item; (item = arg0.next()) != null; ) {
             SequenceIterator tokens = new Whitespace.Tokenizer(item.getUnicodeStringValue());
-            Item token;
-            while ((token = tokens.next()) != null) {
+            for (Item token; (token = tokens.next()) != null; ) {
                 if (collator.comparesEqual(search, token.getUnicodeStringValue())) {
                     tokens.close();
                     arg0.close();

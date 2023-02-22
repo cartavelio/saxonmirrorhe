@@ -7,16 +7,9 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -184,6 +177,13 @@ public class LocalVariableReference extends VariableReference {
      */
 
     public static class LocalVariableReferenceElaborator extends PullElaborator {
+
+        @Override
+        public EagerEvaluator eagerly() {
+            LocalVariableReference varRef = (LocalVariableReference) getExpression();
+            int slot = varRef.getSlotNumber();
+            return context -> context.evaluateLocalVariable(slot).materialize();
+        }
 
         @Override
         public PullEvaluator elaborateForPull() {

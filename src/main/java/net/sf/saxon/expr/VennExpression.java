@@ -816,7 +816,7 @@ public class VennExpression extends BinaryExpression {
                 return context -> {
                     List<SequenceIterator> iterators = new ArrayList<>(leafEvaluators.size());
                     for (PullEvaluator evaluator : leafEvaluators) {
-                        iterators.add(evaluator.eval(context));
+                        iterators.add(evaluator.iterate(context));
                     }
                     return new UnionIterator(iterators, GlobalOrderComparer.getInstance());
                 };
@@ -825,10 +825,10 @@ public class VennExpression extends BinaryExpression {
                 PullEvaluator p2 = makeElaborator(exp.getRhsExpression()).elaborateForPull();
                 if (exp.getOperator() == Token.INTERSECT) {
                     return context -> new IntersectionIterator(
-                            p1.eval(context), p2.eval(context), GlobalOrderComparer.getInstance());
+                            p1.iterate(context), p2.iterate(context), GlobalOrderComparer.getInstance());
                 } else {
                     return context -> new DifferenceIterator(
-                            p1.eval(context), p2.eval(context), GlobalOrderComparer.getInstance());
+                            p1.iterate(context), p2.iterate(context), GlobalOrderComparer.getInstance());
                 }
             }
         }

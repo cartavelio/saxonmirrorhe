@@ -7,9 +7,12 @@
 
 package net.sf.saxon.ma.arrays;
 
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntSet;
@@ -87,6 +90,17 @@ public abstract class ArrayItem implements Function {
      */
 
     public abstract Iterable<GroundedValue> members();
+
+    /**
+     * Get an iterator over the members of the array, each represented as a {@link Parcel}
+     *
+     * @return an {@link SequenceIterator} over the members of the array, represented as parcels
+     */
+    public SequenceIterator parcels() {
+        return new SequenceIteratorOverJavaIterator<GroundedValue>(
+                members().iterator(),
+                member -> new Parcel(member));
+    }
 
     /**
      * Concatenate this array with another

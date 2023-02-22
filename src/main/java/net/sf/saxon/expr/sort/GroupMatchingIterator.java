@@ -15,6 +15,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
@@ -96,14 +97,11 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
 
     private static class ManualGroupMatchingIterator extends ManualGroupIterator {
         private final List<Item> cMembers;
-        private final XPathContext savedcontext;
 
         public ManualGroupMatchingIterator(Item current, int position, List<Item> currentMembers, XPathContext savedContext) {
             super(current, position);
             this.cMembers = currentMembers;
-            this.savedcontext = savedContext;
-            //noinspection Convert2MethodRef
-            setLengthFinder(() -> this.savedcontext.getLast());
+            setLengthFinder(CSharp.methodRef(savedContext::getLast));
         }
 
         @Override

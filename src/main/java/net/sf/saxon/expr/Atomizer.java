@@ -653,7 +653,7 @@ public final class Atomizer extends UnaryExpression {
             final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
             final boolean oneToOne = expr.isUntyped() && expr.getBaseExpression().getItemType() instanceof NodeTest;
             return context -> {
-                SequenceIterator base = baseEval.eval(context);
+                SequenceIterator base = baseEval.iterate(context);
                 return getAtomizingIterator(base, oneToOne);
             };
         }
