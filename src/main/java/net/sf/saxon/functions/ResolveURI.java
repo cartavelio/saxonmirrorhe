@@ -237,6 +237,15 @@ public class ResolveURI extends SystemFunction {
             }
         }
 
+        if (relativeURI.startsWith("classpath:")) {
+            // Resolving a classpath: URI involves searching the classpath.
+            // There's no sense in which it makes sense to attempt to make one absolute
+            // against some base URI. They're effectively absolute already.
+            // (If we don't do this, passing them to java.net.URL causes an exception
+            // anyway.)
+            return new URI(relativeURI);
+        }
+
         try {
             if (base == null || base.isEmpty()) {
                 absoluteURI = new URI(relativeURI);
