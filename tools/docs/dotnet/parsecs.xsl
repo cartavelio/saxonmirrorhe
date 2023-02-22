@@ -13,8 +13,8 @@
   <!-- Can use <c> or <code> tags within documentation comments to get code font in documentation. -->
 
   <xsl:param name="inputdir" required="yes"/>
-  <xsl:variable name="files" select="
-    'Configuration.cs',
+  <xsl:variable name="files" select="uri-collection($inputdir || '?select=*.cs')"/>
+  <!--  'Configuration.cs',
     'Destination.cs',
     'Errors.cs',
     'Extensibility.cs',
@@ -26,7 +26,7 @@
     'Types.cs',
     'XPath.cs',
     'XQuery.cs',
-    'Xslt.cs'"/>
+    'Xslt.cs'"/>-->
   
   <xsl:template name="main">
     <xsl:sequence select="f:group(f:parse())"/>
@@ -35,8 +35,9 @@
   <xsl:function name="f:parse" as="element(package)">  
     <package name="Saxon.Api">
       <xsl:for-each select="$files">
-        <xsl:variable name="filename" select="concat($inputdir, '/', .)"/>
-        <xsl:variable name="filecontent" select="unparsed-text($filename, 'iso-8859-1')"/>
+        <xsl:variable name="filename" select="."/>
+        <xsl:message select="'Processing ' || $filename"/>
+        <xsl:variable name="filecontent" select="unparsed-text($filename)"/>
         <xsl:variable name="filecontent" select="replace($filecontent, '/\*\*public\*\*/\s+', 'public ')"/>
         <xsl:variable name="lines" select="tokenize($filecontent, '\r?\n')"/>
         <xsl:for-each select="$lines">
@@ -55,10 +56,10 @@
             <xsl:when test="starts-with($line, 'namespace')">
               <!--<namespace name="{normalize-space(substring-after($line, 'namespace'))}"/>-->
             </xsl:when>
-            <xsl:when test="$line = 'get' or starts-with($line, 'get {')">
+            <xsl:when test="$line = 'get' or starts-with($line, 'get {') or starts-with($line, 'get =>')">
               <get/>
             </xsl:when>
-            <xsl:when test="$line = 'set' or starts-with($line, 'set {')">
+            <xsl:when test="$line = 'set' or starts-with($line, 'set {') or starts-with($line, 'set =>')">
               <set/>
             </xsl:when> 
             <xsl:when test="starts-with($line, '[Obsolete(')">
@@ -87,9 +88,13 @@
                 methods inside them are not mistakenly attached to the wrong class -->
             <xsl:when test="starts-with($line, 'public') or starts-with($line, 'protected') or
               starts-with($line, 'internal')">
-              <xsl:variable name="tokens" select="tokenize($line, '\s')"/>
+              <xsl:variable name="is-property-with-getter" select="contains($line, '=>')"/>
+              <xsl:variable name="line-pre-arrow" 
+                select="if ($is-property-with-getter) then normalize-space(substring-before($line, '=>')) else $line"/>
+              <xsl:variable name="tokens" select="tokenize($line-pre-arrow, '\s')"/>
               <xsl:variable name="is-class" select="$tokens = 'class'"/>
               <xsl:variable name="is-interface" select="$tokens = 'interface'"/>
+              <xsl:variable name="is-delegate" select="$tokens = 'delegate'"/>
               <xsl:variable name="is-enum" select="$tokens = 'enum'"/>
               <xsl:variable name="is-internal" select="$tokens = 'internal'"/>
               <xsl:variable name="is-public" select="$tokens = 'public'"/>
@@ -98,8 +103,8 @@
               <xsl:variable name="is-override" select="$tokens = 'override'"/>
               <xsl:variable name="is-static" select="$tokens = 'static'"/>
               <xsl:variable name="is-readonly" select="$tokens = 'readonly'"/>
-              <xsl:variable name="is-initializer" select="contains($line, '=')"/>
-              <xsl:variable name="is-method" select="contains($line, '(') and not($is-initializer)"/>
+              <xsl:variable name="is-initializer" select="contains($line-pre-arrow, '=')"/>
+              <xsl:variable name="is-method" select="contains($line-pre-arrow, '(') and not($is-initializer)"/>
               
               <xsl:variable name="has-explicit-base" select="($is-enum or $is-class or $is-interface) and contains($line, ':')"/>
               <xsl:variable name="explicitBase" select="if ($has-explicit-base) 
@@ -108,15 +113,15 @@
               <xsl:variable name="line-pre-base" select="if ($has-explicit-base) then substring-before($line, ':') else $line"/>
               
               <xsl:variable name="is-generic-type" select="(not($is-method or $is-initializer) and contains($line-pre-base, '&lt;')) or 
-                ($is-method and (substring-before($line, '(') => tokenize('\s')) => reverse() =>
+                ($is-method and (substring-before($line-pre-arrow, '(') => tokenize('\s')) => reverse() =>
                 tail() => reverse() => string-join(' ') => contains('&gt;')) or 
-                ($is-initializer and substring-before($line, '=') => contains('&lt;'))"/>
+                ($is-initializer and substring-before($line-pre-arrow, '=') => contains('&lt;'))"/>
               
               <xsl:variable name="is-generic-method" select="$is-method and
-                ends-with(normalize-space(substring-before($line, '(')), '&gt;')"/>
+                ends-with(normalize-space(substring-before($line-pre-arrow, '(')), '&gt;')"/>
               
               <xsl:variable name="is-method-on-generic-interface-impl" select="$is-method and
-                substring-before($line, '(') => tokenize('\s') => reverse() => head() =>
+                substring-before($line-pre-arrow, '(') => tokenize('\s') => reverse() => head() =>
                 contains('&gt;.')"/>
               
               <xsl:variable name="method-input" select="if ($is-method) then
@@ -180,18 +185,18 @@
                   <xsl:when test="$is-method-on-generic-interface-impl">
                     <!-- e.g. IPredicate<T1> IPredicate<T>.And<T1>(IPredicate<T1> other)
                               IPredicate<T> IPredicate<T>.Negate() -->
-                    <xsl:sequence select="substring-before($line, '(') => tokenize('\s') =>
+                    <xsl:sequence select="substring-before($line-pre-arrow, '(') => tokenize('\s') =>
                       reverse() => head() =>
                       replace('^.*\.([A-Za-z0-9_]+)(&lt;([A-Za-z0-9_,\s]+)&gt;)?\s*$', '$1')"/>
                   </xsl:when>
                   <xsl:when test="$is-generic-method">
-                    <xsl:sequence select="replace($line, '^.*\s([A-Za-z0-9_]+)&lt;([A-Za-z0-9_,\s]+)&gt;\s*\(.*', '$1')"/>
+                    <xsl:sequence select="replace($line-pre-arrow, '^.*\s([A-Za-z0-9_]+)&lt;([A-Za-z0-9_,\s]+)&gt;\s*\(.*', '$1')"/>
                   </xsl:when>
                   <xsl:when test="$is-method">
-                    <xsl:sequence select="replace($line, '^.*\s([A-Za-z0-9_]+)\s*\(.*', '$1')"/>
+                    <xsl:sequence select="replace($line-pre-arrow, '^.*\s([A-Za-z0-9_]+)\s*\(.*', '$1')"/>
                   </xsl:when>
                   <xsl:when test="$is-initializer">
-                    <xsl:analyze-string select="$line" regex="([A-Za-z0-9_]+)\s*=">
+                    <xsl:analyze-string select="$line-pre-arrow" regex="([A-Za-z0-9_]+)\s*=">
                       <xsl:matching-substring><xsl:sequence select="regex-group(1)"/></xsl:matching-substring>
                       <xsl:non-matching-substring></xsl:non-matching-substring>
                     </xsl:analyze-string>
@@ -243,7 +248,7 @@
                   </xsl:when>
                   <xsl:otherwise>
                     <!-- Note could still be wrong if we had something like "public Uri<T> Uri" i.e. name is part of type -->
-                    <xsl:variable name="string" select="substring-before($line, concat(' ', $name))"/>
+                    <xsl:variable name="string" select="substring-before($line-pre-arrow, concat(' ', $name))"/>
                     <xsl:choose>
                       <xsl:when test="$is-generic-type">
                         <xsl:variable name="Tclass" select="(substring-before($string,'&lt;')
@@ -287,6 +292,39 @@
                       <xsl:sequence select="f:getTypeParamTypes($type)"/>
                     </xsl:if>
                   </interface>
+                </xsl:when>
+                <xsl:when test="$is-delegate">
+                  <delegate name="{$name}" public="{$is-public}"
+                      type="{if ($is-generic-type) then substring-before($type, '&lt;') else $type}">
+                    <xsl:if test="$is-internal">
+                      <xsl:attribute name="internal" select="$is-internal"/>
+                    </xsl:if>
+                    <xsl:if test="$is-generic-type">
+                      <!--<xsl:message>generic type interface <xsl:value-of select="$name"/></xsl:message>-->
+                      <xsl:sequence select="f:getTypeParamTypes($type)"/>
+                    </xsl:if>
+                    <xsl:if test="$has-args">
+                      <!--<xsl:if test="$has-args and matches($method-input, '^.*&lt;.*,.*&gt;')">
+                        <xsl:message expand-text="true">method args for: {$name}</xsl:message>
+                      </xsl:if>-->
+                      <xsl:for-each select="$method-args">
+                        <xsl:variable name="arg-type" select="substring-before(normalize-space(.),' ')"/>
+                        <!--<xsl:if test="$has-args and matches($method-input, '^.*&lt;.*,.*&gt;')">
+                          <xsl:message expand-text="true">method arg: {$arg-type}</xsl:message>
+                        </xsl:if>-->
+                        <xsl:choose>
+                          <xsl:when test="contains($arg-type, '&lt;')">
+                            <param type="{substring-before($arg-type, '&lt;')}" name="{substring-after(normalize-space(.),' ')}">
+                              <xsl:sequence select="f:getTypeParamTypes($arg-type)"/>
+                            </param>
+                          </xsl:when>
+                          <xsl:otherwise>
+                            <param type="{$arg-type}" name="{substring-after(normalize-space(.),' ')}"/>
+                          </xsl:otherwise>
+                        </xsl:choose>
+                      </xsl:for-each>
+                    </xsl:if>
+                  </delegate>
                 </xsl:when>
                 <xsl:when test="$is-enum">
                   <enum name="{$name}" public="{$is-public}" base="{$base}">
@@ -357,7 +395,7 @@
                       <xsl:sequence select="f:getTypeParamTypes($type)"/>
                     </xsl:if>
                   </property>
-                  <xsl:if test="$tokens = 'get;'">
+                  <xsl:if test="$tokens = 'get;' or $is-property-with-getter">
                     <get />
                   </xsl:if>
                   <xsl:if test="$tokens = 'set;'">

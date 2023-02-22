@@ -98,6 +98,10 @@
                <xsl:apply-templates/>
           </a>
      </xsl:template>
+     
+     <xsl:template match="a[@class ='feature']" mode="secondary" expand-text="yes">
+          <a class="bodylink code" href="/configuration/config-features/{@href}">{@href}</a>
+     </xsl:template>
 
      <xsl:template match="a" mode="secondary">
           <xsl:param name="hash-path" tunnel="yes" required="no" as="xs:string" select="''"/>
