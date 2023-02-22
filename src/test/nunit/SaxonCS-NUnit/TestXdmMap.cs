@@ -182,5 +182,16 @@ namespace SaxonCS_NUnit
             }
 
         }
+
+        [Test]
+        public void TestMapToString() {
+            XdmMap map = new XdmMap();
+            map = map.Put(new XdmAtomicValue("a"), new XdmAtomicValue(1));
+            map = map.Put(new XdmAtomicValue("b"), new XdmAtomicValue(2));
+            map = map.Put(new XdmAtomicValue("c"), new XdmAtomicValue(3));
+            string result = map.ToString();
+            //Console.WriteLine(result);
+            Assert.AreEqual(result, "map{\"a\":1,\"b\":2,\"c\":3}"); // Could change
+        }
     }
 }
