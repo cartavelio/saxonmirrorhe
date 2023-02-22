@@ -1372,6 +1372,45 @@
          conditions to occur, even with quite modest values of <code>minOccurs</code> and
             <code>maxOccurs</code>.</p>
    </section>
+   
+      <section id="built-in-schemas" title="Built-in schemas">
+         <head>Built-in Schemas</head>
+         <p>Saxon includes built-in schemas for a number of namespaces.</p>
+         <p>These fall into two categories:</p>
+         <ul>
+            <li>
+               <p><b>Hard-Coded Namespaces</b></p>
+               <p>Schemas for certain namespaces are hard-coded into the Saxon schema processor and cannot be
+               replaced or extended in any way. The namespaces in this category are:</p>
+               <ulist>
+                  <li><p>The <code>xml</code> namespace <code>http://www.w3.org/XML/1998/namespace</code>
+                  which defines attributes such as <code>xml:space</code> and <code>xml:id</code>.</p></li>
+                  <li><p>The <code>fn</code> namespace <code>http://www.w3.org/2005/xpath-functions</code>
+                  which defines the structure of the document returned by <code>fn:analyze-string</code>
+                     and also the XML representation of the JSON data model.</p></li>
+                  <li><p>The <code>xsi</code> namespace <code>http://www.w3.org/2001/XMLSchema-instance</code>
+                     which defines attributes such as <code>xsi:type</code> and <code>xsi:schemaLocation</code>.</p></li>
+               </ulist>
+            </li>
+            <li>
+               <p><b>Cached Namespaces</b></p>
+               <p>Schemas for certain namespaces are held locally in the standard <code>xmlresolver</code> data cache
+               which Saxon uses by default. If you reference one of these schemas in an <code>xs:import</code>
+                  declaration, Saxon will ignore any location hint in the <code>schemaLocation</code> attribute,
+                  and use its local copy in preference. If you want to use a non-standard version of one of these schemas
+                 from a location of your own choosing, you can use Saxon's resolver mechanisms to achieve this:
+               for example you can supply your own <code>ResourceResolver</code> callback, or you can register a
+               catalog file that redirects the namespace URI to a different location.</p>
+               <p>The schemas in this category are:</p>
+               <ulist>
+                  <li><p>The <code>xlink</code> namespace <code>http://www.w3.org/1999/xlink</code></p></li>
+                  <li><p>The <code>xhtml</code> namespace <code>http://www.w3.org/1999/xhtml</code></p></li>
+                  <li><p>The <code>xsd</code> namespace <code>http://www.w3.org/2001/XMLSchema</code></p></li>
+                  <li><p>The <code>xslt</code> namespace <code>http://www.w3.org/1999/XSL/Transform</code></p></li>
+               </ulist>
+            </li>
+         </ul>
+   </section>
   <section id="absent-components" title="Handling absent components">
     <h1>Handling absent components</h1>
     <p>The XSD 1.0 and 1.1 Recommendations both say that a schema should not be treated
