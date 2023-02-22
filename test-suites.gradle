@@ -188,7 +188,7 @@ def testSuiteMatrix = [
     "xsd": [
       "_class": "com.saxonica.testdriver.ee.SchemaTestSuiteDriver",
       "_depends": ["cloneXsdTestSuite"],
-      "_summerizeresults": "${projectDir}/src/test/extra/tools/summarize-results.xsl",
+      "_summarizeresults": "${projectDir}/src/test/extra/tools/summarize-results.xsl",
 
       "XSD10": [
         "_exceptions": "${projectDir}/src/test/exceptions/xsd.xml",
