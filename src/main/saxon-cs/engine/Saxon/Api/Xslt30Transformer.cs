@@ -82,8 +82,8 @@ namespace Saxon.Api {
         /// This argument can be null if no context item is to be supplied.</summary>
 
         public XdmItem GlobalContextItem {
-            set => transformer.setGlobalContextItem(value == null ? null : XdmItem.FromXdmItemItemToJXdmItem(value));
-            get => (XdmItem) XdmItem.Wrap(transformer.getUnderlyingController().getGlobalContextItem());
+            set => transformer.setGlobalContextItem(value);
+            get => transformer.getUnderlyingController().getGlobalContextItem();
         }
 
 

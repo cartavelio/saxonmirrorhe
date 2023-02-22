@@ -283,7 +283,7 @@ namespace Saxon.Api {
         public void SetOutputProperty(QName name, String value)
         {
             props.setProperty(name.ClarkName, value);
-            jSerializer.setOutputProperty(net.sf.saxon.s9api.Serializer.getProperty(name.UnderlyingQName()), value);
+            jSerializer.setOutputProperty(net.sf.saxon.s9api.Serializer.getProperty(name), value);
         }
 
         /// <summary>
@@ -412,15 +412,12 @@ namespace Saxon.Api {
         /// <param name="value"> The value to be serialized</param>
         /// <remarks>since 9.8</remarks>
         public void SerializeXdmValue(XdmValue value) {
-
-
-            
             if (value is XdmNode)
             {
                 SerializeXdmNode((XdmNode)value);  
             }
             else {
-                jSerializer.serializeXdmValue(net.sf.saxon.s9api.XdmValue.wrap(value.Unwrap()));
+                jSerializer.serializeXdmValue(value);
             }
 
         }

@@ -45,8 +45,8 @@ namespace Saxon.Api {
         /// </summary>
 
         public Uri BaseUri {
-            get => new Uri(destination.getBaseURI().toASCIIString());
-            set => destination.setBaseURI(new Uri(value.ToString()));
+            get => destination.getBaseURI();
+            set => destination.setBaseURI(value);
         }
 
 
@@ -63,12 +63,7 @@ namespace Saxon.Api {
         /// yet been run, or because the process produced no output.</para>
         /// </remarks>
 
-        public XdmNode XdmNode {
-            get {
-                NodeInfo jnode = destination.getXdmNode().getUnderlyingNode();
-                return (jnode == null ? null : (XdmNode) XdmValue.Wrap(jnode));
-            }
-        }
+        public XdmNode XdmNode => destination.getXdmNode();
 
 
         /// <summary>

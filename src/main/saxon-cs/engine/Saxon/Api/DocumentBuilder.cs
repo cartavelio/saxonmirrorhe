@@ -24,7 +24,6 @@ namespace Saxon.Api {
         private XmlResolver xmlResolver;
         private SchemaValidationMode validation;
         private SchemaValidator schemaValidator;
-        private WhitespacePolicy whitespacePolicy;
         private Uri baseUri;
         private QName topLevelElement;
         private XQueryExecutable projectionQuery;
@@ -120,9 +119,7 @@ namespace Saxon.Api {
             get { return topLevelElement; }
             set {
                 topLevelElement = value;
-                schemaValidator.UnderlyingSchemaValidator.setDocumentElementName(topLevelElement == null
-                    ? null
-                    : topLevelElement.UnderlyingQName());
+                schemaValidator.UnderlyingSchemaValidator.setDocumentElementName(topLevelElement);
             }
         }
 
@@ -149,13 +146,8 @@ namespace Saxon.Api {
         /// </remarks>
 
         public WhitespacePolicy WhitespacePolicy {
-            get { return whitespacePolicy; }
-            set {
-                whitespacePolicy = value;
-                builder.setWhitespaceStrippingPolicy(whitespacePolicy == null
-                    ? null
-                    : whitespacePolicy.GetJWhiteSpaceStrippingPolicy());
-            }
+            get => builder.getWhitespaceStrippingPolicy();
+            set => builder.setWhitespaceStrippingPolicy(value);
         }
 
 

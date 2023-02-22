@@ -55,14 +55,8 @@ namespace Saxon.Api {
         /// </remarks>
 
         public XdmNode InitialContextNode {
-            get {
-                NodeInfo node = transformer.getInitialContextNode().getUnderlyingNode();
-                return node == null ? null : ((XdmNode) XdmValue.Wrap(node));
-            }
-            set =>
-                transformer.setInitialContextNode(value == null
-                    ? null
-                    : (net.sf.saxon.s9api.XdmNode) XdmValue.FromGroundedValueToJXdmValue(value.value));
+            get => transformer.getInitialContextNode();
+            set => transformer.setInitialContextNode(value);
         }
 
         /// <summary>
@@ -88,7 +82,8 @@ namespace Saxon.Api {
         /// function if the document contains links to other documents in the form of relative URIs.</param>
         public void SetInputStream(Stream input, Uri baseUri) {
             StreamSource streamSource =
-                new StreamSource(input), Uri.EscapeUriString(baseUri.ToString());
+                    new StreamSource(input),
+                Uri.EscapeUriString(baseUri.ToString());
             transformer.setSource(streamSource);
         }
 
@@ -102,17 +97,8 @@ namespace Saxon.Api {
         /// </remarks>
 
         public QName InitialMode {
-            get {
-                net.sf.saxon.s9api.QName mode = transformer.getInitialMode();
-                if (mode == null) {
-                    return null;
-                }
-
-                return QName.FromClarkName(mode.getClarkName());
-            }
-            set {
-                transformer.setInitialMode(value == null ? null : net.sf.saxon.s9api.QName.fromEQName(value.EQName));
-            }
+            get => transformer.getInitialMode();
+            set => transformer.setInitialMode(value);
         }
 
 
@@ -133,7 +119,7 @@ namespace Saxon.Api {
             get => initialTemplateName;
             set {
                 initialTemplateName = value;
-                transformer.setInitialTemplate(initialTemplateName.UnderlyingQName());
+                transformer.setInitialTemplate(initialTemplateName);
             }
         }
 
@@ -143,8 +129,8 @@ namespace Saxon.Api {
         /// </summary>
 
         public Uri BaseOutputUri {
-            get { return new Uri(transformer.getBaseOutputURI()); }
-            set { transformer.setBaseOutputURI(value.ToString()); }
+            get => new Uri(transformer.getBaseOutputURI());
+            set => transformer.setBaseOutputURI(value.ToString());
         }
 
 
@@ -311,9 +297,9 @@ namespace Saxon.Api {
         /// If the parameter declaration defines a required type for the variable, then
         /// this value will be converted in the same way as arguments to function calls
         /// (for example, numeric promotion is applied).</param>
+         
         public void SetParameter(QName name, XdmValue value) {
-            transformer.setParameter(net.sf.saxon.s9api.QName.fromEQName(name.EQName),
-                net.sf.saxon.s9api.XdmValue.wrap(value.value));
+            transformer.setParameter(name, value);
         }
 
         public Destination GetUnderlyingDestination() {
@@ -391,20 +377,10 @@ namespace Saxon.Api {
             }
         }
 
-        /*internal void applyTemplatesToSource(JStreamSource streamSource, JReceiver outi){
-
-           
-            if (controller.getInitialMode().isDeclaredStreamable()) {
-                controller.applyStreamingTemplates(streamSource, outi);
-            }
-        } */
-
         /// <summary>
         /// Escape hatch to the underlying Java implementation
         /// </summary>
 
-        public Controller Implementation {
-            get { return transformer.getUnderlyingController(); }
-        }
+        public Controller Implementation => transformer.getUnderlyingController();
     }
 }

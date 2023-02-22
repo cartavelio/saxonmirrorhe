@@ -1,8 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
-using com.saxonica.glue;
-using net.sf.saxon.ma.arrays;
 using net.sf.saxon.z;
+using Saxon.Impl.Helpers;
 using GroundedValue = net.sf.saxon.om.GroundedValue;
 
 namespace Saxon.Impl.DataModel {
@@ -38,8 +38,8 @@ namespace Saxon.Impl.DataModel {
         public override bool isEmpty() {
             return backing.IsEmpty;
         }
-        public override java.lang.Iterable<net.sf.saxon.om.GroundedValue> members() {
-            return new IterableFromEnumerable<GroundedValue>(backing);
+        public override IEnumerable<net.sf.saxon.om.GroundedValue> members() {
+            return backing;
         }
         public override net.sf.saxon.ma.arrays.ArrayItem subArray(int start, int end) {
             return new ImmArray(backing.GetRange(start, end - start));

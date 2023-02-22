@@ -7,6 +7,7 @@ using javax.xml.transform.stream;
 using net.sf.saxon;
 using net.sf.saxon.@event;
 using net.sf.saxon.trans;
+using Saxon.Api.Support;
 using Version = net.sf.saxon.Version;
 
 namespace Saxon.Api {
@@ -17,24 +18,21 @@ namespace Saxon.Api {
     /// compiled schemas. This is the first object that a Saxon application should create. Once
     /// established, a <c>Processor</c> may be used in multiple threads.
     /// </summary>
-
     [Serializable]
-    public class Processor : Configuration.ApiProvider
-    {
+    public class Processor : Configuration.ApiProvider {
+        // For largely historic reasons, the Saxon.Api.Processor is implemented
+        // as a wrapper around the s9api Processor, which is C# code converted from Java
 
-        //Transformation data variables
+        private net.sf.saxon.s9api.Processor jProcessor;
         private SchemaManager schemaManager = null;
-        /*internal JConfiguration config;
-       */
         private TextWriter textWriter = Console.Error;
-        private net.sf.saxon.s9api.Processor processor;
         private IQueryResolver moduleResolver;
         private ICollectionFinder collectionFinder = null;
         private StandardCollectionFinder standardCollectionFinder;
 
         internal Processor(net.sf.saxon.s9api.Processor p) {
-            processor = p;
-            processor.getUnderlyingConfiguration().setProcessor(this);
+            jProcessor = p;
+            jProcessor.getUnderlyingConfiguration().setProcessor(this);
             collectionFinder = new StandardCollectionFinder(Implementation.getCollectionFinder());
             standardCollectionFinder = new StandardCollectionFinder(Implementation.getStandardCollectionFinder());
         }
@@ -43,12 +41,10 @@ namespace Saxon.Api {
         /// Create a new <c>Processor</c>. This <c>Processor</c> will have capabilities that depend on the version
         /// of the software that has been loaded, and on the features that have been licensed.
         /// </summary>
-
-        public Processor()
-        {
-            processor = new net.sf.saxon.s9api.Processor(false);
-            processor.getUnderlyingConfiguration().setProcessor(this);
-            processor.getUnderlyingConfiguration().registerExternalObjectModel(new DotNetObjectModelDefinition());
+        public Processor() {
+            jProcessor = new net.sf.saxon.s9api.Processor(false);
+            jProcessor.getUnderlyingConfiguration().setProcessor(this);
+            jProcessor.getUnderlyingConfiguration().registerExternalObjectModel(new DotNetObjectModelDefinition());
             collectionFinder = new StandardCollectionFinder(Implementation.getCollectionFinder());
             standardCollectionFinder = new StandardCollectionFinder(Implementation.getStandardCollectionFinder());
         }
@@ -61,10 +57,10 @@ namespace Saxon.Api {
         /// of the licensed edition of Saxon, according to the version of the software that is loaded, and will
         /// verify the license key. If false, the <c>Processor</c> will load a default <c>Configuration</c> that gives restricted
         /// capability and does not require a license, regardless of which version of the software is actually being run.</param>
-
         public Processor(bool licensedEdition)
             // newline needed by documentation stylesheet
-            : this(licensedEdition, false) { }
+            : this(licensedEdition, false) {
+        }
 
         /// <summary>
         /// Create a <c>Processor</c>.
@@ -75,11 +71,9 @@ namespace Saxon.Api {
         /// verify the license key. If false, the <c>Processor</c> will load a default <c>Configuration</c> that gives restricted
         /// capability and does not require a license, regardless of which version of the software is actually being run.</param>
         /// <param name="loadLocally">This option has no effect at this release.</param>
-
-        public Processor(bool licensedEdition, bool loadLocally)
-        {
-            processor = new net.sf.saxon.s9api.Processor(licensedEdition);
-            processor.getUnderlyingConfiguration().registerExternalObjectModel(new DotNetObjectModelDefinition());
+        public Processor(bool licensedEdition, bool loadLocally) {
+            jProcessor = new net.sf.saxon.s9api.Processor(licensedEdition);
+            jProcessor.getUnderlyingConfiguration().registerExternalObjectModel(new DotNetObjectModelDefinition());
         }
 
         /// <summary>
@@ -87,14 +81,12 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="configurationFile">A stream holding the text of the XML configuration file. Details of the file format
         /// can be found in the Saxon documentation.</param>
-
         [Obsolete("Use the Processor(Stream, Uri) constructor instead.")]
-        public Processor(Stream configurationFile)
-        {
+        public Processor(Stream configurationFile) {
             StreamSource ss = new StreamSource(configurationFile);
             Configuration config = Configuration.readConfiguration(ss);
             config.registerExternalObjectModel(new DotNetObjectModelDefinition());
-            processor = new net.sf.saxon.s9api.Processor(config);
+            jProcessor = new net.sf.saxon.s9api.Processor(config);
         }
 
         /// <summary>
@@ -103,48 +95,34 @@ namespace Saxon.Api {
         /// <param name="configurationFile">A stream holding the text of the XML configuration file. Details of the file format
         /// can be found in the Saxon documentation.</param>
         /// <param name="baseUri">baseUri of the configuration file used for resolving any relative URIs in the file</param> 
-
-        public Processor(Stream configurationFile, Uri baseUri)
-        {
+        public Processor(Stream configurationFile, Uri baseUri) {
             StreamSource ss = new StreamSource(configurationFile, baseUri.AbsoluteUri);
             Configuration config = Configuration.readConfiguration(ss);
             config.registerExternalObjectModel(new DotNetObjectModelDefinition());
-            processor = new net.sf.saxon.s9api.Processor(config);
+            jProcessor = new net.sf.saxon.s9api.Processor(config);
         }
 
-        public ICollectionFinder CollectionFinder{  
+        public ICollectionFinder CollectionFinder {
             set {
-                if (value != null)
-                {
+                if (value != null) {
                     collectionFinder = value;
                     Implementation.setCollectionFinder(new CollectionFinderWrapper(collectionFinder));
-
                 }
-
             }
-            get {
-                return collectionFinder;
-            }
-
+            get { return collectionFinder; }
         }
 
 
-        public StandardCollectionFinder StandardCollectionFinder
-        {
-            get
-            {
-                return standardCollectionFinder;
-            }
-
+        public StandardCollectionFinder StandardCollectionFinder {
+            get { return standardCollectionFinder; }
         }
 
         public void RegisterCollection(String collectionURI, IResourceCollection collection) {
             StandardCollectionFinder.RegisterCollection(collectionURI, collection);
             if (CollectionFinder is StandardCollectionFinder && collectionFinder != standardCollectionFinder) {
-                ((StandardCollectionFinder)collectionFinder).RegisterCollection(collectionURI, collection);
+                ((StandardCollectionFinder) collectionFinder).RegisterCollection(collectionURI, collection);
             }
         }
-
 
 
         /// <summary>
@@ -154,19 +132,16 @@ namespace Saxon.Api {
         /// <param name="uri">the namespace URI of the function name</param>
         /// <param name="type">the .NET class that implements the functions in this namespace</param>
         public void BindExtensions(string uri, System.Type type) {
-            Configuration config = processor.getUnderlyingConfiguration();
+            Configuration config = jProcessor.getUnderlyingConfiguration();
             config.bindExtensions(uri, type);
         }
-
-
 
 
         /// <summary>
         /// Get the full name of the Saxon product version implemented by this <c>Processor</c>
         /// </summary>
 
-        public string ProductTitle
-        {
+        public string ProductTitle {
             get { return Version.getProductTitle(); }
         }
 
@@ -174,8 +149,7 @@ namespace Saxon.Api {
         /// Get the Saxon product version number (for example, "9.2.0.2")
         /// </summary>
 
-        public string ProductVersion
-        {
+        public string ProductVersion {
             get { return Version.getProductVersion(); }
         }
 
@@ -184,11 +158,9 @@ namespace Saxon.Api {
         /// </summary>
         /// 
 
-        public string Edition
-        {
-            get { return processor.getUnderlyingConfiguration().getEditionCode(); }
+        public string Edition {
+            get { return jProcessor.getUnderlyingConfiguration().getEditionCode(); }
         }
-
 
 
         /// <summary>
@@ -196,15 +168,14 @@ namespace Saxon.Api {
         /// if the <c>Processor</c> is not schema-aware.
         /// </summary>
 
-        public SchemaManager SchemaManager
-        {
+        public SchemaManager SchemaManager {
             get {
-                if (schemaManager == null)
-                {
+                if (schemaManager == null) {
                     schemaManager = new SchemaManager(this);
                 }
 
-                return schemaManager; }
+                return schemaManager;
+            }
         }
 
         /// <summary>
@@ -220,21 +191,17 @@ namespace Saxon.Api {
         /// <c>java.xml.transform.Source</c>.</para>
         /// </remarks>
 
-        public XmlResolver XmlResolver
-        {
-            get
-            {
-                javax.xml.transform.URIResolver resolver = processor.getUnderlyingConfiguration().getURIResolver();
+        public XmlResolver XmlResolver {
+            get {
+                javax.xml.transform.URIResolver resolver = jProcessor.getUnderlyingConfiguration().getURIResolver();
                 if (resolver is JDotNetURIResolver) {
-                    return ((JDotNetURIResolver)resolver).getXmlResolver();
-                } else {
+                    return ((JDotNetURIResolver) resolver).getXmlResolver();
+                }
+                else {
                     return new XmlUrlResolver();
                 }
             }
-            set
-            {
-                processor.getUnderlyingConfiguration().setURIResolver(new JDotNetURIResolver(value));
-            }
+            set { jProcessor.getUnderlyingConfiguration().setURIResolver(new JDotNetURIResolver(value)); }
         }
 
 
@@ -245,17 +212,12 @@ namespace Saxon.Api {
         /// <para>By default the <c>Console.Error</c> is used for all such messages.</para>
         /// <para>A user can supply their own <c>TextWriter</c> to redirect error messages from the standard output.</para>
         /// </remarks>
-        public TextWriter ErrorWriter
-        {
-            get
-            {
-                return textWriter;
-            }
-            set
-            {
+        public TextWriter ErrorWriter {
+            get { return textWriter; }
+            set {
                 textWriter = value;
                 StandardLogger logger = new StandardLogger(value);
-                processor.getUnderlyingConfiguration().setLogger(logger);
+                jProcessor.getUnderlyingConfiguration().setLogger(logger);
             }
         }
 
@@ -264,9 +226,7 @@ namespace Saxon.Api {
         /// a variety of sources.
         /// </summary>
         /// <returns>A new <c>DocumentBuilder</c></returns>
-
-        public DocumentBuilder NewDocumentBuilder()
-        {
+        public DocumentBuilder NewDocumentBuilder() {
             DocumentBuilder builder = new DocumentBuilder(this);
             builder.XmlResolver = XmlResolver;
             return builder;
@@ -280,9 +240,7 @@ namespace Saxon.Api {
         /// may be affected by subsequent changes to the <c>Processor</c>.
         /// </remarks>
         /// <returns>A new <c>XQueryCompiler</c></returns>
-
-        public XQueryCompiler NewXQueryCompiler()
-        {
+        public XQueryCompiler NewXQueryCompiler() {
             return new XQueryCompiler(this);
         }
 
@@ -294,9 +252,7 @@ namespace Saxon.Api {
         /// may be affected by subsequent changes to the <c>Processor</c>.
         /// </remarks>
         /// <returns>A new <c>XsltCompiler</c></returns>
-
-        public XsltCompiler NewXsltCompiler()
-        {
+        public XsltCompiler NewXsltCompiler() {
             return new XsltCompiler(this);
         }
 
@@ -308,9 +264,7 @@ namespace Saxon.Api {
         /// may be affected by subsequent changes to the <c>Processor</c>.
         /// </remarks>
         /// <returns>A new <c>XPathCompiler</c></returns>
-
-        public XPathCompiler NewXPathCompiler()
-        {
+        public XPathCompiler NewXPathCompiler() {
             return new XPathCompiler(this, JProcessor.newXPathCompiler());
         }
 
@@ -319,7 +273,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns> a new <c>Serializer</c> </returns>
         public Serializer NewSerializer() {
-            Serializer s = new Serializer(processor.newSerializer());
+            Serializer s = new Serializer(jProcessor.newSerializer());
             s.SetProcessor(this); //TODO this method call might no longer be needed
             return s;
         }
@@ -330,9 +284,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="textWriter">The <c>TextWriter</c> to which the <c>Serializer</c> will write</param>
         /// <returns> a new <c>Serializer</c> </returns>
-        public Serializer NewSerializer(TextWriter textWriter)
-        {
-            Serializer s = new Serializer(processor.newSerializer());
+        public Serializer NewSerializer(TextWriter textWriter) {
+            Serializer s = new Serializer(jProcessor.newSerializer());
             s.SetOutputWriter(textWriter);
             return s;
         }
@@ -343,9 +296,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="stream">The output <c>Stream</c> to which the <c>Serializer</c> will write</param>
         /// <returns> a new Serializer </returns>
-        public Serializer NewSerializer(Stream stream)
-        {
-            Serializer s = new Serializer(processor.newSerializer());
+        public Serializer NewSerializer(Stream stream) {
+            Serializer s = new Serializer(jProcessor.newSerializer());
             s.SetOutputStream(stream);
             return s;
         }
@@ -358,24 +310,18 @@ namespace Saxon.Api {
         /// change in the future.
         /// </remarks>
 
-        public decimal XmlVersion
-        {
-            get
-            {
-                return (processor.getUnderlyingConfiguration().getXMLVersion() == Configuration.XML10 ? 1.0m : 1.1m);
+        public decimal XmlVersion {
+            get {
+                return (jProcessor.getUnderlyingConfiguration().getXMLVersion() == Configuration.XML10 ? 1.0m : 1.1m);
             }
-            set
-            {
-                if (value == 1.0m)
-                {
-                    processor.setXmlVersion("1.0");
+            set {
+                if (value == 1.0m) {
+                    jProcessor.setXmlVersion("1.0");
                 }
-                else if (value == 1.1m)
-                {
-                    processor.setXmlVersion("1.1");
+                else if (value == 1.1m) {
+                    jProcessor.setXmlVersion("1.1");
                 }
-                else
-                {
+                else {
                     throw new ArgumentException("Invalid XML version: " + value);
                 }
             }
@@ -389,9 +335,7 @@ namespace Saxon.Api {
         /// collation rules to be used</param>
         /// <param name="options">Options to be used in performing comparisons, for example
         /// whether they are to be case-blind and/or accent-blind</param>
-
-        public void DeclareCollation(Uri uri, CompareInfo compareInfo, CompareOptions options)
-        {
+        public void DeclareCollation(Uri uri, CompareInfo compareInfo, CompareOptions options) {
             JDotNetComparator comparator = new JDotNetComparator(uri.ToString(), compareInfo, options);
             Implementation.registerCollation(uri.ToString(), comparator);
         }
@@ -421,11 +365,9 @@ namespace Saxon.Api {
         /// while queries and transformations are in progress.</para>
         /// </remarks>
         /// 
-
-        public void RegisterCollection(Uri collectionUri, IEnumerable contents)
-        {
+        public void RegisterCollection(Uri collectionUri, IEnumerable contents) {
             String u = (collectionUri == null ? null : collectionUri.ToString());
-            Configuration config = processor.getUnderlyingConfiguration();
+            Configuration config = jProcessor.getUnderlyingConfiguration();
             config.registerCollection(u, new JDotNetEnumerableCollection(config, contents));
         }
 
@@ -436,11 +378,9 @@ namespace Saxon.Api {
         /// An object that defines the extension function, including its name, arity, arguments types, and
         /// a reference to the class that implements the extension function call.
         /// </param>
-
-        public void RegisterExtensionFunction(ExtensionFunctionDefinition function)
-        {
+        public void RegisterExtensionFunction(ExtensionFunctionDefinition function) {
             WrappedExtensionFunctionDefinition f = new WrappedExtensionFunctionDefinition(function);
-            processor.registerExtensionFunction(f);
+            jProcessor.registerExtensionFunction(f);
         }
 
         /// <summary>
@@ -451,11 +391,9 @@ namespace Saxon.Api {
         /// This interface provides only for simple extensions that have no side-effects and no
         /// dependencies on the static or dynamic context.
         /// </param>
-
-        public void RegisterExtensionFunction(ExtensionFunction function)
-        {
+        public void RegisterExtensionFunction(ExtensionFunction function) {
             WrappedExtensionFunction f = new WrappedExtensionFunction(function);
-            processor.registerExtensionFunction(f);
+            jProcessor.registerExtensionFunction(f);
         }
 
 
@@ -509,23 +447,22 @@ namespace Saxon.Api {
         /// <param name="sequence">The value to be written</param>
         /// <param name="destination">The destination to which the value should be written</param>
         /// 
-
-        public void WriteXdmValue(XdmValue sequence, XmlDestination destination)
-        {
-            try
-            {
-                PipelineConfiguration pipe = processor.getUnderlyingConfiguration().makePipelineConfiguration();
-                Receiver r = destination.GetUnderlyingDestination().getReceiver(pipe, pipe.getConfiguration().obtainDefaultSerializationProperties());
+        public void WriteXdmValue(XdmValue sequence, XmlDestination destination) {
+            try {
+                PipelineConfiguration pipe = jProcessor.getUnderlyingConfiguration().makePipelineConfiguration();
+                Receiver r = destination.GetUnderlyingDestination().getReceiver(pipe,
+                    pipe.getConfiguration().obtainDefaultSerializationProperties());
                 r.open();
                 foreach (XdmItem item in sequence) {
                     r.append(item.Unwrap().head());
                 }
+
                 r.close();
-            } catch (XPathException err) {
+            }
+            catch (XPathException err) {
                 throw new DynamicError(err);
             }
         }
-
 
         /// <summary>
         /// The underlying <c>Configuration</c> object in the Saxon implementation
@@ -541,10 +478,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
 
-        public Configuration Implementation
-        {
-            get { return processor.getUnderlyingConfiguration(); }
-        }
+        public Configuration Implementation => jProcessor.getUnderlyingConfiguration();
 
         /// <summary>
         /// A user-supplied <c>IQueryResolver</c> used to resolve location hints appearing in an
@@ -555,13 +489,12 @@ namespace Saxon.Api {
         /// <para> The URI Resolver for XQuery modules. May be null, in which case any 
         /// existing Module URI Resolver is removed  from the Configuration</para>
         /// </remarks>
-        public IQueryResolver QueryResolver
-        {
-            get { return moduleResolver; }
-            set
-            {
+        public IQueryResolver QueryResolver {
+            get => moduleResolver;
+            set {
                 moduleResolver = value;
-                processor.getUnderlyingConfiguration().setModuleURIResolver((value == null ? null : new DotNetModuleURIResolver(value)));
+                jProcessor.getUnderlyingConfiguration()
+                    .setModuleURIResolver((value == null ? null : new DotNetModuleURIResolver(value)));
             }
         }
 
@@ -569,9 +502,8 @@ namespace Saxon.Api {
         /// The underlying <c>net.sf.saxon.s9api.Processor</c> in the Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.Processor JProcessor
-        {
-            get { return processor; }
+        public net.sf.saxon.s9api.Processor JProcessor {
+            get { return jProcessor; }
         }
 
         /// <summary>
@@ -588,15 +520,12 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="name">The property name</param>
         /// <param name="value">The property value</param>
-        public void SetProperty(String name, String value)
-        {
-            if (name.Equals("http://saxonica.com/oem-data"))
-            {
-                processor.setConfigurationProperty("http://saxonica.com/oem-data", value);
+        public void SetProperty(String name, String value) {
+            if (name.Equals("http://saxonica.com/oem-data")) {
+                jProcessor.setConfigurationProperty("http://saxonica.com/oem-data", value);
             }
-            else
-            {
-                processor.setConfigurationProperty(name, value);
+            else {
+                jProcessor.setConfigurationProperty(name, value);
             }
         }
 
@@ -605,16 +534,13 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="feature">The property feature</param>
         /// <param name="value">The property value</param>
-
-        public void SetProperty<T>(Feature<T> feature, T value)
-        {
-            if (value.GetType() == typeof(Boolean))
-            {
-                processor.setFeature(feature.JFeature.code, value);
+        public void SetProperty<T>(Feature<T> feature, T value) {
+            Implementation.setConfigurationProperty(feature);
+            if (value.GetType() == typeof(Boolean)) {
+                jProcessor.setFeature(feature.JFeature.code, value);
             }
-            else
-            {
-                processor.setConfigurationProperty(feature.JFeature, (object)value);
+            else {
+                jProcessor.setConfigurationProperty(feature.JFeature, (object) value);
             }
         }
 
@@ -631,10 +557,8 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="name">The property name</param>
         /// <returns>The property value, as a string; or null if the property is unset.</returns>
-
-        public String GetProperty(String name)
-        {
-            Object obj = processor.getConfigurationProperty(net.sf.saxon.lib.Feature.byName(name));
+        public String GetProperty(String name) {
+            Object obj = jProcessor.getConfigurationProperty(net.sf.saxon.lib.Feature.byName(name));
             return (obj == null ? null : obj.ToString());
         }
 
@@ -647,8 +571,7 @@ namespace Saxon.Api {
         /// <param name="feature">the required property. </param>
         /// <returns>the value of the property</returns>
         public T GetProperty<T>(Feature<T> feature) {
-            return (T)processor.getConfigurationProperty(feature.JFeature);
+            return (T) jProcessor.getConfigurationProperty(feature.JFeature);
         }
-
     }
 }
