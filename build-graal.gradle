@@ -1101,22 +1101,37 @@ task saxonc_build_wheels(
 ) {
   def user = project.findProperty('wheelUser') ?: System.getProperty('user.name')
 
+  if (user == 'ndw') {
+    user = 'norm' // HACK
+  }
+
+  def osarch = System.getProperty("os.arch") 
   def now = new Date()
   def isodate = "${now.format('yyyy-MM-dd')}T${now.format('HH-mm-ss')}"
 
-  def buildMac     = project.findProperty('macWheels') != null
+  def buildMacA64  = project.findProperty('macWheels_aarch64') != null
+  def buildMacX86  = project.findProperty('macWheels_x86_64') != null
   def buildLinux   = project.findProperty('linuxWheels') != null
   def buildWindows = project.findProperty('windowsWheels') != null
 
-  if (!buildMac && !buildLinux && !buildWindows) {
-    buildMac = systemOs.isMacOsX()
+  if (!buildMacA64 && !buildMacX86 && !buildLinux && !buildWindows) {
+    if (systemOs.isMacOsX()) {
+      if (osarch == 'x86_64') {
+        buildMacX86 = true
+      } else {
+        buildMacA64 = true
+      }
+    }
     buildLinux = systemOs.isLinux()
     buildWindows = systemOs.isWindows()
   }
 
   def arch = []
-  if (buildMac) {
-    arch.add("mac")
+  if (buildMacX86) {
+    arch.add("macx86_64")
+  }
+  if (buildMacA64) {
+    arch.add("macaarch64")
   }
   if (buildLinux) {
     arch.add("linux")
@@ -1140,14 +1155,25 @@ task saxonc_build_wheels(
     }
   }
 
-  if (project.findProperty("skipWheelUpload") == null) {
+  if (project.findProperty("skipWheelUpload") == null
+      && project.findProperty('wheelDryRun') == null) {
     doLast {
-      println("Copying ${systemOsName} staging files to dev.saxonica.com")
+      def wheels = "${systemOsName}.wheels.tar.gz"
+      if (systemOsName == "mac") {
+        wheels = "${systemOsName}-${osarch}.wheels.tar.gz"
+      }
+      def path = "/var/www/html/dev.saxonica.com/github-wheel-sources"
+
+      println("Copying ${systemOsName} staging files to dev.saxonica.com/${wheels}")
       exec {
         workingDir "${buildDir}/distributions"
         commandLine scp, "${systemOsName}.wheels.tar.gz",
-          "dev.saxonica.com:/var/www/html/dev.saxonica.com/wheel-binaries/${user}/"
+          "dev.saxonica.com:${path}/${user}/${wheels}"
       }
+    }
+  } else {
+    doLast {
+      println("Skipping upload of ${systemOsName}.wheels.tar.gz")
     }
   }
 
@@ -1156,12 +1182,18 @@ task saxonc_build_wheels(
     def m = new PrintStream(new File("${buildDir}/BuildWheels/config.json"))
     m.println("{")
     m.println("  \"user\": \"${user}\",")
-    m.println("  \"mac\": ${buildMac},")
+    m.println("  \"macx86_64\": ${buildMacX86},")
+    m.println("  \"macaarch64\": ${buildMacA64},")
     m.println("  \"linux\": ${buildLinux},")
     m.println("  \"windows\": ${buildWindows},")
 
-    if (buildMac) {
-      def path = project.findProperty('macWheels') ?: projectDir
+    if (buildMacX86) {
+      def path = project.findProperty('macWheels_x86_64') ?: projectDir
+      m.println("  \"macpath\": \"${path}\",")
+    }
+
+    if (buildMacA64) {
+      def path = project.findProperty('macWheels_aarch64') ?: projectDir
       m.println("  \"macpath\": \"${path}\",")
     }
 
@@ -1170,12 +1202,14 @@ task saxonc_build_wheels(
     m.close()
   }
 
-  doLast {
-    def msg = "Triggered by ${user} on ${isodate} for ${arch.join(', ')}"
+  if (project.findProperty('wheelDryRun') == null) {
+    doLast {
+      def msg = "Triggered by ${user} on ${isodate} for ${arch.join(', ')}"
 
-    exec {
-      workingDir "${buildDir}/BuildWheels"
-      commandLine 'git', 'commit', '-m', msg, 'config.json'
+      exec {
+        workingDir "${buildDir}/BuildWheels"
+        commandLine 'git', 'commit', '-m', msg, 'config.json'
+      }
     }
   }
 
