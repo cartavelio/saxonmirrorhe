@@ -30,7 +30,7 @@ public final class LargeTextBuffer {
     private final static int MASK = SEGLEN - 1;
 
 
-    private List<Segment> completeSegments;
+    private final List<Segment> completeSegments;
     private Segment lastSegment;
     private int lastSegmentLength;
 
@@ -48,7 +48,7 @@ public final class LargeTextBuffer {
          * @param oldLength the number of characters (codepoints) currently used
          *                  in the segment
          * @param newLength the number of characters (codepoints) that the new segment
-         *               must have room for
+         *               must have room for; must not exceed the maximum segment length
          * @param newWidth the number of bits-per-character that the new segment must
          *              have room for
          * @return either this Segment, or a replacement
@@ -56,15 +56,18 @@ public final class LargeTextBuffer {
         Segment stretch(int oldLength, int newLength, int newWidth);
 
         /**
-         * Get the content of this segment as a {@code UnicodeString}
+         * Get the content of this segment as a {@code UnicodeString}. This method
+         * should only be called on a complete segment (that is, a segment other
+         * than the last), to avoid extracting bytes that have been allocated
+         * but not used.
          */
 
         UnicodeString asUnicodeString();
 
         /**
          * Get a substring of this segment
-         * @param start the start offset (in codepoints)
-         * @param end the end offset (in codepoints)
+         * @param start the start offset, inclusive (in codepoints)
+         * @param end the end offset, exclusive (in codepoints)
          * @return the substring
          */
         UnicodeString substring(int start, int end);
@@ -88,9 +91,10 @@ public final class LargeTextBuffer {
 
         @Override
         public Segment stretch(int oldLength, int newLength, int newWidth) {
+            assert newLength <= SEGLEN;
             if (newWidth <= 8) {
                 if (newLength > bytes.length) {
-                    bytes = Arrays.copyOf(bytes, Math.max(newLength, oldLength*2));
+                    bytes = Arrays.copyOf(bytes, Math.max(newLength, Math.min(oldLength*2, SEGLEN)));
                 }
                 return this;
             } else if (newWidth == 16) {
@@ -145,9 +149,10 @@ public final class LargeTextBuffer {
 
         @Override
         public Segment stretch(int oldLength, int newLength, int newWidth) {
+            assert newLength <= SEGLEN;
             if (newWidth <= 16) {
                 if (newLength > chars.length) {
-                    chars = Arrays.copyOf(chars, Math.max(newLength, oldLength * 2));
+                    chars = Arrays.copyOf(chars, Math.max(newLength, Math.min(oldLength * 2, SEGLEN)));
                 }
                 return this;
             } else {
@@ -192,8 +197,9 @@ public final class LargeTextBuffer {
 
         @Override
         public Segment stretch(int oldLength, int newLength, int newWidth) {
+            assert newLength <= SEGLEN;
             if (newLength * 3 > bytes.length ) {
-                bytes = Arrays.copyOf(bytes, Math.max(newLength * 3, oldLength * 6));
+                bytes = Arrays.copyOf(bytes, Math.max(newLength * 3, Math.min(oldLength * 6, SEGLEN * 3)));
             }
             return this;
         }
@@ -220,9 +226,22 @@ public final class LargeTextBuffer {
         lastSegmentLength = 0;
     }
 
+    /**
+     * Add a segment (which must contain exactly SEGLEN characters) to
+     * the list of complete segment
+     * @param segment the segment to be added
+     */
+
     private void addSegment(Segment segment) {
         completeSegments.add(segment);
     }
+
+    /**
+     * Get the n'th segment, counting from zero.
+     * @param n the required segment (which may be the last, in which case the segment may be
+     *          incomplete)
+     * @return the n'th segment
+     */
 
     private Segment getSegment(int n) {
         if (n == completeSegments.size()) {
@@ -232,6 +251,10 @@ public final class LargeTextBuffer {
         }
     }
 
+    /**
+     * Append a string to the contents of the LargeTextBuffer
+     * @param chars the string to be added
+     */
 
     public void appendUnicodeString(UnicodeString chars) {
         int spaceAvailableInLastSegment = SEGLEN - lastSegmentLength;
@@ -258,7 +281,7 @@ public final class LargeTextBuffer {
     }
 
     private void extendLastSegment(UnicodeString chars) {
-        //System.err.println("Extend last segment from " + lastSegmentLength + " with " + chars.length());
+        //System.err.println("Extend last segment (width " + lastSegment.getWidth() + ") from " + lastSegmentLength + " with " + chars.length());
         lastSegment = lastSegment.stretch(lastSegmentLength, lastSegmentLength + chars.length32(), chars.getWidth());
         if (lastSegment instanceof Segment8) {
             chars.copy8bit(((Segment8)lastSegment).bytes, lastSegmentLength);
@@ -280,6 +303,7 @@ public final class LargeTextBuffer {
         //showSegmentLengths();
     }
 
+    // Diagnostic method
     private void showSegmentLengths() {
         StringBuilder sb = new StringBuilder();
         for (Segment s : completeSegments) {
