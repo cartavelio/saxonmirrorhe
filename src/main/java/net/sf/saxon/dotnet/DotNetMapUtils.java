@@ -9,7 +9,7 @@ import net.sf.saxon.value.AtomicValue;
  * didn't work
  */
 
-public class DotMapUtils {
+public class DotNetMapUtils {
 
     public static MapItem addEntry(MapItem map, AtomicValue key, GroundedValue value) {
         return map.addEntry(key, value);
