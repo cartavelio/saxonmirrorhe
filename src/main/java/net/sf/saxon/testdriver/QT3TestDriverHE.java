@@ -273,15 +273,26 @@ public class QT3TestDriverHE extends TestDriver {
             return !inverse;
         } else if ("format-integer-sequence".equals(type)) {
             return !inverse;
+        } else if ("unicode-version".equals(type)) {
+            return !inverse;
         } else if ("unicode-normalization-form".equals(type)) {
             return value.equalsIgnoreCase("FULLY-NORMALIZED") == inverse;
         } else if ("feature".equals(type)) {
             String edition = env.processor.getSaxonEdition();
             if ("namespace-axis".equals(value)) {
                 return !inverse;
+            } else if ("arbitraryPrecisionDecimal".equals(value)) {
+                return !inverse;
+            } else if ("collection-stability".equals(value)) {
+                // SAXON has a problem here - we don't support stable collections
+                return inverse;
+            } else if ("directory-as-collection-uri".equals(value)) {
+                return !inverse;
             } else if ("higherOrderFunctions".equals(value)) {
                 return !inverse;
-            } else if ("schemaImport".equals(value) || "schemaValidation".equals(value) || "schemaAware".equals(value)) {
+            } else if ("olson-timezone".equals(value)) {
+                return !inverse;
+            } else if ("schemaImport".equals(value) || "typedData".equals(value) || "schemaValidation".equals(value) || "schemaAware".equals(value)) {
                 return makeSchemaAware(env, inverse);
             } else if ("xpath-1.0-compatibility".equals(value)) {
                 env.xpathCompiler.setBackwardsCompatible(!inverse);
