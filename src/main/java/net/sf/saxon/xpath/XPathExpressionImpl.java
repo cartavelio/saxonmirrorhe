@@ -281,7 +281,7 @@ public class XPathExpressionImpl implements XPathExpression {
      * @param qName       The type required, identified by a constant in {@link XPathConstants}
      * @return the result of the evaluation, as a Java object of the appropriate type:
      *         see {@link #evaluate(Object, javax.xml.namespace.QName)}
-     * @throws XPathExpressionException
+     * @throws XPathExpressionException if an error is detected
      */
     /*@Nullable*/
     @Override

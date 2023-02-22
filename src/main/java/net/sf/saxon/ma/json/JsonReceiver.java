@@ -363,6 +363,7 @@ public class JsonReceiver implements Receiver {
      * @param forXml     true if the output is for the json-to-xml function
      * @param hexEscapes a predicate identifying characters that should be output as hex escapes using \ u XXXX notation.
      * @return the escaped string
+     * @throws XPathException if the input contains invalid escape sequences
      */
 
     public static String escape(String in, boolean forXml, IntPredicate hexEscapes) throws XPathException {
@@ -471,7 +472,7 @@ public class JsonReceiver implements Receiver {
     }
 
     /**
-     * Unescape a JSON string literal,
+     * Unescape a JSON string literal
      *
      * @param literal the string literal to be processed
      * @return the result of expanding escape sequences

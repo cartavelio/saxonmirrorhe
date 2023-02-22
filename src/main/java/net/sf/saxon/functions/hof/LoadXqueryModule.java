@@ -57,7 +57,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
      * Prepare an XPathContext object for evaluating the function
      *
      * @param callingContext the XPathContext of the function calling expression
-     * @param originator
+     * @param originator identifies the location of the caller for diagnostics
      * @return a suitable context for evaluating the function (which may or may
      * not be the same as the caller's context)
      */
