@@ -916,6 +916,7 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
 
         if(length == 0) {
             processorDataRef = createProcessorData(sxn_environ->thread);
+            std::cerr << "Converting array of XdmValue to XdmArray length=0"<<std::endl;
         } else {
             processorDataRef = createProcessorDataWithCapacity(sxn_environ->thread, length);
 
@@ -923,7 +924,7 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
 
         for (int i = 0; i < length; i++) {
             if (input[i] == nullptr || input[i]->getUnderlyingValue() <= -1) {
-                std::cerr << "Error found when converting array of XdmValue to XdmArray";
+                std::cerr << "Error found when converting array of XdmValue to XdmArray"<<std::endl;
                 return nullptr;
             }
             addProcessorValue(sxn_environ->thread, (void *)processorDataRef, (void *)input[i]->getUnderlyingValue());
@@ -931,6 +932,11 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
         }
 
         int64_t  xdmArrayRef = j_makeXdmArray(sxn_environ->thread, (void *)processorDataRef);
+
+        if(xdmArrayRef <= 0) {
+           std::cerr << "Error found when converting array of XdmValue to XdmArray - Ref="<< ((long)xdmArrayRef)<<std::endl;
+            return nullptr;
+        }
 
         XdmArray * newArray = new XdmArray(xdmArrayRef, length);
         return newArray;
