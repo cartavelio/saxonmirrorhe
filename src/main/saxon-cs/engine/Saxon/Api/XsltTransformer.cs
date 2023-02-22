@@ -278,6 +278,14 @@ namespace Saxon.Api {
             s9Transformer.setParameter(name, value);
         }
 
+        /// <summary>
+        /// The underlying implementation object. Although this method is public, it is intended
+        /// for advanced applications only, and should not be considered stable from release to release.
+        /// </summary>
+        /// <returns>The underlying implementation object, which will be an instance of the class
+        /// <c>Saxon.Hej.s9api.XsltTransformer</c>. Information about this class is available in the
+        /// Saxon-EE Javadoc documentation for the very similar Java class <c>net.sf.saxon.s9api.XsltTransformer</c>.
+        /// </returns>
 		public Saxon.Hej.s9api.Destination GetUnderlyingDestination() {
             return s9Transformer;
         }
