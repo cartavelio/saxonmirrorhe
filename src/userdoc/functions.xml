@@ -1176,19 +1176,18 @@
       </signatures>
       <status>
         <p>The effect of the function changed in XSLT 3.0 to return true for all defined
-          elements in the XSLT namespace, not only those classified as instructions. Saxon implements
-          the 3.0 specification.</p>
-        <p>If experimental XSLT 4.0 extensions are enabled, then <code>element-available()</code>
-          returns true for the newly defined elements (such as <code>xsl:item-type</code> and
-          <code>xsl:array</code>).</p>
+        elements in the XSLT namespace, not only those classified as instructions. Saxon implements
+        the 3.0 specification.</p>
+        <p>If experimental XSLT 4.0 extensions are enabled, then <code>element-available</code>
+        returns true for the newly defined elements (such as <code>xsl:item-type</code> and <code>xsl:array</code>)</p>
         <p>For <code>xsl:evaluate</code>, <code>element-available()</code> returns true unless the configuration
           option <a class="feature" href="DISABLE_XSL_EVALUATE"/> is set.</p>
         <p>For <code>xsl:import-schema</code>, <code>element-available()</code> returns true if executed under
-          a configuration that supports schema processing (that is, Saxon-EE with a suitable license file), provided
-          that the execution target (for exported SEF files) is also "EE".</p>
+        a configuration that supports schema processing (that is, Saxon-EE with a suitable license file), provided
+        that the execution target (for exported SEF files) is also "EE".</p>
         <p>For a SaxonJS stylesheet using elements in the <code>ixsl</code> namespace (such as <code>ixsl:schedule-action</code>),
-          <code>element-available()</code> returns true with SaxonJ and SaxonCS only if the execution target (for exported SEF files)
-        is "JS".</p>
+          SaxonJ and SaxonCS report <code>element-available() = true</code> only if the execution target (for exported SEF files)
+          is "JS".</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
@@ -4037,12 +4036,12 @@
         <p>More specifically, if the argument is a name in no namespace, that is, if the name is
           unprefixed, then the name is taken to refer to a Java system property, and the value of
           that property is returned if it exists. For example, on a Windows platform,
-          <code>system-property('file.separator')</code> returns "\". This can be used to obtain
+            <code>system-property('file.separator')</code> returns "\". This can be used to obtain
           information from the environment, and is especially useful in conjunction with
-          <code>use-when</code> conditional compilation.</p>
+            <code>use-when</code> conditional compilation.</p>
         <p>Generally, if <code>system-property()</code> is executed at compile-time, then the results
-          pertain to the compile-time environment, but if executed at run-time, the results pertain
-          to the run-time environment. For example, the result of <code>system-property('xsl:product-version')</code>
+        pertain to the compile-time environment, but if executed at run-time, the results pertain
+        to the run-time environment. For example, the result of <code>system-property('xsl:product-version')</code>
           may be different if a SEF file compiled using one Saxon release is executed under another. Evaluation
           is always at compile-time if the function call appears in a static expression (for example in <code>[xsl:]use-when</code>).
           Where the function call appears in a dynamic expression (for example in <code>&lt;xsl:if test="...."></code>),
@@ -4054,14 +4053,14 @@
         <p>For some properties, the result is configuration-dependent:</p>
         <ul>
           <li><code>is-schema-aware</code>: returns "yes" if running under Saxon-EE with a license, provided schema-awareness
-            has been enabled either by including an <code>xsl:import-schema</code> declaration in the stylesheet, or
-            by setting <code>isSchemaAware(true)</code> on the <code>XsltCompiler</code> (or <code>-sa</code> on the command line).</li>
+          has been enabled either by including an <code>xsl:import-schema</code> declaration in the stylesheet, or
+          by setting <code>isSchemaAware(true)</code> on the <code>XsltCompiler</code> (or <code>-sa</code> on the command line).</li>
           <li><code>supports-streaming</code>: returns "yes" if running under Saxon-EE with a license, unless the
-            configuration feature <a class="feature" href="STREAMABILITY"/> has been set to false.</li>
+          configuration feature <a class="feature">STREAMABILITY</a> has been set to false.</li>
           <li><code>supports-dynamic-evaluation</code>: returns "yes" unless the configuration feature 
-            <a class="feature" href="DISABLE_XSL_EVALUATE"/> has been set to false.</li>
-          <li><code>xsd-version</code>: returns the value of the configuration property <a class="feature" href="XSD_VERSION"/>,
-            which defaults to "1.1".</li>
+            <a class="feature">DISABLE_XSL_EVALUATE</a> has been set to false.</li>
+          <li><code>xsd-version</code>: returns the value of the configuration property <a class="feature">XSD_VERSION</a>,
+          which defaults to "1.1".</li>
         </ul>
       </status>
       <saxon-edition>ALL</saxon-edition>
