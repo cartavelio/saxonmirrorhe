@@ -73,45 +73,59 @@
             std::cerr << "Error in getSystemFunction. Please make sure processor and name are not nullptr." << std::endl;
              return nullptr;
         }
-             jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
-             static jmethodID xsfmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getSystemFunction",
+
+        static jmethodID xsfmID = nullptr;
+         jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
+        if(xsfmID == nullptr) {
+
+
+             xsfmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getSystemFunction",
              "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;I)Lnet/sf/saxon/s9api/XdmFunctionItem;");
-             if (!xsfmID) {
+        }
+        if (!xsfmID) {
                        std::cerr << "Error: SaxonC." << "getSystemFunction" << " not found\n" << std::endl;
                          			return nullptr;
-                         		} else {
-                         			jobject result = (jobject)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xsfmID, processor->proc, SaxonProcessor::sxn_environ->env->NewStringUTF(name), arity));
-                         			if(result) {
-                         			    auto functionItem = new XdmFunctionItem(result);
-                         			    return functionItem;
+        } else {
+                jobject result = (jobject)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xsfmID, processor->proc, SaxonProcessor::sxn_environ->env->NewStringUTF(name), arity));
+                if(result) {
+                       auto functionItem = new XdmFunctionItem(result);
+                       return functionItem;
 
-                         			} else {
-                         			    return nullptr;
+                } else {
+                       return nullptr;
 
-                         			}
+                }
 
-                         		}
+        }
 
 
 
     }
 
-    XdmValue * XdmFunctionItem::call(XdmValue ** arguments, int argument_length) {
-          if(argument_length > 0 && arguments == nullptr) {
+    XdmValue * XdmFunctionItem::call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length) {
+          if(argument_length == 0 || arguments == nullptr || processor == nullptr) {
                       std::cerr << "Error in XdmFunctionItem.call.  nullptr arguments found." << std::endl;
                       return nullptr;
           }
+          static jmethodID xffmID = nullptr;
 
-                       jclass xdmFunctionClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
-                       static jmethodID xffmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmFunctionClass,"call",
-                       "(Lnet/sf/saxon/s9api/Processor;[Lnet/sf/saxon/s9api/XdmValue)Lnet/sf/saxon/s9api/XdmValue");
-                       if (!xffmID) {
-                                 std::cerr << "Error: SaxonC." << "getSystemFunction" << " not found\n" << std::endl;
-                                 return nullptr;
-                       } else {
+          jclass xdmFunctionClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
+          if(xffmID == nullptr) {
+                xffmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmFunctionClass,"call",
+                       "(Lnet/sf/saxon/s9api/Processor;[Lnet/sf/saxon/s9api/XdmValue;)Lnet/sf/saxon/s9api/XdmValue;");
+          }
+
+          if (!xffmID) {
+                std::cerr << "Error: SaxonC." << "call" << " not found\n" << std::endl;
+                return nullptr;
+          } else {
 
                                  jobjectArray argumentJArray = SaxonProcessor::createJArray(arguments, argument_length);
-                                 jobject result = (jobject)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmFunctionClass, xffmID, cpp_processor->proc, argumentJArray));
+                                 if(argumentJArray == nullptr) {
+                                        std::cerr << "Error in XdmFunctionItem.call when converting arguments -   nullptr arguments found." << std::endl;
+                                        return nullptr;
+                                 }
+                                 jobject result = (jobject)(SaxonProcessor::sxn_environ->env->CallObjectMethod(value, xffmID, processor->proc, argumentJArray));
                                  if(argumentJArray != nullptr) {
                                     	SaxonProcessor::sxn_environ->env->DeleteLocalRef(argumentJArray);
 
@@ -145,6 +159,7 @@
                                         }
 
                                  } else {
+                                 SaxonProcessor::sxn_environ->env->ExceptionDescribe();
                                  	    return nullptr;
 
                                  }

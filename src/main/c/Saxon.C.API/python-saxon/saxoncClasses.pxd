@@ -595,7 +595,7 @@ cdef extern from "../XdmFunctionItem.h":
 
         XdmFunctionItem * getSystemFunction(SaxonProcessor * processor, const char * name, int arity)
 
-        XdmValue * call(XdmValue ** arguments, int argument_length)
+        XdmValue * call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length)
 
         XdmValue ** createXdmValueArray(int len)
 
