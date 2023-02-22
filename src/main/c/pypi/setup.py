@@ -54,18 +54,18 @@ ext_modules = [Extension(
                 ]
 setup(
     name='saxonc@@edition@@',
-    version='0.0.1',
+    version='12.1.0',
     description='A python package for the SaxonC-@@EDITION@@ @@VERSION@@, an XSLT 3.0, XQuery 3.1, XPath 3.1 and Schema Validator processor by Saxonica.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='ONeil Delpratt',
     author_email='oneil@saxonica.com',
     include_package_data=True,
-    url='https://github.com/tennom/saxonpy',     # TODO change github project
+    url='https://github.com/tennom/saxonpy?????',     # TODO change github project
     # packages=find_packages(),
     package_dir={'saxonc@@edition@@':'src'},
     packages=['saxonc@@edition@@'],
-    python_requires='>=3.6',                # Minimum version requirement of the package
+    python_requires='>=3.8',                # Minimum version requirement of the package
     ext_modules=cythonize(ext_modules,
                           compiler_directives={'language_level': 3},
                           ),
