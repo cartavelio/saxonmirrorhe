@@ -35,18 +35,15 @@ for example collation support, URI handling, and XML parsing.</p>
       </li>
       </ol>
 
-   <p>The different Saxon packages, Saxon-HE (Home Edition), Saxon-PE (Professional Edition) and Saxon-EE (Enterprise Edition), 
-      are all available on .NET, with the same functionality as the Java versions.</p>
+   <p>The initial release of Saxon-CS corresponds in functionality to Saxon-EE on Java, and requires a license key that
+      enables all Saxon-EE facilities.</p>
          
-         <aside>When Saxon-EE is used on .NET, queries and stylesheets are selectively compiled to IL code for faster execution. Internally,
-         the Saxon compiler generates Java bytecode; the IKVM runtime automatically translates this to IL code when it is loaded.
-         Code generation typically improves the performance of queries by around 25%. The code is transient (in memory): it
-         cannot be saved as a persistent executable.</aside>
+         
 
       <p>Installation of Saxon on the .NET platform is described at <a class="bodylink" href="/about/installationdotnet">Installation (.NET)</a>.</p>
 
-      <p>The commands <code>Transform</code>, <code>Query</code>, and <code>Validate</code> have the same format
-as their Java counterparts. They are described in the following places:</p>
+      <p>The commands <code>Transform</code>, <code>Query</code>, and <code>Validate</code> take the same parameters
+as their Java counterparts, with some exceptions. They are described in the following places:</p>
       <ul>
          <li>
          <p>
@@ -312,7 +309,12 @@ class.)</p>
    </section>
    <section id="localization">
       <h1>Localization</h1>
-      <p>TBA</p>
+      <p>Collation URIs for the Unicode Collation Algorithm are implemented using the ICU4N library, which is not as complete
+      as its Java counterpart, ICU4J.</p>
+      
+      <p>One known restriction is that the value <code>alternate=blanked</code> is not recognized.</p>
+      
+      <p>Localization of numbers and dates is not currently available for languages other than English.</p>
    </section>
    <section id="restrictions">
       <h1>Restrictions</h1>
@@ -374,7 +376,7 @@ class.)</p>
       <code>XmlResolver resolver = new SimpleUriResolver(uri => new WebClient().OpenRead(uri))</code>.</p>
       
       <p>A number of getter and setter methods (such as <code>ValidationFailure.GetLineNumber()</code>) have been changed
-         to properties: <code>ValidationFailure.LineNumber</code>.</p>
+         to properties: <code>ValidationFailure.LineNumber</code> in this case.</p>
       
       <p>The <code>Xslt30Compiler</code> class (and others????) no longer has an <code>ErrorList</code> property.
       Replace <code>compiler.ErrorList = errorList;</code> by <code>compiler.ErrorReporter = errorList.Add;</code>.</p>
