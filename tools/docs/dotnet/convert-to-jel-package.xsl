@@ -295,10 +295,10 @@
         </attribute>
     </xsl:template>
     
-    <xsl:template match="example"><!-- TODO what becomes of examples??? -->
-        <div class="example">
+    <xsl:template match="example">
+        <xsl:copy>
             <xsl:apply-templates/>
-        </div>
+        </xsl:copy>
     </xsl:template>
     
     <xsl:template match="summary">

@@ -102,6 +102,20 @@ pre {
 	text-decoration: none;
 }
 
+samp{
+    margin:0px;
+    font-family:monospace;
+    font-size:10pt;
+    line-height:1.4em;
+    white-space:pre-wrap;
+    display:block;
+    border:none;
+    background-color:#F5F5F5;
+    padding:2px;
+    margin-left:8px;
+    margin-bottom:5px;
+}
+
 b {
 	font-weight: bold;
 }

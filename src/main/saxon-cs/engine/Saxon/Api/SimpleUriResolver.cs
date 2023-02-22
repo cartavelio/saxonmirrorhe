@@ -13,7 +13,9 @@ namespace Saxon.Api {
     /// function; it can equally be used for resolving URIs for other media types.
     /// </remarks>
     /// <example>
-    /// <c>XmlResolver resolver = new SimpleUriResolver(uri => new WebClient().OpenRead(uri))</c>
+    /// <code>
+	/// XmlResolver resolver = new SimpleUriResolver(uri => new WebClient().OpenRead(uri))
+	/// </code>
     /// </example>
     public class SimpleUriResolver : XmlResolver {
 
