@@ -64,7 +64,7 @@ public class JDOM2DocumentWrapper extends GenericTreeInfo {
      * Get the element with a given ID, if any
      *
      * @param id        the required ID value
-     * @param getParent
+     * @param getParent true if requesting the parent element of an ID-valued element
      * @return the element node with the given ID if there is one, otherwise null.
      */
 

@@ -34,6 +34,8 @@ public class ListConstructorFunction extends AbstractFunction {
      *
      * @param targetType the type to which the function will convert its input
      * @param resolver   namespace resolver for use if the target type is namespace-sensitive
+     * @param allowEmpty true if the input is allowed to be an empty sequence
+     * @throws MissingComponentException if the target type has not been declared
      */
 
     public ListConstructorFunction(ListType targetType, NamespaceResolver resolver, boolean allowEmpty) throws MissingComponentException {

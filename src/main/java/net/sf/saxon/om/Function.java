@@ -135,13 +135,15 @@ public interface Function extends Item, Callable, GroundedValue {
 
     /**
      * Output information about this function item to the diagnostic explain() output
+     * @param out the destination for the information
+     * @throws XPathException if things go wrong
      */
 
     void export(ExpressionPresenter out) throws XPathException;
 
-
     /**
-     * Check that result type is of the trusted system functions to return a result of the correct type
+     * Ask if the function can be trusted to return a result of the correct type
+     * @return true if the implementation can be trusted
      */
 
     boolean isTrustedResultType();

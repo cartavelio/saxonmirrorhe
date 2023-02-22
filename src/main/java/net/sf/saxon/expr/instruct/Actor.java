@@ -68,6 +68,7 @@ public abstract class Actor implements ExpressionOwner, Location {
 
     /**
      * Get a string used to identify this kind of component when used in tracing output
+     * @return a diagnostic string used to identify the component when tracing
      */
 
     public String getTracingTag() {
@@ -88,6 +89,7 @@ public abstract class Actor implements ExpressionOwner, Location {
     /**
      * Get basic data about the unit of compilation (XQuery module, XSLT package) to which this
      * container belongs
+     * @return the package information
      */
     public PackageData getPackageData() {
         return packageData;
@@ -287,6 +289,7 @@ public abstract class Actor implements ExpressionOwner, Location {
      * is written to the supplied outputstream.
      *
      * @param presenter the expression presenter used to generate the XML representation of the structure
+     * @throws XPathException if things go wrong, for example an I/O failure
      */
 
     public abstract void export(ExpressionPresenter presenter) throws XPathException;

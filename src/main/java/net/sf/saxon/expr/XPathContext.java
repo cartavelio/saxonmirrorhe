@@ -121,6 +121,7 @@ public interface XPathContext {
      *
      * @param iter the current iterator. The context item, position, and size are determined by reference
      *             to the current iterator.
+     * @return the required focus tracking iterator
      */
 
     FocusIterator trackFocus(SequenceIterator iter);
@@ -169,6 +170,7 @@ public interface XPathContext {
      * sequence.
      *
      * @return true if the context position is the same as the context size.
+     * @throws XPathException if a dynamic error occurs while determining the result
      */
 
     boolean isAtLast() throws XPathException;
@@ -197,6 +199,7 @@ public interface XPathContext {
 
     /**
      * Get the current component
+     * @return the current component
      */
 
     Component getCurrentComponent();
@@ -238,9 +241,11 @@ public interface XPathContext {
 
     /**
      * Set the value of a local variable, identified by its slot number
-     *  @param slotNumber the slot number allocated at compile time to the variable,
+     * @param slotNumber the slot number allocated at compile time to the variable,
      *                   which identifies its position within the local stack frame
      * @param value      the value of the variable
+     * @throws XPathException if, for example, the value is supplied in a form that requires
+     * lazy evaluation, and the delayed evaluation fails
      */
 
     void setLocalVariable(int slotNumber, Sequence value) throws XPathException;
@@ -323,6 +328,8 @@ public interface XPathContext {
      *
      * @return the current date and time. All calls within a single query or transformation
      *         will return the same value
+     * @throws NoDynamicContextException if this context object is one used only for early evaluation of constant
+     * expressions; the current date and time are not available in this case
      */
 
     DateTimeValue getCurrentDateTime() throws NoDynamicContextException;

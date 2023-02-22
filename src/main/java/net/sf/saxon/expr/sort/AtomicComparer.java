@@ -66,6 +66,8 @@ public interface AtomicComparer {
      * @param b the second object to be compared.
      * @return true if the values are equal, false if not
      * @throws ClassCastException if the objects are not comparable
+     * @throws NoDynamicContextException if no dynamic context has been supplied, and a dynamic context is needed
+     * (for example, because the comparison uses the implicit timezone)
      */
 
     boolean comparesEqual(AtomicValue a, AtomicValue b) throws NoDynamicContextException;

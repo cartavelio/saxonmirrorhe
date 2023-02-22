@@ -53,6 +53,7 @@ public class XQueryFunction implements Declaration, Location {
     /**
      * Get data about the unit of compilation (XQuery module, XSLT package) to which this
      * container belongs
+     * @return the package information
      */
     public PackageData getPackageData() {
         return staticContext.getPackageData();
@@ -312,6 +313,7 @@ public class XQueryFunction implements Declaration, Location {
     /**
      * Ask whether the function has an annotation with a particular name
      * @param name the name of the required annotation
+     * @return true if the function has an annotation with this name
      */
 
     public boolean hasAnnotation(StructuredQName name) {
@@ -523,6 +525,7 @@ public class XQueryFunction implements Declaration, Location {
      * Type-check references to this function
      *
      * @param visitor the expression visitor
+     * @throws XPathException if type errors are found
      */
 
     public void checkReferences(ExpressionVisitor visitor) throws XPathException {
@@ -543,6 +546,7 @@ public class XQueryFunction implements Declaration, Location {
      * Produce diagnostic output showing the compiled and optimized expression tree for a function
      *
      * @param out the destination to be used
+     * @throws XPathException if things go wrong
      */
     public void explain(/*@NotNull*/ ExpressionPresenter out) throws XPathException {
         out.startElement("declareFunction");
@@ -574,6 +578,7 @@ public class XQueryFunction implements Declaration, Location {
     /**
      * Get a name identifying the object of the expression, for example a function name, template name,
      * variable name, key name, element name, etc. This is used only where the name is known statically.
+     * @return the function name
      */
 
     public StructuredQName getObjectName() {
@@ -642,6 +647,7 @@ public class XQueryFunction implements Declaration, Location {
     /**
      * Get the namespace context of the instruction. This will not always be available, in which
      * case the method returns null.
+     * @return a resolver representing the namespace context for the function
      */
 
     public NamespaceResolver getNamespaceResolver() {
@@ -672,6 +678,7 @@ public class XQueryFunction implements Declaration, Location {
      * Get an iterator over all the properties available. The values returned by the iterator
      * will be of type String, and each string can be supplied as input to the getProperty()
      * method to retrieve the value of the property.
+     * @return the properties available
      */
 
     /*@NotNull*/

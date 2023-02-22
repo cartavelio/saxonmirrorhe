@@ -313,7 +313,7 @@ public class StringValue extends AtomicValue {
     /**
      * Display as a string. In general toString() for an atomic value displays the value as it would be
      * written in XPath: so this method returns the string with delimiting quotes.
-     * @see {{@link #getUnicodeStringValue()}}
+     * @see #getUnicodeStringValue()
      */
 
     /*@NotNull*/

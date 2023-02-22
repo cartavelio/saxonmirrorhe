@@ -11,7 +11,6 @@ import net.sf.saxon.trans.XsltController;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.TransformerException;
-import java.util.function.Function;
 
 
 /**
@@ -41,6 +40,7 @@ public interface OutputURIResolver {
      * each time. For a stateful OutputURIResolver, it must either take care to be
      * thread-safe (handling multiple invocations of xsl:result-document concurrently),
      * or it must return a fresh instance of itself for each call.</p>
+     * @return a new instance of the class
      */
 
     OutputURIResolver newInstance();

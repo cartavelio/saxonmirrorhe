@@ -77,7 +77,7 @@ public class DOM4JWriter extends net.sf.saxon.event.Builder {
 
     /**
      * Start of a document node.
-     * @param properties
+     * @param properties any special properties of the node (none currently defined)
      */
 
     @Override

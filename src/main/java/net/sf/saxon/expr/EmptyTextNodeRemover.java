@@ -58,7 +58,7 @@ public class EmptyTextNodeRemover extends UnaryExpression implements ItemMapping
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings   variables that must be re-bound
      */
 
     /*@NotNull*/
@@ -105,7 +105,7 @@ public class EmptyTextNodeRemover extends UnaryExpression implements ItemMapping
      *
      * @param item The input item to be mapped.
      * @return the result of the mapping: maybe null
-     * @throws XPathException
+     * @throws XPathException probably can't happen
      */
 
     /*@Nullable*/

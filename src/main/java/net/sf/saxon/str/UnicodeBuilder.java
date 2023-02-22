@@ -233,7 +233,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @param end the end offset in bytes
      * @param oldWidth the width of the characters (number of bytes per character) in the input array
      * @param newWidth the width of the characters (number of bytes per character) in the output array. If
-     *                 newWidth <= oldWidth then the input array is copied; the width is never reduced
+     *                 newWidth LE oldWidth then the input array is copied; the width is never reduced
      * @param allocate the number of code points to allow for in the output byte array; if zero (or insufficient)
      *                 the output array will have no spare space for expansion
      * @return the new byte array

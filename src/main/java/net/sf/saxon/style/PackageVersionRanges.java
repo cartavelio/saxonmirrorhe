@@ -81,7 +81,7 @@ public class PackageVersionRanges {
      *
      * @param s Input string describing the ranges in the grammar described in
      *          <a href="http://www.w3.org/TR/xslt-30/#package-versions">http://www.w3.org/TR/xslt-30/#package-versions</a>
-     * @throws XPathException
+     * @throws XPathException if any version range is invalid
      */
     public PackageVersionRanges(String s) throws XPathException {
         ranges = new ArrayList<PackageVersionRange>();

@@ -49,6 +49,7 @@ public class Component {
      * @param provenance        where the visibility property came from
      * @param containingPackage the package to which this component belongs
      * @param declaringPackage  the package in which the original declaration of the component appears
+     * @return the constructed component
      */
 
     public static Component makeComponent(

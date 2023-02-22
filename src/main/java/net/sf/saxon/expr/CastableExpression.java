@@ -141,8 +141,7 @@ public final class CastableExpression extends CastingExpression {
      * Get the static type of the expression as a UType, following precisely the type
      * inference rules defined in the XSLT 3.0 specification.
      *
-     * @return the static item type of the expression according to the XSLT 3.0 defined rules
-     * @param contextItemType
+     * @return the static item type of the expression according to the XSLT 3.0 defined rules: always xs:boolean
      */
     @Override
     public UType getStaticUType(UType contextItemType) {

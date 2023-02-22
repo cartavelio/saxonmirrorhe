@@ -478,8 +478,10 @@ public abstract class AbstractStaticContext implements StaticContext {
     /**
      * Register an alias for an ItemType. This is a Saxon extension. If {@code typename}
      * has been registered as an alias for, say, map{xs:string, xs:integer*}, then
-     * the syntax {@code ~typename} is accepted anywhere this ItemType would
+     * the syntax {@code type(typename)} is accepted anywhere this ItemType would
      * be accepted.
+     * @param name the alias name of the type
+     * @param type the type to which this alias refers
      */
 
     public void setTypeAlias(StructuredQName name, ItemType type) {

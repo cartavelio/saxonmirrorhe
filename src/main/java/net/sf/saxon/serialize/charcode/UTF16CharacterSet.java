@@ -121,21 +121,6 @@ public class UTF16CharacterSet implements CharacterSet {
     }
 
     /**
-     * Test whether a CharSequence contains any surrogates (i.e. any non-BMP characters
-     *
-     * @param s the string to be tested
-     */
-
-    public static boolean containsSurrogates(/*@NotNull*/ CharSequence s) {
-        for (int i = 0; i < s.length(); i++) {
-            if (isSurrogate(s.charAt(i))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Test whether all the characters in a CharSequence are valid XML characters
      *
      * @param iter iterator over the character sequence to be tested

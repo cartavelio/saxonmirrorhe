@@ -65,7 +65,7 @@ public class DotNetReceiver extends Outputter {
      *                   <dt>DISABLE_ESCAPING</dt>    <dd>Disable escaping for this attribute</dd>
      *                   <dt>NO_SPECIAL_CHARACTERS</dt>      <dd>Attribute value contains no special characters</dd>
      *                   </dl>
-     * @throws IllegalStateException: attempt to output an attribute when there is no open element
+     * @throws IllegalStateException attempt to output an attribute when there is no open element
      *                                start tag
      */
 
@@ -197,7 +197,7 @@ public class DotNetReceiver extends Outputter {
      * @param properties Additional information about the PI. The following bits are
      *                   defined:
      *                   <dl>
-     *                   <dt>CHECKED</dt>    <dd>Data is known to be legal (e.g. doesn't contain "?>")</dd>
+     *                   <dt>CHECKED</dt>    <dd>Data is known to be legal (e.g. doesn't contain "?&gt;")</dd>
      *                   </dl>
      * @throws IllegalArgumentException the content is invalid for an XML processing instruction
      */

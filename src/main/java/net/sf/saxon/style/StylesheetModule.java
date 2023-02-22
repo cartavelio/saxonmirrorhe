@@ -287,6 +287,7 @@ public class StylesheetModule {
      * a list of imports or cascades.
      *
      * @param config  The Saxon Configuration
+     * @param resolver a URIResolver to be used for dereferencing URIs
      * @param source  The XML source document.
      * @param media   The media attribute to be matched.  May be null, in which
      *                case the prefered templates will be used (i.e. alternate = no).

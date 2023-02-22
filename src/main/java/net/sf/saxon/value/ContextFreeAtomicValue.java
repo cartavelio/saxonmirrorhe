@@ -14,7 +14,7 @@ public interface ContextFreeAtomicValue {
      * Get an XPathComparable object that supports the semantics of context-free
      * eq and lt comparisons between atomic values. Note that in many cases the
      * returned XPathComparable will be the AtomicValue itself; however because
-     * of the constaints of the generic {@link Comparable<T>} interface, this
+     * of the constaints of the generic {@link Comparable} interface, this
      * cannot be assumed.
      * @return an XPathComparable that can be used in comparisons with other atomic
      * values.

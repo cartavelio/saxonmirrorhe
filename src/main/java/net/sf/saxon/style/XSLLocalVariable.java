@@ -60,6 +60,7 @@ public class XSLLocalVariable extends XSLGeneralVariable {
     /**
      * Get the static type of the variable. This is the declared type, unless the value
      * is statically known and constant, in which case it is the actual type of the value.
+     * @return the declared or inferred type
      */
 
     public SequenceType getRequiredType() {

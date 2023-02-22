@@ -41,6 +41,7 @@ public class Steps {
     /**
      * Obtain a {@link Step} that selects the root node of the containing document (which may or may not
      * be a document node)
+     * @return a step that delivers the root node of the tree containing the step's origin.
      */
 
     public static Step<XdmNode> root() {
@@ -58,6 +59,7 @@ public class Steps {
      * usually produce a single atomic value, but in the case of schema-typed nodes using a list
      * type, there may be more than one atomic value. Atomizing an array also returns multiple
      * atomic values)
+     * @return a step that performs atomization
      */
 
     public static Step<XdmAtomicValue> atomize() {
@@ -90,6 +92,8 @@ public class Steps {
     /**
      * A step equivalent to the XPath "cast as" operator: the supplied item is atomized
      * if necessary, and the resulting atomic values are cast to the required type
+     * @param type the target type of the cast
+     * @return a step that returns the result of the cast
      */
 
     public static Step<XdmAtomicValue> castAs(ItemType type) {
@@ -185,6 +189,7 @@ public class Steps {
 
     /**
      * Obtain a Step that always returns an empty sequence, whatever the input
+     * @param <U> the static item type of the result of the step
      * @return a Step that always returns an empty sequence
      */
 
@@ -937,6 +942,7 @@ public class Steps {
      *              '//' operator in XPath, not to an initial '//')</li>
      *              </ul>.
      *              <p>For more complex paths, see {@link #path(Step...)}</p>
+     * @return a composite Step representing this sequence of steps
      * @throws IllegalArgumentException if any of the strings is invalid according
      *              to these rules.
      */

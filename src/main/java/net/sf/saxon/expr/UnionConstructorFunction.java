@@ -29,6 +29,7 @@ public class UnionConstructorFunction extends AbstractFunction {
     /**
      * Create a cast expression to a union type
      * @param targetType the union type that is the result of the cast
+     * @param resolver used for resolving namespace prefixes if the type is namespace-sensitive
      * @param allowEmpty true if an empty sequence may be supplied as input, converting to an empty sequence on output
      */
 

@@ -28,6 +28,8 @@ public class ListCastableFunction extends ListConstructorFunction {
      *
      * @param targetType the type to which the function will convert its input
      * @param resolver   namespace resolver for use if the target type is namespace-sensitive
+     * @param allowEmpty if the operand can be an empty sequence
+     * @throws MissingComponentException if the item type has not been declared
      */
 
     public ListCastableFunction(ListType targetType, NamespaceResolver resolver, boolean allowEmpty) throws MissingComponentException {

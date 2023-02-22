@@ -131,6 +131,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
     /**
      * Get the namespace context for this expression, needed in the event that one operand contains untyped
      * atomic values and the other contains QNames
+     * @return the resolver used for namespace prefix resolution
      */
 
     public NamespaceResolver getNamespaceResolver() {

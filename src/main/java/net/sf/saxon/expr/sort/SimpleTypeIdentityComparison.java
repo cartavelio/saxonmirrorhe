@@ -10,7 +10,7 @@ import net.sf.saxon.om.AtomicSequence;
  * of the same primitive type; a double and a float, for example, never compare equal.
  *
  * <p>In practice, identity comparison delivers the same result as equality comparison
- * in all cases except NaN: NaN is identical to itself but not equal to itself.</p>>
+ * in all cases except NaN: NaN is identical to itself but not equal to itself.</p>
  */
 
 public class SimpleTypeIdentityComparison extends SimpleTypeComparison {

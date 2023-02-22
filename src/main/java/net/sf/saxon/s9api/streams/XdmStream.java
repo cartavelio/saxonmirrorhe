@@ -29,7 +29,7 @@ import java.util.stream.*;
  * </ul>
  *
  * <p>The implementation is customized to streams of {@link XdmItem}s.</p>
- * @implNote This class is implemented by wrapping a base stream. Generally, the
+ * <p>Note: This class is implemented by wrapping a base stream. Generally, the
  *           methods on this class delegate to the base stream; those methods that
  *           return a stream wrap the stream returned by the base class. The context object can be used by a terminal
  *           method on the XdmStream to signal to the originator of the stream
@@ -154,7 +154,12 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
      * an empty stream is used, instead.)
      *
      * <p>This is an <a href="package-summary.html#StreamOps">intermediate
-     * operation</a>.
+     * operation</a>.</p>
+     *
+     * <p>Note: The {@code flatMap()} operation has the effect of applying a one-to-many
+     *     transformation to the elements of the stream, and then flattening the
+     *     resulting elements into a new stream. This corresponds to the action
+     *     of the "!" operator in XPath.</p>
      *
      * @param <R>    The element type of the new stream
      * @param mapper a <a href="package-summary.html#NonInterference">non-interfering</a>,
@@ -162,10 +167,6 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
      *               function to apply to each element which produces a stream
      *               of new values
      * @return the new stream
-     * @apiNote The {@code flatMap()} operation has the effect of applying a one-to-many
-     * transformation to the elements of the stream, and then flattening the
-     * resulting elements into a new stream. This corresponds to the action
-     * of the "!" operator in XPath.
      */
     @Override
     public <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
@@ -548,6 +549,7 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
      * <code>XdmStream&lt;T&gt;</code> rather than <code>Optional&lt;T&gt;</code> so that further operations such
      * as {@code atomize()} can be applied, and so that a typed result can be returned
      * using a method such as {@link #asOptionalNode()} or {@link #asOptionalString()}
+     * @return a stream containing the first item in this stream
      */
 
     public XdmStream<T> first() {

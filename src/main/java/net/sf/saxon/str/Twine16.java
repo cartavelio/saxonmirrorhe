@@ -28,6 +28,7 @@ public class Twine16 extends UnicodeString {
 
     /**
      * Protected constructor
+     * @param chars the 16-bit characters comprising the string: must not include any surrogates
      */
 
     protected Twine16(char[] chars) {
@@ -38,7 +39,7 @@ public class Twine16 extends UnicodeString {
      * Constructor taking an array of 16-bit chars, or a substring thereof. The caller warrants that
      * the characters are all BMP characters (no surrogate pairs). The character array is copied,
      * so it can be reused and modified after the call.
-     * @param chars the array of characters
+     * @param chars the array of characters (must not include any surrogates)
      * @param start start offset into the array
      * @param len the number of characters to be included.
      */
@@ -226,7 +227,7 @@ public class Twine16 extends UnicodeString {
     }
 
     /**
-     * Compute a hashCode. All implementations of {@code UniString use compatible hash codes and the
+     * Compute a hashCode. All implementations of {@code UnicodeString} use compatible hash codes and the
      * hashing algorithm is therefore identical to that for {@code java.lang.String}. This means
      * that for strings containing Astral characters, the hash code needs to be computed by decomposing
      * an Astral character into a surrogate pair.

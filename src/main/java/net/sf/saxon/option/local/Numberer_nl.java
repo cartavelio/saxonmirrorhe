@@ -21,7 +21,7 @@ import net.sf.saxon.expr.number.AbstractNumberer;
  *         at the start of a sentence, hence there is the problem."</p>
  * @see <a href="http://woordenlijst.org/leidraad/6/9/#r6n">http://woordenlijst.org/leidraad/6/9/#r6n</a>
  * @see <a href="http://taaladvies.net/taal/advies/popup.php?id=88">http://taaladvies.net/taal/advies/popup.php?id=88</a>
- * @see <a href="http://www.vlaanderen.be/servlet/Satellite?c=Page&cid=1120536021990&amp;pagename=taaltelefoon%2FPage%2FHomePageMIN">http://www.vlaanderen.be/servlet/Satellite?c=Page&cid=1120536021990&pagename=taaltelefoon%2FPage%2FHomePageMIN</a>
+ * @see <a href="http://www.vlaanderen.be/servlet/Satellite?c=Page&cid=1120536021990&amp;pagename=taaltelefoon%2FPage%2FHomePageMIN">http://www.vlaanderen.be/servlet/Satellite?c=Page&amp;cid=1120536021990&amp;pagename=taaltelefoon%2FPage%2FHomePageMIN</a>
  */
 
 public class Numberer_nl extends AbstractNumberer {

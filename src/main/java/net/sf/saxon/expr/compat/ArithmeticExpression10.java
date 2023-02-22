@@ -282,7 +282,7 @@ public class ArithmeticExpression10 extends ArithmeticExpression implements Call
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables that must be re-bound
      */
 
     /*@NotNull*/

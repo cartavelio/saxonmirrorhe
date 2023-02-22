@@ -517,7 +517,9 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     }
 
     /**
-     * Ask whether this is a template rule with mode="#all
+     * Ask whether this is a template rule with mode="#all"
+     * @return true if this is the case
+     * @throws XPathException if the mode attribute is found to be invalid
      */
 
     public boolean isOmniMode() throws XPathException {

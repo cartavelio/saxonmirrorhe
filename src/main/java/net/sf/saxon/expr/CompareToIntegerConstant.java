@@ -69,7 +69,7 @@ public class CompareToIntegerConstant extends CompareToConstant {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings list of variable bindings that need to be re-bound
      */
 
     /*@NotNull*/

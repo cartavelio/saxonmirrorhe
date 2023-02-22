@@ -306,6 +306,7 @@ public class DynamicQueryContext {
 
     /**
      * Set a callback that will be used when reporting a dynamic error or warning
+     * @param reporter the error reporter to be notified of dynamic errors or warnings
      * @since 10.0
      */
 
@@ -315,7 +316,7 @@ public class DynamicQueryContext {
 
     /**
      * Get the callback that will be used when reporting a dynamic error or warning
-     *
+     * @return the registered error reporter
      * @since 10.0
      */
 
@@ -425,6 +426,7 @@ public class DynamicQueryContext {
      * Apply the settings from this DynamicQueryContext to a Controller
      *
      * @param controller the Controller whose settings are to be initialized
+     * @throws XPathException if errors occur
      */
 
     public void initializeController(/*@NotNull*/ Controller controller) throws XPathException {
