@@ -1,11 +1,8 @@
 using System;
 using System.Collections;
 using System.Xml;
-using Saxon.Hej.s9api;
 using Saxon.Hej.trans;
-using Saxon.Api.Support;
 using Saxon.Callbacks;
-using Saxon.Impl.Helpers;
 
 namespace Saxon.Api {
     /// <summary inherits="IEnumerable">
@@ -165,3 +162,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

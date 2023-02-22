@@ -34,3 +34,5 @@ namespace Saxon.Cmd {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

@@ -1,6 +1,3 @@
-using System;
-using System.Numerics;
-using Saxon.Ejava.math;
 using Singulink.Numerics;
 
 namespace Saxon.Impl.Helpers {
@@ -54,3 +51,5 @@ namespace Saxon.Impl.Helpers {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

@@ -516,10 +516,6 @@ namespace Saxon.Api {
             return OuterXml;
         }
 
-        internal void SetProcessor(Processor processor) {
-            Implementation.getConfiguration().setProcessor(processor.JProcessor);
-        }
-
         /// <summary>
         /// Escape hatch to the underlying class in the Java implementation
         /// </summary>
@@ -527,3 +523,5 @@ namespace Saxon.Api {
         public NodeInfo Implementation => ((NodeInfo) value);
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

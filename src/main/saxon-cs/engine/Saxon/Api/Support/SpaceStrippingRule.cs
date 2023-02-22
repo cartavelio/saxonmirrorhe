@@ -7,7 +7,7 @@ using Saxon.Hej.type;
 namespace Saxon.Api.Support {
     internal class SpaceStrippingRule : Saxon.Hej.om.SpaceStrippingRule
     {
-        private System.Predicate<QName> elementTest;
+        private readonly System.Predicate<QName> elementTest;
 
         public SpaceStrippingRule(System.Predicate<QName> elementTest)
         {
@@ -33,3 +33,5 @@ namespace Saxon.Api.Support {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

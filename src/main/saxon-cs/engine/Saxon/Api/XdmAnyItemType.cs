@@ -1,4 +1,3 @@
-using Saxon.Hej.s9api;
 using Saxon.Hej.type;
 
 namespace Saxon.Api {
@@ -10,7 +9,7 @@ namespace Saxon.Api {
         /// The singleton instance of this class: an <c>XdmItemType</c> corresponding to the
         /// item type <c>item()</c>, which matches any item.
         /// </summary>
-        public static readonly XdmAnyItemType Instance = new XdmAnyItemType();
+        public static readonly XdmAnyItemType Instance = new();
 
         private XdmAnyItemType() : base (AnyItemType.getInstance()) {
         }
@@ -37,3 +36,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

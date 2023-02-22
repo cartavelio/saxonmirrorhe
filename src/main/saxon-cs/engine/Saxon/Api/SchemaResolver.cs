@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 
 namespace Saxon.Api {
     /// <summary>
@@ -25,3 +24,5 @@ namespace Saxon.Api {
 
     
 }
+
+// Copyright (c) 2021 Saxonica Limited

@@ -1,6 +1,5 @@
 using Saxon.Hej.ma.arrays;
 using Saxon.Hej.om;
-using Saxon.Hej.s9api;
 
 namespace Saxon.Api {
     /// <summary>
@@ -11,9 +10,9 @@ namespace Saxon.Api {
         /// The singleton instance of this class: an <c>XdmArrayType</c> corresponding to the
         /// item type <c>array(*)</c>, which matches any array.
         /// </summary>
-        public static XdmAnyArrayType Instance = new XdmAnyArrayType();
+        public static readonly XdmAnyArrayType Instance = new XdmAnyArrayType();
 
-        internal XdmAnyArrayType() : base(ArrayItemType.ANY_ARRAY_TYPE) {
+        private XdmAnyArrayType() : base(ArrayItemType.ANY_ARRAY_TYPE) {
         }
 
         public override bool Matches(XdmItem item) {
@@ -25,3 +24,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

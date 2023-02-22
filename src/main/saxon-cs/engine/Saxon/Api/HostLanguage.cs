@@ -13,3 +13,5 @@ namespace Saxon.Api {
         XSLT_PATTERN
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

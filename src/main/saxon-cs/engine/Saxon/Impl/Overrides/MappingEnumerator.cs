@@ -37,3 +37,5 @@ namespace Saxon.Impl.Overrides {
 
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

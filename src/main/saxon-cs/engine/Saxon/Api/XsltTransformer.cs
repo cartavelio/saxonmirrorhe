@@ -7,12 +7,10 @@ using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
 using Saxon.Hej.@event;
 using Saxon.Hej.lib;
-using Saxon.Hej.om;
 using Saxon.Hej.s9api;
 using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
-using Saxon.Impl.Helpers;
 using StandardMessageHandler = Saxon.Callbacks.StandardMessageHandler;
 
 namespace Saxon.Api {
@@ -36,7 +34,6 @@ namespace Saxon.Api {
         private StandardLogger traceFunctionDestination;
         private ResultDocumentHandler resultDocumentHandler;
         private QName initialTemplateName;
-        private XdmNode initialContextNode;
         private Saxon.Hej.s9api.XsltTransformer transformer;
         private readonly StandardMessageHandler _standardMessageHandler;
 
@@ -259,7 +256,7 @@ namespace Saxon.Api {
                 traceFunctionDestination = value;
                 transformer.setTraceFunctionDestination(value);
             }
-            get { return traceFunctionDestination; }
+            get => traceFunctionDestination;
         }
 
 
@@ -365,3 +362,5 @@ namespace Saxon.Api {
         public XsltController Implementation => transformer.getUnderlyingController();
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

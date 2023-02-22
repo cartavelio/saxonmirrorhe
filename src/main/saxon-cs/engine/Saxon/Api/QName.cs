@@ -46,9 +46,7 @@ namespace Saxon.Api {
 
         /// <summary>QName constant for the name xs:untypedAtomic</summary>
         public static readonly QName XS_UNTYPED_ATOMIC = new QName(XS, "xs:untypedAtomic");
-
-        /// <summary>QName constant for the name xs:untypedAtomic (for backwards compatibility)</summary>
-        public static readonly QName XDT_UNTYPED_ATOMIC = new QName(XS, "xs:untypedAtomic");
+        
 
         /// <summary>
         /// Construct a <c>QName</c> representing a name in no namespace
@@ -87,14 +85,14 @@ namespace Saxon.Api {
         /// </param>
         public QName(string uri, string lexical) {
             // TODO: check for validity
-            uri = (uri == null ? "" : uri);
+            uri ??= "";
             int colon = lexical.IndexOf(':');
             if (colon < 0) {
                 sqName = new StructuredQName("", uri, lexical);
             }
             else {
-                string prefix = lexical.Substring(0, colon);
-                string local = lexical.Substring(colon + 1);
+                string prefix = lexical[..colon];
+                string local = lexical[(colon + 1)..];
                 sqName = new StructuredQName(prefix, uri, local);
             }
         }
@@ -253,35 +251,11 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Register a <c>QName</c> with the <c>Processor</c>. This makes comparison faster
-        /// when the QName is compared with others that are also registered with the <c>Processor</c>.
-        /// Depreacted method.
-        /// </summary>
-        /// <remarks>
-        /// A given <c>QName</c> object can only be registered with one <c>Processor</c>.
-        /// </remarks>
-        /// <param name="processor">The <c>Processor</c> in which the name is to be registered.</param>
-        [System.Obsolete("This method is no longer in use")]
-        public void Register(Processor processor) {
-        }
-
-        /// <summary>
-        /// Validate the <c>QName</c> against the XML 1.0 or XML 1.1 rules for valid names.
-        /// </summary>
-        /// <param name="processor">This argument is no longer used (at one time it was used
-        /// to establish whether XML 1.0 or XML 1.1 rules should be used for validation, but the
-        /// two versions of the XML specification have since been aligned).</param>
-        /// <returns>true if the name is valid, false if not</returns>
-        public bool IsValid(Processor processor) {
-            return IsValid();
-        }
-
-        /// <summary>
         /// Validate the <c>QName</c> against the XML rules for valid names.
         /// </summary>
         /// <returns>true if the name is valid, false if not</returns>
         public bool IsValid() {
-            if (this.Prefix != String.Empty) {
+            if (this.Prefix != string.Empty) {
                 if (!NameChecker.isValidNCName(Prefix)) {
                     return false;
                 }
@@ -302,38 +276,35 @@ namespace Saxon.Api {
         /// Returns the zero-length string in the case of a QName that has no prefix.
         /// </remarks>
 
-        public String Prefix => sqName.getPrefix();
+        public string Prefix => sqName.getPrefix();
 
         /// <summary>Get the namespace URI of the <c>QName</c>. Returns "" (the zero-length string) if the
         /// QName is not in a namespace.
         /// </summary>
 
-        public String Uri => sqName.getURI();
+        public string Uri => sqName.getURI();
 
         /// <summary>Get the local part of the <c>QName</c></summary>
 
-        public String LocalName => sqName.getLocalPart();
+        public string LocalName => sqName.getLocalPart();
 
         /// <summary>Get the expanded name, as a string using the notation devised by James Clark.
         /// If the name is in a namespace, the resulting string takes the form <c>{uri}local</c>.
         /// Otherwise, the value is the local part of the name.
         /// </summary>
 
-        public String ClarkName {
+        public string ClarkName {
             get {
-                string uri = Uri;
-                if (uri.Equals("")) {
+                if (Uri.Equals("")) {
                     return LocalName;
                 }
-                else {
-                    return "{" + uri + "}" + LocalName;
-                }
+                return "{" + Uri + "}" + LocalName;
             }
         }
 
-        /// <summary>Get the expanded name in EQName format, that is <c>Q{uri}local</c>. A no namespace name is returned as <c>Q{}local</c>.
+        /// <summary>Get the expanded name in EQName format, that is <c>Q{uri}local</c>. A no-namespace name is returned as <c>Q{}local</c>.
         /// </summary>
-        public String EQName => "Q{" + Uri + "}" + LocalName;
+        public string EQName => "Q{" + Uri + "}" + LocalName;
 
         /// <summary>
         /// Convert the value to a string. The resulting string is the lexical form of the QName,
@@ -343,9 +314,7 @@ namespace Saxon.Api {
             if (Prefix.Equals("")) {
                 return LocalName;
             }
-            else {
-                return Prefix + ":" + LocalName;
-            }
+            return Prefix + ":" + LocalName;
         }
 
         /// <summary>
@@ -368,12 +337,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="other">The value to be compared with this <c>QName</c>. If this value is not a <c>QName</c>, the
         /// result is always false. Otherwise, it is true if the namespace URI and local name both match.</param>
-        public override bool Equals(Object other) {
-            if (!(other is QName)) {
-                return false;
-            }
-
-            return sqName.Equals(((QName) other).sqName);
+        public override bool Equals(object other) {
+            return other is QName q && sqName.Equals(q.sqName);
         }
 
         /// <summary>
@@ -404,3 +369,5 @@ namespace Saxon.Api {
         
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

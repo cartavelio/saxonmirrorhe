@@ -40,3 +40,5 @@ namespace Saxon.Api {
     public delegate IDestination ResultDocumentHandler(string href, Uri baseUri);
     
 }
+
+// Copyright (c) 2021 Saxonica Limited

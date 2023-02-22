@@ -41,3 +41,5 @@ namespace Saxon.Api {
         string ContentType { get; }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

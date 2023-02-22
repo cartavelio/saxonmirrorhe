@@ -39,14 +39,16 @@ namespace Saxon.Impl.Helpers {
                 }
             }
             
-            XmlTextReader reader = new XmlTextReader(content, XmlNodeType.Element, 
+            XmlTextReader reader = new(content, XmlNodeType.Element, 
                 new XmlParserContext(null, null, null, XmlSpace.None));
             reader.Normalization = true;
-            DotNetPullProvider provider = new DotNetPullProvider(reader) {
+            DotNetPullProvider provider = new(reader) {
                 AcceptFragment = true
             };
-            PullSource source = new PullSource(provider);
+            PullSource source = new(provider);
             return config.buildDocumentTree(source).getRootNode();
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

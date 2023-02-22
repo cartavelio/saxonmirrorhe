@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
 using SysCollGen = System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Xml;
 using Saxon.Ejavax.xml.transform.stream;
@@ -20,7 +18,6 @@ using Saxon.Hej.expr.parser;
 using Saxon.Hej.sxpath;
 using Saxon.Hej.type;
 using Saxon.Hej.value;
-using Saxon.Impl.Helpers;
 using Version = Saxon.Hej.Version;
 
 namespace Saxon.Api {
@@ -41,7 +38,7 @@ namespace Saxon.Api {
         // For largely historic reasons, the Saxon.Api.Processor is implemented
         // as a wrapper around the s9api Processor, which is C# code converted from Java
 
-        private SchemaManager schemaManager = null;
+        private SchemaManager schemaManager;
         private TextWriter textWriter = Console.Error;
         private CollectionFinder userCollectionFinder;
 
@@ -67,6 +64,7 @@ namespace Saxon.Api {
         /// Create a <c>Processor</c>.
         /// </summary>
         /// <param name="licensedEdition">Must be set to true (kept for future use).</param>
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         public Processor(bool licensedEdition) {
             if (!licensedEdition) {
                 throw new IllegalArgumentException("Argument to new Processor() must be set to true if supplied");
@@ -395,19 +393,6 @@ namespace Saxon.Api {
         /// Register a simple external/extension function that is to be made available within any stylesheet, query
         /// or XPath expression compiled under the control of this <c>Processor</c>
         /// </summary>
-        /// <param name="function">
-        /// This interface provides only for extensions that have no side-effects and no
-        /// dependencies on the static or dynamic context. It does however allow the type signature
-        /// of the function to be defined.
-        /// </param>
-        public void RegisterExtensionFunction(ExtensionFunction function) {
-            Implementation.registerExtensionFunction(new SimpleExtensionFunctionWrapper(function));
-        }
-        
-        /// <summary>
-        /// Register a simple external/extension function that is to be made available within any stylesheet, query
-        /// or XPath expression compiled under the control of this <c>Processor</c>
-        /// </summary>
         /// <param name="name">The name of the function, as a QName</param>
         /// <param name="type">The type of the function, for example <c>ParseItemType("function(xs:double) as xs:double")</c>.
         /// This must be a specific function type.</param>
@@ -443,7 +428,7 @@ namespace Saxon.Api {
         // /// to customize the behaviour of a collection to recognize different file extensions
         // /// </summary>
         // /// <param name="contentType">a media type or MIME type, for example application/xsd+xml</param>
-        // /// <param name="factory">a ResourceFactory used to parse (or otherweise process) resource of that type</param>
+        // /// <param name="factory">a ResourceFactory used to parse (or otherwise process) resource of that type</param>
         // public void RegisterMediaType(String contentType, IResourceFactory factory) {
         //     Implementation.registerMediaType(contentType, new ResourceFactoryWrapper(factory, this));
         // }
@@ -632,3 +617,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

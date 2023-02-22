@@ -2,18 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.NetworkInformation;
 using System.Text;
 using System.Xml;
 using Saxon.Hej.lib;
-using Saxon.Hej.om;
 using Saxon.Hej.query;
-using Saxon.Hej.s9api;
-using Saxon.Hej.trans;
-using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Ejavax.xml.transform.stream;
-using Saxon.Impl.Helpers;
 using Action = System.Action;
 
 namespace Saxon.Api {
@@ -322,12 +316,11 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// Escape hatch to the <c>Saxon.Hej.query.DynamicQueryContext</c> object in the underlying Java implementation
+        /// Escape hatch to the <c>Saxon.Hej.s9api.XQueryEvaluator</c> object in the underlying implementation
         /// </summary>
 
-        private Saxon.Hej.s9api.XQueryEvaluator Implementation {
-            get { return evaluator; }
-        }
-        
+        private Saxon.Hej.s9api.XQueryEvaluator Implementation => evaluator;
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

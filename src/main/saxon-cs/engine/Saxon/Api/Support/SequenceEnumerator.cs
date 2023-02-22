@@ -57,3 +57,5 @@ namespace Saxon.Api.Support {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

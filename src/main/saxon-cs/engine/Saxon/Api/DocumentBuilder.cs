@@ -116,7 +116,7 @@ namespace Saxon.Api {
             get => schemaValidator;
             set {
                 schemaValidator = value;
-                s9Builder.setSchemaValidator(schemaValidator == null ? null : schemaValidator.UnderlyingSchemaValidator);
+                s9Builder.setSchemaValidator(schemaValidator?.UnderlyingSchemaValidator);
             }
         }
 
@@ -302,8 +302,9 @@ namespace Saxon.Api {
                 source = augmentSource(source, options);
             }
             else {
-                XmlReaderSettings settings = new XmlReaderSettings();
-                settings.DtdProcessing = DtdProcessing.Parse; // must expand entity references
+                XmlReaderSettings settings = new () {
+                    DtdProcessing = DtdProcessing.Parse // must expand entity references
+                };
 
                 if (xmlResolver != null) {
                     settings.XmlResolver = xmlResolver;
@@ -322,14 +323,7 @@ namespace Saxon.Api {
             }
 
             try {
-                XdmNode node = s9Builder.build(source);
-                // if (schemaValidator != null 
-                //         && schemaValidator.ErrorList != null 
-                //         && schemaValidator.ErrorList.Count > 0) {
-                //     throw new SaxonApiException("Validation errors were reported");
-                // }
-                node.SetProcessor(processor);
-                return node;
+                return s9Builder.build(source);
             }
             catch (XPathException ex) {
                 throw new SaxonApiException(ex);
@@ -370,11 +364,9 @@ namespace Saxon.Api {
                 source = augmentSource(source, options);
             }
             else {
-                XmlReaderSettings settings = new XmlReaderSettings();
-                settings.DtdProcessing = DtdProcessing.Parse; // must expand entity references
-
-
-                //((XmlTextReader)parser).Normalization = true;
+                XmlReaderSettings settings = new() {
+                    DtdProcessing = DtdProcessing.Parse // must expand entity references
+                };
 
                 if (xmlResolver != null) {
                     settings.XmlResolver = xmlResolver;
@@ -513,3 +505,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

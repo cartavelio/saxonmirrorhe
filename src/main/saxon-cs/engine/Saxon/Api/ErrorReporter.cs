@@ -8,3 +8,5 @@ namespace Saxon.Api {
     [Serializable]
     public delegate void ErrorReporter(XmlProcessingError error);
 }
+
+// Copyright (c) 2021 Saxonica Limited

@@ -2,15 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using Saxon.Ejava.lang;
-using Saxon.Hej.functions;
 using Saxon.Hej.ma.arrays;
 using Saxon.Hej.ma.map;
 using Saxon.Hej.om;
-using Saxon.Hej.tree.iter;
 using Saxon.Hej.value;
-using Saxon.Api.Support;
 using Saxon.Hej.expr;
 using Exception = System.Exception;
 
@@ -22,7 +18,7 @@ namespace Saxon.Api {
     /// <remarks>
     /// <para>An <c>XdmValue</c> is immutable.</para>
     /// <para>An <c>XdmValue</c> is indexed, so you can get the n'th item in the value (starting from zero) by
-    /// writing <c>value[n]</c>. Alternatively, use the method <c>value.ItemAt(n)</c>.
+    /// writing <c>value[n]</c>. Alternatively, use the method <c>value.ItemAt(n)</c>.</para>
     /// <para>A sequence consisting of a single item <i>may</i> be represented
     /// as an instance of <see cref="XdmItem"/>, which is a subtype of <c>XdmValue</c>. However,
     /// there is no guarantee that all single-item sequences will be instances of
@@ -114,11 +110,11 @@ namespace Saxon.Api {
         public static IEnumerable<TInput> Concat<TInput>(IEnumerable<TInput> first, IEnumerable<TInput> second)
             where TInput : XdmItem {
             if (first == null) {
-                throw new ArgumentNullException("first");
+                throw new ArgumentNullException(nameof(first));
             }
 
             if (second == null) {
-                throw new ArgumentNullException("second");
+                throw new ArgumentNullException(nameof(second));
             }
 
             return ConcatImpl(first, second);
@@ -147,7 +143,7 @@ namespace Saxon.Api {
         public IEnumerable<T> Where<T>(Predicate<T> predicate)
             where T : XdmItem {
             if (predicate == null) {
-                throw new ArgumentNullException("Predicate is null");
+                throw new ArgumentNullException(nameof(predicate));
             }
 
             return this.Select(new Step<T, T>(x => {
@@ -171,7 +167,7 @@ namespace Saxon.Api {
         public bool AnyMatch<T>(Predicate<T> predicate)
             where T : XdmItem {
             if (predicate == null) {
-                throw new ArgumentNullException("Predicate is null");
+                throw new ArgumentNullException(nameof(predicate));
             }
 
             foreach (XdmItem item in this) {
@@ -193,15 +189,15 @@ namespace Saxon.Api {
         public bool AllMatch<T>(Predicate<T> predicate)
             where T : XdmItem {
             if (predicate == null) {
-                throw new ArgumentNullException("Predicate is null");
+                throw new ArgumentNullException(nameof(predicate));
             }
 
             foreach (XdmItem item in this) {
-                if (!(item is T)) {
+                if (item is not T xdmItem) {
                     return false;
                 }
 
-                if (!predicate.Invoke((T) item)) {
+                if (!predicate.Invoke(xdmItem)) {
                     return false;
                 }
             }
@@ -297,22 +293,15 @@ namespace Saxon.Api {
                     return XdmEmptySequence.Instance;
                 case 1:
                     Item first = value.head();
-                    switch (first.getGenre()) {
-                        case Genre.NODE:
-                            return new XdmNode((NodeInfo) first);
-                        case Genre.ATOMIC:
-                            return new XdmAtomicValue((AtomicValue) first);
-                        case Genre.MAP:
-                            return new XdmMap((MapItem) first);
-                        case Genre.ARRAY:
-                            return new XdmArray((ArrayItem) first);
-                        case Genre.FUNCTION:
-                            return new XdmFunctionItem((Function) first);
-                        case Genre.EXTERNAL:
-                            //return new XdmExternalObjectValue(first);
-                        default:
-                            throw new IllegalArgumentException();
-                    }
+                    return first.getGenre() switch {
+                        Genre.NODE => new XdmNode((NodeInfo)first),
+                        Genre.ATOMIC => new XdmAtomicValue((AtomicValue)first),
+                        Genre.MAP => new XdmMap((MapItem)first),
+                        Genre.ARRAY => new XdmArray((ArrayItem)first),
+                        Genre.FUNCTION => new XdmFunctionItem((Function)first),
+                        Genre.EXTERNAL => new XdmExternalObject<object>(first),
+                        _ => throw new IllegalArgumentException()
+                    };
                 default:
                     return new XdmValue(value);
             }
@@ -336,30 +325,28 @@ namespace Saxon.Api {
         /// <param name="o">The supplied object</param>
         /// <returns>The result of conversion if successful.</returns>
         public static XdmValue MakeValue(object o) {
-            if (o == null) {
-                return null;
-            }
-            else if (o is GroundedValue) {
-                return FromGroundedValue((GroundedValue) o);
-            }
-            else if (o is Sequence) {
-                return new XdmValue(SequenceTool.toGroundedValue(((Sequence) o).iterate()));
-            }
-            else if (o is XdmValue) {
-                return (XdmValue) o;
-            }
-            else if (o is IDictionary) {
-                return XdmMap.MakeMap((IDictionary) o);
-            }
-            else if (o.GetType().IsArray) {
-                return XdmArray.MakeArray((object[]) o);
-            }
-            else if (o is IEnumerable) {
-                return XdmValue.MakeSequence((IEnumerable) o);
-            }
+            switch (o) {
+                case null:
+                    return null;
+                case GroundedValue groundedValue:
+                    return FromGroundedValue(groundedValue);
+                case Sequence sequence:
+                    return new XdmValue(SequenceTool.toGroundedValue(sequence.iterate()));
+                case XdmValue xdmValue:
+                    return xdmValue;
+                case IDictionary dictionary:
+                    return XdmMap.MakeMap(dictionary);
+                default: {
+                    if (o.GetType().IsArray) {
+                        return XdmArray.MakeArray((object[]) o);
+                    }
 
-            else {
-                return XdmAtomicValue.MakeAtomicValue(o);
+                    if (o is IEnumerable enumerable) {
+                        return MakeSequence(enumerable);
+                    }
+
+                    return XdmAtomicValue.MakeAtomicValue(o);
+                }
             }
         }
 
@@ -367,7 +354,7 @@ namespace Saxon.Api {
             List<Saxon.Hej.om.Item> list = new List<Saxon.Hej.om.Item>();
 
             if (o is string) {
-                return XdmAtomicValue.MakeAtomicValue((object) o);
+                return XdmAtomicValue.MakeAtomicValue(o);
             }
 
             foreach (object oi in o) {
@@ -439,9 +426,6 @@ namespace Saxon.Api {
             return GetList().GetEnumerator();
         }
 
-        // Indexer declaration.
-        //public XdmItem this[int index] => ItemAt(index);
-
         /// <summary>
         /// Get the i'th item in the value, counting from zero.
         /// </summary>
@@ -480,7 +464,7 @@ namespace Saxon.Api {
         /// the value using the adaptive serialization method.
         /// </summary>
         /// <returns>A string representation of the value.</returns>
-        public override String ToString() {
+        public override string ToString() {
             return value.ToString();
         }
 
@@ -493,10 +477,8 @@ namespace Saxon.Api {
         public XdmValue DocumentOrder() {
             try {
                 SequenceIterator iter = value.iterate();
-                Saxon.Hej.expr.sort.DocumentOrderIterator sorted = 
-                    new Saxon.Hej.expr.sort.DocumentOrderIterator(iter,
-                        Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
-                return XdmValue.Wrap(SequenceTool.toGroundedValue(sorted));
+                Saxon.Hej.expr.sort.DocumentOrderIterator sorted = new(iter, Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
+                return Wrap(SequenceTool.toGroundedValue(sorted));
             }
             catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);
@@ -539,27 +521,13 @@ namespace Saxon.Api {
         /// </remarks>
         /// <returns>The XDM value reduced to the simplest possible form.</returns>
 
-        public XdmValue Simplify {
-            get {
-                switch (value.getLength()) {
-                    case 0:
-                        if (this is XdmEmptySequence) {
-                            return this;
-                        }
-
-                        return XdmEmptySequence.Instance;
-
-                    case 1:
-                        if (this is XdmItem) {
-                            return this;
-                        }
-
-                        return XdmValue.Wrap(value);
-
-                    default:
-                        return this;
-                }
-            }
-        }
+        public XdmValue Simplify =>
+            value.getLength() switch {
+                0 => this is XdmEmptySequence ? this : XdmEmptySequence.Instance,
+                1 => this is XdmItem ? this : Wrap(value),
+                _ => this
+            };
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

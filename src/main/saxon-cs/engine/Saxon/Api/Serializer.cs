@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Reflection.Emit;
 using Saxon.Ejava.util;
 using Saxon.Hej;
 using Saxon.Hej.s9api;
@@ -24,10 +22,9 @@ namespace Saxon.Api {
     {
 
         private readonly Saxon.Hej.s9api.Serializer jSerializer;
-        private readonly Properties props = new Properties();
-        private CharacterMapIndex characterMapIndex = new CharacterMapIndex();
-        private Properties defaultOutputProperties = null;
-        private Processor processor = null;
+        private readonly Properties props = new();
+        private readonly CharacterMapIndex characterMapIndex = new();
+        private Properties defaultOutputProperties;
         private Configuration config = null; // Beware: this will often be null
 
         /// <summary>QName identifying the serialization parameter "method". If the value
@@ -264,13 +261,13 @@ namespace Saxon.Api {
         /// <summary>Create a Serializer</summary>
 
         internal Serializer(Processor processor, Saxon.Hej.s9api.Serializer s) {
-            this.processor = processor;
+            this.Processor = processor;
             jSerializer = s;
         }
 
         /// <summary>The Processor from which this <c>Serializer</c> was created.</summary>
 
-        public Processor Processor => processor;
+        public Processor Processor { get; private set; } = null;
 
         /// <summary>Set a serialization property</summary>
         /// <remarks>In the case of XSLT, properties set within the serializer override
@@ -298,7 +295,7 @@ namespace Saxon.Api {
         /// <summary>
         /// Set default output properties, for use when no explicit properties are set using <c>SetOutputProperty()</c>.
         /// The values supplied are typically those specified in the stylesheet or query. In the case of XSLT,
-        /// they are the properties associated with unamed <c>xsl:output</c> declarations.
+        /// they are the properties associated with unnamed <c>xsl:output</c> declarations.
         /// </summary>
         /// <param name="props"></param>
 
@@ -391,18 +388,7 @@ namespace Saxon.Api {
         public object GetOutputDestination(){
             return jSerializer.getOutputDestination();		
         }
-
-
-        /// <summary>Set the <c>Processor</c> associated with this <c>Serializer</c>. This will be called automatically if the
-        /// serializer is created using one of the <c>Processor.NewSerializer()</c> methods.</summary>
-        /// <param name="processor"> the associated <c>Processor</c></param>
         
-        public void SetProcessor(Processor processor)
-        {
-            this.processor = processor;
-            this.config = processor.Implementation;
-        }
-
         /// <summary>Specify the destination of the serialized output, in the
         /// form of a <c>TextWriter</c>.</summary>
         /// <remarks>Note that when writing to a <c>TextWriter</c>, character encoding is
@@ -442,9 +428,9 @@ namespace Saxon.Api {
         /// <param name="value"> The value to be serialized</param>
         /// <remarks>since 9.8</remarks>
         public void SerializeXdmValue(XdmValue value) {
-            if (value is XdmNode)
+            if (value is XdmNode node)
             {
-                SerializeXdmNode((XdmNode)value);  
+                SerializeXdmNode(node);  
             }
             else {
                 jSerializer.serializeXdmValue(value);
@@ -481,8 +467,8 @@ namespace Saxon.Api {
         /// considered to be less stable than the classes in the Saxon.Api namespace.</para> 
         /// <para>The internal methods follow
         /// Java naming conventions rather than .NET conventions.</para>
-        /// <para>Information about the returned <see cref="Saxon.Hej.Configuration"/> object 
-        /// (and the objects it provides access to) is included in the Saxon JavaDoc docmentation.
+        /// <para>Information about the returned <see cref="Saxon.Hej.s9api.Destination"/> object 
+        /// (and the objects it provides access to) is included in the Saxon JavaDoc documentation.
         /// </para>
         /// </remarks>
         /// <returns>returns the underlying Destination object</returns>
@@ -523,3 +509,5 @@ namespace Saxon.Api {
 
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

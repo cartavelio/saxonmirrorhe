@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
 using Saxon.Hej.pull;
-using Saxon.Hej.s9api;
 using Saxon.Hej.type;
 using Saxon.Api.Support;
 using Saxon.Ejavax.xml.transform;
@@ -65,22 +63,7 @@ namespace Saxon.Api {
             get => s9schemaManager.getXsdVersion();
             set => s9schemaManager.setXsdVersion(value);
         }
-
-
-        /// <summary>
-        /// This property provides a way to set the catalog file which will be used by the Apache catalog resolver.
-        /// Not supported in Saxon-CS.
-        /// </summary>
         
-        public string Catalog
-        {
-            set {
-                throw new NotSupportedException("Saxon-CS does not support catalogs");
-                //Saxon.Hej.trans.XmlCatalogResolver.setCatalog(value, this.config, false);
-            }
-        }
-
-
         /// <summary>
         /// The <c>SchemaResolver</c> is a user-supplied callback used for resolving references to
         /// schema documents. It applies to references from one schema document to another
@@ -300,3 +283,5 @@ namespace Saxon.Api {
 
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

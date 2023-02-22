@@ -8,7 +8,7 @@ using Saxon.Hej.lib;
 using Saxon.Hej.trans;
 
 namespace Saxon.Impl.Helpers {
-    public class DotNetCollationFactory {
+    public static class DotNetCollationFactory {
         /**
          * Make a collator with given properties
          *
@@ -136,3 +136,5 @@ namespace Saxon.Impl.Helpers {
         }        
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

@@ -16,3 +16,5 @@ namespace Saxon.Api {
     public delegate IEnumerable<IResource> CollectionFinder(Uri collectionURI);
     
 }
+
+// Copyright (c) 2021 Saxonica Limited

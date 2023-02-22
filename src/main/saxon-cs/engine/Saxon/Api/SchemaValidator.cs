@@ -11,7 +11,6 @@ using Saxon.Hej.@event;
 using Saxon.Hej.lib;
 using Saxon.Hej.om;
 using Saxon.Hej.pull;
-using Saxon.Hej.type;
 using Saxon.Api.Support;
 
 namespace Saxon.Api {
@@ -47,8 +46,7 @@ namespace Saxon.Api {
     [Serializable]
     public class SchemaValidator {
         private Configuration config;
-        private List<Source> sources = new List<Source>();
-        private SchemaType documentElementType;
+        private List<Source> sources = new();
 
         // internal constructor
 
@@ -120,7 +118,6 @@ namespace Saxon.Api {
         /// directory.
         /// </summary>
         /// <param name="source">Source document supplied as a <c>Stream</c></param>
-        /// <param name="baseUri">Base URI of the source document</param>
         
         public void AddSource(Stream source) {
             AddSource(source, new Uri(Environment.CurrentDirectory));
@@ -142,7 +139,6 @@ namespace Saxon.Api {
         /// directory.
         /// </summary>
         /// <param name="source">Source document supplied as a <c>TextReader</c></param>
-        /// <param name="baseUri">Base URI of the source document</param>
         
         public void AddSource(TextReader source) {
             AddSource(source, new Uri(Environment.CurrentDirectory));
@@ -399,3 +395,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

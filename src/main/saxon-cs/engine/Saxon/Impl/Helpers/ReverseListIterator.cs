@@ -4,8 +4,7 @@ using Saxon.Hej.om;
 using Saxon.Hej.tree.iter;
 
 namespace Saxon.Impl.Helpers {
-    public class ReverseListIterator<T> : SequenceIterator, 
-            LastPositionFinder, LookaheadIterator, ReversibleIterator
+    public class ReverseListIterator<T> : LastPositionFinder, LookaheadIterator, ReversibleIterator
             where T : Item {
         
         private readonly IList<T> list;
@@ -51,3 +50,5 @@ namespace Saxon.Impl.Helpers {
         
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

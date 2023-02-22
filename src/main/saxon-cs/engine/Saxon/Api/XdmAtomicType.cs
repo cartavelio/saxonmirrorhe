@@ -19,7 +19,7 @@ namespace Saxon.Api {
         /// Instance object of the <c>XdmAtomicType</c> class
         /// </summary>
         public static readonly XdmAtomicType Instance =
-            new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC);
+            new(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC);
 
         internal XdmAtomicType(AtomicType type) : base (type) {
         }
@@ -485,3 +485,5 @@ namespace Saxon.Api {
         
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

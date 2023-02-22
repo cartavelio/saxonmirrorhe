@@ -16,7 +16,7 @@ namespace Saxon.Api {
     /// </remarks>    
 
     [Serializable]
-    public partial class XsltExecutable
+    public class XsltExecutable
     {
 
         private Processor processor;
@@ -26,7 +26,7 @@ namespace Saxon.Api {
 
         internal XsltExecutable(Saxon.Hej.s9api.XsltExecutable executable)
         {
-            this.jExecutable = executable;
+            jExecutable = executable;
         }
 
         internal Processor InternalProcessor
@@ -110,7 +110,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>
         /// a <c>Dictionary</c> whose keys are the names of global parameters in the stylesheet,
-        /// and whose values are <see cref="Saxon.Api.XsltExecutable+ParameterDetails"/> objects giving information about the
+        /// and whose values are <see cref="Saxon.Api.ParameterDetails"/> objects giving information about the
         /// corresponding parameter.
         /// </returns>
         public Dictionary<QName, ParameterDetails> GetGlobalParameters()
@@ -128,3 +128,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

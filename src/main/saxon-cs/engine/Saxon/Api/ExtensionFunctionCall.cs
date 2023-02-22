@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using Saxon.Hej.expr;
-using Saxon.Hej.om;
-using Saxon.Hej.value;
 
 namespace Saxon.Api {
     /// <summary>
@@ -61,3 +57,5 @@ namespace Saxon.Api {
         
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

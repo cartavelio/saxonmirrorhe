@@ -10,7 +10,7 @@ namespace Saxon.Api {
         /// The singleton instance of this class: an <c>XdmItemType</c> corresponding to the
         /// item type <c>function(*)</c>, which matches any function item.
         /// </summary>
-        public static readonly XdmAnyFunctionType Instance = new XdmAnyFunctionType();
+        public static readonly XdmAnyFunctionType Instance = new();
 
         private XdmAnyFunctionType() : base(AnyFunctionType.ANY_FUNCTION) {
         }
@@ -24,3 +24,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited
