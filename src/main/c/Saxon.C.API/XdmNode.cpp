@@ -68,7 +68,7 @@ bool XdmNode::isAtomic() {
 		return localName;
 	}
 	XDM_NODE_KIND kind = getNodeKind();
-
+	allocFn fn = operator new;
 	switch (kind) {
             case DOCUMENT:
             case TEXT:
@@ -78,7 +78,7 @@ bool XdmNode::isAtomic() {
             case NAMESPACE:
             case ELEMENT:
             case ATTRIBUTE:
-                localName = j_getLocalName(SaxonProcessor::sxn_environ->thread, (void *)value);
+                localName = j_getLocalName(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
 
                 return localName;
 
@@ -97,6 +97,7 @@ bool XdmNode::isAtomic() {
 	if(nodeName != nullptr) {
 		return nodeName;
 	}
+	allocFn fn = operator new;
 	XDM_NODE_KIND kind = getNodeKind();
 	switch (kind) {
             case DOCUMENT:
@@ -107,7 +108,7 @@ bool XdmNode::isAtomic() {
             case NAMESPACE:
             case ELEMENT:
             case ATTRIBUTE:
-                nodeName = j_getNodeName(SaxonProcessor::sxn_environ->thread, (void *)value);
+                nodeName = j_getNodeName(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
                
                 return nodeName;
             default:
@@ -159,8 +160,8 @@ return this;}
 	    if(baseURI != nullptr) {
 		    return baseURI;
 	    }
-
-        baseURI = getBaseURIForXdmNode(SaxonProcessor::sxn_environ->thread, (void *)value);
+        allocFn fn = operator new;
+        baseURI = getBaseURIForXdmNode(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
 	    return baseURI;
 
     }

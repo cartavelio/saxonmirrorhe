@@ -65,15 +65,14 @@ public class XdmUtils {
 
 
     @CEntryPoint(name = "getBaseURIForXdmNode")
-    public static CCharPointer getBaseURIForXdmNode(IsolateThread thread, ObjectHandle value) {
+    public static CCharPointer getBaseURIForXdmNode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn fn, ObjectHandle value) {
         if(value == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
         }
         XdmNode node = SaxonCAPI.objectHandles.get(value);
         URI uri = node.getBaseURI();
+        return SaxonCAPI.stringToNative2(fn, uri.toString());
 
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(uri.toString());
-        return holder.get();
     }
 
     @CEntryPoint(name = "getParentForXdmNode")
@@ -421,15 +420,15 @@ public class XdmUtils {
     }
 
 
-    @CEntryPoint(name = "j_getLocalName")
-    public static CCharPointer getLocalName(IsolateThread thread, ObjectHandle nodeRef) {
+    @CEntryPoint(name = "j_getLocalName", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    public static CCharPointer getLocalName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle nodeRef) {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         QName qname = node.getNodeName();
         /*if (qname == null) {
             return null;
         }  */
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(qname.getLocalName());
-        return holder.get();
+        return SaxonCAPI.stringToNative2(alloc, qname.getLocalName());
+
     }
 
     /**
@@ -440,15 +439,14 @@ public class XdmUtils {
      * @return the name of the node. In the case of unnamed nodes (for example, text and comment nodes)
      * return null.
      */
-    @CEntryPoint(name = "j_getNodeName")
-    public static CCharPointer getNodeName(IsolateThread thread, ObjectHandle nodeRef) {
+    @CEntryPoint(name = "j_getNodeName", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    public static CCharPointer getNodeName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle nodeRef) {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         QName qname = node.getNodeName();
         /*if (qname == null) {
             return null;
         }   */
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(XdmUtils.getEQName(qname));
-        return holder.get();
+        return SaxonCAPI.stringToNative2(alloc, XdmUtils.getEQName(qname));
 
     }
 
