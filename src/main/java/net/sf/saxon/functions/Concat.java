@@ -133,7 +133,7 @@ public class Concat extends SystemFunction implements PushableFunction {
 
     @Override
     public SequenceType getRequiredType(int arg) {
-        return getDetails().argumentTypes[0];
+        return getDetails().paramTypes[0];
         // concat() is a special case
     }
 
