@@ -459,6 +459,8 @@ class SaxonTestSuite {
         }
       }
 
+      testargs += testOptions
+
       doFirst {
         if (this.debugExec) {
           println("Running ${testargs.join(' ')}")
