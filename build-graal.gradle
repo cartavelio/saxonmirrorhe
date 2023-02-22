@@ -621,7 +621,7 @@ task graal_eec_jar(
   def saxoncReleaseDir = "${buildDir}/release/saxon${edition}c"
 
   task "setup_${edition}c_release"(
-          dependsOn: [graalEdition]
+          dependsOn: [graalEdition, "${edition}c_graalImage"]
   ) {
     inputs.files fileTree(dir: "${projectDir}/src/main/c")
     outputs.files fileTree(dir: saxoncReleaseDir, exclude: "dist/**")
