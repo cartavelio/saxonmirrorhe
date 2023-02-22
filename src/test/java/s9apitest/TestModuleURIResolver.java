@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -49,16 +48,16 @@ public class TestModuleURIResolver {
         }
 
         /**
-         * @see net.sf.saxon.lib.StandardModuleURIResolver#getQuerySource(java.net.URI)
+         * 
          */
         @Override
-        protected StreamSource getQuerySource(URI absoluteURI) throws XPathException {
-            if (absoluteURI.toString().startsWith("http://ldueck.librarytest/")) {
-                String replace = absoluteURI.toString().replace("http://ldueck.librarytest/", ConfigTest.DATA_DIR + "xq_modules_problem/");
+        protected StreamSource resolveLocationHint(String baseURI, String locationHint) throws XPathException {
+            if (locationHint.startsWith("http://ldueck.librarytest/")) {
+                String replace = locationHint.replace("http://ldueck.librarytest/", ConfigTest.DATA_DIR + "xq_modules_problem/");
                 System.out.println("Load from " + replace);
-                return super.getQuerySource(new File(replace).toURI());
+                return super.resolveLocationHint(baseURI, replace);
             }
-            return super.getQuerySource(absoluteURI);
+            return super.resolveLocationHint(baseURI, locationHint);
         }
 
     }
