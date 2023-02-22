@@ -15,9 +15,9 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.CompressedWhitespace;
 import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
@@ -342,7 +342,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                                               location,
                                               ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY);
                         // output characters
-                        final CodePoints value = TinyTextImpl.getStringValue(tree, next);
+                        final UnicodeString value = TinyTextImpl.getStringValue(tree, next);
                         receiver.characters(value, location, ReceiverOption.WHOLE_TEXT_NODE);
                         receiver.endElement();
                     } else {
@@ -405,7 +405,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     closePending = false;
 
                     // output characters
-                    final CodePoints value = TinyTextImpl.getStringValue(tree, next);
+                    final UnicodeString value = TinyTextImpl.getStringValue(tree, next);
                     receiver.characters(value, location, ReceiverOption.WHOLE_TEXT_NODE);
                     break;
                 }
@@ -417,7 +417,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
 
                     // output characters
                     long compressedValue = ((long) tree.alpha[next] << 32) | ((long) tree.beta[next] & 0xffffffffL);
-                    final CodePoints value = new CompressedWhitespace(compressedValue);
+                    final UnicodeString value = new CompressedWhitespace(compressedValue);
                     receiver.characters(value, location, ReceiverOption.WHOLE_TEXT_NODE);
                     break;
                 }

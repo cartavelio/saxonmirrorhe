@@ -13,7 +13,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
@@ -73,7 +73,7 @@ public class UncommittedSerializer extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (committed) {
             getNextReceiver().characters(chars, locationId, properties);
         } else {
@@ -92,7 +92,7 @@ public class UncommittedSerializer extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (committed) {
             getNextReceiver().processingInstruction(target, data, locationId, properties);
         } else {
@@ -108,7 +108,7 @@ public class UncommittedSerializer extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (committed) {
             getNextReceiver().comment(chars, locationId, properties);
         } else {

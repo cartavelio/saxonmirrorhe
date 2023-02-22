@@ -14,10 +14,13 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryResult;
-import net.sf.saxon.s9api.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.Message;
+import net.sf.saxon.s9api.QName;
+import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -316,7 +319,7 @@ public class MessageInstr extends Instruction {
      */
 
     private static class MessageAdapter extends ProxyReceiver {
-        private final CodePoints errorCode;
+        private final UnicodeString errorCode;
         private final Location location;
 
         public MessageAdapter(SequenceReceiver next, String errorCode, Location location) {

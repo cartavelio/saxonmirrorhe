@@ -660,7 +660,7 @@ public class ToLower {
         init();
     }
 
-    public static UnicodeString toLower(CodePoints input) {
+    public static UnicodeString toLower(UnicodeString input) {
         UnicodeBuilder ub = new UnicodeBuilder((int)input.estimatedLength());
         IntIterator iter = input.codePoints();
         while (iter.hasNext()) {

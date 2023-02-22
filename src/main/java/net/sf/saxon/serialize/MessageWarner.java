@@ -9,8 +9,8 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeWriterToWriter;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
@@ -42,7 +42,7 @@ public class MessageWarner extends XMLEmitter {
     }
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (target.equals("error-code")) {
             errorCode = data.toString();
         } else {

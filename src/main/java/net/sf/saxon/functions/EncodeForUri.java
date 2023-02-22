@@ -11,7 +11,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
@@ -50,7 +49,7 @@ public class EncodeForUri extends ScalarSystemFunction {
      * @return the %HH-encoded string
      */
 
-    public static StringValue escape(CodePoints s, String allowedPunctuation) {
+    public static StringValue escape(UnicodeString s, String allowedPunctuation) {
         s = s.tidy();
         UnicodeBuilder sb = new UnicodeBuilder();
         IntIterator iter = s.codePoints();

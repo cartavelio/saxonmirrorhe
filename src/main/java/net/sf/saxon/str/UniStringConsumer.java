@@ -35,7 +35,7 @@ public interface UniStringConsumer {
      * @throws XPathException if processing fails for any reason
      */
 
-    UniStringConsumer accept(CodePoints chars) throws XPathException;
+    UniStringConsumer accept(UnicodeString chars) throws XPathException;
 
 
     /**

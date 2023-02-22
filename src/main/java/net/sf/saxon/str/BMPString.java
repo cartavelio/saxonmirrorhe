@@ -114,7 +114,7 @@ public class BMPString extends UnicodeString {
     }
 
     @Override
-    public CodePoints concat(CodePoints other) {
+    public UnicodeString concat(UnicodeString other) {
         if (other instanceof BMPString) {
             return new BMPString(baseString + ((BMPString)other).baseString);
         } else {
@@ -124,7 +124,7 @@ public class BMPString extends UnicodeString {
     }
 
     @Override
-    public int compareTo(CodePoints other) {
+    public int compareTo(UnicodeString other) {
         if (other instanceof BMPString) {
             return baseString.compareTo(((BMPString)other).baseString);
         } else {
@@ -164,10 +164,19 @@ public class BMPString extends UnicodeString {
     }
 
     @Override
-    public void supplyContent(LargeTextBuffer consumer, long start, long length) {
-        consumer.append16(baseString.toCharArray(), requireInt(start), requireInt(length));
+    void copy16bit(char[] target, int offset) {
+        baseString.getChars(0, baseString.length(), target, offset);
     }
 
-
+    @Override
+    void copy24bit(byte[] target, int offset) {
+        char[] chars = baseString.toCharArray();
+        for (int i = 0, j = offset; i < chars.length; ) {
+            char c = chars[i++];
+            target[j++] = 0;
+            target[j++] = (byte) (c >> 8);
+            target[j++] = (byte) (c & 0xff);
+        }
+    }
 }
 

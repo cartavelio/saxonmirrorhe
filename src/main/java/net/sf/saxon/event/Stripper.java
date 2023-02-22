@@ -8,11 +8,14 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
@@ -156,7 +159,7 @@ public class Stripper extends ProxyReceiver {
         }
     }
 
-    private final static CodePoints S_PRESERVE = BMPString.of("preserve");
+    private final static UnicodeString S_PRESERVE = BMPString.of("preserve");
 
     /**
      * Handle an end-of-element event
@@ -173,7 +176,7 @@ public class Stripper extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         // assume adjacent chunks of text are already concatenated
 
         if (((((stripStack[top] & (ALWAYS_PRESERVE | PRESERVE_PARENT | SIMPLE_CONTENT | ASSERTIONS_EXIST)) != 0) &&

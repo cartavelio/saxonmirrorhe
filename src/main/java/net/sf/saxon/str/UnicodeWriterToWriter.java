@@ -32,7 +32,7 @@ public class UnicodeWriterToWriter implements UnicodeWriter {
      * @throws IOException if processing fails for any reason
      */
 
-    public void write(CodePoints chars) throws IOException {
+    public void write(UnicodeString chars) throws IOException {
         writer.write(chars.toString());
     }
 

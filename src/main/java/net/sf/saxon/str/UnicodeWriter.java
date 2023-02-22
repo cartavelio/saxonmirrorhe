@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * Interface that accepts strings in the form of {@link UnicodeString} or {@link CodePoints} objects,
+ * Interface that accepts strings in the form of {@link UnicodeString} objects,
  * which are written to some destination. It also accepts ordinary {@link java.lang.String}
  * objects.
  */
@@ -25,7 +25,7 @@ public interface UnicodeWriter {
      * @throws IOException if processing fails for any reason
      */
 
-    void write(CodePoints chars) throws IOException;
+    void write(UnicodeString chars) throws IOException;
 
     /**
      * Write a supplied string known to consist entirely of ASCII characters,

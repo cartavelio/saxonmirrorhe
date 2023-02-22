@@ -7,9 +7,11 @@
 
 package net.sf.saxon.pull;
 
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceBinding;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AtomicValue;
@@ -48,7 +50,7 @@ public interface UnfailingPullProvider extends PullProvider {
     NodeName getNodeName();
 
     @Override
-    CodePoints getStringValue() throws XPathException;
+    UnicodeString getStringValue() throws XPathException;
 
     @Override
     SchemaType getSchemaType();

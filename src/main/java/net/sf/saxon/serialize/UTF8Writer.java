@@ -411,26 +411,26 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
      * @throws IOException if processing fails for any reason
      */
     @Override
-    public void write(CodePoints chars) throws IOException {
-        if (chars instanceof StringView) {
+    public void write(UnicodeString chars) throws IOException {
+        if (chars instanceof StringView || chars instanceof BMPString) {
             write(chars.toString());
-        } else if (chars instanceof UnicodeString) {
+        } else {
             if (chars instanceof UnicodeChar) {
-                writeCodePoint(((UnicodeChar)chars).codePointAt(0));
+                writeCodePoint(chars.codePointAt(0));
             }
-            if (((UnicodeString)chars).getWidth() <= 8) {
+            if (chars.getWidth() <= 8) {
                 if (chars instanceof Twine8) {
                     int width = ((UnicodeString) chars).getWidth();
                     if (width == 7) {
-                        writeAscii(((Twine8) chars).getByteArray(), 0, ((Twine8) chars).length32());
+                        writeAscii(((Twine8) chars).getByteArray(), 0, chars.length32());
                         return;
                     } else if (width == 8) {
-                        writeLatin1(((Twine8) chars).getByteArray(), 0, ((Twine8) chars).length32());
+                        writeLatin1(((Twine8) chars).getByteArray(), 0, chars.length32());
                         return;
                     }
                 } else if (chars instanceof Slice8) {
                     Slice8 s8 = (Slice8) chars;
-                    int width = ((UnicodeString) chars).getWidth();
+                    int width = chars.getWidth();
                     if (width == 7) {
                         writeAscii(s8.getByteArray(), s8.getStart(), s8.getEnd() - s8.getStart());
                         return;
@@ -439,7 +439,7 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
                         return;
                     }
                 }
-            } else if (((UnicodeString) chars).getWidth() == 16) {
+            } else if (chars.getWidth() == 16) {
                 if (chars instanceof Twine16) {
                     write(((Twine16)chars).getCharArray());
                     return;
@@ -448,11 +448,12 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
                     write(s16.getCharArray(), s16.getStart(), s16.getEnd() - s16.getStart());
                     return;
                 }
+            } else {
+                IntIterator iter = chars.codePoints();
+                while (iter.hasNext()) {
+                    write(iter.next());
+                }
             }
-        }
-        IntIterator iter = chars.codePoints();
-        while (iter.hasNext()) {
-            writeCodePoint(iter.next());
         }
     }
 

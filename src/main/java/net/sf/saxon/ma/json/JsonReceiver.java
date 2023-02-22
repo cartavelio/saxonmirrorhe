@@ -416,17 +416,17 @@ public class JsonReceiver implements Receiver {
     private IntPredicate isControlChar = c -> c < 31 || (c >= 127 && c <= 159);
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         textBuffer.append(chars);
     }
 
     @Override
-    public void processingInstruction(String name, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String name, UnicodeString data, Location locationId, int properties) throws XPathException {
         // no action
     }
 
     @Override
-    public void comment(CodePoints content, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString content, Location locationId, int properties) throws XPathException {
         // no action
     }
 

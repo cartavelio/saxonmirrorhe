@@ -12,7 +12,10 @@ import net.sf.saxon.event.*;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.CompressedWhitespace;
+import net.sf.saxon.str.LargeTextBuffer;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.SchemaType;
@@ -423,7 +426,8 @@ public class TinyBuilder extends Builder {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
+        //System.err.println("Adding text node length " + chars.length());
         if (chars instanceof CompressedWhitespace &&
                 ReceiverOption.contains(properties, ReceiverOption.WHOLE_TEXT_NODE)) {
             TinyTree tt = tree;
@@ -465,6 +469,10 @@ public class TinyBuilder extends Builder {
      */
 
     protected int makeTextNode(UnicodeString chars) {
+        if (Configuration.isAssertionsEnabled()) {
+            chars.verifyCharacters();
+            //System.err.println("make text node length " + chars.length());
+        }
         TinyTree tt = tree;
         assert tt != null;
 
@@ -478,7 +486,7 @@ public class TinyBuilder extends Builder {
             // merge this text node with the previous text node
             tt.beta[n] += len;
         } else {
-            //System.err.println("Adding text node (" + bufferStart + " - " + bufferEnd + ") - " + Err.wrap(chars));
+            //System.err.println("Adding text node (" + bufferStart + " - " + bufferEnd + ") - " /*+ Err.wrap(chars)*/);
             nodeNr = tt.addNode(Type.TEXT, currentDepth, bufferStart, len, -1);
             //nodeNr = tt.addNode(Type.TEXT, currentDepth, tt.textChunksUsed, -1, -1);
             //tt.appendChars(chars);
@@ -499,7 +507,7 @@ public class TinyBuilder extends Builder {
      */
 
     @Override
-    public void processingInstruction(String piname, /*@NotNull*/ CodePoints remainder, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String piname, /*@NotNull*/ UnicodeString remainder, Location locationId, int properties) throws XPathException {
         TinyTree tt = tree;
         assert tt != null;
 
@@ -535,7 +543,7 @@ public class TinyBuilder extends Builder {
      */
 
     @Override
-    public void comment(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(/*@NotNull*/ UnicodeString chars, Location locationId, int properties) throws XPathException {
         TinyTree tt = tree;
         assert tt != null;
 

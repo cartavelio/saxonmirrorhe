@@ -17,7 +17,6 @@ import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -100,7 +99,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             if (++count == 2) {
                 checkAllowsMany(locationId);
@@ -115,7 +114,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             if (++count == 2) {
                 checkAllowsMany(locationId);
@@ -130,7 +129,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             if (++count == 2) {
                 checkAllowsMany(locationId);

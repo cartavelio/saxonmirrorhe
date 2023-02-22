@@ -14,7 +14,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
@@ -277,7 +276,7 @@ public class LinkedTreeBuilder extends Builder
      */
 
     @Override
-    public void characters(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(/*@NotNull*/ UnicodeString chars, Location locationId, int properties) throws XPathException {
         // System.err.println("Characters: " + chars.toString() + " depth=" + depth);
         if (!chars.isEmpty()) {
             UnicodeString t = chars.tidy();
@@ -297,7 +296,7 @@ public class LinkedTreeBuilder extends Builder
      */
 
     @Override
-    public void processingInstruction(String name, /*@NotNull*/ CodePoints remainder, Location locationId, int properties) {
+    public void processingInstruction(String name, /*@NotNull*/ UnicodeString remainder, Location locationId, int properties) {
         ProcInstImpl pi = new ProcInstImpl(name, remainder.tidy());
         currentNode.addChild(pi, size[depth]++);
         pi.setLocation(locationId.getSystemId(), locationId.getLineNumber(), locationId.getColumnNumber());
@@ -308,7 +307,7 @@ public class LinkedTreeBuilder extends Builder
      */
 
     @Override
-    public void comment(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(/*@NotNull*/ UnicodeString chars, Location locationId, int properties) throws XPathException {
         CommentImpl comment = new CommentImpl(chars.tidy());
         currentNode.addChild(comment, size[depth]++);
         comment.setLocation(locationId.getSystemId(), locationId.getLineNumber(), locationId.getColumnNumber());

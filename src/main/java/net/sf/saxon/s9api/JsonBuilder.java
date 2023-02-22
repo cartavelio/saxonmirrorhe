@@ -6,7 +6,7 @@ import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.z.IntPredicateProxy;
@@ -82,7 +82,7 @@ public class JsonBuilder {
         try {
             XPathContext context = new Controller(processor.getUnderlyingConfiguration()).newXPathContext();
             IntPredicateProxy checker = IntSetPredicate.ALWAYS_TRUE;
-            CodePoints content = UnparsedTextFunction.readFile(checker, jsonReader);
+            UnicodeString content = UnparsedTextFunction.readFile(checker, jsonReader);
             Map<String, Sequence> options = new HashMap<>();
             options.put("liberal", BooleanValue.get(liberal));
             options.put("escape", BooleanValue.TRUE);

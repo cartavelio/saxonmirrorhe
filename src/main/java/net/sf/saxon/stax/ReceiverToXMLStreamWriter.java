@@ -12,7 +12,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -140,7 +140,7 @@ public class ReceiverToXMLStreamWriter implements Receiver {
     }
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         try {
             writer.writeCharacters(chars.toString());
         } catch (XMLStreamException e) {
@@ -149,7 +149,7 @@ public class ReceiverToXMLStreamWriter implements Receiver {
     }
 
     @Override
-    public void processingInstruction(String name, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String name, UnicodeString data, Location locationId, int properties) throws XPathException {
         try {
             writer.writeProcessingInstruction(name, data.toString());
         } catch (XMLStreamException e) {
@@ -158,7 +158,7 @@ public class ReceiverToXMLStreamWriter implements Receiver {
     }
 
     @Override
-    public void comment(CodePoints content, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString content, Location locationId, int properties) throws XPathException {
         try {
             writer.writeComment(content.toString());
         } catch (XMLStreamException e) {

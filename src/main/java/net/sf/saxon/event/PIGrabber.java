@@ -9,11 +9,11 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.util.ProcInstParser;
@@ -115,7 +115,7 @@ public class PIGrabber extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties)
             throws XPathException {
         if (target.equals("xml-stylesheet")) {
 

@@ -12,7 +12,6 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Base64BinaryValue;
@@ -59,7 +58,7 @@ public class BinaryTextDecoder extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String name, /*@NotNull*/ CodePoints value, Location locationId, int properties)
+    public void processingInstruction(String name, /*@NotNull*/ UnicodeString value, Location locationId, int properties)
             throws XPathException {
         String encoding;
         byte[] bytes = null;

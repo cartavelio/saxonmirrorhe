@@ -17,10 +17,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.str.UniStringConsumer;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -102,7 +99,7 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
 
     @Override
     public Fold getFold(XPathContext context, Sequence... additionalArguments) throws XPathException {
-        CodePoints separator = EmptyUnicodeString.getInstance();
+        UnicodeString separator = EmptyUnicodeString.getInstance();
         if (additionalArguments.length > 0) {
             separator = ((GroundedValue) additionalArguments[0].head()).getUnicodeStringValue();
         }
@@ -111,7 +108,7 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
 
     @Override
     public void process(Outputter destination, XPathContext context, Sequence[] arguments) throws XPathException {
-        CodePoints separator = arguments.length > 1 ? ((GroundedValue) arguments[1].head()).getUnicodeStringValue() : EmptyUnicodeString.getInstance();
+        UnicodeString separator = arguments.length > 1 ? ((GroundedValue) arguments[1].head()).getUnicodeStringValue() : EmptyUnicodeString.getInstance();
         UniStringConsumer output = destination.getStringReceiver(false);
         output.open();
         boolean first = true;
@@ -135,11 +132,11 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
     private class StringJoinFold implements Fold {
 
         private int position = 0;
-        private final CodePoints separator;
+        private final UnicodeString separator;
         private final UnicodeBuilder data;
         private final boolean returnEmptyIfEmpty;
 
-        public StringJoinFold(CodePoints separator, boolean returnEmptyIfEmpty) {
+        public StringJoinFold(UnicodeString separator, boolean returnEmptyIfEmpty) {
             this.separator = separator;
             this.data = new UnicodeBuilder();
             this.returnEmptyIfEmpty = returnEmptyIfEmpty;

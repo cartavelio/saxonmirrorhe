@@ -13,7 +13,6 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.Type;
@@ -41,7 +40,7 @@ public class Err {
      * @param cs the variable information to be delimited
      * @return the delimited variable information
      */
-    public static String wrap(CodePoints cs) {
+    public static String wrap(UnicodeString cs) {
         return wrap(cs, GENERAL);
     }
 
@@ -72,7 +71,7 @@ public class Err {
      * @param valueType the type of value, e.g. element name or attribute name
      * @return the delimited variable information
      */
-    public static String wrap(CodePoints cs, int valueType) {
+    public static String wrap(UnicodeString cs, int valueType) {
         if (cs == null) {
             return "(NULL)";
         }

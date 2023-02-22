@@ -8,10 +8,13 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.om.*;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AtomicValue;
@@ -26,10 +29,10 @@ import net.sf.saxon.value.AtomicValue;
 
 public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
 
-    private final CodePoints separator;
+    private final UnicodeString separator;
     private boolean first = true;
 
-    public SequenceNormalizerWithItemSeparator(Receiver next, CodePoints separator) {
+    public SequenceNormalizerWithItemSeparator(Receiver next, UnicodeString separator) {
         super(next);
         this.separator = separator;
     }
@@ -68,7 +71,7 @@ public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
      * Character data
      */
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         sep();
         super.characters(chars, locationId, properties);
     }
@@ -77,7 +80,7 @@ public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
      * Processing Instruction
      */
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         sep();
         super.processingInstruction(target, data, locationId, properties);
     }
@@ -86,7 +89,7 @@ public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
      * Output a comment
      */
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         sep();
         super.comment(chars, locationId, properties);
     }

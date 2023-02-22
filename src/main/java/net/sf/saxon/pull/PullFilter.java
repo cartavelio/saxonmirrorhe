@@ -10,7 +10,7 @@ package net.sf.saxon.pull;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AtomicValue;
@@ -192,7 +192,7 @@ public class PullFilter implements PullProvider {
      */
 
     @Override
-    public CodePoints getStringValue() throws XPathException {
+    public UnicodeString getStringValue() throws XPathException {
         return base.getStringValue();
     }
 

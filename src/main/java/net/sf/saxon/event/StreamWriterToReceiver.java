@@ -14,7 +14,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pull.NamespaceContextImpl;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -25,7 +25,6 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.util.*;
-import java.util.function.IntPredicate;
 
 /**
  * This class implements the XmlStreamWriter interface, translating the events into Saxon
@@ -606,7 +605,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
         if (data == null) {
             data = "";
         }
-        CodePoints uData = StringView.of(data);
+        UnicodeString uData = StringView.of(data);
         try {
             if (!isValidChars(uData)) {
                 throw new IllegalArgumentException("Invalid XML character in comment: " + data);
@@ -630,7 +629,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
         checkNonNull(target);
         checkNonNull(data);
         flushStartTag();
-        final CodePoints uData = StringView.of(data);
+        final UnicodeString uData = StringView.of(data);
         try {
             if (isChecking) {
                 if (!isValidNCName(target) || "xml".equalsIgnoreCase(target)) {
@@ -698,7 +697,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
         throws XMLStreamException {
         checkNonNull(text);
         flushStartTag();
-        final CodePoints uData = StringView.of(text);
+        final UnicodeString uData = StringView.of(text);
         if (!isValidChars(uData)) {
             throw new IllegalArgumentException("illegal XML character: " + text);
         }
@@ -857,7 +856,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
      * @return true if the string is valid or if checking is disabled
      */
 
-    private boolean isValidChars(CodePoints text) {
+    private boolean isValidChars(UnicodeString text) {
         return !isChecking || (UTF16CharacterSet.firstInvalidChar(text.codePoints(), charChecker) == -1);
     }
 

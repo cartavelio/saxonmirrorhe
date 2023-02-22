@@ -13,7 +13,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.event.SequenceReceiver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 
 import net.sf.saxon.type.SchemaType;
@@ -91,7 +91,7 @@ public class TracingFilter extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         out.println("RCVR " + id + indent + " CHARACTERS " + (Whitespace.isAllWhite(chars) ? "(whitespace)" : ""));
         StringBuilder sb = new StringBuilder();
         String str = chars.toString();
@@ -118,7 +118,7 @@ public class TracingFilter extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         out.println("RCVR " + id + indent + " COMMENT");
         nextReceiver.comment(chars, locationId, properties);
     }
@@ -162,7 +162,7 @@ public class TracingFilter extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         out.println("RCVR " + id + indent + " PROCESSING INSTRUCTION");
         nextReceiver.processingInstruction(target, data, locationId, properties);
     }

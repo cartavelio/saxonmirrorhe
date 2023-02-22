@@ -13,7 +13,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -132,7 +132,7 @@ public interface Receiver extends Result {
      * @throws XPathException if an error occurs
      */
 
-    void characters(CodePoints chars, Location location, int properties)
+    void characters(UnicodeString chars, Location location, int properties)
             throws XPathException;
 
     /**
@@ -146,7 +146,7 @@ public interface Receiver extends Result {
      * @throws XPathException            if an error occurs
      */
 
-    void processingInstruction(String name, CodePoints data, Location location, int properties)
+    void processingInstruction(String name, UnicodeString data, Location location, int properties)
             throws XPathException;
 
     /**
@@ -159,7 +159,7 @@ public interface Receiver extends Result {
      * @throws XPathException            if an error occurs
      */
 
-    void comment(CodePoints content, Location location, int properties) throws XPathException;
+    void comment(UnicodeString content, Location location, int properties) throws XPathException;
 
     /**
      * Append an arbitrary item (node, atomic value, or function) to the output. The default

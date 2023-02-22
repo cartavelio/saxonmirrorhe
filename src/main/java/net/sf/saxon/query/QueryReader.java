@@ -8,7 +8,7 @@
 package net.sf.saxon.query;
 
 import net.sf.saxon.functions.UnparsedTextFunction;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -125,7 +125,7 @@ public class QueryReader {
 
     private static String readQueryFromReader(Reader reader, IntPredicateProxy charChecker) throws XPathException {
         try {
-            CodePoints content = UnparsedTextFunction.readFile(charChecker, reader);
+            UnicodeString content = UnparsedTextFunction.readFile(charChecker, reader);
             return content.toString();
         } catch (XPathException err) {
             err.setErrorCode("XPST0003");

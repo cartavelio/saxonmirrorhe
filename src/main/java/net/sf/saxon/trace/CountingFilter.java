@@ -10,7 +10,7 @@ package net.sf.saxon.trace;
 import net.sf.saxon.event.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -92,7 +92,7 @@ public class CountingFilter extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         count("characters");
         nextReceiver.characters(chars, locationId, properties);
     }
@@ -112,7 +112,7 @@ public class CountingFilter extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         count("comment");
         nextReceiver.comment(chars, locationId, properties);
     }
@@ -152,7 +152,7 @@ public class CountingFilter extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         count("processingInstruction");
         nextReceiver.processingInstruction(target, data, locationId, properties);
     }

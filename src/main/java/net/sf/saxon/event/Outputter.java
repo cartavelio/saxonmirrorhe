@@ -11,10 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.AbstractUniStringConsumer;
-import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.str.UniStringConsumer;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SchemaType;
@@ -283,7 +280,7 @@ public abstract class Outputter implements Receiver {
      */
 
     @Override
-    abstract public void characters(CodePoints chars, Location location, int properties)
+    abstract public void characters(UnicodeString chars, Location location, int properties)
             throws XPathException;
 
     /**
@@ -298,7 +295,7 @@ public abstract class Outputter implements Receiver {
      */
 
     @Override
-    abstract public void processingInstruction(String name, CodePoints data, Location location, int properties)
+    abstract public void processingInstruction(String name, UnicodeString data, Location location, int properties)
             throws XPathException;
 
     /**
@@ -312,7 +309,7 @@ public abstract class Outputter implements Receiver {
      */
 
     @Override
-    abstract public void comment(CodePoints content, Location location, int properties) throws XPathException;
+    abstract public void comment(UnicodeString content, Location location, int properties) throws XPathException;
 
     /**
      * Append an arbitrary item (node, atomic value, or function) to the output. The default
@@ -362,7 +359,7 @@ public abstract class Outputter implements Receiver {
 
                 @Override
                 @CSharpModifiers(code={"public", "override"})
-                public UniStringConsumer accept(CodePoints chars) {
+                public UniStringConsumer accept(UnicodeString chars) {
                     buffer.accept(chars);
                     return this;
                 }
@@ -380,7 +377,7 @@ public abstract class Outputter implements Receiver {
 
                 @Override
                 @CSharpModifiers(code = {"public", "override"})
-                public UniStringConsumer accept(CodePoints chars) {
+                public UniStringConsumer accept(UnicodeString chars) {
                     buffer.accept(chars);
                     return this;
                 }

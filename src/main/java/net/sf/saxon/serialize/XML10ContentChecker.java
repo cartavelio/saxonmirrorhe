@@ -10,11 +10,14 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.z.IntIterator;
@@ -82,7 +85,7 @@ public class XML10ContentChecker extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         checkString(chars, locationId);
         nextReceiver.characters(chars, locationId, properties);
     }
@@ -92,7 +95,7 @@ public class XML10ContentChecker extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         checkString(chars, locationId);
         nextReceiver.comment(chars, locationId, properties);
     }
@@ -102,7 +105,7 @@ public class XML10ContentChecker extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, /*@NotNull*/ CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, /*@NotNull*/ UnicodeString data, Location locationId, int properties) throws XPathException {
         checkString(data, locationId);
         nextReceiver.processingInstruction(target, data, locationId, properties);
     }
@@ -114,7 +117,7 @@ public class XML10ContentChecker extends ProxyReceiver {
      * @param locationId the location of the string
      */
 
-    private void checkString(CodePoints in, Location locationId) throws XPathException {
+    private void checkString(UnicodeString in, Location locationId) throws XPathException {
         IntIterator iter = in.codePoints();
         while (iter.hasNext()) {
             int ch32 = iter.next();

@@ -8,10 +8,10 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -71,19 +71,19 @@ public class EventMonitor extends Outputter {
     }
 
     @Override
-    public void characters(CodePoints chars, Location location, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location location, int properties) throws XPathException {
         written = true;
         next.characters(chars, location, properties);
     }
 
     @Override
-    public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
+    public void processingInstruction(String name, UnicodeString data, Location location, int properties) throws XPathException {
         written = true;
         next.processingInstruction(name, data, location, properties);
     }
 
     @Override
-    public void comment(CodePoints content, Location location, int properties) throws XPathException {
+    public void comment(UnicodeString content, Location location, int properties) throws XPathException {
         written = true;
         next.comment(content, location, properties);
     }

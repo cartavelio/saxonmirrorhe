@@ -15,7 +15,6 @@ import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.CompressedWhitespace;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -100,7 +99,7 @@ public class UnicodeNormalizer extends ProxyReceiver {
      */
 
     @Override
-    public void characters(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(/*@NotNull*/ UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (Whitespace.isAllWhite(chars)) {
             nextReceiver.characters(chars, locationId, properties);
         } else {
@@ -109,7 +108,7 @@ public class UnicodeNormalizer extends ProxyReceiver {
         }
     }
 
-    public UnicodeString normalize(CodePoints in, boolean containsNullMarkers) {
+    public UnicodeString normalize(UnicodeString in, boolean containsNullMarkers) {
         if (in instanceof CompressedWhitespace) {
             return in.tidy();
         }

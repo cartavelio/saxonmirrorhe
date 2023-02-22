@@ -20,7 +20,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.serialize.charcode.CharacterSet;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
@@ -175,8 +175,8 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
             String s = serializeNode((NodeInfo) item);
             emitter.writeAtomicValue(new StringValue(s));
         } else if (unfailing) {
-            CodePoints s = item.getUnicodeStringValue();
-            emitter.writeAtomicValue(new StringValue(s.tidy()));
+            UnicodeString s = item.getUnicodeStringValue();
+            emitter.writeAtomicValue(new StringValue(s));
         } else {
             throw new XPathException("JSON output method cannot handle an item of type " + item.getClass(), "SERE0021");
         }

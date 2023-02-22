@@ -8,9 +8,11 @@
 package net.sf.saxon.pull;
 
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceBinding;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AtomicValue;
@@ -164,7 +166,7 @@ public interface PullProvider {
      */
 
     /*@Nullable*/
-    CodePoints getStringValue() throws XPathException;
+    UnicodeString getStringValue() throws XPathException;
 
     /**
      * Get the type annotation of the current attribute or element node, or atomic value.

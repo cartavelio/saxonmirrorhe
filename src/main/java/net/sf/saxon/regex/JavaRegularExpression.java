@@ -10,7 +10,6 @@ package net.sf.saxon.regex;
 //import net.sf.saxon.expr.regexj.Matcher;
 //import net.sf.saxon.expr.regexj.Pattern;
 
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -43,7 +42,7 @@ public class JavaRegularExpression implements RegularExpression {
      * @param flags     the user-specified flags (prior to any semicolon)
      */
 
-    public JavaRegularExpression(CodePoints javaRegex, String flags) throws XPathException {
+    public JavaRegularExpression(UnicodeString javaRegex, String flags) throws XPathException {
         this.flagBits = setFlags(flags);
         this.javaRegex = javaRegex.toString();
         try {

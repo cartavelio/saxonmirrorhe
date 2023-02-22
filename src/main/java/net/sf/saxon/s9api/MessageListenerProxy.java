@@ -12,7 +12,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -77,7 +77,7 @@ class MessageListenerProxy extends SequenceWriter {
     }
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (target.equals("error-code") && errorCode == null) {
             // Suppress the error code, not used in this interface
             errorCode = data.toString();
@@ -95,7 +95,7 @@ class MessageListenerProxy extends SequenceWriter {
      */
 
     @Override
-    public void characters(CodePoints s, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString s, Location locationId, int properties) throws XPathException {
         if (this.locationId == null) {
             this.locationId = locationId;
         }

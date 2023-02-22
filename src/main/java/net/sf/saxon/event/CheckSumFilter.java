@@ -9,7 +9,7 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaType;
@@ -81,7 +81,7 @@ public class CheckSumFilter extends ProxyReceiver {
      * Character data
      */
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (!Whitespace.isAllWhite(chars)) {
             checksum ^= hash(chars.toString(), sequence++);
             trace("After characters " + chars + ": " + Integer.toHexString(checksum));
@@ -124,7 +124,7 @@ public class CheckSumFilter extends ProxyReceiver {
      * Processing Instruction
      */
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (target.equals(SIGMA)) {
             checksumFound = true;
             if (checkExistingChecksum) {

@@ -9,8 +9,8 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeName;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -169,11 +169,11 @@ public abstract class OutputterEvent {
 
     public static class Text extends OutputterEvent {
 
-        CodePoints content;
+        UnicodeString content;
         Location location;
         int properties;
 
-        public Text(CodePoints content, Location location, int properties) {
+        public Text(UnicodeString content, Location location, int properties) {
             this.content = content;
             this.location = location;
             this.properties = properties;
@@ -191,11 +191,11 @@ public abstract class OutputterEvent {
 
     public static class Comment extends OutputterEvent {
 
-        CodePoints content;
+        UnicodeString content;
         Location location;
         int properties;
 
-        public Comment(CodePoints content, Location location, int properties) {
+        public Comment(UnicodeString content, Location location, int properties) {
             this.content = content;
             this.location = location;
             this.properties = properties;
@@ -213,11 +213,11 @@ public abstract class OutputterEvent {
 
     public static class ProcessingInstruction extends OutputterEvent {
         String target;
-        CodePoints content;
+        UnicodeString content;
         Location location;
         int properties;
 
-        public ProcessingInstruction(String target, CodePoints content, Location location, int properties) {
+        public ProcessingInstruction(String target, UnicodeString content, Location location, int properties) {
             this.target = target;
             this.content = content;
             this.location = location;

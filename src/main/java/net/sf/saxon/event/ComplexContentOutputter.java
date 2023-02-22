@@ -17,10 +17,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.str.StringConstants;
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UniStringConsumer;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -259,7 +256,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      */
 
     @Override
-    public void characters(CodePoints s, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString s, Location locationId, int properties) throws XPathException {
         if (level >= 0) {
             previousAtomic = false;
             if (s == null) {
@@ -619,7 +616,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      */
 
     @Override
-    public void comment(CodePoints comment, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString comment, Location locationId, int properties) throws XPathException {
         if (level >= 0) {
             if (state == START_TAG) {
                 startContent();
@@ -634,7 +631,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (level >= 0) {
             if (state == START_TAG) {
                 startContent();
@@ -713,7 +710,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         }
 
         @Override
-        public UniStringConsumer accept (CodePoints chars) throws XPathException {
+        public UniStringConsumer accept (UnicodeString chars) throws XPathException {
             cco.characters(chars, Loc.NONE, ReceiverOption.NONE);
             return this;
         }
