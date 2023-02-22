@@ -298,8 +298,11 @@ public class TestPackage {
                     new StreamSource(new File(XMARK_DIR + "q8.xsl")));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             top.export(baos);
-            Processor processor2 = new Processor(false);
-            processor2.getUnderlyingConfiguration().disableLicensing();
+            Processor processor2 = new Processor(true);
+            processor2.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
+            processor2.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, 0);
+            processor2.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, true);
+            //processor2.getUnderlyingConfiguration().disableLicensing();
             XsltCompiler compiler2 = processor2.newXsltCompiler();
             compiler2.compile(new StreamSource(new ByteArrayInputStream(baos.toByteArray())));
             Xslt30Transformer trans = top.load30();
