@@ -508,6 +508,40 @@ namespace SaxonCS_NUnit {
                 //e.printStackTrace(System.err);
             }
         }
+        
+        [Test]
+        public void testCyrillicEncoding() {
+            try {
+                Processor proc = new Processor();
+                XQueryCompiler xqcomp = proc.NewXQueryCompiler();
+                XQueryExecutable xqexec = xqcomp.Compile("<a>{codepoints-to-string((61, 62, 91, 1040, 1041, 1042, 1043, 93, 888, 88888))}</a>");
+                XQueryEvaluator xqeval = xqexec.Load();
+                
+                MemoryStream os = new MemoryStream();
+                Serializer serializer = proc.NewSerializer(os);
+
+                serializer.SetOutputProperty(Serializer.BYTE_ORDER_MARK, "no");
+                serializer.SetOutputProperty(Serializer.ENCODING, "windows-1251");
+                serializer.SetOutputProperty(Serializer.INDENT, "no");
+                serializer.SetOutputProperty(Serializer.METHOD, "xml");
+                serializer.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
+
+                xqeval.Run(serializer);
+
+                string result = ReadMemoryStream(os);
+                Assert.False(result.Contains("<?xml"), "XML declaration exists");
+                Assert.True(result.Contains("&#x378;&#x15b38"), "character references");
+                Assert.True(result.Contains("=&gt;"), "Ordinary chars");
+                Assert.AreEqual(0xC0, os.GetBuffer()[9]);
+                Assert.AreEqual(0xC1, os.GetBuffer()[10]);
+                Assert.AreEqual(0xC2, os.GetBuffer()[11]);
+                Assert.AreEqual(0xC3, os.GetBuffer()[12]);
+
+            }
+            catch (SaxonApiException e) {
+                Assert.Fail(e.Message);
+            }
+        }
 
         // [Test]
         // public void testXmlStreamWriterNamespaces() {    // Bug 5075
