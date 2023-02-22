@@ -58,11 +58,13 @@ char* getTypeName(graal_isolatethread_t*, char*);
 
 char* j_getStringValue(graal_isolatethread_t*, void *);
 
-char* j_getErrorMessage(graal_isolatethread_t*);
+char* j_getErrorMessage(graal_isolatethread_t*, void *);
 
 int j_getLineNumber(graal_isolatethread_t*);
 
-char* j_getErroCode(graal_isolatethread_t*);
+char* j_getErrorCode(graal_isolatethread_t*, void *);
+
+char* j_getSystemId(graal_isolatethread_t*, void *);
 
 void j_clearException(graal_isolatethread_t*);
 

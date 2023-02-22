@@ -551,19 +551,16 @@ public class XdmUtils {
     public static CLongPointer getChildren(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle nodeRef) {
 
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
-
-
         XdmSequenceIterator<XdmNode> iter = node.axisIterator(Axis.CHILD);
         long[] childRefs = null;
         if(iter.hasNext()) {
             childRefs = iter.stream().mapToLong(i -> {
-                ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(iter.next());
+                ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(i);
                 return objectHandle.rawValue();
             }).toArray();
         }else {
             return WordFactory.nullPointer();
         }
-
         CLongPointer addr = SaxonCAPI.longArrayToNative(alloc, childRefs);
         return addr;
     }

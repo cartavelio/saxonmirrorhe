@@ -115,13 +115,11 @@ XDM_TYPE XdmItem::getType(){
 }
 
 XdmItem::~XdmItem() {
-    std::cerr<<"xdmITem destructor"<<std::endl;
     value = -1;
     /*else {
          decrementRefCount();
      }*/
     if(stringValue != nullptr) {
-        std::cerr<<"xdmITem deleting string"<<std::endl;
         delete stringValue;
     }
 }

@@ -34,7 +34,7 @@ public class SaxonCException  {
 
 
     @CEntryPoint(name = "j_getErrorMessage")
-    public static CCharPointer j_getErrorMessage(IsolateThread thread){
+    public static CCharPointer j_getErrorMessage(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
         SaxonApiException exception = null;
         if(throwable == null) {
             return WordFactory.nullPointer();
@@ -44,8 +44,11 @@ public class SaxonCException  {
         } else {
             exception = new SaxonApiException(throwable);
         }
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(exception.getMessage());
-        return holder.get();
+        if(exception.getMessage() == null) {
+            return WordFactory.nullPointer();
+        }
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, exception.getMessage());
+        return a;
     }
 
     @CEntryPoint(name = "j_getLineNumber")
@@ -63,8 +66,8 @@ public class SaxonCException  {
     }
 
 
-    @CEntryPoint(name = "j_getErroCode")
-    public static CCharPointer getErroCode(IsolateThread thread){
+    @CEntryPoint(name = "j_getErrorCode")
+    public static CCharPointer getErrorCode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
         SaxonApiException exception = null;
         if(throwable == null) {
             return WordFactory.nullPointer();
@@ -74,9 +77,30 @@ public class SaxonCException  {
         } else {
             exception = new SaxonApiException(throwable);
         }
+        if(exception.getErrorCode() == null) {
+            return WordFactory.nullPointer();
+        }
         String qnameStr = exception.getErrorCode().getClarkName();
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(qnameStr);
-        return holder.get();
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, qnameStr);
+        return a;
+    }
+
+
+
+    @CEntryPoint(name = "j_getSystemId")
+    public static CCharPointer getSystemId(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
+        SaxonApiException exception = null;
+        if(throwable == null) {
+            return WordFactory.nullPointer();
+        }
+        if(throwable instanceof SaxonApiException) {
+           exception = (SaxonApiException)throwable;
+        } else {
+            exception = new SaxonApiException(throwable);
+        }
+        String systemId = exception.getSystemId();
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, systemId);
+        return a;
     }
 
     @CEntryPoint(name = "j_clearException")

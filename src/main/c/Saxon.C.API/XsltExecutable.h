@@ -510,7 +510,7 @@ private:
 	int64_t procRef, executableRef, selectionRef, saxonMessageListenerRef, saxonResultDocRef;
     std::string cwdXE; /*!< current working directory */
     std::string resources_dir; /*!< current Saxon resources directory */
-	bool tunnel, jitCompilation, rawResultsFlag;
+	bool tunnel, jitCompilation, rawResultsFlag, exceptionFound;
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
 	std::map<std::string,std::string> properties; /*!< map of properties used for the transformation as (string, string) pairs */
     std::map<std::string,XdmValue*> resultDocumentMap;

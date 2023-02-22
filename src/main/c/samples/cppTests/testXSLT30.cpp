@@ -2424,7 +2424,7 @@ int main(int argc, char* argv[]) {
     int check =0;
     //cin>>check;
     SaxonProcessor *processor = new SaxonProcessor(true);
-    setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
+    //setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
 #if defined (__linux__)
     processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/lib/saxon-license.lic");
 #elif  defined (__APPLE__) && defined(__MACH__)
@@ -2450,12 +2450,10 @@ int main(int argc, char* argv[]) {
     }
 
     sResultCount *sresult = new sResultCount();
-    if(processor == nullptr)
-    std::cerr << "testXSLT30 cp0" << std::endl;
+
     Xslt30Processor *trans = processor->newXslt30Processor();
 
     if( trans == nullptr) {
-        cout<< "Error creating Xslt30Processor"<<endl;
         if(processor->exceptionOccurred()) {
             cout<< "Error message: " <<processor->getErrorMessage()<<endl;
 
@@ -2463,7 +2461,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     //testValidation(trans,sresult);
-    std::cerr << "testXSLT30 cp1" << std::endl;
+
     testInitialTemplate(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
