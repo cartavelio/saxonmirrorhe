@@ -1793,10 +1793,10 @@ documentBuilder.build(as);]]></samp>
           directives.</p>
         
         <p>The <code>-xi</code> option on the command line causes XInclude processing to be applied to
-          all input XML documents. This includes source documents, stylesheets, and schema documents
+          most input XML documents. This includes source documents and schema documents
           listed on the command line, and also those loaded indirectly for example by calls on the
-          <code>doc()</code> function or by mechanisms such as <code>xsl:include</code> and
-          <code>xs:include</code>.</p>
+          <code>doc()</code> function or by mechanisms such as <code>xs:include</code> and
+          <code>xs:import</code>. It does not, however, affect the parsing of XSLT stylesheet modules.</p>
         
         <p>From the Java API, the equivalent is to call <code>setXInclude()</code> on the
           <code>Configuration</code> object, or to set the configuration property <a class="feature" href="XINCLUDE"/> to true.</p>
