@@ -34,13 +34,13 @@ namespace Saxon.Api {
         private TextWriter traceFunctionDestination;
         private ResultDocumentHandler resultDocumentHandler;
         private QName initialTemplateName;
-        private Saxon.Hej.s9api.XsltTransformer transformer;
+        private Saxon.Hej.s9api.XsltTransformer s9Transformer;
         private readonly StandardMessageHandler _standardMessageHandler;
 
         // internal constructor
 
         internal XsltTransformer(Saxon.Hej.s9api.XsltTransformer transformer) {
-            this.transformer = transformer;
+            this.s9Transformer = transformer;
             this._standardMessageHandler = new StandardMessageHandler(transformer.controller.getConfiguration());
             transformer.controller.setMessageHandler(message => this._standardMessageHandler.accept(message));
         }
@@ -59,8 +59,8 @@ namespace Saxon.Api {
         /// </remarks>
 
         public XdmNode InitialContextNode {
-            get => transformer.getInitialContextNode();
-            set => transformer.setInitialContextNode(value);
+            get => s9Transformer.getInitialContextNode();
+            set => s9Transformer.setInitialContextNode(value);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace Saxon.Api {
         public void SetInputStream(Stream input, Uri baseUri) {
             StreamSource streamSource = new StreamSource(input,
                 Uri.EscapeUriString(baseUri.ToString()));
-            transformer.setSource(streamSource);
+            s9Transformer.setSource(streamSource);
         }
 
         /// <summary>
@@ -100,8 +100,8 @@ namespace Saxon.Api {
         /// </remarks>
 
         public QName InitialMode {
-            get => transformer.getInitialMode();
-            set => transformer.setInitialMode(value);
+            get => s9Transformer.getInitialMode();
+            set => s9Transformer.setInitialMode(value);
         }
 
 
@@ -122,7 +122,7 @@ namespace Saxon.Api {
             get => initialTemplateName;
             set {
                 initialTemplateName = value;
-                transformer.setInitialTemplate(initialTemplateName);
+                s9Transformer.setInitialTemplate(initialTemplateName);
             }
         }
 
@@ -132,8 +132,8 @@ namespace Saxon.Api {
         /// </summary>
 
         public Uri BaseOutputUri {
-            get => new Uri(transformer.getBaseOutputURI());
-            set => transformer.setBaseOutputURI(value.ToString());
+            get => new Uri(s9Transformer.getBaseOutputURI());
+            set => s9Transformer.setBaseOutputURI(value.ToString());
         }
 
 
@@ -144,7 +144,7 @@ namespace Saxon.Api {
 
         public SchemaValidationMode SchemaValidationMode {
             get {
-                switch (transformer.getUnderlyingController().getSchemaValidationMode()) {
+                switch (s9Transformer.getUnderlyingController().getSchemaValidationMode()) {
                     case Validation.STRICT:
                         return SchemaValidationMode.Strict;
                     case Validation.LAX:
@@ -162,20 +162,20 @@ namespace Saxon.Api {
             set {
                 switch (value) {
                     case SchemaValidationMode.Strict:
-                        transformer.setSchemaValidationMode(ValidationMode.STRICT);
+                        s9Transformer.setSchemaValidationMode(ValidationMode.STRICT);
                         break;
                     case SchemaValidationMode.Lax:
-                        transformer.setSchemaValidationMode(ValidationMode.LAX);
+                        s9Transformer.setSchemaValidationMode(ValidationMode.LAX);
                         break;
                     case SchemaValidationMode.None:
-                        transformer.setSchemaValidationMode(ValidationMode.STRIP);
+                        s9Transformer.setSchemaValidationMode(ValidationMode.STRIP);
                         break;
                     case SchemaValidationMode.Preserve:
-                        transformer.setSchemaValidationMode(ValidationMode.PRESERVE);
+                        s9Transformer.setSchemaValidationMode(ValidationMode.PRESERVE);
                         break;
                     case SchemaValidationMode.Unspecified:
                     default:
-                        transformer.setSchemaValidationMode(ValidationMode.DEFAULT);
+                        s9Transformer.setSchemaValidationMode(ValidationMode.DEFAULT);
                         break;
                 }
             }
@@ -188,10 +188,10 @@ namespace Saxon.Api {
         /// </summary>
 
         public XmlResolver InputXmlResolver {
-            get => ((StandardURIResolver) transformer.getURIResolver()).getXmlResolver();
-            set => transformer.setURIResolver(
+            get => ((StandardURIResolver) s9Transformer.getURIResolver()).getXmlResolver();
+            set => s9Transformer.setURIResolver(
                 new StandardURIResolver(
-                    transformer.getUnderlyingController().getConfiguration(),
+                    s9Transformer.getUnderlyingController().getConfiguration(),
                     value));
         }
 
@@ -212,9 +212,9 @@ namespace Saxon.Api {
             get => resultDocumentHandler;
             set {
                 resultDocumentHandler = value;
-                transformer.getUnderlyingController().setResultDocumentResolver(
+                s9Transformer.getUnderlyingController().setResultDocumentResolver(
                     new ResultDocumentHandlerWrapper(value,
-                        transformer.getUnderlyingController().makePipelineConfiguration()));
+                        s9Transformer.getUnderlyingController().makePipelineConfiguration()));
             }
         }
 
@@ -236,9 +236,9 @@ namespace Saxon.Api {
         /// which terminates the transformation.</para>
         /// </remarks>
 
-        public Consumer<Message> MessageListener {
-            get => transformer.controller.getMessageHandler();
-            set => transformer.controller.setMessageHandler(value);
+        public Action<Message> MessageListener {
+            get => msg => s9Transformer.controller.getMessageHandler().Invoke(msg);
+            set => s9Transformer.controller.setMessageHandler(value.Invoke);
         }
 
 
@@ -255,7 +255,7 @@ namespace Saxon.Api {
 		public TextWriter TraceFunctionDestination {
             set {
                 traceFunctionDestination = value;
-                transformer.setTraceFunctionDestination(new StandardLogger(value));
+                s9Transformer.setTraceFunctionDestination(new StandardLogger(value));
             }
             get => traceFunctionDestination;
         }
@@ -275,11 +275,11 @@ namespace Saxon.Api {
         /// (for example, numeric promotion is applied).</param>
          
         public void SetParameter(QName name, XdmValue value) {
-            transformer.setParameter(name, value);
+            s9Transformer.setParameter(name, value);
         }
 
 		public Saxon.Hej.s9api.Destination GetUnderlyingDestination() {
-            return transformer;
+            return s9Transformer;
         }
 
         /// <summary>
@@ -295,7 +295,7 @@ namespace Saxon.Api {
             get => this.xmlDestination;
             set {
                 this.xmlDestination = value;
-                transformer.setDestination(value.GetUnderlyingDestination());
+                s9Transformer.setDestination(value.GetUnderlyingDestination());
             }
         }
 
@@ -309,7 +309,7 @@ namespace Saxon.Api {
         /// not need to do anything. The default implementation does nothing.
         /// </remarks>
         public void Close() {
-            transformer.close();
+            s9Transformer.close();
         }
         
         /// <summary>
@@ -317,14 +317,14 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="action">The action to be performed.</param>
         public void OnClose(System.Action action) {
-            transformer.onClose(action.Invoke);
+            s9Transformer.onClose(action.Invoke);
         }
 
 
         // internal method
 
         internal Receiver GetDestinationReceiver(IDestination destination) {
-            Controller controller = transformer.getUnderlyingController();
+            Controller controller = s9Transformer.getUnderlyingController();
             PipelineConfiguration pipe = makePipelineConfiguration();
             Receiver r = destination.GetUnderlyingDestination()
                 .getReceiver(pipe, controller.getExecutable().getPrimarySerializationProperties());
@@ -334,7 +334,7 @@ namespace Saxon.Api {
         }
 
         internal PipelineConfiguration makePipelineConfiguration() {
-            return transformer.getUnderlyingController().getConfiguration().makePipelineConfiguration();
+            return s9Transformer.getUnderlyingController().getConfiguration().makePipelineConfiguration();
         }
 
         /// <summary>
@@ -352,15 +352,15 @@ namespace Saxon.Api {
                 throw new SaxonApiException("Destination is null");
             }
 
-            transformer.setDestination(destination.GetUnderlyingDestination());
-            transformer.transform();
+            s9Transformer.setDestination(destination.GetUnderlyingDestination());
+            s9Transformer.transform();
         }
 
         /// <summary>
         /// Escape hatch to the underlying implementation
         /// </summary>
 
-		public Saxon.Hej.trans.XsltController Implementation => transformer.getUnderlyingController();
+		public Saxon.Hej.trans.XsltController Implementation => s9Transformer.getUnderlyingController();
     }
 }
 

@@ -10,10 +10,14 @@ namespace Saxon.Api {
     /// errors in schemas or stylesheets are considered as normal events and do not cause
     /// termination of processing, so they are not delivered as exceptions.
     /// </summary>
+    /// <remarks>
+    /// The constructor for this class is internal; instances of this class can be created
+    /// internally by Saxon-CS, but not by user application code.
+    /// </remarks>
     public class XmlProcessingError
     {
         private readonly Saxon.Hej.s9api.XmlProcessingError incident;
-        public XmlProcessingError(Saxon.Hej.s9api.XmlProcessingError err)
+        internal XmlProcessingError(Saxon.Hej.s9api.XmlProcessingError err)
         {
             this.incident = err;
         }

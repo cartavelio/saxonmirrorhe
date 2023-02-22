@@ -25,7 +25,7 @@ namespace Saxon.Api {
         protected XdmItem(Item item) : base(item) {}
 
         /// <summary>
-        /// Determine whether the item is an atomic value.
+        /// Ask whether the item is an atomic value.
         /// </summary>
         /// <returns>
         /// True if the item is an atomic value, false if it is a node, function, or external object.
@@ -34,7 +34,7 @@ namespace Saxon.Api {
         public abstract bool IsAtomic();
 
         /// <summary>
-        /// Determine whether the item is a node or some other type of item.
+        /// Ask whether the item is a node or some other type of item.
         /// </summary>
         /// <returns>True if the item is a node, false if it is an atomic value or a function (including maps and arrays).</returns>
         public bool IsNode()
@@ -62,7 +62,7 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// Determine whether this item matches a given item type.
+        /// Ask whether this item matches a given item type.
         /// </summary>
         /// <param name="typei">The item type to be tested against this item</param>
         /// <returns>True if the item matches this item type, false if it does not match.</returns>
@@ -83,9 +83,31 @@ namespace Saxon.Api {
         public static XdmItem WrapItem(Saxon.Hej.om.Item value) {
             return (XdmItem) Wrap(value);
         }
+        
+        /// <summary>
+        /// Create an <c>XdmNode</c> from an underlying Saxon <c>Saxon.Hej.om.NodeInfo</c> object.
+        /// The result is the same as applying the <c>XdmValue.Wrap</c> method, but
+        /// it is returned more conveniently as an instance of <c>XdmNode</c>
+        /// </summary>
+        /// <param name="value">An object representing an XDM node in the
+        /// underlying Saxon implementation. Must not be null.</param>
+        /// <returns>An <c>XdmNode</c> that wraps the underlying Saxon XDM node
+        /// representation.</returns>
+        /// 
         public static XdmNode WrapItem(Saxon.Hej.om.NodeInfo value) {
             return (XdmNode) Wrap(value);
         }
+        
+        /// <summary>
+        /// Create an <c>XdmAtomicValue</c> from an underlying Saxon <c>Saxon.Hej.value.AtomicValue</c> object.
+        /// The result is the same as applying the <c>XdmValue.Wrap</c> method, but
+        /// it is returned more conveniently as an instance of <c>XdmAtomicValue</c>
+        /// </summary>
+        /// <param name="value">An object representing an XDM atomic value in the
+        /// underlying Saxon implementation. Must not be null.</param>
+        /// <returns>An <c>XdmAtomicValue</c> that wraps the underlying Saxon atomic value
+        /// representation.</returns>
+        /// 
         public static XdmAtomicValue WrapItem(Saxon.Hej.value.AtomicValue value) {
             return (XdmAtomicValue) Wrap(value);
         }

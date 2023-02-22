@@ -15,18 +15,34 @@ namespace Saxon.Api {
 
     public class XdmSequenceType
     {
+        private readonly XdmItemType itemType;
+        private readonly char occurrenceIn;
+        private readonly int occurrence;
 
-        internal XdmItemType itemType;
-        internal char occurrenceIn;
-        internal int occurrence;
-
-
-        public const char ZERO_OR_MORE='*';
+        /// <summary>
+        /// Occurrence indicator denoting a sequence of any length (zero or more items)
+        /// </summary>
+        public const char ZERO_OR_MORE = '*';
+        /// <summary>
+        /// Occurrence indicator denoting a sequence of any length other than zero (one or more items)
+        /// </summary>
         public const char ONE_OR_MORE = '+';
+        /// <summary>
+        /// Occurrence indicator denoting a sequence of length zero or one
+        /// </summary>
         public const char ZERO_OR_ONE = '?';
-        public const char ZERO = '0'; 
+        /// <summary>
+        /// Occurrence indicator denoting an empty sequence (zero items)
+        /// </summary>
+        public const char ZERO = '0';
+        /// <summary>
+        /// Occurrence indicator denoting a sequence of length exactly one
+        /// </summary>
         public const char ONE = ' ';
 
+        /// <summary>
+        /// A <c>SequenceType</c> that matches any sequence (any kind of item, any length)
+        /// </summary>
         public static readonly XdmSequenceType AnySequenceType = new(
             XdmItemType.MakeXdmItemType(AnyItemType.getInstance()), ZERO_OR_MORE);
 
