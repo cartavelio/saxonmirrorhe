@@ -2,6 +2,7 @@ task resources(
   dependsOn: ["resources_notices",
               "resources_userdoc_xml",
               "resources_userdoc_html",
+              "resources_saxonc_userdoc",
               "resources_drivers",
               "samples_common",
               "samples_j",
@@ -101,6 +102,25 @@ task resources_userdoc_xml(
 ) {
     into "${buildDir}/saxon-resources"
     from "${buildDir}/distributions/source-userdoc.zip"
+}
+
+task saxonc_userdoc_zip(
+        type: Zip,
+        dependsOn: ["saxonc_documentation"]
+) {
+    from ("${buildDir}/saxonc-doc") {
+
+    }
+    archiveFileName = "saxonc-userdoc.zip"
+}
+
+task resources_saxonc_userdoc(
+        type: Copy,
+        dependsOn: ["saxonc_userdoc_zip"],
+        description: "Copy zipped SaxonC userdoc into the resources folder"
+) {
+    into "${buildDir}/saxon-resources"
+    from "${buildDir}/distributions/saxonc-userdoc.zip"
 }
 
 task resources_drivers_src(
