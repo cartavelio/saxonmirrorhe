@@ -46,7 +46,7 @@ public class TemplateRuleTraceListener {
         } else {
             builder.append("rule at ").append(Err.show(rule));
         }
-        String message = builder.toString().replaceAll(" \\.\\.\\./", " ");
+        String message = builder.toString().replace(" .../", " ");
         logger.info(message);
     }
 
