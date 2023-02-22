@@ -8,6 +8,7 @@
 package net.sf.saxon.s9api.streams;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
 
 import java.util.function.Predicate;
@@ -141,7 +142,7 @@ public class Predicates {
      */
 
     public static <T extends XdmItem> Predicate<XdmItem> empty(Step<T> step) {
-        return item -> !step.apply(item).findFirst().isPresent();
+        return item -> step.apply(item).findFirst().isEmpty();
     }
 
     /**
@@ -183,11 +184,12 @@ public class Predicates {
      */
 
     public static Predicate<? super XdmNode> hasName(String uri, String localName) {
+        NamespaceUri nsUri = NamespaceUri.of(uri);
         return item -> {
             QName name = item.getNodeName();
             return name != null &&
                     name.getLocalName().equals(localName) &&
-                    name.getNamespaceURI().equals(uri);
+                    name.getNamespaceURI().equals(nsUri);
         };
     }
 
@@ -220,10 +222,11 @@ public class Predicates {
      */
 
     public static Predicate<XdmNode> hasNamespace(String uri) {
+        NamespaceUri nsUri = NamespaceUri.of(uri);
         return item -> {
             QName name = item.getNodeName();
             return name != null &&
-                    name.getNamespaceURI().equals(uri);
+                    name.getNamespaceURI().equals(nsUri);
         };
     }
 
