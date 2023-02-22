@@ -11,6 +11,7 @@ package net.sf.saxon.option.cpp;
 import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.Configuration;
 
+import net.sf.saxon.Query;
 import net.sf.saxon.Transform;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Feature;
@@ -143,6 +144,28 @@ public class SaxonCAPI {
 
         return STATUS_OK;
     }
+
+
+    @CEntryPoint(name = "j_run_query", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long run_query(IsolateThread thread, ObjectHandle processorDataRef){
+
+        String[] args;
+
+
+        if(processorDataRef == WordFactory.nullPointer()) {
+            return STATUS_FAIL;
+        }   else {
+           ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
+           args = processorDataAccumulator.getParameterNames();
+        }
+
+        new Query().doQuery(args, "java net.sf.saxon.Query");
+
+
+        return STATUS_OK;
+    }
+
+
 
     @CEntryPoint(name = "j_handles_destroy")
    	public static void destroy(IsolateThread thread, ObjectHandle handle) {
