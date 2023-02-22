@@ -346,7 +346,7 @@
    <xsl:template match="*[@RESOLVED_TYPE='java.lang.Double']" 
       priority="30" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'parseDouble#1':         'System.Double.Parse(%args%)',
+         'parseDouble#1':         'Saxon.Impl.Helpers.Utils.ParseDouble(%args%)',
          'signum#1':              'System.Math.Sign(%args%)',
          'compare#2':             '%arg1%.CompareTo(%arg2%)',
          'isInfinite#1':          'System.Double.IsInfinity(%args%)',
@@ -362,7 +362,7 @@
    <xsl:template match="*[@RESOLVED_TYPE='java.lang.Float']" 
       priority="30" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'parseDouble#1':         'System.Single.Parse(%args%)',
+         'parseFloat#1':          'System.Single.Parse(%args%, System.Globalization.CultureInfo.InvariantCulture)',
          'signum#0':              'System.Math.Sign(%args%)',
          'compare#2':             '%arg1%.CompareTo(%arg2%)',
          'isInfinite#1':          'System.Single.IsInfinity(%args%)',
