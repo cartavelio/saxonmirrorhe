@@ -98,12 +98,12 @@ cdef char * make_c_str2(str_value, encoding='utf-8'):
     line = py_string_string if str_value is not None else ""
 
     try:
-        out[0] = b'\x00' # keep C-strings null-terminated
+        out[0] = b'\x00'.encode('ascii') # keep C-strings null-terminated
         incrlength = len(line)
         out = <char *>realloc(out, length + incrlength + 1)
         memcpy(out + length, line, incrlength)
         length += incrlength
-        out[length] = '\x00'  # keep C-strings null-terminated
+        out[length] = '\x00'.encode('ascii')  # keep C-strings null-terminated
         return out  # autoconversion back to a Python string
 
     finally:
