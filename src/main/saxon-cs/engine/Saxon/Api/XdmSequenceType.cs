@@ -144,7 +144,7 @@ namespace Saxon.Api {
         /// <summary>
         /// Compare two sequence types for equality
         /// </summary>
-        /// <param name="other">The object to be compared</param>
+        /// <param name="obj">The object to be compared</param>
         /// <returns>The result of the equality comparison.</returns>
         public override bool Equals(object obj) {
             if (obj is XdmSequenceType other) {
