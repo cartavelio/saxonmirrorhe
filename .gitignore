@@ -7,6 +7,7 @@ java_*.hprof
 /.idea/
 /src/test/testdata/temp/
 /src/test/testdata/sandpit/
+/src/test/cstestrunner/TestDriver/bin
 /src/test/extra/qt3/expath/file/sandpit/temp/
 .DS_Store
 *.iml
