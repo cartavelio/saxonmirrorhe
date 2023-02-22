@@ -257,7 +257,8 @@ public class PackageLoaderHE implements IPackageLoader {
         }
         pack.setPackageVersion(
                 new PackageVersion(packageElement.getAttributeValue(NamespaceUri.NULL,"packageVersion")));
-        pack.setLanguageVersion(getIntegerAttribute(packageElement, "version"));
+        int xsltVersion = getIntegerAttribute(packageElement, "version");
+        pack.setLanguageVersion(xsltVersion);
         pack.setSchemaAware("1".equals(packageElement.getAttributeValue(NamespaceUri.NULL,"schemaAware")));
         if (pack.isSchemaAware()) {
             needsEELicense("schema-awareness");
@@ -286,7 +287,7 @@ public class PackageLoaderHE implements IPackageLoader {
         }
 
         FunctionLibraryList functionLibrary = new FunctionLibraryList();
-        functionLibrary.addFunctionLibrary(config.getXSLT30FunctionSet());
+        functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(xsltVersion));
         addVendorFunctionLibrary(functionLibrary, config);
         functionLibrary.addFunctionLibrary(MapFunctionSet.getInstance());
         functionLibrary.addFunctionLibrary(ArrayFunctionSet.getInstance());
@@ -694,7 +695,7 @@ public class PackageLoaderHE implements IPackageLoader {
             streaming = true;
         }
 
-        function.computeEvaluationMode();
+        //function.computeEvaluationMode();
         //Evaluator(Evaluators.getEvaluator(evalMode));
 
         currentFunction = function;
@@ -3185,9 +3186,13 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("supplied", (loader, element) -> {
             int slot = loader.getIntegerAttribute(element, "slot");
-            return new SuppliedParameterReference(slot);
+            SuppliedParameterReference ref = new SuppliedParameterReference(slot);
+            String sType = element.getAttributeValue(NamespaceUri.NULL, "sType");
+            if (sType != null) {
+                ref.setSuppliedType(AlphaCode.toSequenceType(sType, loader.getConfiguration()));
+            }
+            return ref;
         });
-
 
         eMap.put("tail", (loader, element) -> {
             Expression select = loader.getFirstChildExpression(element);
@@ -3334,8 +3339,20 @@ public class PackageLoaderHE implements IPackageLoader {
 //            AtomicComparer comp = loader.makeAtomicComparer(compAtt, element);
 //            vc.setAtomicComparer(comp);
             String onEmptyAtt = element.getAttributeValue(NamespaceUri.NULL,"onEmpty");
-            if (onEmptyAtt != null) {
+            if (onEmptyAtt != null) {     // legacy, pre-12.x
                 vc.setResultWhenEmpty(BooleanValue.get("1".equals(onEmptyAtt)));
+            }
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
+            if (flags != null) {
+                if (flags.contains("1")) {
+                    vc.setResultWhenEmpty(BooleanValue.TRUE);
+                }
+                if (flags.contains("0")) {
+                    vc.setResultWhenEmpty(BooleanValue.FALSE);
+                }
+                if (flags.contains("u")) {
+                    vc.setCompareUntypedToNumeric(true);
+                }
             }
             return vc;
         });

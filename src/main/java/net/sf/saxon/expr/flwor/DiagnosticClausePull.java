@@ -43,7 +43,7 @@ public class DiagnosticClausePull extends TuplePull {
         if (!base.nextTuple(context)) {
             return false;
         }
-        SequenceIterator val = diagClause.getEvaluator().evaluate(diagClause.getSequence(), context).iterate();
+        SequenceIterator val = diagClause.getEvaluator().iterate(context);
         Logger out = context.getController().getTraceFunctionDestination();
         Item item;
         int pos = 1;

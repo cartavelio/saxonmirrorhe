@@ -1314,8 +1314,14 @@ public class Configuration implements SourceResolver, NotationSet {
         throw new XPathException("Class " + className + " is not a TraceListener");
     }
 
-    public BuiltInFunctionSet getXSLT30FunctionSet() {
-        return XSLT30FunctionSet.getInstance();
+    public BuiltInFunctionSet getXSLTFunctionSet(int version) {
+        if (version == 30) {
+            return XSLT30FunctionSet.getInstance();
+        } else if (version == 40) {
+            return XSLT40FunctionSet.getInstance();
+        } else {
+            throw new IllegalArgumentException("XSLT version must be 30 or 40");
+        }
     }
 
     public BuiltInFunctionSet getUseWhenFunctionSet() {
@@ -1348,7 +1354,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     public SystemFunction makeSystemFunction(String localName, int arity) {
         try {
-            return getXSLT30FunctionSet().makeFunction(localName, arity);
+            return getXSLTFunctionSet(30).makeFunction(localName, arity);
         } catch (XPathException e) {
             return null;
         }

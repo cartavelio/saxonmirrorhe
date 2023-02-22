@@ -10,6 +10,7 @@ package net.sf.saxon.expr;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
@@ -20,7 +21,6 @@ import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
@@ -480,7 +480,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
 
     @Override
     public Item evaluateItem(XPathContext c) throws XPathException {
-        return callFunction(c).head();
+        return makeElaborator().elaborateForItem().eval(c);
     }
 
     /**
@@ -491,61 +491,9 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext c) throws XPathException {
-        return callFunction(c).iterate();
+        return makeElaborator().elaborateForPull().iterate(c);
     }
 
-
-    private static int depth = 0;
-
-    /**
-     * This is the method that actually does the function call (in pull mode)
-     *
-     * @param context the dynamic context
-     * @return the result of the function
-     * @throws XPathException if dynamic errors occur
-     */
-    private Sequence callFunction(XPathContext context) throws XPathException {
-        depth++;
-        System.err.println("depth=" + depth);
-        UserFunction targetFunction;
-        Sequence[] actualArgs = evaluateArguments(context);
-        XPathContextMajor c2;
-        if (isTailCall()) {
-            depth--;
-            requestTailCall(context, actualArgs);
-            return EmptySequence.getInstance();
-        }
-
-        if (bindingSlot >= 0) {
-            Component target = getTargetComponent(context);
-            if (target.isHiddenAbstractComponent()) {
-                throw new XPathException("Cannot call an abstract function (" +
-                                                 name.getDisplayName() +
-                                                 ") with no implementation", "XTDE3052");
-            }
-            targetFunction = (UserFunction) target.getActor();
-            c2 = targetFunction.makeNewContext(context, this);
-            c2.setCurrentComponent(target);
-            c2.setOrigin(this);
-        } else {
-            targetFunction = function;
-            c2 = targetFunction.makeNewContext(context, this);
-            c2.setOrigin(this);
-        }
-
-        try {
-            Sequence result = targetFunction.call(c2, actualArgs);
-            depth--;
-            return result;
-        } catch (UncheckedXPathException e) {
-            XPathException xe = e.getXPathException();
-            xe.maybeSetLocation(getLocation());
-            throw xe;
-        } catch (StackOverflowError err) {
-            throw new XPathException.StackOverflow("Too many nested function calls. May be due to infinite recursion",
-                                     SaxonErrorCode.SXLM0001, getLocation());
-        }
-    }
 
     private void requestTailCall(XPathContext context, Sequence[] actualArgs) throws XPathException {
         if (bindingSlot >= 0) {
@@ -579,29 +527,8 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-
-        Sequence[] actualArgs = evaluateArguments(context);
-
-        if (isTailCall()) {
-            requestTailCall(context, actualArgs);
-            return;
-        }
-
-        if (bindingSlot >= 0) {
-            Component target = getTargetComponent(context);
-            UserFunction targetFunction = (UserFunction) target.getActor();
-            if (target.getVisibility() == Visibility.ABSTRACT) {
-                throw new XPathException("Cannot call a function defined with visibility=abstract", "XTDE3052");
-            }
-            XPathContextMajor c2 = targetFunction.makeNewContext(context, this);
-            c2.setCurrentComponent(target);
-            c2.setOrigin(this);
-            targetFunction.process(c2, actualArgs, output);
-        } else {
-            XPathContextMajor c2 = function.makeNewContext(context, this);
-            c2.setOrigin(this);
-            function.process(c2, actualArgs, output);
-        }
+        TailCall tc = makeElaborator().elaborateForPush().processLeavingTail(output, context);
+        dispatchTailCall(tc);
     }
 
     public Component getTargetComponent(XPathContext context) {
@@ -618,10 +545,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         return (UserFunction) getTargetComponent(context).getActor();
     }
 
-    @Override
-    public Sequence[] evaluateArguments(XPathContext c) throws XPathException {
-        return evaluateArguments(c, false);
-    }
 
 
     public Sequence[] evaluateArguments(XPathContext c, boolean streamed) throws XPathException {
@@ -706,7 +629,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
             return new UserFunctionCallElaborator();
         }
     }
-    private static abstract class UserFunctionCallAbstractElaborator extends FunctionCallElaborator {
+    public static abstract class UserFunctionCallAbstractElaborator extends FunctionCallElaborator {
 
         @Override
         public void allocateArgumentEvaluators(FunctionCall expr, boolean allowRepeatedUse) {
@@ -813,10 +736,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                                                          expr.getFunctionName().getDisplayName() +
                                                          ") with no implementation", "XTDE3052");
                     }
-                    depth++;
-                    //System.err.println("depth(pull)=" + depth);
                     SequenceIterator result = callTargetFunction(expr, target, context).iterate();
-                    depth--;
                     return result;
                 };
             } else {

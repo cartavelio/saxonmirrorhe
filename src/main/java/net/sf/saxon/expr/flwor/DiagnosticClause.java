@@ -9,6 +9,7 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -24,16 +25,16 @@ import static net.sf.saxon.expr.flwor.Clause.ClauseName.DIAG;
 public class DiagnosticClause extends Clause {
 
     private Operand sequenceOp;
-    private Evaluator evaluator;
+    private PullEvaluator evaluator;
 
     @Override
     public ClauseName getClauseKey() {
         return DIAG;
     }
 
-    public Evaluator getEvaluator() {
+    public PullEvaluator getEvaluator() {
         if (evaluator == null) {
-            evaluator = ExpressionTool.lazyEvaluator(getSequence(), true);
+            evaluator = getSequence().makeElaborator().elaborateForPull();
         }
         return evaluator;
     }
@@ -115,7 +116,7 @@ public class DiagnosticClause extends Clause {
 
     @Override
     public void typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        evaluator = ExpressionTool.lazyEvaluator(getSequence(), true);
+        //
     }
 
     @Override

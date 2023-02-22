@@ -12,7 +12,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.SlotManager;
-import net.sf.saxon.expr.parser.Evaluator;
+import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -159,7 +159,7 @@ public class AccumulatorData implements IAccumulatorData {
         c2.setLocalVariable(0, value);
         c2.setCurrentComponent(accumulator.getDeclaringComponent());
         c2.setTemporaryOutputState(StandardNames.XSL_ACCUMULATOR_RULE);
-        value = Evaluator.EagerSequence.INSTANCE.evaluate(delta, c2);
+        value = ExpressionTool.eagerEvaluate(delta, c2);
         //System.err.println("Node " + ((TinyNodeImpl) node).getNodeNumber() + " : " + value);
         if (node.getParent() == null && !isPostDescent && values.size() == 1) {
             // Overwrite the accumulator's initial value with the "before document start" value. Bug 4786.

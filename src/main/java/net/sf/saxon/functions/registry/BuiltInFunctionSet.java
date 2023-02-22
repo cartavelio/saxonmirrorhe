@@ -20,7 +20,6 @@ import net.sf.saxon.om.Function;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -296,7 +295,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         if (entry == null) {
             return false;
         }
-        if ((entry.properties & SEQV) != 0) {
+        //if ((entry.properties & SEQV) != 0) {
             // sequence-variadic functions in 4.0 (e.g..concat, codepoints-to-string)
             // combine the "variable" arguments into a single argument
             if (languageLevel < 40 &&
@@ -304,7 +303,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                     symbolicName.getArity() < 2) {
                 return false;
             }
-        }
+        //}
         return true;
 
     }

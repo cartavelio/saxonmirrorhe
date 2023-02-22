@@ -838,8 +838,7 @@ public class StylesheetPackage extends PackageData {
     public void createFunctionLibrary() {
 
         FunctionLibraryList functionLibrary = new FunctionLibraryList();
-        boolean includeHOF = !("HE".equals(getTargetEdition()) || "JS".equals(getTargetEdition()));
-        functionLibrary.addFunctionLibrary(includeHOF ? config.getXSLT30FunctionSet() : new Configuration().getXSLT30FunctionSet());
+        functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(hostLanguageVersion));
         functionLibrary.addFunctionLibrary(new StylesheetFunctionLibrary(this, true));
         functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList());
         functionLibrary.addFunctionLibrary(new ConstructorFunctionLibrary(config));

@@ -35,7 +35,7 @@ public class DiagnosticClausePush extends TuplePush {
      */
     @Override
     public void processTuple(XPathContext context) throws XPathException {
-        SequenceIterator val = diagClause.getEvaluator().evaluate(diagClause.getSequence(), context).iterate();
+        SequenceIterator val = diagClause.getEvaluator().iterate(context);
         Logger out = context.getController().getTraceFunctionDestination();
         Item item;
         int pos = 1;
