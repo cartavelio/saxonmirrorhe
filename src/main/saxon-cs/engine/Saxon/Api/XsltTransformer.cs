@@ -8,7 +8,6 @@ using Saxon.Hej;
 using Saxon.Hej.@event;
 using Saxon.Hej.lib;
 using Saxon.Hej.s9api;
-using JDestination = Saxon.Hej.s9api.Destination;
 using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
@@ -252,7 +251,7 @@ namespace Saxon.Api {
         /// <para>The supplied destination is ignored if a <c>TraceListener</c> is in use.</para>
         /// </remarks>
 
-        public StandardLogger TraceFunctionDestination {
+		public StandardLogger TraceFunctionDestination {
             set {
                 traceFunctionDestination = value;
                 transformer.setTraceFunctionDestination(value);
@@ -278,7 +277,7 @@ namespace Saxon.Api {
             transformer.setParameter(name, value);
         }
 
-        public JDestination GetUnderlyingDestination() {
+		public Saxon.Hej.s9api.Destination GetUnderlyingDestination() {
             return transformer;
         }
 
@@ -360,7 +359,7 @@ namespace Saxon.Api {
         /// Escape hatch to the underlying implementation
         /// </summary>
 
-        public XsltController Implementation => transformer.getUnderlyingController();
+		public Saxon.Hej.trans.XsltController Implementation => transformer.getUnderlyingController();
     }
 }
 

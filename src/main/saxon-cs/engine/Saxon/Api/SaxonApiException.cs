@@ -154,7 +154,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>The underlying <c>XPathException</c></returns>
         
-        public XPathException UnderlyingException => exception;
+		public Saxon.Hej.trans.XPathException UnderlyingException => exception;
 
         /// <summary>
         /// Return the error message.

@@ -21,7 +21,7 @@ namespace Saxon.Api {
         protected XdmFunctionItem() {
         }
 
-        public XdmFunctionItem(Function function) : base(function) {
+		public XdmFunctionItem(Saxon.Hej.om.Function function) : base(function) {
         }
         
          /// <summary>

@@ -1,5 +1,4 @@
 using System;
-using SysCollGen = System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -34,7 +33,7 @@ namespace Saxon.Api {
     /// </remarks>
 
     [Serializable]
-    public class Processor : Configuration.ApiProvider {
+	public class Processor : Saxon.Hej.Configuration.ApiProvider {
         // For largely historic reasons, the Saxon.Api.Processor is implemented
         // as a wrapper around the s9api Processor, which is C# code converted from Java
 
@@ -104,7 +103,7 @@ namespace Saxon.Api {
             init();
         }
 
-        public Processor(Configuration config) {
+		public Processor(Saxon.Hej.Configuration config) {
             JProcessor = new Saxon.Hej.s9api.Processor(config);
             config.setProcessor(this);
             init();
@@ -120,7 +119,7 @@ namespace Saxon.Api {
 
         private void checkLicense() {
             Implementation.checkLicensedFeature(
-                Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION, "Saxon-CS", -1);
+                Configuration.LicenseFeature.SCHEMA_VALIDATION, "Saxon-CS", -1);
         }
         
         /// <summary>
@@ -492,7 +491,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
 
-        public Configuration Implementation => JProcessor.getUnderlyingConfiguration();
+		public Saxon.Hej.Configuration Implementation => JProcessor.getUnderlyingConfiguration();
 
         /// <summary>
         /// The underlying <c>Saxon.Hej.s9api.Processor</c> in the Java implementation

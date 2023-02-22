@@ -488,7 +488,7 @@ namespace Saxon.Api {
         /// <returns> the underlying <c>CompilerInfo</c> object, which holds compilation-time options. The methods on
         /// this object are not guaranteed stable from release to release.
         /// </returns>
-        public CompilerInfo GetUnderlyingCompilerInfo() {
+		public Saxon.Hej.trans.CompilerInfo GetUnderlyingCompilerInfo() {
             return jXsltCompiler.getUnderlyingCompilerInfo();
         }
 

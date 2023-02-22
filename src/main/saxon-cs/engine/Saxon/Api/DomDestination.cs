@@ -1,5 +1,4 @@
 using System.Xml;
-using JDestination = Saxon.Hej.s9api.Destination;
 using Saxon.Impl.Dom;
 
 namespace Saxon.Api {
@@ -109,7 +108,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <returns>returns the underlying Destination object</returns>
-        public JDestination GetUnderlyingDestination()
+		public Saxon.Hej.s9api.Destination GetUnderlyingDestination()
         {
             return destination;
         }

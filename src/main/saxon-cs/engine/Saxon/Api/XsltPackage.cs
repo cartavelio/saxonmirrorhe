@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Saxon.Hej.style;
 using Saxon.Hej.trace;
 
 namespace Saxon.Api {
@@ -83,7 +82,7 @@ namespace Saxon.Api {
         /// <returns>the underlying <c>StylesheetPackage</c>. The interface to <c>StylesheetPackage</c>
         /// is not a stable part of the s9api API definition.</returns>
 
-        public StylesheetPackage getUnderlyingPreparedPackage()
+		public Saxon.Hej.style.StylesheetPackage getUnderlyingPreparedPackage()
         {
             return package.getUnderlyingPreparedPackage();
         }

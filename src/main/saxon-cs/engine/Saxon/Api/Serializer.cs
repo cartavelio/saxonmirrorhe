@@ -2,10 +2,10 @@ using System;
 using System.IO;
 using Saxon.Ejava.util;
 using Saxon.Hej;
-using JDestination = Saxon.Hej.s9api.Destination;
 using Saxon.Hej.serialize;
 using Saxon.Hej.z;
 using SysCollGen = System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Saxon.Api {
     /// <summary>
@@ -308,7 +308,7 @@ namespace Saxon.Api {
         /// Get the character map with a given nae
         /// </summary>
         
-        public SysCollGen.IDictionary<int, string> GetCharacterMap(QName name) {
+        public IDictionary<int, string> GetCharacterMap(QName name) {
             Saxon.Hej.serialize.CharacterMap map = 
                     characterMapIndex.getCharacterMap(name.GetStructuredQName());
             if (map != null) {
@@ -335,7 +335,7 @@ namespace Saxon.Api {
         /// <param name="name">the name of the character map</param>
         /// <param name="charMap">the content of the character map</param>
 
-        public void SetCharacterMap(QName name, SysCollGen.IDictionary<int, string> charMap) {
+        public void SetCharacterMap(QName name, IDictionary<int, string> charMap) {
             IntHashMap<string> content = new IntHashMap<string>();
             foreach(SysCollGen.KeyValuePair<int, string> pair in charMap) {
                 content.put(pair.Key, pair.Value);
@@ -472,7 +472,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <returns>returns the underlying Destination object</returns>
-        public JDestination GetUnderlyingDestination()
+		public Saxon.Hej.s9api.Destination GetUnderlyingDestination()
         {
             return jSerializer;
         }

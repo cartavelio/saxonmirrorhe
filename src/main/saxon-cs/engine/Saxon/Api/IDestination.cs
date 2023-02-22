@@ -1,4 +1,3 @@
-using JDestination = Saxon.Hej.s9api.Destination;
 
 namespace Saxon.Api {
     /// <summary>
@@ -25,7 +24,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <returns>returns the underlying Destination object</returns>
-		/**public**/ JDestination GetUnderlyingDestination();
+		/**public**/ Saxon.Hej.s9api.Destination GetUnderlyingDestination();
 
         /// <summary>
         /// Define an action to be performed when writing to the Destination is complete.

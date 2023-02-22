@@ -32,7 +32,7 @@ namespace Saxon.Api {
     [Serializable]
     public class XdmNode : XdmItem {
 
-        public XdmNode(NodeInfo node) : base(node) {
+		public XdmNode(Saxon.Hej.om.NodeInfo node) : base(node) {
             
         }
         
@@ -520,7 +520,7 @@ namespace Saxon.Api {
         /// Escape hatch to the underlying class in the Java implementation
         /// </summary>
 
-        public NodeInfo Implementation => ((NodeInfo) value);
+		public Saxon.Hej.om.NodeInfo Implementation => ((NodeInfo) value);
     }
 }
 
