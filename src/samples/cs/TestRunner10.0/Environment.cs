@@ -30,8 +30,7 @@ using java.io;
 using java.net;
 using net.sf.saxon;
 using net.sf.saxon.expr;
-using net.sf.saxon.lib;
-using java.util;
+//using net.sf.saxon.lib;
 using net.sf.saxon.om;
 using net.sf.saxon.resource;
 
@@ -678,8 +677,8 @@ namespace TestRunner
     }
 
     private static void CreateCollectionUriResolver(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, DocumentBuilder builder) {
-        Dictionary<Uri, ResourceCollection> collections = new Dictionary<Uri, ResourceCollection>();
-            JAbstractResourceCollection collectioni = null;
+        Dictionary<Uri, IResourceCollection> collections = new Dictionary<Uri, IResourceCollection>();
+            AbstractResourceCollection collectioni = null;
             Configuration config = environment.processor.Implementation;
             XmlUrlResolver res = new XmlUrlResolver();
 
@@ -687,7 +686,7 @@ namespace TestRunner
                 return;
             }
         foreach (XdmNode coll in env.Children("collection")) {
-                List<Resource> resourcesi = new List<Resource>();
+                List<IResource> resourcesi = new List<IResource>();
             String collectionURI = coll.GetAttributeValue(new QName("uri"));
             if (collectionURI == null) {
                 collectionURI = "";
@@ -698,14 +697,23 @@ namespace TestRunner
                 }
             Uri u;
             try {
+                    
                 u = new Uri(collectionURI);
             } catch (Exception e) {
-                driver.println("**** Invalid collection URI " + collectionURI);
-                break;
+               
+                //break;
 				}
-            if (!collectionURI.Equals("") && !u.IsAbsoluteUri) {
-                u = res.ResolveUri(((XdmNode)env).BaseUri, collectionURI);
-                collectionURI = u.ToString();
+            if (!collectionURI.Equals("") /*&& !u.IsAbsoluteUri*/) {
+                    try
+                    {
+
+
+                        u = res.ResolveUri(((XdmNode)env).BaseUri, collectionURI);
+                        collectionURI = u.ToString();
+                    } catch (Exception ) {
+                        driver.println("**** Invalid collection URI " + collectionURI);
+                        break;
+                    }
             }
 
                 
@@ -756,9 +764,9 @@ namespace TestRunner
                         driver.println("**** Fragment not found: " + frag);
                         break;
                     }
-                    resourcesi.Add(new net.sf.saxon.resource.XmlResource(config, selected.Implementation));
+                    resourcesi.Add(new Saxon.Api.XmlResource(selected));
                 } else {
-                        resourcesi.Add(new net.sf.saxon.resource.XmlResource(config, doc.Implementation));
+                        resourcesi.Add(new Saxon.Api.XmlResource(doc));
                     }
 					environment.sourceDocs.Add(uriStr, doc);
             }
@@ -822,7 +830,8 @@ namespace TestRunner
 
                     }
                 }
-                collectioni = new JAbstractResourceCollection(collectionURI, resourcesi);
+                collectioni = new AbstractResourceCollection(collectionURI, resourcesi);
+                
                 try {
                 collections.Add(new Uri(collectionURI), collectioni);
             } catch (Exception e) {
@@ -831,7 +840,7 @@ namespace TestRunner
 
         }
         if (collections.Count != 0) {
-                environment.processor.Implementation.setCollectionFinder(new CollectionFinder(collections));
+                environment.processor.CollectionFinder = new CollectionFinder(collections);
         }
     }
 
@@ -1036,104 +1045,116 @@ namespace TestRunner
         }
     }
 
-        public class JAbstractResourceCollection : ResourceCollection
+        public class AbstractResourceCollection : IResourceCollection
 
         {
             private String cURI;
-            private List<Resource> resourcesOrig;
+            private List<IResource> resourcesOrig;
             private java.util.List resourcesi = new java.util.ArrayList();
-            public JAbstractResourceCollection(String uri, List<Resource> ri) {
+
+
+            public AbstractResourceCollection(String uri, List<IResource> ri) {
                
                 resourcesOrig = ri;
                 cURI = uri;
                
             }
 
-            public Iterator getResources(XPathContext value)
+            public AbstractResourceCollection()
             {
-                resourcesi.clear();
-                foreach (Resource r in resourcesOrig)
-                {
-                    resourcesi.add(r);
-                }
-
-                return resourcesi.iterator();
             }
 
-            public Iterator getResourceURIs(XPathContext value)
+
+
+
+
+            /*  Iterator ResourceCollection.getResources(XPathContext xpc)
             {
                 java.util.ArrayList resourceUris = new java.util.ArrayList();
                 foreach (Resource r in resourcesOrig)
                 {
-                    resourcesi.add(r.getResourceURI());
+                    resourcesi.add(r);
                 }
                 return resourcesi.iterator();
             }
+            Iterator ResourceCollection.getResourceURIs(XPathContext xpc)
+             {
+                 java.util.ArrayList resourceUris = new java.util.ArrayList();
+                 foreach (Resource r in resourcesOrig)
+                 {
+                     resourcesi.add(r.getResourceURI());
+                 }
+                 return resourcesi.iterator();
+             }
 
-            string ResourceCollection.getCollectionURI()
+
+
+             internal Resource MakeResource(JConfiguration config, net.sf.saxon.resource.AbstractResourceCollection.InputDetails details, string absolutePath)
+             {
+                 net.sf.saxon.lib.ResourceFactory factory = null;
+                 String contentType = details.contentType;
+                 if (contentType != null) {
+                     factory = config.getResourceFactoryForMediaType(contentType);
+                 }
+                 if (factory == null) {
+                     factory = BinaryResource.FACTORY;
+                 }
+                 return factory.makeResource(config, details);
+             } */
+
+            public string CollectionURI()
             {
                 return cURI;
             }
 
-            Iterator ResourceCollection.getResources(XPathContext xpc)
+            public List<string> GetResourceURIs(DynamicContext context)
             {
-                java.util.ArrayList resourceUris = new java.util.ArrayList();
+                List<string> resourceUris = new List<string>();
                 foreach (Resource r in resourcesOrig)
                 {
-                    resourcesi.add(r);
+                    resourceUris.Add(r.GetResourceURI());
                 }
-                return resourcesi.iterator();
+                return resourceUris;
             }
 
-            Iterator ResourceCollection.getResourceURIs(XPathContext xpc)
+            public List<IResource> GetResources(DynamicContext context)
             {
-                java.util.ArrayList resourceUris = new java.util.ArrayList();
-                foreach (Resource r in resourcesOrig)
-                {
-                    resourcesi.add(r.getResourceURI());
-                }
-                return resourcesi.iterator();
+                return resourcesOrig;
             }
 
-            bool ResourceCollection.isStable(XPathContext xpc)
-            {
-                return false;
-            }
-
-            bool ResourceCollection.stripWhitespace(SpaceStrippingRule ssr)
+            internal Resource MakeResource(JConfiguration config, net.sf.saxon.resource.AbstractResourceCollection.InputDetails details, string absolutePath)
             {
                 throw new NotImplementedException();
-            }
-
-            internal Resource MakeResource(JConfiguration config, AbstractResourceCollection.InputDetails details, string absolutePath)
-            {
-                net.sf.saxon.lib.ResourceFactory factory = null;
-                String contentType = details.contentType;
-                if (contentType != null) {
-                    factory = config.getResourceFactoryForMediaType(contentType);
-                }
-                if (factory == null) {
-                    factory = BinaryResource.FACTORY;
-                }
-                return factory.makeResource(config, details);
             }
         }
 
 
-        public class CollectionFinder : net.sf.saxon.lib.CollectionFinder
+        public class CollectionFinder : ICollectionFinder
         {
 
-            Dictionary<Uri, ResourceCollection> collections;
-            public CollectionFinder(Dictionary<Uri, ResourceCollection> collections)
+            Dictionary<Uri, IResourceCollection> collections;
+            public CollectionFinder(Dictionary<Uri, IResourceCollection> collections)
             {
                 this.collections = collections;
             }
-            public ResourceCollection findCollection(XPathContext xpc, string str)
+ 
+
+            public IResourceCollection FindCollection(DynamicContext context, string str)
             {
-                if (str == null) {
+                if (str == null)
+                {
                     str = "";
                 }
-                return (ResourceCollection)collections[new Uri(str)];
+                
+                    Uri uri = new Uri(str);
+                if (collections.ContainsKey(uri))
+                {
+                    return collections[new Uri(str)];
+                }
+                else {
+                    return null;
+                }
+                        
             }
         }
 
