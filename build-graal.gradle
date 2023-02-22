@@ -626,7 +626,7 @@ task graal_eec_jar(
   }
 
   task "setup_${edition}c_pypi"(
-    dependsOn: [graalEdition]
+    dependsOn: [graalEdition, "${edition}c_graalImage"]
   ) {
     inputs.files fileTree(dir: "${projectDir}/src/main/c/pypi")
     inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
