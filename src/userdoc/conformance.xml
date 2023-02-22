@@ -119,8 +119,7 @@
                
             <p>Saxon-EE also provides many
                more operational options not specifically tied to language features, for example 
-               the ability to export packages in compiled form, and multi-threaded execution. SaxonJ-EE also includes
-            Java bytecode generation.</p>
+               the ability to export packages in compiled form, and multi-threaded execution. </p>
          </li>
       </ul>
       
