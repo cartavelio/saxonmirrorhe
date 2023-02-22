@@ -163,6 +163,7 @@
                 collation.</p>
         </desc>
     </feature>
+    
     <feature>
         <featureCode>7</featureCode>
         <name>COLLATION_URI_RESOLVER_CLASS</name>

@@ -234,7 +234,15 @@ public class Feature<T> {
     </xsl:template>
 
     <xsl:template match="type[starts-with(., 'string') or starts-with(., 'Absolute URI')]">
-        <xsl:text><![CDATA[String]]></xsl:text>
+        <xsl:text><![CDATA[string]]></xsl:text>
+    </xsl:template>
+    
+    <xsl:template match="type[starts-with(., 'com.saxonica.') ]">
+        <xsl:text>{replace(., 'com\.saxonica\.', 'Saxon.Eej.')</xsl:text>
+    </xsl:template>
+    
+    <xsl:template match="type[starts-with(., 'net.sf.saxon.') ]">
+        <xsl:text>{replace(., 'net\.sf\.saxon\.', 'Saxon.Hej.')</xsl:text>
     </xsl:template>
 
     <xsl:template match="type[starts-with(., 'Instance of')]" expand-text="yes">
