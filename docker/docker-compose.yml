@@ -1,13 +1,26 @@
 version: '3.8'
 
 services:
+#    sqlserver:
+#      image: az82/docker-derby
+#      container_name: sqlserver
+#      ports:
+#        - 1527:1527
+#      volumes:
+#        - ../build/sql/data:/dbs
+#      networks:
+#        - external_net
+
     sqlserver:
-      image: az82/docker-derby
+      image: postgres:13.2-alpine
       container_name: sqlserver
       ports:
-        - 1527:1527
+        - 5432:5432
       volumes:
-        - ../build/derby/data:/dbs
+        - ../build/sql/data:/var/lib/postgresql/data
+        - ../tools/postgresql:/app/sql
+      environment:
+        POSTGRES_PASSWORD: admin
       networks:
         - external_net
 
