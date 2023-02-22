@@ -141,6 +141,7 @@ public class AllowedProtocolsTest {
             }
         } catch (TransformerException e) {
             if (expectSuccess) {
+                e.printStackTrace();
                 fail("Expected execution to succeed");
             }
         }
