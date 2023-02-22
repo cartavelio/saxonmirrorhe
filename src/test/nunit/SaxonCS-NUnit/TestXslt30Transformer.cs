@@ -1522,15 +1522,15 @@ namespace SaxonCS_NUnit {
             char c3 = paramsi[(new QName("doc"))].DeclaredType.OccurrenceIndicator;
             Assert.AreEqual(c3, XdmSequenceType.ONE, "c3");
             XdmItemType t4 = paramsi[(new QName("ele"))].DeclaredType.ItemType;
-            Assert.AreEqual("element(Q{http://pre/}a, Q{" + NamespaceConstant.SCHEMA + "}date)", t4.ToString(), "t4");
+            Assert.AreEqual("element(Q{http://pre/}a, xs:date)", t4.ToString(), "t4");
             char c4 = paramsi[(new QName("ele"))].DeclaredType.OccurrenceIndicator;
             Assert.AreEqual(c4, XdmSequenceType.ONE_OR_MORE, "c4");
         }
 
         /**
-     * Test an external  call on a stylesheet function
-     * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
-     */
+         * Test an external  call on a stylesheet function
+         * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
+         */
         [Test]
         public void TestCallFunction() {
             try {

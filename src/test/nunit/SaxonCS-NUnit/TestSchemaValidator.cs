@@ -265,11 +265,15 @@ namespace SaxonCS_NUnit {
             try {
                 Processor proc = new Processor(true);
                 SchemaManager schemaManager = proc.SchemaManager;
+                schemaManager.ErrorReporter = error => {
+                    Console.Error.WriteLine(error.ToString());
+                };
                 schemaManager.Compile(new Uri("https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd"));
                 SchemaValidator validator = schemaManager.NewSchemaValidator();
                 validator.Validate(new Uri(ConfigTest.DataDirUri + "books.xsl"));
             }
             catch (Exception e) {
+                Console.Error.WriteLine(e.StackTrace);
                 Assert.Fail(e.Message);
             }
         }
