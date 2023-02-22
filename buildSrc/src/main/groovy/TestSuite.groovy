@@ -199,6 +199,7 @@ class TestSuite {
   private String computeTaskName() {
     def taskroot = ["qt3" : "QT3TestSuite",
                     "qt3extra": "QT3ExtraTestSuite",
+                    "qt4" : "QT4TestSuite",
                     "xslt30": "Xslt30TestSuite",
                     "xslt30extra": "Xslt30ExtraTestSuite",
                     "xsd": "XsdTestSuite"]
@@ -254,6 +255,7 @@ class TestSuite {
   private String computeClass() {
     def mainclass = ["qt3" : "QT3TestDriver${testRelease.toUpperCase()}",
                      "qt3extra": "QT3TestDriver${testRelease.toUpperCase()}",
+                     "qt4" : "QT3TestDriver${testRelease.toUpperCase()}",
                      "xslt30": "Xslt30TestSuiteDriver${testRelease.toUpperCase()}",
                      "xslt30extra": "Xslt30TestSuiteDriver${testRelease.toUpperCase()}",
                      "xsd": "ee.SchemaTestSuiteDriver"]
@@ -473,6 +475,109 @@ class TestSuite {
     }
 
     Task t = project.tasks.findByName("qt3ExtraTestsJava")
+    if (t) {
+      t.dependsOn testTaskName
+    }
+    t = project.tasks.findByName("${testRelease}jTestSuitesJava")
+    if (t) {
+      t.dependsOn testTaskName
+    }
+  }
+
+  def qt4(Closure cl) {
+    reset("qt4")
+    cl.delegate = this
+    cl()
+
+    require("language", testLang)
+    require("directory", testDir)
+    require("release", testRelease)
+    forbid("jit", testJit)
+    forbid("export", testExport)
+
+    testCatalog = testCatalog ?: "catalog.xml"
+    testTaskName = testTaskName ?: computeTaskName()
+    testClass = testClass ?: computeClass()
+    testEx = testEx ?: computeExceptions()
+
+    def testReport = computeReport()
+    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
+    testReportFilename = getReportFilename(testReport.getAbsolutePath())
+
+    if (testDebug) {
+      dumpConfiguration()
+    }
+
+    project.task(testTaskName, type: JavaExec) {
+      inputs.files project.fileTree(dir: "${project.projectDir}/src")
+      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
+      outputs.upToDateWhen { false }
+
+      def msg = "Run the QT4 test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
+      if (testByteCode != null || testUnfolded != null) {
+        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
+      }
+      description msg
+      dependsOn "${testRelease}jCompile", "${testRelease}j_compileTestDrivers", "cloneQT4TestSuite"
+      classpath = project.configurations.testDrivers \
+      + project.files("${project.buildDir}/classes/${testRelease}j") \
+      + project.files("${project.buildDir}/testdriver_classes/${testRelease}j")
+
+      doFirst {
+        project.mkdir testReportDirectory
+      }
+
+      main = testClass
+      def testargs = [testDir, testCatalog,
+                      "-exceptions:${testEx}",
+                      "-reportfilename:${testReportFilename}.xml",
+                      "-o:${testReportDirectory}",
+                      "-lang:${testLang}",
+                      "-bytecode:${testByteCode ? 'on' : 'off'}"]
+
+      if (testUnfolded) {
+        testargs += ["-unfolded"]
+      }
+
+      testargs += testOptions
+
+      //println(testargs)
+
+      args testargs
+    }
+
+    project.task("debug_${testTaskName}", type: JavaExec) {
+      inputs.files project.fileTree(dir: "${project.projectDir}/src")
+      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
+      outputs.upToDateWhen { false }
+
+      def msg = "Debug the QT4 test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
+      if (testByteCode != null || testUnfolded != null) {
+        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
+      }
+      description msg
+      dependsOn "compileJava", "cloneQT4TestSuite"
+      classpath = project.configurations.testDrivers \
+      + project.files("${project.buildDir}/classes/java/main")
+
+      doFirst {
+        project.mkdir testReportDirectory
+      }
+
+      main = testClass
+      def testargs = [testDir, testCatalog,
+                      "-exceptions:${testEx}",
+                      "-reportfilename:${testReportFilename}.xml",
+                      "-o:${testReportDirectory}",
+                      "-lang:${testLang}",
+                      "-bytecode:${testByteCode ? 'on' : 'off'}",
+                      "-unfolded:${testUnfolded ? 'on' : 'off'}"]
+
+      testargs += testOptions
+      args testargs
+    }
+
+    Task t = project.tasks.findByName("qt4TestsJava")
     if (t) {
       t.dependsOn testTaskName
     }
