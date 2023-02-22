@@ -1575,7 +1575,7 @@
             <li class="csonly"><p>Similarly with the Saxon.Api interface on .NET, use the method
             <code>Xslt30Transformer.ApplyTemplates()</code>, supplying a <code>Stream</code> 
             as input.</p></li>
-            <li class="javaonly><p">With the JAXP API, start by instantiating a <code>com.saxonica.config.StreamingTransformerFactory</code>.
+            <li class="javaonly"><p>With the JAXP API, start by instantiating a <code>com.saxonica.config.StreamingTransformerFactory</code>.
             Invoke the transformation in the usual way by creating a <code>Transformer</code> (optionally via a
             <code>Templates</code> object). When the <code>transform()</code> method is called with a
             <code>StreamSource</code> or <code>SAXSource</code> as input, and when the initial mode
