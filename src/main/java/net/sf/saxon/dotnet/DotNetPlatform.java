@@ -493,7 +493,8 @@ public class DotNetPlatform implements Platform {
 //#if EE==true
         editionCode = "ee";
 //#endif
-        System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl, saxon-"+editionCode+"-"+ Version.getProductVersion() +", Version="+ Version.getProductVersion()+", Culture=neutral, PublicKeyToken=e1fdd002d5083fe6");
+        System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl, saxon-"+editionCode+"-"+
+                Version.getProductVersion() +", Version="+ Version.getProductVersion()+".0.0, Culture=neutral, PublicKeyToken=e1fdd002d5083fe6");
     }
 
     @Override
