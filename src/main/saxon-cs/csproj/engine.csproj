@@ -30,8 +30,8 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
     </ItemGroup>
     
     <ItemGroup>
-        <None Include="../../tools/saxon-cs/LICENSE.txt"/>
-        <None Include="../../tools/saxon-cs/README.md"/>
+        <None Include="../../tools/saxon-cs/LICENSE.txt" Pack="true" PackagePath=""/>
+        <None Include="../../tools/saxon-cs/README.md" Pack="true" PackagePath=""/>
     </ItemGroup>    
     
     <ItemGroup>
