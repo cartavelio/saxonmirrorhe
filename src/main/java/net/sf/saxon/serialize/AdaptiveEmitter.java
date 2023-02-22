@@ -333,9 +333,13 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
     @Override
     public void close() throws XPathException {
         super.close();
-        if (writer != null && mustClose) {
+        if (writer != null) {
             try {
-                writer.close();
+                if (mustClose) {
+                    writer.close();
+                } else {
+                    writer.flush();
+                }
             } catch (IOException e) {
                 throw new XPathException(e);
             }
