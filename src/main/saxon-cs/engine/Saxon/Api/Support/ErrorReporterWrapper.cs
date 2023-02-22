@@ -27,7 +27,7 @@ namespace Saxon.Api.Support {
         
 
         public void report(Saxon.Hej.s9api.XmlProcessingError error) {
-            this.reporter.Invoke(new Saxon.Api.XmlProcessingError(error));
+            this.reporter.Invoke(new Saxon.Api.Error(error));
         }
     }
 }

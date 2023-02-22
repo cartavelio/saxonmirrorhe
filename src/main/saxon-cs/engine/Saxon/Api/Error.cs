@@ -4,7 +4,7 @@ using Saxon.Hej.expr.parser;
 
 namespace Saxon.Api {
     /// <summary>
-    /// The <c>XmlProcessorError</c> class contains information about an error detected during
+    /// The <c>Saxon.Api.Error</c> class contains information about an error detected during
     /// compilation or execution of a stylesheet, query, XPath expression, or schema. Note
     /// that this class is not an exception (though in some cases it may wrap an exception);
     /// errors in schemas or stylesheets are considered as normal events and do not cause
@@ -14,10 +14,10 @@ namespace Saxon.Api {
     /// The constructor for this class is internal; instances of this class can be created
     /// internally by Saxon-CS, but not by user application code.
     /// </remarks>
-    public class XmlProcessingError
+    public class Error
     {
         private readonly Saxon.Hej.s9api.XmlProcessingError incident;
-        internal XmlProcessingError(Saxon.Hej.s9api.XmlProcessingError err)
+        internal Error(Saxon.Hej.s9api.XmlProcessingError err)
         {
             this.incident = err;
         }
@@ -51,7 +51,7 @@ namespace Saxon.Api {
         /// <summary>
         /// Return an equivalent error condition, to be treated as a warning. The original error is not changed.
         /// </summary>
-        public XmlProcessingError AsWarning() {
+        public Error AsWarning() {
             return new(incident.asWarning());
         }
 

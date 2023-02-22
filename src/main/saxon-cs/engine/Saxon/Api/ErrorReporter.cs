@@ -8,7 +8,7 @@ namespace Saxon.Api {
     /// <param name="error">The error condition being reported. Note that this is not an
     /// exception object (it cannot be thrown).</param>
     [Serializable]
-    public delegate void ErrorReporter(XmlProcessingError error);
+    public delegate void ErrorReporter(Error error);
 }
 
 // Copyright (c) 2021 Saxonica Limited
