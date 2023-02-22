@@ -252,6 +252,10 @@
         the filename or URI of a stylesheet to be used for formatting the result. This allows you, for example, to
         output the results in XML or JSON format, or to filter or reorder the results for analysis.</p>
         
+        <p>The <code>Transform</code> command recognizes the options <code>-target:JS2</code> and <code>-target:JS3</code>
+            to generate SEF files for different versions of SaxonJS. The option <code>-target:JS</code> is equivalent
+            to <code>-target:JS2</code> for the time being; the option <code>-target:JS3</code> is for future use.</p>
+        
        
         
     </category>
