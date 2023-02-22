@@ -25,14 +25,15 @@
                      standard library classes, the language runtime, and statically linked native 
                      code from the JDK.</li>
                </ul>
+               <p>All editions of SaxonC are currently built using GraalVM Community Edition.</p>
             </li>
             <li><p>SaxonC now uses the Native Image C API instead of JNI Invocation API for calling methods embedded 
                in a native (that is, non-Java) shared library. There are benchmarks
                available which show that using the Native Image C API is considerably faster than using JNI.</p>
             </li>
-            <li><p>SaxonC-EE and SaxonC-PE are built using GraalVM Enterprise Edition, while SaxonC-HE 
+            <!--<li><p>SaxonC-EE and SaxonC-PE are built using GraalVM Enterprise Edition, while SaxonC-HE 
                is built using GraalVM Community Edition. Early indications suggest that GraalVM Enterprise
-               Edition delivers a 20% performance boost.</p></li>
+               Edition delivers a 20% performance boost.</p></li>-->
             <li><p>The SaxonC Python extension is now available as a Python wheel package. This is available using Pypi for a number of platforms and
                flavors including MacOS, Linux and Windows.
                Python 3.8+ is supported.</p></li>
