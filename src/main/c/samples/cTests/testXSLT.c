@@ -1,11 +1,23 @@
+
+#include <stdio.h>  /* defines FILENAME_MAX */
+#ifdef WINDOWS
+#include <direct.h>
+#define GetCurrentDir _getcwd
+#else
+#include <unistd.h>
+#define GetCurrentDir getcwd
+#endif
+
 #include "../../Saxon.C.API/SaxonCProcessor.h"
 /*#include "../../Saxon.C.API/SaxonCXPath.h" */
 //#include "../../Saxon.C.API/SaxonCGlue.h"
 
 int main()
 {
-   /* HANDLE myDllHandle;
-    jclass  myClassInDll;
+
+    char cwd[FILENAME_MAX]; //create string buffer to hold path
+    GetCurrentDir( cwd, FILENAME_MAX );
+    printf("CWD = %s\n",cwd);
     int cap = 10;
     sxnc_parameter * parameters;
     parameters;
@@ -20,10 +32,6 @@ int main()
 
     initSaxonc(&environi, &processor, &parameters, &properties, parCap, parCap);
 
-    environi->myDllHandle = loadDefaultDll ();*/
-
-
-
      /* graal_isolate_t *isolate = NULL;
   graal_isolatethread_t *thread = NULL;
 
@@ -31,35 +39,17 @@ int main()
     fprintf(stderr, "initialization error\n");
     return 1;
   }*/
-    sxnc_environment * environi;
-    environi  =  (sxnc_environment *)malloc(sizeof(sxnc_environment));
+
+    //environi  =  (sxnc_environment *)malloc(sizeof(sxnc_environment));
     create_graalvm_isolate(environi);
 
 
-/*
-    graal_isolate_t *isolate = NULL;
-    graal_isolatethread_t *thread = NULL;
-    sxnc_environment * environi;
-    environi = malloc(sizeof(sxnc_environment));
+    c_createSaxonProcessor((environi->thread), processor, 0);
 
-
-    create_graalvm_isolate(environi);*/
-
-    /*initJavaRT (environi->myDllHandle, &(environi->jvm), &(environi->env));
-    const char *verCh = version(environi);
-    printf("XSLT Tests\n\nSaxon version: %s \n", verCh);	
-    jobject num = integerValue(environi, 5);
-    setParameter(&parameters, &parLen, &parCap,"", "numParam", num);*/
-
-
-    //const char *result = xsltApplyStylesheet(environi, &processor, NULL, "../data/cat.xml","../data/test.xsl", 0 ,0, 0, 0);
-    int64_t procRef = createSaxonProcessor2((environi->thread), 0);
-
-    char * verCh  = getProductVariantAndVersion(environi, procRef);
+    char * verCh  = getProductVariantAndVersion(environi, processor);
     printf("XSLT Tests\n\nSaxon version: %s \n", verCh);
-    printf("%ld", (long)procRef);
 
-    const char *result = xsltApplyStylesheet1(environi, procRef, "/home/ond1/work/repository/saxondev-11/src/main/c/samples/cTests", "../data/cat.xml","../data/test.xsl", 0 ,0, 0, 0);
+    const char *result = xsltApplyStylesheet(environi, processor, cwd, "../data/cat.xml","../data/test.xsl", 0 ,0, 0, 0);
 
     if(!result) {
       printf("result is null \n");

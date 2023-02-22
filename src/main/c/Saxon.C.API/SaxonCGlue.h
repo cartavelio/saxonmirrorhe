@@ -90,7 +90,8 @@ typedef struct {
  * <p/>
  */
 typedef struct {
-    int64_t parameterDataRef; /*!< Internal use only. The value of the parameter points to the Java object. */
+    char * name;
+    int64_t value; /*!< Internal use only. The value of the parameter points to the Java object. */
 
 } sxnc_parameter;
 
@@ -100,7 +101,8 @@ typedef struct {
  * <p/>
  */
 typedef struct {
-    int64_t parameterDataRef; /*!< Internal use only. The value of the parameter points to the Java object. */
+    char * name;
+    char * value; /*!< Internal use only. The value of the parameter points to the Java object. */
 } sxnc_property;
 
 /*! <code>sxnc_value</code>. This struct is used to capture the xdmvalue and its type information.
@@ -110,9 +112,17 @@ typedef struct {
     int64_t xdmvalue; /*!< Internal use only. The value given as a Java object. */
 } sxnc_value;
 
+
+/*! <code>sxnc_processor</code>. This struct is used to capture the Java processor objects created in C for XSLT, XQuery and XPath
+ * <p/>
+ */
+typedef struct {
+	int64_t value;
+} sxnc_processor;
+
 extern int64_t cpp;
 
-
+typedef void* (*allocFn)(size_t length);
 
 extern const char * failure;
 
@@ -138,8 +148,6 @@ void addProcessorValue(graal_isolatethread_t*,  int64_t processorDataRef, int64_
 void setCatalogFile(graal_isolatethread_t*, char * filename); */
 
 
-
-//void initSaxonc(sxnc_environment ** environi);
 
 
 /*
@@ -167,6 +175,9 @@ int detach_graalvm_thread(sxnc_environment * env);
 
 
 int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license);
+
+
+sxnc_processor* c_createSaxonProcessor(graal_isolatethread_t *thread, sxnc_processor * proc, int license);
 
 
 /*

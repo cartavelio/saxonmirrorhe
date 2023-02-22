@@ -16,14 +16,28 @@
 
 
 
-/*! <code>sxnc_processor</code>. This struct is used to capture the Java processor objects created in C for XSLT, XQuery and XPath 
+/*! <code>sxnc_xquery</code>. This struct is used to capture the Java processor objects created in C for XQuery
  * <p/>
  */
 typedef struct {
 	int64_t xqueryProc;
+} sxnc_xquery;
+
+
+/*! <code>sxnc_processor</code>. This struct is used to capture the Java processor objects created in C for XSLT
+ * <p/>
+ */
+typedef struct {
     int64_t xsltProc;
+} sxnc_xslt;
+
+
+/*! <code>sxnc_processor</code>. This struct is used to capture the Java processor objects created in C for XPath
+ * <p/>
+ */
+typedef struct {
     int64_t xpathProc;
-} sxnc_processor;
+} sxnc_xpath;
 
 EXTERN_SAXONC
 
@@ -33,9 +47,9 @@ EXTERN_SAXONC
 /*
  * Get the Saxon version 
  */
-const char * version(sxnc_environment *environi, int64_t proc);
+const char * version(sxnc_environment *environi, sxnc_processor* proc);
 
-const char * getProductVariantAndVersion(sxnc_environment * environi, int64_t proc);
+const char * getProductVariantAndVersion(sxnc_environment * environi, sxnc_processor* proc);
 
 
 
@@ -43,15 +57,15 @@ void initSaxonc(sxnc_environment ** environi, sxnc_processor ** proc, sxnc_param
 
 void freeSaxonc(sxnc_environment ** environi, sxnc_processor ** proc, sxnc_parameter **param, sxnc_property ** prop);
 
-void xsltSaveResultToFile(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char * source, char* stylesheet, char* outputfile, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
+void xsltSaveResultToFile(sxnc_environment *environi, sxnc_processor * proc, char * cwd, char * source, char* stylesheet, char* outputfile, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
 
-const char * xsltApplyStylesheet1(sxnc_environment *environi, int64_t proc, char * cwd, char * source, char* stylesheet, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
+const char * xsltApplyStylesheet(sxnc_environment *environi, sxnc_processor* proc, char * cwd, char * source, char* stylesheet, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
 
 
 
-void executeQueryToFile(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char* outputfile, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
+void executeQueryToFile(sxnc_environment *environi, sxnc_processor * proc, char * cwd, char* outputfile, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
 
-const char * executeQueryToString(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
+const char * executeQueryToString(sxnc_environment *environi, sxnc_processor * proc, char * cwd, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
 
 EXTERN_SAXONC_END
 
