@@ -173,10 +173,13 @@ dependencies {
     [group: 'javax.mail', name: 'javax.mail-api', version: mailVersion ],
     [group: 'com.sun.mail', name: 'javax.mail', version: mailVersion ],
     [group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: tagsoupVersion],
+    [group: 'org.graalvm.sdk', name: 'graal-sdk', version: graalVersion],
     fileTree(dir: "lib/asm-${asmVersion}"),
     files(saxonLicenseDir),
     files("lib/Tidy.jar"),
     //fileTree(dir: 'extra/lib/', include: ['*.jar'])
+    fileTree(dir: '/usr/lib/jvm/graalvm/lib/graalvm', include: ['*.jar']),
+    fileTree(dir: '/usr/lib/jvm/graalvm/lib/*', include: ['*.jar'])
   )
   jarjarAsm (
     fileTree(dir: "${buildDir}/lib/asm")
