@@ -23,9 +23,7 @@ namespace Saxon.Api {
 
         private readonly Saxon.Hej.s9api.Serializer jSerializer;
         private readonly Properties props = new();
-        //private readonly CharacterMapIndex characterMapIndex = new();
-        private Properties defaultOutputProperties;
-        
+
         /// <summary>QName identifying the serialization parameter "method". If the value
         /// is a user-defined method, then it is given as a QName in Clark notation, that is
         /// "{uri}local".</summary>
