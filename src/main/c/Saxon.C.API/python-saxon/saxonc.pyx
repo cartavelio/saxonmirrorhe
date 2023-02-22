@@ -147,13 +147,15 @@ cdef class PySaxonProcessor:
             py_config_string = config_file.encode('UTF-8') if config_file is not None else None
             c_str = py_config_string if config_file is not None else ""
             if c_str is not NULL:
-                self.thisptr = new saxoncClasses.SaxonProcessor(c_str)
-                if self.thisptr == NULL:
-                    raise Exception("Configuration file for SaxonProcessor is None")
-            else:
-                raise Exception("Configuration file for SaxonProcessor is None")
+                try:
+                    self.thisptr = new saxoncClasses.SaxonProcessor(c_str)
+                except:
+                    raise Exception("Failed to create PySaxonProcessor object - with configuration file") from None
         else:
-            self.thisptr = new saxoncClasses.SaxonProcessor(l)
+            try:
+                self.thisptr = new saxoncClasses.SaxonProcessor(l)
+            except:
+                raise Exception("Failed to create PySaxonProcessor object") from None
 
     def __dealloc__(self):
         """The destructor."""
@@ -4752,4 +4754,4 @@ cdef class PyXdmArray(PyXdmFunctionItem):
          return 1
 
      
-_o=PySaxonProcessor(None, False, True)       #  This is important to prevent Jet calling release until all Saxon objects have been garbage collected!
+_o=PySaxonProcessor(None, False, True)       # This is important to prevent Python calling release too early before all Saxon objects have been garbage collected!

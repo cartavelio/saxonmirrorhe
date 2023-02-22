@@ -18,6 +18,14 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"com.saxonica.config.ProfessionalConfiguration",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"net.sf.saxon.Configuration",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"com.saxonica.ee.domino.DominoNode"
 },
 {
