@@ -18,52 +18,191 @@
 #include <map>
 #include <set>
 
+
+/**
+ * A map in the XDM data model. A map is a list of zero or more entries, each of which
+ * is a pair comprising a key (which is an atomic value) and a value (which is an arbitrary value).
+ * The map itself is an XDM item.
+ * <p>An XdmMap is immutable.</p>
+ * @since 11
+ */
 class XdmMap : public XdmFunctionItem {
 
 public:
 
+    //! Default constructor.
+    /**
+     * Create an empty XdmMap
+     */
     XdmMap();
 
+    //! Copy constructor.
+    /**
+     * Copy constructor for XdmMap
+     */
     XdmMap(const XdmMap &d);
 
-
+    //! Destructor.
+    /**
+     * Destructor for XdmMap
+     */
     virtual ~XdmMap(){
-	//std::cerr<<"destructor called for XdmMap"<<std::endl;
 
     }
 
-    XdmMap(jobject);
+    //! XdmMap constructor which is a wrapper object from the Java XdmMap object - internal use
+    /**
+     * @param obj - The internal Java object for the XdmMap is wrapped here in the C++ XdmMap
+     */
+    XdmMap(jobject obj);
 
-    XdmMap(std::map<XdmAtomicValue *, XdmValue*> value);
+    //! Create an XdmMap supplying the entries in the form of a std::map, where the keys and values in the std::map are XDM values
+    /**
+     *
+     * @param map - a std::map whose entries are the (key, value) pairs
+     */
+    XdmMap(std::map<XdmAtomicValue *, XdmValue*> map);
 
+
+    //! Get the number of entries in the map
+    /**
+     *
+     *
+     * @return the number of entries in the map. (Note that the <code>size()</code> method returns 1 (one),
+     * because an XDM map is an item.)
+     */
     int mapSize();
 
+    //! Returns the value to which the specified key is mapped, or NULL if this map contains no mapping for the key.
+    /**
+     *
+     *
+     * @param key the key whose associated value is to be returned.
+     * @return the value to which the specified key is mapped, or
+     * NULL if this map contains no mapping for the key
+     * @remark if null is returned check getException method on the SaxonProcessor object for errors
+     */
     XdmValue * get(XdmAtomicValue* key);
 
+    //! Returns the value to which the specified string-valued key is mapped,
+    //! or NULL if this map contains no mapping for the key. This is a convenience
+    //! method to save the trouble of converting the String to an <code>XdmAtomicValue</code>.
+    /**
+     *
+     * @param key the key whose associated value is to be returned. This is treated
+     *            as an instance of <code>xs:string</code> (which will also match
+     *            entries whose key is <code>xs:untypedAtomic</code> or <code>xs:anyURI</code>)
+     * @return the value to which the specified key is mapped, or
+     * NULL if this map contains no mapping for the key
+     */
     XdmValue * get(const char * key);
 
+    //!  Returns the value to which the specified integer-valued key is mapped
+    //! or NULL if this map contains no mapping for the key. This is a convenience
+    //! method to save the trouble of converting the integer to an <code>XdmAtomicValue</code>.
+    /**
+     *
+     * @param key the key whose associated value is to be returned. This is treated
+     *            as an instance of <code>xs:integer</code> (which will also match
+     *            entries whose key belongs to another numeric type)
+     * @return the value to which the specified key is mapped, or NULL if this map contains no mapping for the key
+     */
     XdmValue * get(int key);
 
+    //! Returns the value to which the specified double-valued key is mapped,
+    //! or {@code null} if this map contains no mapping for the key. This is a convenience
+    //! method to save the trouble of converting the double to an <code>XdmAtomicValue</code>.
+    /**
+     *
+     * @param key the key whose associated value is to be returned. This is treated
+     *            as an instance of <code>xs:double</code> (which will also match
+     *            entries whose key belongs to another numeric type)
+     * @return the value to which the specified key is mapped, or
+     * NULL if this map contains no mapping for the key
+     */
     XdmValue * get(double key);
 
+    //!  Returns the value to which the specified integer-valued key is mapped
+    //! or NULL if this map contains no mapping for the key. This is a convenience
+    //! method to save the trouble of converting the integer to an <code>XdmAtomicValue</code>.
+    /**
+     *
+     * @param key the key whose associated value is to be returned. This is treated
+     *            as an instance of <code>xs:integer</code> (which will also match
+     *            entries whose key belongs to another numeric type)
+     * @return the value to which the specified key is mapped, or
+     * {@code null} if this map contains no mapping for the key
+     */
     XdmValue *  get(long key);
 
+    //! Create a new map containing an additional (key, value) pair.
+    /**
+     *
+     * If there is an existing entry with the same key, it is removed
+     * @return a new map containing the additional entry. The original map is unchanged.
+     */
     XdmMap * put(XdmAtomicValue * key, XdmValue * value);
 
+    //! Create a new map in which the entry for a given key has been removed.
+    /**
+     *
+     * If there is no entry with the same key, the new map has the same content as the old (it may or may not
+     * be the same Java object)
+     * @param key - The key to be removed given as an XdmAtomicValue
+     * @return a map without the specified entry. The original map is unchanged.
+     */
     XdmMap * remove(XdmAtomicValue* key);
 
+    //! Get the keys present in the map in the form of an unordered std::set.
+    /**
+     *
+     * @return an unordered std::set of the keys present in this map, in arbitrary order.
+     */
     std::set<XdmAtomicValue*> keySet();
 
+    //! Get the keys present in the map in the form of an unordered pointer array of XdmAtomicValue.
+    /**
+     *
+     * @return an unordered pointer array of the keys present in this map, in arbitrary order.
+     */
     XdmAtomicValue ** keys();
 
     //std::map<XdmAtomicValue*, XdmValue*> asMap();
 
+    //! Returns <tt>true</tt> if this map contains no key-value mappings.
+    /**
+     * @return <tt>true</tt> if this map contains no key-value mappings
+     */
     bool isEmpty();
 
+    //! Returns <tt>true</tt> if this map contains a mapping for the specified key.
+    /**
+     * More formally, returns <tt>true</tt> if and only if
+     * this map contains a mapping for a key <tt>k</tt> such that
+     * <tt>(key==null ? k==null : key.equals(k))</tt>.  (There can be
+     * at most one such mapping.)
+     *
+     * @param key key whose presence in this map is to be tested
+     * @return <tt>true</tt> if this map contains a mapping for the specified key
+     */
     bool containsKey(XdmAtomicValue* key);
 
+    //! Returns a std::list containing the values found in this map, that is, the value parts of the key-value pairs.
+    /**
+     *
+     *
+     * @return a std::list containing the values found in this map. The result
+     * may contain duplicates, and the ordering of the collection is unpredictable.
+     */
     std::list<XdmValue*> valuesAsList();
 
+    //! Returns a pointer array containing the values found in this map, that is, the value parts of the key-value pairs.
+    /**
+     *
+     *
+     * @return a pointer array containing the values found in this map. The result
+     * may contain duplicates, and the ordering of the collection is unpredictable.
+     */
     XdmValue** values();
 
     /**
@@ -86,9 +225,10 @@ public:
 private:
 
 
-    std::string fname;
-    std::map<XdmAtomicValue *, XdmValue*> data;
-    int arity, map_size;
+    std::string fname; /*!< The function name  */
+    std::map<XdmAtomicValue *, XdmValue*> data; /*!< Cached XdmMap represented internally as an std::map. This can also be represented as an JNI object */
+    int arity; /*!< The arity of this function  */
+    int map_size; /*!< Cached size of the map if  represented as a JNI object*/
 
 };
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2021 Saxonica Limited.
+// Copyright (c) 2022 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -25,7 +25,7 @@ class XdmArray;
 
 /*! An <code>XsltExecutable</code> represents the compiled form of a stylesheet.
  * <p>An XsltExecutable is created by using one of the <code>compile</code> methods on the
-  * {@link XsltProcessor} class.</p>
+  * Xslt30Processor class.</p>
  */
 class XsltExecutable {
 
@@ -47,18 +47,13 @@ public:
    void setcwd(const char* cwd);
 
 
-      //!Set the base output URI.
+      //! Set the base output URI.
           /**
-           * <p>This defaults to the base URI of the {@link Destination} for the principal output
-           * of the transformation if a destination is supplied and its base URI is known.</p>
-           * <p>If a base output URI is supplied using this method then it takes precedence
-           * over any base URI defined in the supplied {@code Destination} object, and
-           * it may cause the base URI of the {@code Destination} object to be modified in situ.</p>
-           * <p> The base output URI is used for resolving relative URIs in the <code>href</code> attribute
+        <p> The base output URI is used for resolving relative URIs in the <code>href</code> attribute
            * of the <code>xsl:result-document</code> instruction; it is accessible to XSLT stylesheet
-           * code using the XPath {@code current-output-uri()} function</p>
+           * code using the XPath current-output-uri() function</p>
            *
-           * @param baseUri - the base output URI
+           * @param baseURI - the base output URI
            */
       void setBaseOutputURI(const char * baseURI);
 
@@ -260,6 +255,12 @@ public:
 	return (new char*[len]);
     }
 
+    //! Utility method for Python API - internal use only
+    /**
+     * This method deletes a XdmValue pointer array
+     * @param arr - XdmValue pointer array
+     * @param len - length of the array
+     */
     void deleteXdmValueArray(XdmValue ** arr, int len){
 	for(int i =0; i< len; i++) {
 		//delete arr[i];
@@ -267,8 +268,9 @@ public:
 	delete [] arr;
     }
 
+    //! This method gives users the option to switch on or off the <code>xsl:message</code> feature.
     /**
-     * This method gives users the option to switch on or off the <code>xsl:message</code> feature. It is also possible
+     * It is also possible
      * to send the <code>xsl:message</code> outputs to file given by file name.
      * @param show - boolean to indicate if xsl:message should be outputted. Default is on.
      * @param  filename - If the filename argument is present then the xsl:message output is appended to the given
@@ -276,23 +278,24 @@ public:
      */
     void setSaveXslMessage(bool show, const char* filename=nullptr);
 
-   /*
+    //! Enable the capture of the result-document ouput into a std:map
+   /**
      * When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
      * via a user defined std::map object where we have the pair document URI and XdmNode object.
-     * @param 
      * @param flag - true enables map object which is used to save the result documents from the transformation
     */
     void setCaptureResultDocuments(bool flag);
 
 
+    //! Produce a representation of the compiled stylesheet
     /**
-     * Produce a representation of the compiled stylesheet, in XML form, suitable for
+     * The representation of the compiled stylesheet is in an XML form, suitable for
      * distribution and reloading. If the configuration under which the export takes place
      * is suitably licensed, then license information will be included in the export file
      * allowing execution of the stylesheet without any additional license.
      * <p><i>The detailed form of the output representation is not documented.</i></p>
      *
-     * @param outputFilename the destination for the XML document containing the diagnostic representation
+     * @param filename - the destination for the XML document containing the diagnostic representation
      *                    of the compiled stylesheet. The stream will be closed when writing has finished.
      */
     void exportStylesheet(const char * filename);
@@ -331,7 +334,7 @@ public:
      * The initial match selection must be set using one of the two methods setInitialMatchSelection or setInitialMatchSelectionFile.
      * The result is stored in the supplied output file.
      *
-     * @param outputfile - The file name where results will be stored
+     * @param outfile - The file name where results will be stored
      */
     void applyTemplatesReturningFile(const char* outfile);
 
@@ -355,7 +358,7 @@ public:
     * called, then the parameters supplied are made available to the called template (no error
     * occurs if parameters are supplied that are not used).
     * @param templateName - The name of the initial template. This must match the name of a public named template in the stylesheet. If the value is nullptr, the clark name for xsl:initial-template is used.
-    * @param outputfile - The file name where results will be stored,
+    * @param outfile - The file name where results will be stored,
     */
     void callTemplateReturningFile(const char* templateName, const char* outfile);
 
@@ -369,13 +372,12 @@ public:
     */
     const char* callTemplateReturningString(const char* templateName);
 
-    //! Invoke a transformation by calling a named template and return result as a string.
+    //! Invoke a transformation by calling a named template and return result as a XdmValue.
     /** The results of calling the template are wrapped in a document node, which is then returned as an XdmValue.
     * If setInitialTemplateParameters(std::Map, boolean) has been
     * called, then the parameters supplied are made available to the called template (no error
     * occurs if parameters are supplied that are not used).
     * @param templateName - the name of the initial template. This must match the name of a public named template in the stylesheet. If the value is nullptr, the clark name for xsl:initial-template is used.
-    * @param outputfile - The file name where results will be stored,
     */
     XdmValue* callTemplateReturningValue(const char* templateName);
 
@@ -388,7 +390,7 @@ public:
     *                    will be converted if necessary to the type as defined in the function signature, using
     *                    the function conversion rules.
     * @param argument_length - the Coutn of arguments objects in the array
-    * @param outputfile - The file name where results will be stored,
+    * @param outfile - The file name where results will be stored,
     */
     void callFunctionReturningFile(const char* functionName, XdmValue ** arguments, int argument_length, const char* outfile);
 
@@ -400,7 +402,6 @@ public:
     *                    will be converted if necessary to the type as defined in the function signature, using
     *                    the function conversion rules.
     * @param argument_length - the Coutn of arguments objects in the array
-    * @param outputfile - The file name where results will be stored,
     */
     const char * callFunctionReturningString(const char* functionName, XdmValue ** arguments, int argument_length);
 

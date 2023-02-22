@@ -112,7 +112,7 @@ typedef struct {
 //==========================================
 
 
-//!An <code>SaxonProcessor</code> class acts as a factory for generating XQuery, XPath, Schema and XSLT compilers
+//! The <code>SaxonProcessor</code> class acts as a factory for generating XQuery, XPath, Schema and XSLT compilers
 /*! The <code>SaxonProcessor</code> class not only generates XQuery, XPath, Schema and XSLT Processors, but is used to create Xdm objects from primitive types.
  */
 class SaxonProcessor {
@@ -173,16 +173,14 @@ public:
     SaxonProcessor &operator=(const SaxonProcessor &other);
 
 
+    //! SaxonProcessor copy constructor.
     /**
-     * Xslt30Processor copy constructor.
-     * @param other - Xslt30Processor
+     *
+     * @param other - SaxonProcessor
      */
     SaxonProcessor(const SaxonProcessor &other);
 
-    /*!
-
-       * Destructor
-     */
+    //! Destructor method. At the end of the program call the release() method to clear the JVM.
     ~SaxonProcessor();
 
     //! Get any error message thrown by the processor
@@ -192,48 +190,51 @@ public:
     */
     const char * getErrorMessage();
 
+    //! Create a DocumentBuilder.
     /**
-     * Create a DocumentBuilder. A DocumentBuilder is used to load source XML documents.
+     * A DocumentBuilder is used to load source XML documents.
      *
      * @return a newly created DocumentBuilder
      */
     DocumentBuilder * newDocumentBuilder();
 
 
+    //! Create an Xslt30Processor.
     /*!
-
-       * Create an Xslt30Processor. An Xslt30Processor is used to compile XSLT30 stylesheets.
+       * An Xslt30Processor is used to compile XSLT30 stylesheets.
        * @return a newly created Xslt30Processor
      */
     Xslt30Processor *newXslt30Processor();
 
 
+    //! Create an XQueryProcessor.
     /*!
-     * Create an XQueryProcessor. An XQueryProcessor is used to compile XQuery queries.
+     * An XQueryProcessor is used to compile XQuery queries.
      *
      * @return a newly created XQueryProcessor
      */
     XQueryProcessor *newXQueryProcessor();
 
 
+    //! Create an XPathProcessor. An XPathProcessor is used to compile XPath expressions.
     /*!
-     * Create an XPathProcessor. An XPathProcessor is used to compile XPath expressions.
+     *
      *
      * @return a newly created XPathProcessor
      */
     XPathProcessor *newXPathProcessor();
 
-    /*!
-     * Create a SchemaValidator which can be used to validate instance documents against the schema held by this
-     * SchemaManager
+    //! Create a SchemaValidator which can be used to validate instance documents against the schema held by this SchemaManager
+    /**
+     *
      *
      * @return a new SchemaValidator
      */
     SchemaValidator *newSchemaValidator();
 
-
+    //! Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
     /*!
-     * Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
+     *
      * of a zero-length string (and potentially other strings, in future)
      *
      * @param value the String value. nullptr is taken as equivalent to "".
@@ -241,8 +242,9 @@ public:
      */
     XdmAtomicValue *makeStringValue(std::string str);
 
+    //! Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
     /*!
-     * Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
+     *
      * of a zero-length string (and potentially other strings, in future)
      *
      * @param value the char pointer array. nullptr is taken as equivalent to "".
@@ -250,8 +252,9 @@ public:
      */
     XdmAtomicValue *makeStringValue(const char *str);
 
+    //! Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
     /*!
-     * Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
+     *
      * of a zero-length string (and potentially other strings, in future)
      *
      * @param value the std:string
@@ -268,32 +271,35 @@ public:
     XdmAtomicValue *makeIntegerValue(int i);
 
 
+    //! Factory method. make an XdmAtomicValue from a primitive double value
     /*!
-     * Factory method (for convenience in compiled bytecode)
      *
      * @param d the value of the double
      * @return a new XdmAtomicValue
      */
     XdmAtomicValue *makeDoubleValue(double d);
 
+    //! Factory method. make an XdmAtomicValue from a primitive float value
     /*!
-     * Factory method (for convenience in compiled bytecode)
+     *
      *
      * @param f the value of the foat
      * @return a new XdmAtomicValue
      */
     XdmAtomicValue *makeFloatValue(float);
 
+    //! Factory method: makes either an Int64Value or a BigIntegerValue depending on the value supplied
     /*!
-     * Factory method: makes either an Int64Value or a BigIntegerValue depending on the value supplied
+     *
      *
      * @param l the supplied primitive long value
      * @return the value as a XdmAtomicValue which is a BigIntegerValue or Int64Value as appropriate
      */
     XdmAtomicValue *makeLongValue(long l);
 
+    //! Factory method: makes a XdmAtomicValue representing a boolean Value
     /*!
-     * Factory method: makes a XdmAtomicValue representing a boolean Value
+     *
      *
      * @param b true or false, to determine which boolean value is
      *              required
@@ -301,15 +307,17 @@ public:
      */
     XdmAtomicValue *makeBooleanValue(bool b);
 
+    //! Create an QName Xdm value from string representation in clark notation
     /**
-     * Create an QName Xdm value from string representation in clark notation
+     *
      * @param str - The value given in a string form in clark notation. {uri}local
      * @return XdmAtomicValue - value
     */
     XdmAtomicValue *makeQNameValue(const char *str);
 
+    //! Create an Xdm Atomic value from string representation
     /*!
-     * Create an Xdm Atomic value from string representation
+     *
      * @param type    - Local name of a type in the XML Schema namespace.
      * @param value - The value given in a string form.
      * In the case of a QName the value supplied must be in clark notation. {uri}local
@@ -317,181 +325,191 @@ public:
     */
     XdmAtomicValue *makeAtomicValue(const char *type, const char *value);
 
+    //! Make an XdmArray whose members are from string representation
     /**
-        * Make an XdmArray whose members are from string representation
+        *
         * @param input the input array of booleans
+        * @param length - the number of items in the array
         * @return an XdmArray whose members are xs:boolean values corresponding one-to-one with the input
    */
     XdmArray *makeArray(const char **input, int length);
 
 
+    //! Make an XdmArray whose members are xs:short values
     /**
-        * Make an XdmArray whose members are xs:short values
-        * @param input the input array of booleans
+        *
+        * @param input  - the input array of short values
+        * @param length - the number of items in the array
         * @return an XdmArray whose members are xs:boolean values corresponding one-to-one with the input
    */
     XdmArray *makeArray(short *input, int length);
 
 
+    //! Make an XdmArray whose members are xs:int values
     /**
-        * Make an XdmArray whose members are xs:int values
-        * @param input the input array of booleans
+        *
+        * @param input  - the input array of int values
+        * @param length - the number of items in the array
         * @return an XdmArray whose members are xs:boolean values corresponding one-to-one with the input
    */
     XdmArray *makeArray(int *input, int length);
 
+    //! Make an XdmArray whose members are xs:long values
     /**
-        * Make an XdmArray whose members are xs:long values
-        * @param input the input array of booleans
+        *
+        * @param input  - the input array of long values
+        * @param length - the number of items in the array
         * @return an XdmArray whose members are xs:boolean values corresponding one-to-one with the input
    */
     XdmArray *makeArray(long *input, int length);
 
     /**
         * Make an XdmArray whose members are xs:boolean values
-        * @param input the input array of booleans
+        * @param input  - the input array of boolean values
+        * @param length - the number of items in the array
         * @return an XdmArray whose members are xs:boolean values corresponding one-to-one with the input
    */
     XdmArray *makeArray(bool *input, int length);
 
 
+    //! Make an XdmArray whose members are of type XdmValue
     /**
-        * Make an XdmArray whose members are of type XdmValue
+        *
         * @param input the input array of XdmValue pointers
+        * @param length - the number of items in the array
         * @return an XdmArray whose members are XdmValue values corresponding one-to-one with the input
    */
     XdmArray *makeArray(XdmValue ** values, int length);
 
+    //! Make an XdmMap whose argument is a map from the standard template library.
     /**
-        * Make an XdmMap whose argument is a map from the standard template library.
+        *
         * @param dataMap  is std::map, which consists of keys as XdmAtomicValue and value is XdmValue.
         * @return an XdmMap whose members are key, value pair given as (XdmAtomicValue, XdmValue)
    */
     XdmMap *makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap);
 
+    //! Make an XdmMap whose argument is a map from the standard template library.
     /**
-        * Make an XdmMap whose argument is a map from the standard template library.
+        *
         * @param dataMap  is std::map, which consists of keys as std::string and value is XdmValue. Keys are converted to XdmAtomicValue objects
         * @return an XdmMap whose members are key, value pair given as (XdmAtomicValue, XdmValue)
    */
     static XdmMap *makeMap2(std::map<std::string, XdmValue *> dataMap);
 
+    //! Make an XdmMap from an array of keys and values.
     /**
-        * Make an XdmMap from an array of keys and values.
-        * @param keys. The keys are given as a pointer array of XdmAtomicValue
-        * @param values. The values are given as a pointer array of XdmValue
-        * @param len. The length of the arrays given as argument
+        *
+        * @param keys - The keys are given as a pointer array of XdmAtomicValue
+        * @param values - The values are given as a pointer array of XdmValue
+        * @param len - The length of the arrays given as argument
         * @return an XdmMap whose members are key, value pair given as (XdmAtomicValue, XdmValue)
    */
     XdmMap *makeMap3(XdmAtomicValue ** keys, XdmValue ** values, int len);
 
 
+    //! Get the string representation of the XdmValue.
     /**
-    * Get the string representation of the XdmValue.
-    * @return char array
+    * @param item - The XdmItem
+    * @return string value as char array
     */
     const char *getStringValue(XdmItem *item);
 
+    //! Parse a lexical representation of the source document and return it as an XdmNode
     /**
-     * Parse a lexical representation of the source document and return it as an XdmNode
-     TODO - parser options need adding. Make validator part of the options.
-     @param validator
-     @return an XdmNode
+     *
+     * @param source
+     * @param validator
+     * @return an XdmNode
     */
     XdmNode *parseXmlFromString(const char *source, SchemaValidator * validator = nullptr);
 
+    //! Parse a source document file and return it as an XdmNode.
     /**
-     * Parse a source document file and return it as an XdmNode.
+     *
      @param validator.
      @return an XdmNode
     */
     XdmNode *parseXmlFromFile(const char *source, SchemaValidator * validator = nullptr);
 
+    //! Parse a source document available by URI and return it as an XdmNode.
     /**
-     * Parse a source document available by URI and return it as an XdmNode.
+     *
      @param validator.
      @return an XdmNode
     */
     XdmNode *parseXmlFromUri(const char *source, SchemaValidator * validator = nullptr);
 
+    //! Get the kind of node.
     /**
-     * Get the kind of node.
+     *
+     * @param obj - The Java object representation of the XdmNode
      * @return the kind of node, for example ELEMENT or ATTRIBUTE
      */
-    int getNodeKind(jobject);
+    int getNodeKind(jobject obj);
 
+    //! Test whether this processor is schema-aware
     /**
-     * Test whether this processor is schema-aware
+     *
      * @return true if this this processor is licensed for schema processing, false otherwise
      */
     bool isSchemaAwareProcessor();
 
 
+    //! Checks for thrown exceptions
     /**
-     * Checks for thrown exceptions
+     *
      * @return bool - true when there is a pending exception; otherwise return false
     */
     bool exceptionOccurred();
 
-    /**
-
-     * Clears any exception that is currently being thrown. If no exception is currently being thrown, this routine has no effect.
-    */
+    //! Clears any exception that is currently being thrown. If no exception is currently being thrown, this routine has no effect.
     void exceptionClear();
 
 
-    /**
-    * Utility method for working with SaxonC on Python
-    */
+    //! Utility method for working with SaxonC on Python
     XdmValue ** createXdmValueArray(int len){
 	   return (new XdmValue*[len]);
     }
 
-    /**
-    * Utility method for working with SaxonC on Python
-    */
+    //! Utility method for working with SaxonC on Python
     XdmAtomicValue ** createXdmAtomicValueArray(int len){
 	   return (new XdmAtomicValue*[len]);
     }
 
+    //! Checks for pending exceptions and creates a SaxonApiException object, which handles one or more local exceptions objects
     /**
-     * Checks for pending exceptions and creates a SaxonApiException object, which handles one or more local exceptions objects
+     *
      * @param env
      * @param callingClass
      * @param callingObject
-     * @return SaxonApiException
     */
     static SaxonApiException *checkForExceptionCPP(JNIEnv *env, jclass callingClass, jobject callingObject);
 
-
-    /**
-      * Clean up and destroy Java VM to release memory used. 
-     */
+    //! Clean up and destroy Java VM to release memory used. Method to be called at the end of the program
     static void release();
 
 
-    /**
-     * set the current working directory
-    */
+    //! Set the current working directory
     void setcwd(const char *cwd);
 
+    //! Get the current working directory
     /**
-     * get the current working directory
+     *
      * @return string value of the cwd
     */
     const char *getcwd();
 
 
+    //! Get saxon resources directory
     /**
-     * get saxon resources directory
+     *
      * @return string value of the resource directory
     */
    const char * getResourcesDirectory();
 
 
-    /**
-     * set saxon resources directory
-    */
+    //! set saxon resources directory
    void setResourcesDirectory(const char* dir);
 
     /**
@@ -500,8 +518,9 @@ public:
     void setCatalog(const char *catalogFile, bool isTracing);
 
 
+    //! Set a configuration property specific to the processor in use.
     /**
-     * Set a configuration property specific to the processor in use. 
+     *
      * Properties specified here are common across all the processors.
      * Example 'l':enable line number has the value 'on' or 'off'
      * @param name of the property
@@ -509,24 +528,24 @@ public:
      */
     void setConfigurationProperty(const char *name, const char *value);
 
-    /**
-     * Clear configuration properties specific to the processor in use. 
-     */
+    //! Clear configuration properties specific to the processor in use.
     void clearConfigurationProperties();
 
 
+    //! Get the Saxon version
     /**
-     * Get the Saxon version
+     *
      * @return char array
      */
     const char *version();
 
-/**
-     * Add a native method.
+    //! Add a native method.
+    /**
+     *
      * @param name of the native method
      * @param signature of the native method
      * @param fnPtr Pointer to the native method
- */
+    */
     void addNativeMethod(char *name, char *signature, void *fnPtr) {
 
         JNINativeMethod method;
@@ -539,13 +558,14 @@ public:
 
     }
 
-/**
-     * Register several native methods for one class.
+    //! Register several native methods for one class.
+    /**
+     *
      * @param libName name of the library which contains the function(s). Loads the library
      * @param gMethods Register native methods. Default is nullptr, also nullptr allowed in
      which cause assumption is made the user has added native methods using the method addNativeMethod .
- * @return bool success of registered native method
- */
+    * @return bool success of registered native method
+    */
     bool registerCPPFunction(char *libName, JNINativeMethod *gMethods = nullptr) {
         if (libName != nullptr) {
             setConfigurationProperty("extc", libName);
@@ -567,10 +587,14 @@ public:
         return false;
     }
 
-/**
- * Register several native methods for one class.
- * @return bool success of registered native method
- */
+    //! Register several native methods for one class.
+    /**
+    * @param env
+     * @param className
+     * @param gMethods
+     * @param numMethods
+    * @return bool success of registered native method
+    */
     static bool registerNativeMethods(JNIEnv *env, const char *className,
                                       JNINativeMethod *gMethods, int numMethods) {
         jclass clazz;
@@ -587,8 +611,9 @@ public:
         return true;
     }
 
+    //! Check for exception thrown in the underlying JNI. Then create the SaxonApiException class which the user can retrieve
     /**
-     * Check for exception thrown and create
+     *
      * @param cppClass
      * @return The SaxonApiException with information about the exception thrown
      */
@@ -597,12 +622,6 @@ public:
 
 
 
-
-//	XPathEngine
-//	XQueryEngine
-//	SchemaManager
-
-    // static JNIEnv *env;
     static int jvmCreatedCPP; /*!< Flag to indicate jvm created - used in memory management */
     static sxnc_environment *sxn_environ;/*!< Environment to captures the jni, JVM and handler to the cross compiled SaxonC library. */
     std::string cwd; /*!< current working directory */

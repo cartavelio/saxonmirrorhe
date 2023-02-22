@@ -149,8 +149,8 @@ public:
      *                will not be cached until caching is re-enabled. The cache is also cleared
      *                (but without disabling future caching)
      *                if any method is called that changes the static context for compiling
-     *                expressions, for example {@link #declareVariable(QName)} or
-     *                {@link #declareNamespace(String, String)}.
+     *                expressions, for example declareVariable(QName) or
+     *                declareNamespace(String, String).
     */
 
     void setCaching(bool caching);
@@ -165,7 +165,7 @@ public:
      * the set of declarations and definitions made available to the XPath expression is empty). The schema
      * document for the specified namespace may be loaded before or after this method is called.</p>
      * <p>This method does not bind a prefix to the namespace. That must be done separately, using the
-     * {@link #declareNamespace(String, String)} method.</p>
+     * declareNamespace(String, String) method.</p>
      *
      * @param uri The schema namespace to be imported. To import declarations in a no-namespace schema,
      *            supply a zero-length string.
@@ -232,7 +232,7 @@ public:
     /**
      * After the execution of the processor if there is an error, then a SaxonApiException is created.
      * NULL returned if there is no error.
-     * @return SaxomApiException object of the exception thrown.
+     * @return SaxonApiException object of the exception thrown.
      */
     SaxonApiException * getException();
 
@@ -242,13 +242,13 @@ private:
 
     void setParameter(const char * name, XdmValue*value, bool withParam);
 
-	SaxonProcessor * proc;
+	SaxonProcessor * proc; /*!< SaxonProcessor pointer to object. This is the object that created the XPathProcessor */
         std::string cwdXP; /*!< current working directory */
-	jclass  cppClass;
-	jobject cppXP;
+	jclass  cppClass; /*!< Reference to the XPathProcessor Java class under JNI */
+	jobject cppXP; /*!< The XPathProcessor underlying Java object  */
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
 	std::map<std::string,std::string> properties; /*!< map of properties used for the transformation as (string, string) pairs */
-    SaxonApiException * exception;
+    SaxonApiException * exception; /*!< exception object created when there is an error */
 };
 
 
