@@ -1427,6 +1427,7 @@ public class Configuration implements SourceResolver, NotationSet {
         FunctionLibraryList result = builtInExtensionLibraryList.get(version);
         if (result == null) {
             result = makeBuiltInExtensionLibraryList(version);
+            builtInExtensionLibraryList.put(version, result);
         }
         return result;
     }
