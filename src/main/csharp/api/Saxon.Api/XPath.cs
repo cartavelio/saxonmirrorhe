@@ -170,6 +170,16 @@ namespace Saxon.Api
 
 
         /// <summary>
+        /// Escape hatch to the <c>net.sf.saxon.s9api.XPathCompiler</c> object in the underlying Java implementation
+        /// </summary>
+
+        public JXPathCompiler Implementation
+        {
+            get { return compiler; }
+        }
+
+
+        /// <summary>
         /// This property indicates whether the XPath expression may contain references to variables that have not been
         /// explicitly declared by calling <c>DeclareVariable</c>. The property is false by default (that is, variables
         /// must be declared).
@@ -178,8 +188,8 @@ namespace Saxon.Api
         /// If undeclared variables are permitted, then it is possible to determine after compiling the expression which
         /// variables it refers to by calling the method <c>EnumerateExternalVariables</c> on the <c>XPathExecutable</c> object.
         /// </remarks>
-        
-		public Boolean AllowUndeclaredVariables
+
+        public Boolean AllowUndeclaredVariables
         {
             get
             {
@@ -564,6 +574,15 @@ namespace Saxon.Api
         }
 
         /// <summary>
+        /// Escape hatch to the <c>net.sf.saxon.s9api.XPathExecutable</c> object in the underlying Java implementation
+        /// </summary>
+
+        public JXPathExecutable Implementation
+        {
+            get { return executable; }
+        }
+
+        /// <summary>
         /// Get a list of external variables used by the expression. This will include both variables that were explicitly
         /// declared to the <c>XPathCompiler</c>, and (if the <c>AllowUndeclaredVariables</c> option was set) variables that
         /// are referenced within the expression but not explicitly declared.
@@ -726,6 +745,15 @@ namespace Saxon.Api
                     throw new StaticError(err);
                 }
             }
+        }
+
+        /// <summary>
+        /// Escape hatch to the <c>net.sf.saxon.s9api.XPathSelector</c> object in the underlying Java implementation
+        /// </summary>
+
+        public JXPathSelector Implementation
+        {
+            get { return selector; }
         }
 
         /// <summary>
