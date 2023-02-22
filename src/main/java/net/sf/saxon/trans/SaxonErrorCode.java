@@ -451,6 +451,42 @@ public class SaxonErrorCode {
 
     public static final String SXWN9018 = "SXWN9018";
 
+    /**
+     * SXWN9019: stylesheet module included or imported more than once
+     */
+
+    public static final String SXWN9019 = "SXWN9019";
+
+    /**
+     * SXWN9020: unrecognized XSLT version
+     */
+
+    public static final String SXWN9020 = "SXWN9020";
+
+    /**
+     * SXWN9021: extension attribute ignored because not recognized in this Saxon version
+     */
+
+    public static final String SXWN9021 = "SXWN9021";
+
+    /**
+     * SXWN9022: warning returned by regular expression compiler
+     */
+
+    public static final String SXWN9022 = "SXWN9022";
+
+    /**
+     * SXWN9023: mode="#current" specified when not inside xsl:template
+     */
+
+    public static final String SXWN9023 = "SXWN9023";
+
+    /**
+     * SXWN9024: Fallback to non-streamed execution
+     */
+
+    public static final String SXWN9024 = "SXWN9024";
+
 
 }
 
