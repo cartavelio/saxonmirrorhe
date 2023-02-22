@@ -18,6 +18,8 @@ typedef long long int (*j_db_setDTDValidation_fn_t)(graal_isolatethread_t*, void
 
 typedef int (*run_main_fn_t)(int argc, char** argv);
 
+typedef long long int (*j_run_validate_fn_t)(graal_isolatethread_t*, void *);
+
 typedef long long int (*createProcessorDataWithArray_fn_t)(graal_isolatethread_t*, void *);
 
 typedef long long int (*createProcessorData_fn_t)(graal_isolatethread_t*);
@@ -36,7 +38,9 @@ typedef void (*clearProcessorData_fn_t)(graal_isolatethread_t*, void *);
 
 typedef long long int (*createSaxonProcessor_fn_t)(graal_isolatethread_t*, int);
 
-typedef long long int (*j_run_transform_fn_t)(graal_isolatethread_t*, int, void *);
+typedef long long int (*j_run_transform_fn_t)(graal_isolatethread_t*, void *);
+
+typedef long long int (*j_run_query_fn_t)(graal_isolatethread_t*, void *);
 
 typedef void (*j_handles_destroy_fn_t)(graal_isolatethread_t*, void *);
 
