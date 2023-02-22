@@ -588,7 +588,10 @@ public class Controller implements ContextOriginator {
                 NodeInfo node = (NodeInfo) contextItem;
                 contextItem = prepareInputTree(node);
                 if (node.getNodeKind() == Type.DOCUMENT && node.getSystemId() != null) {
-                    getDocumentPool().add(node.getTreeInfo(), node.getSystemId());
+                    DocumentKey key = new DocumentKey(node.getSystemId());
+                    if (getDocumentPool().find(key) == null) {
+                        getDocumentPool().add(node.getTreeInfo(), key);
+                    }
                 }
             }
         }

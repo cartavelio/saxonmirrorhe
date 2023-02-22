@@ -118,6 +118,9 @@ public class StandardCollectionFinder implements CollectionFinder {
         // check if file is a zip file
 
         String regex = context.getConfiguration().getConfigurationProperty(Feature.ZIP_URI_PATTERN);
+        if (regex == null) {
+            regex = "^jar:|\\.jar$|\\.zip$";
+        }
         if (isJarFileURI(collectionURI) || ARegularExpression.compile(regex, "").containsMatch(StringView.of(collectionURI).tidy())) {
             return new JarCollection(context, collectionURI, params);
         }

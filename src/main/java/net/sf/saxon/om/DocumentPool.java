@@ -47,9 +47,9 @@ public final class DocumentPool {
      * @param uri The document-uri property of the document.
      */
 
-    public synchronized void add(TreeInfo doc, /*@Nullable*/ String uri) {
+    public synchronized void add(TreeInfo doc, /*@Nullable*/ String uri) throws XPathException {
         if (uri != null) {
-            documentNameMap.put(new DocumentKey(uri), doc);
+            add(doc, new DocumentKey(uri));
         }
     }
 

@@ -41,10 +41,39 @@ public class RecordTest extends AnyFunctionType implements TupleType {
 
     private final Map<String, SequenceType> fieldTypes = new HashMap<>();
     private final Set<String> optionalFields = new HashSet<>();
-    private final boolean extensible;
+    private boolean extensible;
+
+    /**
+     * Construct a dummy RecordTest, details to be supplied later
+     */
+
+    public RecordTest() {}
+
+    /**
+     * Construct a RecordTest
+     * @param names the names of the fields
+     * @param types the types of the fields
+     * @param optionalFieldNames a list of the names of the fields that are declared optional
+     * @param extensible indicates whether the RecordTest is extensible (allows fields other
+     *                   than those declared)
+     */
 
     public RecordTest(List<String> names, List<SequenceType> types, List<String> optionalFieldNames, boolean extensible) {
-        for (int i=0; i<names.size(); i++) {
+        setDetails(names, types, optionalFieldNames, extensible);
+    }
+
+    /**
+     * Supply the details of the RecordTest. This method is only to be used during initialisation,
+     * it is needed so that a RecordTest can refer to itself. Apart from this, the RecordTest
+     * is immutable.
+     * @param names the names of the fields
+     * @param types the types of the fields
+     * @param optionalFieldNames a list of the names of the fields that are declared optional
+     * @param extensible indicates whether the RecordTest is extensible (allows fields other
+     *                   than those declared)
+     */
+    public void setDetails(List<String> names, List<SequenceType> types, List<String> optionalFieldNames, boolean extensible) {
+        for (int i = 0; i < names.size(); i++) {
             fieldTypes.put(names.get(i), types.get(i));
         }
         optionalFields.addAll(optionalFieldNames);
@@ -279,7 +308,11 @@ public class RecordTest extends AnyFunctionType implements TupleType {
                 sb.append('?');
             }
             sb.append(": ");
-            sb.append(show.apply(field.getValue()));
+            if (field.getValue().getPrimaryType() == this) {
+                sb.append("..").append(Cardinality.getOccurrenceIndicator(field.getValue().getCardinality()));
+            } else {
+                sb.append(show.apply(field.getValue()));
+            }
         }
         if (isExtensible()) {
             sb.append(", *");
@@ -305,7 +338,17 @@ public class RecordTest extends AnyFunctionType implements TupleType {
      */
     @Override
     public int hashCode() {
-        return fieldTypes.hashCode();
+        // Need to avoid infinite recursion for self-reference fields
+        int h = 0x27ca481f;
+        for (Map.Entry<String, SequenceType> entry : fieldTypes.entrySet()) {
+            h ^= entry.getKey().hashCode();
+            if (entry.getValue().getPrimaryType() == this) {
+                h ^= 0x05050505;
+            } else {
+                h ^= entry.getValue().hashCode();
+            }
+        }
+        return h;
     }
 
     /**
@@ -466,7 +509,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
                 while ((key = keyIter.next()) != null) {
                     if (!(key instanceof StringItem)) {
                         return Optional.of("Undeclared field " + key + " is present, but it is not a string, and the record type is not extensible");
-                    } else if (!fieldTypes.containsKey(key.getUnicodeStringValue())) {
+                    } else if (!fieldTypes.containsKey(key.getStringValue())) {
                         return Optional.of("Undeclared field " + key + " is present, but the record type is not extensible");
                     }
                 }

@@ -1610,6 +1610,11 @@ public class XPathParser {
             // No occurrence indicator allowed
             return SequenceType.makeSequenceType(primaryType, StaticProperty.EMPTY);
         }
+        int occurrenceFlag = parseOccurrenceIndicator();
+        return SequenceType.makeSequenceType(primaryType, occurrenceFlag);
+    }
+
+    public int parseOccurrenceIndicator() throws XPathException {
         int occurrenceFlag;
         switch (t.currentToken) {
             case Token.STAR:
@@ -1635,7 +1640,7 @@ public class XPathParser {
             default:
                 occurrenceFlag = StaticProperty.EXACTLY_ONE;
         }
-        return SequenceType.makeSequenceType(primaryType, occurrenceFlag);
+        return occurrenceFlag;
     }
 
     /**
@@ -1755,6 +1760,7 @@ public class XPathParser {
         List<String> optionalFieldNames = new ArrayList<>(6);
         List<SequenceType> fieldTypes = new ArrayList<>(6);
         boolean extensible = false;
+        RecordTest recordTest = new RecordTest();
         while (true) {
             String name;
             if (t.currentToken == Token.NAME) {
@@ -1781,7 +1787,17 @@ public class XPathParser {
             SequenceType arg = SequenceType.NON_EMPTY_SEQUENCE;
             if (t.currentToken == Token.AS) {
                 p.nextToken();
-                arg = p.parseSequenceType();
+                if (t.currentToken == Token.DOTDOT) {
+                    // self-reference
+                    p.nextToken();
+                    int occ = parseOccurrenceIndicator();
+                    arg = SequenceType.makeSequenceType(recordTest, occ);
+                    if (!Cardinality.allowsZero(occ) && !optionalFieldNames.contains(name)) {
+                        throw new XPathException("A self-referencing field in a record type must be emptiable or optional", "XPST0140");
+                    }
+                } else {
+                    arg = p.parseSequenceType();
+                }
             }
             fieldTypes.add(arg);
             if (t.currentToken == Token.RPAR) {
@@ -1804,8 +1820,8 @@ public class XPathParser {
             p.grumble("RecordTest must contain at least one field");
             return null;
         }
-        return new RecordTest(fieldNames, fieldTypes, optionalFieldNames, extensible);
-
+        recordTest.setDetails(fieldNames, fieldTypes, optionalFieldNames, extensible);
+        return recordTest;
     }
 
     /**

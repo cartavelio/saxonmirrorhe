@@ -11,12 +11,14 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -1291,6 +1293,10 @@ public final class DateTimeValue extends CalendarValue
             default:
                 throw new IllegalArgumentException("Unknown component for dateTime: " + component);
         }
+    }
+
+    private SequenceIterator oneInt(long value) {
+        return SingletonIterator.makeIterator(Int64Value.makeIntegerValue(value));
     }
 
     @Override
