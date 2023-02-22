@@ -17,8 +17,9 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.SerializationProperties;
-import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.linked.DocumentImpl;
 
@@ -244,7 +245,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
         try {
             parameters.put(name.getStructuredQName(),
                     value == null ? null : ((Sequence) value.getUnderlyingValue()).materialize());
-        } catch (XPathException e) {
+        } catch (UncheckedXPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
     }

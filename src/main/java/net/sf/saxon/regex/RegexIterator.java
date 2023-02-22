@@ -24,7 +24,7 @@ public interface RegexIterator extends SequenceIterator {
      * iterator.
      */
     @Override
-    StringItem next() throws XPathException;
+    StringItem next();
 
     /**
      * Determine whether the current item in the sequence is a matching item or a non-matching item

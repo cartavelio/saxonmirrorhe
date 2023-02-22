@@ -26,6 +26,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.NoDynamicContextException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpInnerClass;
@@ -507,21 +508,25 @@ public class MergeInstr extends Instruction {
             private int last  = -1;
 
             @Override
-            public int getLength() throws XPathException {
-                if (last >= 0) {
-                    return last;
-                } else {
-                    AtomicComparer[] comps = getComparators(context);
+            public int getLength() {
+                try {
+                    if (last >= 0) {
+                        return last;
+                    } else {
+                        AtomicComparer[] comps = getComparators(context);
 
-                    GroupIterator mgi = context.getCurrentMergeGroupIterator();
-                    final XPathContextMajor c1 = context.newContext();
-                    c1.setCurrentMergeGroupIterator(mgi);
-                    SequenceIterator inputIterator = getMergedInputIterator(context, comps, c1);
+                        GroupIterator mgi = context.getCurrentMergeGroupIterator();
+                        final XPathContextMajor c1 = context.newContext();
+                        c1.setCurrentMergeGroupIterator(mgi);
+                        SequenceIterator inputIterator = getMergedInputIterator(context, comps, c1);
 
-                    // Now perform the merge into a grouped sequence
-                    inputIterator = new MergeGroupingIterator(inputIterator, getComparer(mergeSources[0].mergeKeyDefinitions, comps), null);
+                        // Now perform the merge into a grouped sequence
+                        inputIterator = new MergeGroupingIterator(inputIterator, getComparer(mergeSources[0].mergeKeyDefinitions, comps), null);
 
-                    return last = Count.steppingCount(inputIterator);
+                        return last = Count.steppingCount(inputIterator);
+                    }
+                } catch (XPathException e) {
+                    throw new UncheckedXPathException(e);
                 }
             }
         };
@@ -841,7 +846,7 @@ public class MergeInstr extends Instruction {
             throws XPathException {
 
         try (SequenceIterator iter = iterate(context)) {
-            iter.forEachOrFail(it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES));
+            SequenceTool.supply(iter, (ItemConsumer<? super Item>) it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES));
         } catch (XPathException e) {
             e.maybeSetLocation(getLocation());
             e.maybeSetContext(context);

@@ -14,7 +14,6 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.type.*;
 
@@ -498,34 +497,30 @@ public final class SequenceType {
      */
 
     public Optional<String> explainMismatch(GroundedValue value, TypeHierarchy th) {
-        try {
-            int count = 0;
-            SequenceIterator iter = value.iterate();
-            Item item;
-            while ((item = iter.next()) != null) {
-                count++;
-                if (!primaryType.matches(item, th)) {
-                    String s = "The " + RoleDiagnostic.ordinal(count) + " item is not an instance of the required type";
-                    Optional<String> more = primaryType.explainMismatch(item, th);
-                    if (more.isPresent()) {
-                        s = count == 1 ? more.get() : s + ". " + more.get();
-                    } else {
-                        if (count == 1) {
-                            return Optional.empty(); // no new information, so don't say anything
-                        }
+        int count = 0;
+        SequenceIterator iter = value.iterate();
+        Item item;
+        while ((item = iter.next()) != null) {
+            count++;
+            if (!primaryType.matches(item, th)) {
+                String s = "The " + RoleDiagnostic.ordinal(count) + " item is not an instance of the required type";
+                Optional<String> more = primaryType.explainMismatch(item, th);
+                if (more.isPresent()) {
+                    s = count == 1 ? more.get() : s + ". " + more.get();
+                } else {
+                    if (count == 1) {
+                        return Optional.empty(); // no new information, so don't say anything
                     }
-                    return Optional.of(s);
                 }
+                return Optional.of(s);
             }
-            if (count == 0 && !Cardinality.allowsZero(cardinality)) {
-                return Optional.of("The type does not allow an empty sequence");
-            } else if (count > 1 && !Cardinality.allowsMany(cardinality)) {
-                return Optional.of("The type does not allow a sequence of more than one item");
-            }
-            return Optional.empty();
-        } catch (XPathException e) {
-            return Optional.empty();
         }
+        if (count == 0 && !Cardinality.allowsZero(cardinality)) {
+            return Optional.of("The type does not allow an empty sequence");
+        } else if (count > 1 && !Cardinality.allowsMany(cardinality)) {
+            return Optional.of("The type does not allow a sequence of more than one item");
+        }
+        return Optional.empty();
     }
 
     /**

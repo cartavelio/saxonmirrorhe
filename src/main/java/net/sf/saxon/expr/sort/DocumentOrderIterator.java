@@ -8,8 +8,7 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.LastPositionFinder;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.NodeListIterator;
@@ -39,12 +38,12 @@ public final class DocumentOrderIterator implements SequenceIterator {
      * that is not a node
      */
 
-    public DocumentOrderIterator(SequenceIterator base, Comparator<? super NodeInfo> comparer) throws XPathException {
+    public DocumentOrderIterator(SequenceIterator base, Comparator<? super NodeInfo> comparer)  {
 
         int len = base.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)
                 ? ((LastPositionFinder) base).getLength() : 50;
         sequence = new ArrayList<>(len);
-        base.forEachOrFail(item -> {
+        SequenceTool.supply(base, (ItemConsumer<? super Item>) item -> {
             if (item instanceof NodeInfo) {
                 sequence.add((NodeInfo) item);
             } else {
@@ -63,7 +62,7 @@ public final class DocumentOrderIterator implements SequenceIterator {
     // over the sequenceExtent, but looking ahead to remove duplicates.
 
     @Override
-    public NodeInfo next() throws XPathException {
+    public NodeInfo next() {
         while (true) {
             NodeInfo next = (NodeInfo)iterator.next();
             if (next == null) {

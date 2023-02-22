@@ -7,8 +7,8 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-import net.sf.saxon.trans.XPathException;
 
 
 /**
@@ -26,11 +26,11 @@ public interface LastPositionFinder {
      * includes the bit setting {@link SequenceIteratorProperty#LAST_POSITION_FINDER}
      *
      * @return the number of items in the sequence
-     * @throws XPathException if an error occurs evaluating the sequence in order to determine
+     * @throws UncheckedXPathException if an error occurs evaluating the sequence in order to determine
      *                        the number of items
      */
 
-    int getLength() throws XPathException;
+    int getLength();
 
 }
 

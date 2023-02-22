@@ -13,6 +13,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
@@ -318,6 +319,7 @@ public class LocalUnionType implements PlainType, UnionType {
      *         in its transitive membership, in declaration order
      */
     @Override
+    @CSharpReplaceBody(code="return new System.Collections.Generic.List<net.sf.saxon.type.PlainType>(memberTypes);")
     public List<? extends PlainType> getPlainMemberTypes()  {
         return memberTypes;
     }

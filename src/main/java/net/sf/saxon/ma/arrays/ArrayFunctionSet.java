@@ -235,7 +235,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     public static class ArrayFlatten extends SystemFunction {
 
         private void flatten(Sequence arg, List<Item> out) throws XPathException {
-            arg.iterate().forEachOrFail(item -> {
+            SequenceTool.supply(arg.iterate(), (ItemConsumer<? super Item>) item -> {
                 if (item instanceof ArrayItem) {
                     for (Sequence member : ((ArrayItem) item).members()) {
                         flatten(member, out);
@@ -433,8 +433,8 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             }
             IntSet positions = new IntHashSet();
             SequenceIterator arg1 = arguments[1].iterate();
-            arg1.forEachOrFail(pos -> {
-                int index = checkSubscript((IntegerValue)pos, array.arrayLength()) - 1;
+            SequenceTool.supply(arg1, (ItemConsumer<? super Item>) pos -> {
+                int index = checkSubscript((IntegerValue) pos, array.arrayLength()) - 1;
                 positions.add(index);
             });
             return array.removeSeveral(positions);

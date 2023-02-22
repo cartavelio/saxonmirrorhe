@@ -42,7 +42,7 @@ public class ArraySort extends SystemFunction {
     @Override
     public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         ArrayItem array = (ArrayItem) arguments[0].head();
-        final List<MemberToBeSorted> inputList = new ArrayList<>(array.arrayLength());
+        final ArrayList<MemberToBeSorted> inputList = new ArrayList<>(array.arrayLength());
         int i = 0;
         StringCollator collation;
         if (arguments.length == 1) {
@@ -130,6 +130,6 @@ public class ArraySort extends SystemFunction {
     private static GroundedValue atomize(Sequence input) throws XPathException {
         SequenceIterator iterator = input.iterate();
         SequenceIterator mapper = Atomizer.getAtomizingIterator(iterator, false);
-        return mapper.materialize();
+        return SequenceTool.toGroundedValue(mapper);
     }
 }

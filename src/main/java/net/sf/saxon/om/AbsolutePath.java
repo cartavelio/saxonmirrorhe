@@ -9,11 +9,11 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.trans.Err;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,7 +34,7 @@ public class AbsolutePath {
      *             for the document node.
      */
 
-    public AbsolutePath(List<PathElement> path) {
+    public AbsolutePath(Collection<PathElement> path) {
         this.path = new ArrayList<>(path);
     }
 

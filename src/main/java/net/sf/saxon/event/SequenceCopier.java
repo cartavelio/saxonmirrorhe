@@ -7,7 +7,10 @@
 
 package net.sf.saxon.event;
 
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.ItemConsumer;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -30,7 +33,8 @@ public class SequenceCopier {
 
     public static void copySequence(SequenceIterator in, Receiver out) throws XPathException {
         out.open();
-        in.forEachOrFail(out::append);  // it -> out.append(it)
+        // it -> out.append(it)
+        SequenceTool.supply(in, (ItemConsumer<? super Item>) out::append);
         out.close();
     }
 }

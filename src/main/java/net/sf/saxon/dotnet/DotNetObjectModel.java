@@ -226,7 +226,7 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
             return ((DotNetNodeWrapper) value).getRealNode();
         } else if (isXdmAtomicValueType(targetClass)) {
             SequenceIterator atomIterator = Atomizer.getAtomizingIterator(value.iterate(), false);
-            GroundedValue extent = atomIterator.materialize();
+            GroundedValue extent = SequenceTool.toGroundedValue(atomIterator);
             if (extent.getLength() == 0) {
                 return null;
             } else if (extent instanceof AtomicValue) {

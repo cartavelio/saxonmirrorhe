@@ -9,10 +9,7 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.tree.jiter.WrappingJavaIterator;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
 import java.util.function.Consumer;
 
 
@@ -21,7 +18,7 @@ import java.util.function.Consumer;
  * is a SequenceIterator that throws no checked exceptions.
  */
 
-public interface UnfailingIterator extends SequenceIterator, Iterable<Item> {
+public interface UnfailingIterator extends SequenceIterator /*, Iterable<Item> */ {
 
     /**
      * Get the next item in the sequence.
@@ -45,9 +42,5 @@ public interface UnfailingIterator extends SequenceIterator, Iterable<Item> {
         }
     }
 
-    @NotNull
-    default Iterator<Item> iterator() {
-        return new WrappingJavaIterator<Item>(this);
-    }
 }
 

@@ -840,10 +840,10 @@ public class TestOutcome {
                 } else {
                     iter0 = value.getUnderlyingValue().iterate();
                 }
-                GroundedValue val0 = iter0.materialize();
+                GroundedValue val0 = SequenceTool.toGroundedValue(iter0);
                 SequenceIterator iter1 = expected.axisIterator(Axis.CHILD).next()
                         .getUnderlyingValue().iterateAxis(AxisInfo.CHILD);
-                GroundedValue val1 = iter1.materialize();
+                GroundedValue val1 = SequenceTool.toGroundedValue(iter1);
                 boolean success = DeepEqual.deepEqual(
                     val0.iterate(), val1.iterate(),
                     new GenericAtomicComparer(CodepointCollator.getInstance(), null),

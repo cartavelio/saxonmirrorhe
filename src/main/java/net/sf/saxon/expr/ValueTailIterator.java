@@ -11,7 +11,6 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
@@ -44,7 +43,7 @@ public class ValueTailIterator
     }
 
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         return baseValue.itemAt(start + pos++);
     }
 

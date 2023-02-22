@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
@@ -62,7 +63,7 @@ public class MergeIterator implements
     }
 
     @Override
-    public ObjectValue<ItemWithMergeKeys> next() throws XPathException {
+    public ObjectValue<ItemWithMergeKeys> next() {
 
         // main merge loop: take an item from whichever set has the lower value otherwise take value from first and move iterator on by one.
 
@@ -79,7 +80,7 @@ public class MergeIterator implements
                         + Type.displayTypeName(a1)
                         + " and " + Type.displayTypeName(a2) + ")", "XTTE2230");
                 err.setIsTypeError(true);
-                throw err;
+                throw new UncheckedXPathException(err);
             }
             if (c <= 0) {
                 ObjectValue<ItemWithMergeKeys> current = nextItem1;

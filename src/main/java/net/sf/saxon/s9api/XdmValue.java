@@ -18,6 +18,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ExternalObject;
@@ -136,7 +137,7 @@ public class XdmValue implements Iterable<XdmItem> {
         GroundedValue gv;
         try {
             gv = value.materialize();
-        } catch (XPathException e) {
+        } catch (UncheckedXPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
         if (gv.getLength() == 0) {
@@ -237,7 +238,7 @@ public class XdmValue implements Iterable<XdmItem> {
         try {
             Item item = SequenceTool.itemAt(value, n);
             return (XdmItem)XdmItem.wrap(item);
-        } catch (XPathException e) {
+        } catch (UncheckedXPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
     }
@@ -254,7 +255,7 @@ public class XdmValue implements Iterable<XdmItem> {
         try {
             Sequence v = getUnderlyingValue();
             return new XdmSequenceIterator<>(v.iterate());
-        } catch (XPathException e) {
+        } catch (UncheckedXPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
     }
@@ -383,8 +384,8 @@ public class XdmValue implements Iterable<XdmItem> {
         try {
             SequenceIterator iter = value.iterate();
             SequenceIterator sorted = new DocumentOrderIterator(iter, GlobalOrderComparer.getInstance());
-            return XdmValue.fromGroundedValue(sorted.materialize());
-        } catch (XPathException e) {
+            return XdmValue.fromGroundedValue(SequenceTool.toGroundedValue(sorted));
+        } catch (UncheckedXPathException e) {
             throw new SaxonApiException(e);
         }
     }

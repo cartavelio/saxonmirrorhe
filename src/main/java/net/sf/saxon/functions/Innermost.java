@@ -130,7 +130,7 @@ public class Innermost extends SystemFunction {
         }
 
         @Override
-        public NodeInfo next() throws XPathException {
+        public NodeInfo next() {
             if (pending == null) {
                 // we're done
                 position = -1;

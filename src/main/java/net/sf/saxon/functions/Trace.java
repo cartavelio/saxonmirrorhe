@@ -117,7 +117,7 @@ public class Trace extends SystemFunction implements Traceable {
         Controller controller = context.getController();
         String label = arguments.length == 1 ? "*" : arguments[1].head().getStringValue();
         if (controller.isTracing()) {
-            Sequence value = arguments[0].iterate().materialize();
+            Sequence value = SequenceTool.toGroundedValue(arguments[0].iterate());
             notifyListener(label, value, context);
             return value;
         } else {
@@ -162,7 +162,7 @@ public class Trace extends SystemFunction implements Traceable {
         }
 
         @Override
-        public Item next() throws XPathException {
+        public Item next() {
             Item n = base.next();
             position++;
             if (n == null) {

@@ -9,7 +9,6 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.trans.XPathException;
 
 /**
  * An iterator over nodes, that prepends a given node to the nodes
@@ -34,7 +33,7 @@ public class PrependSequenceIterator implements SequenceIterator {
 
     /*@Nullable*/
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         if (start != null) {
             Item temp = start;
             start = null;

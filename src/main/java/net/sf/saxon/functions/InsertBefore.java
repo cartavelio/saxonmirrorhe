@@ -75,7 +75,7 @@ public class InsertBefore extends SystemFunction {
 
 
         @Override
-        public Item next() throws XPathException {
+        public Item next() {
             Item nextItem;
             if (inserting) {
                 nextItem = insert.next();

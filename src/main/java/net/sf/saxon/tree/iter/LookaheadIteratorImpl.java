@@ -43,7 +43,7 @@ public class LookaheadIteratorImpl implements LookaheadIterator {
 
     /*@Nullable*/
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         Item current = _next;
         if (_next != null) {
             _next = base.next();

@@ -11,6 +11,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -132,7 +133,7 @@ public class SignificantItemDetector extends ProxyOutputter {
                                 return true;
                             }
                         }
-                    } catch (XPathException e) {
+                    } catch (UncheckedXPathException e) {
                         return true;
                     }
                 }

@@ -11,6 +11,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
@@ -99,6 +100,8 @@ public class PathMaintainer extends ProxyReceiver {
         return fsb.toString();
     }
 
+    @CSharpReplaceBody(code="return new net.sf.saxon.om.AbsolutePath(new List<net.sf.saxon.om.AbsolutePath.PathElement>(path.ToArray()));")
+    // Custom code needed for C# because a Stack is not a List.
     public AbsolutePath getAbsolutePath() {
         return new AbsolutePath(path);
     }

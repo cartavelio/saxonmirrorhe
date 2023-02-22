@@ -297,7 +297,7 @@ public class PartialApply extends Expression {
             if (boundArgumentsOp[i] == null) {
                 values[i] = null;
             } else {
-                values[i] = boundArgumentsOp[i].getChildExpression().iterate(context).materialize();
+                values[i] = SequenceTool.toGroundedValue(boundArgumentsOp[i].getChildExpression().iterate(context));
             }
         }
         return new CurriedFunction(f, values);

@@ -16,10 +16,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.ma.map.TupleType;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -332,7 +329,7 @@ public class LookupExpression extends BinaryExpression {
                 });
             } else {
                 SequenceIterator baseIterator = getLhsExpression().iterate(context);
-                GroundedValue rhs = getRhsExpression().iterate(context).materialize();
+                GroundedValue rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
                 return MappingIterator.map(baseIterator, baseItem ->
                     MappingIterator.map(rhs.iterate(), index -> {
                         ArrayItem array = (ArrayItem) baseItem;
@@ -354,7 +351,7 @@ public class LookupExpression extends BinaryExpression {
                 );
             } else {
                 SequenceIterator baseIterator = getLhsExpression().iterate(context);
-                GroundedValue rhs = getRhsExpression().iterate(context).materialize();
+                GroundedValue rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
                 return MappingIterator.map(baseIterator, baseItem ->
                         MappingIterator.map(rhs.iterate(), index ->
                             optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) index))
@@ -364,7 +361,7 @@ public class LookupExpression extends BinaryExpression {
 
         } else {
             SequenceIterator baseIterator = getLhsExpression().iterate(context);
-            GroundedValue rhs = getRhsExpression().iterate(context).materialize();
+            GroundedValue rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
             MappingFunction mappingFunction = SequenceMapper.of(baseItem -> {
                 switch(baseItem.getGenre()) {
                     case ARRAY: {

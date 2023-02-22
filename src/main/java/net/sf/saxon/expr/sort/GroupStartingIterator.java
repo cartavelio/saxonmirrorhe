@@ -12,6 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
@@ -38,9 +39,13 @@ public class GroupStartingIterator extends GroupMatchingIterator implements Look
     }
 
     @Override
-    public int getLength() throws XPathException {
-        GroupStartingIterator another = new GroupStartingIterator(select, pattern, baseContext);
-        return Count.steppingCount(another);
+    public int getLength() {
+        try {
+            GroupStartingIterator another = new GroupStartingIterator(select, pattern, baseContext);
+            return Count.steppingCount(another);
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
     }
 
     @Override

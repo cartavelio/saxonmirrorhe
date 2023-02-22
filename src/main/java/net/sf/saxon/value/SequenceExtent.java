@@ -12,6 +12,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.*;
 
@@ -34,11 +35,11 @@ public abstract class SequenceExtent implements GroundedValue {
      * @param iter The supplied sequence of items. The returned sequence will contain all
      *             items delivered by repeated calls on next() on this iterator, and the
      *             iterator will be consumed by calling the method.
-     * @throws net.sf.saxon.trans.XPathException if reading the items using the
+     * @throws UncheckedXPathException if reading the items using the
      *                                           SequenceIterator raises an error
      */
 
-    public static SequenceExtent.Of<Item> from(SequenceIterator iter) throws XPathException {
+    public static SequenceExtent.Of<Item> from(SequenceIterator iter) {
         List<Item> list = new ArrayList<>(!iter.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)
                                                       ? 20
                                                       : ((LastPositionFinder) iter).getLength());
@@ -48,6 +49,7 @@ public abstract class SequenceExtent implements GroundedValue {
         }
         return new SequenceExtent.Of<>(list);
     }
+
 
     /**
      * Factory method to make a GroundedValue holding the remaining contents of any SequenceIterator,
@@ -59,11 +61,11 @@ public abstract class SequenceExtent implements GroundedValue {
      * sequence is empty the result will be an instance of {@link EmptySequence}. If it is of length
      * one, the result will be an {@link Item}. In all other cases, it will be an instance of
      * {@link SequenceExtent}.
-     * @throws net.sf.saxon.trans.XPathException if an error occurs processing the values from
+     * @throws UncheckedXPathException if an error occurs processing the values from
      *                                           the iterator.
      */
 
-    public static GroundedValue makeResidue(SequenceIterator iter) throws XPathException {
+    public static GroundedValue makeResidue(SequenceIterator iter) {
         if (iter.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
             return ((GroundedIterator) iter).getResidue();
         }
@@ -156,7 +158,7 @@ public abstract class SequenceExtent implements GroundedValue {
 
         /*@NotNull*/
         public UnfailingIterator reverseIterate() {
-            return new Reverse.ReverseListIterator(items);
+            return Reverse.reverseIterator(items);
         }
 
         /**
@@ -199,7 +201,11 @@ public abstract class SequenceExtent implements GroundedValue {
 
         @Override
         public T head() {
-            return items.isEmpty() ? null : items.get(0);
+            if (items.isEmpty()) {
+                return null;
+            } else {
+                return items.get(0);
+            }
         }
 
         @Override
@@ -213,7 +219,7 @@ public abstract class SequenceExtent implements GroundedValue {
                 case 0:
                     return EmptyUniString.getInstance();
                 case 1:
-                    return head().getUnicodeStringValue();
+                    return this.head().getUnicodeStringValue();
                 default:
                     UnicodeBuilder builder = new UnicodeBuilder();
                     UnicodeString separator = EmptyUniString.getInstance();
@@ -232,7 +238,7 @@ public abstract class SequenceExtent implements GroundedValue {
                 case 0:
                     return "";
                 case 1:
-                    return head().getStringValue();
+                    return this.head().getStringValue();
                 default:
                     StringBuilder builder = new StringBuilder();
                     String separator = "";
@@ -267,7 +273,7 @@ public abstract class SequenceExtent implements GroundedValue {
             if (start > getLength()) {
                 return EmptySequence.getInstance();
             }
-            return new SequenceSlice(this, start, length).reduce();
+            return new SequenceExtent.Of<T>(items.subList(start, start + length)).reduce();
         }
 
         /*@NotNull*/
@@ -295,7 +301,7 @@ public abstract class SequenceExtent implements GroundedValue {
             if (len == 0) {
                 return EmptySequence.getInstance();
             } else if (len == 1) {
-                return itemAt(0);
+                return this.itemAt(0);
             } else {
                 return this;
             }

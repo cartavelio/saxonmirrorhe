@@ -13,6 +13,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Int64Value;
@@ -72,10 +73,10 @@ public class Count extends SystemFunction {
      *             before the first item (there must have been no call on next()). It will
      *             always be consumed
      * @return the number of items in the underlying sequence
-     * @throws net.sf.saxon.trans.XPathException if a failure occurs reading the input sequence
+     * @throws UncheckedXPathException if a failure occurs reading the input sequence
      */
 
-    public static int steppingCount(SequenceIterator iter) throws XPathException {
+    public static int steppingCount(SequenceIterator iter) {
         int n = 0;
         while (iter.next() != null) {
             n++;

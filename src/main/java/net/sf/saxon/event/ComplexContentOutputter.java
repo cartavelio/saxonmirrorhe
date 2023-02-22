@@ -809,7 +809,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
 
     protected void flatten(ArrayItem array, Location locationId, int copyNamespaces) throws XPathException {
         for (Sequence member : array.members()) {
-            member.iterate().forEachOrFail(it -> append(it, locationId, copyNamespaces));
+            SequenceTool.supply(member.iterate(), (ItemConsumer<? super Item>) it -> append(it, locationId, copyNamespaces));
         }
     }
 

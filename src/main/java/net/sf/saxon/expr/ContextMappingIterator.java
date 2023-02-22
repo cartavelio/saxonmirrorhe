@@ -10,6 +10,7 @@ package net.sf.saxon.expr;
 import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -45,7 +46,7 @@ public final class ContextMappingIterator implements SequenceIterator {
     }
 
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         Item nextItem;
         while (true) {
             if (stepIterator != null) {
@@ -58,7 +59,11 @@ public final class ContextMappingIterator implements SequenceIterator {
             }
             if (base.next() != null) {
                 // Call the supplied mapping function
-                stepIterator = action.map(context);
+                try {
+                    stepIterator = action.map(context);
+                } catch (XPathException e) {
+                    throw new UncheckedXPathException(e);
+                }
                 nextItem = stepIterator.next();
                 if (nextItem == null) {
                     stepIterator = null;

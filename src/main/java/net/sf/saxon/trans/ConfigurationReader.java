@@ -634,7 +634,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         GroundedValue value = null;
         try {
             Expression exp = parser.parse(select, 0, Token.EOF, env);
-            value = exp.iterate(env.makeEarlyEvaluationContext()).materialize();
+            value = SequenceTool.toGroundedValue(exp.iterate(env.makeEarlyEvaluationContext()));
         } catch (XPathException e) {
             error(e);
         }

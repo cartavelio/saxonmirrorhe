@@ -9,6 +9,7 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -62,7 +63,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
     }
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         ARegexIterator another = new ARegexIterator(theString, _regex, new REMatcher(_matcher.getProgram()));
         int n = 0;
         while (another.next() != null) {
@@ -78,7 +79,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public StringItem next() throws XPathException {
+    public StringItem next() {
         try {
             if (nextSubstring == null && prevEnd >= 0) {
                 // we've returned a match (or we're at the start), so find the next match
@@ -137,9 +138,10 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
             }
             return currentStringValue();
         } catch (StackOverflowError e) {
-            throw new XPathException.StackOverflow(
+            XPathException err = new XPathException.StackOverflow(
                     "Stack overflow (excessive recursion) during regular expression evaluation",
                     SaxonErrorCode.SXRE0001, Loc.NONE);
+            throw new UncheckedXPathException(err);
         }
     }
 

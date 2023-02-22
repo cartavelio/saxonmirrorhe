@@ -139,7 +139,7 @@ public class XsltCompiler {
         try {
             compilerInfo.setParameter(name.getStructuredQName(),
                                       ((Sequence) value.getUnderlyingValue()).materialize());
-        } catch (XPathException e) {
+        } catch (UncheckedXPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
     }

@@ -7,11 +7,10 @@ import net.sf.saxon.trans.XPathException;
 
 public class DotNetSequenceIterator implements SequenceIterator {
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         return null;
     }
 
-    @Override
     public GroundedValue materialize() throws XPathException {
         return null;
     }

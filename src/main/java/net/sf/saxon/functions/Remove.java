@@ -80,7 +80,7 @@ public class Remove extends SystemFunction {
         }
 
         @Override
-        public Item next() throws XPathException {
+        public Item next() {
             current = base.next();
             basePosition++;
             if (current != null && basePosition == removePosition) {
@@ -102,7 +102,7 @@ public class Remove extends SystemFunction {
          */
 
         @Override
-        public int getLength() throws XPathException {
+        public int getLength() {
             if (base instanceof LastPositionFinder) {
                 int x = ((LastPositionFinder) base).getLength();
                 if (removePosition >= 1 && removePosition <= x) {

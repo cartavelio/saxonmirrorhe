@@ -13,6 +13,7 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -56,16 +57,20 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
     }
 
     @Override
-    public Item next() throws XPathException {
-        if (nextItem != null) {
-            current = nextItem;
-            position++;
-            advance();
-            return current;
-        } else {
-            current = null;
-            position = -1;
-            return null;
+    public Item next() {
+        try {
+            if (nextItem != null) {
+                current = nextItem;
+                position++;
+                advance();
+                return current;
+            } else {
+                current = null;
+                position = -1;
+                return null;
+            }
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
         }
     }
 

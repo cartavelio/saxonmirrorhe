@@ -9,6 +9,7 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.ListIterator;
@@ -137,7 +138,9 @@ public class Chain implements GroundedValue {
     private void consolidate() {
         if (extent == null) {
             List<Item> list = new ArrayList<>();
-            for (Item item : iterate()) {
+            UnfailingIterator iter = iterate();
+            Item item;
+            while ((item = iter.next()) != null) {
                 list.add(item);
             }
             extent = list;
@@ -381,12 +384,12 @@ public class Chain implements GroundedValue {
          * SequenceIterator, starting at the current position. This should be an "in-memory" value, not a Closure.
          *
          * @return the corresponding Value
-         * @throws XPathException in the cases of subclasses (such as the iterator over a MemoClosure)
+         * @throws UncheckedXPathException in the cases of subclasses (such as the iterator over a MemoClosure)
          *                        which cause evaluation of expressions while materializing the value.
          */
 
         @Override
-        public GroundedValue getResidue() throws XPathException {
+        public GroundedValue getResidue() {
             return SequenceExtent.from(this);
         }
     }

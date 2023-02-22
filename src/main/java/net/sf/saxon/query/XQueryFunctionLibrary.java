@@ -14,9 +14,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
 import net.sf.saxon.functions.hof.UserFunctionReference;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -194,7 +192,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             }
             Sequence[] args = new Sequence[arguments.length];
             for (int i = 0; i < arguments.length; i++) {
-                args[i] = arguments[i].iterate().materialize();
+                args[i] = SequenceTool.toGroundedValue(arguments[i].iterate());
             }
             return function.call(context.newCleanContext(), args);
         }

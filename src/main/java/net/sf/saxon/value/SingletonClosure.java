@@ -10,6 +10,7 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
@@ -55,8 +56,12 @@ public class SingletonClosure extends Closure implements Sequence {
 
     /*@NotNull*/
     @Override
-    public UnfailingIterator iterate() throws XPathException {
-        return SingletonIterator.makeIterator(asItem());
+    public UnfailingIterator iterate() {
+        try {
+            return SingletonIterator.makeIterator(asItem());
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
     }
 
 
@@ -105,8 +110,12 @@ public class SingletonClosure extends Closure implements Sequence {
      */
 
     @Override
-    public GroundedValue materialize() throws XPathException {
-        return SequenceTool.itemOrEmpty(asItem());
+    public GroundedValue materialize() {
+        try {
+            return SequenceTool.itemOrEmpty(asItem());
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
     }
 
     @Override

@@ -11,6 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
@@ -37,9 +38,13 @@ public class GroupEndingIterator extends GroupMatchingIterator implements GroupI
     }
 
     @Override
-    public int getLength() throws XPathException {
-        GroupEndingIterator another = new GroupEndingIterator(select, pattern, baseContext);
-        return Count.steppingCount(another);
+    public int getLength() {
+        try {
+            GroupEndingIterator another = new GroupEndingIterator(select, pattern, baseContext);
+            return Count.steppingCount(another);
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
     }
 
     @Override

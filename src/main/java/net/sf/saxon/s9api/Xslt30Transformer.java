@@ -155,6 +155,15 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
     }
 
     /**
+     * Get the global context item
+     * @return the global context item if it has been set, or null otherwise
+     */
+
+    public XdmItem getGlobalContextItem() {
+        return XdmItem.wrapItem(this.globalContextItem);
+    }
+
+    /**
      * Supply the values of global stylesheet parameters.
      *
      * <p>If a value is supplied for a parameter with a particular name, and the stylesheet does not declare
@@ -194,7 +203,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
             try {
                 globalParameterSet.put(name,
                                        ((Sequence) param.getValue().getUnderlyingValue()).materialize());
-            } catch (XPathException e) {
+            } catch (UncheckedXPathException e) {
                 throw new SaxonApiException(e);
             }
         }

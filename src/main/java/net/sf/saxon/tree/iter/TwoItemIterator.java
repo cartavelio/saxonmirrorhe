@@ -10,7 +10,6 @@ package net.sf.saxon.tree.iter;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -66,12 +65,12 @@ public class TwoItemIterator implements UnfailingIterator, LookaheadIterator, Gr
     }
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         return 2;
     }
 
     @Override
-    public GroundedValue getResidue() throws XPathException {
+    public GroundedValue getResidue() {
         switch (pos) {
             case 0:
                 return new SequenceExtent.Of<>(new Item[]{one, two});

@@ -20,11 +20,9 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.TupleType;
-import net.sf.saxon.om.AbstractSequenceIterator;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -120,7 +118,7 @@ public class LookupAllExpression extends UnaryExpression {
         }
 
         if (getBaseExpression() instanceof Literal) {
-            return new Literal(iterate(visitor.makeDynamicContext()).materialize());
+            return new Literal(SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
         }
 
         return this;
@@ -131,7 +129,7 @@ public class LookupAllExpression extends UnaryExpression {
         getOperand().optimize(visitor, contextItemType);
 
         if (getBaseExpression() instanceof Literal) {
-            return new Literal(iterate(visitor.makeDynamicContext()).materialize());
+            return new Literal(SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
         }
         
         // See W3C bug 30228. In the interests of keeping certain tests streamable, we do a rewrite of [A,B,C]?*
@@ -242,7 +240,7 @@ public class LookupAllExpression extends UnaryExpression {
 
             @Override
             @CSharpModifiers(code = {"public", "override"})
-            public Item next() throws XPathException {
+            public Item next() {
                 if (level2 == null) {
                     if (level1forArrays == null && level1forMaps == null) {
                         Item lhs = level0.next();
@@ -255,7 +253,11 @@ public class LookupAllExpression extends UnaryExpression {
                             level1forMaps = ((MapItem)lhs).keyValuePairs().iterator();
                             return next();
                         } else {
-                            LookupExpression.mustBeArrayOrMap(LookupAllExpression.this, lhs);
+                            try {
+                                LookupExpression.mustBeArrayOrMap(LookupAllExpression.this, lhs);
+                            } catch (XPathException e) {
+                                throw new UncheckedXPathException(e);
+                            }
                             return null;
                         }
                     } else if (level1forArrays != null && level1forArrays.hasNext()) {

@@ -89,7 +89,7 @@ public class GroupByClausePush extends TuplePush {
         for (int i = 0; i < groupingValues.length; i++) {
             Sequence v = groupingValues[i];
             if (!(v instanceof EmptySequence || v instanceof AtomicValue)) {
-                v = Atomizer.getAtomizingIterator(v.iterate(), false).materialize();
+                v = SequenceTool.toGroundedValue(Atomizer.getAtomizingIterator(v.iterate(), false));
                 if (SequenceTool.getLength(v) > 1) {
                     throw new XPathException("Grouping key value cannot be a sequence of more than one item", "XPTY0004");
                 }

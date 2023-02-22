@@ -1614,7 +1614,7 @@ public class Controller implements ContextOriginator {
                 try {
                     MemoSequence ms = new MemoSequence(base);
                     fti = FocusTrackingIterator.track(ms.iterate());
-                } catch (XPathException e) {
+                } catch (UncheckedXPathException e) {
                     fti = FocusTrackingIterator.track(base);
                 }
             } else {

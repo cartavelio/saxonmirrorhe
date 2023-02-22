@@ -100,7 +100,7 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
     }
 
     @Override
-    public NodeInfo next() throws XPathException {
+    public NodeInfo next() {
 
         // Since the intakes are sorted, we can simply take the first.
 
