@@ -14,7 +14,7 @@
          <ul>
             <li><p>The SaxonC 12 release is built from the Java source code of SaxonJ 12, with some variations.</p></li>
             <li><p>SaxonC is now compiled to a native executable using GraalVM Native Image (version 22.3.0). (Earlier
-               versions used Excelsior Jet, which is no longer marketed or supported). GraalVM performs ahead-of-time
+               versions used Excelsior Jet, which is no longer marketed or supported.) GraalVM performs ahead-of-time
                compilation of the Java source code to executable machine code: the target code is specific to an
                operating system (Windows, Linux, or MacOS) and CPU architecture.</p>
                <p>The move from Excelsior JET to GraalVM has a number of benefits:</p>
@@ -30,8 +30,8 @@
                in a native (that is, non-Java) shared library. There are benchmarks
                available which show that using the Native Image C API is considerably faster than using JNI.</p>
             </li>
-            <li><p>SaxonC-EE is built using GraalVM Enterprise edition, while SaxonC-PE and SaxonC-HE 
-               are built using GraalVM Community edition. Early indications suggest that GraalVM Enterprise
+            <li><p>SaxonC-EE and SaxonC-PE are built using GraalVM Enterprise Edition, while SaxonC-HE 
+               is built using GraalVM Community Edition. Early indications suggest that GraalVM Enterprise
                Edition delivers a 20% performance boost.</p></li>
             <li><p>The SaxonC Python extension is now available as a Python wheel package. This is available using Pypi for a number of platforms and
                flavors including MacOS, Linux and Windows.
@@ -40,9 +40,9 @@
             <li><p>In SaxonC 12.0, a few features from SaxonC 11.x have not yet been bridged to GraalVM,
             in particular:</p>
             <ul>
-               <li><p>Localization using ICU-J. (Localization using the capabilities of the JDK remains
+               <li><p>Localization using ICU4J. (Localization using the capabilities of the JDK remains
                available, but is more limited.)</p></li>
-               <li><p>Calls to user-written host language extension functions</p></li>
+               <li><p>Calls to user-written host language extension functions.</p></li>
             </ul>
             <p>We hope to restore these features (perhaps in a slightly different form) in the future.</p></li>
          </ul>
@@ -51,19 +51,26 @@
       <category name="api">
          <ul>
             <li>ICU localization is currently not supported.</li>
-            <li>Host language Extension functions are currently not supported.</li>
-            <li>A new method <code>clarkNameToEQName</code> and <code>EQNameToClarkName</code> 
-               is available on the <code>SaxonProcessor</code> class across the languages C++, PHP and Python</li>
-            <li>The <code>flag</code> argument in the <code>setCatalog</code> method has been dropped.</li>
+            <li>Host language extension functions are currently not supported.</li>
+            <li>The new methods <code>clarkNameToEQName()</code> and <code>EQNameToClarkName()</code> 
+               are available on the <code>SaxonProcessor</code> class across the languages C++, PHP and
+               Python.</li>
+            <li>The <code>flag</code> argument in the <code>setCatalog()</code> method of
+               <code>SaxonProcessor</code> has been dropped.</li>
          </ul>
       </category>
       
       <category name="installation">
          <ul>
             <li>The move to a different JVM technology inevitably changes the mechanisms for
-            product installation and configuration. Please see the documentation for details.</li>
-            <li>For Python users, the product is now available as a Python wheel package,
-            for multiple platforms.</li>
+            product installation and configuration. Please see the documentation for details: for instance
+               <a href="/starting/installing">Installing SaxonC</a>, and the installation documentation for
+               the <a href="/starting/installingphp">PHP extension</a> and <a
+                  href="/starting/installingpython">Python extension</a>.</li>
+            <li>For Python users, the product is now available as a Python wheel package on pypi,
+               for multiple platforms. This means that it can be installed with pip, which greatly simplifies
+               the installation process. See <a href="/starting/installingpython">Python extension</a> for
+               details.</li>
          </ul>
       </category>
    </release>
