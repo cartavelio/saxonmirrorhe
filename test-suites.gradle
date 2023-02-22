@@ -387,7 +387,7 @@ testSuiteMatrix.keySet().findAll { !it.startsWith("_") }.each { product ->
         }
         def config = ["name": name,
                       "language": lang]
-        config += options[optname] + g0opt + g1opt + g2opt + g3opt
+        config += g0opt + g1opt + g2opt + g3opt + options[optname]
         if (product.contains("dotnet")) {
           config["platform"] = "dotnet"
           config["dotnet"] = dotnetex
