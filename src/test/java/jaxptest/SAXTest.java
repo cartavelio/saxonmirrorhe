@@ -2,11 +2,15 @@ package jaxptest;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.jaxp.SaxonTransformerFactory;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.*;
 
+import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -14,6 +18,7 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
+import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -170,6 +175,30 @@ public class SAXTest {
             Transformer t = factory.newTransformer(new StreamSource(new StringReader(xsl)));
             t.transform(new StreamSource(new StringReader(xml)), result);
         } catch (TransformerException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testSAXParserFactory() {
+        try {
+            Configuration configuration = new Configuration();
+            Processor processor = new Processor(configuration);
+            StringWriter sw = new StringWriter();
+            Serializer serializer = processor.newSerializer(sw);
+
+            SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+            XMLReader xmlReader = parser.getXMLReader();
+            ParseOptions parseOptions = new ParseOptions();
+            parseOptions.setXMLReader(xmlReader);
+
+            NodeInfo node = configuration
+                    .buildDocumentTree(new StreamSource(new StringReader("<b xmlns='a'/>")), parseOptions)
+                    .getRootNode();
+            serializer.serialize(node);
+            assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><b xmlns=\"a\"/>", sw.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
             fail();
         }
     }
