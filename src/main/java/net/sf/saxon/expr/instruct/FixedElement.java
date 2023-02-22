@@ -666,7 +666,7 @@ public class FixedElement extends ElementCreator {
     public static class FixedElementElaborator extends ComplexNodePushElaborator {
 
         @Override
-        @CSharpInnerClass(outer = false, extra = {"Saxon.Hej.expr.instruct.FixedElement instr", "Saxon.Eej.ee.elab.eval.PushEvaluator contentPusher"})
+        @CSharpInnerClass(outer = false, extra = {"Saxon.Hej.expr.instruct.FixedElement instr", "Saxon.Hej.expr.elab.PushEvaluator contentPusher"})
         public PushEvaluator elaborateForPush() {
             final FixedElement instr = (FixedElement) getExpression();
             final PushEvaluator contentPusher =
@@ -685,7 +685,7 @@ public class FixedElement extends ElementCreator {
                 @Override
                 public void processContent(Outputter output, XPathContext context) throws XPathException {
                     TailCall tc = contentPusher.process(output, context);
-                    dispatchTailCall(tc);
+                    Expression.dispatchTailCall(tc);
                 }
             };
 
