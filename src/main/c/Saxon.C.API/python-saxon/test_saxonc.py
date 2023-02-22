@@ -3,6 +3,7 @@ import pytest
 from saxonc import *
 import os
 from os.path import isfile
+from datetime import datetime as date
 
 
 @pytest.fixture
@@ -147,7 +148,14 @@ def test_version():
     sp = PySaxonProcessor()
     ver = sp.version
 
-    assert ver.startswith('SaxonC ')
+    assert ver.startswith('SaxonC-HE')
+    assert ver.endswith('from Saxonica')
+def test_version2():
+    """SaxonProcessor version string content"""
+    sp = PySaxonProcessor(license=True)
+    ver = sp.version
+
+    assert ver.startswith('SaxonC-EE')
     assert ver.endswith('from Saxonica')
 def test_schema_aware1(saxonproc):
     assert saxonproc.is_schema_aware == False
@@ -160,8 +168,7 @@ def test_icu_lib():
     xqc.set_query_content("format-date(current-date(),'[FNn]','de',(),())")
     result = xqc.run_query_to_value()
     print("format-date(current-date(),'[FNn]','de',(),()) => " + str(result))
-
-    assert 'Montag' in str(result)
+    assert str(result) in "Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag, Sonntag"
 
     xqc.set_query_content("format-integer(33,'[Ww]')")
     result2 = xqc.run_query_to_value()
@@ -193,7 +200,8 @@ def test_icu_lib_HE():
     xqc.set_query_content("format-date(current-date(),'[FNn]','de',(),())")
     result = xqc.run_query_to_value()
     print("format-date(current-date(),'[FNn]','de',(),()) => " + str(result))
-    assert '[Language: en]Monday' in str(result)
+    day = date.today().strftime("%A")
+    assert '[Language: en]'+day in str(result)
 
     xqc.set_query_content("format-integer(33,'[Ww]')")
     result2 = xqc.run_query_to_value()
