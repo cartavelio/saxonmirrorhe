@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
@@ -1204,6 +1207,83 @@ public final class AxisExpression extends Expression {
         a.setRetainedStaticContext(getRetainedStaticContext());
         pre.add(a);
         return pre;
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new AxisExpressionElaborator();
+    }
+
+    /**
+     * Elaborator for an AxisExpression
+     */
+
+    public static class AxisExpressionElaborator extends PullElaborator {
+
+        private void reportDoesNotExist(Expression expression, XPathContext context) throws XPathException {
+            XPathException err = new XPathException("The context item for axis step " +
+                                                            expression + " is absent");
+            err.setErrorCode("XPDY0002");
+            err.setXPathContext(context);
+            err.setLocation(expression.getLocation());
+            err.setIsTypeError(true);
+            throw err;
+        }
+
+        private void reportIsNotNode(Expression expression, XPathContext context) throws XPathException {
+            XPathException err = new XPathException("The context item for axis step " +
+                                                            expression + " is not a node");
+            err.setErrorCode("XPTY0020");
+            err.setXPathContext(context);
+            err.setLocation(expression.getLocation());
+            err.setIsTypeError(true);
+            throw err;
+        }
+
+        @SuppressWarnings("DuplicatedCode")
+        @Override
+        public PullEvaluator elaborateForPull() {
+            AxisExpression axisExpression = (AxisExpression) getExpression();
+            NodeTest test = axisExpression.getNodeTest();
+            int axis = axisExpression.getAxis();
+            // These variables are computed in the hope that the optimizer will remove runtime error tests
+            // that aren't needed because the condition cannot occur
+            boolean checkContextItemExists = axisExpression.isContextPossiblyUndefined();
+            boolean checkContextItemIsNode = axisExpression.getContextItemType().getGenre() != Genre.NODE;
+            if (test == null || test instanceof AnyNodeTest) {
+                return context -> {
+                    Item item = context.getContextItem();
+                    if (checkContextItemExists && item == null) {
+                        reportDoesNotExist(axisExpression, context);
+                    }
+                    if (checkContextItemIsNode && !(item instanceof NodeInfo)) {
+                        reportIsNotNode(axisExpression, context);
+                    }
+                    assert item != null;
+                    return ((NodeInfo)item).iterateAxis(axis);
+                };
+            } else {
+                return context -> {
+                    Item item = context.getContextItem();
+                    if (checkContextItemExists && item == null) {
+                        reportDoesNotExist(axisExpression, context);
+                    }
+                    if (checkContextItemIsNode && !(item instanceof NodeInfo)) {
+                        reportIsNotNode(axisExpression, context);
+                    }
+                    assert item != null;
+                    return ((NodeInfo) item).iterateAxis(axis, test);
+                };
+            }
+        }
+
+
     }
 }
 

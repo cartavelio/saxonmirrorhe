@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr.sort;
 
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.SequenceIterator;
@@ -465,6 +468,35 @@ public class SortExpression extends Expression
 
     public void setSortKeyDefinitionList(SortKeyDefinitionList skd) {
         sortOp.setChildExpression(skd);
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new SortExprElaborator();
+    }
+
+    /**
+     * Elaborator for a sort expression - sorts nodes into order based on a user-supplied sort key
+     */
+
+    public static class SortExprElaborator extends PullElaborator {
+
+        public PullEvaluator elaborateForPull() {
+
+            // TODO: elaborate the sort key expression, and other expressions in the sort key definition
+
+            final SortExpression expr = (SortExpression) getExpression();
+            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+
+            return context -> expr.iterateSorted(baseEval.eval(context), context);
+        }
+
     }
 }
 

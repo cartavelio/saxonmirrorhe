@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.BooleanEvaluator;
+import com.saxonica.ee.elab.eval.UnicodeStringEvaluator;
+import com.saxonica.ee.elab.gen.BooleanElaborator;
+import com.saxonica.ee.elab.gen.Elaborator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.parser.Token;
@@ -16,6 +20,7 @@ import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.Cardinality;
 
 /**
  * This class implements a comparison of a computed value to a string constant using one of the operators
@@ -192,5 +197,43 @@ public class CompareToStringConstant extends CompareToConstant {
         // Note: this treats NaN=NaN as true, but it doesn't matter, because the rhs will never be NaN.
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new CompareToStringConstantElaborator();
+    }
+
+    /**
+     * Elaborator for a "compare to string constant" expression
+     */
+
+    public static class CompareToStringConstantElaborator extends BooleanElaborator {
+
+        public BooleanEvaluator elaborateForBoolean() {
+            final CompareToStringConstant expression = (CompareToStringConstant) getExpression();
+            final Expression arg = expression.getBaseExpression();
+            final UnicodeStringEvaluator argEval = makeElaborator(arg).elaborateForUnicodeString(false);
+            final boolean nullable = Cardinality.allowsZero(expression.getCardinality());
+            final int operator = expression.getComparisonOperator();
+            final UnicodeString comparand = expression.getComparand();
+
+            return context -> {
+                UnicodeString value = argEval.eval(context);
+                if (nullable && value == null) {
+                    return false;
+                }
+                int c = value.compareTo(comparand);
+                return interpretComparisonResult(operator, c);
+            };
+
+        }
+
+
+    }
 }
 

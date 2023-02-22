@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -16,6 +19,7 @@ import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.HomogeneityCheckerIterator;
 import net.sf.saxon.type.Affinity;
@@ -158,6 +162,36 @@ public class HomogeneityChecker extends UnaryExpression {
     @Override
     public String getExpressionName() {
         return "homCheck";
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new HomogeneityCheckerElaborator();
+    }
+
+    /**
+     * Elaborator for a homogeneity checker, which checks that the items in a sequence are
+     * either all nodes, or all non-nodes.
+     */
+
+    public static class HomogeneityCheckerElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            HomogeneityChecker exp = (HomogeneityChecker) getExpression();
+            Location location = exp.getLocation();
+            Expression arg = exp.getBaseExpression();
+            PullEvaluator argEval = Elaborator.makeElaborator(arg).elaborateForPull();
+
+            return context -> new HomogeneityCheckerIterator(argEval.eval(context), location);
+        }
+
     }
 }
 

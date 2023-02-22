@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.BooleanEvaluator;
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.gen.BooleanElaborator;
+import com.saxonica.ee.elab.gen.Elaborator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.parser.Token;
@@ -14,8 +18,14 @@ import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.DoubleSortComparer;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.NumericValue;
+
+import java.math.BigDecimal;
 
 /**
  * This class implements a comparison of a numeric value to an integer constant using one of the operators
@@ -191,5 +201,81 @@ public class CompareToIntegerConstant extends CompareToConstant {
         // Note: this treats NaN=NaN as true, but it doesn't matter, because the rhs will never be NaN.
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new CompareToIntegerConstantElaborator();
+    }
+
+    /**
+     * Elaborator for a "compare to integer constant" expression
+     */
+
+    public static class CompareToIntegerConstantElaborator extends BooleanElaborator {
+
+        public BooleanEvaluator elaborateForBoolean() {
+            CompareToIntegerConstant expression = (CompareToIntegerConstant) getExpression();
+            Expression arg = expression.getBaseExpression();
+            ItemEvaluator argEval = makeElaborator(arg).elaborateForItem();
+            int operator = expression.getComparisonOperator();
+            long comparand = expression.getComparand();
+
+            TypeHierarchy th = getConfiguration().getTypeHierarchy();
+            ItemType operandType = arg.getItemType();
+
+            boolean isDouble = th.isSubType(operandType, BuiltInAtomicType.DOUBLE);
+            boolean isFloat = th.isSubType(operandType, BuiltInAtomicType.FLOAT);
+            boolean isInteger = th.isSubType(operandType, BuiltInAtomicType.INTEGER);
+            boolean isDecimal = (!isInteger) && th.isSubType(operandType, BuiltInAtomicType.DECIMAL);
+
+            if (isInteger) {
+                return context -> {
+                    IntegerValue val = (IntegerValue) argEval.eval(context);
+                    return interpretComparisonResult(operator, val.compareTo(comparand));
+                };
+
+            }
+
+            if (isDouble || isFloat) {
+                // convert constant to double in advance
+                final double constant = (double) comparand;
+                return context -> {
+                    double val = ((NumericValue) argEval.eval(context)).getDoubleValue();
+                    if (Double.isNaN(val)) {
+                        return operator == Token.FNE;
+                    }
+                    return interpretComparisonResult(operator, Double.compare(val, constant));
+                };
+            }
+
+            if (isDecimal) {
+                // convert constant to BigDecimal in advance
+                final BigDecimal deci = BigDecimal.valueOf(comparand);
+                return context -> {
+                    BigDecimal val = ((NumericValue) argEval.eval(context)).getDecimalValue();
+                    return interpretComparisonResult(operator, val.compareTo(deci));
+                };
+            }
+
+            // Otherwise, the type is not statically known or is known to be untyped
+
+            return context -> {
+                NumericValue num = ((NumericValue) argEval.eval(context));
+                if (num.isNaN()) {
+                    return operator == Token.FNE;
+                }
+                int c = num.compareTo(comparand);
+                return interpretComparisonResult(operator, c);
+            };
+
+        }
+
+
+    }
 }
 

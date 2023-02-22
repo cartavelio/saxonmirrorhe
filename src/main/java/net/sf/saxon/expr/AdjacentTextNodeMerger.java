@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.instruct.ValueOf;
@@ -247,5 +250,30 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
         return item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.TEXT;
     }
 
+    /**
+     * Make an elaborator for this expression
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new AdjacentTextNodeMergerElaborator();
+    }
+
+    /**
+     * Elaborator for an adjacent text node merging expression - inserted into a pipeline for node construction
+     */
+
+    public static class AdjacentTextNodeMergerElaborator extends PullElaborator {
+
+        public PullEvaluator elaborateForPull() {
+
+            final AdjacentTextNodeMerger expr = (AdjacentTextNodeMerger) getExpression();
+            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+
+            return context -> new AdjacentTextNodeMergingIterator(baseEval.eval(context));
+        }
+
+    }
 }
 

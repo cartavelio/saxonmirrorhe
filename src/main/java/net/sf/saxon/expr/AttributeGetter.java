@@ -7,12 +7,12 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.FingerprintedQName;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
@@ -192,6 +192,51 @@ public final class AttributeGetter extends Expression {
         out.emitAttribute("name", attributeName.getStructuredQName());
         out.emitAttribute("chk", "" + requiredChecks);
         out.endElement();
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new AttributeGetterElaborator();
+    }
+
+    /**
+     * Elaborator for an AttributeGetter expression (which gets a named attribute of the context item
+     * and returns its value as an untyped atomic value)
+     */
+
+    public static class AttributeGetterElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+            final AttributeGetter exp = (AttributeGetter)getExpression();
+            final int fingerprint = exp.getAttributeName().getFingerprint();
+            final NamespaceUri uri = exp.getAttributeName().getNamespaceUri();
+            final String local = exp.getAttributeName().getLocalPart();
+            return context -> {
+                Item item = context.getContextItem();
+                if (item instanceof TinyElementImpl) {
+                    // fast path
+                    String val = ((TinyElementImpl) item).getAttributeValue(fingerprint);
+                    return val == null ? null : new StringValue(val, BuiltInAtomicType.UNTYPED_ATOMIC);
+                }
+                assert item instanceof NodeInfo;
+                NodeInfo node = (NodeInfo) item;
+                if (node.getNodeKind() == Type.ELEMENT) {
+                    String val = node.getAttributeValue(uri, local);
+                    if (val != null) {
+                        return new StringValue(val, BuiltInAtomicType.UNTYPED_ATOMIC);
+                    }
+                }
+                return null;
+            };
+        }
+
+
     }
 }
 

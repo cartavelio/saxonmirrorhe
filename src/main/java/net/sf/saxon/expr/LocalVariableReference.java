@@ -7,8 +7,15 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.eval.PushEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 
@@ -160,4 +167,51 @@ public class LocalVariableReference extends VariableReference {
 //    public void refineVariableReference(Expression parent) {
 //        // no-op
 //    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new LocalVariableReferenceElaborator();
+    }
+
+    /**
+     * Elaborator for a local variable reference, for example {@code $var}.
+     */
+
+    public static class LocalVariableReferenceElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            LocalVariableReference varRef = (LocalVariableReference)getExpression();
+            int slot = varRef.getSlotNumber();
+            return context -> context.evaluateLocalVariable(slot).iterate();
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            LocalVariableReference varRef = (LocalVariableReference) getExpression();
+            int slot = varRef.getSlotNumber();
+            return (out, context) -> {
+                SequenceIterator value = context.evaluateLocalVariable(slot).iterate();
+                Item it;
+                while ((it = value.next()) != null) {
+                    out.append(it);
+                }
+                return null;
+            };
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            LocalVariableReference varRef = (LocalVariableReference) getExpression();
+            int slot = varRef.getSlotNumber();
+            return context -> context.evaluateLocalVariable(slot).head();
+        }
+
+    }
 }

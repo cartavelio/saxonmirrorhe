@@ -7,6 +7,8 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.FallbackElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
@@ -1762,6 +1764,14 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
 
     public String getStreamerName() {
         return null;
+    }
+
+    /**
+     * Make an elaborator for this expression
+     */
+
+    public Elaborator getElaborator() {
+        return new FallbackElaborator();
     }
 
 

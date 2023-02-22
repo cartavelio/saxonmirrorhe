@@ -7,11 +7,14 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.eval.PushEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
@@ -165,5 +168,49 @@ public class GlobalVariableReference extends VariableReference implements Compon
     @Override
     public String getExpressionName() {
         return "gVarRef";
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new GlobalVariableReferenceElaborator();
+    }
+
+    /**
+     * Elaborator for a global variable reference, for example {@code $globalVar}.
+     */
+
+    public static class GlobalVariableReferenceElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            GlobalVariableReference varRef = (GlobalVariableReference)getExpression();
+            return context -> varRef.evaluateVariable(context).iterate();
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            GlobalVariableReference varRef = (GlobalVariableReference) getExpression();
+            return (out, context) -> {
+                SequenceIterator value = varRef.evaluateVariable(context).iterate();
+                Item it;
+                while ((it = value.next()) != null) {
+                    out.append(it);
+                }
+                return null;
+            };
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            GlobalVariableReference varRef = (GlobalVariableReference) getExpression();
+            return context -> varRef.evaluateVariable(context).head();
+        }
+
     }
 }

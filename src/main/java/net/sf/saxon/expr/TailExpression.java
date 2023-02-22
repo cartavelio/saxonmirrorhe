@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -198,6 +201,37 @@ public class TailExpression extends UnaryExpression {
         } else {
             return getBaseExpression().toShortString() + "[position() ge " + start + "]";
         }
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new TailExprElaborator();
+    }
+
+    /**
+     * Elaborator for a tail expression
+     */
+
+    public static class TailExprElaborator extends PullElaborator {
+
+        public PullEvaluator elaborateForPull() {
+            final TailExpression expr = (TailExpression) getExpression();
+            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            final int start = expr.getStart();
+
+            return context -> {
+                SequenceIterator baseIter = baseEval.eval(context);
+                return TailIterator.make(baseIter, start);
+            };
+
+        }
+
     }
 }
 

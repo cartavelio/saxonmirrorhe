@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.BooleanEvaluator;
+import com.saxonica.ee.elab.gen.BooleanElaborator;
+import com.saxonica.ee.elab.gen.Elaborator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.trans.XPathException;
@@ -137,6 +140,33 @@ public class OrExpression extends BooleanExpression {
         return getLhsExpression().effectiveBooleanValue(c) || getRhsExpression().effectiveBooleanValue(c);
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
 
+    @Override
+    public Elaborator getElaborator() {
+        return new OrElaborator();
+    }
+
+    /**
+     * Elaborator for an "or" expression ({@code A or B})
+     */
+
+    public static class OrElaborator extends BooleanElaborator {
+
+        public BooleanEvaluator elaborateForBoolean() {
+
+            OrExpression expr = (OrExpression) getExpression();
+            BooleanEvaluator eval0 = makeElaborator(expr.getLhsExpression()).elaborateForBoolean();
+            BooleanEvaluator eval1 = makeElaborator(expr.getRhsExpression()).elaborateForBoolean();
+
+            return context -> eval0.eval(context) || eval1.eval(context);
+        }
+
+
+    }
 }
 
