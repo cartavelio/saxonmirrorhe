@@ -730,7 +730,7 @@ public class XsltController extends Controller {
     }
 
     private MappingFunction getInputPreprocessor(Mode finalMode) {
-        return item -> {
+        return SequenceMapper.of(item -> {
             if (item instanceof NodeInfo) {
                 NodeInfo node = (NodeInfo) item;
                 if (node.getConfiguration() == null) {
@@ -774,7 +774,7 @@ public class XsltController extends Controller {
             } else {
                 return SingletonIterator.makeIterator(item);
             }
-        };
+        });
     }
 
     private void warningIfStreamable(Mode mode) {

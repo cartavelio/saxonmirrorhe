@@ -9,7 +9,6 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.trans.XPathException;
 
 import java.util.Optional;
 
@@ -69,7 +68,7 @@ public interface ItemType {
      * @return true if the item is an instance of this type; false otherwise
      */
 
-    boolean matches(Item item, TypeHierarchy th) throws XPathException;
+    boolean matches(Item item, TypeHierarchy th);
 
     /**
      * Get the primitive item type corresponding to this item type. For item(),

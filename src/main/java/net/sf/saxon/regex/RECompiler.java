@@ -30,6 +30,7 @@
 
 package net.sf.saxon.regex;
 
+import net.sf.saxon.annotate.CSharp;
 import net.sf.saxon.regex.charclass.*;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -861,6 +862,7 @@ public class RECompiler {
                         break;
                     }
                     // else fall through ($ is not a metacharacter in XSD)
+                    CSharp.emitCode("goto default");
 
                 default:
 

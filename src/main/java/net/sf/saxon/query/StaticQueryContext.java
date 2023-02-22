@@ -16,8 +16,8 @@ import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
@@ -863,7 +863,7 @@ public class StaticQueryContext {
      */
 
     public void declareGlobalVariable(
-            StructuredQName qName, SequenceType type, Sequence value, boolean external)
+            StructuredQName qName, SequenceType type, GroundedValue value, boolean external)
             throws XPathException {
         if (value == null && !external) {
             throw new NullPointerException("No initial value for declared variable");

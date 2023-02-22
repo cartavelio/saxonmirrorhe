@@ -30,7 +30,7 @@ public class CallableWithBoundFocus implements Callable {
         } else {
             ManualIterator iter =
                     new ManualIterator(context.getContextItem(), context.getCurrentIterator().position());
-            iter.setLastPositionFinder(context::getLast);
+            iter.setLengthFinder(context::getLast);
             boundContext.setCurrentIterator(iter);
         }
     }

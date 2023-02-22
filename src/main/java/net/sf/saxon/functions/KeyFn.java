@@ -91,29 +91,6 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
     }
 
     /**
-     * Mapping class to filter nodes that have the origin node as an ancestor-or-self
-     */
-
-    public static class SubtreeFilter implements ItemMappingFunction {
-
-        private final NodeInfo origin;
-
-        public SubtreeFilter(NodeInfo origin) {
-            this.origin = origin;
-        }
-
-        @Override
-        public NodeInfo mapItem(Item item) {
-            if (Navigator.isAncestorOrSelf(origin, (NodeInfo)item)) {
-                return (NodeInfo)item;
-            } else {
-                return null;
-            }
-        }
-
-    }
-
-    /**
      * Allow the function to create an optimized call based on the values of the actual arguments.
      * This binds the key definition in the common case where the key name is defined statically
      *
@@ -258,9 +235,6 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
             final KeyManager keyManager, XPathContext context, Sequence sought, NodeInfo origin, KeyDefinitionSet selectedKeySet) throws XPathException {
 
 
-//        if (internal) {
-//            System.err.println("Using key " + fprint + " on doc " + doc);
-//        }
         NodeInfo doc = origin.getRoot();
         if (selectedKeySet.isComposite()) {
             SequenceIterator soughtKey = sought.iterate();
@@ -269,7 +243,8 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
             if (origin.equals(doc)) {
                 return new LazySequence(all);
             }
-            return new LazySequence(new ItemMappingIterator(all, new SubtreeFilter(origin)));
+            return new LazySequence(new ItemMappingIterator(all, ItemFilter.of(
+                    item -> Navigator.isAncestorOrSelf(origin, (NodeInfo) item))));
 
         } else {
             // Changed by bug 2929 and bug 4656
@@ -291,7 +266,8 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
             if (origin.equals(doc)) {
                 return new LazySequence(allResults);
             }
-            return new LazySequence(new ItemMappingIterator(allResults, new SubtreeFilter(origin)));
+            return new LazySequence(new ItemMappingIterator(allResults, ItemFilter.of(item ->
+                Navigator.isAncestorOrSelf(origin, (NodeInfo) item))));
         }
     }
 

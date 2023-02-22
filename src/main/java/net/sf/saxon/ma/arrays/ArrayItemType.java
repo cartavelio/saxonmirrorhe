@@ -11,12 +11,10 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
 
@@ -157,14 +155,14 @@ public class ArrayItemType extends AnyFunctionType {
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) throws XPathException{
+    public boolean matches(Item item, TypeHierarchy th) {
         if (!(item instanceof ArrayItem)) {
             return false;
         }
         if (this == ANY_ARRAY_TYPE) {
             return true;
         } else {
-            for (Sequence s : ((ArrayItem) item).members()){
+            for (GroundedValue s : ((ArrayItem) item).members()){
                 if (!memberType.matches(s, th)){
                     return false;
                 }
@@ -294,22 +292,18 @@ public class ArrayItemType extends AnyFunctionType {
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         if (item instanceof ArrayItem) {
             for (int i=0; i<((ArrayItem)item).arrayLength(); i++) {
-                try {
-                    GroundedValue member = ((ArrayItem) item).get(i);
-                    if (!memberType.matches(member, th)) {
-                        String s = "The " + RoleDiagnostic.ordinal(i+1) +
-                                " member of the supplied array {" +
-                                Err.depictSequence(member) +
-                                "} does not match the required member type " +
-                                memberType;
-                        Optional<String> more = memberType.explainMismatch(member, th);
-                        if (more.isPresent()) {
-                            s = s + ". " + more.get();
-                        }
-                        return Optional.of(s);
+                GroundedValue member = ((ArrayItem) item).get(i);
+                if (!memberType.matches(member, th)) {
+                    String s = "The " + RoleDiagnostic.ordinal(i+1) +
+                            " member of the supplied array {" +
+                            Err.depictSequence(member) +
+                            "} does not match the required member type " +
+                            memberType;
+                    Optional<String> more = memberType.explainMismatch(member, th);
+                    if (more.isPresent()) {
+                        s = s + ". " + more.get();
                     }
-                } catch (XPathException e) {
-                    return Optional.empty();
+                    return Optional.of(s);
                 }
             }
         }

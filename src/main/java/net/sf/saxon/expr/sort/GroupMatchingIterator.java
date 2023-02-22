@@ -92,7 +92,7 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
 
         ManualGroupMatchingIterator() {
             super(current, position);
-            setLastPositionFinder(() -> savedcontext.getLast());
+            setLengthFinder(() -> savedcontext.getLast());
         }
 
         @Override

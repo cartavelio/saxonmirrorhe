@@ -302,16 +302,15 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
             }
             final ItemType type = resultType.getPrimaryType();
             if (type != AnyItemType.getInstance()) {
-                result = new ItemMappingIterator(result,
-                                                 item -> {
-                                                     if (!type.matches(item, th)) {
-                                                         String msg = role.composeErrorMessage(type, item, th);
-                                                         XPathException err = new XPathException(msg, "XPTY0004");
-                                                         err.setLocation(getLocation());
-                                                         throw err;
-                                                     }
-                                                     return item;
-                                                 }, true);
+                result = new ItemMappingIterator(result, ItemMapper.of(item -> {
+                     if (!type.matches(item, th)) {
+                         String msg = role.composeErrorMessage(type, item, th);
+                         XPathException err = new XPathException(msg, "XPTY0004");
+                         err.setLocation(getLocation());
+                         throw err;
+                     }
+                     return item;
+                 }), true);
             }
             if (th.relationship(type, AnyNodeTest.getInstance()) != Affinity.DISJOINT) {
                 result = new ItemMappingIterator(

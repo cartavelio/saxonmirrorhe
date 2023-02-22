@@ -24,8 +24,7 @@ import net.sf.saxon.type.Type;
  *
  * @since 9.3
  */
-public class EmptyTextNodeRemover extends UnaryExpression
-        implements ItemMappingFunction {
+public class EmptyTextNodeRemover extends UnaryExpression implements ItemMappingFunction {
 
     public EmptyTextNodeRemover(Expression p0) {
         super(p0);
@@ -110,7 +109,6 @@ public class EmptyTextNodeRemover extends UnaryExpression
      */
 
     /*@Nullable*/
-    @Override
     public Item mapItem(Item item) throws XPathException {
         if (item instanceof NodeInfo &&
             ((NodeInfo) item).getNodeKind() == Type.TEXT &&

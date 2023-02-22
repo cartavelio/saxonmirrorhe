@@ -137,7 +137,6 @@ public abstract class SuperId extends SystemFunction {
          * (implements the MappingFunction interface)
          */
 
-        @Override
         public SequenceIterator map(Item item) {
 
             UnicodeString idrefs = Whitespace.trim(item.getUnicodeStringValue());

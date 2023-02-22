@@ -517,8 +517,7 @@ public class ForExpression extends Assignation {
      * source sequence. It acts as the MappingFunction for the mapping iterator.
      */
 
-    public static class MappingAction
-            implements MappingFunction, ItemMappingFunction {
+    public static class MappingAction implements MappingFunction, ItemMappingFunction {
 
         protected XPathContext context;
         private final int slotNumber;
@@ -533,14 +532,12 @@ public class ForExpression extends Assignation {
         }
 
         /*@Nullable*/
-        @Override
         public SequenceIterator map(Item item) throws XPathException {
             context.setLocalVariable(slotNumber, item);
             return action.iterate(context);
         }
 
         /*@Nullable*/
-        @Override
         public Item mapItem(Item item) throws XPathException {
             context.setLocalVariable(slotNumber, item);
             return action.evaluateItem(context);

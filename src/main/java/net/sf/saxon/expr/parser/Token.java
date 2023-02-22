@@ -524,7 +524,7 @@ public abstract class Token {
     /**
      * Constant identifying the token number of the last token to be classified as an operator
      */
-    static int LAST_OPERATOR = 150;
+    public static final int LAST_OPERATOR = 150;
 
     // Tokens that set "operator" context, so an immediately following "div" is recognized
     // as an operator, not as an element name

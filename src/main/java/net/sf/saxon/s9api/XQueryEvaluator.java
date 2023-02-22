@@ -626,17 +626,17 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
                 context.initializeController(controller);
             }
             Configuration config = processor.getUnderlyingConfiguration();
+            TypeHierarchy th = config.getTypeHierarchy();
             Sequence[] vr = SequenceTool.makeSequenceArray(arguments.length);
             for (int i = 0; i < arguments.length; i++) {
                 net.sf.saxon.value.SequenceType type = fn.getParameterDefinitions()[i].getRequiredType();
-                vr[i] = arguments[i].getUnderlyingValue();
-
-                TypeHierarchy th = config.getTypeHierarchy();
-                if (!type.matches(vr[i], th)) {
+                GroundedValue gVal = arguments[i].getUnderlyingValue();
+                if (!type.matches(gVal, th)) {
                     RoleDiagnostic role = new RoleDiagnostic(
                             RoleDiagnostic.FUNCTION, function.getStructuredQName().getDisplayName(), i);
-                    vr[i] = th.applyFunctionConversionRules(vr[i], type, role, Loc.NONE);
+                    gVal = th.applyFunctionConversionRules(vr[i], type, role, Loc.NONE);
                 }
+                vr[i] = gVal;
             }
             Sequence result = fn.call(vr, controller);
             return XdmValue.wrap(result);

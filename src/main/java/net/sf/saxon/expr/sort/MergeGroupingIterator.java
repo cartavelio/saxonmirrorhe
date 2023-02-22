@@ -175,7 +175,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
 
         public ManualMergeGroupingIterator() {
             super(currenti.getObject().baseItem, position);
-            setLastPositionFinder(() -> currentMembers.size());
+            setLengthFinder(() -> currentMembers.size());
         }
 
         @Override

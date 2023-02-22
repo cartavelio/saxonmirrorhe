@@ -147,7 +147,7 @@ public class AnyFunctionType implements FunctionItemType {
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) throws XPathException {
+    public boolean matches(Item item, TypeHierarchy th) {
         return item instanceof Function;
     }
 

@@ -16,7 +16,6 @@ import net.sf.saxon.trans.XPathException;
  * able to return the position of the last item in the sequence.
  */
 
-@FunctionalInterface
 public interface LastPositionFinder {
 
     /**

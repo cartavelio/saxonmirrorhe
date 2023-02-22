@@ -15,6 +15,7 @@ import net.sf.saxon.functions.Count;
 import net.sf.saxon.functions.DistinctValues;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -203,7 +204,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
         ManualGroupAdjacentIterator() {
             super(current, position);
             setCurrentGroupingKey(currentKey);
-            setLastPositionFinder(() -> savedcontext.getLast());
+            setLengthFinder(savedcontext::getLast);
         }
 
         @Override
