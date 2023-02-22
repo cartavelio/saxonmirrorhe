@@ -185,7 +185,6 @@ public abstract class StandardNames {
     public static final int XS_ANY_URI = XS + 17;
     public static final int XS_QNAME = XS + 18;
     public static final int XS_NOTATION = XS + 19;
-    //public static final int XS_PRECISION_DECIMAL = XS + 20;
     public static final int XS_INTEGER = XS + 21;
 
     // Note that any type code <= XS_INTEGER is considered to represent a
