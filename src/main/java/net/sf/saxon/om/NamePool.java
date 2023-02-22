@@ -309,8 +309,7 @@ public final class NamePool {
                 // otherwise, look for the name in this namepool
             }
         }
-        Integer fingerprint = qNameToInteger.get(new StructuredQName("", uri, localName));
-        return fingerprint == null ? -1 : fingerprint;
+        return qNameToInteger.getOrDefault(new StructuredQName("", uri, localName), -1);
 
     }
 

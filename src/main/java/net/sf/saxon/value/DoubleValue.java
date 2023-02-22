@@ -145,6 +145,11 @@ public final class DoubleValue extends NumericValue {
      */
     @Override
     public long longValue() throws XPathException {
+        //#if CSHARP==true
+        if (Math.abs(value) > (double)Long.MAX_VALUE) {
+            return value < 0 ? -Long.MAX_VALUE : +Long.MAX_VALUE;
+        }
+        //#endif
         return (long) value;
     }
 
