@@ -8,7 +8,7 @@ import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -345,7 +345,7 @@ public class TransformTest  {
             TransformerFactoryImpl factory = new TransformerFactoryImpl();
             StreamSource xslS = new StreamSource(new StringReader(xsl));
             CompilerInfo info = new CompilerInfo(factory.getConfiguration());
-            info.setParameter(new StructuredQName("", "", "x"), StringItem.bmp("2+2"));
+            info.setParameter(new StructuredQName("", "", "x"), StringValue.bmp("2+2"));
             Templates templates = factory.newTemplates(xslS, info);
             Transformer transformer = templates.newTransformer();
             transformer.setOutputProperty("method", "text");

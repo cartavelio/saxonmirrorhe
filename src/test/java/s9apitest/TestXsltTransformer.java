@@ -24,7 +24,7 @@ import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -863,7 +863,7 @@ public class TestXsltTransformer {
     /**
      * Extension function used by the above test
      */
-    public static StringItem debug(XPathContext context) {
+    public static StringValue debug(XPathContext context) {
         Controller controller = context.getController();
         Executable exec = controller.getExecutable();
         for (PackageData pd : exec.getPackages()) {
@@ -875,7 +875,7 @@ public class TestXsltTransformer {
                     " value=" + (used ? bindery.getGlobalVariableValue(var) : "*unused*"));
             }
         }
-        return StringItem.makeStringValue("done");
+        return StringValue.makeStringValue("done");
     }
 
     @Test
