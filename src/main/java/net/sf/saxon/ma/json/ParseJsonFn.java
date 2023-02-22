@@ -32,12 +32,15 @@ public class ParseJsonFn extends JsonToXMLFn {
     static {
         SpecificFunctionType fallbackType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_STRING);
+        SpecificFunctionType parserType = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_ATOMIC);
         OptionsParameter parseJsonOptions = new OptionsParameter();
         parseJsonOptions.addAllowedOption("liberal", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringItem.bmp("use-first"));
         parseJsonOptions.setAllowedValues("duplicates", "FOJS0005", "reject", "use-first", "use-last");
         parseJsonOptions.addAllowedOption("escape", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("fallback", SequenceType.makeSequenceType(fallbackType, StaticProperty.EXACTLY_ONE), null);
+        parseJsonOptions.addAllowedOption("number-parser", SequenceType.makeSequenceType(parserType, StaticProperty.EXACTLY_ONE), null);
         OPTION_DETAILS = parseJsonOptions;
     }
 
@@ -85,6 +88,7 @@ public class ParseJsonFn extends JsonToXMLFn {
         }
         if (options != null) {
             handler.setFallbackFunction(options, context);
+            parser.setNumberParser(options, context);
         }
         parser.parse(input, flags, handler, context);
         return handler.getResult().head();
