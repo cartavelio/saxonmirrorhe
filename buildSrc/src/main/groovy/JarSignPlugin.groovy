@@ -63,9 +63,9 @@ public class JarSignPlugin implements Plugin<Project> {
     prop = project.findProperty("signTokenFile") ?: System.getenv("SAXON_SIGN_ETOKEN")
     if (prop != null) {
       extension.tokenfile = prop
-      File etoken = new File(tokfn)
+      File etoken = new File(prop)
       if (!etoken.exists()) {
-        println("Warning: signing token file does not exist: ${tokfn}")
+        println("Warning: signing token file does not exist: ${prop}")
       }
     }
 
