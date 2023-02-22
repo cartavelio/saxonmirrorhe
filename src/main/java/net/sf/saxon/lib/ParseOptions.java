@@ -13,6 +13,7 @@ import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
 import net.sf.saxon.ma.trie.ImmutableMap;
+import net.sf.saxon.ma.trie.TrieKVP;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeModel;
@@ -29,10 +30,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -62,8 +60,8 @@ public class ParseOptions {
         INVALIDITY_HANDLER,
         LINE_NUMBERING,
         MODEL,
-        PARSER_FEATURE,
-        PARSER_PROPERTY,
+        PARSER_FEATURES,
+        PARSER_PROPERTIES,
         PLEASE_CLOSE,
         SCHEMA_VALIDATION,
         SPACE_STRIPPING_RULE,
@@ -418,12 +416,17 @@ public class ParseOptions {
      * @param uri   The features as a URIs
      * @param value The value given to the feature as boolean
      */
-    public ParseOptions withAdditionalParserFeature(String uri, boolean value) {
-//        if (parserFeatures == null) {
-//            parserFeatures = new HashMap<>();
-//        }
-//        parserFeatures.put(uri, value);
-        return this;            // TODO
+    public ParseOptions withParserFeature(String uri, boolean value) {
+        Map<String, Boolean> parserFeatures = (Map<String, Boolean>) getProperty(Key.PARSER_FEATURES);
+        Map<String, Boolean> parserFeatures2;
+        if (parserFeatures == null) {
+            parserFeatures2 = new HashMap<>(4);
+        } else {
+            parserFeatures2 = new HashMap<>(parserFeatures);
+        }
+        Boolean old = parserFeatures2.put(uri, value);
+
+        return old != null && old == value ? this : withProperty(Key.PARSER_FEATURES, parserFeatures2);
     }
 
     /**
@@ -432,12 +435,21 @@ public class ParseOptions {
      * @param uri   The properties as a URIs
      * @param value The value given to the properties as a string
      */
-    public ParseOptions withAdditionalParserProperties(String uri, Object value) {
-//        if (parserProperties == null) {
-//            parserProperties = new HashMap<>();
-//        }
-//        parserProperties.put(uri, value);
-        return this;   //TODO
+    public ParseOptions withParserProperty(String uri, Object value) {
+        Map<String, Object> parserProperties = (Map<String, Object>) getProperty(Key.PARSER_FEATURES);
+        Map<String, Object> parserProperties2;
+        if (parserProperties == null) {
+            parserProperties2 = new HashMap<>(4);
+        } else {
+            parserProperties2 = new HashMap<>(parserProperties);
+        }
+        Object old;
+        if (value != null) {
+            old = parserProperties2.put(uri, value);
+        } else {
+            old = parserProperties2.remove(uri);
+        }
+        return (old != null && old.equals(value)) ? this : withProperty(Key.PARSER_PROPERTIES, parserProperties2);
     }
 
     /**
@@ -447,7 +459,7 @@ public class ParseOptions {
      * @return The feature value as boolean
      */
     public boolean getParserFeature(String uri) {
-        Set<String> parserFeatures = (Set<String>)getProperty(Key.PARSER_FEATURE);
+        Set<String> parserFeatures = (Set<String>)getProperty(Key.PARSER_FEATURES);
         return parserFeatures != null && parserFeatures.contains(uri);
     }
 
@@ -469,8 +481,7 @@ public class ParseOptions {
      * @return A map of (feature, value) pairs
      */
     public Map<String, Boolean> getParserFeatures() {
-        //return parserFeatures;
-        return null; // TODO
+        return (Map<String, Boolean>)getProperty(Key.PARSER_FEATURES);
     }
 
     /**
@@ -479,7 +490,7 @@ public class ParseOptions {
      * @return A map of (feature, string) pairs
      */
     public Map<String, Object> getParserProperties() {
-        return null; // TODO
+        return (Map<String, Object>)getProperty(Key.PARSER_PROPERTIES);
     }
 
     /**
@@ -678,10 +689,10 @@ public class ParseOptions {
      */
 
     public ParseOptions withDTDValidationMode(int option) {
-        // TODO: reinstate
-//        addParserFeature("http://xml.org/sax/features/validation",
-//                         option == Validation.STRICT || option == Validation.LAX);
-        return withProperty(Key.DTD_VALIDATION, option);
+
+        return withParserFeature("http://xml.org/sax/features/validation",
+                                 option == Validation.STRICT || option == Validation.LAX)
+                .withProperty(Key.DTD_VALIDATION, option);
     }
 
     /**
@@ -1167,6 +1178,22 @@ public class ParseOptions {
         } catch (IOException err) {
             // no action
         }
+    }
+
+    /**
+     * Returns a string representation of the object.
+     * @return a string representation of the object.
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (TrieKVP<Key, Object> entry : properties) {
+            sb.append(entry.key);
+            sb.append('=');
+            sb.append(entry.value);
+            sb.append(' ');
+        }
+        return sb.toString();
     }
 }
 
