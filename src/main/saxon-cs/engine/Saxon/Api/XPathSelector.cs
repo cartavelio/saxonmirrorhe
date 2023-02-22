@@ -23,6 +23,7 @@ namespace Saxon.Api {
     public class XPathSelector : IEnumerable {
         Saxon.Hej.s9api.XPathSelector selector;
         private ResourceResolver xmlDocumentResolver;
+        private ResourceResolver textResolver;
 
         // internal constructor
 
@@ -98,7 +99,8 @@ namespace Saxon.Api {
         /// </ul>
         /// </para>
         /// <para>If no <c>XmlDocumentResolver</c> is supplied, or if it returns null, then
-        /// the <c>CommonResourceResolver</c> associated with the Saxon Configuration is invoked.
+        /// the <c>CommonResourceResolver</c> associated with the Saxon Configuration is invoked;
+        /// if this also returns null, then the URI is resolved directly.
         /// </para>
         /// </remarks>
 
@@ -108,6 +110,31 @@ namespace Saxon.Api {
                 xmlDocumentResolver = value;
                 selector.setURIResolver(new UriResolverWrappingDocumentResolver(
                     value, selector.getUnderlyingXPathContext().getXPathContextObject().getConfiguration()));
+            }
+        }
+        
+        /// <summary>
+        /// The <c>TextResolver</c> to be used at run-time to resolve and dereference URIs
+        /// supplied to the <c>unparsed-text()</c>, <c>unparsed-text-lines()</c>,
+        /// <c>unparsed-text-available()</c>, and <c>json-doc()</c> functions.
+        /// </summary>
+        /// <remarks>
+        /// <para>If no <c>TextResolver</c> is supplied, or if the supplied <c>TextResolver</c> returns null
+        /// when called, the <c>CommonResourceResolver</c> for the Saxon <c>Configuration</c> is invoked,
+        /// with a <c>ResourceRequest</c> having <c>Nature == ResourceRequest.TEXT_NATURE</c>. If this
+        /// returns null, then the "direct" URI resolution provided by <c>Org.XmlResolver.UriUtils</c> is
+        /// invoked: this is capable of handling regular <c>file:</c>, <c>http:</c>, and <c>https:</c>
+        /// URIs, as well as the <c>data:</c> and <c>pack:</c> schemes.
+        /// </para>
+        /// <para>If the call on <c>unparsed-text()</c> supplies an encoding parameter, this is made
+        /// available in the call to the <c>TextResolver</c>. 
+        /// </remarks>
+
+        public ResourceResolver TextResolver {
+            get => textResolver;
+            set {
+                textResolver = value;
+                selector.setUnparsedTextResolver(Xslt30Transformer.WrapTextResolver(value));
             }
         }
 
