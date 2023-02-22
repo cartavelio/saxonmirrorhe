@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using Org.XmlResolver.Features;
+using Saxon.Hej.trans;
 
 
 namespace Saxon.Impl.Helpers {
@@ -270,7 +271,13 @@ namespace Saxon.Impl.Helpers {
                         throw new IllegalArgumentException("Supplied StreamSource includes no stream, reader, or URI");
                     }
 
-                    Stream stream = new WebClient().OpenRead(new Uri(sysId));
+                    Stream stream;
+                    try {
+                        stream = new WebClient().OpenRead(new Uri(sysId));
+                    }
+                    catch (System.Exception e) {
+                        throw new XPathException("Unable to retrieve URI " + sysId);
+                    }
                     xmlReader = XmlReader.Create(stream, settings,source.getSystemId());
                 }
             
