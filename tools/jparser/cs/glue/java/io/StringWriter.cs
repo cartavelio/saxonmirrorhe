@@ -18,5 +18,13 @@ namespace java.io {
         public string ToString() {
             return this._sw.ToString();
         }
+
+        public void flush() {
+            
+        }
+
+        public void close() {
+            
+        }
     }
 }

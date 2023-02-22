@@ -6,7 +6,7 @@ using System.Collections.Generic;
  */
  
 namespace java.util {
-    public interface Comparator<T> {
+    public interface Comparator<in T> {
         int compare(T a, T b);
     }
 }

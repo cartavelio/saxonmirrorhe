@@ -31,7 +31,7 @@
 
    <xsl:function name="f:full-method-name" as="xs:string">
       <xsl:param name="method" as="element(method)"/>
-      <xsl:text>{$method/../../@package}.{$method/../@name}.{$method/@name}</xsl:text>
+      <xsl:text>{$method/../../@package}.{$method/../@name}#{$method/@name}!{$method/@sig}</xsl:text>
    </xsl:function>
 
    <xsl:function name="f:process-methods" as="map(*)*">
@@ -105,7 +105,7 @@
             </xsl:when>
             <xsl:otherwise>
                <xsl:variable name="supermethod"
-                  select="$superclass/method[@name = $method/@name and @arity = $method/@arity]"/>
+                  select="$superclass/method[@name = $method/@name and string(@sig) = string($method/@sig)]"/>
                <xsl:sequence select="$supermethod[$include-abstract or parent::class]"/>
                <!-- TODO: digest needs to record which methods are abstract... -->
                <xsl:sequence select="f:overridden-methods($method, $superclass, $include-abstract)"

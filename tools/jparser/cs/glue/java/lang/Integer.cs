@@ -1,3 +1,4 @@
+using System;
 using SysInt32 = System.Int32;
 namespace java.lang {
     public static class Integer {
@@ -28,6 +29,10 @@ namespace java.lang {
         
         public static int parseInt(string str) {
             return SysInt32.Parse(str); // TODO: use TryParse to avoid exceptions?
+        }
+        
+        public static int parseInt(string str, int radix) {
+            throw new NotImplementedException();
         }
 
         public static int valueOf(int v) {

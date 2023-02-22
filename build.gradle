@@ -208,7 +208,8 @@ configurations.compileClasspath.each { cp ->
   }
 }
 
-apply from: "build-n.gradle"
+//apply from: "build-n.gradle"
+apply from: "build-cs.gradle"
 apply from: "build-c.gradle"
 apply from: "build-doc.gradle"
 

@@ -55,8 +55,15 @@
    
    <xsl:function name="f:isDelegate" as="xs:boolean">
       <xsl:param name="interfaceDecl" as="element()"/>
-      <xsl:sequence select="exists($interfaceDecl[@nodeType='ClassOrInterfaceDeclaration'][@isInterface='true']
-         [annotations/annotation/name/@identifier='FunctionalInterface'][count(members/member)=1])"/>
+      <xsl:choose>
+         <xsl:when test="$interfaceDecl/annotations/annotation/name/@identifier='CSharpDelegate'">
+            <xsl:sequence select="xs:boolean($interfaceDecl/annotations/annotation[name/@identifier='CSharpDelegate']/memberValue/@value)"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:sequence select="exists($interfaceDecl[@nodeType='ClassOrInterfaceDeclaration'][@isInterface='true']
+               [annotations/annotation/name/@identifier='FunctionalInterface'][count(members/member)=1])"/>
+         </xsl:otherwise>
+      </xsl:choose>      
    </xsl:function>
    
    <xsl:template match="*[@nodeType='ClassOrInterfaceDeclaration'][@isInterface='true']">
@@ -81,6 +88,7 @@
          </xsl:if>
          <xsl:apply-templates select="extendedTypes/extendedType"/>
          <xsl:apply-templates select="implementedTypes/implementedType"/>
+         <xsl:apply-templates select="members/member[@nodeType='FieldDeclaration']"/>
          <xsl:apply-templates select="members/member[@nodeType='MethodDeclaration']">
             <xsl:with-param name="isInterface" select="false()" tunnel="yes"/>
          </xsl:apply-templates>
@@ -117,9 +125,12 @@
    
    <xsl:template match="member[@nodeType='MethodDeclaration']">
       <xsl:param name="isInterface" as="xs:boolean" tunnel="yes" select="false()" required="no"/>
-      <method name="{name/@identifier}" 
-              arity="{count(parameters/parameter)}" 
+      <method name="{name/@identifier}"              
               returns="{replace(type/@RESOLVED_TYPE, '\? extends ', '')}">
+         <xsl:if test="parameters/parameter or $isInterface">
+            <xsl:attribute name="sig" select="string-join(parameters/parameter/type/(name/@identifier, @type)[1], ',')"/>
+            <xsl:attribute name="params" select="string-join(parameters/parameter/type/@RESOLVED_TYPE, '|')"/>
+         </xsl:if>
          <xsl:if test="modifiers/modifier[@keyword='STATIC']">
             <xsl:attribute name="static" select="1"/>
          </xsl:if>
@@ -134,6 +145,15 @@
       </method>
    </xsl:template>
    
-   <xsl:template match="member[@nodeType='FieldDeclaration']"/>
+   <xsl:template match="member[@nodeType='FieldDeclaration']">
+      <xsl:variable name="staticModifier" select="modifiers/modifier[@keyword='STATIC']"/>
+      <xsl:for-each select="variables/variable">
+         <field name="{name/@identifier}" type="{type/@RESOLVED_TYPE}">
+            <xsl:if test="$staticModifier">
+               <xsl:attribute name="static" select="1"/>
+            </xsl:if>
+         </field>
+      </xsl:for-each>
+   </xsl:template>
  
 </xsl:stylesheet>

@@ -37,7 +37,7 @@ namespace java.util {
             _list.Insert(index, entry);
         }
 
-        public void addAll(List<E> entry)
+        public void addAll(java.util.Collection<E> entry)
         {
             throw new Exception("not implemented");
         }

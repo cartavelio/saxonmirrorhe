@@ -9,6 +9,9 @@ namespace java.lang {
         public IllegalStateException(string str, Throwable cause) : base(str, cause) {
 
         }
+        public IllegalStateException(Throwable cause) : base(cause) {
+
+        }
 
     }
 }

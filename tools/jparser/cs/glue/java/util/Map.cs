@@ -12,6 +12,7 @@ namespace java.util {
         Collection<V> values();
         Set<Map_Entry<K, V>> entries();
         void putAll(Map<K, V> map);
+        void clear();
     }
     public class Map_Entry<K, V> {
         private K _key;

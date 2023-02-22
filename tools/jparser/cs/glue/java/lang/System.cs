@@ -1,3 +1,4 @@
+using java.util;
 using Sys = System;
 
 namespace java.lang
@@ -11,6 +12,10 @@ namespace java.lang
 
         public static string getProperty(string name) {
             return Sys.Environment.GetEnvironmentVariable(name);
+        }
+
+        public static java.util.Map<string, string> getProperties() {
+            throw new Sys.NotImplementedException();
         }
 
         public static int identityHashCode(object o) {
