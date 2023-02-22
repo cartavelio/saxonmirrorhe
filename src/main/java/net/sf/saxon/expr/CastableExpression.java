@@ -205,7 +205,7 @@ public final class CastableExpression extends CastingExpression {
                     return false;
                 }
             } else if (item instanceof ArrayItem) {
-                
+                return false;
             } else {
                 throw new XPathException("Input to cast cannot be atomized", "XPTY0004");
             }
