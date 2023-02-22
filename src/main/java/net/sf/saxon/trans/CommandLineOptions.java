@@ -125,12 +125,12 @@ public class CommandLineOptions {
         for (String arg : args) {
             if ("-".equals(arg)) {
                 positionalOptions.add(arg);
-            } else if (arg.equals("--?")) {
-                System.err.println("Configuration features:" + featureKeys());
+//            } else if (arg.equals("--?")) {
+//                System.err.println("Configuration features:" + featureKeys());
             } else if (arg.charAt(0) == '-') {
                 String option;
                 String value = "";
-                if (arg.length() > 5 && arg.charAt(1) == '-') {
+                if (arg.length() > 2 && arg.charAt(1) == '-') {
                     // --featureKey:value format
                     int colon = arg.indexOf(':');
                     if (colon > 0 && colon < arg.length() - 1) {
@@ -255,6 +255,11 @@ public class CommandLineOptions {
     public void applyToConfiguration(/*@NotNull*/ final Processor processor) throws TransformerException {
 
         Configuration config = processor.getUnderlyingConfiguration();
+
+        if (configOptions.getProperty("?") != null) {
+            System.err.println(featureKeys(processor.getSaxonEdition()));
+            return;
+        }
 
         for (String name : configOptions.stringPropertyNames()) {
             String value = configOptions.getProperty(name);
@@ -805,11 +810,13 @@ public class CommandLineOptions {
         }
     }
 
-    public static String featureKeys() {
+    public static String featureKeys(String edition) {
         final int index = "http://saxon.sf.net/feature/".length();
         StringBuilder sb = new StringBuilder();
         for (String name : FeatureIndex.getNames()) {
-            sb.append("\n  ").append(name.substring(index));
+            if (FeatureIndex.getData(name).editions.contains(edition)) {
+                sb.append("\n  ").append(name.substring(index));
+            }
         }
         return sb.toString();
     }
