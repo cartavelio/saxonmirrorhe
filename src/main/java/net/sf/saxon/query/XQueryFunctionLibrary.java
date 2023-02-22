@@ -15,12 +15,14 @@ import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
 import net.sf.saxon.functions.hof.UserFunctionReference;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 
@@ -138,15 +140,15 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                         functionName.getComponentName().getDisplayName() + " from outside its module", "XPST0017");
             }
             final UserFunction fn = fd.getUserFunction();
-            FunctionItemType type = new SpecificFunctionType(
-                    fd.getArgumentTypes(), fd.getResultType(), fd.getAnnotations());
+//            FunctionItemType type = new SpecificFunctionType(
+//                    fd.getArgumentTypes(), fd.getResultType(), fd.getAnnotations());
             if (fn == null) {
                 // not yet compiled: create a dummy
                 UserFunction uf = new UserFunction();
                 uf.setFunctionName(functionName.getComponentName());
                 uf.setResultType(fd.getResultType());
                 uf.setParameterDefinitions(fd.getParameterDefinitions());
-                final UserFunctionReference ref = new UserFunctionReference(uf);
+                final UserFunctionReference ref = new UserFunctionReference(uf, functionName);
                 fd.registerReference(ref);
                 return new UnresolvedXQueryFunctionItem(fd, functionName, ref);
 

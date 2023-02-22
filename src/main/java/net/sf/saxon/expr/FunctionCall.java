@@ -9,9 +9,9 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
-import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -22,6 +22,8 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.Collections;
 import java.util.function.Supplier;
+
+import static net.sf.saxon.expr.parser.RoleDiagnostic.ordinal;
 
 /**
  * Abstract superclass for calls to system-defined and user-defined functions
@@ -214,6 +216,10 @@ public abstract class FunctionCall extends Expression {
                                   ExpressionVisitor visitor) throws XPathException {
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(visitor.getStaticContext().isInBackwardsCompatibleMode());
         SequenceType[] argTypes = target.getFunctionItemType().getArgumentTypes();
+        FunctionDefinition fd = null;
+        if (target instanceof FunctionDefinition) {
+            fd = (FunctionDefinition)target;
+        }
         if (target.isSequenceVariadic() && getArity() == 1) {
             String name = getFunctionName() == null ? "" : getFunctionName().getDisplayName();
             Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, 0);
@@ -233,10 +239,17 @@ public abstract class FunctionCall extends Expression {
                 // Substitute default value expression for an argument marked for replacement. This is necessary
                 // because the default value expression was not necessarily available when the function call
                 // was first parsed, in the case where it is a forwards reference
-                if (arg instanceof DefaultedArgumentExpression) {
-                    arg = ((UserFunction)target).getParameterDefinitions()[i].getDefaultValueExpression();
+                if (arg instanceof DefaultedArgumentExpression && fd != null) {
+                    if (i <= fd.getMinimumArity()) {
+                        // This argument cannot be omitted
+                        throw new XPathException("No value supplied for " + ordinal(i + 1) +
+                                                         " parameter of function " +
+                                                         (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
+                                                 "XPST0141");
+                    }
+                    arg = fd.getDefaultValueExpression(i);
                 }
-                if (!(arg instanceof DefaultedArgumentExpression)) {
+                if (arg != null && !(arg instanceof DefaultedArgumentExpression)) {
                     setArg(i, tc.staticTypeCheck(
                             arg,
                             argTypes[i],

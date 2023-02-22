@@ -658,6 +658,16 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         }
 
         /**
+         * Get the number of mandatory arguments (the lower bound of the arity range)
+         *
+         * @return the number of mandatory arguments
+         */
+        @Override
+        public int getMinimumArity() {
+            return minArity;
+        }
+
+        /**
          * Get the name (keyword) of the Nth parameter
          *
          * @param i

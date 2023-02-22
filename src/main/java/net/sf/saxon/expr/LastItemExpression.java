@@ -113,23 +113,30 @@ public final class LastItemExpression extends SingleItemFilter {
             final LastItemExpression expr = (LastItemExpression) getExpression();
             final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
 
-            return context -> {
-                final SequenceIterator forwards = baseEval.iterate(context);
-                if (forwards instanceof ReversibleIterator) {
-                    return ((ReversibleIterator) forwards).getReverseIterator().next();
-                } else {
-                    Item current = null;
-                    while (true) {
-                        Item item = forwards.next();
-                        if (item == null) {
-                            return current;
-                        }
-                        current = item;
-                    }
-                }
-            };
+            return context -> getLast(baseEval.iterate(context));
         }
 
+    }
+
+    /**
+     * Get the last item delivered by an iterator, or null if the iterator is empty
+     * @param iter the supplied iterator (which may or may not be consumed)
+     * @return the last item returned by the iterator, or null if there are none.
+     */
+
+    public static Item getLast(SequenceIterator iter) {
+        if (iter instanceof ReversibleIterator) {
+            return ((ReversibleIterator) iter).getReverseIterator().next();
+        } else {
+            Item current = null;
+            while (true) {
+                Item item = iter.next();
+                if (item == null) {
+                    return current;
+                }
+                current = item;
+            }
+        }
     }
 }
 

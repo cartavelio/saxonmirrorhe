@@ -17,6 +17,7 @@ import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
 /**
@@ -107,6 +108,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("expanded-QName", 1, e -> e.populate(ExpandedQNameFn::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, null));
 
+        register("foot", 1, e -> e.populate(net.sf.saxon.functions.FootFn::new, AnyItemType.getInstance(), OPT, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
+
         register("highest", 1, e -> e.populate(net.sf.saxon.functions.hof.HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
@@ -135,6 +139,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("is-NaN", 1, e -> e.populate( IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
+
+        register("items-at", 2, e -> e.populate(net.sf.saxon.functions.ItemsAt::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance())
+                .arg(1, BuiltInAtomicType.INTEGER, STAR, EmptySequence.getInstance()));
 
         register("items-before", 2, e -> e.populate(ItemsEnding.ItemsBefore::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
@@ -221,6 +229,8 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(2, compareFnType, ONE, null));
 
+        register("truncate", 1, e -> e.populate(net.sf.saxon.functions.Truncate::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
 
         register("unparcel", 1, e -> e.populate( UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, Parcel.TYPE, ONE, null));

@@ -19,6 +19,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.AbstractFunction;
+import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.style.StylesheetPackage;
@@ -27,6 +28,8 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
+
+import java.util.Arrays;
 
 /**
  * A UserFunctionReference is an expression in the form local:f#1 where local:f is a user-defined function.
@@ -38,7 +41,7 @@ import net.sf.saxon.value.AtomicValue;
 public class UserFunctionReference extends Expression
         implements ComponentInvocation, UserFunctionResolvable, Callable {
 
-    private final SymbolicName functionName;
+    private final SymbolicName.F functionName;
     private UserFunction nominalTarget;
     private int bindingSlot = -1;
     private int optimizeCounter = 0;
@@ -49,14 +52,24 @@ public class UserFunctionReference extends Expression
         this.functionName = target.getSymbolicName();
     }
 
-    public UserFunctionReference(SymbolicName name) {
+    public UserFunctionReference(UserFunction target, SymbolicName.F name) {
+        // The name of the reference might be a reduced-arity version of the function name, if it has optional params
+        this.nominalTarget = target;
+        this.functionName = name;
+    }
+
+    public UserFunctionReference(SymbolicName.F name) {
         this.functionName = name;
     }
 
     @Override
     public void setFunction(UserFunction function) {
-        if (!function.getSymbolicName().equals(functionName)) {
+        if (!function.getSymbolicName().getComponentName().equals(functionName.getComponentName())) {
             throw new IllegalArgumentException("Function name does not match");
+        }
+
+        if (function.getMinimumArity() > functionName.getArity() || function.getArity() < functionName.getArity()) {
+            throw new IllegalArgumentException("Function arity does not match");
         }
         this.nominalTarget = function;
     }
@@ -216,7 +229,7 @@ public class UserFunctionReference extends Expression
      * @return the number of arguments in the function signature
      */
     public int getArity() {
-        return nominalTarget.getArity();
+        return functionName.getArity();
     }
 
     /**
@@ -391,13 +404,13 @@ public class UserFunctionReference extends Expression
             UserFunctionReference expr = (UserFunctionReference) getExpression();
             if (expr.bindingSlot == -1) {
                 return context -> new BoundUserFunction(
-                        expr, expr.nominalTarget, expr.nominalTarget.getDeclaringComponent(), context.getController());
+                        expr.nominalTarget, expr.getArity(), expr.nominalTarget.getDeclaringComponent(), expr, context.getController());
 
             } else {
                 return context -> {
                     Component targetComponent = context.getTargetComponent(expr.bindingSlot);
                     return new BoundUserFunction(
-                            expr, (UserFunction) targetComponent.getActor(), targetComponent, context.getController());
+                            (UserFunction) targetComponent.getActor(), expr.getArity(), targetComponent, expr, context.getController());
                 };
             }
         }
@@ -414,13 +427,24 @@ public class UserFunctionReference extends Expression
 
         private final ExportAgent agent;
         private final FunctionItem function;
+        private final int arity;
         private final Component component;
         private final Controller controller; // retained in case a function is returned from a query or stylesheet
 
-
-        public BoundUserFunction(ExportAgent agent, FunctionItem function, Component component, Controller controller) {
+        /**
+         * Create a bound user function
+         * @param function the function in question
+         * @param arity the specific arity. This is relevant when the function item has an arity range and we
+         *              are binding a function reference to a specific arity version
+         * @param component the XSLT component containing the function (the same function in two different
+         *                  packages corresponds to different components)
+         * @param agent  used when the function needs to be exported to a SEF file
+         * @param controller the controller object
+         */
+        public BoundUserFunction(FunctionItem function, int arity, Component component, ExportAgent agent, Controller controller) {
             this.agent = agent;
             this.function = function;
+            this.arity = arity;
             this.component = component;
             this.controller = controller;
         }
@@ -455,6 +479,15 @@ public class UserFunctionReference extends Expression
             if (c2 instanceof XPathContextMajor && component != null) {
                 ((XPathContextMajor) c2).setCurrentComponent(component);
             }
+            if (function.getArity() > args.length) {
+                assert function instanceof FunctionDefinition && ((FunctionDefinition)function).getMinimumArity() <= args.length;
+                FunctionDefinition fd = (FunctionDefinition)function;
+                Sequence[] extendedArgs = Arrays.copyOf(args, fd.getNumberOfParameters());
+                for (int i=args.length; i<extendedArgs.length; i++) {
+                    extendedArgs[i] = fd.getDefaultValueExpression(i).makeElaborator().lazily(true).evaluate(context);
+                }
+                args = extendedArgs;
+            }
             return function.call(c2, args);
         }
 
@@ -475,7 +508,7 @@ public class UserFunctionReference extends Expression
 
         @Override
         public int getArity() {
-            return function.getArity();
+            return arity;
         }
 
         @Override

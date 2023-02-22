@@ -3288,7 +3288,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("ufRef", (loader, element) -> {
             StructuredQName name = loader.getQNameAttribute(element, "name");
             int arity = loader.getIntegerAttribute(element, "arity");
-            SymbolicName symbolicName = new SymbolicName.F(name, arity);
+            SymbolicName.F symbolicName = new SymbolicName.F(name, arity);
             UserFunctionReference call = new UserFunctionReference(symbolicName);
             int bindingSlot = loader.getIntegerAttribute(element, "bSlot");
             call.setBindingSlot(bindingSlot);

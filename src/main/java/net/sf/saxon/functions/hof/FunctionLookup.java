@@ -152,7 +152,7 @@ public class FunctionLookup extends ContextAccessorFunction {
         }
         Component target = fi instanceof UserFunction ? ((UserFunction) fi).getDeclaringComponent() : null;
         ExportAgent agent = new FunctionLookupExportAgent(this, qname, arity);
-        return new UserFunctionReference.BoundUserFunction(agent, fi, target, c.getController());
+        return new UserFunctionReference.BoundUserFunction(fi, (int) arity.longValue(), target, agent, c.getController());
     }
 
     public static class FunctionLookupExportAgent implements ExportAgent {

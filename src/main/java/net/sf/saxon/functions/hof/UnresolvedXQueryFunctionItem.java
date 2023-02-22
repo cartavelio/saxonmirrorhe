@@ -40,7 +40,7 @@ public class UnresolvedXQueryFunctionItem extends AbstractFunction {
 
     @Override
     public int getArity() {
-        return fd.getNumberOfParameters();
+        return functionName.getArity();
     }
 
     @Override

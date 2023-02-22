@@ -7,24 +7,19 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.FirstItemExpression;
+import net.sf.saxon.expr.LastItemExpression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
- * This class implements the function fn:head(), which is a standard function in XPath 3.0
+ * This class implements the function fn:foot(), which is proposed as a standard function in XPath 4.0
  */
 
-public class HeadFn extends SystemFunction {
-
-    @Override
-    public Expression makeFunctionCall(Expression[] arguments) {
-        return FirstItemExpression.makeFirstItemExpression(arguments[0]);
-    }
+public class FootFn extends SystemFunction {
 
     /**
      * Evaluate the expression
@@ -32,12 +27,16 @@ public class HeadFn extends SystemFunction {
      * @param context   the dynamic evaluation context
      * @param arguments the values of the arguments, supplied as Sequences
      * @return the result of the evaluation, in the form of a Sequence
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Item head = arguments[0].head();
-        return SequenceTool.itemOrEmpty(head);
+        try {
+            Item foot = LastItemExpression.getLast(arguments[0].iterate());
+            return SequenceTool.itemOrEmpty(foot);
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 }

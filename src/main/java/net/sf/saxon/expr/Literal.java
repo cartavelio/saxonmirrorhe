@@ -747,6 +747,21 @@ public class Literal extends Expression {
     }
 
     /**
+     * Test if a literal represents the integer value 1
+     *
+     * @param exp an expression
+     * @return true if the expression is a literal and the literal represents the integer value 1
+     */
+
+    public static boolean isConstantZero(Expression exp) {
+        if (exp instanceof Literal) {
+            GroundedValue v = ((Literal) exp).getGroundedValue();
+            return v instanceof Int64Value && ((Int64Value) v).longValue() == 0;
+        }
+        return false;
+    }
+
+    /**
      * Determine whether the expression can be evaluated without reference to the part of the context
      * document outside the subtree rooted at the context node.
      *

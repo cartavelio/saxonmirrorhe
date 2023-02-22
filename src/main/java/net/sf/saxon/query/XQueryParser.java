@@ -1981,12 +1981,12 @@ public class XQueryParser extends XPathParser {
                     nextToken();
                     Expression defaultValue = parseExprSingle();
                     arg.setDefaultValueExpression(defaultValue);
+                    arg.setRequired(false);
                 } else if (foundDefault) {
                     grumble("If a parameter in a function declaration has a default value, "
                                     + "all subsequent parameters must also have default values");
                 }
                 func.addParameter(arg);
-                declareRangeVariable(arg);
                 if (t.currentToken == Token.RPAR) {
                     break;
                 } else if (t.currentToken == Token.COMMA) {
@@ -1995,6 +1995,11 @@ public class XQueryParser extends XPathParser {
                     grumble("Expected ',' or ')' after function argument, found '" +
                                     Token.tokens[t.currentToken] + '\'');
                 }
+            }
+            // Don't declare the variables until the end, to prevent one parameter being referenced
+            // as the default value of another
+            for (UserFunctionParameter p : func.getParameterDefinitions()) {
+                declareRangeVariable(p);
             }
         }
         t.setState(Tokenizer.BARE_NAME_STATE);

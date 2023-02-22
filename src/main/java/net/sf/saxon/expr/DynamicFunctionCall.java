@@ -287,6 +287,7 @@ public class DynamicFunctionCall extends Expression {
         @Override
         public PullEvaluator elaborateForPull() {
             DynamicFunctionCall expr = (DynamicFunctionCall)getExpression();
+            TypeHierarchy th = getConfiguration().getTypeHierarchy();
             SequenceEvaluator[] argEvaluators = new SequenceEvaluator[expr.getArity()];
             for (int i=0; i<argEvaluators.length; i++) {
                 Expression arg = expr.suppliedArguments.getOperand(i).getChildExpression();
@@ -295,8 +296,7 @@ public class DynamicFunctionCall extends Expression {
             Expression body = expr.targetFunction.getChildExpression();
             ItemEvaluator functionEvaluator = body.makeElaborator().elaborateForItem();
             return context -> {
-                FunctionItem fn = (FunctionItem)functionEvaluator.eval(context);
-                TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
+                FunctionItem fn = (FunctionItem) functionEvaluator.eval(context);
                 FunctionItemType fit = fn.getFunctionItemType();
                 if (fn.getArity() != argEvaluators.length) {
                     String errorCode = "XPTY0004";
@@ -305,6 +305,7 @@ public class DynamicFunctionCall extends Expression {
                                     "; number supplied = " + argEvaluators.length, errorCode);
                     err.setIsTypeError(true);
                     err.setXPathContext(context);
+                    err.setLocation(expr.getLocation());
                     throw err;
                 }
 
@@ -346,6 +347,7 @@ public class DynamicFunctionCall extends Expression {
                 }
             };
         }
+        
     }
 }
 

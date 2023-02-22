@@ -619,6 +619,12 @@ public class SaxonErrorCode {
 
     public static final String SXWN9045 = "SXWN9045";
 
+    /**
+     * SXWN9046: predicate [0] selects nothing
+     */
+
+    public static final String SXWN9046 = "SXWN9046";
+
 
     /**
      * SXSD1000: unknown attribute group
