@@ -164,12 +164,20 @@ public class SerializationProperties {
         for (String prop : this.getProperties().stringPropertyNames()) {
             String value = this.getProperties().getProperty(prop);
             if (prop.equals(OutputKeys.CDATA_SECTION_ELEMENTS)
-                    || prop.equals(SaxonOutputKeys.SUPPRESS_INDENTATION)) {
+                    || prop.equals(SaxonOutputKeys.SUPPRESS_INDENTATION)
+                    || prop.equals(SaxonOutputKeys.USE_CHARACTER_MAPS)) {
                 String existing = defaults.getProperty(prop);
                 if (existing == null || existing.equals(value)) {
                     props.setProperty(prop, value);
                 } else {
                     props.setProperty(prop, existing + " " + value);
+                    if (prop.equals(SaxonOutputKeys.USE_CHARACTER_MAPS)) {
+                        CharacterMapIndex charMapIndex2 = charMap.copy();
+                        for (CharacterMap map : defaults.getCharacterMapIndex()) {
+                            charMapIndex2.putCharacterMap(map.getName(), map);
+                        }
+                        charMap = charMapIndex2;
+                    }
                 }
             } else {
                 props.setProperty(prop, value);
