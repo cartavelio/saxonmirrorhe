@@ -10,6 +10,7 @@ using Saxon.Callbacks;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
 using Saxon.Hej.lib;
+using Saxon.Hej.om;
 using Saxon.Hej.trace;
 using Saxon.Hej.tree.tiny;
 using SaxonCS_NUnit;
@@ -279,7 +280,7 @@ namespace SaxonCS_NUnit {
                 proc.SchemaManager.ImportComponents(scm);
                 // define a ns prefix to be associated with a default attribute added to the instance during validation
                 proc.Implementation.getNamePool()
-                    .suggestPrefix("dita", "http://dita.oasis-open.org/architecture/2005/");
+                    .suggestPrefix("dita", NamespaceUri.of("http://dita.oasis-open.org/architecture/2005/"));
                 XdmNode doc = proc.NewDocumentBuilder().Build(new Uri(ConfigTest.DataDirUri, "dita/concept.xml"));
                 XQueryCompiler c = proc.NewXQueryCompiler();
                 c.SchemaAware = (true);
