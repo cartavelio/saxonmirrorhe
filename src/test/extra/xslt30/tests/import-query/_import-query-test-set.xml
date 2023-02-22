@@ -16,10 +16,13 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <all-of>
-            <assert>/out/var/element/a = "23"</assert>
-            <assert>/out/fun/xxx/a = "23"</assert>
-         </all-of>
+         <any-of>
+            <all-of>
+               <assert>/out/var/element/a = "23"</assert>
+               <assert>/out/fun/xxx/a = "23"</assert>
+            </all-of>
+            <error code="SXST0069"/> <!-- export not allowed -->
+         </any-of>
       </result>
    </test-case>
    
@@ -38,6 +41,7 @@
          <any-of>
             <error code="XPST0008"/>
             <error code="XPST0017"/>
+            <error code="SXST0069"/>
          </any-of>
       </result>
    </test-case>
@@ -54,7 +58,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <error code="XPST0008"/>
+         <any-of>
+            <error code="XPST0008"/>
+            <error code="SXST0069"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -70,7 +77,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <error code="XPST0017"/>
+         <any-of>
+            <error code="XPST0017"/>
+            <error code="SXST0069"/>
+         </any-of>
       </result>
    </test-case>
 
@@ -86,7 +96,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <assert>/out/fun/zzz/a = "23"</assert>
+         <any-of>
+            <assert>/out/fun/zzz/a = "23"</assert>
+            <error code="SXST0069"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -102,7 +115,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <error code="XQST0059"/>
+         <any-of>
+            <error code="XQST0059"/>
+            <error code="SXST0069"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -118,7 +134,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <error code="XPST0003"/>
+         <any-of>
+            <error code="XPST0003"/>
+            <error code="SXST0069"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -134,7 +153,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <assert>/out="28"</assert>
+         <any-of>
+            <assert>/out="28"</assert>
+            <error code="SXST0069"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -150,7 +172,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <error code="XPST0017"/>
+         <any-of>
+            <error code="XPST0017"/>
+            <error code="SXST0069"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -166,7 +191,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <error code="XQST0049"/>
+         <any-of>
+            <error code="XQST0049"/>
+            <error code="SXST0069"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -182,7 +210,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <error code="XQST0034"/>
+         <any-of>
+            <error code="XQST0034"/>
+            <error code="SXST0069"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -199,10 +230,13 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <all-of>
-            <assert>/out/var/element/a = "23"</assert>
-            <assert>/out/fun/xxx/a = "23"</assert>
-         </all-of>
+         <any-of>
+            <all-of>
+               <assert>/out/var/element/a = "23"</assert>
+               <assert>/out/fun/xxx/a = "23"</assert>
+            </all-of>
+            <error code="SXST0069"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -218,7 +252,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <error code="XTSE0010"/>
+         <any-of>
+            <error code="XTSE0010"/>
+            <error code="SXST0069"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -234,7 +271,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <error code="XQST0059"/>
+         <any-of>
+            <error code="XQST0059"/>
+            <error code="SXST0069"/>
+         </any-of>
       </result>
    </test-case>
    
