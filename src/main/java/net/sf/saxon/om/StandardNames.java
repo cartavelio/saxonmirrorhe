@@ -376,7 +376,6 @@ public abstract class StandardNames {
         bindXSLTName(XSL_KEY, "key");
         bindXSLTName(XSL_MAP, "map");
         bindXSLTName(XSL_MAP_ENTRY, "map-entry");
-        bindXSLTName(XSL_MATCH, "match");
         bindXSLTName(XSL_MATCHING_SUBSTRING, "matching-substring");
         bindXSLTName(XSL_MERGE, "merge");
         bindXSLTName(XSL_MERGE_SOURCE, "merge-source");
