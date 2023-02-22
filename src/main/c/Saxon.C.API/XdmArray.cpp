@@ -202,7 +202,7 @@ XdmValue ** XdmArray::values() {
                     } else if (typeRef == 6) {
                        //Empty Sequence detected.
                        //TODO Maybe we should create an EmptySequence object
-                       std::cerr<<"XdmArray.values() failed - EmtpySequence not handled"<<std::endl;
+                       std::cerr<<"XdmArray.values() failed - EmptySequence not handled"<<std::endl;
                         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)results[p]);
                         
 

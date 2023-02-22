@@ -39,7 +39,7 @@ public:
     //! XdmItem constructor created as a wrapper around an existing Saxon Java object
     /**
      * XdmItem constructor created from a JNI Java object. This is for internal use only
-     * @param obj - The internal Java object for the XdmItem is wrapped here in the C++ XdmItem class
+     * @param objRef - The internal Java object for the XdmItem is wrapped here in the C++ XdmItem class
      */
     explicit XdmItem(int64_t);
 

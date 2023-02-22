@@ -64,7 +64,7 @@ public:
     //! A copy constructor.
     /**
 	 *
-	 * @param other - Xdmvalue
+	 * @param other - XdmValue
 	 */
 	XdmValue(const XdmValue &other);
 
@@ -72,7 +72,7 @@ public:
 	//! Add an XdmItem  to the sequence
 	 /**
 	  * This method is designed for the primitive types.
-	  * @param type - specify target type of the value
+	  * @param tStr - specify target type of the value
 	  * @param val - Value to convert
 	  */
 	XdmValue * addXdmValueWithType(const char * tStr, const char * val);//TODO check and document

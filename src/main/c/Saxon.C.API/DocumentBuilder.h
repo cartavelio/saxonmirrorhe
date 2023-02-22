@@ -137,7 +137,7 @@ class DocumentBuilder {
     /**
      * Load an XML document, to create a tree representation of the document in memory.
      *
-     * @param content - the XML doucment as a serialized string
+     * @param content - the XML document as a serialized string
      *
      * @return An <code>XdmNode</code>. This will be
      *         the document node at the root of the tree of the resulting in-memory document.
@@ -196,7 +196,7 @@ class DocumentBuilder {
     /**
      * After the execution of the processor if there is an error, then a SaxonApiException is created.
      * NULL returned if there is no error.
-     * @return SaxomApiException object of the exception thrown.
+     * @return SaxonApiException object of the exception thrown.
      */
     SaxonApiException * getException();
 

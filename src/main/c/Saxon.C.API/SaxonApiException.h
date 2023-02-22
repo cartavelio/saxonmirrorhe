@@ -44,7 +44,7 @@ public:
 
     /** Returns a pointer to the (constant) error description.
         *  @return A pointer to a const char*. The underlying memory
-        *          is in posession of the Exception object. Callers must
+        *          is in possession of the Exception object. Callers must
         *          not attempt to free the memory.
              */
     virtual const char * what ();
@@ -54,7 +54,7 @@ public:
      * @param message - The detail message string of this throwable.
      * @param errorCode - The error code of the underlying exception thrown, if known
      * @param systemId - Get the URI of the module associated with the exception, if known.
-     * @param lineNumber - The line number in the stylesheet related to cause of the exception
+     * @param linenumber - The line number in the stylesheet related to cause of the exception
      */
 	SaxonApiException(const char * message, const char * errorCode, const char * systemId, int linenumber);
 

@@ -789,9 +789,6 @@ XdmNode *SaxonProcessor::parseXmlFromUri(const char *uri, SchemaValidator * vali
 
 /**
    * Set a configuration property.
-   *
-   * @param name of the property
-   * @param value of the property
    */
 void SaxonProcessor::setConfigurationProperty(const char *name, const char *value) {
     if (name != nullptr && value != nullptr) {

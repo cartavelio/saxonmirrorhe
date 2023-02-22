@@ -38,7 +38,7 @@ public:
     //! Constructor with the SaxonProcessor supplied.
     /*!
       @param proc - Supplied pointer to the SaxonProcessor object
-      cwd - The current working directory
+      @param cwd - The current working directory
     */
     Xslt30Processor(SaxonProcessor* proc, std::string cwd="");
 
@@ -112,7 +112,7 @@ public:
 
     /**
      * Get a parameter value by name
-     * @param name - Specified paramater name to get
+     * @param name - Specified parameter name to get
      * @return XdmValue
     */
      XdmValue* getParameter(const char* name);
@@ -122,7 +122,7 @@ public:
      * Remove a parameter (name, value) pair from a stylesheet
      *
      * @param name  the name of the stylesheet parameter
-     * @return bool - outcome of the romoval
+     * @return bool - outcome of the removal
      */
     bool removeParameter(const char* name);
 
@@ -136,11 +136,11 @@ public:
      std::map<std::string,XdmValue*>& getParameters();
 
 
-    //!Clear parameter values set
+    //!Clear parameter values set.
     /**
-     * Default behaviour (false) is to leave XdmValues in memory
-     *  true then XdmValues are deleted
-     *  @param deleteValues -  Individual pointers to XdmValue objects have to be deleted in the calling program
+     * Default behaviour (false) is to leave XdmValues in memory.
+     * Individual pointers to XdmValue objects have to be deleted in the calling program.
+     * @param deleteValues - if true then XdmValues are deleted
      */
     void clearParameters(bool deleteValues = false);
 
@@ -281,7 +281,7 @@ public:
      * Note: the term "compile" here indicates that the stylesheet is converted into an executable
      * form. The compilation uses a snapshot of the properties of the <code>Xslt30Processor</code> at the
      * time this method is invoked.
-     * @param stylesheet as a lexical string representation
+     * @param node the XdmNode object for the stylesheet
      * @return an XsltExecutable, which represents the compiled stylesheet. The XsltExecutable
      * is immutable and thread-safe; it may be used to run multiple transformations, in series or concurrently.
      */
@@ -299,7 +299,7 @@ public:
     /**
      * After the execution of the processor if there is an error, then a SaxonApiException is created.
      * NULL returned if there is no error.
-     * @return SaxomApiException object of the exception thrown.
+     * @return SaxonApiException object of the exception thrown.
      */
     SaxonApiException * getException();
 

@@ -31,7 +31,7 @@ public:
 
     //! Constructor with the SaxonProcessor supplied.
     /*!
-     * @param SaxonProcessor - Supplied pointer to the SaxonProcessor object
+     * @param p - Supplied pointer to the SaxonProcessor object
      * @param cwd - set the current working directory. Default is the empty string
     */
     XQueryProcessor(SaxonProcessor *p, std::string cwd="");
@@ -67,7 +67,7 @@ public:
 
     /**
      * Set a parameter value used in the query
-     *s
+     *
      * @param name  of the parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name"
      * @param value of the query parameter, or nullptr to clear a previously set value
      */
@@ -93,12 +93,11 @@ public:
      */
     void setProperty(const char * name, const char * value);
 
-    //! Clear parameter values set
+    //! Clear parameter values set.
     /**
-     *
-     *  @param deleteValues.  Individual pointers to XdmValue objects have to be deleted in the calling program
-     * Default behaviour (false) is to leave XdmValues in memory
-     *  true then XdmValues are deleted
+     * Default behaviour (false) is to leave XdmValues in memory.
+     * Individual pointers to XdmValue objects have to be deleted in the calling program.
+     * @param deleteValues - if true then XdmValues are deleted
      */
     void clearParameters(bool deleteValues=false);
 
@@ -130,7 +129,6 @@ public:
      //!Perform the Query to a XdmValue representation.
     /**
      * @param infilename - The file name of the source document
-     * @param ofilename - The file name of where result will be stored
      * @param query - The query as string representation
      * @return XdmValue - result of the the query as a XdmValue 
      */
@@ -166,7 +164,6 @@ public:
     /**
      * The use of the context item would have had to be set in advance
      * Assume the output filename has been set in advance
-     * @return Result as a string (i.e. pointer array of char)
      *
      */
     void runQueryToFile();
@@ -260,7 +257,7 @@ public:
     /**
      * After the execution of the processor if there is an error, then a SaxonApiException is created.
      * NULL returned if there is no error.
-     * @return SaxomApiException object of the exception thrown.
+     * @return SaxonApiException object of the exception thrown.
      */
     SaxonApiException * getException();
     

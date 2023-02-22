@@ -148,9 +148,6 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
     /**
      * Set a parameter value used in the query
-     *
-     * @param name  of the parameter, as a string
-     * @param value of the query parameter, or nullptr to clear a previously set value
      */
     void XQueryProcessor::setParameter(const char * name, XdmValue*value){
         if(value != nullptr && name != nullptr) {
@@ -170,19 +167,12 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
     /**
      * Remove a parameter (name, value) pair
-     *
-     * @param namespacei currently not used
-     * @param name  of the parameter
-     * @return bool - outcome of the romoval
      */
     bool XQueryProcessor::removeParameter(const char * name){
 	return (bool)(parameters.erase("param:"+std::string(name)));
     }
     /**
      * Set a property.
-     *
-     * @param name of the property
-     * @param value of the property
      */
     void XQueryProcessor::setProperty(const char * name, const char * value){
 #ifdef DEBUG	

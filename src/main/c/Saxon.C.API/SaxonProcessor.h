@@ -187,7 +187,7 @@ public:
     //! Get any error message thrown by the processor
     /*!
       * @return string value of the error message. JNI exceptions thrown by this
-      * processor are handled internally and can be retrived by this method.
+      * processor are handled internally and can be retrieved by this method.
     */
     const char * getErrorMessage();
 
@@ -238,7 +238,7 @@ public:
      *
      * of a zero-length string (and potentially other strings, in future)
      *
-     * @param value the String value. NULL is taken as equivalent to "".
+     * @param str the String value. NULL is taken as equivalent to "".
      * @return the corresponding StringValue
      */
     XdmAtomicValue *makeStringValue(std::string str);
@@ -248,7 +248,7 @@ public:
      *
      * of a zero-length string (and potentially other strings, in future)
      *
-     * @param value the char pointer array. nullptr is taken as equivalent to "".
+     * @param str the char pointer array. nullptr is taken as equivalent to "".
      * @return the corresponding StringValue
      */
     XdmAtomicValue *makeStringValue(const char *str);
@@ -275,10 +275,10 @@ public:
     /*!
      *
      *
-     * @param f the value of the foat
+     * @param f the value of the float
      * @return a new XdmAtomicValue
      */
-    XdmAtomicValue *makeFloatValue(float);
+    XdmAtomicValue *makeFloatValue(float f);
 
     //! Factory method: makes either an Int64Value or a BigIntegerValue depending on the value supplied
     /*!
@@ -367,7 +367,7 @@ public:
     //! Make an XdmArray whose members are of type XdmValue
     /**
         *
-        * @param input the input array of XdmValue pointers
+        * @param values the input array of XdmValue pointers
         * @param length - the number of items in the array
         * @return an XdmArray whose members are XdmValue values corresponding one-to-one with the input
    */
@@ -410,7 +410,7 @@ public:
     //! Parse a lexical representation of the source document and return it as an XdmNode
     /**
      *
-     * @param source
+     * @param source the source document as a lexical string
      * @param validator
      * @return an XdmNode
     */
@@ -419,7 +419,8 @@ public:
     //! Parse a source document file and return it as an XdmNode.
     /**
      *
-     @param validator.
+     @param source the filename of the source document
+     @param validator
      @return an XdmNode
     */
     XdmNode *parseXmlFromFile(const char *source, SchemaValidator * validator = nullptr);
@@ -427,7 +428,8 @@ public:
     //! Parse a source document available by URI and return it as an XdmNode.
     /**
      *
-     @param validator.
+     @param source the URI of the source document
+     @param validator
      @return an XdmNode
     */
     XdmNode *parseXmlFromUri(const char *source, SchemaValidator * validator = nullptr);
@@ -470,12 +472,6 @@ public:
     }
 
     //! Checks for pending exceptions and creates a SaxonApiException object, which handles one or more local exceptions objects
-    /**
-     *
-     * @param env
-     * @param callingClass
-     * @param callingObject
-    */
     static SaxonApiException *checkForExceptionCPP(/*JNIEnv *env, jclass callingClass, jobject callingObject*/);
 
     //! Clean up and destroy Java VM to release memory used. Method to be called at the end of the program

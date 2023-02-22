@@ -33,7 +33,7 @@ public:
     //! A constructor with a SaxonProcessor.
     /*!
      * The supplied processor should have license flag set to true for the Schema Validator to operate.
-     * @param SaxonProcessor
+     * @param proc - the SaxonProcessor
      * @param cwd - set the current working directory
     */
     SchemaValidator(SaxonProcessor* proc, std::string cwd="");
@@ -113,13 +113,13 @@ public:
 
      //!Set the source node for validation
     /**
-     * @param The source document supplied as an XdmNode, which will be used to validate against the schema using the validate methods.
+     * @param source - The source document supplied as an XdmNode, which will be used to validate against the schema using the validate methods.
     */
     void setSourceNode(XdmNode * source);
 
      //! Get the Validation report
    /**
-    * The valdiation-report option must have been set to true in the properties to use this feature.
+    * The validation-report option must have been set to true in the properties to use this feature.
     * @return XdmNode - Pointer to XdmNode. Return nullptr if validation reporting feature has not been enabled
    */
     XdmNode* getValidationReport();
@@ -152,12 +152,12 @@ public:
      * @param value of the property
      */
     void setProperty(const char * name, const char * value);
-//! Clear parameter values set
+//! Clear parameter values set.
     /**
+     * Default behaviour (false) is to leave XdmValues in memory.
+     * Individual pointers to XdmValue objects have to be deleted in the calling program.
      *
-     *  @param deleteValues.  Individual pointers to XdmValue objects have to be deleted in the calling program
-     * Default behaviour (false) is to leave XdmValues in memory
-     *  true then XdmValues are deleted
+     *  @param deleteValues - if true then XdmValues are deleted
      */
     void clearParameters(bool deleteValues=false);
 
@@ -226,7 +226,7 @@ public:
 
 
 private:
-    bool lax; /*!< flag to indicate lax mode for the Schema valdiation */
+    bool lax; /*!< flag to indicate lax mode for the Schema validation */
 	SaxonProcessor * proc; /*!< Saxon Processor Pointer, which created this SchemaValidator */
 	//jclass  cppClass; /*!< JNI object where the SchemaValidator method will be invoked */
 	int64_t cppV; /*!< The underlying SchemaValidator Java object */
