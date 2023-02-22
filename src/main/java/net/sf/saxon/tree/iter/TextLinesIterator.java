@@ -77,7 +77,7 @@ public abstract class TextLinesIterator implements SequenceIterator {
                 close();
                 return null;
             }
-            if (position == 0 && s.startsWith("\ufeff")) {
+            if (position == 0 s.getLength() > 0 && s.charAt(0) == '\ufeff') {
                 // remove any BOM found at start of file
                 s = s.substring(1);
             }
