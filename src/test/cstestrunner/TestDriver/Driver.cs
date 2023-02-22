@@ -409,12 +409,12 @@ namespace TestDriver {
                     if (appliesThisEdition) {
                         if (runVal == "false") {
                             foreach (string tc in Regex.Split(testName.Trim(), "\\s+")) {
-                                exceptionsMap.Add(tc, entry);
+                                exceptionsMap.TryAdd(tc, entry);
                             }
                         }
                         else {
                             foreach (XdmNode optim in entry.Children("optimization")) {
-                                optimizationAssertions.Add(testName, optim.GetAttributeValue("assert"));
+                                optimizationAssertions.TryAdd(testName, optim.GetAttributeValue("assert"));
                             }
                         }
                     }
