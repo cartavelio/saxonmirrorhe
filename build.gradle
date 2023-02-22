@@ -90,7 +90,7 @@ ext {
 // Find dotnet
 // Laboriously construct a search path that includes some default locations
 // plus the users actual path.
-def spath = ["/usr/local/share/dotnet"]
+def spath = ["/usr/local/share/dotnet", "/usr/local/share/dotnet/x64"]
 System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
   spath += [dir]
 }
