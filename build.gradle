@@ -20,6 +20,11 @@ apply plugin: 'java'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
+// These plugins are in buildSrc
+apply plugin: JarSignPlugin
+apply plugin: ManageBranchesPlugin
+apply plugin: ManageTestSuitesPlugin
+
 import org.gradle.internal.os.OperatingSystem;
 import com.nwalsh.DockerContainer
 
@@ -180,31 +185,6 @@ talaiot {
 }
 */
 
-// Set the locations of the W3C test suites
-if (!hasProperty("w3cQT3TestSuiteDir")) {
-  ext.w3cQT3TestSuiteDir = System.getenv("W3C_QT3_TEST_SUITE_DIR")
-}
-if (!hasProperty("w3cXslt30TestSuiteDir")) {
-  ext.w3cXslt30TestSuiteDir = System.getenv("W3C_XSLT30_TEST_SUITE_DIR")
-}
-if (!hasProperty("w3cXsdTestSuiteDir")) {
-  ext.w3cXsdTestSuiteDir = System.getenv("W3C_XSD_TEST_SUITE_DIR")
-}
-if (!hasProperty("w3cQT4TestSuiteDir")) {
-  ext.w3cQT4TestSuiteDir = System.getenv("W3C_QT4_TEST_SUITE_DIR")
-}
-if (!hasProperty("w3cXslt40TestSuiteDir")) {
-  ext.w3cXslt40TestSuiteDir = System.getenv("W3C_XSLT40_TEST_SUITE_DIR")
-}
-
-if (!hasProperty("sonatypeUsername")) {
-  ext.sonatypeUsername=""
-}
-
-if (!hasProperty("sonatypePassword")) {
-  ext.sonatypePassword=""
-}
-
 ext {
   systemOs = OperatingSystem.current()
   icu4jJar = null
@@ -215,121 +195,15 @@ ext {
   version_h = saxonVersion.replace(".", "-")
   fileSeparator = System.getProperty("file.separator")
   DSTAMP=new Date().format("yyyyMMdd")
-  // Jar signing parameters 
-  eToken = "THIS-IS-NOT-THE-ETOKEN"
-  signkeyNewAlias = "THIS-IS-NOT-THE-ALIAS"
-  signkeyPassword = "THIS-IS-NOT-THE-PASSWORD"
-  signJarArgs = null
-  makeSignedJars = false
   // Docker containers
   c_sqlserver = "sqlserver"
 }
 
-public class DeleteFilesRecursively {
-  static void delete(File file){
-    for (File fspec : file.listFiles()) {
-      if (fspec.isDirectory()) {
-        delete(fspec);
-      } else {
-        fspec.delete();
-      }
-    }
-    file.delete();
-  }
-}
-
-// ============================================================
-// Have you switched branches?
-def branch = new ByteArrayOutputStream()
-def result = exec {
-  commandLine "git", "rev-parse", "--abbrev-ref", "HEAD"
-  standardOutput = branch;
-}
-def currentBranch = branch.toString().trim()
-
-def builtBranch = "none";
-try {
-  def xbranch = new BufferedReader(new FileReader(new File("${buildDir}/built-branch")))
-  builtBranch = "${xbranch.readLine().trim()}"
-} catch (FileNotFoundException foe) {
-  // nop
-}
-
-if (currentBranch != builtBranch
-    && (file("${buildDir}/src").exists()
-        || file("${buildDir}/preprocess").exists()
-        || file("${buildDir}/filtered").exists()
-        || file("${buildDir}/classes").exists())) {
-  if (builtBranch != "none") {
-    println("Switching branches from '${builtBranch}' to '${currentBranch}'...")
-  }
-  DeleteFilesRecursively.delete(new File("${buildDir}/src"))
-  DeleteFilesRecursively.delete(new File("${buildDir}/preprocess"))
-  DeleteFilesRecursively.delete(new File("${buildDir}/filtered"))
-  DeleteFilesRecursively.delete(new File("${buildDir}/classes"))
-}
-
-// ============================================================
-// Private options required for signing jars. (Can't be
-// checked into the repository because they're sekrit.)
-def eToken = "THIS-IS-NOT-THE-ETOKEN"
-["${System.getenv("SAXON_SIGN_ETOKEN")}",
- "${projectDir}/../../private/eToken/macos/eToken.cfg",
- "z:/some/other/token/path"].each { path ->
-  if (eToken == "THIS-IS-NOT-THE-ETOKEN"
-      && new File(path).exists()) {
-    eToken = path
-  }
-}
-
-if (System.getenv("SAXON_SIGN_ALIAS") != null) {
-  ext.signkeyNewAlias = System.getenv("SAXON_SIGN_ALIAS")
-}
-
-if (System.getenv("SAXON_SIGN_PASSWORD") != null) {
-  ext.signkeyPassword = System.getenv("SAXON_SIGN_PASSWORD")
-}
-
-def canSignJars = (!eToken.startsWith("THIS-IS-NOT")
-                   && !signkeyNewAlias.startsWith("THIS-IS-NOT")
-                   && !signkeyPassword.startsWith("THIS-IS-NOT"))
-
-if (OperatingSystem.current().isWindows()) {
-  ext.signjarArgs = ["jarsigner",
-                     "-keystore", "NONE",
-                     "-storetype", "PKCS11",
-                     "-tsa", "http://rfc3161timestamp.globalsign.com/advanced",
-                     "-providerClass", "sun.security.pkcs11.SunPKCS11",
-                     "-providerArg", eToken]
-} else {
-  ext.signjarArgs = ["jarsigner",
-                     "-tsa", "http://rfc3161timestamp.globalsign.com/advanced",
-                     "-storetype", "PKCS11",
-                     "-providerClass", "sun.security.pkcs11.SunPKCS11",
-                     "-providerArg", eToken]
-}
-
-if (project.findProperty("testSignJars") == "true") {
-  canSignJars = true
-  ext.signjarArgs = ["echo", "JARSIGNER"]
-}
-
-if (project.findProperty("signJars") == "true") {
-  if (!canSignJars) {
-    raise GradleException("Build is not configured to sign jars.")
-  }
-  ext.makeSignedJars = true
-}
-
 def signJar(String jarfile) {
-  if (ext.makeSignedJars) {
-    def args = ext.signjarArgs +
-      [jarfile,
-       ext.signkeyNewAlias,
-       "-storepass",
-       ext.signkeyPassword]
+  // It's convenient to leave this in the build because of the exec closure.
+  if (jarsigner.makeSignedJars) {
     exec {
-      commandLine args
+      commandLine jarsigner.signJarCommand(jarfile)
     }
   }
 }
@@ -337,12 +211,11 @@ def signJar(String jarfile) {
 // ============================================================
 // Find jar files that need to be part of the build or release
 //
-def filesep = System.getProperty("file.separator")
-icu4jJar = "${filesep}icu4j-${icu4jVersion}.jar"
-tagsoupJar = "${filesep}tagsoup-${tagsoupVersion}.jar"
-mailJar = "${filesep}javax.mail-${mailVersion}.jar"
-jlineJar = "${filesep}jline-${jlineVersion}.jar"
-resolverJar = "${filesep}xml-resolver-1.2.jar"
+icu4jJar = "${fileSeparator}icu4j-${icu4jVersion}.jar"
+tagsoupJar = "${fileSeparator}tagsoup-${tagsoupVersion}.jar"
+mailJar = "${fileSeparator}javax.mail-${mailVersion}.jar"
+jlineJar = "${fileSeparator}jline-${jlineVersion}.jar"
+resolverJar = "${fileSeparator}xml-resolver-1.2.jar"
 configurations.compileClasspath.each { cp ->
   if (cp.toString().endsWith(icu4jJar)) {
     icu4jJar = cp.toString()
@@ -528,53 +401,6 @@ task eej_extrajars(
 ) {
   into "${buildDir}/releases/eej"
   from jlineJar
-}
-
-// ============================================================
-// In an ideal world, I'd make the build process more standalone
-// by automatically cloning the repositories if they weren't
-// available. But the QT3 test suite in particular is huge and
-// takes a long time to clone. So for now, just force users to
-// tell us where they've cloned them.
-
-task cloneQT3TestSuite() {
-  doLast {
-    if (w3cQT3TestSuiteDir == null) {
-      throw new GradleException("The location of the QT3 test suite is unknown.")
-    }
-  }
-}
-
-task cloneXslt30TestSuite() {
-  doLast {
-    if (w3cXslt30TestSuiteDir == null) {
-      throw new GradleException("The location of the XSLT 3.0 test suite is unknown.")
-    }
-  }
-}
-
-task cloneXsdTestSuite() {
-  doLast {
-    if (w3cXsdTestSuiteDir == null) {
-      throw new GradleException("The location of the XSD test suite is unknown.")
-    }
-  }
-}
-
-task cloneQT4TestSuite() {
-  doLast {
-    if (w3cQT4TestSuiteDir == null) {
-      throw new GradleException("The location of the QT4 test suite is unknown.")
-    }
-  }
-}
-
-task cloneXslt40TestSuite() {
-  doLast {
-    if (w3cXslt40TestSuiteDir == null) {
-      throw new GradleException("The location of the XSLT 4.0 test suite is unknown.")
-    }
-  }
 }
 
 // ============================================================
@@ -1735,8 +1561,8 @@ publishing {
     maven {
       url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
       credentials {
-        username = sonatypeUsername
-        password = sonatypePassword
+        username = project.findProperty("sonatypeUsername") ?: "NOUSER"
+        password = project.findProperty("sonatypePassword") ?: "NOPASS"
       }
     }
   }
@@ -1802,9 +1628,10 @@ task sqlServerStop(dependsOn: ["dockerup"]) {
 task helloWorld() {
   doLast {
     println("Hello, world.")
-
+/*
     configurations.samples.resolve().each { path ->
       println(path)
     }
+*/
   }
 }

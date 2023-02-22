@@ -270,7 +270,7 @@ def qt3OptionMap = ["tdTree": "-tree",
              + files("${buildDir}/testdriver_classes/${release}j")
 
                         main = "${jpackage}.QT3TestDriver${RELEASE}"
-                        def testargs = [w3cQT3TestSuiteDir,
+                        def testargs = [testsuites.w3cQT3TestSuiteDir,
                                         "catalog.xml",
                                         "-exceptions:${projectDir}/src/test/exceptions/qt3.xml",
                                         "-reportfilename:${getReportFilename(reportFilename)}.xml",
@@ -485,7 +485,7 @@ task xslt30TestsJava() {
                + files("${buildDir}/testdriver_classes/${release}j")
 
                             main = "${jpackage}.Xslt30TestSuiteDriver${RELEASE}"
-                            def testargs = [w3cXslt30TestSuiteDir,
+                            def testargs = [testsuites.w3cXslt30TestSuiteDir,
                                             "catalog.xml",
                                             "-exceptions:${projectDir}/src/test/exceptions/xslt30.xml",
                                             "-reportfilename:${getReportFilename(reportFilename)}.xml",
@@ -697,7 +697,7 @@ task xsdTestsJava() {
          + files("${buildDir}/testdriver_classes/${release}j")
 
                 main = "${jpackage}.SchemaTestSuiteDriver"
-                def testargs = [w3cXsdTestSuiteDir,
+                def testargs = [testsuites.w3cXsdTestSuiteDir,
                                 "-exceptions:${exceptions}",
                                 "-reportfilename:${getReportFilename(reportFilename)}.xml",
                                 "-errorfilename:${getReportFilename(errorFilename)}.xml",
