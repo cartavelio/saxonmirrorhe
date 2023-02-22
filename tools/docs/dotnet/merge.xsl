@@ -113,9 +113,9 @@
     
     <xsl:if test="not($is-nested) or $process-nested-class">
       <xsl:copy>
-        <xsl:copy-of select="@* except (@base|@name)"/>
+        <xsl:copy-of select="@* except (@base|@name|@type)"/>
         <xsl:attribute name="name" select="if ($process-nested-class) then $nestedname else @name"/>
-        <xsl:attribute name="fulltype" select="$fullname"/>
+        <xsl:attribute name="{if (self::delegate) then 'fullname' else 'fulltype'}" select="$fullname"/>
         <xsl:if test="@base">
           <xsl:variable name="superclasses" select="tokenize(@base, ', ', 'q')"/>
           <!-- For generic superclasses, can just remove type parameters in @base -->
@@ -128,6 +128,11 @@
             <xsl:with-param name="derived-class" select="." as="element()" tunnel="yes"/>
             <xsl:with-param name="base-attr-value" select="string(@base)"/>
           </xsl:call-template>
+        </xsl:if>
+        <xsl:if test="@type">
+          <!-- for delegates -->
+          <xsl:attribute name="type" select="@type"/>
+          <xsl:attribute name="fulltype" select="f:getKnownFullType(@type)"/>
         </xsl:if>
         <xsl:apply-templates select="type"/><!-- for classes and interfaces which are generic types -->
         <xsl:if test="self::delegate">
@@ -196,7 +201,7 @@
           <xsl:when test="empty($basei)">
             <!-- If non-local super is not known to be an interface, then assume it is a class.
                   ($knownInterfaces must be maintained.) -->
-            <xsl:if test="contains($superclass, '.')">
+            <xsl:if test="contains($superclass, '.') and not(contains($superclass, 'Saxon.Hej'))">
               <xsl:message>-- Unhandled nested superclass: <xsl:value-of select="$superclass"/></xsl:message>
             </xsl:if>
             <xsl:variable name="knownType" select="f:getKnownFullType($superclass)"/>
@@ -471,6 +476,9 @@
       <xsl:if test="subsequence(following-sibling::*, 1, 2)/self::set">
         <xsl:attribute name="set">true</xsl:attribute>
       </xsl:if>
+      <xsl:if test="subsequence(following-sibling::*, 1, 2)/self::init">
+        <xsl:attribute name="init">true</xsl:attribute>
+      </xsl:if>
       <xsl:apply-templates select="type"/><!-- for properties which are generic types -->
       <comments>
         <xsl:variable name="obsolete" select="reverse(preceding-sibling::*)[1]/self::obsolete"/>
@@ -503,7 +511,7 @@
   
   <xsl:template match="using"/> 
   
-  <xsl:template match="get|set"/> 
+  <xsl:template match="get|set|init"/> 
   
   <xsl:template match="obsolete"/>
   
@@ -596,14 +604,15 @@
     <xsl:sequence select="if ($is-list) then concat($out,'[]') else $out"/>
   </xsl:function>
   
-  <!-- Types which are known to be interfaces, rather than classes -->
-  <xsl:variable name="knownInterfaces" select="('IEnumerable', 'IInvalidityHandler')"/>
+  <!-- Types which are known to be interfaces, rather than classes. TODO check use/status e.g. IResource -->
+  <xsl:variable name="knownInterfaces" select="('IEnumerable', 'IInvalidityHandler', 'IDestination')"/>
   
   <!-- Resolve all known System types. Map from short name to resolved type. 
       This map requires maintenance. -->
   <xsl:variable name="knownSystemClassesMap" as="map(xs:string,xs:string)"
     select="map{
     'bool':'System.Boolean',
+    'byte':'System.Byte',
     'char':'System.Char',
     'decimal':'System.Decimal',
     'double':'System.Double',
@@ -634,8 +643,9 @@
     'HashSet':'System.Collections.Generic.HashSet',
     'IDictionary':'System.Collections.Generic.IDictionary',
     'List':'System.Collections.Generic.List',
-    'TextWriter':'System.IO.TextWriter',
     'Stream':'System.IO.Stream',
+    'TextReader':'System.IO.TextReader',
+    'TextWriter':'System.IO.TextWriter',
     'Encoding':'System.Text.Encoding',
     'XmlDocument':'System.Xml.XmlDocument',
     'XmlNode':'System.Xml.XmlNode',

@@ -348,6 +348,8 @@ div.section h2{
 }
 .javaclassmember{
     font-family:monospace;
+}
+.apilink{
     color:#688790;
 }
 .javalink, .feature {
@@ -951,6 +953,12 @@ span.javasee{
 }
 span.cslink{
     color:#B3956F !important;
+    font-size:inherit;
+    cursor:pointer;
+    font-family:monospace;
+}
+span.apilink{
+    color:#688790 !important;
     font-size:inherit;
     cursor:pointer;
     font-family:monospace;

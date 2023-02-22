@@ -23,7 +23,7 @@
   
   <xsl:template match="class | interface | enum | delegate">
     <xsl:variable name="shortname" select="@name"/>
-    <xsl:variable name="fullname" select="@fulltype"/>
+    <xsl:variable name="fullname" select="if (self::delegate) then @fullname else @fulltype"/>
     <xsl:variable name="is-nested" select="contains(@name, '.')"/>
     <xsl:variable name="depth" select="if ($is-nested) then 2 else 1"/>
     <xsl:variable name="file-ext" select="translate(@name, '.','/')"/>
@@ -382,6 +382,7 @@
                       <xsl:text>&#xa0;{</xsl:text>
                       <xsl:if test="@get='true'">get; </xsl:if>
                       <xsl:if test="@set='true'">set; </xsl:if>
+                      <xsl:if test="@init='true'">init; </xsl:if>
                       <xsl:text>}</xsl:text>
                     </div>
                     <xsl:apply-templates select="comments">
@@ -490,7 +491,7 @@
     <xsl:param name="depth" as="xs:integer"/>
     <xsl:for-each select="key('class-by-base', $class-name, $root)">
       <xsl:sort select="lower-case(@name)"/>
-      <xsl:sequence select="f:classLink(@fulltype, $depth)"/>
+      <xsl:sequence select="f:classLink(if (self::delegate) then @fullname else @fulltype, $depth)"/>
       <xsl:if test="position() ne last()"><xsl:text>, </xsl:text></xsl:if>
     </xsl:for-each>
   </xsl:template>
@@ -595,8 +596,8 @@
       <xsl:if test="@super">
         <xsl:value-of select="'in '"/>
       </xsl:if>
-      <xsl:if test="@type">
-        <xsl:sequence select="f:classLink(@type, $depth)"/>
+      <xsl:if test="@fulltype|@type">
+        <xsl:sequence select="f:classLink((@fulltype,@type)[1], $depth)"/>
       </xsl:if>
       <xsl:if test="exists(type)">
         <span class="operator">
@@ -847,7 +848,7 @@
   </xsl:template>
   
   <xsl:template name="summary-table">
-    <xsl:param name="member"/>
+    <xsl:param name="member" as="xs:string"/>
     <xsl:param name="exception" select="false()"/>
     <table>
       <thead>
@@ -865,7 +866,7 @@
           <xsl:sort select="lower-case(@name)"/>
           <tr class="TableRow">
             <td>
-              <xsl:sequence select="f:classLink(@fulltype, 0)"/>
+              <xsl:sequence select="f:classLink(if (self::delegate) then @fullname else @fulltype, 0)"/>
             </td>
             <td>
               <div class="fnormal"><xsl:apply-templates select="comments/summary" mode="table-summary"/></div>

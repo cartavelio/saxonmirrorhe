@@ -72,8 +72,8 @@
       and -EE) on both platforms. Saxon-HE source code for the latest release is also available for
       download from the SourceForge project page.</aside>
 
-   <p><a href="/javadoc" class="apilink">Java API specifications</a> and <a href="/dotnetdoc"
-         class="apilink">C# API specifications</a> are also available.</p>
+   <p><a href="/javadoc" class="bodylink">Java API specifications</a> and <a href="/dotnetdoc"
+         class="bodylink">C# API specifications</a> are also available.</p>
 
    <p>A full <a class="bodylink" href="/changes">change log</a> is provided.</p>
 
