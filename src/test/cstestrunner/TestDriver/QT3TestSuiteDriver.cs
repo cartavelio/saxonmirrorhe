@@ -657,7 +657,7 @@ namespace TestDriver {
                                 else {
                                     println("Failed optimization test");
                                     Serializer ser = env.processor.NewSerializer();
-                                    ser.SetOutputStream((Stream) System.Console.OpenStandardError());
+                                    ser.OutputStream = System.Console.OpenStandardError();
                                     driverProc.WriteXdmValue(explanation, ser);
                                     writeTestcaseElement(testCaseName, "fail", "Failed optimization assertions", requestedSpec);
                                     recordFailure(testSetName, testCaseName);
@@ -682,7 +682,7 @@ namespace TestDriver {
                             if (needSerializedResult) {
                                 StringWriter sw = new StringWriter();
                                 Serializer serializer = env.processor.NewSerializer();
-                                serializer.SetOutputWriter(sw);
+                                serializer.OutputWriter= sw;
                                 selector.Run(serializer);
                                 outcome.SetPrincipalSerializedResult(sw.ToString());
                             }
