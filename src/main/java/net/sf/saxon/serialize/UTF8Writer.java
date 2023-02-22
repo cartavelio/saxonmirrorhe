@@ -39,13 +39,13 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
     final static int SURR2_FIRST = 0xDC00;
     final static int SURR2_LAST = 0xDFFF;
 
-    /*@Nullable*/ protected OutputStream _out;
+    private OutputStream _out;
 
-    protected byte[] _outBuffer;
+    private byte[] _outBuffer;
 
-    final protected int _outBufferLast;
+    final private int _outBufferLast;
 
-    protected int _outPtr;
+    private int _outPtr;
 
     /**
      * When outputting chars from BMP, surrogate pairs need to be coalesced.

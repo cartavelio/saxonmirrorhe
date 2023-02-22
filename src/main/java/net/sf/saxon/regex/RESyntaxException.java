@@ -24,6 +24,8 @@
 
 package net.sf.saxon.regex;
 
+import net.sf.saxon.transpile.CSharpModifiers;
+
 /**
  * Exception thrown to indicate a syntax error in a regular expression.
  * This is a non-checked exception because you should only have problems compiling
@@ -55,11 +57,14 @@ public class RESyntaxException extends RuntimeException {
         super("Syntax error at char " + offset + " in regular expression: " + s);
     }
 
+    //#if CSHARP==true
     /**
      * Redundant override of getMessage(), added for ease of C# conversion
      * @return the message associated with the error
      */
+    @CSharpModifiers(code={"public", "override"})
     public String getMessage() {
         return super.getMessage();
     }
+    //#endif
 }

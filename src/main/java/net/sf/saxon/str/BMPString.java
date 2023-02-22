@@ -2,6 +2,7 @@ package net.sf.saxon.str;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.function.IntPredicate;
@@ -14,7 +15,7 @@ import java.util.function.IntPredicate;
 
 public class BMPString extends UnicodeString {
 
-    private String baseString;
+    private final String baseString;
 
     /**
      * Protected constructor
@@ -140,14 +141,17 @@ public class BMPString extends UnicodeString {
         }
     }
 
-    //#if CSHARP==false
     // In Saxon-J, the hashCode of a UnicodeString is the same as the hashCode
-    // of the corresponding String. This is not the case in Saxon-CS.
+    // of the corresponding String. This is not the case in Saxon-CS. In Saxon-CS,
+    // we compute the hashCode by inheriting the hashCode() method from the superclass:
+    // but we do this explicitly, to avoid compiler warnings that arise when there's
+    // an Equals() method but no GetHashCode() method
     @Override
+    @CSharpReplaceBody(code="return base.GetHashCode();")
     public int hashCode() {
         return baseString.hashCode();
     }
-    //#endif
+
 
     @Override
     public UnicodeString economize() {

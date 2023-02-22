@@ -65,7 +65,7 @@ public class XQueryParser extends XPathParser {
     //protected String queryVersion = null;
     private int errorCount = 0;
     /*@Nullable*/ private XPathException firstError = null;
-    private int languageVersion = 31;
+    //private int languageVersion = 31;
 
     /*@NotNull*/ protected Executable executable;
 

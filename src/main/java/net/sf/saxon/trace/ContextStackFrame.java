@@ -28,7 +28,7 @@ import net.sf.saxon.value.AtomicValue;
  */
 public abstract class ContextStackFrame {
 
-    private XPathContext context;
+    protected XPathContext context;
     private Location location;
     private Item contextItem;
     private Object container;
@@ -173,7 +173,6 @@ public abstract class ContextStackFrame {
      */
 
     public static class BuiltInTemplateRule extends ContextStackFrame {
-        private final XPathContext context;
         public BuiltInTemplateRule(XPathContext context) {
             this.context = context;
         }

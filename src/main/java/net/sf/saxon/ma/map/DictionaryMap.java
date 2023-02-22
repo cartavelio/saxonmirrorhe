@@ -237,7 +237,7 @@ public class DictionaryMap extends MapItem {
         return target;
     }
 
-    private class KeyIterator implements AtomicIterator {
+    private class KeyIterator extends AtomicIterator {
         Iterator<String> keyIter;
 
         public KeyIterator(Map<String, GroundedValue> hashMap) {

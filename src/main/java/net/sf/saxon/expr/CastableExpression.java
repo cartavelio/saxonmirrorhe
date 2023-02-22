@@ -63,7 +63,7 @@ public final class CastableExpression extends CastingExpression {
         return this;
     }
 
-    protected Expression preEvaluate() throws XPathException {
+    private Expression preEvaluate() {
         GroundedValue literalOperand = ((Literal) getBaseExpression()).getGroundedValue();
         if (literalOperand instanceof AtomicValue && converter != null) {
             ConversionResult result = converter.convert((AtomicValue) literalOperand);
