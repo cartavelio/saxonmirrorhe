@@ -11,6 +11,7 @@ import net.sf.saxon.str.*;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.z.IntIterator;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -32,7 +33,7 @@ import java.util.Arrays;
 public final class UTF8Writer extends Writer implements UnicodeWriter {
 
     private final static int MIN_BUF_LEN = 32;
-    private final static int DEFAULT_BUF_LEN = 4000;
+    private final static int DEFAULT_BUF_LEN = 4096;
 
     final static int SURR1_FIRST = 0xD800;
     final static int SURR1_LAST = 0xDBFF;
@@ -62,7 +63,8 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
         if (bufferLength < MIN_BUF_LEN) {
             bufferLength = MIN_BUF_LEN;
         }
-        _out = out;
+        _out = new BufferedOutputStream(out);
+
         _outBuffer = new byte[bufferLength];
         /* Max. expansion for a single Unicode code point is 4 bytes when
          * recombining UCS-2 surrogate pairs, so:
@@ -503,7 +505,8 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
 
             int c = str.charAt(off++);
             // And then see if we have an Ascii char:
-            if (c < 0x80) { // If so, can do a tight inner loop:
+            if (c < 0x80)
+            { // If so, can do a tight inner loop:
                 outBuf[outPtr++] = (byte) c;
                 // Let's calc how many ascii chars we can copy at most:
                 int maxInCount = (len - off);
@@ -514,13 +517,17 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
                 }
                 maxInCount += off;
                 boolean continueOuter = false;
-                while (true) {
-                    if (off >= maxInCount) { // done with max. ascii seq
+
+                while (true)
+                {
+                    if (off >= maxInCount)
+                    { // done with max. ascii seq
                         continueOuter = true;
                         break;
                     }
                     c = str.charAt(off++);
-                    if (c >= 0x80) {
+                    if (c >= 0x80)
+                    {
                         break;
                     }
                     outBuf[outPtr++] = (byte) c;
@@ -530,40 +537,69 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
                 }
             }
 
-            // Nope, multi-byte:
-            if (c < 0x800) { // 2-byte
-                outBuf[outPtr++] = (byte) (0xc0 | (c >> 6));
-                outBuf[outPtr++] = (byte) (0x80 | (c & 0x3f));
-            } else { // 3 or 4 bytes
-                // Surrogates?
-                if (c < SURR1_FIRST || c > SURR2_LAST) {
-                    outBuf[outPtr++] = (byte) (0xe0 | (c >> 12));
-                    outBuf[outPtr++] = (byte) (0x80 | ((c >> 6) & 0x3f));
-                    outBuf[outPtr++] = (byte) (0x80 | (c & 0x3f));
-                    continue;
-                }
-                // Yup, a surrogate:
-                if (c > SURR1_LAST) { // must be from first range
-                    _outPtr = outPtr;
-                    throwIllegal(c);
-                }
-                _surrogate = c;
-                // and if so, followed by another from next range
-                if (off >= len) { // unless we hit the end?
-                    break;
-                }
-                c = _convertSurrogate(str.charAt(off++));
-                if (c > 0x10FFFF) { // illegal, as per RFC 3629
-                    _outPtr = outPtr;
-                    throwIllegal(c);
-                }
-                outBuf[outPtr++] = (byte) (0xf0 | (c >> 18));
-                outBuf[outPtr++] = (byte) (0x80 | ((c >> 12) & 0x3f));
-                outBuf[outPtr++] = (byte) (0x80 | ((c >> 6) & 0x3f));
-                outBuf[outPtr++] = (byte) (0x80 | (c & 0x3f));
+            int[] result = writeMultiByte(c, outBuf, outPtr, str, off, len);
+
+            if (result == null)
+            {
+                break;
+            }
+            else
+            {
+                outPtr = result[0];
+                off = result[1];
             }
         }
         _outPtr = outPtr;
+    }
+
+    private int[] writeMultiByte(int c, byte[] outBuf, int outPtr, String str, int off, int len) throws IOException
+    {
+        // Nope, multi-byte:
+        if (c < 0x800)
+        { // 2-byte
+            outBuf[outPtr++] = (byte) (0xc0 | (c >> 6));
+            outBuf[outPtr++] = (byte) (0x80 | (c & 0x3f));
+        }
+        else
+        { // 3 or 4 bytes
+            // Surrogates?
+            if (c < SURR1_FIRST || c > SURR2_LAST)
+            {
+                outBuf[outPtr++] = (byte) (0xe0 | (c >> 12));
+                outBuf[outPtr++] = (byte) (0x80 | ((c >> 6) & 0x3f));
+                outBuf[outPtr++] = (byte) (0x80 | (c & 0x3f));
+                return new int[]{outPtr, off};
+            }
+            // Yup, a surrogate:
+            if (c > SURR1_LAST)
+            { // must be from first range
+                _outPtr = outPtr;
+                throwIllegal(c);
+            }
+
+            _surrogate = c;
+
+            // and if so, followed by another from next range
+            if (off >= len)
+            { // unless we hit the end?
+                return null;
+            }
+
+            c = _convertSurrogate(str.charAt(off++));
+
+            if (c > 0x10FFFF)
+            { // illegal, as per RFC 3629
+                _outPtr = outPtr;
+                throwIllegal(c);
+            }
+
+            outBuf[outPtr++] = (byte) (0xf0 | (c >> 18));
+            outBuf[outPtr++] = (byte) (0x80 | ((c >> 12) & 0x3f));
+            outBuf[outPtr++] = (byte) (0x80 | ((c >> 6) & 0x3f));
+            outBuf[outPtr++] = (byte) (0x80 | (c & 0x3f));
+        }
+
+        return new int[]{outPtr, off};
     }
 
     /*
