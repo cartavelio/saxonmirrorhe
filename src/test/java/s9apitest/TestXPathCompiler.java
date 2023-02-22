@@ -994,6 +994,5 @@ public class TestXPathCompiler {
         }
     }
 
-
 }
 
