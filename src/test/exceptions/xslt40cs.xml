@@ -27,6 +27,11 @@
     <reason>'output file="#absent"' not recognised by test driver</reason>
   </exception>
   
+  <exception test-case="format-date-en-032" run="false" report="Dependency not satisfied">
+    <created by="Michael Kay" on="2021-12-08"/>
+    <reason>Test assumes that Iberian (lang="xib") is not recognised, but on .NET it is.</reason>
+  </exception>
+  
   <exception test-case="format-number-044" run="false" report="BigDecimal precision issue">
     <created by="Michael Kay" on="2021-06-12"/>
     <reason>https://github.com/Singulink/Singulink.Numerics.BigDecimal/issues/4. See also qt3test numberformat60
