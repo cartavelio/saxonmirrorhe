@@ -1532,9 +1532,8 @@
             </attributes>
             <details>
                 <p>The <code>xsl:evaluate</code> instruction allows dynamic evaluation of XPath
-                    expressions in the same way as the <a class="bodylink code"
-                        href="/functions/saxon/evaluate">saxon:evaluate()</a> extension function
-                    that has been available in Saxon for many years.</p>
+                    expressions. (This was previously available using the <code>saxon:evaluate()</code> extension function
+                    which was available in Saxon for many years, but dropped in Saxon 12.)</p>
 
                 <p>The functionality is available as an XSLT instruction, rather than a function, to
                     allow more flexibility in the syntax, in particular the ability to define
@@ -1582,7 +1581,6 @@
                     <a class="feature" href="DISABLE_XSL_EVALUATE"/>.</p>
                 
             </status>
-            <see-also name="evaluate" type="functions" namespace="saxon"/>
         </xsl-element>
     </section>
 
@@ -1653,21 +1651,21 @@
                     <code>xsl:for-each</code> element are applied to each item in the input sequence
                     in turn. The full syntax of expressions is outlined in <a class="bodylink"
                         href="/expressions">XPath syntax</a>.</attribute>
-                <attribute name="array" use="optional">Experimental addition in XSLT 4.0, 
+                <!--<attribute name="array" use="optional">Experimental addition in XSLT 4.0, 
                     allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
                     Defines an array over which
                     the statement will iterate. The XSLT statements subordinate to the
                     <code>xsl:for-each</code> element are applied to each member of the input array
                     in turn; the members are presented as instances of the type <code>record(value)</code>,
                     which can be converted to a sequence (or in many cases, a single item) using the
-                    expression <code>?value</code>. </attribute>
-                <attribute name="map" use="optional">Experimental addition in XSLT 4.0, 
+                    expression <code>?value</code>. </attribute>-->
+                <!--<attribute name="map" use="optional">Experimental addition in XSLT 4.0, 
                     allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
                     Defines a map over which the statement will iterate. The XSLT statements subordinate to the
                     <code>xsl:for-each</code> element are applied to each entry of the input map
                     in turn (in an undefined order); the entries are presented as instances of the type 
                     <code>record(key as xs:anyAtomicType, value as item()*)</code>, so the key
-                    can be obtained using <code>?key</code>, and the value using <code>?value</code>.</attribute>
+                    can be obtained using <code>?key</code>, and the value using <code>?value</code>.</attribute>-->
                 <attribute name="separator" use="optional">Experimental addition in XSLT 4.0, 
                     allowed only if syntax extensions are
                     enabled. The value is an attribute value template. If present, a text node is formed
@@ -1775,15 +1773,15 @@
             <attributes>
                 <attribute name="select" use="mandatory">Expression to select
                     nodes/values.</attribute>
-                <attribute name="array" use="optional">Experimental addition in XSLT 4.0, 
+                <!--<attribute name="array" use="optional">Experimental addition in XSLT 4.0, 
                     allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
                     Defines an array over which
                     the statement will iterate. The XSLT statements subordinate to the
                     <code>xsl:for-each-group</code> element are applied to each member of the input array
                     in turn; the members are presented as instances of the type <code>record(value)</code>,
                     which can be converted to a sequence (or in many cases, a single item) using the
-                    expression <code>?value</code>. </attribute>
-                <attribute name="map" use="optional">Experimental addition in XSLT 4.0, 
+                    expression <code>?value</code>. </attribute>-->
+                <!--<attribute name="map" use="optional">Experimental addition in XSLT 4.0, 
                     allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
                     Defines a map over which the statement will iterate. The XSLT statements subordinate to the
                     <code>xsl:for-each-group</code> element are applied to each entry of the input map
@@ -1792,7 +1790,7 @@
                     can be obtained using <code>?key</code>, and the value using <code>?value</code>.
                     Because the order of entries is undefined, the only grouping option that makes sense
                     for maps is <code>group-by</code>.
-                </attribute>
+                </attribute>-->
                 <attribute name="group-by" use="optional">Groups together all items having the same
                     value for a grouping key. The grouping key may have multiple values (a sequence
                     of values) in which case the item is added to more than one group.</attribute>
@@ -2330,21 +2328,21 @@
             <attributes>
                 <attribute name="select" use="mandatory">Input sequence over which the iteration is
                     processed.</attribute>
-                <attribute name="array" use="optional">Experimental addition in XSLT 4.0, 
+                <!--<attribute name="array" use="optional">Experimental addition in XSLT 4.0, 
                     allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
                     Defines an array over which
                     the statement will iterate. The XSLT statements subordinate to the
                     <code>xsl:iterate</code> element are applied to each member of the input array
                     in turn; the members are presented as instances of the type <code>record(value)</code>,
                     which can be converted to a sequence (or in many cases, a single item) using the
-                    expression <code>?value</code>. </attribute>
-                <attribute name="map" use="optional">Experimental addition in XSLT 4.0, 
+                    expression <code>?value</code>. </attribute>-->
+                <!--<attribute name="map" use="optional">Experimental addition in XSLT 4.0, 
                     allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
                     Defines a map over which the statement will iterate. The XSLT statements subordinate to the
                     <code>xsl:iterate</code> element are applied to each entry of the input map
                     in turn (in an undefined order); the entries are presented as instances of the type 
                     <code>record(key as xs:anyAtomicType, value as item()*)</code>, so the key
-                    can be obtained using <code>?key</code>, and the value using <code>?value</code>.</attribute>
+                    can be obtained using <code>?key</code>, and the value using <code>?value</code>.</attribute>-->
             </attributes>
             
             <details>
@@ -2591,7 +2589,7 @@
         </xsl-element>
     </section>
     
-    <section id="match" title="xsl:match">
+    <!--<section id="match" title="xsl:match">
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>match</name>
             <description>
@@ -2627,7 +2625,7 @@
                 <p>Available from Saxon 11; requires syntax extensions to be enabled.</p>
             </status>
         </xsl-element>
-    </section>
+    </section>-->
 
     <section id="matching-substring" title="xsl:matching-substring">
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">

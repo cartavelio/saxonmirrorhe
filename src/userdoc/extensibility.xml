@@ -1940,7 +1940,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
               <a class="javalink" href="net.sf.saxon.value.IntegerValue">IntegerValue</a>, 
               <a class="javalink" href="net.sf.saxon.value.BooleanValue">BooleanValue</a>,
               <a class="javalink" href="net.sf.saxon.value.DateTimeValue">DateTimeValue</a> etc.</li>
-            <li><a class="javalink" href="net.sf.saxon.om.Function">Function</a> representing a function item</li>
+            <li><a class="javalink" href="net.sf.saxon.om.FunctionItem">FunctionItem</a> representing a function item</li>
             <li><a class="javalink" href="net.sf.saxon.ma.map.MapItem">MapItem</a> representing a map</li>
             <li><a class="javalink" href="net.sf.saxon.ma.arrays.ArrayItem">ArrayItem</a> representing an array</li>
             <li><a class="javalink" href="net.sf.saxon.om.ZeroOrOne">ZeroOrOne</a>, 

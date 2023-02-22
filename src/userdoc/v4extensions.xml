@@ -1054,7 +1054,9 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
       <section id="xsl-match" title="The xsl:match instruction">
          <h1>The <code>xsl:match</code> instruction</h1>
          
-         <p>The new <a class="bodylink code" href="/xsl-elements/match">xsl:match</a> instruction is most
+         <p>The experimental <code>xsl:match</code> instruction was introduced in Saxon 11, but dropped in Saxon 12.</p>
+         
+         <!--<p>The new <a class="bodylink code" href="/xsl-elements/match">xsl:match</a> instruction is most
             useful if wrapped in a stylesheet function. For example:</p>
          <samp><![CDATA[  <xsl:function name="f:in-appendix" as="xs:boolean">
     <xsl:param name="content" as="element(*)"/>
@@ -1063,7 +1065,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
   
   ...
   
-  <xsl:if test="f:in-appendix(.)">...</xsl:if>]]></samp>
+  <xsl:if test="f:in-appendix(.)">...</xsl:if>]]></samp>-->
       </section>
       <section id="iteration-maps-arrays" title="Iterating over maps and arrays">
          <h1>Iterating over maps and arrays</h1>
