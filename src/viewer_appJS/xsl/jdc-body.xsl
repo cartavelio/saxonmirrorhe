@@ -921,8 +921,12 @@
                         else if ($i eq 5) then $this-class/property
                         else if ($i eq 6) then $this-class/indexer
                         else $this-class/methods/method"
-                as="node()*"/>
-            <xsl:if test="exists($members)">
+                        as="node()*"/>
+            
+            <xsl:variable name="inherited-fields" select="($i eq 3) and $this-class/implements/interface/fields"/>
+            <xsl:variable name="inherited-methods" select="($i eq 7) and $this-class/extends/interface/methods"/>
+            
+            <xsl:if test="exists($members) or $inherited-fields or $inherited-methods">
                 <table border="1" style="width:100%">
                     <thead>
                         <tr>
@@ -1017,9 +1021,69 @@
                         </xsl:for-each>
                     </tbody>
                 </table>
-
+                
+                <xsl:if test="$inherited-fields">
+                    <xsl:for-each select="$this-class/implements/interface">
+                        <xsl:variable name="this-superclass" select="@fulltype"/>
+                        <!--<xsl:message>Inherited fields <xsl:value-of select="$this-superclass"/></xsl:message>-->
+                        <div>
+                            <p class="methodLabel">Fields inherited from <xsl:sequence select="f:showType(.,
+                                true(), false())"/>:</p>
+                            <p>
+                                <xsl:for-each select="fields/field">
+                                    <xsl:variable name="this-superclass-field" select="string(.)"/>
+                                    <xsl:choose>
+                                        <xsl:when test="f:isJavaType($this-superclass)">
+                                            <span class="{if ($isDotNetApiMember) then 'cslink' else 'javalink'}"
+                                                data-href="{concat($this-superclass, '@', $this-superclass-field)}">
+                                                <xsl:value-of select="$this-superclass-field"/>
+                                            </span>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:value-of select="$this-superclass-field"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                    <xsl:if test="position() ne last()">
+                                        <xsl:text>, </xsl:text>
+                                    </xsl:if>
+                                </xsl:for-each>
+                            </p>
+                        </div>
+                    </xsl:for-each>
+                </xsl:if>
+                
+                <xsl:if test="$inherited-methods">
+                    <xsl:for-each select="$this-class/extends/interface">
+                        <xsl:variable name="this-superclass" select="@fulltype"/>
+                        <!--<xsl:message>Inherited methods <xsl:value-of select="$this-superclass"/></xsl:message>-->
+                        <div>
+                            <p class="methodLabel">Methods inherited from <xsl:sequence select="f:showType(.,
+                                true(), false())"/>:</p>
+                            <p>
+                                <xsl:for-each select="methods/method">
+                                    <xsl:variable name="this-superclass-method"
+                                        select="substring-before(text(), '(')"/>
+                                    <xsl:choose>
+                                        <xsl:when test="f:isJavaType($this-superclass)">
+                                            <span class="{if ($isDotNetApiMember) then 'cslink' else 'javalink'}"
+                                                data-href="{concat($this-superclass, '@', $this-superclass-method)}">
+                                                <xsl:value-of select="$this-superclass-method"/>
+                                            </span>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:value-of select="$this-superclass-method"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                    <xsl:if test="position() ne last()">
+                                        <xsl:text>, </xsl:text>
+                                    </xsl:if>
+                                </xsl:for-each>
+                            </p>
+                        </div>
+                    </xsl:for-each>
+                </xsl:if>
+                
                 <p>&#160;</p>
-
             </xsl:if>
         </xsl:for-each>
         
