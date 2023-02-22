@@ -473,10 +473,15 @@ public class CommandLineOptions {
 
         optionValue = getOptionValue("init");
         if (optionValue != null) {
-            Initializer initializer = (Initializer) config.getInstance(optionValue);
-            initializer.initialize(config);
+            invokeInitializer(processor, optionValue);
         }
+    }
 
+    @CSharpReplaceBody(code="Saxon.Api.Support.InitializationHandler.doInitialization(new Saxon.Api.Processor(processor), initializationClass);")
+    private void invokeInitializer(Processor processor, String initializationClass) throws TransformerException {
+        Configuration config = processor.getUnderlyingConfiguration();
+        Initializer initializer = (Initializer) config.getInstance(initializationClass);
+        initializer.initialize(config);
     }
 
     private void setCatalogFiles(Configuration config, List<String> catalogs) {
