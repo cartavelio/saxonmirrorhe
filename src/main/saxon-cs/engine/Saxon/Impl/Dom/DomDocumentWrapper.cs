@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using HtmlAgilityPack;
 
 namespace Saxon.Impl.Dom {
     /**
@@ -8,10 +9,7 @@ namespace Saxon.Impl.Dom {
      * but for Saxon-CS is maintained as native C# code.
      */
     public class DomDocumentWrapper : net.sf.saxon.om.GenericTreeInfo {
-        public DomDocumentWrapper(XmlNode doc, string baseURI, net.sf.saxon.Configuration config) : base (config) {
-            if ((doc.NodeType!=XmlNodeType.Document)) {
-                throw new java.lang.IllegalArgumentException("Node must be a DOM Document");
-            }
+        public DomDocumentWrapper(XmlDocument doc, string baseURI, net.sf.saxon.Configuration config) : base (config) {
             setRootNode(wrap(doc));
             setSystemId(baseURI);
         }

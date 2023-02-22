@@ -6,7 +6,6 @@ namespace Saxon.Impl.Helpers {
             return !uri.LocalPath.StartsWith("/");
         }
         public static System.Uri Normalize(System.Uri uri) {
-            // Javadoc: An opaque URI is an absolute URI whose scheme-specific part does not begin with a slash character ('/'). 
             return uri;
         }
 
@@ -18,6 +17,10 @@ namespace Saxon.Impl.Helpers {
             builder.Query = query;
             builder.Fragment = fragment;
             return builder.Uri;
+        }
+        
+        public static java.net.URL ToURL(System.Uri uri) {
+            throw new(uri.ToString());
         }
 
     }

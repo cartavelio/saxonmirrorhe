@@ -35,6 +35,11 @@ namespace javax.xml.transform
         public System.Exception getException() {
             return this.getCause();
         }
+
+        public string getMessageAndLocation() {
+            return "Error at " + _locator.getSystemId() + "#" + _locator.getLineNumber() + ": " +
+                   getMessage();
+        }
         
     }
 }

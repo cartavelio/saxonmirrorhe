@@ -36,7 +36,7 @@ using System.Collections.Generic;
             string g2 = s2.ToString();
             int i = comparer.IndexOf(g1, g2, options);
             if ((i<0)) {
-                return net.sf.saxon.str.EmptyUniString.getInstance();
+                return net.sf.saxon.str.EmptyUnicodeString.getInstance();
             }
             int pivot = (i+s2.length32());
             if ((comparer.Compare(g1.Substring(i, pivot), g2, options)==0)) {
@@ -56,19 +56,19 @@ using System.Collections.Generic;
                     return s1.substring((pivot-z));
                 }
                 if ((reachedStart&&reachedEnd)) {
-                    return net.sf.saxon.str.EmptyUniString.getInstance();
+                    return net.sf.saxon.str.EmptyUnicodeString.getInstance();
                 }
             }
         }
-        private net.sf.saxon.value.StringItem stringValueFrom(string s, int from) {
-            return new net.sf.saxon.value.StringItem(s.Substring(from));
+        private net.sf.saxon.value.StringValue stringValueFrom(string s, int from) {
+            return new net.sf.saxon.value.StringValue(s.Substring(from));
         }
         public net.sf.saxon.str.UnicodeString substringBefore(net.sf.saxon.str.UnicodeString s1, net.sf.saxon.str.UnicodeString s2) {
             string g1 = s1.ToString();
             string g2 = s2.ToString();
             int j = comparer.IndexOf(g1, g2, options);
             if ((j<0)) {
-                return net.sf.saxon.str.EmptyUniString.getInstance();
+                return net.sf.saxon.str.EmptyUnicodeString.getInstance();
             }
             return s1.substring(0, j);
         }
