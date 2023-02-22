@@ -99,23 +99,6 @@ def check_examplecontenthandler(output):
     lines = check(expect, "n/a", lines)
 
 
-def check_queryapiexamples(output):
-    check_against_map(
-        {"toStreamResult": [r"<\?xml", r"<a b=.c.>7<"],
-         "toSingleton": [r"^38\.5"],
-         "toDOM": [r"<\?xml.*<a xmlns=.*another.uri.*text<"],
-         "toSequence": [r"^1", r"^4", r"9", r"16"],
-         "toSerializedSequence": [r"<a>3.*<b>4.*>19"],
-         "toWrappedSequence": [r"<\?xml", r"^<result:sequence",
-                               r"^[\s]*xmlns:", r"^[\s]*xmlns:",
-                               r"^.*<result:element"],
-         "toHTMLFile": [r"Output written to booklist.html"],
-         "withParam": [r"^17\ \*\ 17 = 289"],
-         "pipeline": [r"3\*3\ \+\ 5 = 14\.0"],
-         "directFunction": [r"10 div 3 = 3\.33333", r"10 div 4 = 2.5", r"10 div 5 = 2"]
-         }, output)
-
-
 def check_s9apiexamplesom_pe(output):
     check_against_map(
         {"XPathDOM": ["", "Pride and Prejudice", "Wuthering Heights"],
@@ -300,8 +283,6 @@ def check_samples(edition, sample, output, ignore_errors):
             check_applyxpathjaxp(output, "saxon")
         elif sample == "ExampleContentHandler":
             check_examplecontenthandler(output)
-        elif sample == "QueryAPIExamples":
-            check_queryapiexamples(output)
         elif sample == "S9APIExamplesOM_ee":
             check_s9apiexamplesom_ee(output)
         elif sample == "S9APIExamplesOM_pe":
