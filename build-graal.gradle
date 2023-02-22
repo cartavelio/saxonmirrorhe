@@ -631,12 +631,9 @@ task graal_eec_jar(
             ? "${saxoncReleaseDir}/libs/darwin"
             : (systemOs.isLinux()
             ? "${saxoncReleaseDir}/libs/nix"
-            : null))
+            : "${saxoncReleaseDir}/libs/win"))
 
     doLast {
-      if (SAXONC_HOME == null) {
-        throw GradleException("Don't know how to create Python packages on this OS.");
-      }
       copy {
         into SAXONC_HOME
         from "${buildDir}/c"
