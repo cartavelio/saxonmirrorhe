@@ -98,7 +98,7 @@ dependencies {
     [group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.2'],
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
     files("${buildDir}/classes/${saxonEdition}j"),
-    files("${buildDir}/filtered/${saxonEdition}j"),
+    files("src/main/resources"),
     files("lib/Tidy.jar"),
     files(saxonLicenseDir),
     fileTree("${buildDir}/lib/asm")
@@ -339,8 +339,7 @@ task runXslt30TestSuiteDriver() {
   ) {
     classpath = configurations.testDrivers \
                 + files("${buildDir}/classes/${release}j") \
-                + files("${buildDir}/testdriver_classes/${release}j") \
-                + files("${buildDir}/filtered/${release}j")
+                + files("${buildDir}/testdriver_classes/${release}j")
     main = "${jpackage}.QT3TestDriver${RELEASE}"
     //args "-?"
     args "${w3cQT3TestSuiteDir}",
@@ -359,8 +358,7 @@ task runXslt30TestSuiteDriver() {
   ) {
     classpath = configurations.testDrivers \
                 + files("${buildDir}/classes/${release}j") \
-                + files("${buildDir}/testdriver_classes/${release}j") \
-                + files("${buildDir}/filtered/${release}j")
+                + files("${buildDir}/testdriver_classes/${release}j")
     main = "${jpackage}.Xslt30TestSuiteDriver${RELEASE}"
     //args "-?"
     args "/Volumes/Saxonica/src/w3c/xslt30-test",
@@ -468,7 +466,7 @@ task hej_setupPreprocess(
   into "${buildDir}/filtered/hej"
   include "net/sf/saxon/**/*.java"
   include "net/sf/saxon/**/package.html"
-  include "net/sf/saxon/data/**"
+  //include "net/sf/saxon/data/**"
   exclude "javax/xml/xquery/*.java"
   exclude "**/dotnet/**"
   exclude "net/sf/saxon/testdriver/**"
@@ -491,7 +489,7 @@ task hej_setupPreprocessForPej(
   exclude "net/sf/saxon/testdriver/**"
   exclude "net/sf/saxon/option/cpp/**"
   exclude "net/sf/saxon/jetonnet/**"
-  include "net/sf/saxon/data/**"
+  //include "net/sf/saxon/data/**"
 }
 
 task eej_setupPreprocessForPej(
@@ -549,7 +547,7 @@ task hej_setupPreprocessForEej(
   exclude "net/sf/saxon/option/cpp/**"
   exclude "net/sf/saxon/jetonnet/**"
   exclude "net/sf/saxon/jetonnet/**"
-  include "net/sf/saxon/data/**"
+  //include "net/sf/saxon/data/**"
 }
 
 // Rename org.objectweb to com.saxonica.objectweb in the bytecode sources
@@ -941,7 +939,7 @@ task hejJar(
     include "net/**/*.class"
     exclude "net/sf/saxon/option/**"
   }
-  from ("src/main/java") {
+  from ("src/main/resources") {
     include "net/sf/saxon/data/**"
   }
 }
@@ -1004,7 +1002,7 @@ task pejJar(
     exclude "com/saxonica/functions/sql/**"
     exclude "net/sf/saxon/option/sql/**"
   }
-  from ("src/main/java") {
+  from ("src/main/resources") {
     include "net/sf/saxon/data/**"
   }
 }
@@ -1044,7 +1042,7 @@ task eejJar(
     exclude "com/saxonica/functions/sql/**"
     exclude "net/sf/saxon/option/sql/**"
   }
-  from ("src/main/java") {
+  from ("src/main/resources") {
     include "net/sf/saxon/data/**"
   }
 }
