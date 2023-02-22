@@ -9,10 +9,8 @@
    <test-case name="highest-001">
       <description>test saxon:highest() - Saxon 9.2 version using higher-order functions</description>
       <created by="Michael Kay" on="2014-04-13"/>
-      <dependencies>
-         <spec value="XSLT20+"/>
-         <feature value="Saxon-PE"/>
-      </dependencies>
+      <dependency type="spec" value="XSLT20+"/>
+      <dependency type="feature" value="Saxon-PE"/>
       <test>
          saxon:highest(doc('highest/highest-001.xml')/*/*, function($item as element()){xs:decimal($item)})
       </test>
