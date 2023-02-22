@@ -1,0 +1,713 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<release number="9.9" date="2018-09-27" xmlns="http://www.saxonica.com/ns/doc/changes">
+    
+    <category name="documentation">
+        <p>The documentation application now runs using Saxon-JS (XSLT 3.0 in the browser).</p>
+        <p>The search mechanism has been updated to make it is easier to browse the pages with hits:
+            as well as the original pop-up box (top left) showing the number of hits with up/down
+            buttons used to move between these pages with hits, a second pop-up box (bottom left)
+            provides a scrollable list of links to all page hits, referenced by section name.</p>
+        <p>For ease of browsing, the option "ALL" has been added to the list of categories in the
+            change history. This displays the changes for all categories (for the selected Saxon
+            versions) on one page, which means you no longer need to view each category
+            individually.</p>
+    </category>
+    
+    <category name="xslt30">
+        
+        <p>Saxon 9.8 allowed <code>xsl:merge-source/@for-each-stream</code> as a synonym for 
+            <code>xsl:merge-source/@for-each-source</code>, to ease transition from the XSLT 3.0 Candidate Recommendation.
+        This synonym has now been dropped.</p>
+        
+        <p>The attribute <code>xsl:try/@rollback-output="no"</code> is now implemented. When evaluated in push
+        mode, the output of the <code>xsl:try</code> is written to the result tree destination, and the
+        <code>xsl:catch</code> takes effect only if no output has been written at the time the dynamic 
+            error occurs.</p>
+        
+        <p>The XSLT 3.0 specification states:</p>
+        
+        <blockquote>In previous versions of this specification it was stated that when the raw result of the initial 
+            template or function is an empty sequence, a result tree should be produced if and only if 
+            the transformation generates no secondary results (that is, if it does not invoke xsl:result-document).... 
+            Processor APIs offering backwards compatibility with earlier versions of XSLT must respect this behavior, 
+            but there is no requirement for new processor APIs to do so.</blockquote>
+        
+        <p>Saxon 9.9 changes so that a principal result is always generated, even if it is empty, regardless whether
+        any secondary results have been produced. This means, for example, that when running a transformation from
+        the command line with <code>-o:dummy.xml</code>, where all output from the stylesheet is sent to specific
+        files using <code>xsl:result-document</code>, an empty <code>dummy.xml</code> file will now be written.</p>
+        
+        <p>The XSLT 3.0 specification permits processors to support XPath 3.1, but also requires them to provide
+            a mode of operation that only supports XPath 3.0. Saxon supports XPath 3.1 by default, but in the
+            interests of conformance, a configuration option <code
+                java="net.sf.saxon.lib.Feature#XPATH_VERSION_FOR_XSLT">Feature.XPATH_VERSION_FOR_XSLT</code> has been added;
+            if set to the integer value "30", XPath expressions are restricted to use XPath 3.0 syntax, plus the
+            extensions to XPath 3.0 syntax defined in the XSLT 3.0 recommendation.</p>
+        
+        <p>In 9.8, it was possible to export a SEF file using Saxon-EE with the options <code>-export:on
+            -target:HE</code>, and provided the stylesheet used no Saxon-PE or Saxon-EE facilities, it could then be
+            executed on a run-time version of Saxon with no license key - but only by downloading the Saxon-PE software.
+            (However, see bug 3859.) This has now been rationalized: such a SEF file can now be executed using Saxon-HE alone.</p>
+        
+        <p>SEF files generated using Saxon 9.8 will in many cases continue to work using Saxon 9.9, but this has not
+            been thoroughly tested, so recompiling is recommended.</p>
+        
+        <p>The data tables used to decide whether a character is alphanumeric, used primarily to support <code>xsl:number</code>,
+        have been regenerated from Unicode 10.0.0 (previously Unicode 4.0.0 was used).</p>
+        
+        <p>In previous releases, Saxon passed all the W3C XSLT 3.0 test cases, but there were a few discrepancies on error tests where the
+        wrong error code was generated. In 9.9, for the first time, the generated error codes in all cases match the test expectations.</p>
+        
+    </category>
+    
+    <category name="xpath31">
+        
+        <p>Whether in XSLT, XPath, or XQuery, previous releases of Saxon allowed sorting operations to mix <code>untypedAtomic</code>
+        sort keys with keys of a more specific type, converting the <code>untypedAtomic</code> values to the other type if required.
+        This has never been permitted by any of the specifications, and Saxon has now been changed to report a type
+        error for such cases. This change is required for conformance with the W3C specifications, but it may cause
+        existing applications to break.</p>
+        
+        <p>The Saxon XPath processor now supports XPath 2.0, 3.0, and 3.1, plus the version of XPath (3.0 with enhancements)
+        defined in the XSLT 3.0 specification. Whichever version is chosen, XPath 1.0 backwards compatibility mode can be
+        optionally enabled.</p>
+        
+        <p>Enhancements to the <a class="bodylink code" href="/functions/fn/transform">fn:transform()</a> function:</p>
+        
+        <ul>
+           <!-- <li>The map entry <code>vendor-options?package-library</code> may be supplied to identify the locations of used
+            packages. The value is a sequence of strings, each one being a file name, the location of a package which is available
+            to be used in xsl:use-package declarations in the target stylesheet.</li>-->
+            
+            <li>The option <code>source-location</code> can be used (as an alternative to <code>source-node</code> or
+            <code>initial-match-selection</code>) to supply the principal input to the stylesheet. This is necessary if 
+            streamed processing is required (the W3C specification for <code>fn:transform()</code> provides no way of supplying
+            streamed input to the transformation). The value is the URI location of the source document.</li>
+            
+            <!--<li>The option <code>source-text</code> can also be used (as an alternative to <code>source-node</code> or
+                <code>initial-match-selection</code>) to supply the principal input to the stylesheet. The value is a string
+            containing the textual content of the source document.</li>-->
+        </ul>
+        
+    </category>
+    
+    <category name="functions31">
+        <p>The data types <code>xs:dateTime</code>, <code>xs:time</code>, and <code>xs:duration</code>
+        now handle values with a precision of nanoseconds (previously microsecond precision was supported).</p>
+    </category>
+    
+    <category name="s9api">
+        
+        <p>A new method <code>setResultDocumentHandler()</code> has been added to <code java="net.sf.saxon.s9api.XsltTransformer">XsltTransformer</code>
+            and <code java="net.sf.saxon.s9api.Xslt30Transformer">Xslt30Transformer</code>, to control the destination of the output of
+        <code>xsl:result-document</code> instructions. The argument is a function that is supplied with
+        a URI, and returns a <code>Destination</code> object. If the application needs to be notified when writing the <code>Destination</code> completes,
+        it can register a callback using <code>Destination.onClose()</code>.</p>
+        
+        <p>At the <code>Controller</code> level, a new interface <code
+            java="net.sf.saxon.lib.ResultDocumentResolver">ResultDocumentResolver</code> supersedes the old <code>OutputURIResolver</code>
+        (which is still supported for the time being). This change was necessary to support the full flexibility of result document handling in XSLT 3.0,
+        for example the ability to deliver raw output, to control sequence normalization, and the <code>item-separator</code> property.</p>
+        
+        <p>In previous releases an <a class="bodylink code" href="/xsl-elements/result-document">xsl:result-document</a> instruction with no <code>href</code> attribute, or with <code>href=""</code>,
+        was treated as writing to the destination supplied (at API level) for the principal stylesheet output. From 9.9 it is treated
+        in the same way as <code>&lt;xsl:result-document href="{$base-output-uri}"/></code> (where <code>$base-output-uri</code> is the
+            initial value of <code>current-output-uri()</code>): this is much closer to the intent of the W3C language specification.
+        The practical difference is that the destination for such a result document is now under the control of the <code>ResultDocumentResolver</code>
+        (or <code>OutputURIResolver</code>) and need not be the same as the principal output destination supplied when invoking the transformation.</p>
+        
+        <p>A new subclass of <code>Destination</code> has been defined, called <code
+            java="net.sf.saxon.s9api.RawDestination">RawDestination</code>: this
+        forces <code>buildTree=no</code> so it captures the raw output of a query or stylesheet (or of
+            <code>xsl:result-document</code>) as an <code>XdmValue</code>.</p>
+        
+        <p>The <code>Destination</code> interface has been extended with methods <code>onClose()</code> and <code>closeAndNotify()</code>;
+        user-written implementations of <code>Destination</code> will need to implement these methods. This can be done easily by inheriting
+        from the new <code>AbstractDestination</code> class, or if that is not possible, by delegating to <code>DestinationHelper</code>.</p>
+        
+        <p>Because destinations that do sequence normalization (including for example <code>XdmDestination</code>, <code>SAXDestination</code>,
+        and <code>DOMDestination</code>) use the value of the <code>item-separator</code> property, Saxon now makes the serialization parameters
+        available to the <code>Destination.getReceiver()</code> method in all cases, no longer treating the <code>Serializer</code>
+        destination as a special case.</p>
+        
+        <p>In previous releases, the value of <code>xsl:result-document/@href</code> would be interpreted relative to the current working directory
+        if no base output URI is available. This has been dropped as too dangerous (there is a tendency for result documents to be written where no-one
+        can find them). Instead, if <code>@href</code> is a relative URI and no base output URI is available, an error is reported. However, when running from
+        the command line, the value of the <code>-o</code> option is still interpreted as relative to the current working directory.</p>
+        
+        <p>When an <code>XdmDestination</code> is supplied for the result of a query, the raw results of the query
+            are now wrapped into a document node according to the rules of "sequence normalization" in the <a class="bodylink"
+                href="https://www.w3.org/TR/xslt-xquery-serialization-31/">Serialization specification</a>. 
+        Previously an error was reported if the result was not a single node.</p>
+        
+        <p>The <code java="net.sf.saxon.s9api.SchemaValidator">SchemaValidator</code> class now has an <code>asSource()</code> method. This allows 
+        a post-validation document to be supplied as input to any (s9api or JAXP) method expecting a <code>Source</code>
+        as input. For example, it can be used to supply schema-validated streamed input to a transformation,
+        or it can be used as the return value from a <code>URIResolver</code> to indicate that the result
+            of a particular call to <code>doc()</code> or <code>document()</code> should be schema-validated.</p>
+        
+        <p>The <code java="net.sf.saxon.s9api.Xslt30Transformer">Xslt30Transformer</code> class now has an <code>asDocumentDestination()</code> method allowing
+        the transformation to be used as a destination of other operations, for example a validation or
+        another transformation. (The <code>XsltTransformer</code> class implements the <code>Destination</code>
+        interface, providing a very convenient way of creating a pipeline of transformations. The ability
+        to construct a <code>Destination</code> from a <code>Xslt30Transformer</code> provides the same
+        capability for transformations that make full use of XSLT 3.0 capabilities.) Pipelines constructed
+        in this way can be either streamed or unstreamed.</p>
+        
+        <aside>Note that the <code>build-tree</code> attribute on <code>xsl:output</code> and <code>xsl:result-document</code>
+        no longer has any effect. Whether or not a tree is built (i.e. whether sequence normalization takes place) is
+        now determined entirely by the kind of Destination supplied when the transformation is invoked.</aside>
+        
+        <p>The method <code
+            java="net.sf.saxon.s9api.WhitespaceStrippingPolicy#makeCustomPolicy">WhitespaceStrippingPolicy.makeCustomPolicy()</code>
+            has changed to use the standard Java 8 <code>Predicate</code> class in place of the Saxon version.</p>
+        
+        <p>The classes <code java="net.sf.saxon.s9api.XPathCompiler">XPathCompiler</code>, <code
+            java="net.sf.saxon.s9api.XQueryCompiler">XQueryCompiler</code>, and <code
+                java="net.sf.saxon.s9api.XsltCompiler">XsltCompiler</code> now have
+        a method <code>setFastCompilation(true)</code> which causes the compiler to reduce the amount of time it spends
+        optimizing the code for run-time execution speed; it may also reduce the effort devoted to ensuring good error diagnostics.
+        This option is appropriate when compiling code that will only execute once, with a modest amount of input data,
+        and where the code is known to be functionally correct.</p>
+        
+        <p>A new convenience method <code>XdmNode.getProcessor()</code> is provided to allow the <code>Processor</code>
+            associated with a given <code java="net.sf.saxon.s9api.XdmNode">XdmNode</code> to be retrieved (for example,
+            for the purpose of obtaining a <code>Serializer</code> or <code>XPathCompiler</code>).</p>
+        
+        <h2>Navigating XML Documents Using s9api</h2>
+        
+        <p>Saxon 9.9 introduces a major extension of the s9api interface to take advantage of the Streams functionality
+        in Java 8. Whereas s9api has traditionally focused on mechanisms enabling Java applications to invoke XPath, XSLT,
+        XQuery, and XSD processing, the new extensions are designed to make it easier to manipulate the inputs and outputs
+        of these processors directly in the Java code. The starting point is that the results are generally delivered either 
+        in the form of <code>XdmValue</code> objects or as <code>Iterator&lt;XdmItem></code> objects.</p>
+        
+        <p>The interface <code java="net.sf.saxon.s9api.streams.Step">net.sf.saxon.s9api.streams.Step</code> represents a function
+            from an item to a stream of items. For example, <code>child()</code> (a static method defined in class <code
+                java="net.sf.saxon.s9api.streams.Steps">net.sf.saxon.s9api.streams.Steps</code>) is a <code>Step</code> that delivers the children
+            of a node. Given a node <code>N</code> and a step <code>S</code>, <code>N.select(S)</code> returns a stream of items; so
+            <code>N.select(child())</code> returns a stream containing the children of the node.</p>
+        
+        <p>Combining a step with a predicate gives a new step: for example <code>child.where(isElement())</code> is a step that selects
+            the element children of a node; so <code>N.select(child().where(isElement()))</code> returns the element children of <code>N</code>
+            as a stream. The static method <code>isElement()</code> used here returns a predicate defined in the utility class
+            <code java="net.sf.saxon.s9api.streams.Predicates">net.sf.saxon.s9api.streams.Predicates</code>,
+            but of course any <code>Predicate</code> can be used in its place.</p>
+        
+        <p>Commonly-used filters can be expressed in abbreviated form. For example the first title element in a book can be obtained by
+        writing <code>book.select(descendant("title").first())</code>.</p>
+        
+        <p>Steps can be composed using the <code>then()</code> method, so <code>N.select(child().then(child()))</code> selects all the grandchildren of a node.</p>
+        
+        <p>The resulting stream of nodes can be processed using standard Java 8 techniques, for example it can be collected into a list:
+            <code>N.select(child().then(atomize())).collect(Collectors.toList())</code> atomizes the values of the child nodes and returns the result
+            as a Java List whose members are <code>XdmAtomicValue</code> instances.</p>
+        
+        <p>The class <code>XdmValue</code> has a constructor accepting a <code>Stream</code>, so for example <code>new XdmValue(N.select(child()))</code>
+        delivers an <code>XdmValue</code> containing the children of a supplied node <code>N</code>.</p>
+        
+        <p>The Java expressions that can be assembled using these primitives are very close to XPath in their expressive power. Although Saxon will
+        not be able to optimize them in the same way as it can optimize XPath expressions (for example, a filter will always literally work by
+        testing each item in a sequence to see if it matches), there is a considerable performance benefit over XPath in that the Java compiler
+        does all the hard work of parsing; it will also detect many compile-time errors that would not be detected until execution time with XPath.</p>
+        
+        <p>In addition there are some new convenience methods such as <code>XdmNode.attribute("xxx")</code> which gets the value of an attribute given
+            only its local name, <code>XdmNode.children()</code> which gets all the children of a node, and <code>XdmNode.children("xxx")</code> which
+        gets all the child elements with local name <code>"xxx"</code>.</p>
+        
+    </category>
+    
+    <category name="spi">
+        
+        <p>The venerable and overgrown <code java="net.sf.saxon.Controller">Controller</code> class has been split into two: all
+            functionality that applies to XSLT only has been moved into a subclass, <code
+                java="net.sf.saxon.trans.XsltController">XsltController</code>. The <code>transform()</code>
+        method (which at one time implemented the JAXP <code>Transformer.transform()</code> interface) has
+        been dropped; instead the specific entry points such as <code>XsltController.applyTemplates()</code>
+        and <code>XsltController.callTemplate()</code> must be used. These methods in turn have been changed
+        so that they now deliver the raw result of the transformation (without the sequence normalization
+        process that wraps the result into a document node). Any wrapping that is required is now performed
+        in the s9api API layer (classes <code java="net.sf.saxon.s9api.XsltTransformer">XsltTransformer</code> and <code
+            java="net.sf.saxon.s9api.Xslt30Transformer">Xslt30Transformer</code>), and
+        is specific to the type of <code>Destination</code> supplied.</p>
+        
+        <p>The <code java="net.sf.saxon.Configuration">Configuration</code> class no longer has a <code>finalize()</code> method
+            (because this is deprecated in Java 9). The only action of the <code>finalize()</code> method was to ensure that any
+            log file was closed; an application that supplies a logger that needs closing is now responsible for ensuring
+        that it is closed after use, which can be achieved if convenient by calling <code>Configuration.close()</code>.</p>
+        
+        <p>A number of key interfaces such as <code java="net.sf.saxon.om.Sequence">Sequence</code>, 
+            <code  java="net.sf.saxon.om.SequenceIterator">SequenceIterator</code>, <code java="net.sf.saxon.event.Receiver">Receiver</code>, and
+            <code java="net.sf.saxon.om.NodeInfo">NodeInfo</code> now have default implementations of some of their methods,
+        making it easier to define new implementations of these interfaces. In some cases this has led to removal of the static
+        helper methods that previously were used to avoid code duplication.</p>
+        
+    </category>
+    
+    <category name="extensibility">
+        <p>An item representing an external Java object (for example, the result of calling <code>new()</code>
+        in a reflexive extension function call) may now be treated as a map. There is one entry in the map for each
+        public non-static method defined on the object (either directly, or inherited), provided that its name is
+        unique. If there are several methods with the same name but different arity, then they are available
+        under suffixed names such as "action_0" and "action_1". But if there are several methods with the same arity,
+        this group of methods is not included in the map. The key of the entry is the method name, while the
+        value is a function item that may be called using dynamic function call syntax to invoke the method.</p>
+        
+        <p>The conversion of the Java object to a map may be done explicitly or implicitly.</p>
+        <ul>
+            <li>It is done explicitly by calling the new extension function
+                <a class="bodylink code" href="/functions/saxon/object-map">saxon:object-map()</a> which takes an external object as
+                its argument, and returns the constructed map.</li>
+            <li>It is done implicitly when an external object is used as the left-hand operand of the lookup operator "?".</li>
+        </ul>
+
+        <p>For example, the extension function <code>sql:connect</code> returns an external Java object of
+        class <code>java.sql.Connection</code>. If <code>$connection</code> holds the result of this function,
+        then <code>$connection?isClosed()</code> calls the <code>isClosed</code> method on the underlying object. The
+        <code>rollback</code> method of this class has two variants; the arity-0 version may be invoked as
+        <code>$connection?rollback_0()</code>.</p>
+        
+        <p>The conversion of XDM atomic values to Java values (when passing parameters to extension
+        functions) now handles conversion of the XSD date/time types (<code>xs:dateTime</code>, etc)
+        to the new Java 8 types <code>java.time.ZonedDateTime</code> and <code>java.time.Instant</code>.</p>
+
+    </category>
+    
+    <category name="optimization">
+        
+        <p>Arrays have been re-implemented to use a "persistent" immutable data structure (based on
+        the PCollections Java library). This means that operations such as <code>array:put()</code> no
+        longer make a copy of the entire array.</p>
+        
+        <p>As an example of the performance savings, using <code>array:put()</code> to modify every item of an array takes the
+            following times in microseconds:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>No of members</th>
+                        <th>Saxon 9.8 (microsecs)</th>
+                        <th>Saxon 9.9 (microsecs)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>100</td>
+                        <td>10</td>
+                        <td>24</td>
+                    </tr>
+                    <tr>
+                        <td>1000</td>
+                        <td>1149</td>
+                        <td>475</td>
+                    </tr>
+                    <tr>
+                        <td>10000</td>
+                        <td>113531</td>
+                        <td>6680</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+ 
+        
+        
+       
+        
+        <p>Type checking has been improved: the main impact is to give better diagnostics, but there will also
+        be cases where performance is improved. The main changes are:</p>
+        
+        <ul>
+            <li>Static type checking of returned item types is now distributed to all operands of an expression that
+            contribute directly to the returned result (operands with usage Transmission in terms of the XSLT 3.0
+            streamability analysis). For example, if a template is required to return a sequence of integers, then
+            every instruction in the template that contributes directly to the result is checked to ensure that it
+            returns integers. This means that more errors are detected statically, and less time is spent at run-time checking
+            the results of subexpressions that are statically known to be correct. It also enables more precise diagnostics as to
+            which instruction or subexpression generated invalid results; this is particularly useful when functions have been
+            inlined.</li>
+            
+            <li>Diagnostics for type errors now give more precise information, particularly for functions, maps, and arrays.
+            When a supplied value V does not match the required type R, then instead of reporting that V is of type S, the message
+            reports why V does not match the required type R. For example if R is <code>map(xs:string, item()*)</code> and
+            V contains an entry whose key is of type <code>xs:untypedAtomic</code>, the error message in in 9.8 would
+            report that V was of type <code>map(xs:anyAtomicType, item()*)</code>, whereas 9.9 will give a message in the form
+                <em>"The map contains an entry with key ("abc") of type xs:untypedAtomic that is not an instance of the
+                    required type xs:string"</em>.</li>
+            
+        </ul>
+        
+        <p>The lookup operator "?" has been re-implemented as a native expression (previously it was compiled into a complex
+        expression involving loops and conditionals). As a result it should now be faster, but more particularly, it now
+        benefits from improved type checking, and any run-time type errors are now much clearer because they relate to the
+        expression as written, and not to some internally-generated code.</p>
+        
+        <p>The <code>map:merge()</code> function has been re-implemented to avoid quadratic performance when a large number of maps
+        containing duplicate keys are combined using the <code>duplicates:combine</code> option. </p>
+        
+        <p>In Saxon-EE, regular expressions used in functions such as <code>matches()</code>, <code>replace()</code>,
+        <code>tokenize()</code>, and <code>analyze-string()</code> are now cached so that when the same regular expression is used
+        repeatedly, the compiled form of the regex is reused. (This is only relevant where the regular expression is not known statically:
+        regular expressions that are known at query/stylesheet compile time are always compiled at compile time.) The cache is
+        held at the level of a <code>Configuration</code>. The optimization can be suppressed using <code>opt:-e</code>.</p>
+        
+        <p>Saxon by default checks axis steps at compile time to ensure they are capable of returning a non-empty result.
+        "Void" steps such as <code>comment()/*</code> result in a compile-time warning. This check appears to be quite
+        expensive in some use cases, so an optimization flag (<code>opt:-d</code>) has been introduced to suppress it.</p>
+        
+        <p>A new optimization has been introduced to reduce the cost of executing simple path expressions like
+        <code>books/book/price</code>. Specifically, if the right-hand operand of "/" is a simple axis step, Saxon
+        now evaluates it without creating a new dynamic context object, and without tracking the context item and position,
+        because they are never needed in this situation. This appears to give a speed-up of around 10% for such
+        path expressions.</p>
+        
+        <h2>Changes to the TinyTree data structure</h2>
+        
+        <p>Two significant changes have been implemented for the TinyTree:</p>
+        
+        <ul>
+        <li><p>Where an element has a single text node child (and no attributes or namespace declarations), the
+            element and text nodes are now combined in a single entry in the main node array (called a TextualElement).
+            For documents that have many such simple-content elements, this can reduce the space overhead (over and above
+            the space used by character content) by up to 50%. (Note: further reductions can be achieved if whitespace
+            is stripped.) As a side-effect, searching for elements using the child or descendant axes is fractionally faster
+            because there is no need to skip the entries containing text nodes.</p></li>
+            
+        <li><p>It is now possible for a TinyTree to contain element nodes created as virtual copies of nodes in another external tree
+        (typically but not necessarily another TinyTree). These are referred to as "grafted" nodes. They arise when a tree is constructed
+        by copying parts of another tree. For example, given:</p>
+        
+            <samp><![CDATA[<xsl:variable name="sorted">
+   <temp>
+     <xsl:copy-of select="sort(//employee, function($e){number($e!salary)})"/>
+   </temp>
+</xsl:variable>]]></samp>
+            
+        <p>a new tree will be constructed that consists largely of grafted nodes containing references to the <code>employee</code>
+        elements in the original unsorted input tree. This saves the cost in time and space of copying the employee subtrees from
+        the old tree to the new. Saxon ensures that the nodes behave like copies even though they are not physically copied: for example,
+        <code>generate-id()</code> will return a different value from the original, and navigating down into the subtree and then back up
+        again will find the correct parent node.</p>    
+        </li>
+            
+        </ul>    
+        
+    </category>
+
+    <category name="installation">
+        
+        <p>For efficiency, Configuration options can now be written and read using a new set of constants: for example <code
+            java="net.sf.saxon.lib.Feature#ALLOW_EXTERNAL_FUNCTIONS">Feature.ALLOW_EXTERNAL_FUNCTIONS</code> in place of
+            <code>FeatureKeys.ALLOW_EXTERNAL_FUNCTIONS</code>. This avoids the expensive lookup using long string values. The old
+            mechanism remains available but is deprecated.</p>
+        
+        <p>If the configuration option <code
+            java="net.sf.saxon.lib.Feature#ALLOW_EXTERNAL_FUNCTIONS">Feature.ALLOW_EXTERNAL_FUNCTIONS</code> is set to false,
+        environment variables are no longer visible to the functions <code>fn:available-environment-variables</code>
+        and <code>fn:environment-variable</code> (the behaviour is as if the environment variable did not exist).
+        This brings these functions into line with the <code>fn:system-property</code> function.</p>
+        
+
+        
+    </category>
+
+    <category name="serialization">
+        
+        <p>The serialization property <code>saxon:attribute-order</code> has been extended so that it may now include
+        the token "*" to match unspecified attributes; this allows selected attributes to be forced to the end of the list.
+        For example <code>saxon:attribute-order="a b c * xml:space"</code> will cause attributes to be output in the order
+        <code>a</code>, then <code>b</code>, then <code>c</code>, then everything else (sorted by URI and local name), 
+            then <code>xml:space</code>. Further details at <a class="bodylink"
+                href="/extensions/output-extras/serialization-parameters">Serialization parameters</a>.</p>
+        
+        <p>The algorithm for indenting XML has been improved so that existing whitespace appearing
+        in a position where indenting takes place (before a start tag or after an end tag) is replaced
+        by the new whitespace, rather than being retained.</p>
+        
+        <p>The serialization property <code>suppress-indentation</code> is now implemented for the
+        HTML and XHTML output methods.</p>
+        
+        <p>A new serialization property <code>saxon:property-order</code> controls the order of properties
+            within a serialized map when using the JSON output method. It follows the same principles as
+        <code>saxon:attribute-order</code>. In this case the value is a space-separated list of tokens, with "*"
+            treated specially. Further details at <a class="bodylink"
+                href="/extensions/output-extras/serialization-parameters">Serialization parameters</a>.</p>
+        
+        <p>With indented JSON output, the output is now more compact:</p>
+            <ol>
+                <li>The <code>saxon:indent-spaces</code> property now controls the amount of indentation (default is two spaces).</li>
+                <li>The serializer avoids outputting a new line before or after a map or array containing less than two entries.</li>
+                <li>The serializer output arrays and objects on a single line if none of the entries
+                    is an array or map, and the total size of the entries is less than L, where L is the value of <code>saxon:line-length</code>
+                    if present, or 80 if not specified.</li>
+            </ol>
+
+        <p>In JSON serialized output, integers (specifically, <code>xs:integer</code> values, and any other numeric values that are equal to a whole number
+            and have absolute value less than 10^18) are now output as integers; exponential notation is no longer used in such cases.</p>
+
+        <p>A new serialization property <code>saxon:canonical</code> is available (values <code>yes</code> or <code>no</code>). Used
+        with the output method XML, the value <code>yes</code> requests output conforming to the W3C XML Canonicalization 1.1
+        specification (C14N). This can be useful when comparing test results, or when documents need to be digitally signed.</p>
+        
+        <p>The restrictions on the use of <code>disable-output-escaping</code> in conjunction with <code>xsl:try</code> and
+        <code>xsl:fork</code> have been lifted. These instructions need to buffer their output, rather than writing it straight
+        to the serializer; the buffer is now held in the form of a list of push events, which allows the <code>disable-output-escaping</code>
+        property to be retained along with the event.</p>
+        
+
+        
+    </category>
+    
+    <category name="extensions">
+        <h2>Extension Functions</h2>
+        
+        <p>For the extension functions <a class="bodylink code" href="/functions/saxon/highest">saxon:highest</a> and <a class="bodylink code"
+            href="/functions/saxon/lowest">saxon:lowest</a>,
+            the function that computes the key may now return an empty sequence, in which case the relevant item from the input is excluded
+            from consideration (it will not feature in the result). The implementation has been made more robust in edge cases, for example
+            where the key returns a value of an unordered type, or where the set of keys are not mutually comparable, or where they include NaN values.</p>
+        
+        <p>A new function <a class="bodylink code" href="/functions/saxon/map-search">saxon:map-search</a> is introduced. It is
+            similar to <code>map:find</code>, in that it searches recursively through nested maps and arrays, but is more
+            versatile. It differs from <code>map:find</code> in two main respects:</p>
+        
+        <ol>
+            <li>Whereas <code>map:find</code> only takes as input the key value to look for, <code>saxon:map-search</code> also
+                takes a function that can be used to test the associated value.
+            </li>
+            <li>Whereas <code>map:find</code> returns the value associated with the specified key, <code>saxon:map-search</code>
+                returns much more information about where the match was found.</li>
+        </ol>
+        
+        <p>The new function <a class="bodylink code" href="/functions/saxon/with-pedigree">saxon:with-pedigree()</a> takes a map or array as input (typically, the result of parsing JSON),
+            and returns an equivalent map or array whose implementation has special behavior: any downward selections
+            of nested maps/arrays using subscripting or key lookup return a map/array that has "pedigree" information;
+            the pedigree information tells you how the map/array was selected within its containing tree, and enables
+            you to retrace your steps. If a map or array has pedigree information, the <a  class="bodylink code" href="/functions/saxon/pedigree">saxon:pedigree()</a> function returns
+            a map, with an entry "container" identifying the containing map or array, and an entry "key" or "index"
+            identifying the key value in the containing map, or the index value in the containing array.</p>
+        
+        <p>The new (higher-order) extension function <a class="bodylink code"
+            href="/functions/saxon/group-starting">saxon:group-starting</a> splits a sequence into groups, based on a starting
+            condition for each group. For example, the function call <code>saxon:group-starting(following-sibling::*, fn{boolean(self::h1)})[1]?*</code> 
+            selects the following-sibling elements of the context item up to (and excluding) the first <code>h1</code>
+            element.</p>
+        
+        <p>The new extension function <a class="bodylink code" href="/functions/saxon/object-map">saxon:object-map</a>
+            converts a Java object to an XDM map. For more information, see the "Extensibility mechanisms" changes
+            category.</p>
+        
+        <h2>Extension Attributes</h2>
+        
+        <p>An extension attribute <a class="bodylink code" href="/extensions/attributes/options">saxon:options</a> has
+            been added to <a class="bodylink code" href="/xsl-elements/evaluate">xsl:evaluate</a>: the value is an expression,
+            which must evaluate to a map. The map allows additional Saxon-specific options for
+            expression evaluation to be defined. Initially two options are defined:</p>
+        
+        <ul>
+            <li>
+                <p><b>allow-any-namespace</b></p>
+                <p>If this option is set to the value <code>true()</code>, the XPath expression may reference schema components that
+                    are present in the Saxon <code>Configuration</code> whether or not they have been imported into the stylesheet
+                    using <code>xsl:import-schema</code>.</p>
+            </li>
+            <li>
+                <p><b>default-collation</b></p>
+                <p>The value of this option is a collation URI. This allows the default collation for evaluating the target
+                    expression to be selected dynamically (standard XSLT 3.0 facilities only allow it to be selected statically).</p>
+            </li>
+            
+        </ul>
+        
+        
+        <p>An <a class="bodylink code" href="/xsl-elements/accumulator-rule">accumulator rule</a> for a 
+            streamable accumulator that specifies <code>phase="end"</code> may now also specify
+            <a class="bodylink code" href="/extensions/attributes/capture">saxon:capture="yes"</a>. This relaxes the rule
+            that the accumulator evaluation must be motionless; instead it can now be consuming. When the "end-element" event for
+            the accumulator rule is reached, the rule now has access to a snapshot of the entire element content (made using the
+            <code>fn:snapshot</code> function). To avoid the snapshots become over-large, this is best used on elements that have
+            minimal content; in such cases it can make programming an accumulator significantly easier.</p>
+        
+        
+        <p>Elements that have an <code>as</code> attribute to define a required type (for example, <code>xsl:variable</code>,
+            <code>xsl:param</code>, and <code>xsl:function</code>) now additionally recognize a <a
+                class="bodylink code" href="/extensions/attributes/as">saxon:as</a> attribute
+            that can be used to provide additional type information using Saxon extension syntax. For example, if the <code>as</code>
+            attribute specifies <code>as="map(xs:string, xs:double)"</code> for a map used to represent a complex number, then
+            the additional attribute <code>saxon:as="tuple(i: xs:double, r: xs:double)"</code> may be used to indicate the required
+            keys that must be present in the map. Similarly, if a function returns either a date or dateTime and indicates this
+            using <code>as="xs:anyAtomicType"</code>, the return type may be more precisely described using the syntax
+            <code>saxon:as="union(xs:date, xs:dateTime)"</code>. This allows Saxon extended types to
+            be used without sacrificing stylesheet portability.</p>
+        
+        <h2>Extension Instructions</h2>
+        
+        <p>A new XSLT extension instruction <a class="bodylink code" href="/extensions/instructions/do">saxon:do</a> is provided:
+            it is designed for use when invoking 
+            XPath expressions that have side-effects. For example, <code><![CDATA[<saxon:do action="$connection?close()"/>]]></code>
+            calls the function <code>$connection?close()</code>, while <code><![CDATA[<saxon:do action="saxon:discard-document($doc)"/>]]></code> 
+            calls <code>saxon:discard-document()</code>. Any result of the expression is discarded. The instruction is useful
+            in preference to <code>xsl:sequence</code> firstly because the result of the expression is discarded, and secondly
+            because it is recognized by the optimizer as signaling an expression that is being evaluated for its side-effects.
+            The optimizer will attempt to avoid aggressive optimizations such as lifting the instruction
+            out of an <code>xsl:for-each</code> loop. Note however that this does not propagate; just
+            because a function <code>F</code> calls <code>saxon:do</code>, for example, does not prevent calls on <code>F</code> being moved
+            out of a loop.</p>
+        
+        <p>The extension XSLT instruction <a class="bodylink code"
+            href="/extensions/instructions/tabulate-maps">saxon:tabulate-maps</a> takes selected maps in a 
+            structure containing maps and arrays, such as might be derived
+            by parsing JSON input, and returns these maps, expanded with information taken from containing
+            maps and arrays.</p>
+        
+        <p>The <a class="bodylink code" href="/extensions/instructions/deep-update">saxon:deep-update</a> instruction
+            creates a new map or array that is the same as an existing
+            map or array except for modified content that may be several layers deep within nested
+            maps and arrays. Typically (but not necessarily) the map or array to which it is applied will have been constructed
+            by parsing JSON content using the <a class="bodylink code" href="/functions/fn/parse-json">parse-json()</a> function.</p>
+        
+        <p>As a result of the continuing popularity of the DocBook 1.0 stylesheets, which rely on the <code>saxon:output</code>
+            extension element present in Saxon 6.5.5 and earlier releases, the extension instruction
+            <a class="bodylink code" href="/extensions/instructions/output">saxon6:output</a>
+            (in namespace <code>xmlns:saxon6="http://icl.com/saxon"</code>) has been reinstated. It is a synonym for 
+            <code>xsl:result-document</code>. This enables the DocBook 1.0 stylesheets to run without error using
+            Saxon-PE/EE 9.9.</p>
+        
+        <p><b>XSLT Update Extension</b> (<em>Requires Saxon-EE</em>). New extension instructions
+            have been introduced to provide an XSLT equivalent of the XQuery Update
+            capability. For example, you can delete selected attributes using the construct:</p>
+        
+        <samp><![CDATA[<saxon:update select="//chapter[1]">
+    <saxon:delete select=".//para[@deleted='yes']"/>
+</saxon:update>]]></samp>
+        
+        <p>The outermost instruction is <a class="bodylink code"
+            href="/extensions/instructions/update">saxon:update</a>. This has a <code>select</code> attribute to
+            select the nodes whose subtrees will be updated. The default is <code>select="."</code>. The result of the
+            instruction is a sequence of nodes that are modified copies of the selected nodes (unless any of these nodes
+            are deleted, in which case they are omitted from the result). The original tree remains unchanged.</p>
+        
+        <p>Within the <code>saxon:update</code> instruction, the following subsidiary instructions may be evaluated: 
+            <code>saxon:change</code>, <code>saxon:delete</code>, <code>saxon:insert</code>, <code>saxon:rename</code>, <code>saxon:replace</code>.</p>
+        
+        <p>The update extension for XSLT does not provide any equivalent to XQuery updating functions; all update instructions must be contained lexically
+            within the <code>saxon:update</code> instruction.</p>
+        
+        
+        <h2>XPath Syntax Extensions</h2>
+        
+        <p>Saxon 9.9 implements a number of extensions to the XPath 3.1 grammar, for more information see <a class="bodylink"
+            href="/extensions/syntax-extensions">Syntax Extensions</a>. These are enabled only if the configuration option
+            <code java="net.sf.saxon.lib.Feature#ALLOW_SYNTAX_EXTENSIONS">Feature.ALLOW_XPATH_SYNTAX_EXTENSIONS</code>
+            is set, and they require Saxon-PE or higher.</p>
+        
+        <p>Some of these syntax extensions were issued experimentally in Saxon 9.8, and the detailed rules have been refined in the light of 
+        experience.</p>
+        
+        <p>The tuple type syntax, for example <code>tuple(i: xs:double, r: xs:double)</code>, now allows a "?" after the field name to
+        indicate that the field may be absent from the map, and allows a final ", *" to indicate that extra undeclared entries are permitted
+        in the map.</p>
+        
+        <p><b>andAlso</b> and <b>orElse</b> operators. These operators (often called short-circuit operators) 
+            have the same effect as <code>and</code> and <code>or</code>,
+            but they are guaranteed to evaluate the left-hand operand before the right-hand operand, and to avoid evaluating the
+            right-hand operand when it is not needed. For example <code>if ($x castable as xs:date andAlso xs:date($x) > current-date())...</code>
+            ensures that no failure occurs when <code>$x</code> is not a valid date. (The XPath specification offers no such guarantee
+            for the <code>and</code> and <code>or</code> operators. Saxon will occasionally rearrange the order of evaluation, as permitted
+            by the specification, if it thinks this will improve performance.)</p>
+        
+        
+        <h2>XSLT syntax extensions</h2>
+        
+        <p>The syntax of match patterns is extended to make it easier to match maps and arrays (see
+            <a class="bodylink" href="/extensions/xslt-syntax-extensions">XSLT Syntax Extensions</a>).</p>
+        
+        <p>In particular the syntax <code>ma-type predicate*</code> is allowed, where <code>ma-type</code>
+            is any of:</p>
+        
+        <ol>
+            <li>~type-alias</li>
+            <li>tuple(...)</li>
+            <li>map(...)</li>
+            <li>array(...)</li>
+        </ol>
+       
+        <p>For example if a type alias has been declared:</p>
+        
+        <samp>&lt;saxon:type-alias name="cx:complex" type="tuple(r: xs:double, i: xs:double)"/></samp>
+        
+        <p>Then it can be used in a match pattern to match instances of the type, with or without predicates:</p>
+        
+        <samp>&lt;xsl:template match="~cx:complex[?i=0]">{?r}&lt;/xsl:template></samp>
+        
+        <samp>&lt;xsl:template match="~cx:complex">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></samp>
+        
+        <p>The construct <code>~T</code> at the start of a pattern can be regarded as an abbreviation for
+        <code>.[. instance of ~T]</code>.</p>
+        
+
+    
+    </category>
+    
+    <category name="sql">
+        <p>A number of SQL extension functions are now available, designed to supersede the existing SQL extension
+            instructions. See the <a class="bodylink" href="/sql-extension">Saxon SQL Extension</a> section and <a
+                class="bodylink" href="/functions/sql">Function Library</a> for details.</p>
+    </category>
+    
+    <category name="sourcedocs">
+        
+        <p>A number of interfaces now recognize the "data" URI scheme, defined in RFC 2397. This allows the actual content of a resource to
+        be contained directly in the URI, using either %HH or base64 encoding.</p>
+        
+        <p>Specifically, "data" URIs are recognized:</p>
+        
+        <ul>
+            <li>By the StandardURIResolver, allowing them to be used by the <code>doc()</code> and <code>document()</code> functions (as well as
+            other less useful places, like <code>xsl:include</code> and <code>xsl:import</code>)</li>
+            <li>By the <code>StandardUnparsedTextResolver</code>, allowing use in <code>unparsed-text()</code> and <code>unparsed-text-lines()</code></li>
+            <li>In a collection catalog, allowing use in the <code>collection()</code> function.</li>
+        </ul>
+        
+        <p>Applications using user-written URI resolvers or collection finders can take advantage of the same features by reference to the class
+        <code>DataURIScheme</code>, which converts a Base64 "data" URI into a <code>BinaryResource</code>, and any other "data" URI into an
+        <code>UnparsedTextResource</code>.</p>
+    </category>
+    
+    <category name="xsd11">
+        
+        <p>The XSD 1.1 specification mandates support for XPath 2.0 in XPath expressions such as assertions.
+            Saxon enforces conformance to XPath 2.0 by default, but also allows support for later versions
+            to be configured. This can be achieved by setting the configuration option <code
+                java="net.sf.saxon.lib.Feature#XPATH_VERSION_FOR_XSD">Feature.XPATH_VERSION_FOR_XSD</code>,
+            for example setting the option to the integer value 31 enables support for XPath 3.1. (It is also possible,
+        as in previous releases, to set the attribute <code>saxon:extensions="any-xpath-version"</code> on the
+        <code>xs:schema</code> element.)</p>
+        
+        
+    </category>
+    
+    <category name="xquery-update">
+        
+        <p>It is now possible to use the copy-modify expression without explicitly configuring Saxon to use a mutable tree model such as
+        the linked tree. The linked tree will automatically be used for the temporary tree constructed by the copy-modify
+        expression.</p>
+        
+        <p>The <a class="bodylink code" href="/functions/fn/put">fn:put()</a> function now takes account of serialization parameters set within the query body using declarations such
+        as <code>declare option output:indent "yes".</code> (It does not, however, take account of serialization parameters set on the command
+        line.)</p>
+    </category>
+    
+    <category name="xquery31">
+        
+        <p>The pull-mode implementation of window clauses in FLWOR expressions has been rewritten, reducing memory requirements
+        when performing windowing over a long sequence of items.</p>
+        
+        <p>In previous releases, Saxon passed all the W3C XQuery 3.1 test cases, but there were a few discrepancies on error tests where the
+            wrong error code was generated. In 9.9, for the first time, the generated error codes in all cases match the test expectations.</p>
+    </category>
+
+
+
+</release>
