@@ -8,6 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
@@ -94,7 +95,11 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
         int card = arguments[0].getCardinality();
         if (!Cardinality.allowsMany(card)) {
             if (Cardinality.allowsZero(card) || arguments[0].getItemType().getPrimitiveItemType() != BuiltInAtomicType.STRING) {
-                return SystemFunction.makeCall("string", getRetainedStaticContext(), arguments[0]);
+                if (returnEmptyIfEmpty) {
+                    return new CastExpression(arguments[0], BuiltInAtomicType.STRING, true);
+                } else {
+                    return SystemFunction.makeCall("string", getRetainedStaticContext(), arguments[0]);
+                }
             } else {
                 return arguments[0];
             }
