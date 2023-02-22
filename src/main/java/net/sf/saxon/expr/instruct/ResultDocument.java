@@ -692,6 +692,9 @@ public class ResultDocument extends Instruction
             }
         }
 
+        // For choosing the default output method, avoid using the backwards-compatibility rules
+        computedLocalProps.setProperty(SaxonOutputKeys.STYLESHEET_VERSION, "30");
+
         return computedLocalProps;
     }
 
