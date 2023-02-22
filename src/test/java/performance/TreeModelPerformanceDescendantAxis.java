@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TreeModelPerformanceDescendantAxis extends PerformanceTestCase {
 
     private static final String INPUT = ConfigTest.XMARK_DIR + "xmark10.xml";
-    //private static final String INPUT = "/Users/mike/Desktop/temp/testdata.xml";
 
 
 

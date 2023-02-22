@@ -2,7 +2,6 @@ package nativetests;
 
 import com.saxonica.config.JavaLocalizerFactory;
 import com.saxonica.config.ProfessionalConfiguration;
-import com.saxonica.config.ProfessionalTransformerFactory;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.number.Numberer_en;
 import net.sf.saxon.lib.LocalizerFactory;
@@ -10,16 +9,6 @@ import net.sf.saxon.lib.Numberer;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XPathCompiler;
-import net.sf.saxon.trans.XPathException;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamSource;
-import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -58,36 +47,7 @@ public class ConfigurationTest {
         }
     }
 
-    @Test
-    @Tag("mikeonly")
-    // This test can't succeed for anyone except Mike :-)
-    public void testBug4650() {
-        try {
-            Configuration configuration = Configuration.readConfiguration(new StreamSource(new File("/Users/mike/bugs/2020/4650-Nadolu/SaxonTest-2/resources/saxonPEConfig.xml")));
-            ProfessionalTransformerFactory factory = new ProfessionalTransformerFactory((ProfessionalConfiguration) configuration);
-            factory.setErrorListener(new ErrorListener() {
-                @Override
-                public void warning(TransformerException exception) throws TransformerException {
-                    exception.printStackTrace(System.out);
-                }
 
-                @Override
-                public void fatalError(TransformerException exception) throws TransformerException {
-                    exception.printStackTrace(System.out);
-                }
-
-                @Override
-                public void error(TransformerException exception) throws TransformerException {
-                    exception.printStackTrace(System.out);
-                }
-            });
-            factory.newTransformer(new StreamSource(new File("resources/test-xsl-validation.xsl")));
-        } catch (TransformerConfigurationException e) {
-            e.printStackTrace(System.out);
-        } catch (XPathException e) {
-            e.printStackTrace(System.out);
-        }
-    }
 }
 
 
