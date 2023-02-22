@@ -1216,6 +1216,7 @@ public class Transform {
             XsltExecutable sheet, CommandLineOptions options) throws SaxonApiException {
         Configuration config = getConfiguration();
         final Xslt30Transformer transformer = sheet.load30();
+
         transformer.setTraceFunctionDestination(traceDestination);
         String initialMode = options.getOptionValue("im");
         if (initialMode != null) {
@@ -1238,8 +1239,6 @@ public class Transform {
         } else if ("off".equals(options.getOptionValue("ea"))) {
             transformer.getUnderlyingController().setAssertionsEnabled(true);
         }
-
-        transformer.getUnderlyingController().freezeParseOptions();
 
         return transformer;
     }
@@ -1353,9 +1352,8 @@ public class Transform {
                 traceDestination = null;
             }
 
-
-
             Xslt30Transformer transformer = newTransformer(sheet, options);
+
             Serializer serializer;
             if (outputFile == null) {
                 transformer.setBaseOutputURI(getCurrentWorkingDirectory().toASCIIString());

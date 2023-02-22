@@ -364,7 +364,7 @@ public class Controller implements ContextOriginator {
      */
 
     public SequenceCollector allocateSequenceOutputter() {
-        PipelineConfiguration pipe = makePipelineConfiguration();
+        PipelineConfiguration pipe = makePipelineConfiguration(true);
         return new SequenceCollector(pipe, 20);
     }
 
@@ -376,7 +376,7 @@ public class Controller implements ContextOriginator {
      */
 
     public SequenceCollector allocateSequenceOutputter(int size) {
-        PipelineConfiguration pipe = makePipelineConfiguration();
+        PipelineConfiguration pipe = makePipelineConfiguration(true);
         return new SequenceCollector(pipe, size);
     }
 
@@ -393,46 +393,40 @@ public class Controller implements ContextOriginator {
      * Controller as well as other configuration information.
      */
 
-    private ParseOptions parseOptions;
+    private ParseOptions cachedParseOptions;
 
-    private boolean freezeParseOptions;
-
-    public void freezeParseOptions()
-    {
-        this.freezeParseOptions = true;
+    public PipelineConfiguration makePipelineConfiguration() {
+        return makePipelineConfiguration(false);
     }
 
     /*@NotNull*/
-    public PipelineConfiguration makePipelineConfiguration() {
+    public PipelineConfiguration makePipelineConfiguration(boolean reuseParseOptions) {
 
-        //ExitCounter.countTrace(4);
+        ParseOptions parseOptions;
 
-        PipelineConfiguration pipe = new PipelineConfiguration(getConfiguration());
-        pipe.setController(this);
-
-        if (freezeParseOptions)
+        if (reuseParseOptions)
         {
-            if (parseOptions == null)
+            if (cachedParseOptions == null)
             {
-                parseOptions = new ParseOptions(getConfiguration().getParseOptions());
-                parseOptions.setSchemaValidationMode(validationMode);
-                parseOptions.setErrorReporter(errorReporter);
-                parseOptions.freeze();
-            }
-            else
-            {
-                ExitCounter.count("avoided new ParseOptions");
+                cachedParseOptions = new ParseOptions(getConfiguration().getParseOptions());
+                cachedParseOptions.setSchemaValidationMode(validationMode);
+                cachedParseOptions.setErrorReporter(errorReporter);
+                cachedParseOptions.freeze();
             }
 
-            pipe.setParseOptions(parseOptions);
+            parseOptions = cachedParseOptions;
+
         }
         else
         {
-            ParseOptions options = new ParseOptions(getConfiguration().getParseOptions());
-            options.setSchemaValidationMode(validationMode);
-            options.setErrorReporter(errorReporter);
-            pipe.setParseOptions(options);
+            parseOptions = new ParseOptions(getConfiguration().getParseOptions());
+            parseOptions.setSchemaValidationMode(validationMode);
+            parseOptions.setErrorReporter(errorReporter);
         }
+
+        PipelineConfiguration pipe = new PipelineConfiguration(getConfiguration(), parseOptions);
+
+        pipe.setController(this);
 
         return pipe;
         //pipe.setURIResolver(userURIResolver == null ? standardURIResolver : userURIResolver);
