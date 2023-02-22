@@ -21,78 +21,37 @@
     }
 
     const char* XdmFunctionItem::getName(){
-          /*if(fname.empty()) {
-             jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
-             		static jmethodID xmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getFunctionName",
-             					"(Lnet/sf/saxon/s9api/XdmFunctionItem;)Ljava/lang/String;");
-             		if (!xmID) {
-             			std::cerr << "Error: SaxonC." << "getFunctionName"
-             				<< " not found\n" << std::endl;
-             			return nullptr;
-             		} else {
-             			jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID, value));
-             			if(result) {
-                        			const char * stri = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
-
-                        		    SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                        			fname = std::string(stri);
-                        			return stri;
-                        }
-                        return nullptr;
-             		}
-
+          if(fname.empty()) {
+              allocFn fn = operator new;
+              fname = j_getFunctionName(SaxonProcessor::sxn_environ->thread,(void *)fn, (void *)value);
+              return fname;
           } else {
-            return fname.c_str();
-          }*/
-
-          return nullptr;
+            return fname;
+          }
 
     }
 
     int XdmFunctionItem::getArity(){
-         /* if(arity == -1) {
-             jclass xdmFunctionClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
-             		static jmethodID bfmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmFunctionClass,
-             					"getArity",
-             					"()I");
-             		if (!bfmID) {
-             			std::cerr << "Error: SaxonC." << "getArity"
-             				<< " not found\n" << std::endl;
-             			return 0;
-             		} else {
-             			jint result = (jint)(SaxonProcessor::sxn_environ->env->CallIntMethod(value, bfmID));
-             			return (int)result;
-             		}
-
+          if(arity == -1) {
+              if(value <= 0) {
+                  return -1;
+              }
+              arity = j_xdmFunctionItem_getArity(SaxonProcessor::sxn_environ->thread, (void *)value);
+              return arity;
           } else {
             return arity;
-          }*/
-
-          return 0;
-
+          }
     }
 
     XdmFunctionItem * XdmFunctionItem::getSystemFunction(SaxonProcessor * processor, const char * name, int arity){
-        /*if(processor == nullptr || name == nullptr) {
+        if(processor == nullptr || name == nullptr) {
             std::cerr << "Error in getSystemFunction. Please make sure processor and name are not nullptr." << std::endl;
              return nullptr;
         }
 
-        static jmethodID xsfmID = nullptr;
-         jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
-        if(xsfmID == nullptr) {
-
-
-             xsfmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getSystemFunction",
-             "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;I)Lnet/sf/saxon/s9api/XdmFunctionItem;");
-        }
-        if (!xsfmID) {
-                       std::cerr << "Error: SaxonC." << "getSystemFunction" << " not found\n" << std::endl;
-                         			return nullptr;
-        } else {
-                jobject result = (jobject)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xsfmID, processor->proc, SaxonProcessor::sxn_environ->env->NewStringUTF(name), arity));
+        int64_t result = j_getSystemFunction(SaxonProcessor::sxn_environ->thread, (void *)processor->procRef, name, arity);
                 if(result) {
-                       auto functionItem = new XdmFunctionItem(result);
+                       xdmFunctionItem * functionItem = new XdmFunctionItem(result);
                        return functionItem;
 
                 } else {
@@ -100,7 +59,7 @@
 
                 }
 
-        }*/
+        }
 
         return nullptr;
 
@@ -109,70 +68,74 @@
     }
 
     XdmValue * XdmFunctionItem::call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length) {
-          /*if(argument_length == 0 || arguments == nullptr || processor == nullptr) {
+          if(argument_length == 0 || arguments == nullptr || processor == nullptr) {
                       std::cerr << "Error in XdmFunctionItem.call.  nullptr arguments found." << std::endl;
                       return nullptr;
           }
-          static jmethodID xffmID = nullptr;
 
-          jclass xdmFunctionClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
-          if(xffmID == nullptr) {
-                xffmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmFunctionClass,"call",
-                       "(Lnet/sf/saxon/s9api/Processor;[Lnet/sf/saxon/s9api/XdmValue;)Lnet/sf/saxon/s9api/XdmValue;");
+          int64_t argumentJArrayRef = SaxonProcessor::createJArray(arguments, argument_length);
+          if(argumentJArray == -1 && argument_length > 0) {
+            std::cerr << "Error in XdmFunctionItem.call when converting arguments -   nullptr arguments found." << std::endl;
+            return nullptr;
           }
+           int64_t results = j_xdmFunctionItem_call(SaxonProcessor::sxn_environ->thread, (void *)processor->procRef, (void *)value, (argumentJArrayRef == -1 ? (void *) nullptr: (void *)argumentJArrayRef));
+           if(argumentJArray != -1) {
+               j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)argumentJArrayRef);
+               argumentJArrayRef = -1;
+           }
+           if(result > 0) {
+               XdmValue * value = nullptr;
+               int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results);
+               XdmItem * xdmItem = nullptr;
+               if(typeRef == -2) {
+                   //TODO handle exception = new SaxonApiException();
+                   return nullptr;
+               }
+               if(typeRef == 1) {
+                   value = new XdmValue();
+                   xdmItem = new XdmAtomicValue(results);
+                   value->addXdmItem(xdmItem);
 
-          if (!xffmID) {
-                std::cerr << "Error: SaxonC." << "call" << " not found\n" << std::endl;
-                return nullptr;
-          } else {
+               } else if(typeRef == 2) {
+                   value = new XdmValue();
+                   xdmItem = new XdmNode(results);
+                   value->addXdmItem(xdmItem);
 
-                                 jobjectArray argumentJArray = SaxonProcessor::createJArray(arguments, argument_length);
-                                 if(argumentJArray == nullptr) {
-                                        std::cerr << "Error in XdmFunctionItem.call when converting arguments -   nullptr arguments found." << std::endl;
-                                        return nullptr;
-                                 }
-                                 jobject result = (jobject)(SaxonProcessor::sxn_environ->env->CallObjectMethod(value, xffmID, processor->proc, argumentJArray));
-                                 if(argumentJArray != nullptr) {
-                                    	SaxonProcessor::sxn_environ->env->DeleteLocalRef(argumentJArray);
+               }  else if (typeRef == 4) {
+                   value = new XdmValue();
+                   value = new XdmValue();
+                   xdmItem =  new XdmMap(results);
+                   value->addXdmItem(xdmItem);
+
+               } else if (typeRef == 3) {
+                   value = new XdmValue();
+                   xdmItem =  new XdmArray(results);
+                   value->addXdmItem(xdmItem);
+
+               } else if (typeRef == 5) {
+                   value = new XdmValue();
+                   xdmItem =  new XdmFunctionItem(results);
+                   value->addXdmItem(xdmItem);
+               } else if (typeRef == 6) {
+                   //Empty Sequence detected.
+                   //TODO Maybe we should create an EmptySequence object
+                   j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)results);
+                   results = -1;
+                   return nullptr;
+
+               }else {
+                   value = new XdmValue(results, true);
+
+               }
 
 
-                                 }
-                                 if(result) {
-                                        jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
-                                        jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
-                                        jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
-                                        XdmValue * value = nullptr;
-                                        XdmItem * xdmItem = nullptr;
+               return value;
+           } else if(results == -2){
+               exception = new SaxonApiException();
+           }
 
 
-                                        if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, atomicValueClass)           == JNI_TRUE) {
-                                                xdmItem =  new XdmAtomicValue(result);
-                                                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                                                return xdmItem;
-
-                                        } else if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, nodeClass)           == JNI_TRUE) {
-                                                xdmItem =  new XdmNode(result);
-                                                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                                                return xdmItem;
-                                        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
-                                                xdmItem =  new XdmFunctionItem(result);
-                                                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                                                return xdmItem;
-                                        } else {
-                                                value = new XdmValue(result, true);
-                                                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                                                return value;
-                                        }
-
-                                 } else {
-                                 SaxonProcessor::sxn_environ->env->ExceptionDescribe();
-                                 	    return nullptr;
-
-                                 }
-
-                       }*/
-
-          return nullptr;
+        return nullptr;
 
     }
 

@@ -134,7 +134,7 @@ public:
     }
 
 protected:
-    std::string fname; /*!< The name of the function item */
+    char * fname; /*!< The name of the function item */
 
 private:
 

@@ -419,39 +419,25 @@ void SaxonProcessor::applyConfigurationProperties() {
 }
 
 
-/*jobjectArray SaxonProcessor::createJArray(XdmValue **values, int length) {
-    jobjectArray valueArray = nullptr;
-
-    jclass xdmValueClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                        "net/sf/saxon/s9api/XdmValue");
+int64_t SaxonProcessor::createJArray(XdmValue **values, int length) {
+    if (size > 0) {
+        int64_t processorDataRef = createProcessorDataWithCapacity(SaxonProcessor::sxn_environ->thread, length);
 
 
-    valueArray = SaxonProcessor::sxn_environ->env->NewObjectArray((jint) length,
-                                                                  xdmValueClass, 0);
+        for (int i=0; i < length; i++) {
 
-    for (int i = 0; i < length; i++) {
-#ifdef DEBUG
-        std::string s1 = typeid(values[i]).name();
-        std::cerr<<"In createJArray\nType of itr:"<<s1<<std::endl;
+            addProcessorValue(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (void *)(values[i])->getUnderlyingValue());
 
-
-        jobject xx = values[i]->getUnderlyingValue();
-
-        if(xx == nullptr) {
-            std::cerr<<"value failed"<<std::endl;
-        } else {
-
-            std::cerr<<"Type of value:"<<(typeid(xx).name())<<std::endl;
         }
-        if(values[i]->getUnderlyingValue() == nullptr) {
-            std::cerr<<"value["<<i<<"]->getUnderlyingValue() is nullptr"<<std::endl;
-        }
-#endif
-        SaxonProcessor::sxn_environ->env->SetObjectArrayElement(valueArray, i, values[i]->getUnderlyingValue());
+
+
+        return processorDataRef;
+
+    } else {
+        return -1;
     }
-    return valueArray;
 
-} */
+}
 
 
 int64_t SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue *> parameters,
