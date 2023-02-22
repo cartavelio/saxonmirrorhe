@@ -39,8 +39,7 @@
     <reason>format-number() is allowed under XPath 2.0 though it should not be</reason>
   </exception>
   
- 
- format-time-025b
+
 
 
 </exceptions>
