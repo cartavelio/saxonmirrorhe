@@ -327,10 +327,10 @@ public class JarCollection extends AbstractResourceCollection {
                         details.parseOptions = options;
                         resourceURI = makeResourceURI(entry.getName());
                         details.resourceUri = resourceURI;
-                        nextItem = makeResource(context.getConfiguration(), details);
+                        nextItem = makeResource(context, details);
                         if (metadata) {
                             Map<String, GroundedValue> properties = makeProperties(entry);
-                            nextItem = new MetadataResource(resourceURI, nextItem, properties);
+                            nextItem = new MetadataResource(resourceURI, nextItem, properties, context);
                         }
                         return;
                     } catch (XPathException e) {

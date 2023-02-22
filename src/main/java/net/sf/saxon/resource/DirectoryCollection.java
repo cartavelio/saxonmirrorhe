@@ -102,10 +102,10 @@ public class DirectoryCollection extends AbstractResourceCollection {
                      if (params.getContentType().isPresent()) {
                          details.contentType = params.getContentType().get();
                      }
-                     Resource resource = makeResource(context.getConfiguration(), details);
+                     Resource resource = makeResource(context, details);
                      if (resource != null) {
                          if (metadata) {
-                             return makeMetadataResource(resource, details);
+                             return makeMetadataResource(resource, details, context);
                          } else {
                              return resource;
                          }
@@ -130,11 +130,12 @@ public class DirectoryCollection extends AbstractResourceCollection {
      * the directory structure, but properties of that file in the form of name/value pairs.
      * @param resource a resource representing the content of the file
      * @param details details about where the resource came from
+     * @param context the evaluation context
      * @return a MetadataResource, being an object containing both the original content resource,
      * and an extensible set of properties of that resource.
      */
 
-    private MetadataResource makeMetadataResource(Resource resource, InputDetails details) {
+    private MetadataResource makeMetadataResource(Resource resource, InputDetails details, XPathContext context) {
         Map<String, GroundedValue> properties = new HashMap<>();
         try {
 
@@ -168,7 +169,7 @@ public class DirectoryCollection extends AbstractResourceCollection {
             // ignore
         }
 
-        return new MetadataResource(resource.getResourceURI(), resource, properties);
+        return new MetadataResource(resource.getResourceURI(), resource, properties, context);
     }
 
 

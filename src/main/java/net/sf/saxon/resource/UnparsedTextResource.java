@@ -7,7 +7,6 @@
 
 package net.sf.saxon.resource;
 
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
 import net.sf.saxon.om.Item;
@@ -75,7 +74,7 @@ public class UnparsedTextResource implements Resource {
         }
     }
 
-    public final static ResourceFactory FACTORY = (config, details) -> new UnparsedTextResource(details);
+    public final static ResourceFactory FACTORY = (context, details) -> new UnparsedTextResource(details);
 
     @Override
     public String getResourceURI() {
@@ -103,7 +102,7 @@ public class UnparsedTextResource implements Resource {
     }
 
     @Override
-    public Item getItem(XPathContext context) throws XPathException {
+    public Item getItem() throws XPathException {
         return new StringValue(getContent());
     }
 

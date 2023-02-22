@@ -30,11 +30,13 @@ public class MetadataResource implements Resource {
     private final Map<String, GroundedValue> properties;
     private final String resourceURI;
     private final Resource content;
+    private final XPathContext context;
 
-    public MetadataResource(String resourceURI, Resource content, Map<String, GroundedValue> properties) {
+    public MetadataResource(String resourceURI, Resource content, Map<String, GroundedValue> properties, XPathContext context) {
         this.resourceURI = resourceURI;
         this.content = content;
         this.properties = properties;
+        this.context = context;
     }
 
     @Override
@@ -48,7 +50,7 @@ public class MetadataResource implements Resource {
     }
 
     @Override
-    public Item getItem(XPathContext context)  {
+    public Item getItem()  {
 
         // Create a map for the result
         DictionaryMap map = new DictionaryMap();
@@ -62,7 +64,7 @@ public class MetadataResource implements Resource {
         map.initialPut("name", StringValue.makeStringValue(resourceURI));
 
         // Add a fetch() function, which can be used to fetch the resource
-        Callable fetcher = new CallableDelegate((context1, arguments) -> content.getItem(context1));
+        Callable fetcher = new CallableDelegate((context1, arguments) -> content.getItem());
 
         FunctionItemType fetcherType = new SpecificFunctionType(new SequenceType[0], SequenceType.SINGLE_ITEM);
         CallableFunction fetcherFunction = new CallableFunction(0, fetcher, fetcherType);

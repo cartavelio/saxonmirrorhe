@@ -42,12 +42,11 @@ public class DotNetEnumerableCollection extends AbstractResourceCollection {
 
     @Override
     public Iterator<? extends Resource> getResources(XPathContext context) throws XPathException {
-        final Configuration config = context.getConfiguration();
         return new DotNetIterator<Resource>(list.GetEnumerator(), new DotNetIterator.Mapper<Resource>() {
             @Override
             public Resource convert(Object o) {
                 try {
-                    return makeResource(config, o.toString());
+                    return makeResource(context, o.toString());
                 } catch (XPathException e) {
                     return new FailedResource(o.toString(), e);
                 }
