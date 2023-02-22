@@ -35,14 +35,18 @@ public class TestXdmNode {
         DocumentBuilder builder = processor.newDocumentBuilder();
         XdmNode doc = builder.build(new SAXSource(new InputSource(new StringReader(xml))));
 
-        assertTrue(doc.toString().startsWith("<document>"), "doc1a");
-        assertTrue(doc.toString().endsWith("</document>"), "doc1b");
-        assertTrue(doc.toString().contains("> some &lt; text <"), "doc2");
+        String output = doc.toString();
+        assertTrue(output.startsWith("<document>"), "doc1a");
+        assertTrue(output.endsWith("</document>"), "doc1b");
+        assertTrue(output.contains("> some &lt; text <"), "doc2");
+        assertTrue(output.contains(">\n "), "indented");
 
         XdmNode root = doc.select(child()).firstItem();
-        assertTrue(root.toString().startsWith("<document>"), "root1a");
-        assertTrue(root.toString().endsWith("</document>"), "root1b");
-        assertTrue(root.toString().contains("> some &lt; text <"), "root2");
+        output = root.toString();
+        assertTrue(output.startsWith("<document>"), "root1a");
+        assertTrue(output.endsWith("</document>"), "root1b");
+        assertTrue(output.contains("> some &lt; text <"), "root2");
+        assertTrue(output.contains(">\n "), "indented");
 
         XdmNode foo = root.select(child()).firstItem();
         assertEquals("<?foo bar?>", foo.toString(), "pi");
