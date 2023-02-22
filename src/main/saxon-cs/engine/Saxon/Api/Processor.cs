@@ -40,6 +40,7 @@ namespace Saxon.Api {
         internal Processor(Saxon.Hej.s9api.Processor p) {
             JProcessor = p;
             JProcessor.getUnderlyingConfiguration().setProcessor(this);
+            checkLicense();
         }
 
         /// <summary>
@@ -49,6 +50,7 @@ namespace Saxon.Api {
         public Processor() {
             JProcessor = new Saxon.Hej.s9api.Processor(true);
             JProcessor.getUnderlyingConfiguration().setProcessor(this);
+            checkLicense();
         }
 
         /// <summary>
@@ -61,6 +63,7 @@ namespace Saxon.Api {
             }
             JProcessor = new Saxon.Hej.s9api.Processor(true);
             JProcessor.getUnderlyingConfiguration().setProcessor(this);
+            checkLicense();
         }
 
         /// <summary>
@@ -75,6 +78,7 @@ namespace Saxon.Api {
             //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
             JProcessor = new Saxon.Hej.s9api.Processor(config);
             config.setProcessor(this);
+            checkLicense();
         }
 
         /// <summary>
@@ -89,11 +93,18 @@ namespace Saxon.Api {
             //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
             JProcessor = new Saxon.Hej.s9api.Processor(config);
             config.setProcessor(this);
+            checkLicense();
         }
 
         public Processor(Configuration config) {
             JProcessor = new Saxon.Hej.s9api.Processor(config);
             config.setProcessor(this);
+            checkLicense();
+        }
+
+        private void checkLicense() {
+            Implementation.checkLicensedFeature(
+                Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION, "Saxon-CS", -1);
         }
         
         /// <summary>

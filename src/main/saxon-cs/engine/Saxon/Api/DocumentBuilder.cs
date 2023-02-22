@@ -436,7 +436,7 @@ namespace Saxon.Api {
             pp.setPipelineConfiguration(config.makePipelineConfiguration());
             // pp = new PullTracer(pp);  /* diagnostics */
             Source source = new PullSource(pp);
-            String documentBaseUri = reader.BaseURI;
+            string documentBaseUri = reader.BaseURI;
             if (string.IsNullOrEmpty(documentBaseUri)) {
                 documentBaseUri = this.BaseUri.ToString();
             }

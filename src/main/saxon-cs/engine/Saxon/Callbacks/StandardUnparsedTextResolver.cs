@@ -63,6 +63,9 @@ namespace Saxon.Callbacks {
                 if (encoding == null) {
                     encoding = inferEncoding(stream);
                 }
+                if (encoding == "iso-646") {
+                    encoding = "us-ascii";
+                }
                 return new StreamReader(stream, Encoding.GetEncoding(encoding));
             }
             catch (Exception e) {
