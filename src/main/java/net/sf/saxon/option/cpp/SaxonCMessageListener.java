@@ -53,7 +53,7 @@ public class SaxonCMessageListener implements MessageListener2 {
 
         SaxonCMessageListener listener = new SaxonCMessageListener(processor, cwd, mode);
 
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(listener);
+        ObjectHandle handle = SaxonCAPI.createHandle(listener);
 
         return handle.rawValue();
     }
@@ -86,7 +86,7 @@ public class SaxonCMessageListener implements MessageListener2 {
         List<XdmNode> xslMessages = messageListener.xslMessages;
 
             long[] refs= xslMessages.stream().mapToLong( i ->{
-                        ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(i);
+                        ObjectHandle objectHandle = SaxonCAPI.createHandle(i);
                         return objectHandle.rawValue();
                     }).toArray();
             CLongPointer addr = SaxonCAPI.longArrayToNative(alloc,refs);

@@ -167,7 +167,7 @@ public class SaxonCAPI {
         return STATUS_OK;
     }
 
-    public static void ObjectHandle createHandle(Object obj) {
+    public static ObjectHandle createHandle(Object obj) {
         if(debug) {
             objHandlesCreated++;
             System.err.println("Object Handles created: "+ objHandlesCreated);
@@ -266,7 +266,7 @@ public class SaxonCAPI {
     public static long createStringObject(IsolateThread thread, CCharPointer cValue){
         if(cValue != WordFactory.nullPointer()) {
             String value = CTypeConversion.toJavaString(cValue);
-            ObjectHandle handle = objectHandles.create(value);
+            ObjectHandle handle = createHandle(value);
             return handle.rawValue();
         }
         return -1;
@@ -720,7 +720,7 @@ public class SaxonCAPI {
 
         ObjectHandle handle = null;
 
-        handle = objectHandles.create(createXdmAtomicItem(valueStr, typeStr));
+        handle = createHandle(createXdmAtomicItem(valueStr, typeStr));
         return handle.rawValue();
 
     }
@@ -847,7 +847,7 @@ public class SaxonCAPI {
                     System.err.println("XdmNode: " + System.identityHashCode(doc));
                 }
             }
-            ObjectHandle handle = objectHandles.create(doc);
+            ObjectHandle handle = createHandle(doc);
 
             return handle.rawValue();
         } catch (SaxonApiException ex) {
@@ -932,10 +932,11 @@ public class SaxonCAPI {
 
     /**
      * Receives file name of XML document and parse to XdmNode object. It is possible to validate with a SchemaValidator
-     * @param cwd - The current working directory for parsing the XML file
-     * @param proci   Processor object
-     * @param validator - Schema Validator
-     * @param filename
+     * @param thread
+     * @param ccwd - The current working directory for parsing the XML file
+     * @param builderRef
+     * @param validatorRef - Schema Validator
+     * @param cfilename
      * @return  XdmNode object for the XML file
      * @throws SaxonApiException
      */
@@ -979,7 +980,7 @@ public class SaxonCAPI {
             }
             XdmNode node = builder.build(source);
 
-            ObjectHandle handle = objectHandles.create(node);
+            ObjectHandle handle = createHandle(node);
             return handle.rawValue();
         } catch (SaxonApiException ex) {
             if(debug) {

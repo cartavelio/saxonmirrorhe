@@ -105,7 +105,7 @@ public class Xslt30Processor extends SaxonCAPI {
      */
     @CEntryPoint(name = "createXslt30Processor", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createXslt30Processor(IsolateThread thread) {
-            ObjectHandle handle = objectHandles.create(new net.sf.saxon.option.cpp.Xslt30Processor(false));
+            ObjectHandle handle = SaxonCAPI.createHandle(new net.sf.saxon.option.cpp.Xslt30Processor(false));
             return handle.rawValue();
     }
 
@@ -115,7 +115,7 @@ public class Xslt30Processor extends SaxonCAPI {
             if(processor == null) {
                 return 0;
             }
-            ObjectHandle handle = objectHandles.create(Xslt30Processor.newInstance(processor));
+            ObjectHandle handle = SaxonCAPI.createHandle(Xslt30Processor.newInstance(processor));
             return handle.rawValue();
     }
 
@@ -293,7 +293,7 @@ public class Xslt30Processor extends SaxonCAPI {
             compiler.setSchemaAware(xslt30Processor.schemaAware);
             compiler.setErrorList(SaxonCException.errorList);
             executable = compiler.compile(compiler.getAssociatedStylesheet(source, null, null, null));
-            ObjectHandle handle = SaxonCAPI.objectHandles.create(executable);
+            ObjectHandle handle = SaxonCAPI.createHandle(executable);
 
             return handle.rawValue();
         } catch (SaxonApiException ex) {
@@ -337,7 +337,7 @@ public class Xslt30Processor extends SaxonCAPI {
         compiler.setSchemaAware(xslt30Processor.schemaAware);
         compiler.setErrorList(SaxonCException.errorList);
         executable = compiler.compile(source);
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(executable);
+        ObjectHandle handle = SaxonCAPI.createHandle(executable);
 
         return handle.rawValue();
 
@@ -387,7 +387,7 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         compiler.setErrorList(SaxonCException.errorList);
         XsltExecutable executable = compiler.compile(source);
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(executable);
+        ObjectHandle handle = SaxonCAPI.createHandle(executable);
 
         return handle.rawValue();
 
@@ -424,7 +424,7 @@ public class Xslt30Processor extends SaxonCAPI {
         }  */
         compiler.setErrorList(SaxonCException.errorList);
         XsltExecutable executable = compiler.compile(node.asSource());
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(executable);
+        ObjectHandle handle = SaxonCAPI.createHandle(executable);
 
         return handle.rawValue();
 
@@ -593,7 +593,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         XdmValue value = getXdmValue(xdmResult, paramsMap);
 
-        ObjectHandle handle = objectHandles.create(value);
+        ObjectHandle handle = SaxonCAPI.createHandle(value);
         return handle.rawValue();
     }
 
@@ -870,7 +870,7 @@ public class Xslt30Processor extends SaxonCAPI {
             arguments = argumentsAccumulator.getValues();
         }
         XdmValue result =  transformer.callFunction(qname, getArguments(arguments));
-        ObjectHandle handle = objectHandles.create(result);
+        ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
     }
 
@@ -1008,7 +1008,7 @@ public class Xslt30Processor extends SaxonCAPI {
         transformer.callTemplate(qname, xdmResult);
 
         XdmValue value =  getXdmValue(xdmResult, paramsMap);
-        ObjectHandle handle = objectHandles.create(value);
+        ObjectHandle handle = SaxonCAPI.createHandle(value);
         return handle.rawValue();
     }
 
@@ -1459,7 +1459,7 @@ public class Xslt30Processor extends SaxonCAPI {
             }
 
             XdmValue value = getXdmValue(destination, paramsMap);
-            ObjectHandle handle = objectHandles.create(value);
+            ObjectHandle handle = SaxonCAPI.createHandle(value);
             return handle.rawValue();
         } catch (Exception ex) {
             throw new SaxonApiException(ex);

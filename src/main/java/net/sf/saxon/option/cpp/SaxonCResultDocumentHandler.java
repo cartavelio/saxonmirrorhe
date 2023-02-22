@@ -39,7 +39,7 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
     @CEntryPoint(name = "createSaxonCResultDocumentHandler")
     public static long createSaxonCResultDocumentHandler(IsolateThread thread, int flagInt) {
         SaxonCResultDocumentHandler resultDocumentHandler = new SaxonCResultDocumentHandler(CTypeConversion.toBoolean(flagInt));
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(resultDocumentHandler);
+        ObjectHandle handle = SaxonCAPI.createHandle(resultDocumentHandler);
         return handle.rawValue();
     }
 

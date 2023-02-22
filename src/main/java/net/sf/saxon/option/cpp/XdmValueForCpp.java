@@ -105,7 +105,7 @@ public class XdmValueForCpp {
         valueRefs[0] = value.size();
         int i = 1;
         for (XdmItem item : value) {
-            ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(item);
+            ObjectHandle objectHandle = SaxonCAPI.createHandle(item);
             valueRefs[i] = objectHandle.rawValue();
             i++;
         }
@@ -120,7 +120,7 @@ public class XdmValueForCpp {
     public static long getTypedValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
         XdmNode value = SaxonCAPI.objectHandles.get(valueRef);
         XdmValue resultValue = value.getTypedValue();
-        ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(resultValue);
+        ObjectHandle objectHandle = SaxonCAPI.createHandle(resultValue);
         return objectHandle.rawValue();
     }
 
