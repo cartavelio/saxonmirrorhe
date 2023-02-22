@@ -19,9 +19,8 @@ import net.sf.saxon.value.StringItem;
 
 
 /**
- * TinyCommentImpl is an implementation of CommentInfo
+ * TinyCommentImpl is a comment node in the TinyTree
  *
- * @author Michael H. Kay
  */
 
 

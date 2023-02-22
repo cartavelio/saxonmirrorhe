@@ -79,7 +79,6 @@ import static net.sf.saxon.trans.KeyIndex.Status.FAILED;
  * sought value is untypedAtomic).</li>
  * </ul>
  *
- * @author Michael H. Kay
  */
 
 public class KeyManager {

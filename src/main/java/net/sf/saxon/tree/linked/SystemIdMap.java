@@ -23,7 +23,6 @@ import java.util.Arrays;
  * The system IDs of nodes are assumed to be immutable; they can only be set sequentially,
  * as the nodes are being created. </p>
  *
- * @author Michael H. Kay
  */
 
 public class SystemIdMap {

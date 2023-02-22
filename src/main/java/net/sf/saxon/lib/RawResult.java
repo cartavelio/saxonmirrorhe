@@ -22,8 +22,6 @@ import java.util.List;
  * delivered in "raw" form, that is, without building a tree (equivalently, without performing
  * "sequence normalization"). Once output has been written to a RawResult, it is available to
  * the caller in the form of a {@link Sequence}.
- *
- * @author Michael H. Kay
  */
 
 public class RawResult implements Result {

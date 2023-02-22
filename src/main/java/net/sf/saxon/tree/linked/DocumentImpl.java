@@ -33,7 +33,6 @@ import java.util.*;
  * <p>A DocumentImpl object may either represent a real document node, or it may represent an imaginary
  * container for a parentless element.</p>
  *
- * @author Michael H. Kay
  */
 
 public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, MutableDocumentInfo {

@@ -24,7 +24,6 @@ import net.sf.saxon.type.Type;
  * A node in the XML parse tree representing an attribute. Note that this is
  * generated only "on demand", when the attribute is selected by a select pattern.
  *
- * @author Michael H. Kay
  */
 
 final public class TinyAttributeImpl extends TinyNodeImpl {

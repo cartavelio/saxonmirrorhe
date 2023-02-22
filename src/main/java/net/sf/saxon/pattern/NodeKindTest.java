@@ -21,8 +21,6 @@ import java.util.Optional;
 /**
  * NodeTest is an interface that enables a test of whether a node has a particular
  * name and kind. A NodeKindTest matches the node kind only.
- *
- * @author Michael H. Kay
  */
 
 public class NodeKindTest extends NodeTest {

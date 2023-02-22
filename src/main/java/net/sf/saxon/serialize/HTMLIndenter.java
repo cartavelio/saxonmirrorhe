@@ -33,7 +33,6 @@ import java.util.*;
  * The character data is never added when within an inline element.
  * The string used for indentation defaults to three spaces
  *
- * @author Michael Kay
  */
 
 

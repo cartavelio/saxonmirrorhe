@@ -32,8 +32,6 @@ import java.util.List;
 
 /**
  * A node in the XDM tree; specifically, a node that wraps an Axiom element node.
- *
- * @author Michael H. Kay
  */
 
 public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {

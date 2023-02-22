@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLConnection;
 
 
@@ -31,8 +30,6 @@ import java.net.URLConnection;
  * to locate a module by dereferencing the URI given as the location hint. It accepts standard
  * URIs recognized by the Java URL class, including the <code>jar</code> URI scheme; it also
  * accepts <code>classpath</code> URIs as defined in the Spring framework.
- *
- * @author Michael H. Kay
  */
 
 public class StandardModuleURIResolver implements ModuleURIResolver {

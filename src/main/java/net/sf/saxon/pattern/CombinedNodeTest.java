@@ -26,8 +26,6 @@ import java.util.Optional;
  * when optimizing a union (etc) of two path expressions using the same axis.
  * A CombinedNodeTest is also used to support constructs such as element(N,T),
  * which can be expressed as (element(N,*) intersect element(*,T))
- *
- * @author Michael H. Kay
  */
 
 public class CombinedNodeTest extends NodeTest {

@@ -35,8 +35,6 @@ import javax.xml.transform.sax.TemplatesHandler;
  * interface. It acts as a ContentHandler which receives a stream of
  * SAX events representing a stylesheet, and returns a Templates object that
  * represents the compiled form of this stylesheet.
- *
- * @author Michael H. Kay
  */
 
 public class TemplatesHandlerImpl extends ReceivingContentHandler implements TemplatesHandler {

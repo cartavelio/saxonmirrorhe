@@ -28,8 +28,6 @@ import java.util.Iterator;
 /**
  * A node in the XDM tree. This is the implementation of the NodeInfo interface used as a wrapper for
  * Axiom comment, text, and processing instruction nodes.
- *
- * @author Michael H. Kay
  */
 
 public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements SiblingCountingNode {

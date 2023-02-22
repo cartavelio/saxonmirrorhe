@@ -26,8 +26,6 @@ import java.util.Optional;
  * as a supplied node.
  *
  * <p>Note: it's not safe to use this if the supplied node is mutable.</p>
- *
- * @author Michael H. Kay
  */
 
 public class SameNameTest extends NodeTest implements QNameTest {

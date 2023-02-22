@@ -31,7 +31,6 @@ import net.sf.saxon.value.UntypedAtomicValue;
  * A node in the "linked" tree representing any kind of node except a namespace node.
  * Specific node kinds are represented by concrete subclasses.
  *
- * @author Michael H. Kay
  */
 
 public abstract class NodeImpl

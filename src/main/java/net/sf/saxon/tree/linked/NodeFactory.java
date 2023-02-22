@@ -22,8 +22,6 @@ import net.sf.saxon.type.SchemaType;
  * A Factory for nodes used to build a tree. <br>
  * Currently only allows Element nodes to be user-constructed.
  *
- * @author Michael H. Kay
- * @version 25 February 2000
  */
 
 public interface NodeFactory {

@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 /**
  * This class generates TEXT output
  *
- * @author Michael H. Kay
  */
 
 public class TEXTEmitter extends XMLEmitter {

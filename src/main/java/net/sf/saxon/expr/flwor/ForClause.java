@@ -245,7 +245,7 @@ public class ForClause extends Clause {
 
 
         if (positionVariable != null && positionVariable.getNominalReferenceCount() == 0) {
-            // Eliminating an unused position variable opens up optimisation opportunties: bug 4947
+            // Eliminating an unused position variable opens up optimisation opportunities: bug 4947
             positionVariable = null;
         }
 
