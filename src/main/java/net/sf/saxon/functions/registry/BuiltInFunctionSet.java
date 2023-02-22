@@ -7,10 +7,8 @@
 
 package net.sf.saxon.functions.registry;
 
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.OperandUsage;
-import net.sf.saxon.expr.StaticContext;
-import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.OptionsParameter;
@@ -27,6 +25,7 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -67,6 +66,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     public static final int CARD0 = 1024*32;      // Result is empty only if first arg is empty
     public static final int NEW = 1024*64;        // All nodes in the result are newly created
     public static final int CTRL = 1024*128;      // Controls the optimization of its arguments
+    public static final int SEQV = 1024 * 256;    // Sequence-variadic, like concat() in 4.0
 
     public static final int DEPENDS_ON_STATIC_CONTEXT = BASE | NS | DCOLL;
     public static final int FOCUS = CITEM | POSN | LAST | CDOC;
@@ -85,6 +85,10 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
 
     private final HashMap<String, Entry> functionTable = new HashMap<>(200);
     //private List<BuiltInFunctionSet> importedFunctions = new ArrayList<BuiltInFunctionSet>();
+
+    // Sequence-variadic functions (XPath 4.0+) are registered in a table indexed by the local
+    // name of the function; the corresponding value is the minimum arity.
+    private final HashMap<String, Integer> sequenceVariadicFunctions = new HashMap<>(10);
 
     /**
      * Import another function set (which must be in the same namespace)
@@ -122,7 +126,13 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         if (entry != null) {
             return entry;
         }
-        // Try for a variable-arity function (concat only)
+        // Try for a generalised (XP40) sequence-variadic function
+        Integer minArity = sequenceVariadicFunctions.get(name);
+        if (minArity != null && arity >= minArity) {
+            key = name + "#" + (minArity + 1);
+            return functionTable.get(key);
+        }
+        // Try for a variable-arity function (concat only up to 3.1)
         if (name.equals("concat") && arity >= 2 && getNamespace().equals(NamespaceConstant.FN)) {
             key = "concat#-1";
             entry = functionTable.get(key);
@@ -160,10 +170,24 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         StructuredQName functionName = symbolicName.getComponentName();
         int arity = symbolicName.getArity();
         String localName = functionName.getLocalPart();
-        if (functionName.hasURI(getNamespace()) && getFunctionDetails(localName, arity) != null) {
+        Entry entry = getFunctionDetails(localName, arity);
+        if (functionName.hasURI(getNamespace()) && entry != null) {
+            if ((entry.properties & SEQV) != 0) {
+                // sequence-variadic functions in 4.0 (e.g..concat, codepoints-to-string)
+                // combine the "variable" arguments into a single argument
+                int declaredArity = entry.arity;
+                Expression[] newArgs = Arrays.copyOf(staticArgs, declaredArity);
+                if (declaredArity > staticArgs.length) {
+                    newArgs[declaredArity - 1] = Literal.makeEmptySequence();
+                } else if (declaredArity < staticArgs.length) {
+                    Expression block = new Block(Arrays.copyOfRange(staticArgs, declaredArity - 1, staticArgs.length));
+                    newArgs[declaredArity - 1] = block;
+                }
+                staticArgs = newArgs;
+            }
             RetainedStaticContext rsc = new RetainedStaticContext(env);
             try {
-                SystemFunction fn = makeFunction(localName, arity);
+                SystemFunction fn = makeFunction(localName, staticArgs.length);
                 fn.setRetainedStaticContext(rsc);
                 Expression f = fn.makeFunctionCall(staticArgs);
                 f.setRetainedStaticContext(rsc);
@@ -200,7 +224,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         Class<? extends SystemFunction> functionClass = entry.implementationClass;
         SystemFunction f;
         try {
-            f = (SystemFunction) functionClass.newInstance();
+            f = functionClass.newInstance();
         } catch (Exception err) {
             err.printStackTrace();
             throw new AssertionError("Failed to instantiate system function " + name + " - " + err.getMessage());
@@ -284,6 +308,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      * Register a system function in the table of function details.
      *
      * @param name                the function name
+     * @param arity               the function arity (-1 is treated specially)
      * @param implementationClass the class used to implement the function
      * @param itemType            the item type of the result of the function
      * @param cardinality         the cardinality of the result of the function
@@ -317,6 +342,9 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             e.usage = new OperandUsage[arity];
         }
         functionTable.put(name + "#" + arity, e);
+        if ((properties & SEQV) != 0) {
+            sequenceVariadicFunctions.put(name, arity - 1);
+        }
         return e;
     }
 
