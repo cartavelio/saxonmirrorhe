@@ -44,6 +44,16 @@ public:
 
     std::list<XdmValue *> asList();
 
+    /**
+    * Utility method for working with Saxon/C on Python
+    */
+    XdmValue ** createXdmValueArray(int len){
+	   return (new XdmValue*[len]);
+    }
+
+
+    XdmValue** values();
+
     int getArity(){return 1;}
 
     /**
@@ -59,7 +69,7 @@ public:
 	* Get the type of the object
 	*/
 	XDM_TYPE getType() {
-		return XDM_FUNCTION_ITEM;
+		return XDM_ARRAY;
 	}
 
 

@@ -55,6 +55,8 @@ public:
         return true;
     }
 
+    int getHashCode();
+
 	/**
 	* Get the type of the object
 	*/

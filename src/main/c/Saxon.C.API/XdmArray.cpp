@@ -173,3 +173,51 @@ std::list<XdmValue *> XdmArray::asList() {
 
 
 }
+
+
+
+
+
+XdmValue ** XdmArray::values() {
+  XdmValue ** arr;
+
+	jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
+	static jmethodID xmID = nullptr;
+
+
+	if(xmID == nullptr) {
+	    xmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"convertXdmArrayToArrayObject",
+					"(Lnet/sf/saxon/s9api/XdmArray;)[Lnet/sf/saxon/s9api/XdmValue;");
+	}
+
+	if (!xmID) {
+			std::cerr << "Error: SaxonDll." << "convertXdmArrayToArrayObject"
+				<< " not found\n" << std::endl;
+			return arr;
+		}
+
+
+	auto results = (jobjectArray)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID,value));
+	if(results) {
+	   int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
+
+       if(sizex == 0) {
+         return nullptr;
+       }
+       arr = new XdmValue*[sizex];
+       		XdmValue * tempValue;
+       		for (int p=0; p < sizex; ++p){
+       			jobject resulti = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(results, p);
+       			tempValue = new XdmValue();
+       			tempValue->addUnderlyingValue(resulti);
+       			arr[p] = tempValue;
+
+       		}
+       	return arr;
+
+	} else {
+	    return arr;
+	}
+
+
+}

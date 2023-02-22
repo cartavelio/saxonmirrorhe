@@ -18,6 +18,7 @@ import net.sf.saxon.type.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,10 +98,34 @@ public class XdmUtils {
 
 
     public static XdmMap makeXdmMap(XdmAtomicValue [] keyArr, XdmValue [] valueArray) {
-        XdmMap map = new XdmMap();
+        if(keyArr == null || valueArray == null || keyArr.length ==0 || valueArray.length == 0) {
+            if(SaxonCAPI.debug){
+                    System.err.println("DEBUG: makeXdmMap has null arrays");
+                }
 
+            return null;
+        }
+        Map<XdmAtomicValue, XdmValue> jmap = new HashMap<>();
+
+
+        XdmMap map;
+        if(SaxonCAPI.debug){
+            if(keyArr != null && valueArray != null) {
+                System.err.println("DEBUG: makeXdmMap: key length=" + keyArr.length + " value length=" + valueArray.length);
+            } else {
+                System.err.println("DEBUG: makeXdmMap has null arrays");
+            }
+
+        }
         for(int i=0; i< keyArr.length;i++){
-            map.put(keyArr[i], valueArray[i]);
+            jmap.put(keyArr[i], valueArray[i]);
+        }
+
+        map = new XdmMap(jmap);
+        if(SaxonCAPI.debug){
+                System.err.println("DEBUG: makeXdmMap: map size=" + map.mapSize() );
+
+
         }
         return map;
 

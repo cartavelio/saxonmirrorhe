@@ -337,7 +337,20 @@ public:
     XdmArray *makeArray(bool *input, int length);
 
 
+    /**
+        * Make an XdmArray whose members are of type XdmValue
+        * @param input the input array of XdmValue pointers
+        * @return an XdmArray whose members are XdmValue values corresponding one-to-one with the input
+   */
+    XdmArray *makeArray(XdmValue ** values, int length);
+
+
     XdmMap *makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap);
+
+    XdmMap *makeMap2(std::map<std::string, XdmValue *> dataMap);
+
+
+    XdmMap *makeMap3(XdmAtomicValue **, XdmValue **, int len);
 
 
     /**
@@ -380,6 +393,21 @@ public:
      * Clears any exception that is currently being thrown. If no exception is currently being thrown, this routine has no effect.
     */
     void exceptionClear();
+
+
+    /**
+    * Utility method for working with Saxon/C on Python
+    */
+    XdmValue ** createXdmValueArray(int len){
+	   return (new XdmValue*[len]);
+    }
+
+    /**
+    * Utility method for working with Saxon/C on Python
+    */
+    XdmAtomicValue ** createXdmAtomicValueArray(int len){
+	   return (new XdmAtomicValue*[len]);
+    }
 
     /**
      * Checks for pending exceptions and creates a SaxonApiException object, which handles one or more local exceptions objects
