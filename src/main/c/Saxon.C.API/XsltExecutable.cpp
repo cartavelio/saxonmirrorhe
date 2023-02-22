@@ -119,7 +119,7 @@ void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
     selectionRef = -1;
 
     if (filename != nullptr) {
-        //selectionRef = j_createStringObject(SaxonProcessor::sxn_environ->thread, (char *)filename);
+        selectionRef = j_createStringObject(SaxonProcessor::sxn_environ->thread, (char *)filename);
 
     }   else {
        selectionRef = -1;

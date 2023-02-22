@@ -406,7 +406,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
     private static void setStaticParametersFromArray(XsltCompiler compiler, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator = null;
-        if(processorDataAccumulator != WordFactory.nullPointer()) {
+        if(processorDataAccumulatorRef != WordFactory.nullPointer()) {
             processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);
         }  else {
             if(debug) {
