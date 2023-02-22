@@ -2260,7 +2260,7 @@ cdef class PyXsltExecutable:
             return val
      def call_template_returning_string(self, str template_name=None, str base_output_uri=None):
         """
-        call_template_returning_string(self, str template_name, **kwds)
+        call_template_returning_string(self, str template_name, str base_output_uri)
         Invoke a transformation by calling a named template and return the result as a string. This method does not
         set the global context item for the transformation; if that is required, it can be done separately using the
         set_global_context_item method.
