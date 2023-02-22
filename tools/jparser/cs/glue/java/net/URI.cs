@@ -24,6 +24,13 @@ namespace java.net {
         public URI resolve(URI relative) {
             return new URI(new SysUri(this.uri, relative.uri));
         }
+        public URI resolve(string relative) {
+            return new URI(new SysUri(this.uri, relative));
+        }
+
+        public string toASCIIString() {
+            return uri.OriginalString; // TODO - probably not correct
+        }
         //public java.net.URI(java.net.URI base, string href) {
         //    uri = System.Uri(new System.Uri(base.ToString(), href));
         //}

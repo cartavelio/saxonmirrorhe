@@ -20,8 +20,14 @@ namespace java.util {
         public bool contains(object key) {
             return key is E && _set.Contains((E)key);
         }
-        public void add(E entry) {
-            _set.Add(entry);
+        public bool add(E entry) {
+            return _set.Add(entry);
+        }
+
+        public void addAll(Collection<E> other) {
+            foreach (E e in other) {
+                add(e);
+            }
         }
     }
 }

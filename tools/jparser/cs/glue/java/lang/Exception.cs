@@ -7,10 +7,10 @@ namespace java.lang {
         public Exception(string str) : base(str) {
             
         }
-        public Exception(Throwable cause) : base("", cause) {
+        public Exception(SysExcept cause) : base("", cause) {
 
         }
-        public Exception(string str, Throwable cause) : base(str, cause) {
+        public Exception(string str, SysExcept cause) : base(str, cause) {
 
         }
 

@@ -7,6 +7,10 @@ namespace java.lang {
             return num.ToString();
         }
 
+        public static string toHexString(int num) {
+            return num.ToString("X");
+        }
+
         public static int min(int x, int y) {
             return x < y ? x : y;
         }

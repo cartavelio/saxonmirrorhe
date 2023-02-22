@@ -15,12 +15,23 @@ namespace java.util {
         public void add(E entry) {
             _set.Add(entry);
         }
+
+        public void remove(E entry) {
+            _set.Remove(entry);
+        }
         public static EnumSet<E> of (params E[] entries) {
             EnumSet<E> result = new EnumSet<E>();
             foreach (E e in entries) {
                 result.add(e);
             }
             return result;
+        }
+        
+        public static EnumSet<E> noneOf (Type t) {
+            return new EnumSet<E>();
+        }
+        public static EnumSet<E> noneOf () {
+            return new EnumSet<E>();
         }
     }
 }

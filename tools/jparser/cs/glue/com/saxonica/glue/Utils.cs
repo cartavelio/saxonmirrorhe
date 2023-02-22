@@ -13,6 +13,31 @@ namespace com.saxonica.glue {
 
         public static bool stringEqualsIgnoreCase(string a, string b) {
             return String.Compare(a, b, true) == 0;
-        } 
+        }
+        
+        // Test "instanceof" a generic type. For example,
+        // IsInstanceOfGenericType(new List<string>(), typeof(List<>))
+        // returns true
+        static bool IsInstanceOfGenericType(object instance, Type genericType)
+        {
+            Type type = instance.GetType();
+            while (type != null)
+            {
+                if (type.IsGenericType &&
+                    type.GetGenericTypeDefinition() == genericType)
+                {
+                    return true;
+                }
+                type = type.BaseType;
+            }
+            return false;
+        }
+
+        static void Main(string[] args)
+        {
+            // True
+            Console.WriteLine(IsInstanceOfGenericType(typeof(List<>),
+                new List<string>()));
+
     }
 }

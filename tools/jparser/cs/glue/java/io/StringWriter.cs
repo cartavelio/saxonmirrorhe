@@ -7,6 +7,14 @@ namespace java.io {
             this._sw = new SysIO.StringWriter();
         }
 
+        public void write(string str) {
+            _sw.Write(str);
+        }
+
+        public void write(char ch) {
+            _sw.Write(ch);
+        }
+
         public string ToString() {
             return this._sw.ToString();
         }

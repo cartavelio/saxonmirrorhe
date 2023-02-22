@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Numerics;
+using java.lang;
 
 /**
  * Emulation of java.math.BigDecimal taken from GitHIb Gist: nberardi/BigDecimal.cs
@@ -10,6 +11,27 @@ namespace java.math
 {
 	public struct BigDecimal : IConvertible, IFormattable, IComparable, IComparable<BigDecimal>, IEquatable<BigDecimal>
 	{
+
+		public static BigDecimal valueOf(long l) {
+			return new BigDecimal(l);
+		}
+
+		public BigDecimal add(BigDecimal other) {
+			throw new UnsupportedOperationException()
+		}
+		
+		public BigDecimal subtract(BigDecimal other) {
+			throw new UnsupportedOperationException()
+		}
+		
+		public BigDecimal multiply(BigDecimal other) {
+			throw new UnsupportedOperationException()
+		}
+		
+		public BigDecimal divide(BigDecimal other) {
+			throw new UnsupportedOperationException()
+		}
+		
 		public static readonly BigDecimal MinusOne = new BigDecimal(BigInteger.MinusOne, 0);
 		public static readonly BigDecimal Zero = new BigDecimal(BigInteger.Zero, 0);
 		public static readonly BigDecimal One = new BigDecimal(BigInteger.One, 0);

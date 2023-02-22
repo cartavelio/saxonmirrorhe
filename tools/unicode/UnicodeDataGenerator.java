@@ -320,6 +320,7 @@ class UnicodeDataGenerator {
                         i = j;
                         break;
                     } // else fall through--error
+                    CSharp.emitCode("goto default");
                 default:
                     throw new IllegalArgumentException("Bad hex value in " + source);
             }

@@ -12,6 +12,11 @@ namespace java.util {
         public ArrayList(int alloc) {
             this._list = new SysCollGen.List<E>(alloc);
         }
+        
+        public ArrayList(ArrayList<E> existing) {
+            this._list = new SysCollGen.List<E>(existing.size());
+            addAll(existing);
+        }
 
         internal ArrayList(SysCollGen.List<E> list) {
             this._list = list;
