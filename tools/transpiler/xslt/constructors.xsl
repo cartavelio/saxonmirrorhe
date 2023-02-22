@@ -83,7 +83,7 @@
             <xsl:text>Singulink.Numerics.BigDecimal.FromDouble</xsl:text>
             <xsl:text>(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-            <xsl:text>, Singulink.Numerics.FloatConversion.Roundtrip)</xsl:text>
+            <xsl:text>, Singulink.Numerics.FloatConversion.Exact)</xsl:text>
          </xsl:when>
          <xsl:when test="$argType = 'java.math.BigInteger' and $arity=1">
             <xsl:text>new Singulink.Numerics.BigDecimal(</xsl:text>
