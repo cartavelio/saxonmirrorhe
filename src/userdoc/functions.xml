@@ -1178,15 +1178,16 @@
         <p>The effect of the function changed in XSLT 3.0 to return true for all defined
           elements in the XSLT namespace, not only those classified as instructions. Saxon implements
           the 3.0 specification.</p>
-        <p>If experimental XSLT 4.0 extensions are enabled, then <code>element-available</code>
-          returns true for the newly defined elements (such as <code>xsl:item-type</code> and <code>xsl:array</code>)</p>
+        <p>If experimental XSLT 4.0 extensions are enabled, then <code>element-available()</code>
+          returns true for the newly defined elements (such as <code>xsl:item-type</code> and
+          <code>xsl:array</code>).</p>
         <p>For <code>xsl:evaluate</code>, <code>element-available()</code> returns true unless the configuration
           option <a class="feature" href="DISABLE_XSL_EVALUATE"/> is set.</p>
         <p>For <code>xsl:import-schema</code>, <code>element-available()</code> returns true if executed under
           a configuration that supports schema processing (that is, Saxon-EE with a suitable license file), provided
           that the execution target (for exported SEF files) is also "EE".</p>
         <p>For a SaxonJS stylesheet using elements in the <code>ixsl</code> namespace (such as <code>ixsl:schedule-action</code>),
-          SaxonJ and SaxonCS report <code>element-available() = true</code> only if the execution target (for exported SEF files)
+          <code>element-available()</code> returns true with SaxonJ and SaxonCS only if the execution target (for exported SEF files)
         is "JS".</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
@@ -4056,10 +4057,10 @@
             has been enabled either by including an <code>xsl:import-schema</code> declaration in the stylesheet, or
             by setting <code>isSchemaAware(true)</code> on the <code>XsltCompiler</code> (or <code>-sa</code> on the command line).</li>
           <li><code>supports-streaming</code>: returns "yes" if running under Saxon-EE with a license, unless the
-            configuration feature <a class="feature">STREAMABILITY</a> has been set to false.</li>
+            configuration feature <a class="feature" href="STREAMABILITY"/> has been set to false.</li>
           <li><code>supports-dynamic-evaluation</code>: returns "yes" unless the configuration feature 
-            <a class="feature">DISABLE_XSL_EVALUATE</a> has been set to false.</li>
-          <li><code>xsd-version</code>: returns the value of the configuration property <a class="feature">XSD_VERSION</a>,
+            <a class="feature" href="DISABLE_XSL_EVALUATE"/> has been set to false.</li>
+          <li><code>xsd-version</code>: returns the value of the configuration property <a class="feature" href="XSD_VERSION"/>,
             which defaults to "1.1".</li>
         </ul>
       </status>
