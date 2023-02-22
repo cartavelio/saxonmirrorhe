@@ -274,6 +274,19 @@ def testEmbeddedStylesheet(saxonproc, data_dir):
         print(executable.error_message)
     assert node is not None
 
+def xquery_40_functions():
+    proc = PySaxonProcessor(license=True)
+
+    proc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')
+
+    xquery_processor = proc.new_xquery_processor()
+
+    result = xquery_processor.run_query_to_value(query_text = 'xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")')
+
+    assert not xquery_processor.exception_occurred
+    
+    assert "paragraph" in result
+
 def testContext2NotRootNamedTemplate(saxonproc, files_dir, data_dir):
         trans = saxonproc.new_xslt30_processor()
         input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")

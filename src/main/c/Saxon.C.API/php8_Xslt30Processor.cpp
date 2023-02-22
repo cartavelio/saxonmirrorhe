@@ -513,7 +513,7 @@ PHP_METHOD(Xslt30Processor,  setXsltLanguageVersion)
     if (xslt30Processor != nullptr) {
 
         if(str != nullptr) {
-            xslt30Processor->setFastCompilation(str);
+            xslt30Processor->setXsltLanguageVersion(str);
         }
     }
 }

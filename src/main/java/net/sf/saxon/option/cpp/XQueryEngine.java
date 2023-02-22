@@ -228,6 +228,11 @@ public class XQueryEngine extends SaxonCAPI {
                     }
                 }
 
+                if(optionsMap.containsKey("-lang-version")) {
+                    String versionStr = (String)optionsMap.get("-lang-version");
+                    compiler.setLanguageVersion(versionStr);
+                }
+
                 if (optionsMap.containsKey("qs")) {
                     query = (String) optionsMap.get("qs");
                     executable = compiler.compile(query);
