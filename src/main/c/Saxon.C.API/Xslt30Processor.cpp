@@ -162,6 +162,14 @@ void Xslt30Processor::setFastCompilation(bool fast){
     }
 }
 
+void Xslt30Processor::setRelocatable(bool flag){
+    if(flag) {
+        setProperty("-relocate", "1");
+    } else {
+        setProperty("-relocate", "0");
+    }
+}
+
 void Xslt30Processor::setXsltLanguageVersion(const char* version) {
     if (version != nullptr) {
         setProperty("-lang", version);
