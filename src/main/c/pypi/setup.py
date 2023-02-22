@@ -25,7 +25,7 @@ else:
 
 # extented modules
 ext_modules = [Extension(
-                        "saxonc", 
+                        "saxonc@@edition@@", 
                         sources=[
                             "python_saxon/saxonc.pyx", 
                             "Saxon.C.API/SaxonProcessor.cpp",
