@@ -393,7 +393,7 @@ public class ZenoChain<T> implements Iterable<T> {
      * @param end the zero-based end position of the required sublist, exclusive
      * @return the sublist, as a new ZenoChain
      * @throws IndexOutOfBoundsException under the same conditions as for {@link List#subList(int, int)}:
-     *  (start < 0 || end > size || start > end)
+     *  (start &lt; 0 || end &gt; size || start &gt; end)
      */
 
     public ZenoChain<T> subList(int start, int end) {

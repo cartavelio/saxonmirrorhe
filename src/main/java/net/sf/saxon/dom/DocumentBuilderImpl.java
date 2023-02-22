@@ -265,7 +265,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      * @param stripAction one of {@link net.sf.saxon.value.Whitespace#IGNORABLE},
      *                    {@link net.sf.saxon.value.Whitespace#ALL}, or {@link net.sf.saxon.value.Whitespace#NONE}
      * @since 8.9
-     * @deprecated since 10.0: use {@link ParseOptions#setSpaceStrippingRule(SpaceStrippingRule)}
+     * @deprecated since 10.0: use {@link ParseOptions#withSpaceStrippingRule(SpaceStrippingRule)}
      */
 
     @Deprecated

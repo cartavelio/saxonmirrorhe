@@ -1336,7 +1336,7 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Get the set of functions in the FN namespace defined in the XSLT and F&O specifications
+     * Get the set of functions in the "fn" namespace defined in the XSLT and F&amp;O specifications
      * @param version The XSLT version (30 or 40)
      * @return the function library
      */
@@ -1351,7 +1351,7 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Get the set of functions in the FN namespace defined in the F&O specification
+     * Get the set of functions in the "fn" namespace defined in the F&amp;O specification
      * @param version The XPath version (eg 20, 30, 31, 40)
      * @return the function library
      */

@@ -83,7 +83,7 @@ public class Optimizer {
 
     /**
      * Ask whether a particular optimizer option is set
-     * @param option the code identifying the option, e.g. {@link OptimizerOptions#BYTE_CODE}
+     * @param option the code identifying the option, e.g. {@link OptimizerOptions#LOOP_LIFTING}
      *            @return true if the option is set
      */
 
