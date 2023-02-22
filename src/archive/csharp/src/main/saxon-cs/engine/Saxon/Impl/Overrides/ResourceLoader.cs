@@ -1,0 +1,77 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
+using System.Xml.XPath;
+using Saxon.Ejava.io;
+using Saxon.Ejava.net;
+using IOException = System.IO.IOException;
+
+namespace Saxon.Impl.Overrides {
+    public class ResourceLoader {
+        /**
+         * The maximum number of redirects to follow before throwing an IOException.
+         * If you allow the underlying Java URL class to follow redirects, it gives
+         * up after 20 hops.
+         */
+        public static int MAX_REDIRECTS = 20;
+
+        /**
+         * Open a URLConnection to the resource identified by the URI. For HTTP URIs, this
+         * method will follow up to MAX_REDIRECTS redirects or until it detects a loop;
+         * the connection returned in this case is to the first resource that did not
+         * return a 301 or 302 response code.
+         *
+         * @param url The URL to retrieve.
+         * @return An InputStream for the resource content.
+         * @throws IOException If more than MAX_REDIRECTS are occur or if a loop is detected.
+         */
+
+        public static URLConnection urlConnection(URL url) {
+            if ("http" == url.getProtocol() || "https" == url.getProtocol()) {
+                // TODO: handle redirects
+                HttpResponseMessage response = readHttp(url.toURI().ToString());
+                return new HttpURLConnection(url, response);
+            } else if ("file" == url.getProtocol()) {
+                Stream input = System.IO.File.OpenRead(url.getPath());
+                return new URLConnection(url, input);
+            }
+            else {
+                throw new XPathException("Cannot handle protocol " + url.getProtocol());
+            }
+        }
+        
+        private static readonly HttpClient _client = new HttpClient();
+
+        public static HttpResponseMessage readHttp(String uri) {
+            // See https://stackoverflow.com/questions/67696375/in-net-failure-to-retrieve-http-resource-from-w3c-web-site
+            // Failure to set user-agent caused problems with XSLT test catalog-005
+            var req = new HttpRequestMessage(HttpMethod.Get, uri);
+            req.Headers.Add("user-agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X)");
+            var resp = _client.Send(req);
+            resp.EnsureSuccessStatusCode();
+            return resp;
+        }
+
+        /**
+         * Open a stream to retrieve the content identified by the URI. For HTTP URIs, this
+         * method will follow up to MAX_REDIRECTS redirects or until it detects a loop.
+         * This method automatically accepts and decompresses gzip encoded responses.
+         *
+         * @param url The URL to retrieve.
+         * @return An InputStream for the resource content.
+         * @throws IOException If more than MAX_REDIRECTS are occur or if a loop is detected.
+         */
+        public static Stream urlStream(URL url) {
+            try {
+                URLConnection conn = urlConnection(url);
+                return conn.getInputStream();
+            }
+            catch (Exception e) {
+                throw new System.IO.IOException("Failed to open connection to " + url + ": " + e.Message);
+            }
+        }
+    }
+}
+
+// Copyright (c) 2021 Saxonica Limited
