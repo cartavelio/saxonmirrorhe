@@ -33,7 +33,6 @@ import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.AttributeValueTemplate;
 import net.sf.saxon.trans.*;
-import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.tree.util.NamespaceResolverWithDefault;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -93,6 +92,7 @@ public class XQueryParser extends XPathParser {
 
     /**
      * Constructor for internal use: this class should be instantiated via the QueryModule
+     *
      * @param languageVersion the XQuery language version, for example 31 for XQuery 3.1
      */
 
@@ -224,11 +224,11 @@ public class XQueryParser extends XPathParser {
         for (int i = 0; i < in.length(); i++) {
             char ch = in.charAt(i);
             switch (ch) {
-                case (char)0x85:
-                case (char)0x2028:
+                case (char) 0x85:
+                case (char) 0x2028:
                     sb.append((char) 0xa);
                     break;
-                case (char)0xd:
+                case (char) 0xd:
                     if (i < in.length() - 1 && (in.charAt(i + 1) == (char) 0xa || in.charAt(i + 1) == (char) 0x85)) {
                         sb.append((char) 0xa);
                         i++;
@@ -368,8 +368,8 @@ public class XQueryParser extends XPathParser {
                         allowXPath40Syntax || env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
 
         QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
-            .withAcceptEQName(true)
-            .withUnescaper(new Unescaper(env.getConfiguration().getValidCharacterChecker()));
+                .withAcceptEQName(true)
+                .withUnescaper(new Unescaper(env.getConfiguration().getValidCharacterChecker()));
 
         setQNameParser(qp);
 
@@ -432,8 +432,8 @@ public class XQueryParser extends XPathParser {
         t.languageLevel = languageVersion;
         t.isXQuery = true;
         QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
-            .withAcceptEQName(true)
-            .withUnescaper(new Unescaper(config.getValidCharacterChecker()));
+                .withAcceptEQName(true)
+                .withUnescaper(new Unescaper(config.getValidCharacterChecker()));
         setQNameParser(qp);
         try {
             t.tokenize(queryString, 0, -1);
@@ -2410,7 +2410,7 @@ public class XQueryParser extends XPathParser {
         }
         do {
             nextToken();
-            
+
             int offset = t.currentTokenStartOffset;
             ForClause clause = forMember ? new ForMemberClause() : new ForClause();
             clause.setRepeated(!first || containsLoopingClause(clauseList));
@@ -4074,55 +4074,54 @@ public class XQueryParser extends XPathParser {
      */
 
     /*@NotNull*/
-    @CSharpReplaceException(from="java.lang.StringIndexOutOfBoundsException", to="System.ArgumentOutOfRangeException")
     private Expression parsePseudoXML(boolean allowEndTag) throws XPathException {
-        try {
-            Expression exp;
-            int offset = t.inputOffset;
-            // we're reading raw characters, so we don't want the currentTokenStartOffset
-            char c = t.nextChar();
-            switch (c) {
-                case '!':
-                    c = t.nextChar();
-                    if (c == '-') {
-                        exp = parseCommentConstructor();
-                    } else if (c == '[') {
-                        grumble("A CDATA section is allowed only in element content");
-                        return null;
-                        // if CDATA were allowed here, we would have already read it
-                    } else {
-                        grumble("Expected '--' or '[CDATA[' after '<!'");
-                        return null;
-                    }
-                    break;
-                case '?':
-                    exp = parsePIConstructor();
-                    break;
-                case '/':
-                    if (allowEndTag) {
-                        StringBuilder sb = new StringBuilder(16);
-                        while (true) {
-                            c = t.nextChar();
-                            if (c == '>') {
-                                break;
-                            }
-                            sb.append(c);
+        Expression exp;
+        int offset = t.inputOffset;
+        // we're reading raw characters, so we don't want the currentTokenStartOffset
+        char c = t.nextChar();
+        switch (c) {
+            case '!':
+                c = t.nextChar();
+                if (c == '-') {
+                    exp = parseCommentConstructor();
+                } else if (c == '[') {
+                    grumble("A CDATA section is allowed only in element content");
+                    return null;
+                    // if CDATA were allowed here, we would have already read it
+                } else {
+                    grumble("Expected '--' or '[CDATA[' after '<!'");
+                    return null;
+                }
+                break;
+            case '?':
+                exp = parsePIConstructor();
+                break;
+            case '/':
+                if (allowEndTag) {
+                    StringBuilder sb = new StringBuilder(16);
+                    while (true) {
+                        c = t.nextChar();
+                        if (c == '>') {
+                            break;
+                        } else if (c == Tokenizer.NUL) {
+                            grumble("Expected '>' after '/'; found end of input");
                         }
-                        return new StringLiteral(sb.toString());
+                        sb.append(c);
                     }
-                    grumble("Unmatched XML end tag");
-                    return new ErrorExpression();
-                default:
-                    t.unreadChar();
-                    exp = parseDirectElementConstructor(allowEndTag);
-                    break;
-            }
-            setLocation(exp, offset);
-            return exp;
-        } catch (StringIndexOutOfBoundsException e) {
-            grumble("End of input encountered while parsing direct constructor");
-            return new ErrorExpression();
+                    return new StringLiteral(sb.toString());
+                }
+                grumble("Unmatched XML end tag");
+                return new ErrorExpression();
+            case Tokenizer.NUL:
+                grumble("End of input encountered while parsing direct constructor");
+                return new ErrorExpression();
+            default:
+                t.unreadChar();
+                exp = parseDirectElementConstructor(allowEndTag);
+                break;
         }
+        setLocation(exp, offset);
+        return exp;
     }
 
     /**
@@ -4132,11 +4131,10 @@ public class XQueryParser extends XPathParser {
      *                 element constructor. This has the effect that the child element is not copied, which means
      *                 that namespace inheritance (which only happens during copying) has no effect
      * @return the expression representing the constructor
-     * @throws XPathException                  if a syntax error is found
-     * @throws StringIndexOutOfBoundsException if the end of input is encountered prematurely
+     * @throws XPathException if a syntax error is found
      */
 
-    private Expression parseDirectElementConstructor(boolean isNested) throws XPathException, StringIndexOutOfBoundsException {
+    private Expression parseDirectElementConstructor(boolean isNested) throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
         boolean changesContext = false;
         int offset = t.inputOffset - 1;
@@ -4148,6 +4146,8 @@ public class XQueryParser extends XPathParser {
             c = t.nextChar();
             if (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '/' || c == '>') {
                 break;
+            } else if (c == Tokenizer.NUL) {
+                grumble("Found end of input while reading element name in XQuery element constructor");
             }
             buff.append(c);
         }
@@ -4170,6 +4170,8 @@ public class XQueryParser extends XPathParser {
             c = skipSpaces(c);
             if (c == '/' || c == '>') {
                 break;
+            } else if (c == Tokenizer.NUL) {
+                grumble("End of input encountered within element start tag");
             }
             int attOffset = t.inputOffset - 1;
             buff.setLength(0);
@@ -4177,7 +4179,7 @@ public class XQueryParser extends XPathParser {
             do {
                 buff.append(c);
                 c = t.nextChar();
-            } while (c != ' ' && c != '\n' && c != '\r' && c != '\t' && c != '=');
+            } while (c != ' ' && c != '\n' && c != '\r' && c != '\t' && c != '=' && c != Tokenizer.NUL);
             String attName = buff.toString();
             if (!NameChecker.isQName(StringTool.codePoints(attName))) {
                 grumble("Invalid attribute name " + Err.wrap(attName, Err.ATTRIBUTE));
@@ -4186,6 +4188,9 @@ public class XQueryParser extends XPathParser {
             expectChar(c, '=');
             c = t.nextChar();
             c = skipSpaces(c);
+            if (c == Tokenizer.NUL) {
+                grumble("End of input encountered within element start tag");
+            }
             char delim = c;
             boolean isNamespace = "xmlns".equals(attName) || attName.startsWith("xmlns:");
             int end;
@@ -4206,6 +4211,9 @@ public class XQueryParser extends XPathParser {
                 // by convention, this returns the end position when called with scanOnly set
                 end = (int) ((Int64Value) ((Literal) avt).getGroundedValue()).longValue();
 
+            }
+            if (end >= t.input.length()) {
+                grumble("Reached end of input while processing attributes in start tag");
             }
             // save the value with its surrounding quotes
             String val = t.input.substring(t.inputOffset - 1, end + 1);
@@ -4646,214 +4654,212 @@ public class XQueryParser extends XPathParser {
      * @throws XPathException if any static errors are detected
      */
     private void readElementContent(String startTag, /*@NotNull*/ List<Expression> components) throws XPathException {
-        try {
-            boolean afterEnclosedExpr = false;
+        boolean afterEnclosedExpr = false;
+        while (true) {
+            // read all the components of the element value
+            StringBuilder text = new StringBuilder(64);
+            char c;
+            boolean containsEntities = false;
             while (true) {
-                // read all the components of the element value
-                StringBuilder text = new StringBuilder(64);
-                char c;
-                boolean containsEntities = false;
-                while (true) {
-                    c = t.nextChar();
-                    if (c == '<') {
-                        // See if we've got a CDATA section
-                        if (t.nextChar() == '!') {
-                            if (t.nextChar() == '[') {
-                                readCDATASection(text);
-                                containsEntities = true;
-                                continue;
-                            } else {
-                                t.unreadChar();
-                                t.unreadChar();
-                            }
+                c = t.nextChar();
+                if (c == '<') {
+                    // See if we've got a CDATA section
+                    if (t.nextChar() == '!') {
+                        if (t.nextChar() == '[') {
+                            readCDATASection(text);
+                            containsEntities = true;
+                            continue;
                         } else {
                             t.unreadChar();
+                            t.unreadChar();
                         }
+                    } else {
+                        t.unreadChar();
+                    }
+                    break;
+                } else if (c == '&') {
+                    text.append(readEntityReference());
+                    containsEntities = true;
+                } else if (c == '}') {
+                    c = t.nextChar();
+                    if (c != '}') {
+                        grumble("'}' must be written as '}}' within element content");
+                    }
+                    text.append(c);
+                } else if (c == '{') {
+                    c = t.nextChar();
+                    if (c != '{') {
+                        c = '{';
                         break;
-                    } else if (c == '&') {
-                        text.append(readEntityReference());
-                        containsEntities = true;
-                    } else if (c == '}') {
-                        c = t.nextChar();
-                        if (c != '}') {
-                            grumble("'}' must be written as '}}' within element content");
-                        }
-                        text.append(c);
-                    } else if (c == '{') {
-                        c = t.nextChar();
-                        if (c != '{') {
-                            c = '{';
-                            break;
-                        }
-                        text.append(c);
-                    } else {
-                        if (!charChecker.test(c) && !UTF16CharacterSet.isSurrogate(c)) {
-                            grumble("Character code " + c + " is not a valid XML character");
-                        }
-                        text.append(c);
                     }
-                }
-                String textStr = text.toString();
-                if (!textStr.isEmpty() &&
-                        (containsEntities |
-                                 ((QueryModule) env).isPreserveBoundarySpace() ||
-                                 !Whitespace.isAllWhite(StringView.of(textStr)))) {
-                    ValueOf inst = new ValueOf(new StringLiteral(new StringValue(textStr)), false, false);
-                    setLocation(inst);
-                    components.add(inst);
-                    afterEnclosedExpr = false;
-                }
-                if (c == '<') {
-                    Expression exp = parsePseudoXML(true);
-                    // An end tag can appear here, and is returned as a string value
-                    if (exp instanceof StringLiteral) {
-                        String endTag = ((StringLiteral) exp).getString().toString();
-                        if (Whitespace.isWhite(endTag.charAt(0))) {
-                            grumble("End tag contains whitespace before the name");
-                        }
-                        endTag = Whitespace.trim(endTag);
-                        if (endTag.equals(startTag)) {
-                            return;
-                        } else {
-                            grumble("End tag </" + endTag +
-                                            "> does not match start tag <" + startTag + '>', "XQST0118");
-                            // error code allocated by spec bug 11609
-                        }
-                    } else {
-                        components.add(exp);
-                    }
+                    text.append(c);
+                } else if (c == Tokenizer.NUL) {
+                    grumble("Reached end of input while reading XQuery element content");
                 } else {
-                    // we read an '{' indicating an enclosed expression
-                    if (afterEnclosedExpr) {
-                        Expression previousComponent = components.get(components.size() - 1);
-                        boolean previousComponentIsNodeTest = true;
-                        UType previousItemType = previousComponent.getStaticUType(UType.ANY);
-                        previousComponentIsNodeTest = UType.ANY_NODE.subsumes(previousItemType);
-                        if (!previousComponentIsNodeTest) {
-                            // Add a zero-length text node, to prevent {"a"}{"b"} generating an intervening space
-                            // See tests (qxmp132, qxmp261)
-                            ValueOf inst = new ValueOf(new StringLiteral(StringValue.EMPTY_STRING), false, false);
-                            setLocation(inst);
-                            components.add(inst);
-                        }
+                    if (!charChecker.test(c) && !UTF16CharacterSet.isSurrogate(c)) {
+                        grumble("Character code " + c + " is not a valid XML character");
                     }
-                    t.unreadChar();
-                    t.setState(Tokenizer.DEFAULT_STATE);
-                    lookAhead();
-                    nextToken();
-                    if (t.currentToken == Token.RCURLY && allowXPath31Syntax) {
-                        components.add(Literal.makeEmptySequence());
-                    } else {
-                        Expression exp = parseExpression();
-                        if (!((QueryModule) env).isPreserveNamespaces()) {
-                            exp = new CopyOf(exp, false, Validation.PRESERVE, null, true);
-                        }
-                        components.add(exp);
-                        expect(Token.RCURLY);
-                    }
-                    afterEnclosedExpr = true;
+                    text.append(c);
                 }
             }
-        } catch (StringIndexOutOfBoundsException err) {
-            grumble("No closing end tag found for direct element constructor");
+            String textStr = text.toString();
+            if (!textStr.isEmpty() &&
+                    (containsEntities |
+                             ((QueryModule) env).isPreserveBoundarySpace() ||
+                             !Whitespace.isAllWhite(StringView.of(textStr)))) {
+                ValueOf inst = new ValueOf(new StringLiteral(new StringValue(textStr)), false, false);
+                setLocation(inst);
+                components.add(inst);
+                afterEnclosedExpr = false;
+            }
+            if (c == '<') {
+                Expression exp = parsePseudoXML(true);
+                // An end tag can appear here, and is returned as a string value
+                if (exp instanceof StringLiteral) {
+                    String endTag = ((StringLiteral) exp).getString().toString();
+                    if (Whitespace.isWhite(endTag.charAt(0))) {
+                        grumble("End tag contains whitespace before the name");
+                    }
+                    endTag = Whitespace.trim(endTag);
+                    if (endTag.equals(startTag)) {
+                        return;
+                    } else {
+                        grumble("End tag </" + endTag +
+                                        "> does not match start tag <" + startTag + '>', "XQST0118");
+                        // error code allocated by spec bug 11609
+                    }
+                } else {
+                    components.add(exp);
+                }
+            } else {
+                // we read an '{' indicating an enclosed expression
+                if (afterEnclosedExpr) {
+                    Expression previousComponent = components.get(components.size() - 1);
+                    boolean previousComponentIsNodeTest = true;
+                    UType previousItemType = previousComponent.getStaticUType(UType.ANY);
+                    previousComponentIsNodeTest = UType.ANY_NODE.subsumes(previousItemType);
+                    if (!previousComponentIsNodeTest) {
+                        // Add a zero-length text node, to prevent {"a"}{"b"} generating an intervening space
+                        // See tests (qxmp132, qxmp261)
+                        ValueOf inst = new ValueOf(new StringLiteral(StringValue.EMPTY_STRING), false, false);
+                        setLocation(inst);
+                        components.add(inst);
+                    }
+                }
+                t.unreadChar();
+                t.setState(Tokenizer.DEFAULT_STATE);
+                lookAhead();
+                nextToken();
+                if (t.currentToken == Token.RCURLY && allowXPath31Syntax) {
+                    components.add(Literal.makeEmptySequence());
+                } else {
+                    Expression exp = parseExpression();
+                    if (!((QueryModule) env).isPreserveNamespaces()) {
+                        exp = new CopyOf(exp, false, Validation.PRESERVE, null, true);
+                    }
+                    components.add(exp);
+                    expect(Token.RCURLY);
+                }
+                afterEnclosedExpr = true;
+            }
         }
     }
 
     /*@Nullable*/
     private Expression parsePIConstructor() throws XPathException {
-        try {
-            StringBuilder pi = new StringBuilder(64);
-            int firstSpace = -1;
-            while (!pi.toString().endsWith("?>")) {
-                char c = t.nextChar();
-                if (firstSpace < 0 && " \t\r\n".indexOf(c) >= 0) {
-                    firstSpace = pi.length();
-                }
-                pi.append(c);
-            }
-            pi.setLength(pi.length() - 2);
 
-            String target;
-            String data = "";
-            if (firstSpace < 0) {
-                // there is no data part
-                target = pi.toString();
-            } else {
-                // trim leading space from the data part, but not trailing space
-                target = pi.toString().substring(0, firstSpace);
-                firstSpace++;
-                while (firstSpace < pi.length() && " \t\r\n".indexOf(pi.charAt(firstSpace)) >= 0) {
-                    firstSpace++;
-                }
-                data = pi.toString().substring(firstSpace);
+        StringBuilder pi = new StringBuilder(64);
+        int firstSpace = -1;
+        while (!pi.toString().endsWith("?>")) {
+            char c = t.nextChar();
+            if (c == Tokenizer.NUL) {
+                grumble("Found end of input while reading processing instruction constructor");
             }
-
-            if (!NameChecker.isValidNCName(target)) {
-                grumble("Invalid processing instruction name " + Err.wrap(target));
+            if (firstSpace < 0 && " \t\r\n".indexOf(c) >= 0) {
+                firstSpace = pi.length();
             }
-
-            if (target.equalsIgnoreCase("xml")) {
-                grumble("A processing instruction must not be named 'xml' in any combination of upper and lower case");
-            }
-
-            ProcessingInstruction instruction =
-                    new ProcessingInstruction(new StringLiteral(target));
-            instruction.setSelect(new StringLiteral(data));
-            setLocation(instruction);
-            return instruction;
-        } catch (StringIndexOutOfBoundsException err) {
-            grumble("No closing '?>' found for processing instruction");
-            return null;
+            pi.append(c);
         }
+        pi.setLength(pi.length() - 2);
+
+        String target;
+        String data = "";
+        if (firstSpace < 0) {
+            // there is no data part
+            target = pi.toString();
+        } else {
+            // trim leading space from the data part, but not trailing space
+            target = pi.toString().substring(0, firstSpace);
+            firstSpace++;
+            while (firstSpace < pi.length() && " \t\r\n".indexOf(pi.charAt(firstSpace)) >= 0) {
+                firstSpace++;
+            }
+            data = pi.toString().substring(firstSpace);
+        }
+
+        if (!NameChecker.isValidNCName(target)) {
+            grumble("Invalid processing instruction name " + Err.wrap(target));
+        }
+
+        if (target.equalsIgnoreCase("xml")) {
+            grumble("A processing instruction must not be named 'xml' in any combination of upper and lower case");
+        }
+
+        ProcessingInstruction instruction =
+                new ProcessingInstruction(new StringLiteral(target));
+        instruction.setSelect(new StringLiteral(data));
+        setLocation(instruction);
+        return instruction;
+
     }
 
     private void readCDATASection(StringBuilder cdata) throws XPathException {
-        try {
-            char c;
-            // CDATA section
-            c = t.nextChar();
-            expectChar(c, 'C');
-            c = t.nextChar();
-            expectChar(c, 'D');
-            c = t.nextChar();
-            expectChar(c, 'A');
-            c = t.nextChar();
-            expectChar(c, 'T');
-            c = t.nextChar();
-            expectChar(c, 'A');
-            c = t.nextChar();
-            expectChar(c, '[');
-            while (!cdata.toString().endsWith("]]>")) {
-                cdata.append(t.nextChar());
+        char c;
+        // CDATA section
+        c = t.nextChar();
+        expectChar(c, 'C');
+        c = t.nextChar();
+        expectChar(c, 'D');
+        c = t.nextChar();
+        expectChar(c, 'A');
+        c = t.nextChar();
+        expectChar(c, 'T');
+        c = t.nextChar();
+        expectChar(c, 'A');
+        c = t.nextChar();
+        expectChar(c, '[');
+        while (!cdata.toString().endsWith("]]>")) {
+            char cc = t.nextChar();
+            if (cc == Tokenizer.NUL) {
+                grumble("No closing ']]>' found for CDATA section");
             }
-            cdata.setLength(cdata.length() - 3);
-        } catch (StringIndexOutOfBoundsException err) {
-            grumble("No closing ']]>' found for CDATA section");
+            cdata.append(cc);
         }
+        cdata.setLength(cdata.length() - 3);
     }
 
     /*@Nullable*/
     private Expression parseCommentConstructor() throws XPathException {
-        try {
-            char c = t.nextChar();
-            // XML-like comment
-            expectChar(c, '-');
-            StringBuilder comment = new StringBuilder(256);
-            while (!comment.toString().endsWith("--")) {
-                comment.append(t.nextChar());
+
+        char c = t.nextChar();
+        // XML-like comment
+        expectChar(c, '-');
+        StringBuilder comment = new StringBuilder(256);
+        while (!comment.toString().endsWith("--")) {
+            char cc = t.nextChar();
+            if (cc == Tokenizer.NUL) {
+                grumble("Reached end of input while reading XML comment constructor");
             }
-            if (t.nextChar() != '>') {
-                grumble("'--' is not permitted in an XML comment");
-            }
-            String commentText = comment.substring(0, comment.length() - 2);
-            Comment instruction = new Comment();
-            instruction.setSelect(new StringLiteral(new StringValue(commentText.toString())));
-            setLocation(instruction);
-            return instruction;
-        } catch (StringIndexOutOfBoundsException err) {
-            grumble("No closing '-->' found for comment constructor");
-            return null;
+            comment.append(cc);
         }
+        if (t.nextChar() != '>') {
+            grumble("'--' is not permitted in an XML comment");
+        }
+        String commentText = comment.substring(0, comment.length() - 2);
+        Comment instruction = new Comment();
+        instruction.setSelect(new StringLiteral(new StringValue(commentText.toString())));
+        setLocation(instruction);
+        return instruction;
     }
 
     /**
@@ -5044,21 +5050,19 @@ public class XQueryParser extends XPathParser {
 
     /*@Nullable*/
     private String readEntityReference() throws XPathException {
-        try {
-            StringBuilder sb = new StringBuilder(64);
-            while (true) {
-                char c = t.nextChar();
-                if (c == ';') {
-                    break;
-                }
-                sb.append(c);
+        StringBuilder sb = new StringBuilder(64);
+        while (true) {
+            char c = t.nextChar();
+            if (c == ';') {
+                break;
+            } else if (c == Tokenizer.NUL) {
+                grumble("No closing ';' found for entity or character reference");
+                return "";     // to keep the Java compiler happy
             }
-            String entity = sb.toString();
-            return new Unescaper(env.getConfiguration().getValidCharacterChecker()).analyzeEntityReference(entity);
-        } catch (StringIndexOutOfBoundsException err) {
-            grumble("No closing ';' found for entity or character reference");
-            return "";     // to keep the Java compiler happy
+            sb.append(c);
         }
+        String entity = sb.toString();
+        return new Unescaper(env.getConfiguration().getValidCharacterChecker()).analyzeEntityReference(entity);
     }
 
     /**
@@ -5103,40 +5107,40 @@ public class XQueryParser extends XPathParser {
             }
             char prior = (char) 0;
             char penult = (char) 0;
-            try {
-                boolean continueOuter = false;
-                while (true) {
-                    c = t.nextChar();
-                    if (prior == '`' && c == '{') {
-                        sb.setLength(sb.length() - 1);
-                        components.add(new StringLiteral(sb.toString()));
-                        t.lookAhead();
-                        t.next();
-                        if (t.currentToken == Token.RCURLY) {
-                            components.add(Literal.makeEmptySequence());
-                            sb.setLength(0);
-                            continue;
-                        } else {
-                            continueOuter = true;
-                            break;
-                        }
-                    } else if (penult == ']' && prior == '`' && c == '`') {
-                        sb.setLength(sb.length() - 2);
-                        components.add(new StringLiteral(sb.toString()));
-                        t.lookAhead();
-                        t.next();
-                        continueOuter = false;
+
+            boolean continueOuter = false;
+            while (true) {
+                c = t.nextChar();
+                if (c == Tokenizer.NUL) {
+                    grumble("Reached end of input while reading string constructor");
+                }
+                if (prior == '`' && c == '{') {
+                    sb.setLength(sb.length() - 1);
+                    components.add(new StringLiteral(sb.toString()));
+                    t.lookAhead();
+                    t.next();
+                    if (t.currentToken == Token.RCURLY) {
+                        components.add(Literal.makeEmptySequence());
+                        sb.setLength(0);
+                        continue;
+                    } else {
+                        continueOuter = true;
                         break;
                     }
-                    sb.append(c);
-                    penult = prior;
-                    prior = c;
-                }
-                if (!continueOuter) {
+                } else if (penult == ']' && prior == '`' && c == '`') {
+                    sb.setLength(sb.length() - 2);
+                    components.add(new StringLiteral(sb.toString()));
+                    t.lookAhead();
+                    t.next();
+                    continueOuter = false;
                     break;
                 }
-            } catch (StringIndexOutOfBoundsException e) {
-                grumble("String constructor is missing ]`` terminator ");
+                sb.append(c);
+                penult = prior;
+                prior = c;
+            }
+            if (!continueOuter) {
+                break;
             }
 
         }
@@ -5195,11 +5199,10 @@ public class XQueryParser extends XPathParser {
      * Skip whitespace.
      *
      * @param c the current character
-     * @return the first character after any whitespace
-     * @throws StringIndexOutOfBoundsException if the end of input is encountered
+     * @return the first character after any whitespace, or NUL at end of input
      */
 
-    private char skipSpaces(char c) throws StringIndexOutOfBoundsException {
+    private char skipSpaces(char c) {
         while (c == ' ' || c == '\n' || c == '\r' || c == '\t') {
             c = t.nextChar();
         }
@@ -5216,7 +5219,8 @@ public class XQueryParser extends XPathParser {
 
     private void expectChar(char actual, char expected) throws XPathException {
         if (actual != expected) {
-            grumble("Expected '" + expected + "', found '" + actual + '\'');
+            grumble("Expected '" + expected + "', found " +
+                            (actual == Tokenizer.NUL ? "end of input" : "'" + actual + "'"));
         }
     }
 
