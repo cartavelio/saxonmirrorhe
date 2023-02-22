@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
@@ -11,6 +18,12 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+/**
+ * A <code>DirectResourceResolver</code> is a {@link ResourceResolver} that resolves requests
+ * using the direct, native capabilities of the platform. For example a "file:" URI is resolved
+ * by finding the file in filestore, and an "http:" URI is resolved by making an HTTP request.
+ */
 
 public class DirectResourceResolver implements ResourceResolver {
 

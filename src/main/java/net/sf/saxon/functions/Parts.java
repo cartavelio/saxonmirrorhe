@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.functions;
 
 
@@ -30,6 +37,10 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * Proposed XPath 4.0 function that returns the components of an atomic value as a map (for example, the components
+ * of a dateTime, a duration, or a URI).
+ */
 public class Parts extends SystemFunction implements Callable {
 
     /**

@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.regex;
 
 import net.sf.saxon.regex.charclass.CharacterClass;
@@ -11,7 +18,7 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * A sequence of multiple pieces
+ * A sequence of multiple pieces in a regular expression
  */
 
 public class OpSequence extends Operation {
@@ -243,20 +250,3 @@ public class OpSequence extends Operation {
 
 }
 
-//
-// The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Saxonica Limited
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All Rights Reserved.
-//
-// Contributor(s): none.
-//
