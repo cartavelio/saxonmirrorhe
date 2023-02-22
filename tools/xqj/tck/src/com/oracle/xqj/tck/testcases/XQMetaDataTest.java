@@ -3,6 +3,10 @@ package com.oracle.xqj.tck.testcases;
 
 import javax.xml.xquery.*;
 
+import org.junit.Assert;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class XQMetaDataTest extends XQJTestCase {
 
   public void testGetProductMajorVersion() throws XQException {
@@ -13,11 +17,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.getProductMajorVersion();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -25,7 +29,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.getProductMajorVersion();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -37,11 +41,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.getProductMinorVersion();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -49,7 +53,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.getProductMinorVersion();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -61,11 +65,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.getProductName();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -73,7 +77,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.getProductName();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -85,11 +89,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.getProductVersion();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -97,7 +101,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.getProductVersion();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -109,11 +113,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.getXQJMajorVersion();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -121,7 +125,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.getXQJMajorVersion();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -133,11 +137,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.getXQJMinorVersion();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -145,7 +149,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.getXQJMinorVersion();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -157,11 +161,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.getXQJVersion();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -169,7 +173,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.getXQJMinorVersion();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -181,11 +185,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isReadOnly();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -193,7 +197,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.isReadOnly();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -204,11 +208,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isXQueryXSupported();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -217,7 +221,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       supportsXQueryX = xqmd.isXQueryXSupported();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
     
     if (supportsXQueryX) {
@@ -240,9 +244,9 @@ public class XQMetaDataTest extends XQJTestCase {
         xqs.next();
         String s = xqs.getAtomicValue();
         xqe.close();
-        junit.framework.Assert.assertEquals("XQueryX is supported, executing an XQueryX query yields unexpected results.", "Hello world!", s);
+        Assert.assertEquals("XQueryX is supported, executing an XQueryX query yields unexpected results.", "Hello world!", s);
       } catch (XQException e) {
-        junit.framework.Assert.fail("A-XQMD-2.1: XQueryX is supported, executing an XQueryX query failed with message: " + e.getMessage());
+        fail("A-XQMD-2.1: XQueryX is supported, executing an XQueryX query failed with message: " + e.getMessage());
       }
     }
   }
@@ -254,11 +258,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isTransactionSupported();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -267,7 +271,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       supportsTransaction = xqmd.isTransactionSupported();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
     
     if (supportsTransaction) {
@@ -275,7 +279,7 @@ public class XQMetaDataTest extends XQJTestCase {
         xqc.setAutoCommit(false);
         xqc.rollback();
       } catch (XQException e) {
-        junit.framework.Assert.fail("A-XQMD-3.1: Transactions are supported, starting and ending a transaction failed with message: " + e.getMessage());
+        fail("A-XQMD-3.1: Transactions are supported, starting and ending a transaction failed with message: " + e.getMessage());
       }
     }
   }
@@ -287,11 +291,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isStaticTypingFeatureSupported();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -300,14 +304,14 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       supportsStaticTyping = xqmd.isStaticTypingFeatureSupported();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
     
     if (supportsStaticTyping) {
       try {
         // According to the XQuery Formal Semantics, the following query must result in a static type  error.
         xqc.prepareExpression("declare variable $v as item() external; $v + 1");
-        junit.framework.Assert.fail("A-XQMD-4.1: XQMetaData reports support for static typing feature, successfully generate a static type error.");
+        fail("A-XQMD-4.1: XQMetaData reports support for static typing feature, successfully generate a static type error.");
       } catch (XQException e) {
         e = null;
         // Expect an xQException
@@ -322,11 +326,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isSchemaImportFeatureSupported();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -335,7 +339,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       supportsSchemaImport = xqmd.isSchemaImportFeatureSupported();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
     
     if (supportsSchemaImport) {
@@ -350,11 +354,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isSchemaValidationFeatureSupported();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -363,7 +367,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       supportsSchemaValidation = xqmd.isSchemaValidationFeatureSupported();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
     
     if (supportsSchemaValidation) {
@@ -378,11 +382,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isFullAxisFeatureSupported();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -391,7 +395,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       supportsFullAxis = xqmd.isFullAxisFeatureSupported();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
     
     if (supportsFullAxis) {
@@ -406,9 +410,9 @@ public class XQMetaDataTest extends XQJTestCase {
         String count = xqs.getAtomicValue();
         xqe.close();
         xqe.close();
-        junit.framework.Assert.assertEquals("Full Axis feature is supported, executing a query with full axis yields unexpected results.", "1", count);
+        Assert.assertEquals("Full Axis feature is supported, executing a query with full axis yields unexpected results.", "1", count);
       } catch (XQException e) {
-        junit.framework.Assert.fail("A-XQMD-7.1: Full Axis feature is supported, executing a query with full axis failed with message: " + e.getMessage());
+        fail("A-XQMD-7.1: Full Axis feature is supported, executing a query with full axis failed with message: " + e.getMessage());
       }
     }
   }
@@ -420,11 +424,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isModuleFeatureSupported();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -433,7 +437,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       supportsModules = xqmd.isModuleFeatureSupported();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
     
     if (supportsModules) {
@@ -448,11 +452,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isSerializationFeatureSupported();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -461,7 +465,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       supportsSerialization = xqmd.isSerializationFeatureSupported();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
     
     if (supportsSerialization) {
@@ -476,11 +480,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isStaticTypingExtensionsSupported();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -489,7 +493,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       supportsStaticTypingExtensions = xqmd.isStaticTypingExtensionsSupported();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
     
     if (supportsStaticTypingExtensions) {
@@ -505,11 +509,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.getUserName();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -517,7 +521,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.getUserName();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -529,11 +533,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.getMaxExpressionLength();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -541,7 +545,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.getMaxExpressionLength();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -553,11 +557,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.getMaxUserNameLength();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -565,7 +569,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.getMaxUserNameLength();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -577,20 +581,20 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.wasCreatedFromJDBCConnection();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
     
     try {
       boolean wasFromJDBC = xqmd.wasCreatedFromJDBCConnection();
-      junit.framework.Assert.assertFalse("A-XQMD-11.1: XQMetaData reports that the connection was not created from a JDBC Connection.", wasFromJDBC);
+      Assert.assertFalse("A-XQMD-11.1: XQMetaData reports that the connection was not created from a JDBC Connection.", wasFromJDBC);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -601,11 +605,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isXQueryEncodingDeclSupported();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -614,7 +618,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       supportsXQueryEncodingDecls = xqmd.isXQueryEncodingDeclSupported();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
     
     if (supportsXQueryEncodingDecls) {
@@ -629,11 +633,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.getSupportedXQueryEncodings();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -641,7 +645,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.isXQueryEncodingDeclSupported();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -652,11 +656,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isXQueryEncodingSupported("UTF-8");
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -664,7 +668,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.isXQueryEncodingSupported("UTF-8");;
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
   }
 
@@ -675,11 +679,11 @@ public class XQMetaDataTest extends XQJTestCase {
       XQMetaData my_xqmd = my_xqc.getMetaData();
       my_xqc.close();
       my_xqmd.isUserDefinedXMLSchemaTypeSupported();
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     } catch (XQException e) {
       // Expect an XQException
     } catch (Exception other_e) {
-      junit.framework.Assert.fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
+      fail("A-XQMD-1.1: XQMetaData methods throw an XQException when the parent XQConnection object is closed.");
     }
 
     XQMetaData xqmd = xqc.getMetaData();
@@ -687,7 +691,7 @@ public class XQMetaDataTest extends XQJTestCase {
     try {
       xqmd.isUserDefinedXMLSchemaTypeSupported();;
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
+      fail("A-XQMD-1.2: XQMetaData method failed with message: " + e.getMessage());
     }
     
     // if user defined XML schema is supported.
