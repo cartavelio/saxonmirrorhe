@@ -77,7 +77,7 @@
       (:'com.saxonica.ee.parallel.MultithreadedFocusTrackingIterator': 'Saxon.Impl.Parallel.MultithreadedFocusTrackingIterator',:)
       'com.saxonica.ee.parallel.PushToPull': 'Saxon.Impl.Parallel.PushToPull',
       'com.saxonica.ee.parallel.PushToPull.Pusher': 'Saxon.Impl.Parallel.PushToPull.Pusher',
-      'com.saxonica.functions.extfn.ParseHtml': 'Saxon.Impl.Helpers.ParseHtml',
+      'com.saxonica.functions.qt4.ParseHtml': 'Saxon.Impl.Helpers.ParseHtml',
       'java.io.BufferedInputStream': 'System.IO.BufferedStream',
       'java.io.BufferedOutputStream': 'System.IO.BufferedStream',
       'java.io.BufferedReader': 'Saxon.Impl.Helpers.BufferedReader',
