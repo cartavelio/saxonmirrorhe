@@ -1,6 +1,6 @@
 # Writing Java code that converts to C#
 
-The Saxon-CS product is generated from the Saxon-J source code by an automated conversion process. This document describes the rules you need to follow when writing Java to make sure that the conversion is successful.
+The SaxonCS product is generated from the Saxon-J source code by an automated conversion process. This document describes the rules you need to follow when writing Java to make sure that the conversion is successful.
 
 ## Naming of variables
 

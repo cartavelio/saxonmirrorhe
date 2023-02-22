@@ -896,7 +896,7 @@
           &#xa0;
         </div>
         <div class="main">
-          <h1>Saxon.Api - the Saxon-CS Application Programming Interface for .NET</h1>
+          <h1>Saxon.Api - the SaxonCS Application Programming Interface for .NET</h1>
           <p>This namespace contains Saxon's application programming interfaces for using XSLT, XQuery,
             XPath and XSD on .NET.</p>
           <p>The top-level object is the <a href="Saxon/Api/Processor.html" class="apilink">Processor</a>;
