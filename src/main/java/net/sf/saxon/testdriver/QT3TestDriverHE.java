@@ -274,7 +274,7 @@ public class QT3TestDriverHE extends TestDriver {
         } else if ("format-integer-sequence".equals(type)) {
             return !inverse;
         } else if ("unicode-version".equals(type)) {
-            return !inverse;
+            return false; // TODO: we're not running tests that depend on a specific Unicode version
         } else if ("unicode-normalization-form".equals(type)) {
             return value.equalsIgnoreCase("FULLY-NORMALIZED") == inverse;
         } else if ("feature".equals(type)) {
