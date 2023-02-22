@@ -151,7 +151,7 @@ public class SaxonCAPI {
        CLongPointer call(long size);
      }
 
-     @CEntryPoint
+    @CEntryPoint(name = "j_getLongArray")
      static CLongPointer getLongArray(IsolateThread thread, AllocatorFn alloc, ObjectHandle refsObj) {
         DataWrapper obj = objectHandles.get(refsObj);
        return longArrayToNative(alloc, obj.getDataRefs());
