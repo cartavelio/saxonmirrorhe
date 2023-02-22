@@ -158,17 +158,17 @@ namespace SaxonCS_NUnit
 
         public class MyInvalidityHandler : IInvalidityHandler
         {
-            public XdmValue endReporting()
+            public XdmValue EndReporting()
             {
                 return null;
             }
 
-            public void reportInvalidity(ValidationFailure i)
+            public void ReportInvalidity(ValidationFailure i)
             {
                 Console.WriteLine(i.Message);
             }
 
-            public void startReporting(string systemId)
+            public void StartReporting(string systemId)
             {
                 
             }

@@ -1299,19 +1299,19 @@ namespace SaxonCS_NUnit {
 
             XsltExecutable xsltExecutable = xsltCompiler.Compile(new StringReader(source));
             Dictionary<QName, ParameterDetails> paramsi = xsltExecutable.GetGlobalParameters();
-            XdmItemType t1 = paramsi[(new QName("surname"))].GetDeclaredItemType();
+            XdmItemType t1 = paramsi[(new QName("surname"))].DeclaredItemType;
             Assert.AreEqual(t1.ToString(), "Q{" + NamespaceConstant.SCHEMA + "}string", "t1");
             char c1 = paramsi[new QName("surname")].GetDeclaredCardinality();
             Assert.AreEqual(c1, XdmSequenceType.ONE, "c1");
-            XdmItemType t2 = paramsi[new QName("age")].GetDeclaredItemType();
+            XdmItemType t2 = paramsi[new QName("age")].DeclaredItemType;
             Assert.AreEqual(t2.ToString(),"Q{" + NamespaceConstant.SCHEMA + "}integer", "t2");
             char c2 = paramsi[new QName("age")].GetDeclaredCardinality();
             Assert.AreEqual(c2, XdmSequenceType.ZERO_OR_ONE, "c2");
-            XdmItemType t3 = paramsi[(new QName("doc"))].GetDeclaredItemType();
+            XdmItemType t3 = paramsi[(new QName("doc"))].DeclaredItemType;
             Assert.AreEqual(t3.ToString(),"document-node()", "t3");
             char c3 = paramsi[(new QName("doc"))].GetDeclaredCardinality();
             Assert.AreEqual(c3, XdmSequenceType.ONE, "c3");
-            XdmItemType t4 = paramsi[(new QName("ele"))].GetDeclaredItemType();
+            XdmItemType t4 = paramsi[(new QName("ele"))].DeclaredItemType;
             Assert.AreEqual("element(Q{http://pre/}a, Q{" + NamespaceConstant.SCHEMA + "}date)", t4.ToString(), "t4");
             char c4 = paramsi[(new QName("ele"))].GetDeclaredCardinality();
             Assert.AreEqual(c4, XdmSequenceType.ONE_OR_MORE, "c4");
