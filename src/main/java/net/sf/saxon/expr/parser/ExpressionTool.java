@@ -19,6 +19,7 @@ import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.sort.ConditionalSorter;
 import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardLogger;
@@ -1360,6 +1361,10 @@ public class ExpressionTool {
         int total = 1;
         for (Operand o : exp.operands()) {
             total += expressionSize(o.getChildExpression());
+            if (o.getChildExpression() instanceof UserFunctionReference) {  // bug 5054
+                UserFunction uf = ((UserFunctionReference) o.getChildExpression()).getNominalTarget();
+                total += expressionSize(uf.getBody());
+            }
         }
         return total;
     }
