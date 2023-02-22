@@ -2,7 +2,7 @@
 namespace Saxon.Api {
     
     /// <summary>
-    /// An <c>Message</c> represents the output of an <c>xsl:message</c> or <c>xsl:assert</c>
+    /// A <c>Message</c> represents the output of an <c>xsl:message</c> or <c>xsl:assert</c>
     /// instruction.
     /// </summary>
     public class Message {
