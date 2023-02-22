@@ -403,7 +403,7 @@ namespace Saxon.Impl.Helpers {
                 XmlReaderSettings settings = new XmlReaderSettings() {
                     DtdProcessing = DtdProcessing.Parse,
                     MaxCharactersFromEntities = 100000,
-                    XmlResolver = config.getCommonResourceResolver()
+                    XmlResolver = config.getCommonResourceResolver().GetEntityResolver()
                 };
 
                 // if (source.getSystemId() != null) {
@@ -454,9 +454,9 @@ namespace Saxon.Impl.Helpers {
                     else {
                         Uri uri = new Uri(sysId);
                         CommonResourceResolver crr = config.getCommonResourceResolver();
-                        object o = crr.GetEntity(uri, "xml", typeof(Stream));
-                        if (o is Stream) {
-                            xmlReader = XmlReader.Create((Stream) o, settings);
+                        object o = crr.GetEntityResolver().GetEntity(uri, "xml", typeof(Stream));
+                        if (o is Stream stream) {
+                            xmlReader = XmlReader.Create(stream, settings);
                         }
                         // URIResolver ur = config.getURIResolver();
                         // if (ur is StandardURIResolver) {

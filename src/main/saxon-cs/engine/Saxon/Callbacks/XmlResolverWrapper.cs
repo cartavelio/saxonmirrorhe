@@ -20,7 +20,7 @@ namespace Saxon.Callbacks {
             return newResolver;
         }
 
-        public override IResource DereferenceLocation(ResourceRequest request) {
+        public override IResource Resolve(ResourceRequest request) {
             Uri baseUri = request.BaseUri ?? request.Uri;
             string href = request.RelativeUri ?? request.Uri.ToString();
             Uri abs = xmlResolver.ResolveUri(baseUri, href);
@@ -34,16 +34,10 @@ namespace Saxon.Callbacks {
             }
         }
 
-        public override IResource DereferenceNamespace(string namespaceUri, ResourceRequest request) {
-            throw new NotImplementedException();
+        public override XmlResolver GetEntityResolver() {
+            return xmlResolver;
         }
 
-        public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn) {
-            return xmlResolver.GetEntity(absoluteUri, role, ofObjectToReturn);
-        }
-
-        public override Uri ResolveUri(Uri baseUri, string relativeUri) {
-            return xmlResolver.ResolveUri(baseUri, relativeUri);
-        }
+ 
     }
 }

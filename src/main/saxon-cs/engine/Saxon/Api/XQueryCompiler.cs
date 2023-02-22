@@ -29,13 +29,14 @@ namespace Saxon.Api {
         internal XQueryCompiler(Processor processor) {
             this.Processor = processor;
             Implementation = processor.JProcessor.newXQueryCompiler();
-            Implementation.setModuleURIResolver(new StandardModuleURIResolver(processor.Implementation, processor.XmlResolver));
+            Implementation.setModuleURIResolver(new StandardModuleURIResolver(
+                processor.Implementation, processor.Implementation.getCommonResourceResolver().GetEntityResolver()));
         }
 
         /// <summary>
         /// Declare a namespace for use by the query. This has the same
-        /// status as a namespace appearing within the query prolog (though
-        /// a declaration in the query prolog of the same prefix will take
+        /// status as a namespace declaration appearing within the query prolog (though
+        /// a declaration of the same prefix in the query prolog will take
         /// precedence).
         /// </summary>
         /// <param name="prefix">The namespace prefix to be declared. Use
@@ -230,7 +231,7 @@ namespace Saxon.Api {
         /// status, and is not useful for diagnosing the actual error.</exception>
         public XQueryExecutable Compile(Stream query) {
             Saxon.Hej.s9api.XQueryExecutable exec = Implementation.compile(query);
-            return new XQueryExecutable(exec);
+            return new XQueryExecutable(Processor, exec);
         }
 
         /// <summary>
@@ -258,7 +259,7 @@ namespace Saxon.Api {
         /// status, and is not useful for diagnosing the actual error.</exception>
         public XQueryExecutable Compile(string query) {
             Saxon.Hej.s9api.XQueryExecutable exec = Implementation.compile(query);
-            return new XQueryExecutable(exec);
+            return new XQueryExecutable(Processor, exec);
         }
         
         /// <summary>

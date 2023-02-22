@@ -4,17 +4,13 @@ using System.Impl.Helpers;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Saxon.Ejava.util.function;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.@event;
 using Saxon.Hej.lib;
 using Saxon.Hej.s9api;
-using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
-using Saxon.Ejavax.xml.transform;
 using Saxon.Hej;
-using Saxon.Hej.om;
 using Saxon.Hej.pull;
 using StandardMessageHandler = Saxon.Callbacks.StandardMessageHandler;
 
@@ -294,7 +290,8 @@ namespace Saxon.Api {
             get => xmlDocumentResolver;
             set {
                 xmlDocumentResolver = value;
-                s9Transformer.setURIResolver(new UriResolverWrappingDocumentResolver(value));
+                s9Transformer.setURIResolver(new UriResolverWrappingDocumentResolver(
+                    value, s9Transformer.getUnderlyingController().getConfiguration()));
             }
         }
 

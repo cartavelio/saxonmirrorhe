@@ -16,7 +16,7 @@ namespace Saxon.Callbacks {
 
         public StandardModuleURIResolver(Saxon.Hej.Configuration config) {
             this.config = config;
-            this.resolver = config.getCommonResourceResolver();
+            this.resolver = config.getCommonResourceResolver().GetEntityResolver();
         }
 
         public StandardModuleURIResolver(Saxon.Hej.Configuration config, XmlResolver resolver) {
@@ -115,12 +115,14 @@ namespace Saxon.Callbacks {
                 IResource source = null;
                 if (config != null) {
                     ResourceRequest request = new() {
-                        Nature = ResourceRequest.XQUERY_NATURE
+                        Uri = new Uri(moduleURI),
+                        Nature = ResourceRequest.XQUERY_NATURE,
+                        UriIsNamespace = true
                     };
-                    source = config.getCommonResourceResolver().DereferenceNamespace(moduleURI, request);
+                    source = config.getCommonResourceResolver().Resolve(request);
                     if (source == null && baseURI != null) {
-                        Uri resuri = new Uri(new Uri(baseURI), moduleURI);
-                        source = config.getCommonResourceResolver().DereferenceNamespace(resuri.ToString(), request);
+                        request.Uri = new Uri(new Uri(baseURI), moduleURI);
+                        source = config.getCommonResourceResolver().Resolve(request);
                     }
                 }
 

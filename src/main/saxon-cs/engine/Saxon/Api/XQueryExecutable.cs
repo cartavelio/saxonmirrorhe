@@ -22,9 +22,16 @@ namespace Saxon.Api {
 
         // internal constructor
 
-        internal XQueryExecutable(Saxon.Hej.s9api.XQueryExecutable exec) {
+        internal XQueryExecutable(Processor processor, Saxon.Hej.s9api.XQueryExecutable exec) {
+            this.Processor = processor;
             this.executable = exec;
         }
+        
+        /// <summary>
+        /// Get the <c>Processor</c> from which this <c>XQueryExecutable</c> was constructed
+        /// </summary>
+
+        public Processor Processor { get; }
 
         /// <summary>Ask whether this is an updating query (that is, one that returns a pending
         /// update list rather than a conventional value).</summary>
@@ -70,7 +77,7 @@ namespace Saxon.Api {
         /// set up the dynamic context for query evaluation, and to run the query.
         /// </returns>
         public XQueryEvaluator Load() {
-            return new XQueryEvaluator(executable.load());
+            return new XQueryEvaluator(Processor, executable.load());
         }
     }
 }

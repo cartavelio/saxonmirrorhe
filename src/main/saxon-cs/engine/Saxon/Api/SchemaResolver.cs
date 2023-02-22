@@ -15,11 +15,11 @@ namespace Saxon.Api {
     /// <param name="locationHint"Xslt>The URI (if any) provided as a location hint.
     /// Note: the <c>import schema</c> declaration in XQuery permits several location hints; if
     /// there is more than one, all but the first are ignored</param>
-    /// <returns>An XdmNode representing the root document node of the schema document to be loaded.
+    /// <returns>An <c>IResource</c> representing the schema document to be loaded.
     /// </returns>
 
 
-    public delegate XdmNode SchemaResolver(string targetNamespace, Uri baseUri, Uri locationHint);
+    public delegate IResource SchemaResolver(string targetNamespace, Uri baseUri, Uri locationHint);
     
 
     
