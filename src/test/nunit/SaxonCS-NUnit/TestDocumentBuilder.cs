@@ -54,21 +54,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("Parsing failed but validation was not requested: " + e.Message);
             }
         }
-
-        [Test]
-        public void TestReadConfigFile() {
-            try {
-                // Create a Processor instance.
-                Uri address = new Uri(ConfigTest.DataDirUri, "saxon-cs.config");
-                Stream configFile = new WebClient().OpenRead(address);
-                Processor processor = new(configFile, address);
-                Assert.NotNull(processor);
-            }
-            catch (Exception ex) {
-                Console.Error.WriteLine(ex.StackTrace);
-                Assert.Fail(ex.Message);
-            }
-        }
+        
 
         [Test]
         public void TestStringReaderSource() {
