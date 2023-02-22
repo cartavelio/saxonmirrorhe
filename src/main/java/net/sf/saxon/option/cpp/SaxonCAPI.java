@@ -126,7 +126,7 @@ public class SaxonCAPI {
         return handle.rawValue();
     }
 
-    @CEntryPoint(name = "j_run_transform", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_run_transform")
     public static long run_transform(IsolateThread thread, ObjectHandle processorDataRef){
 
         String[] args;

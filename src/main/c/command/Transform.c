@@ -29,14 +29,12 @@ const char * failure;
 
 int transform(sxnc_environment * environi, int argc, const char* argv[]) {
 
-
-
     if(argc < 2) {
         printf("\nError: Not enough arguments in Transform");
         return 0;
     }
-
     int64_t processorDataRef = createProcessorDataWithCapacity(environi->thread, argc);
+
     for (int i =1; i < argc; i++) {
 #ifdef DEBUG
         printf("\nArgument = %s", (char *)argv[i]);
@@ -46,7 +44,14 @@ int transform(sxnc_environment * environi, int argc, const char* argv[]) {
 #ifdef DEBUG
     printf("\nprocessorData = %i", (int)processorDataRef);
 #endif
-     j_run_transform(environi->thread, (void *)processorDataRef);
+     long status = j_run_transform(environi->thread, (void *)processorDataRef);
+#ifdef DEBUG
+    printf("\nj_run_transform status=%i", (int)status);
+    if(status == -1) {
+            printf("\nProcessorDataRef is null");
+    }
+#endif
+
 	return 0;
 }
 
