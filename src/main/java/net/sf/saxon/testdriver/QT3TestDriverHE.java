@@ -16,6 +16,7 @@ import net.sf.saxon.lib.EnvironmentVariableResolver;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardModuleURIResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
@@ -798,6 +799,8 @@ public class QT3TestDriverHE extends TestDriver {
             assertXpc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
             assertXpc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
             assertXpc.declareNamespace("j", NamespaceConstant.FN);
+            assertXpc.declareNamespace("file", NamespaceUri.EXPATH_FILE.toString());
+            assertXpc.declareNamespace("bin", NamespaceUri.EXPATH_BINARY.toString());
             assertXpc.declareVariable(new QName("result"));
             assertXpc.setBaseURI(assertion.getBaseURI());
 
