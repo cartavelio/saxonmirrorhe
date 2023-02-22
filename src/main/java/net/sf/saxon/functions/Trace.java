@@ -181,11 +181,6 @@ public class Trace extends SystemFunction implements Traceable {
             base.close();
         }
 
-        @Override
-        public void discharge() {
-            base.discharge();
-        }
-
     }
 
     @Override

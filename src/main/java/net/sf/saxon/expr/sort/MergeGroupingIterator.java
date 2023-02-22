@@ -153,11 +153,6 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     }
 
     @Override
-    public void discharge() {
-        baseItr.discharge();
-    }
-
-    @Override
     public boolean supportsGetLength() {
         return true;
     }

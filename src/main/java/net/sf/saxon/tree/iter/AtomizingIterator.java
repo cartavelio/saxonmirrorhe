@@ -91,11 +91,6 @@ public class AtomizingIterator implements SequenceIterator {
         base.close();
     }
 
-    @Override
-    public void discharge() {
-        base.discharge();
-    }
-
 
 }
 

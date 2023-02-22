@@ -8,6 +8,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.trans.UncheckedXPathException;
+import net.sf.saxon.tree.iter.UnparsedTextIterator;
 
 import java.io.Closeable;
 
@@ -63,24 +64,22 @@ public interface SequenceIterator extends Closeable {
      * <p>Closing an iterator is not necessary if the iterator is read to completion: if a call
      * on {@link #next()} returns null, the iterator will be closed automatically. An explicit
      * call on {@link #close()} is needed only when iteration is abandoned prematurely.</p>
+     * <p>It is not possible to guarantee that an iterator that is not read to completion or
+     * will be closed. For example, if a lazy-evaluated variable <code>$var</code> is passed to a user-written function,
+     * the function may access <code>$var[1]</code> only; we have no way of knowing whether further items
+     * will be read. For this reason, any <code>SequenceIterator</code> that holds resources which need
+     * to be closed should use the <code>Cleaner</code> mechanism. The <code>Configuration</code> holds
+     * a <code>Cleaner</code>, and resources held by a <code>SequenceIterator</code> should be registered
+     * with the <code>Cleaner</code>; if the <code>SequenceIterator</code> is then garbage-collected
+     * without being closed, the <code>Cleaner</code> will ensure that the underlying resources are
+     * closed. (An example of a <code>SequenceIterator</code> that uses this mechanism is the
+     * {@link UnparsedTextIterator}).</p>
      *
      * @since 9.1. Default implementation added in 9.9.
      */
 
     @Override
     default void close() {
-    }
-
-    /**
-     * Calling this method instructs the iterator to release any resources it holds, while still
-     * remaining able to deliver the remaining items in the sequence. This may require
-     * the iterator to calculate the rest of the sequence eagerly. The method is called by a client
-     * if it anticipates that it might not read the iterator to completion, but it cannot
-     * guarantee that {@link #close()} will be called when no more items are needed.
-     * @since 11.1
-     */
-
-    default void discharge() {
     }
 
 }

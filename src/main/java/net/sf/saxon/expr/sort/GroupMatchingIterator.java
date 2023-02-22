@@ -86,11 +86,6 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
         population.close();
     }
 
-    @Override
-    public void discharge() {
-        population.discharge();
-    }
-
     //#if EE==true
 
     @Override

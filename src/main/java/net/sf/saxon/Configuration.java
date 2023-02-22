@@ -66,6 +66,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.*;
 import java.io.*;
+import java.lang.ref.Cleaner;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -204,7 +205,9 @@ public class Configuration implements SourceResolver, NotationSet {
     private int regexBacktrackingLimit = 10000000;
 
     private final TreeStatistics treeStatistics = new TreeStatistics();
-
+    //#if CSHARP==false
+    private Cleaner cleaner = null;    // created on demand
+    //#endif
     /**
      * Constant indicating the XML Version 1.0
      */
@@ -4763,7 +4766,8 @@ public class Configuration implements SourceResolver, NotationSet {
                             break;
                         default:
                             makeErrorReporter().report(
-                                    new XmlProcessingIncident("XQuery version ignored: only \"3.1\" is recognized").asWarning());
+                                    new XmlProcessingIncident("XQuery version ignored: only \"3.1\" and \"4.0\" are recognized",
+                                                              SaxonErrorCode.SXWN9049).asWarning());
                             qvn = 40;
                             break;
                     }
@@ -4833,7 +4837,8 @@ public class Configuration implements SourceResolver, NotationSet {
                             break;
                         default:
                             makeErrorReporter().report(
-                                    new XmlProcessingIncident("XSLT version ignored: only \"3.0\" and \"4.0\" are recognized").asWarning());
+                                    new XmlProcessingIncident("XSLT version ignored: only \"3.0\" and \"4.0\" are recognized",
+                                                              SaxonErrorCode.SXWN9020).asWarning());
                             xsltVersion = 30;
                             break;
                     }
@@ -5375,12 +5380,16 @@ public class Configuration implements SourceResolver, NotationSet {
     /**
      * Close any resources held by the Configuration. This implementation
      * closes the Logger and/or trace output file if one has been allocated.
+     * It also makes the Cleaner unreachable, allowing the relevant thread to terminate.
      */
 
     public void close() {
         if (traceOutput != null) {
             traceOutput.close();
         }
+        //#if CSHARP==false
+        cleaner = null;
+        //#endif
     }
 
     /**
@@ -5489,5 +5498,16 @@ public class Configuration implements SourceResolver, NotationSet {
     public String getLabel() {
         return label;
     }
+
+
+    //#if CSHARP==false
+    public Cleaner getCleaner() {
+        if (cleaner == null) {
+            cleaner = Cleaner.create();
+        }
+        return cleaner;
+    }
+    //#endif
+
 }
 

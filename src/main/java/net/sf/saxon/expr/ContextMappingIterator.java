@@ -29,7 +29,6 @@ public final class ContextMappingIterator implements SequenceIterator {
     private final ContextMappingFunction action;
     private final XPathContext context;
     private SequenceIterator stepIterator = null;
-    private boolean discharged;
 
     /**
      * Construct a ContextMappingIterator that will apply a specified ContextMappingFunction to
@@ -62,9 +61,6 @@ public final class ContextMappingIterator implements SequenceIterator {
                 // Call the supplied mapping function
                 try {
                     stepIterator = action.map(context);
-                    if (discharged) {
-                        stepIterator.discharge();
-                    }
                 } catch (XPathException e) {
                     throw new UncheckedXPathException(e);
                 }
@@ -90,15 +86,6 @@ public final class ContextMappingIterator implements SequenceIterator {
         if (stepIterator != null) {
             stepIterator.close();
         }
-    }
-
-    @Override
-    public void discharge() {
-        base.discharge();
-        if (stepIterator != null) {
-            stepIterator.discharge();
-        }
-        discharged = true;
     }
 
 

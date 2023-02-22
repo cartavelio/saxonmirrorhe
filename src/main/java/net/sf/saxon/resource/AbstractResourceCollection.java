@@ -16,6 +16,7 @@ import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.query.InputStreamMarker;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.Maker;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import org.xml.sax.XMLReader;
@@ -184,7 +185,8 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                 originalErrorReporter.report(error);
             } else {
                 originalErrorReporter.report(error.asWarning());
-                XmlProcessingIncident supp = new XmlProcessingIncident("The document will be excluded from the collection").asWarning();
+                XmlProcessingIncident supp = new XmlProcessingIncident("The document will be excluded from the collection",
+                                                                       SaxonErrorCode.SXWN9050).asWarning();
                 supp.setLocation(error.getLocation());
                 originalErrorReporter.report(supp);
             }

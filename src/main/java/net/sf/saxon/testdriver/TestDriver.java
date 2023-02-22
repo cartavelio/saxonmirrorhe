@@ -241,6 +241,8 @@ public abstract class TestDriver {
 
         Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
         System.err.println("Wrapping up. Looking for dangling threads.");
+        driverProc.getUnderlyingConfiguration().close();
+        System.gc();
         Thread mainThread = null;
         for (Thread t: threadSet) {
             if ("system".equals(t.getThreadGroup().getName())) {
@@ -253,7 +255,9 @@ public abstract class TestDriver {
                     } else {
                         System.err.println("UNEXPECTED main thread: " + t);
                     }
-                } else{
+                } else if ("Common-Cleaner".equals(t.getName())) {
+                    System.err.println("Cleaner thread: " + t);
+                } else {
                     System.err.println("Unexpected thread: " + t);
                 }
             }

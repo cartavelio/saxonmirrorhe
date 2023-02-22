@@ -212,7 +212,7 @@ public class JarCollection extends AbstractResourceCollection {
     }
 
 
-    private class JarIterator implements Iterator<Resource>, Closeable {
+    public class JarIterator implements Iterator<Resource>, Closeable {
         private final FilenameFilter filter;
         private Resource nextItem = null;
         private final XPathContext context;

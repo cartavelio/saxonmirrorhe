@@ -84,10 +84,5 @@ public class AdjacentTextNodeMergingIterator implements LookaheadIterator, Close
         base.close();
     }
 
-    @Override
-    public void discharge() {
-        base.discharge();
-    }
-
 }
 

@@ -395,11 +395,6 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
             base.close();
         }
 
-        @Override
-        public void discharge() {
-            base.discharge();
-        }
-
 
     }  // end of class StrippingIterator
 

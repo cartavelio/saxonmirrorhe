@@ -163,11 +163,6 @@ public class Innermost extends SystemFunction {
             in.close();
         }
 
-        @Override
-        public void discharge() {
-            in.discharge();
-        }
-
     }
 }
 

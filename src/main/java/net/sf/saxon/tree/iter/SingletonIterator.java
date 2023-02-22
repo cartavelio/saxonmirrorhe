@@ -96,11 +96,6 @@ public class SingletonIterator implements SequenceIterator, FocusIterator,
     }
 
     @Override
-    public void discharge() {
-        // no action
-    }
-
-    @Override
     public boolean supportsGetLength() {
         return true;
     }

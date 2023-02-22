@@ -138,6 +138,12 @@ public class SaxonErrorCode {
     public static final String SXSQ0004 = "SXSQ0004";
 
     /**
+     * SXSQ0005: Warning JDBC is not thread safe
+     */
+
+    public static final String SXSQ0005 = "SXSQ0005";
+
+    /**
      * SXJE0001:  Must supply an argument for a non-static extension function
      */
 
@@ -630,6 +636,30 @@ public class SaxonErrorCode {
      */
 
     public static final String SXWN9046 = "SXWN9046";
+
+    /**
+     * SXWN9047: dynamic error evaluating expression used in XSD type alternative
+     */
+
+    public static final String SXWN9047 = "SXWN9047";
+
+    /**
+     * SXWN9048: An xs:ID element at the outermost level has no effect
+     */
+
+    public static final String SXWN9048 = "SXWN9048";
+
+    /**
+     * SXWN9049: Requested XQuery version not supported (request ignored)
+     */
+
+    public static final String SXWN9049 = "SXWN9049";
+
+    /**
+     * SXWN9050: Invalid document excluded from collection
+     */
+
+    public static final String SXWN9050 = "SXWN9050";
 
 
     /**

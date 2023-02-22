@@ -119,10 +119,4 @@ public class MergeIterator implements
         e2.close();
     }
 
-    @Override
-    public void discharge() {
-        e1.discharge();
-        e2.discharge();
-    }
-
 }
