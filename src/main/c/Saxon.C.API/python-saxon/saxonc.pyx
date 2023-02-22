@@ -3486,14 +3486,14 @@ cdef class PyXdmValueIterator:
 
 
 cdef class PyXdmItem(PyXdmValue):
-    """The class XdmItem represents an item in a sequence, as defined by the XDM data model.
+     """The class XdmItem represents an item in a sequence, as defined by the XDM data model.
      An item is either an atomic value or a node."""
      cdef saxoncClasses.XdmItem *derivedptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
-         """
+        """
          cinit(self)
          Constructor for PyXdmItem
-         """
+        """
         if type(self) is PyXdmItem:
             self.derivedptr = self.thisvptr = new saxoncClasses.XdmItem()
      def __dealloc__(self):
@@ -3567,15 +3567,15 @@ cdef class PyXdmItem(PyXdmValue):
         val.derivedaptr.incrementRefCount()
         return val
 cdef class PyXdmNode(PyXdmItem):
-    """This class represents a node in the XDM data model. A Node is an <code>XdmItem</code>, and is therefore an
-    <code>XdmValue</code> in its own right, and may also participate as one item within a sequence value.
-    <p>The XdmNode interface exposes basic properties of the node, such as its name, its string value, and     """
+     """This class represents a node in the XDM data model. A Node is an <code>XdmItem</code>, and is therefore an
+     <code>XdmValue</code> in its own right, and may also participate as one item within a sequence value.
+     <p>The XdmNode interface exposes basic properties of the node, such as its name, its string value, and     """
      cdef saxoncClasses.XdmNode *derivednptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
-         """
+        """
          cinit(self)
          Constructor for PyXdmNode
-         """
+        """
         self.derivednptr = self.derivedptr = self.thisvptr = NULL
 
      def __dealloc__(self):
@@ -4036,10 +4036,10 @@ cdef class PyXdmMap(PyXdmFunctionItem):
      """
      cdef saxoncClasses.XdmMap *derivedmmptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
-         """
+        """
          cinit(self)
          Constructor for PyXdmMap
-         """
+        """
         if type(self) is PyXdmMap:
             self.derivedmmptr = self.derivedfptr = self.derivedptr = self.thisvptr = new saxoncClasses.XdmMap()
      def __dealloc__(self):
