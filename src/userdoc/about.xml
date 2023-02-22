@@ -91,9 +91,7 @@
    <section id="gettingstarted" title="Getting started">
       <h1>Getting started</h1>
       
-      <p class="conly">For information on getting started with SaxonC, please see <a class="bodylink"
-         href="http://www.saxonica.com/saxon-c/documentation11/#!about/gettingstarted">Getting Started</a> in
-         the SaxonC documentation.</p>
+      
 
       <p>If you are new to Saxon, or to the Java or .NET platform, 
          or to XML, XSLT, and XQuery, this section provides a
@@ -108,6 +106,10 @@
       <nav>
          <ul/>
       </nav>
+      
+      <p class="conly">For information on getting started with SaxonC, please see <a class="bodylink"
+         href="http://www.saxonica.com/saxon-c/documentation11/#!about/gettingstarted">Getting Started</a> in
+         the SaxonC documentation.</p>
 
       <section id="gettingstartedjava" title="Getting started with SaxonJ" class="javaonly">
          <h1>Getting started with SaxonJ</h1>
@@ -962,6 +964,9 @@
 
 
       <h2 class="subtitle">Installing the software</h2>
+      
+      <p>Before you can run the software, you will need to ensure that a license file is installed, as described
+         in <a class="bodylink" href="/about/license/licensekey">Setting up a license key</a>.</p>
          
       <p>The software is designed to be installed using Nuget, in which case all its dependencies
       will be automatically loaded as well. It consists of a single DLL file, named SaxonCS.</p>
@@ -983,9 +988,7 @@
          </li>
       </ul>
          
-      <p>Before you can run the software, you will need to ensure that a license file is installed, as described
-         in <a class="bodylink" href="/about/license/licensekey">Setting up a license key</a>.</p>
-
+      
 
       <h2 class="subtitle">Sample applications</h2>
 
