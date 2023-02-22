@@ -30,7 +30,7 @@ public class FLWORExpression extends Expression {
 
     public List<Clause> clauses;
     public Operand returnClauseOp;
-    public PushEvaluator returnClausePush; // needed if generating push bytecode
+    public PushEvaluator returnPushEvaluator; // needed if generating push bytecode
 
     public FLWORExpression() {}
 
@@ -71,6 +71,19 @@ public class FLWORExpression extends Expression {
     /*@NotNull*/
     public Expression getReturnClause() {
         return returnClauseOp.getChildExpression();
+    }
+
+    /**
+     * Get a push-evaluator for the return clause (used from bytecode)
+     */
+
+    public PushEvaluator getReturnPushEvaluator() {
+        synchronized(this) {
+            if (returnPushEvaluator == null) {
+                returnPushEvaluator = makeElaborator().elaborateForPush();
+            }
+        }
+        return returnPushEvaluator;
     }
 
     /**
@@ -972,9 +985,9 @@ public class FLWORExpression extends Expression {
         @Override
         public PushEvaluator elaborateForPush() {
             FLWORExpression expr = (FLWORExpression) getExpression();
-            expr.returnClausePush = expr.getReturnClause().makeElaborator().elaborateForPush();
+            expr.returnPushEvaluator = expr.getReturnClause().makeElaborator().elaborateForPush();
             return (output, context) -> {
-                TuplePush destination = new ReturnClausePush(output, expr.returnClausePush);
+                TuplePush destination = new ReturnClausePush(output, expr.returnPushEvaluator);
                 for (int i = expr.clauses.size() - 1; i >= 0; i--) {
                     Clause c = expr.clauses.get(i);
                     destination = c.getPushStream(destination, output, context);

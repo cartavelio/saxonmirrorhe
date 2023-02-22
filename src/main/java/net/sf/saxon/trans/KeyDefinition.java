@@ -10,6 +10,7 @@ package net.sf.saxon.trans;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -40,6 +41,7 @@ public class KeyDefinition extends Actor implements ContextOriginator {
     private boolean convertUntypedToOther = false;
     private boolean rangeKey = false;
     private boolean composite = false;
+    private PullEvaluator useExpressionEvaluator;
 
     /**
      * Constructor to create a key definition
@@ -250,6 +252,13 @@ public class KeyDefinition extends Actor implements ContextOriginator {
 
     public Expression getUse() {
         return getBody();
+    }
+
+    public synchronized PullEvaluator obtainUseEvaluator() {
+        if (useExpressionEvaluator == null) {
+            useExpressionEvaluator = getBody().makeElaborator().elaborateForPull();
+        }
+        return useExpressionEvaluator;
     }
 
     /**

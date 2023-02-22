@@ -402,6 +402,13 @@ public class SortExpression extends Expression
                 comps[s] = comp;
             }
         }
+        makeSortKeyEvaluators();
+        iter = new SortedIterator(context, iter, this, comps, getSortKeyDefinition(0).isSetContextForSortKey());
+        ((SortedIterator) iter).setHostLanguage(getPackageData().getHostLanguage());
+        return iter;
+    }
+
+    public synchronized void makeSortKeyEvaluators() {
         if (sortKeyEvaluators == null) {
             int len = getSortKeyDefinitionList().size();
             sortKeyEvaluators = new ItemEvaluator[len];
@@ -409,9 +416,6 @@ public class SortExpression extends Expression
                 sortKeyEvaluators[s] = getSortKeyDefinition(s).getSortKey().makeElaborator().elaborateForItem();
             }
         }
-        iter = new SortedIterator(context, iter, this, comps, getSortKeyDefinition(0).isSetContextForSortKey());
-        ((SortedIterator) iter).setHostLanguage(getPackageData().getHostLanguage());
-        return iter;
     }
 
     /**

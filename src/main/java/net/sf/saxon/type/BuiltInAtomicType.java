@@ -239,6 +239,20 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         this.fingerprint = fingerprint;
     }
 
+    /**
+     * Ask whether an item type is "string-like" in its comparison semantics
+     *
+     * @param type the item type
+     * @return true if the item type is xs:string, xs:anyURI, or xs:untypedAtomic
+     */
+
+    public static boolean isStringLike(ItemType type) {
+        int fp = type.getPrimitiveType();
+        return fp == StandardNames.XS_STRING ||
+                fp == StandardNames.XS_ANY_URI ||
+                fp == StandardNames.XS_UNTYPED_ATOMIC;
+    }
+
 
     /**
      * Get the local name of this type

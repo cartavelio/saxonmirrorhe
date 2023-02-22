@@ -7,9 +7,9 @@
 
 package net.sf.saxon.trans;
 
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
@@ -20,11 +20,8 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
-import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.tree.iter.ManualIterator;
-import net.sf.saxon.tree.iter.NodeListIterator;
-import net.sf.saxon.tree.iter.SingleNodeIterator;
+import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
@@ -72,6 +69,7 @@ public class KeyIndex {
         }
         creatingThread = Thread.currentThread().getId();
         status = Status.UNDER_CONSTRUCTION;
+        //Instrumentation.count("Building KeyIndex");
     }
 
     /**
@@ -202,7 +200,7 @@ public class KeyIndex {
 
         // Evaluate the "use" expression against this context node
 
-        Expression use = keydef.getUse();
+        PullEvaluator use = keydef.obtainUseEvaluator();
         SequenceIterator useval = use.iterate(xc);
         if (keydef.isComposite()) {
             List<AtomicMatchKey> amks = new ArrayList<>(4);
