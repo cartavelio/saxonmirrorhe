@@ -389,7 +389,7 @@ task eecs_dll(
 ) {
   inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
   inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
-  outputs.file "${buildDir}/cs/obj/Debug/net6.0/engine.dll"
+  outputs.dir "${buildDir}/csout"
 
   doLast {
     if (dotnetex == null) {

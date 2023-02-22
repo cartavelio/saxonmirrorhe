@@ -672,6 +672,13 @@ task all_saxonc_releases() {
         into "${saxoncReleaseDir}"
         exclude "Dockerfile"
         exclude "pypi/**"
+        filter { line ->
+          line.replaceAll('@@VERSION@@', saxonVersion)
+                  .replace('@@edition@@', edition)
+                  .replace('@@EDITION@@', edition.toUpperCase())
+                  .replace('@@libpath@@', libpath)
+                  .replace('@@location@@', location)
+        }
       }
     }
 
@@ -679,7 +686,7 @@ task all_saxonc_releases() {
       copy {
         from "${projectDir}/src/main/c/Saxon.C.API"
         into "${saxoncReleaseDir}"
-        include "readme.md"
+        include "README.md"
         filter { line ->
           line.replaceAll('@@VERSION@@', saxonVersion)
                   .replace('@@edition@@', edition)
