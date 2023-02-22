@@ -519,6 +519,9 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 String href = Whitespace.trim(use.getAttributeValue("", "href"));
                 DocumentKey key = DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), false);
                 TreeInfo includedTree = compilation.getStylesheetModules().get(key);
+                if (includedTree == null) {
+                    throw new XPathException("Internal problem: the included stylesheet module '" + href + "' should be in the compiler's module store, but was not found");
+                }
                 StyleElement incWrapper = (StyleElement) ((DocumentImpl) includedTree.getRootNode()).getDocumentElement();
                 gatherUsePackageDeclarations(compilation, incWrapper, declarations);
             }
