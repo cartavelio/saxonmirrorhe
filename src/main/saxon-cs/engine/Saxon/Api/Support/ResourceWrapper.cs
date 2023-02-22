@@ -10,8 +10,8 @@ namespace Saxon.Api.Support {
 
         public Uri ResourceUri => new Uri(resource.getResourceURI());
 
-        public XdmItem GetXdmItem(DynamicContext context) {
-            return XdmItem.WrapItem(resource.getItem(context.context));
+        public XdmItem GetXdmItem() {
+            return XdmItem.WrapItem(resource.getItem());
         }
 
         public string ContentType => resource.getContentType();

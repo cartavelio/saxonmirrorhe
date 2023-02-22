@@ -14,6 +14,7 @@ using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Hej;
+using Saxon.Hej.om;
 using Saxon.Hej.pull;
 using StandardMessageHandler = Saxon.Callbacks.StandardMessageHandler;
 
@@ -77,6 +78,7 @@ namespace Saxon.Api {
         private Saxon.Hej.s9api.Xslt30Transformer s9Transformer;
         private readonly StandardMessageHandler _standardMessageHandler;
         private TextResolver textResolver;
+        private ResourceResolver xmlDocumentResolver;
 
         // internal constructor
 
@@ -271,27 +273,43 @@ namespace Saxon.Api {
             get => textResolver;
             set {
                 textResolver = value;
-                s9Transformer.setUnparsedTextResolver((uri, encoding, config) => {
-                    Encoding enc;
-                    if (encoding == null) {
-                        enc = null;
-                    }
-                    else {
-                        if (encoding == "iso-646") {
-                            encoding = "us-ascii";
-                        }
-                        try {
-                            enc = Encoding.GetEncoding(encoding);
-                        }
-                        catch (System.ArgumentException e) {
-                            throw new SaxonApiException(new Saxon.Hej.trans.XPathException("Unparsed-text encoding problem: " + e.Message, "FOUT1190"));
-                        }
-                    }
-                    return value(uri, enc);
-                });
+                s9Transformer.setUnparsedTextResolver(WrapTextResolver(value));
             }
         }
 
+        /// <summary>
+        /// The <code>ResourceResolver</code> to be used at run-time to resolve and dereference URIs
+        /// supplied to functions retrieving XML, such as the <c>fn:doc()</c>, <c>fn:document()</c>, and
+        /// <c>fn:doc-available()</c> functions, as well as <c>fn:transform()</c>
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The URI supplied as the first argument to the resolver is the absolute URI requested,
+        /// that is, the result of resolving the requested relative URI against the relevant base URI.
+        /// </para>
+        /// <para>The requested relative URI and the corresponding base URI are supplied as separate
+        /// properties within the <c>ResourceProperties</c> argument, in case they are needed.
+        /// </para>
+        /// <para>The returned <c>IResource</c> must be one of the following:
+        /// <ul>
+        /// <li>An <c>IResource</c> such as a <c>NodeResource</c> or an <c>XmlReaderResource</c>
+        /// whose <c>getItem()</c> method delivers an <c>XdmNode</c>;</li>
+        /// <li>A <c>TextResource</c> delivering lexical XML in its <c>Content</c> property; this
+        /// will then be parsed to deliver the corresponding XML document.</li>
+        /// </ul>
+        /// </para>
+        /// <para>If no <c>XmlDocumentResolver</c> is supplied, or if it returns null, then
+        /// the <c>CommonResourceResolver</c> associated with the Saxon Configuration is invoked.
+        /// </para>
+        /// </remarks>
+
+        public ResourceResolver XmlDocumentResolver {
+            get => xmlDocumentResolver;
+            set {
+                xmlDocumentResolver = value;
+                s9Transformer.setURIResolver(new UriResolverWrappingDocumentResolver(value));
+            }
+        }
 
         /// <summary>
         /// Ask whether assertions (<c>xsl:assert</c> instructions) have been enabled at run time. 
@@ -692,7 +710,35 @@ namespace Saxon.Api {
         public void CallFunction(QName function, XdmValue[] arguments, IDestination destination) {
             s9Transformer.callFunction(function, arguments, destination.UnderlyingDestination);
         }
+        
+        
+        protected internal static UnparsedTextURIResolver WrapTextResolver(TextResolver value) {
+            return (uri, encoding, config) => {
+                Encoding enc;
+                if (encoding == null) {
+                    enc = null;
+                }
+                else {
+                    if (encoding == "iso-646") {
+                        encoding = "us-ascii";
+                    }
+                    try {
+                        enc = Encoding.GetEncoding(encoding);
+                    }
+                    catch (System.ArgumentException e) {
+                        throw new Saxon.Hej.trans.XPathException("Unparsed-text encoding problem: " + e.Message, "FOUT1190");
+                    }
+                }
+                TextResource resource = value(uri, enc);
+                return new StringReader(resource.Content);
+            };
+        }
+        
+ 
+
     }
+    
+    
 }
 
 // Copyright (c) 2021 Saxonica Limited

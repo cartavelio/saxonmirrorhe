@@ -12,7 +12,7 @@ namespace Saxon.Api {
     /// <param name="targetNamespace">The target namespace of the required schema components</param>
     /// <param name="baseUri">The base URI of the module containing the reference to a schema document
     /// declaration</param>
-    /// <param name="locationHint">The URI (if any) provided as a location hint.
+    /// <param name="locationHint"Xslt>The URI (if any) provided as a location hint.
     /// Note: the <c>import schema</c> declaration in XQuery permits several location hints; if
     /// there is more than one, all but the first are ignored</param>
     /// <returns>An XdmNode representing the root document node of the schema document to be loaded.
