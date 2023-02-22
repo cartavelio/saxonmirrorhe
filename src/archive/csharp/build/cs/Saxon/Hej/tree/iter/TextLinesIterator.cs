@@ -9,6 +9,7 @@ namespace Saxon.Hej.tree.iter {
         internal int position = 0;
         protected internal Saxon.Hej.s9api.Location location;
         protected internal System.Uri uri;
+        private Saxon.Hej.om.SequenceIterator dischargedIterator;
         protected internal TextLinesIterator()  {
         }
         public TextLinesIterator(Saxon.Impl.Helpers.LineNumberReader reader, Saxon.Hej.s9api.Location location, System.Uri uri, Saxon.Hej.z.IntPredicateProxy checker)  {
@@ -18,6 +19,9 @@ namespace Saxon.Hej.tree.iter {
             this.checker = checker;
         }
         public virtual Saxon.Hej.om.Item next() {
+            if ((dischargedIterator != null)) {
+                return (Saxon.Hej.value.StringValue)(dischargedIterator.next());
+            }
             if ((position<0)) {
                 close();
                 return null;
@@ -39,7 +43,7 @@ namespace Saxon.Hej.tree.iter {
                 return current;
             } catch (System.IO.IOException err) {
                 close();
-                Saxon.Hej.trans.XPathException e = Saxon.Hej.functions.UnparsedTextFunction.handleIOError(uri, err, null);
+                Saxon.Hej.trans.XPathException e = handleIOError(uri, err);
                 if ((location != null)) {
                     e.setLocator(location);
                 }
@@ -48,11 +52,18 @@ namespace Saxon.Hej.tree.iter {
                 throw new Saxon.Hej.trans.UncheckedXPathException(err);
             }
         }
+        protected internal virtual Saxon.Hej.trans.XPathException handleIOError(System.Uri uri, System.IO.IOException err) {
+            return Saxon.Hej.functions.UnparsedTextFunction.handleIOError(uri, err);
+        }
         public void close() {
             try {
                 reader.Close();
             } catch (System.IO.IOException err) {
             }
+        }
+        public void discharge() {
+            dischargedIterator = Saxon.Hej.om.SequenceTool.toGroundedValue(this).iterate();
+            close();
         }
         private void checkLine(Saxon.Hej.z.IntPredicateProxy checker, string buffer) {
             for (int c = 0; (c<buffer.Length); ) {

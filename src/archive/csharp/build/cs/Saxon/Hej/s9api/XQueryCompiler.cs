@@ -26,6 +26,9 @@ namespace Saxon.Hej.s9api {
             }
         }
         public System.Uri getBaseURI() {
+            if ((staticQueryContext.getBaseURI() == null)) {
+                return null;
+            }
             try {
                 return new System.Uri(staticQueryContext.getBaseURI(), System.UriKind.RelativeOrAbsolute);
             } catch (System.UriFormatException err) {
@@ -107,6 +110,9 @@ namespace Saxon.Hej.s9api {
         }
         public void declareDefaultCollation(string uri) {
             staticQueryContext.declareDefaultCollation(uri);
+        }
+        public string getDefaultCollationName() {
+            return staticQueryContext.getDefaultCollationName();
         }
         public void setRequiredContextItemType(Saxon.Api.XdmItemType type) {
             requiredContextItemType = type;

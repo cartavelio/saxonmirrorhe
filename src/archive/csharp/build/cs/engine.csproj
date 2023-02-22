@@ -35,7 +35,7 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
     </ItemGroup>    
 
     <ItemGroup>
-      <EmbeddedResource Include="../../src/main/resources/**/*">
+      <EmbeddedResource Include="../../src/main/resources/**/*" Exclude="../../src/main/resources/**/.DS_Store">
         <LogicalName>$(AssemblyName).$([System.IO.Path]::GetFullPath('%(Identity)'))</LogicalName>
       </EmbeddedResource>
     </ItemGroup>
@@ -49,9 +49,14 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
       <PackageReference Include="ICU4N.RegionData" Version="60.1.0-alpha.354" />
       <PackageReference Include="ICU4N.Transliterator" Version="60.1.0-alpha.354" />
       <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
+      <PackageReference Include="XmlResolver" Version="1.0.0" />
+      <PackageReference Include="XmlResolverData" Version="1.0.0" />
       <PackageReference Include="Singulink.Numerics.BigDecimal" Version="2.0.0" />
       <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.0.1" />
       <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="5.0.0" />
     </ItemGroup>
 
     

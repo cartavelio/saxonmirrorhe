@@ -172,7 +172,7 @@ namespace Saxon.Hej.expr {
             if ((groupSizeOp != null)) {
                 string g = groupSizeOp.getChildExpression().evaluateAsString(context).ToString();
                 try {
-                    gpsize = System.Int32.Parse(g);
+                    gpsize = Saxon.Impl.Helpers.Utils.ParseInt(g);
                 } catch (Saxon.Ejava.lang.NumberFormatException err) {
                     Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("grouping-size must be numeric");
                     e.setXPathContext(context);
@@ -227,7 +227,7 @@ namespace Saxon.Hej.expr {
             string[] tokens = System.Text.RegularExpressions.Regex.Split(value, "\\s+");
             foreach (string tok in tokens) {
                 try {
-                    int n = System.Int32.Parse(tok);
+                    int n = Saxon.Impl.Helpers.Utils.ParseInt(tok);
                     list.Add(n);
                 } catch (Saxon.Ejava.lang.NumberFormatException err) {
                     Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((("Invalid start-at value: non-integer component {"+tok)+"}"));

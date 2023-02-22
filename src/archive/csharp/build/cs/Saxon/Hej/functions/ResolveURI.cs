@@ -57,7 +57,7 @@ namespace Saxon.Hej.functions {
             }
             if (((!(@base.StartsWith("jar:")) && (absoluteURI.LocalPath != null)) && absoluteURI.LocalPath.Length==0)) {
                 try {
-                    absoluteURI = Saxon.Impl.Helpers.UriUtils.Build(absoluteURI.Scheme, absoluteURI.UserInfo, absoluteURI.Host, absoluteURI.Port, "/", Saxon.Impl.Helpers.UriUtils.GetQuery(absoluteURI), Saxon.Impl.Helpers.StringUtils.nullIfEmpty(absoluteURI.Fragment));
+                    absoluteURI = Saxon.Impl.Helpers.UriUtils.Build(absoluteURI.Scheme, absoluteURI.UserInfo, absoluteURI.Host, absoluteURI.Port, "/", Saxon.Impl.Helpers.UriUtils.GetQuery(absoluteURI), Saxon.Impl.Helpers.UriUtils.GetFragment(absoluteURI));
                 } catch (System.UriFormatException e) {
                     throw new Saxon.Hej.trans.XPathException(("Failed to parse JAR scheme URI "+Saxon.Hej.trans.Err.wrap(absoluteURI.OriginalString)), "FORG0002", context);
                 }
@@ -129,6 +129,9 @@ namespace Saxon.Hej.functions {
                 } else {
                     return absoluteURI;
                 }
+            }
+            if (relativeURI.StartsWith("classpath:")) {
+                return new System.Uri(relativeURI, System.UriKind.RelativeOrAbsolute);
             }
             try {
                 if (((@base == null) || @base.Length==0)) {

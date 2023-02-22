@@ -28,9 +28,6 @@ namespace Saxon.Hej.resource {
             } catch (System.UriFormatException e) {
                 throw new Saxon.Hej.trans.XPathException(e);
             }
-            if (!(context.getConfiguration().getAllowedUriTest()(resolvedURI))) {
-                throw new Saxon.Hej.trans.XPathException((("URI scheme '"+resolvedURI.Scheme)+"' has been disallowed"));
-            }
             if ("file".Equals(resolvedURI.Scheme)) {
                 Saxon.Ejava.io.File file = new Saxon.Ejava.io.File(resolvedURI);
                 checkFileExists(file, resolvedURI, context);

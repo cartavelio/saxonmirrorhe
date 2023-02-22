@@ -101,7 +101,7 @@ namespace Saxon.Hej.style {
                         break ;
                     }
                     if (!(found)) {
-                        compileError((("No "+sName.ToString())+" exists in the containing package"), "XTSE3020");
+                        compileError((("No "+sName)+" exists in the containing package"), "XTSE3020");
                     }
                 }
             }

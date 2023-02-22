@@ -16,10 +16,21 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.z.IntPredicateProxy checker = config.getValidCharacterChecker();
             System.IO.TextReader reader;
             try {
-                reader = /*Delegate.resolve()*/context.getController().getUnparsedTextURIResolver()(absoluteURI, encoding, config);
+                reader = context.getController().getUnparsedTextURIResolver().resolve(absoluteURI, encoding, config);
             } catch (Saxon.Hej.trans.XPathException err) {
                 err.maybeSetErrorCode("FOUT1170");
                 throw;
+            }
+            if ((reader == null)) {
+                Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+                request.uri = absoluteURI.ToString();
+                request.nature = Saxon.Hej.lib.JJ_ResourceRequest.TEXT_NATURE;
+                Saxon.Ejavax.xml.transform.Source src = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
+                if ((src is Saxon.Ejavax.xml.transform.stream.StreamSource)) {
+                    reader = Saxon.Hej.lib.StandardUnparsedTextResolver.getReaderFromStreamSource((Saxon.Ejavax.xml.transform.stream.StreamSource)(src), encoding, config, false);
+                } else {
+                    throw new Saxon.Hej.trans.XPathException("unparsed-text(): resolver returned non-StreamSource");
+                }
             }
             try {
                 readFile(checker, reader, output);
@@ -28,7 +39,7 @@ namespace Saxon.Hej.functions {
                 e.setErrorCode("FOUT1190");
                 throw e;
             } catch (System.IO.IOException ioErr) {
-                throw handleIOError(absoluteURI, ioErr, context);
+                throw handleIOError(absoluteURI, ioErr);
             }
         }
         public static System.Uri getAbsoluteURI(string href, string baseURI, Saxon.Hej.expr.XPathContext context) {
@@ -39,7 +50,7 @@ namespace Saxon.Hej.functions {
                 handleURISyntaxException(href, baseURI, err);
                 return null;
             }
-            if ((Saxon.Impl.Helpers.StringUtils.nullIfEmpty(absoluteURI.Fragment) != null)) {
+            if ((Saxon.Impl.Helpers.UriUtils.GetFragment(absoluteURI) != null)) {
                 Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("URI for unparsed-text() must not contain a fragment identifier");
                 e.setErrorCode("FOUT1170");
                 throw e;
@@ -55,7 +66,7 @@ namespace Saxon.Hej.functions {
             e.setErrorCode("FOUT1170");
             throw e;
         }
-        public static Saxon.Hej.trans.XPathException handleIOError(System.Uri absoluteURI, System.IO.IOException ioErr, Saxon.Hej.expr.XPathContext context) {
+        public static Saxon.Hej.trans.XPathException handleIOError(System.Uri absoluteURI, System.IO.IOException ioErr) {
             string message = "Failed to read input file";
             if (((absoluteURI != null) && !(ioErr.Message.Equals(absoluteURI.ToString())))) {
                 message += (' '+absoluteURI.ToString());
@@ -66,12 +77,12 @@ namespace Saxon.Hej.functions {
             e.setErrorCode(errorCode);
             return e;
         }
-        private static string getErrorCode(System.IO.IOException ioErr) {
+        public static string getErrorCode(System.IO.IOException ioErr) {
             return "FOUT1170";
         }
         public static Saxon.Hej.str.UnicodeString readFile(Saxon.Hej.z.IntPredicateProxy checker, System.IO.TextReader reader) {
             Saxon.Hej.str.UnicodeBuilder buffer = new Saxon.Hej.str.UnicodeBuilder();
-            readFile(checker, reader, new Inner_AbstractUniStringConsumer_d1187e797(buffer));
+            readFile(checker, reader, new Inner_AbstractUniStringConsumer_44(buffer));
             return buffer.toUnicodeString();
         }
         public static void readFile(Saxon.Hej.z.IntPredicateProxy checker, System.IO.TextReader reader, Saxon.Hej.str.UniStringConsumer output) {
@@ -143,8 +154,8 @@ namespace Saxon.Hej.functions {
             return bytesRead == 0;
         }
     
-        private class Inner_AbstractUniStringConsumer_d1187e797 : Saxon.Hej.str.AbstractUniStringConsumer {
-            public Inner_AbstractUniStringConsumer_d1187e797(Saxon.Hej.str.UnicodeBuilder buffer) {
+        private class Inner_AbstractUniStringConsumer_44 : Saxon.Hej.str.AbstractUniStringConsumer {
+            public Inner_AbstractUniStringConsumer_44(Saxon.Hej.str.UnicodeBuilder buffer) {
                 this.buffer = buffer;
             }
             private Saxon.Hej.str.UnicodeBuilder buffer;

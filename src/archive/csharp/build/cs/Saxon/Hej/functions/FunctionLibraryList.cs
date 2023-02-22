@@ -22,9 +22,9 @@ namespace Saxon.Hej.functions {
             }
             return null;
         }
-        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName) {
+        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
             foreach (Saxon.Hej.functions.FunctionLibrary lib in libraryList) {
-                if (lib.isAvailable(functionName)) {
+                if (lib.isAvailable(functionName, languageLevel)) {
                     return true;
                 }
             }

@@ -343,18 +343,18 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.str.UnicodeString widths = Saxon.Hej.str.EmptyUnicodeString.getInstance();
             if ((comma>=0)) {
                 widths = format.substring(comma);
-                format = format.substring(0, comma);
+                format = format.prefix(comma);
             }
             Saxon.Hej.str.UnicodeString primary = format;
             string letterValue = null;
             string ordinal = null;
             int lastCP = Saxon.Hej.str.StringTool.lastCodePoint(primary);
             if ((lastCP == 't')) {
-                primary = primary.substring(0, (primary.length()-1));
+                primary = primary.prefix((primary.length()-1));
                 letterValue = "traditional";
             } else {
                 if ((lastCP == 'o')) {
-                    primary = primary.substring(0, (primary.length()-1));
+                    primary = primary.prefix((primary.length()-1));
                     ordinal = numberer.getOrdinalSuffixForDateTime(component.ToString());
                 }
             }
@@ -447,10 +447,10 @@ namespace Saxon.Hej.functions {
                         if (!(digitsOrOptionalDigitsPattern.matches(primary))) {
                             Saxon.Hej.str.UnicodeString reverseFormat = reverse(format);
                             Saxon.Hej.str.UnicodeString reverseValue = reverse(Saxon.Hej.str.BMPString.of((""+value)));
-                            Saxon.Hej.str.UnicodeString reverseResult = formatNumber(STR_s, System.Int32.Parse(reverseValue.ToString()), reverseFormat, false, numberer, context);
+                            Saxon.Hej.str.UnicodeString reverseResult = formatNumber(STR_s, Saxon.Impl.Helpers.Utils.ParseInt(reverseValue.ToString()), reverseFormat, false, numberer, context);
                             Saxon.Hej.str.UnicodeString correctedResult = reverse(reverseResult);
                             if ((correctedResult.length()>max)) {
-                                correctedResult = correctedResult.substring(0, max);
+                                correctedResult = correctedResult.prefix(max);
                             }
                             return correctedResult;
                         }
@@ -463,7 +463,7 @@ namespace Saxon.Hej.functions {
                         } else {
                             str = Saxon.Hej.str.BMPString.of(((((1000000+value))+"")).Substring(1));
                             if ((str.length()>max)) {
-                                str = str.substring(0, max);
+                                str = str.prefix(max);
                             }
                         }
                         while ((str.length()<min)) {
@@ -471,7 +471,7 @@ namespace Saxon.Hej.functions {
                         }
                         if ((str.length()>min)) {
                             while (((str.length()>min) && (str.codePointAt((str.length()-1)) == '0'))) {
-                                str = str.substring(0, (str.length()-1));
+                                str = str.prefix((str.length()-1));
                             }
                         }
                         int zeroDigit = Saxon.Hej.expr.number.Alphanumeric.getDigitFamily(format.codePointAt(0));
@@ -557,13 +557,13 @@ namespace Saxon.Hej.functions {
                         if ((((smin == null) || smin.isEmpty()) || Saxon.Hej.str.StringConstants.ASTERISK.Equals(smin))) {
                             min = 1;
                         } else {
-                            min = System.Int32.Parse(smin.ToString());
+                            min = Saxon.Impl.Helpers.Utils.ParseInt(smin.ToString());
                         }
                         Saxon.Hej.str.UnicodeString smax = widthIter.getRegexGroup(3);
                         if ((((smax == null) || smax.isEmpty()) || Saxon.Hej.str.StringConstants.ASTERISK.Equals(smax))) {
                             max = System.Int32.MaxValue;
                         } else {
-                            max = System.Int32.Parse(smax.ToString());
+                            max = Saxon.Impl.Helpers.Utils.ParseInt(smax.ToString());
                         }
                         if ((min<1)) {
                             throw new Saxon.Hej.trans.XPathException(("Invalid min value in format picture "+Saxon.Hej.trans.Err.wrap(widths, Saxon.Hej.trans.Err.VALUE)), "FOFD1340");
@@ -590,7 +590,7 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.str.UnicodeString widthModifier = Saxon.Hej.str.EmptyUnicodeString.getInstance();
             if ((comma>=0)) {
                 widthModifier = format.substring(comma);
-                format = format.substring(0, comma);
+                format = format.prefix(comma);
             }
             if (!(value.hasTimezone())) {
                 if (format.Equals(STR_Z)) {
@@ -622,7 +622,7 @@ namespace Saxon.Hej.functions {
                 return STR_Z;
             }
             if (useZforZero) {
-                format = format.substring(0, (format.length()-1));
+                format = format.prefix((format.length()-1));
             }
             int digits = 0;
             int separators = 0;

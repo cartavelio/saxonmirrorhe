@@ -103,7 +103,8 @@ namespace Saxon.Hej.tree.linked {
             }
         }
         public override void copy(Saxon.Hej.@event.Receiver @out, int copyOptions, Saxon.Hej.s9api.Location location) {
-            Saxon.Hej.type.SchemaType typeCode = (Saxon.Hej.om.CopyOptions.includes(copyOptions, Saxon.Hej.om.CopyOptions.TYPE_ANNOTATIONS) ? getSchemaType() : Saxon.Hej.type.Untyped.getInstance());
+            bool copyTypes = Saxon.Hej.om.CopyOptions.includes(copyOptions, Saxon.Hej.om.CopyOptions.TYPE_ANNOTATIONS);
+            Saxon.Hej.type.SchemaType typeCode = (copyTypes ? getSchemaType() : Saxon.Hej.type.Untyped.getInstance());
             System.Func<Saxon.Hej.om.NodeInfo,System.Object> informee = @out.getPipelineConfiguration().getCopyInformee();
             if ((informee != null)) {
                 System.Object o = informee(this);
@@ -112,9 +113,30 @@ namespace Saxon.Hej.tree.linked {
                 }
             }
             Saxon.Hej.om.NamespaceMap ns = (Saxon.Hej.om.CopyOptions.includes(copyOptions, Saxon.Hej.om.CopyOptions.ALL_NAMESPACES) ? getAllNamespaces() : Saxon.Hej.om.NamespaceMap.emptyMap());
+            bool disallowNamespaceSensitiveContent = (((((copyOptions&Saxon.Hej.om.CopyOptions.TYPE_ANNOTATIONS)) != 0)) && ((((copyOptions&Saxon.Hej.om.CopyOptions.ALL_NAMESPACES)) == 0)));
+            if ((copyTypes && disallowNamespaceSensitiveContent)) {
+                try {
+                    checkNotNamespaceSensitiveElement(getSchemaType());
+                } catch (Saxon.Hej.@event.CopyNamespaceSensitiveException e) {
+                    e.setErrorCode((@out.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
+                    throw;
+                }
+            }
             System.Collections.Generic.IList<Saxon.Hej.om.AttributeInfo> atts = new System.Collections.Generic.List<Saxon.Hej.om.AttributeInfo>(attributes().size());
             foreach (Saxon.Hej.om.AttributeInfo att in attributes()) {
-                atts.Add(new Saxon.Hej.om.AttributeInfo(att.getNodeName(), Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), att.getLocation(), 0));
+                Saxon.Hej.type.SimpleType attributeType = Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC;
+                if (copyTypes) {
+                    attributeType = att.getType();
+                    if (disallowNamespaceSensitiveContent) {
+                        try {
+                            checkNotNamespaceSensitiveAttribute(attributeType, att);
+                        } catch (Saxon.Hej.@event.CopyNamespaceSensitiveException e) {
+                            e.setErrorCode((@out.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
+                            throw;
+                        }
+                    }
+                }
+                atts.Add(new Saxon.Hej.om.AttributeInfo(att.getNodeName(), attributeType, att.getValue(), att.getLocation(), 0));
             }
             @out.startElement(Saxon.Hej.om.NameOfNode.makeName(this), typeCode, Saxon.Hej.om.SequenceTool.attributeMapFromList(atts), ns, location, (Saxon.Hej.@event.ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY|Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK));
             Saxon.Hej.tree.linked.NodeImpl next = getFirstChild();
@@ -123,6 +145,34 @@ namespace Saxon.Hej.tree.linked {
                 next = ((/*1430*/Saxon.Hej.tree.linked.NodeImpl)next.getNextSibling());
             }
             @out.endElement();
+        }
+        protected internal void checkNotNamespaceSensitiveElement(Saxon.Hej.type.SchemaType type) {
+            if (((type is Saxon.Hej.type.SimpleType) && ((Saxon.Hej.type.SimpleType)(type)).isNamespaceSensitive())) {
+                if (type.isAtomicType()) {
+                    throw new Saxon.Hej.@event.CopyNamespaceSensitiveException("Cannot copy QName or NOTATION values without copying namespaces");
+                } else {
+                    Saxon.Hej.om.AtomicSequence value = atomize();
+                    foreach (Saxon.Hej.value.AtomicValue val in value) {
+                        if (val.getPrimitiveType().isNamespaceSensitive()) {
+                            throw new Saxon.Hej.@event.CopyNamespaceSensitiveException("Cannot copy QName or NOTATION values without copying namespaces");
+                        }
+                    }
+                }
+            }
+        }
+        private void checkNotNamespaceSensitiveAttribute(Saxon.Hej.type.SimpleType type, Saxon.Hej.om.AttributeInfo att) {
+            if (type.isNamespaceSensitive()) {
+                if (type.isAtomicType()) {
+                    throw new Saxon.Hej.@event.CopyNamespaceSensitiveException("Cannot copy QName or NOTATION values without copying namespaces");
+                } else {
+                    Saxon.Hej.om.AtomicSequence value = type.getTypedValue(att.getXdmStringValue().getUnicodeStringValue(), namespaceMap, getConfiguration().getConversionRules());
+                    foreach (Saxon.Hej.value.AtomicValue val in value) {
+                        if (val.getPrimitiveType().isNamespaceSensitive()) {
+                            throw new Saxon.Hej.@event.CopyNamespaceSensitiveException("Cannot copy QName or NOTATION values without copying namespaces");
+                        }
+                    }
+                }
+            }
         }
         public override void delete() {
             Saxon.Hej.tree.linked.DocumentImpl root = getPhysicalRoot();
@@ -217,7 +267,7 @@ namespace Saxon.Hej.tree.linked {
         }
         public override void addAttribute(Saxon.Hej.om.NodeName nodeName, Saxon.Hej.type.SimpleType attType, string value, int properties, bool inheritNamespaces) {
             Saxon.Hej.tree.linked.AttributeMapWithIdentity atts = prepareAttributesForUpdate();
-            atts = atts.add(new Saxon.Hej.om.AttributeInfo(nodeName, attType, value.ToString(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE));
+            atts = atts.add(new Saxon.Hej.om.AttributeInfo(nodeName, attType, value, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE));
             setAttributes(atts);
             if (!(nodeName.hasURI(""))) {
                 Saxon.Hej.om.NamespaceBinding binding = nodeName.getNamespaceBinding();

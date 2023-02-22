@@ -48,6 +48,10 @@ namespace Saxon.Hej.functions.hof {
                 seq0.close();
                 seq1.close();
             }
+            public void discharge() {
+                seq0.discharge();
+                seq1.discharge();
+            }
         
         }
     

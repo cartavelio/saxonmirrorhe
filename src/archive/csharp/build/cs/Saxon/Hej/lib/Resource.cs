@@ -4,7 +4,7 @@ using System.Linq;
 namespace Saxon.Hej.lib {
     public interface Resource {
         string getResourceURI();
-        Saxon.Hej.om.Item getItem(Saxon.Hej.expr.XPathContext context);
+        Saxon.Hej.om.Item getItem();
         string getContentType();
     
     }

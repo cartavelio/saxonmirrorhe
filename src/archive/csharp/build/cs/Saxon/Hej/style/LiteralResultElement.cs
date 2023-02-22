@@ -14,6 +14,8 @@ namespace Saxon.Hej.style {
         private int validation = Saxon.Hej.lib.Validation.STRIP;
         private bool inheritNamespaces = true;
         private static readonly Saxon.Hej.z.IntHashSet STANDARD_ATTRIBUTES = Saxon.Hej.z.IntHashSet.of(Saxon.Hej.om.StandardNames.XSL_USE_ATTRIBUTE_SETS, Saxon.Hej.om.StandardNames.XSL_DEFAULT_COLLATION, Saxon.Hej.om.StandardNames.XSL_DEFAULT_MODE, Saxon.Hej.om.StandardNames.XSL_DEFAULT_VALIDATION, Saxon.Hej.om.StandardNames.XSL_EXTENSION_ELEMENT_PREFIXES, Saxon.Hej.om.StandardNames.XSL_EXCLUDE_RESULT_PREFIXES, Saxon.Hej.om.StandardNames.XSL_EXPAND_TEXT, Saxon.Hej.om.StandardNames.XSL_VERSION, Saxon.Hej.om.StandardNames.XSL_XPATH_DEFAULT_NAMESPACE, Saxon.Hej.om.StandardNames.XSL_TYPE, Saxon.Hej.om.StandardNames.XSL_USE_WHEN, Saxon.Hej.om.StandardNames.XSL_VALIDATION);
+        public LiteralResultElement()  {
+        }
         protected internal override bool mayContainSequenceConstructor() {
             return true;
         }
@@ -153,6 +155,7 @@ namespace Saxon.Hej.style {
                 return null;
             }
             Saxon.Hej.expr.instruct.FixedElement inst = new Saxon.Hej.expr.instruct.FixedElement(resultNodeName, retainedNamespaces, inheritNamespaces, true, schemaType, validation);
+            inst.setLocation(allocateLocation());
             Saxon.Hej.expr.Expression content = compileSequenceConstructor(exec, decl, true);
             if ((numberOfAttributes>0)) {
                 for (int i = (attributeNames.Length-1); (i>=0); i--) {

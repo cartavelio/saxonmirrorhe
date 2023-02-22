@@ -70,6 +70,11 @@ namespace Saxon.Hej.expr.flwor {
             fsb.append(getPredicate().ToString());
             return fsb.ToString();
         }
+        public override System.Collections.Generic.IDictionary<string,System.Object> getTraceInfo() {
+            System.Collections.Generic.IDictionary<string,System.Object> info = new System.Collections.Generic.Dictionary<string, System.Object>(1);
+            Saxon.Impl.Helpers.MapUtils.Put(info, "condition", getPredicate().toShortString());
+            return info;
+        }
     
     }
 }

@@ -46,16 +46,6 @@ namespace Saxon.Hej.functions {
             return getDescription();
         }
     
-        /* Expanding default method isSequenceVariadic from interface Function */
-        public virtual bool isSequenceVariadic() {
-            return false;
-        }
-
-        /* Expanding default method getGenre from interface Function */
-        public virtual Saxon.Hej.om.Genre getGenre() {
-            return Saxon.Hej.om.Genre.FUNCTION;
-        }
-
         /* Expanding default method reduce from interface Item */
         public virtual Saxon.Hej.om.GroundedValue reduce() {
             return this;
@@ -68,7 +58,7 @@ namespace Saxon.Hej.functions {
 
         /* Expanding default method asIterable from interface GroundedValue */
         public virtual System.Collections.Generic.IEnumerable<Saxon.Hej.om.Item> asIterable() {
-            return new Saxon.Hej.om.GroundedValueAsIterable<Saxon.Hej.om.Item>(this);
+            return new Saxon.Hej.om.GroundedValueAsIterable(this);
         }
 
         /* Expanding default method containsNode from interface GroundedValue */
@@ -84,6 +74,21 @@ namespace Saxon.Hej.functions {
                 chain.appendSequence(seq);
             }
             return chain;
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
+        }
+
+        /* Expanding default method isSequenceVariadic from interface Function */
+        public virtual bool isSequenceVariadic() {
+            return false;
+        }
+
+        /* Expanding default method getGenre from interface Function */
+        public virtual Saxon.Hej.om.Genre getGenre() {
+            return Saxon.Hej.om.Genre.FUNCTION;
         }
 
         /* Expanding default method head from interface Item */
@@ -125,16 +130,6 @@ namespace Saxon.Hej.functions {
             return false;
         }
 
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
-        }
-
-        /* Creating stub method call to satisfy interface Callable */
-        public virtual Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext arg1, Saxon.Hej.om.Sequence[] arg2) {
-            throw new System.NotImplementedException();
-        }
-
         /* Creating stub method getFunctionItemType to satisfy interface Function */
         public virtual Saxon.Hej.type.FunctionItemType getFunctionItemType() {
             throw new System.NotImplementedException();
@@ -152,6 +147,11 @@ namespace Saxon.Hej.functions {
 
         /* Creating stub method getDescription to satisfy interface Function */
         public virtual string getDescription() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method call to satisfy interface Callable */
+        public virtual Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext arg1, Saxon.Hej.om.Sequence[] arg2) {
             throw new System.NotImplementedException();
         }
 

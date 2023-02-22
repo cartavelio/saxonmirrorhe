@@ -1,13 +1,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Saxon.Ejava.lang;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej;
+using Saxon.Hej.@event;
 using Saxon.Hej.ma.arrays;
 using Saxon.Hej.ma.map;
 using Saxon.Hej.om;
 using Saxon.Hej.value;
 using Saxon.Hej.expr;
+using Saxon.Hej.serialize;
+using Saxon.Hej.trans;
 using Exception = System.Exception;
 
 namespace Saxon.Api {
@@ -293,13 +300,14 @@ namespace Saxon.Api {
                     return XdmEmptySequence.Instance;
                 case 1:
                     Item first = value.head();
+
                     return first.getGenre() switch {
                         Genre.NODE => new XdmNode((NodeInfo)first),
                         Genre.ATOMIC => new XdmAtomicValue((AtomicValue)first),
                         Genre.MAP => new XdmMap((MapItem)first),
                         Genre.ARRAY => new XdmArray((ArrayItem)first),
                         Genre.FUNCTION => new XdmFunctionItem((Function)first),
-                        Genre.EXTERNAL => new XdmExternalObject<object>(first),
+                        Genre.EXTERNAL => new XdmExternalObject(((Saxon.Hej.value.AnyExternalObject)first).getWrappedObject()),
                         _ => throw new IllegalArgumentException()
                     };
                 default:
@@ -465,7 +473,31 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>A string representation of the value.</returns>
         public override string ToString() {
-            return value.ToString();
+            try {
+                Configuration config = null;
+                SequenceIterator iter = value.iterate();
+                Item item;
+                while ((item = iter.next()) != null) {
+                    if (item is NodeInfo) {
+                        config = ((NodeInfo)item).getConfiguration();
+                        break;
+                    }
+                }
+                if (config == null) {
+                    config = Configuration.newConfiguration();
+                }
+                StringWriter writer = new StringWriter();
+                StreamResult result = new StreamResult(writer);
+                SerializationProperties properties = new SerializationProperties();
+                properties.setProperty(OutputKeys.METHOD, "adaptive");
+                properties.setProperty(OutputKeys.INDENT, "true");
+                properties.setProperty(OutputKeys.OMIT_XML_DECLARATION, "true");
+                Receiver r = config.getSerializerFactory().getReceiver(result, properties);
+                SequenceCopier.copySequence(value.iterate(), r);
+                return writer.ToString();
+            } catch (XPathException) {
+                return base.ToString();
+            }
         }
 
 

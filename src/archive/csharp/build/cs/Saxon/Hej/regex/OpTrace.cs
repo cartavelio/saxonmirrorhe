@@ -15,7 +15,7 @@ namespace Saxon.Hej.regex {
             int lastDot = clName.LastIndexOf(".");
             string iterName = clName.Substring((lastDot+1));
             System.Console.Error.WriteLine(((((((((("Iterating over "+@base.GetType().Name)+" ")+@base.display())+" at position ")+position)+" returning ")+iterName)+" ")+iterNr));
-            return new Inner_IntIterator_d1456e172(this, baseIter, iterNr);
+            return new Inner_IntIterator_9(this, baseIter, iterNr);
         }
         public override int getMatchLength() {
             return @base.getMatchLength();
@@ -31,9 +31,9 @@ namespace Saxon.Hej.regex {
             return @base.display();
         }
     
-        private class Inner_IntIterator_d1456e172 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_9 : Saxon.Hej.z.IntIterator {
             private readonly OpTrace outerInstance;
-            public Inner_IntIterator_d1456e172(OpTrace outerInstance, Saxon.Hej.z.IntIterator baseIter, int iterNr) {
+            public Inner_IntIterator_9(OpTrace outerInstance, Saxon.Hej.z.IntIterator baseIter, int iterNr) {
                 this.outerInstance = outerInstance;
                 this.baseIter = baseIter;
                 this.iterNr = iterNr;

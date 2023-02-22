@@ -18,7 +18,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             Saxon.Eej.ee.schema.sdoc.XSDSchema thisSchemaDocument = getXSDSchema();
             Saxon.Eej.config.EnterpriseConfiguration config = (Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration());
-            Saxon.Eej.ee.schema.SchemaCompiler manager = thisSchemaDocument.getSchemaCompiler();
+            Saxon.Eej.ee.schema.SchemaCompiler compiler = thisSchemaDocument.getSchemaCompiler();
             if ((@namespace == null)) {
                 @namespace = "";
             }
@@ -26,7 +26,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             if ((schemaLocation != null)) {
                 try {
                     string location = Saxon.Hej.functions.ResolveURI.makeAbsolute(schemaLocation, documentBase).ToString();
-                    Saxon.Eej.ee.schema.sdoc.XSDSchema existing = manager.getExistingSchemaDocument(location, @namespace);
+                    Saxon.Eej.ee.schema.sdoc.XSDSchema existing = compiler.getExistingSchemaDocument(location, @namespace);
                     if ((existing != null)) {
                         importedSchema = existing.getSchema();
                         return ;
@@ -43,27 +43,27 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     return ;
                 }
             }
+            if (@namespace.Equals(thisSchemaDocument.getTargetNamespace())) {
+                error("The namespace attribute in the xs:import element cannot be the same as the targetNamespace of the containing schema");
+                return ;
+            }
             Saxon.Ejavax.xml.transform.Source source = null;
             if ((schemaLocation != null)) {
                 try {
-                    source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(documentBase, schemaLocation, manager.getPipelineConfiguration(), @namespace);
+                    source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(documentBase, schemaLocation, compiler, @namespace);
                 } catch (Saxon.Hej.type.SchemaException e) {
                     processSchemaException(schemaLocation, @namespace, e);
                     return ;
                 }
             }
-            if (@namespace.Equals(thisSchemaDocument.getTargetNamespace())) {
-                error("The namespace attribute in the xs:import element cannot be the same as the targetNamespace of the containing schema");
-                return ;
-            }
             if ((source != null)) {
-                if (manager.isBeingRead(source.getSystemId())) {
+                if (compiler.isBeingRead(source.getSystemId())) {
                     return ;
                 }
             }
             int status = config.getNamespaceStatus(@namespace);
             if ((status == Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION)) {
-                if (((source == null) || ((!(manager.isBeingRead(source.getSystemId())) && !(config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.MULTIPLE_SCHEMA_IMPORTS)))))) {
+                if (((source == null) || ((!(compiler.isBeingRead(source.getSystemId())) && !(config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.MULTIPLE_SCHEMA_IMPORTS)))))) {
                     if ((schemaLocation != null)) {
                         string message = (("The schema document at "+schemaLocation)+" is not being read because schema components for this namespace are already being processed");
                         if (!(@namespace.Equals(Saxon.Hej.lib.NamespaceConstant.XML))) {
@@ -89,6 +89,11 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     }
                 }
             }
+            if (((source == null) && (schemaLocation != null))) {
+                warning(("Failed to locate imported schema document: "+schemaLocation));
+                importedSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), @namespace);
+                return ;
+            }
             if ((schemaLocation == null)) {
                 if (@namespace.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE)) {
                     importedSchema = /*134*/Saxon.Eej.ee.schema.sdoc.XSINamespaceSchema.buildSchema(config);
@@ -105,8 +110,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                             source = new Saxon.Ejavax.xml.transform.stream.StreamSource(@in, "http://www.w3.org/2005/xpath-functions.scm");
                         }
                     } else {
-                        Saxon.Hej.@event.PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-                        Saxon.Hej.lib.SchemaURIResolver resolver = pipe.getSchemaURIResolver();
+                        Saxon.Hej.lib.SchemaURIResolver resolver = compiler.getSchemaURIResolver();
                         if ((resolver != null)) {
                             try {
                                 Saxon.Ejavax.xml.transform.Source[] sources = resolver.resolve(@namespace, getBaseURI(), new string[0]);
@@ -132,7 +136,6 @@ namespace Saxon.Eej.ee.schema.sdoc {
             int errors;
             try {
                 Saxon.Hej.@event.PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-                Saxon.Eej.ee.schema.SchemaCompiler compiler = getSchemaNodeFactory().getSchemaCompiler();
                 importee = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, compiler, pipe, null);
                 Saxon.Eej.ee.schema.sdoc.XSDSchema s = importee.getXSDSchema();
                 errors = importee.getXSDSchema().getErrorCount();

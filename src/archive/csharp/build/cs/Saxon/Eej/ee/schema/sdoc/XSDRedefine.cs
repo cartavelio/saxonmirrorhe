@@ -20,24 +20,27 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             string documentBase = getBaseURI();
             Saxon.Hej.@event.PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-            Saxon.Eej.ee.schema.SchemaCompiler manager = getXSDSchema().getSchemaCompiler();
+            Saxon.Eej.ee.schema.SchemaCompiler compiler = getXSDSchema().getSchemaCompiler();
             Saxon.Ejavax.xml.transform.Source source = null;
             try {
-                source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(documentBase, schemaLocation, manager.getPipelineConfiguration(), null);
+                source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(documentBase, schemaLocation, compiler, null);
             } catch (Saxon.Hej.type.SchemaException e) {
                 handleSchemaException(schemaLocation, e);
             }
+            if ((source == null)) {
+                warning(("Failed to locate redefined schema document "+schemaLocation));
+                externalSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), "");
+            }
             if ((source != null)) {
-                if (manager.isBeingRead(source.getSystemId())) {
+                if (compiler.isBeingRead(source.getSystemId())) {
                     error((("The schema document "+source.getSystemId())+" includes or redefines itself recursively"));
                     return ;
                 }
-                if ((manager.getExistingSchemaDocument(schemaLocation, getXSDSchema().getTargetNamespace()) != null)) {
+                if ((compiler.getExistingSchemaDocument(schemaLocation, getXSDSchema().getTargetNamespace()) != null)) {
                     error("Saxon can't handle redefinition of a schema document that has already been loaded by a different route");
                     return ;
                 }
                 try {
-                    Saxon.Eej.ee.schema.SchemaCompiler compiler = getSchemaNodeFactory().getSchemaCompiler();
                     Saxon.Eej.ee.schema.sdoc.SchemaDocument schemaDoc = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, compiler, pipe, this);
                     Saxon.Eej.ee.schema.sdoc.XSDSchema redefined = schemaDoc.getXSDSchema();
                     externalSchema = redefined.getSchema();

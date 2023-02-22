@@ -53,7 +53,13 @@ namespace Saxon.Hej.expr.parser {
             if ((exp is Saxon.Hej.expr.flwor.FLWORExpression)) {
                 ((Saxon.Hej.expr.flwor.FLWORExpression)(exp)).injectCode(injector);
             } else {
-                if (!(((exp is Saxon.Hej.expr.instruct.TraceExpression)))) {
+                if ((exp is Saxon.Hej.expr.instruct.TraceExpression)) {
+                    foreach (Saxon.Hej.expr.Operand o in ((Saxon.Hej.expr.instruct.TraceExpression)(exp)).getChild().operands()) {
+                        if (!(o.getOperandRole().isConstrainedClass())) {
+                            o.setChildExpression(injectCode(o.getChildExpression(), injector));
+                        }
+                    }
+                } else {
                     foreach (Saxon.Hej.expr.Operand o in exp.operands()) {
                         if (!(o.getOperandRole().isConstrainedClass())) {
                             o.setChildExpression(injectCode(o.getChildExpression(), injector));
@@ -710,14 +716,17 @@ namespace Saxon.Hej.expr.parser {
                     o.setChildExpression(e2);
                     replaced = true;
                 } else {
-                    replaced = replaceSelectedSubexpressions(child, selector, replacement, mustCopy);
+                    replaced |= replaceSelectedSubexpressions(child, selector, replacement, mustCopy);
                 }
             }
             return replaced;
         }
         public static void replaceVariableReferences(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.Binding binding, Saxon.Hej.expr.Expression replacement, bool mustCopy) {
             System.Predicate<Saxon.Hej.expr.Expression> selector = child => ((child is Saxon.Hej.expr.VariableReference) && (((Saxon.Hej.expr.VariableReference)(child)).getBinding() == binding));
-            replaceSelectedSubexpressions(exp, selector, replacement, mustCopy);
+            bool changed = replaceSelectedSubexpressions(exp, selector, replacement, mustCopy);
+            if (changed) {
+                resetPropertiesWithinSubtree(exp);
+            }
         }
         public static int getReferenceCount(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.Binding binding, bool inLoop) {
             int rcount = 0;

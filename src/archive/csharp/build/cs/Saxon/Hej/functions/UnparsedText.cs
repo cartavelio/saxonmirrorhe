@@ -9,6 +9,9 @@ namespace Saxon.Hej.functions {
             try {
                 return Saxon.Hej.om.SequenceTool.itemOrEmpty(evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context));
             } catch (Saxon.Hej.trans.XPathException e) {
+                if ((e.getErrorCodeQName() == null)) {
+                    e.setErrorCode("FOUT1170");
+                }
                 if (((getArity() == 2) && e.getErrorCodeLocalPart().Equals("FOUT1200"))) {
                     e.setErrorCode("FOUT1190");
                 }
@@ -27,7 +30,7 @@ namespace Saxon.Hej.functions {
                 Saxon.Hej.value.StringValue href = (Saxon.Hej.value.StringValue)(arguments[0].head());
                 System.Uri absoluteURI = getAbsoluteURI(href.getStringValue(), getStaticBaseUriString(), context);
                 string encoding = ((getArity() == 2) ? arguments[1].head().getStringValue() : null);
-                Saxon.Hej.str.UniStringConsumer consumer = destination.getStringReceiver(false);
+                Saxon.Hej.str.UniStringConsumer consumer = destination.getStringReceiver(false, Saxon.Hej.expr.parser.Loc.NONE);
                 consumer.open();
                 try {
                     readFile(absoluteURI, encoding, consumer, context);
@@ -58,7 +61,7 @@ namespace Saxon.Hej.functions {
                         if ((cache != null)) {
                             Saxon.Hej.str.UnicodeString existing = Saxon.Impl.Helpers.MapUtils.Get(cache, absoluteURI);
                             if ((existing != null)) {
-                                if ((existing.codePointAt(0) == errorValue)) {
+                                if (((existing.length()>0) && (existing.codePointAt(0) == errorValue))) {
                                     throw new Saxon.Hej.trans.XPathException(existing.substring(1).ToString(), "FOUT1170");
                                 }
                                 return new Saxon.Hej.value.StringValue(existing);

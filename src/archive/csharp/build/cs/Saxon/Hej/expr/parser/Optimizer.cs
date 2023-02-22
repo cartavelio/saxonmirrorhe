@@ -159,7 +159,7 @@ namespace Saxon.Hej.expr.parser {
                 Saxon.Hej.lib.Logger err = getConfiguration().getLogger();
                 err.info(((("OPT : At line "+exp.getLocation().getLineNumber())+" of ")+exp.getLocation().getSystemId()));
                 err.info(("OPT : "+message));
-                err.info(("OPT : Expression after rewrite: "+exp.ToString()));
+                err.info(("OPT : Expression after rewrite: "+exp));
                 exp.verifyParentPointers();
             }
         }
@@ -168,7 +168,7 @@ namespace Saxon.Hej.expr.parser {
                 Saxon.Hej.lib.Logger err = config.getLogger();
                 err.info(((("OPT : At line "+exp.getLocation().getLineNumber())+" of ")+exp.getLocation().getSystemId()));
                 err.info(("OPT : "+message));
-                err.info(("OPT : Expression after rewrite: "+exp.ToString()));
+                err.info(("OPT : Expression after rewrite: "+exp));
                 exp.verifyParentPointers();
             }
         }

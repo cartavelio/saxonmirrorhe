@@ -181,21 +181,25 @@ namespace Saxon.Hej.style {
             if ((href == null)) {
                 throw new Saxon.Hej.trans.XPathException(("Missing href attribute on "+elemName.getDisplayName()), "XTSE0010");
             }
-            Saxon.Ejavax.xml.transform.URIResolver resolver = compilation.getCompilerInfo().getURIResolver();
+            Saxon.Hej.Configuration config = getConfiguration();
+            Saxon.Hej.lib.JJ_ResourceResolver resolver = compilation.getCompilerInfo().getResourceResolver();
             string baseUriStr = baseUri.ToString();
-            Saxon.Hej.om.DocumentKey key = Saxon.Hej.functions.DocumentFn.computeDocumentKey(href, baseUriStr, compilation.getPackageData(), resolver, false);
+            Saxon.Hej.om.DocumentKey key = Saxon.Hej.functions.DocumentFn.computeDocumentKey(href, baseUriStr, compilation.getPackageData(), false);
             System.Collections.Generic.IDictionary<Saxon.Hej.om.DocumentKey,Saxon.Hej.om.TreeInfo> map = compilation.getStylesheetModules();
             if (map.ContainsKey(key)) {
                 return (Saxon.Hej.tree.linked.DocumentImpl)(Saxon.Impl.Helpers.MapUtils.Get(map, key));
             } else {
-                Saxon.Ejavax.xml.transform.Source source;
-                try {
-                    source = resolver.resolve(href, baseUriStr);
-                } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
-                    throw Saxon.Hej.trans.XPathException.makeXPathException(e);
-                }
+                Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+                request.relativeUri = href;
+                request.baseUri = baseUriStr;
+                request.uri = key.getAbsoluteURI();
+                request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSLT_NATURE;
+                request.purpose = "stylesheet module";
+                Saxon.Ejavax.xml.transform.Source source = request.resolve(resolver, config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                 if ((source == null)) {
-                    source = getConfiguration().getSystemURIResolver().resolve(href, baseUriStr);
+                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(((("Unable to resolve "+elemName.getDisplayName())+" stylesheet URI ")+href), "XTSE0165");
+                    e.setLocation(location);
+                    throw e;
                 }
                 if ((source is Saxon.Hej.lib.EmptySource)) {
                     source = new Saxon.Ejavax.xml.transform.stream.StreamSource(new System.IO.StringReader("<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'/>"));
@@ -453,7 +457,9 @@ namespace Saxon.Hej.style {
             Saxon.Hej.Controller controller = new Saxon.Hej.Controller(getConfiguration());
             controller.getExecutable().setFunctionLibrary((Saxon.Hej.functions.FunctionLibraryList)(staticContext.getFunctionLibrary()));
             if ((staticContext.getXPathVersion()<30)) {
-                controller.setURIResolver(new Saxon.Hej.style.UseWhenFilter.URIPreventer());
+                controller.setResourceResolver(new Saxon.Hej.lib.ResourceResolverDelegate(request => {
+                    throw new Saxon.Hej.trans.UncheckedXPathException("No external documents are available within an [xsl]use-when expression");
+                } ));
             }
             controller.setCurrentDateTime(currentDateTime);
             Saxon.Hej.expr.XPathContext dynamicContext = controller.newXPathContext();
@@ -469,12 +475,6 @@ namespace Saxon.Hej.style {
             Saxon.Hej.expr.XPathContext dynamicContext = makeDynamicContext(staticContext);
             ((Saxon.Hej.expr.XPathContextMajor)(dynamicContext)).openStackFrame(stackFrameMap);
             return Saxon.Hej.om.SequenceTool.toGroundedValue(expr.iterate(dynamicContext));
-        }
-        private class URIPreventer : Saxon.Ejavax.xml.transform.URIResolver {
-            public Saxon.Ejavax.xml.transform.Source resolve(string href, string @base) {
-                throw new Saxon.Hej.trans.XPathException("No external documents are available within an [xsl]use-when expression");
-            }
-        
         }
     
     }

@@ -169,6 +169,22 @@ namespace Saxon.Hej.functions {
         public Saxon.Ejava.util.Optional<bool> getStable() {
             return stable;
         }
+        public Saxon.Hej.lib.ParseOptions makeParseOptions(Saxon.Hej.Configuration config) {
+            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions();
+            Saxon.Ejava.util.Optional<Saxon.Hej.om.SpaceStrippingRule> stripSpace = getSpaceStrippingRule();
+            if (stripSpace.isPresent()) {
+                options.setSpaceStrippingRule(stripSpace.get());
+            }
+            Saxon.Ejava.util.Optional<int> validation = getValidationMode();
+            if (validation.isPresent()) {
+                options.setSchemaValidationMode(validation.get());
+            }
+            Saxon.Ejava.util.Optional<bool> xinclude = getXInclude();
+            if (xinclude.isPresent()) {
+                options.setXIncludeAware(xinclude.get());
+            }
+            return options;
+        }
         public class RegexFilter : Saxon.Ejava.io.FilenameFilter {
             private readonly Saxon.Hej.regex.RegularExpression pattern;
             public RegexFilter(Saxon.Hej.regex.RegularExpression regex)  {

@@ -73,7 +73,7 @@ namespace Saxon.Hej.type {
             return (other is Saxon.Hej.type.ErrorType);
         }
         public Saxon.Hej.om.AtomicSequence atomize(Saxon.Hej.om.NodeInfo node) {
-            return new Saxon.Hej.value.UntypedAtomicValue(node.getUnicodeStringValue());
+            return Saxon.Hej.value.StringValue.makeUntypedAtomic(node.getUnicodeStringValue());
         }
         public void checkTypeDerivationIsOK(Saxon.Hej.type.SchemaType type, int block) {
             if (((type == this) || (type == Saxon.Hej.type.AnySimpleType.getInstance()))) {

@@ -45,12 +45,12 @@ namespace Saxon.Hej.functions {
             op.addAllowedOption("post-process", Saxon.Hej.value.SequenceType.makeSequenceType(new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_STRING, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE), Saxon.Hej.expr.StaticProperty.EXACTLY_ONE));
             return op;
         }
-        private void checkTransformOptions(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options, Saxon.Hej.expr.XPathContext context, bool isXslt30Processor) {
+        private void checkTransformOptions(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options, Saxon.Hej.expr.XPathContext context, int languageVersion) {
             if (options.Count==0) {
                 throw new Saxon.Hej.trans.XPathException("No transformation options supplied", "FOXT0002");
             }
             foreach (string keyName in Saxon.Impl.Helpers.MapUtils.KeySet(options)) {
-                if ((isTransformOptionName30(keyName) && !(isXslt30Processor))) {
+                if ((isTransformOptionName30(keyName) && (languageVersion<30))) {
                     throw new Saxon.Hej.trans.XPathException((("The transform option "+keyName)+" is only available when using an XSLT 3.0 processor"), "FOXT0002");
                 }
             }
@@ -292,6 +292,7 @@ namespace Saxon.Hej.functions {
             }
             Saxon.Hej.trans.StylesheetCache cache = context.getController().getStylesheetCache();
             Saxon.Hej.s9api.XsltExecutable executable = null;
+            Saxon.Hej.Configuration config = xsltCompiler.getProcessor().getUnderlyingConfiguration();
             switch (styleOptionStr) {
               case "stylesheet-location":
                 string stylesheetLocation = styleOptionItem.getStringValue();
@@ -299,13 +300,18 @@ namespace Saxon.Hej.functions {
                     executable = cache.getStylesheetByLocation(stylesheetLocation);
                 }
                 if ((executable == null)) {
-                    Saxon.Ejavax.xml.transform.Source style;
+                    Saxon.Ejavax.xml.transform.Source style = null;
                     try {
                         string @base = getStaticBaseUriString();
-                        style = xsltCompiler.getURIResolver().resolve(stylesheetLocation, @base);
-                        if ((style == null)) {
-                            style = xsltCompiler.getProcessor().getUnderlyingConfiguration().getSystemURIResolver().resolve(stylesheetLocation, @base);
-                        }
+                        Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+                        request.baseUri = @base;
+                        request.relativeUri = stylesheetLocation;
+                        request.uri = Saxon.Hej.functions.ResolveURI.makeAbsolute(stylesheetLocation, @base).ToString();
+                        request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSLT_NATURE;
+                        request.purpose = "transformation";
+                        style = request.resolve(xsltCompiler.getResourceResolver(), config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
+                    } catch (System.UriFormatException e) {
+                        throw new Saxon.Hej.trans.XPathException(("Failed to resolve stylesheet-location in fn:transform: "+e.Message));
                     } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
                         throw new Saxon.Hej.trans.XPathException(e);
                     }
@@ -442,15 +448,13 @@ namespace Saxon.Hej.functions {
             }
             Saxon.Hej.s9api.Processor processor = new Saxon.Hej.s9api.Processor(true);
             processor.setConfigurationProperty(Saxon.Hej.lib.Feature<Saxon.Hej.Configuration>.CONFIGURATION, targetConfig);
-            bool isXslt30Processor = true;
-            checkTransformOptions(options, context, isXslt30Processor);
-            bool useXslt30Processor = isXslt30Processor;
+            int languageVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+            checkTransformOptions(options, context, languageVersion);
             if ((Saxon.Impl.Helpers.MapUtils.Get(options, "xslt-version") != null)) {
-                Saxon.Hej.value.BigDecimalValue xsltVersion = (Saxon.Hej.value.BigDecimalValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "xslt-version").head());
-                if (((((xsltVersion.compareTo(Saxon.Hej.value.BigDecimalValue.THREE)>=0) && !(isXslt30Processor))) || (((xsltVersion.compareTo(Saxon.Hej.value.BigDecimalValue.THREE)>0) && isXslt30Processor)))) {
-                    throw new Saxon.Hej.trans.XPathException("The transform option xslt-version is higher than the XSLT version supported by this processor", "FOXT0002");
+                double targetVersion = ((Saxon.Hej.value.BigDecimalValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "xslt-version").head())).getDoubleValue();
+                if (((targetVersion*10)>languageVersion)) {
+                    throw new Saxon.Hej.trans.XPathException("The transform option xslt-version is higher than the language version supported by this processor", "FOXT0002");
                 }
-                useXslt30Processor = (xsltVersion.compareTo(Saxon.Hej.value.BigDecimalValue.THREE) == 0);
             }
             string principalInput = oneOf(options, "source-node", "source-location", "initial-match-selection");
             string invocationOption;
@@ -475,7 +479,7 @@ namespace Saxon.Hej.functions {
                 setRequestedProperties(options, processor);
             }
             Saxon.Hej.s9api.XsltCompiler xsltCompiler = processor.newXsltCompiler();
-            xsltCompiler.setURIResolver(context.getURIResolver());
+            xsltCompiler.setResourceResolver(context.getResourceResolver());
             xsltCompiler.setJustInTimeCompilation(false);
             if ((Saxon.Impl.Helpers.MapUtils.Get(options, "static-params") != null)) {
                 setStaticParams(options, xsltCompiler, allowTypedNodes);
@@ -613,20 +617,24 @@ namespace Saxon.Hej.functions {
                         if ((sourceLocation != null)) {
                             try {
                                 string @base = getStaticBaseUriString();
-                                Saxon.Ejavax.xml.transform.Source ss = xsltCompiler.getURIResolver().resolve(sourceLocation, @base);
-                                if ((ss == null)) {
-                                    ss = targetConfig.getURIResolver().resolve(sourceLocation, @base);
-                                    if ((ss == null)) {
-                                        throw new Saxon.Hej.trans.XPathException(("Cannot locate document at sourceLocation "+sourceLocation), "FOXT0003");
-                                    }
+                                Saxon.Hej.lib.JJ_ResourceRequest rr = new Saxon.Hej.lib.JJ_ResourceRequest();
+                                rr.relativeUri = sourceLocation;
+                                rr.baseUri = @base;
+                                rr.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
+                                rr.purpose = "source document";
+                                try {
+                                    rr.uri = Saxon.Hej.functions.ResolveURI.makeAbsolute(sourceLocation, @base).ToString();
+                                } catch (System.UriFormatException err) {
+                                    throw new Saxon.Hej.trans.XPathException(("Unresolvable sourceLocation URI "+sourceLocation), "FOXT0003");
                                 }
+                                Saxon.Ejavax.xml.transform.Source ss = rr.resolve(xsltCompiler.getResourceResolver(), targetConfig.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(targetConfig));
                                 Saxon.Hej.lib.ParseOptions parseOptions = new Saxon.Hej.lib.ParseOptions(targetConfig.getParseOptions());
                                 parseOptions.setSchemaValidationMode(schemaValidation);
                                 Saxon.Hej.om.TreeInfo tree = targetConfig.buildDocumentTree(ss, parseOptions);
                                 sourceNode = tree.getRootNode();
                                 sourceLocation = null;
-                            } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
-                                throw Saxon.Hej.trans.XPathException.makeXPathException(e);
+                            } catch (Saxon.Hej.trans.XPathException e) {
+                                e.setErrorCode("FOXT0003");
                             }
                         }
                     }

@@ -159,8 +159,31 @@ namespace Saxon.Hej.trans {
             if (((untypedKeys != null) && !(keyTypesConvertedFromUntyped.subsumes(soughtValue.getUType())))) {
                 reindexUntypedValues(soughtValue.getPrimitiveType());
             }
-            System.Object value = Saxon.Impl.Helpers.MapUtils.Get(index, getCollationKey(soughtValue, collation, implicitTimezone));
-            return entryIterator(value);
+            if (soughtValue.isUntypedAtomic()) {
+                System.Collections.Generic.IList<Saxon.Hej.om.NodeInfo> resultNodes = new System.Collections.Generic.List<Saxon.Hej.om.NodeInfo>();
+                int counter = 0;
+                foreach (Saxon.Hej.type.PrimitiveUType type in keyTypesPresent.decompose()) {
+                    Saxon.Hej.type.AtomicType targetType = (Saxon.Hej.type.AtomicType)(type.toItemType());
+                    Saxon.Hej.value.AtomicValue converted = Saxon.Hej.type.Converter.convert(soughtValue, targetType, rules);
+                    System.Object value = Saxon.Impl.Helpers.MapUtils.Get(index, getCollationKey(converted, collation, implicitTimezone));
+                    if ((value != null)) {
+                        counter++;
+                        if ((value is Saxon.Hej.om.NodeInfo)) {
+                            resultNodes.Add(((Saxon.Hej.om.NodeInfo)(value)));
+                        } else {
+                            Saxon.Impl.Helpers.ListUtils.AddAll(resultNodes, (System.Collections.Generic.IList<Saxon.Hej.om.NodeInfo>)(value));
+                        }
+                    }
+                }
+                Saxon.Hej.om.SequenceIterator result = new Saxon.Hej.tree.iter.ListIterator.Of<Saxon.Hej.om.NodeInfo>(resultNodes);
+                if ((counter>1)) {
+                    result = new Saxon.Hej.expr.sort.DocumentOrderIterator(result, Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
+                }
+                return result;
+            } else {
+                System.Object value = Saxon.Impl.Helpers.MapUtils.Get(index, getCollationKey(soughtValue, collation, implicitTimezone));
+                return entryIterator(value);
+            }
         }
         private Saxon.Hej.om.SequenceIterator entryIterator(System.Object value) {
             if ((value == null)) {

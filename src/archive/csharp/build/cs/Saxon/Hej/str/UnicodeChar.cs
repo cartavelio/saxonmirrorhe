@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.str {
     public class UnicodeChar : Saxon.Hej.str.UnicodeString {
-        internal int codepoint;
+        private readonly int codepoint;
         public UnicodeChar(int codepoint)  {
             this.codepoint = codepoint;
         }
         public override Saxon.Hej.z.IntIterator codePoints() {
             return new Saxon.Hej.z.IntSingletonIterator(codepoint);
+        }
+        public int getCodepoint() {
+            return codepoint;
         }
         public override long length() {
             return 1;
@@ -32,7 +35,11 @@ namespace Saxon.Hej.str {
             return ((((this.codepoint == codePoint) && (from<=0))) ? 0 : -1);
         }
         public override int codePointAt(long index) {
-            return ((index == 0) ? codepoint : -1);
+            if ((index == 0)) {
+                return codepoint;
+            } else {
+                throw new System.IndexOutOfRangeException("Only valid index for a single-character string is zero");
+            }
         }
         public override Saxon.Hej.str.UnicodeString substring(long start, long end) {
             checkSubstringBounds(start, end);

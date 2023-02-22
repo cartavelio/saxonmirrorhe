@@ -5,19 +5,19 @@ namespace Saxon.Eej.ee.schema.sdoc {
     public abstract class SchemaReader {
         private SchemaReader()  {
         }
-        public static Saxon.Ejavax.xml.transform.Source getSource(string baseURI, string relativeURI, Saxon.Hej.@event.PipelineConfiguration pipe, string targetNamespace) {
+        public static Saxon.Ejavax.xml.transform.Source getSource(string baseURI, string relativeURI, Saxon.Eej.ee.schema.SchemaCompiler compiler, string targetNamespace) {
             try {
                 string[] locations = {relativeURI};
                 Saxon.Ejavax.xml.transform.Source[] sources = null;
-                Saxon.Hej.lib.SchemaURIResolver r = pipe.getSchemaURIResolver();
+                Saxon.Hej.lib.SchemaURIResolver r = compiler.getSchemaURIResolver();
                 if ((r != null)) {
                     sources = r.resolve(targetNamespace, baseURI, locations);
                 }
-                if ((sources == null)) {
-                    r = new Saxon.Eej.ee.config.StandardSchemaResolver((Saxon.Eej.config.EnterpriseConfiguration)(pipe.getConfiguration()));
+                if (((sources == null) || (((sources.Length == 1) && (sources[0] == null))))) {
+                    r = new Saxon.Eej.ee.config.StandardSchemaResolver((Saxon.Eej.config.EnterpriseConfiguration)(compiler.getConfiguration()));
                     sources = r.resolve(targetNamespace, baseURI, locations);
                 }
-                if ((sources.Length == 0)) {
+                if (((sources.Length == 0) || (sources[0] == null))) {
                     return null;
                 } else {
                     if ((sources.Length == 1)) {
@@ -30,11 +30,11 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 throw new Saxon.Hej.type.SchemaException(e);
             }
         }
-        public static Saxon.Ejavax.xml.transform.Source[] getSources(string baseURI, string[] relativeURIs, Saxon.Hej.@event.PipelineConfiguration pipe, string targetNamespace) {
+        public static Saxon.Ejavax.xml.transform.Source[] getSources(string baseURI, string[] relativeURIs, Saxon.Eej.ee.schema.SchemaCompiler compiler, string targetNamespace) {
             try {
-                Saxon.Ejavax.xml.transform.Source[] sources = pipe.getSchemaURIResolver().resolve(targetNamespace, baseURI, relativeURIs);
+                Saxon.Ejavax.xml.transform.Source[] sources = compiler.getSchemaURIResolver().resolve(targetNamespace, baseURI, relativeURIs);
                 if ((sources == null)) {
-                    Saxon.Hej.lib.SchemaURIResolver r = new Saxon.Eej.ee.config.StandardSchemaResolver((Saxon.Eej.config.EnterpriseConfiguration)(pipe.getConfiguration()));
+                    Saxon.Hej.lib.SchemaURIResolver r = new Saxon.Eej.ee.config.StandardSchemaResolver((Saxon.Eej.config.EnterpriseConfiguration)(compiler.getConfiguration()));
                     sources = r.resolve(targetNamespace, baseURI, relativeURIs);
                 }
                 return sources;
@@ -96,7 +96,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 if (!(@base.Equals(source.getSystemId()))) {
                     schemaBuilder.setSystemId(@base);
                 }
-                Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier((((Saxon.Hej.om.NodeInfo)(source)).getNodeKind() == Saxon.Hej.type.Type.DOCUMENT));
+                Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier((((Saxon.Hej.om.NodeInfo)(source)).getNodeKind() == Saxon.Hej.type.Type.DOCUMENT), @base);
                 pipe.setCopyInformee(element => copier.notifyElementNode(element));
             }
             Saxon.Hej.tree.tiny.TinyBuilder scmBuilder = new Saxon.Hej.tree.tiny.TinyBuilder(pipe);

@@ -49,6 +49,12 @@ namespace Saxon.Hej.tree.tiny {
                 uniformBaseURI = true;
                 tree.setUniformBaseUri(baseURI);
             }
+            if (useEventLocation) {
+                System.Object copier = getPipelineConfiguration().getComponent(typeof(Saxon.Hej.@event.CopyInformee).Name);
+                if ((copier is Saxon.Hej.@event.LocationCopier)) {
+                    setSystemId(((Saxon.Hej.@event.LocationCopier)(copier)).getSystemId());
+                }
+            }
             base.open();
         }
         public override void startDocument(int properties) {

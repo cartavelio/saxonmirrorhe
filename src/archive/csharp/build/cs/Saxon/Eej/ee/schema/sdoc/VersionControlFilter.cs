@@ -12,7 +12,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
         public VersionControlFilter(Saxon.Eej.ee.schema.SchemaCompiler compiler, Saxon.Hej.@event.Receiver next) : base (next) {
             this.compiler = compiler;
             int xsdVersion = compiler.getLanguageVersion();
-            thisVersion = new Saxon.Hej.value.BigDecimalValue(Singulink.Numerics.BigDecimal.Parse(((xsdVersion == Saxon.Hej.Configuration.XSD10) ? "1.0" : "1.1")));
+            thisVersion = new Saxon.Hej.value.BigDecimalValue(Singulink.Numerics.BigDecimal.Parse(((xsdVersion == Saxon.Hej.Configuration.XSD10) ? "1.0" : "1.1"), System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture));
             isXSD11 = (xsdVersion == Saxon.Hej.Configuration.XSD11);
         }
         public override void open() {

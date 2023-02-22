@@ -92,7 +92,7 @@ namespace Saxon.Eej.ee.schema {
             return schemaURIResolver;
         }
         public string readSchema(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, string schemaLocation, string expected) {
-            Saxon.Ejavax.xml.transform.Source source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(baseURI, schemaLocation, pipe, expected);
+            Saxon.Ejavax.xml.transform.Source source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(baseURI, schemaLocation, this, expected);
             if ((source == null)) {
                 throw new Saxon.Hej.type.SchemaException(("No schema could be loaded at location "+schemaLocation));
             }
@@ -143,7 +143,7 @@ namespace Saxon.Eej.ee.schema {
             foreach (string schemaLocation in schemaLocations) {
                 locations[loc++] = schemaLocation;
             }
-            Saxon.Ejavax.xml.transform.Source[] sources = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSources(baseURI, locations, pipe, expected);
+            Saxon.Ejavax.xml.transform.Source[] sources = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSources(baseURI, locations, this, expected);
             if ((sources.Length == 0)) {
                 return ;
             }
@@ -154,6 +154,9 @@ namespace Saxon.Eej.ee.schema {
                 Saxon.Eej.ee.schema.sdoc.SchemaDocument schemadoc;
                 try {
                     Saxon.Ejavax.xml.transform.Source source = sources[i];
+                    if ((source == null)) {
+                        throw new Saxon.Hej.type.SchemaException(("Unable to load schema at "+schemaLocations[i]));
+                    }
                     schemadoc = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, this, pipe, null);
                     if (schemadoc.isCompiledSchemaDocument()) {
                         throw new Saxon.Hej.type.SchemaException("Only source schema documents (not SCM compiled schemas) are accepted here");

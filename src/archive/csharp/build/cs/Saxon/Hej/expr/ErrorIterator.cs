@@ -10,8 +10,14 @@ namespace Saxon.Hej.expr {
         public Saxon.Hej.om.Item next() {
             throw new Saxon.Hej.trans.UncheckedXPathException(exception);
         }
-        public void close() {
-        }
     
+        /* Expanding default method close from interface SequenceIterator */
+        public virtual void close() {
+        }
+
+        /* Expanding default method discharge from interface SequenceIterator */
+        public virtual void discharge() {
+        }
+
     }
 }

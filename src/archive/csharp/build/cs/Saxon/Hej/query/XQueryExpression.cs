@@ -319,10 +319,22 @@ namespace Saxon.Hej.query {
                 this.location = location;
             }
             public Saxon.Hej.om.Item next() {
-                return @base.next();
+                try {
+                    return @base.next();
+                } catch (Saxon.Hej.trans.UncheckedXPathException e1) {
+                    Saxon.Hej.trans.XPathException xe = e1.getXPathException();
+                    xe.maybeSetLocation(location);
+                    Saxon.Hej.trans.XmlProcessingException err = new Saxon.Hej.trans.XmlProcessingException(xe);
+                    reporter.report(err);
+                    xe.setHasBeenReported(true);
+                    throw;
+                }
             }
             public void close() {
                 @base.close();
+            }
+            public void discharge() {
+                @base.discharge();
             }
         
         }

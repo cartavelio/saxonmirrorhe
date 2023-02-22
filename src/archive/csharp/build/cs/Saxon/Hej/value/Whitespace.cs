@@ -63,7 +63,7 @@ namespace Saxon.Hej.value {
             return false;
         }
         public static bool isAllWhite(Saxon.Hej.str.UnicodeString content) {
-            if ((content is Saxon.Hej.str.CompressedWhitespace)) {
+            if ((content is Saxon.Hej.str.WhitespaceString)) {
                 return true;
             }
             Saxon.Hej.z.IntIterator iter = content.codePoints();
@@ -322,9 +322,15 @@ namespace Saxon.Hej.value {
                 position = end;
                 return new Saxon.Hej.value.StringValue(input.substring(start, end));
             }
-            public void close() {
-            }
         
+            /* Expanding default method close from interface SequenceIterator */
+            public virtual void close() {
+            }
+
+            /* Expanding default method discharge from interface SequenceIterator */
+            public virtual void discharge() {
+            }
+
         }
     
     }

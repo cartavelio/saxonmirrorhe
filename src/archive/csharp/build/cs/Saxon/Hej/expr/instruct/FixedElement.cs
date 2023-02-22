@@ -14,6 +14,9 @@ namespace Saxon.Hej.expr.instruct {
             setValidationAction(validation, schemaType);
             preservingTypes = ((schemaType == null) && (validation == Saxon.Hej.lib.Validation.PRESERVE));
         }
+        public override void setLocation(Saxon.Hej.s9api.Location id) {
+            base.setLocation(id);
+        }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
             return contentOp;
         }

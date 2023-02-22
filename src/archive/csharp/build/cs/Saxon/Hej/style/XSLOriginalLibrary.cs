@@ -23,7 +23,7 @@ namespace Saxon.Hej.style {
                 return null;
             }
         }
-        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName) {
+        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
             return false;
         }
         public Saxon.Hej.functions.FunctionLibrary copy() {

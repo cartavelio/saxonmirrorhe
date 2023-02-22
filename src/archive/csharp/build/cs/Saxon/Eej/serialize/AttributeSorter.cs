@@ -35,7 +35,7 @@ namespace Saxon.Eej.serialize {
                 nextReceiver.startElement(elemName, type, attributesIn, namespaces, location, properties);
             } else {
                 System.Collections.Generic.List<Saxon.Hej.om.AttributeInfo> attributes = attributesIn.asList();
-                attributes.Sort((a, b) => {
+                Saxon.Impl.Helpers.ListUtils.Sort(attributes, (a, b) => {
     Saxon.Hej.om.NodeName n0 = a.getNodeName();
     Saxon.Hej.om.NodeName n1 = b.getNodeName();
     int r0 = Saxon.Impl.Helpers.MapUtils.GetOrDefault(knownAttributes, n0, System.Int32.MinValue);

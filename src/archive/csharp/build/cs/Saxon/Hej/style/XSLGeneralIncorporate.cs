@@ -37,11 +37,9 @@ namespace Saxon.Hej.style {
             }
             try {
                 Saxon.Hej.style.PrincipalStylesheetModule psm = importer.getPrincipalStylesheetModule();
-                Saxon.Ejavax.xml.transform.URIResolver resolver = getCompilation().getCompilerInfo().getURIResolver();
-                Saxon.Hej.Configuration config = getConfiguration();
                 Saxon.Hej.style.XSLStylesheet includedSheet;
                 Saxon.Hej.style.StylesheetModule incModule;
-                Saxon.Hej.om.DocumentKey key = Saxon.Hej.functions.DocumentFn.computeDocumentKey(href, getBaseURI(), getCompilation().getPackageData(), resolver, false);
+                Saxon.Hej.om.DocumentKey key = Saxon.Hej.functions.DocumentFn.computeDocumentKey(href, getBaseURI(), getCompilation().getPackageData(), false);
                 includedSheet = (Saxon.Hej.style.XSLStylesheet)(psm.getStylesheetDocument(key));
                 if ((includedSheet != null)) {
                     incModule = new Saxon.Hej.style.StylesheetModule(includedSheet, precedence);

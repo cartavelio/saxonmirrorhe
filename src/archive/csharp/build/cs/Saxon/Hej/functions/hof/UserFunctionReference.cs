@@ -21,6 +21,14 @@ namespace Saxon.Hej.functions.hof {
             }
             this.nominalTarget = function;
         }
+        public override Saxon.Hej.expr.Expression simplify() {
+            if ((nominalTarget.getFunctionName().hasURI(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS) && (typeCheckCounter == 0))) {
+                typeCheckCounter++;
+                nominalTarget.setBody(nominalTarget.getBody().simplify());
+                typeCheckCounter--;
+            }
+            return this;
+        }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             if ((nominalTarget.getFunctionName().hasURI(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS) && (typeCheckCounter == 0))) {
                 typeCheckCounter++;
@@ -155,7 +163,7 @@ namespace Saxon.Hej.functions.hof {
                 c2.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_FUNCTION);
                 c2.setCurrentOutputUri(null);
                 c2.setCurrentComponent(component);
-                c2.setURIResolver(oldContext.getURIResolver());
+                c2.setResourceResolver(oldContext.getResourceResolver());
                 c2.setOrigin(originator);
                 return function.makeNewContext(c2, originator);
             }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.extfn.js {
     public class JSFunctionLibrary : Saxon.Hej.functions.FunctionLibrary {
-        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName) {
+        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
             return Saxon.Hej.lib.NamespaceConstant.GLOBAL_JS.Equals(functionName.getComponentName().getURI());
         }
         public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {

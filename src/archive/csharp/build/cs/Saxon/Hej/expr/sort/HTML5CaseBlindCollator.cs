@@ -67,7 +67,7 @@ namespace Saxon.Hej.expr.sort {
             if ((j<0)) {
                 return Saxon.Hej.str.EmptyUnicodeString.getInstance();
             }
-            return s1.substring(0, j);
+            return s1.prefix(j);
         }
         public Saxon.Hej.expr.sort.AtomicMatchKey getCollationKey(Saxon.Hej.str.UnicodeString s) {
             return normalize(s);

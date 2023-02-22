@@ -38,10 +38,10 @@ namespace Saxon.Hej.resource {
                     if (@params.getContentType().isPresent()) {
                         details.contentType = @params.getContentType().get();
                     }
-                    Saxon.Hej.lib.Resource resource = makeResource(context.getConfiguration(), details);
+                    Saxon.Hej.lib.Resource resource = makeResource(context, details);
                     if ((resource != null)) {
                         if (metadata) {
-                            return makeMetadataResource(resource, details);
+                            return makeMetadataResource(resource, details, context);
                         } else {
                             return resource;
                         }
@@ -62,7 +62,7 @@ namespace Saxon.Hej.resource {
                 }
             } );
         }
-        private Saxon.Hej.resource.MetadataResource makeMetadataResource(Saxon.Hej.lib.Resource resource, Saxon.Hej.resource.AbstractResourceCollection.InputDetails details) {
+        private Saxon.Hej.resource.MetadataResource makeMetadataResource(Saxon.Hej.lib.Resource resource, Saxon.Hej.resource.AbstractResourceCollection.InputDetails details, Saxon.Hej.expr.XPathContext context) {
             System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> properties = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.GroundedValue>();
             try {
                 System.Uri uri = new System.Uri(resource.getResourceURI(), System.UriKind.RelativeOrAbsolute);
@@ -89,7 +89,7 @@ namespace Saxon.Hej.resource {
                 }
             } catch (Exception e) when (e is System.UriFormatException || e is System.IO.IOException) {
             }
-            return new Saxon.Hej.resource.MetadataResource(resource.getResourceURI(), resource, properties);
+            return new Saxon.Hej.resource.MetadataResource(resource.getResourceURI(), resource, properties, context);
         }
         protected internal System.Collections.Generic.IEnumerator<string> directoryContents(Saxon.Ejava.io.File directory, Saxon.Hej.functions.URIQueryParameters @params) {
             Saxon.Ejava.io.FilenameFilter filter = null;

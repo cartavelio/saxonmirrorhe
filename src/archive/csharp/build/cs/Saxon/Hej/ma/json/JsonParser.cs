@@ -39,7 +39,7 @@ namespace Saxon.Hej.ma.json {
                 invalidJSON("Unexpected token beyond end of JSON input", ERR_GRAMMAR, t.lineNumber);
             }
         }
-        public static int getFlags(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options, Saxon.Hej.expr.XPathContext context, bool allowValidate) {
+        public static int getFlags(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options, bool allowValidate, bool isSchemaAware) {
             int flags = 0;
             Saxon.Hej.value.BooleanValue debug = (Saxon.Hej.value.BooleanValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "debug"));
             if (((debug != null) && debug.getBooleanValue())) {
@@ -61,7 +61,7 @@ namespace Saxon.Hej.ma.json {
             if (allowValidate) {
                 validate = ((Saxon.Hej.value.BooleanValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "validate"))).getBooleanValue();
                 if (validate) {
-                    if (!(context.getController().getExecutable().isSchemaAware())) {
+                    if (!(isSchemaAware)) {
                         error("Requiring validation on non-schema-aware processor", ERR_SCHEMA);
                     }
                     flags |= VALIDATE;

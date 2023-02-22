@@ -35,7 +35,7 @@ namespace Saxon.Hej.expr.flwor {
                     tupleArray.Add(itbs);
                 }
                 try {
-                    tupleArray.Sort((a, b) => {
+                    Saxon.Impl.Helpers.ListUtils.Sort(tupleArray, (a, b) => {
     try {
         for (int i = 0; (i<comparers.Length); i++) {
             int comp = comparers[i].compareAtomicValues(a.sortKeyValues[i], b.sortKeyValues[i]);
@@ -43,12 +43,12 @@ namespace Saxon.Hej.expr.flwor {
                 return comp;
             }
         }
-    } catch (Saxon.Hej.trans.NoDynamicContextException e) {
+    } catch (/* no matching annotation */ Saxon.Hej.trans.NoDynamicContextException e) {
         throw new Saxon.Ejava.lang.AssertionError(("Sorting without dynamic context: "+e.Message));
     }
     return (a.originalPosition-b.originalPosition);
 } );
-                } catch (System.InvalidCastException e) {
+                } catch (/* no matching annotation */ System.InvalidCastException e) {
                     Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Non-comparable types found while sorting: "+e.Message));
                     err.setErrorCode("XPTY0004");
                     throw err;

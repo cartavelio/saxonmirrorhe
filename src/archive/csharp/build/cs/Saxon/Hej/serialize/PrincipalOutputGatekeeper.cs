@@ -85,7 +85,7 @@ namespace Saxon.Hej.serialize {
             return null;
         }
         private string identifySystemId() {
-            string uri = getSystemId();
+            string uri = controller.getBaseOutputURI();
             return ((uri == null) ? "(no URI supplied)" : uri);
         }
         public override void close() {

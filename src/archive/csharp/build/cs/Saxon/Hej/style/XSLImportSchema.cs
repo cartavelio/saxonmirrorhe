@@ -89,8 +89,6 @@ namespace Saxon.Hej.style {
                 }
                 if (!(namespaceKnown)) {
                     Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
-                    Saxon.Hej.lib.SchemaURIResolver schemaResolver = config.makeSchemaURIResolver(getCompilation().getCompilerInfo().getURIResolver());
-                    pipe.setSchemaURIResolver(schemaResolver);
                     pipe.setErrorReporter(getCompilation().getCompilerInfo().getErrorReporter());
                     @namespace = config.readSchema(pipe, getBaseURI(), schemaLoc, @namespace);
                 }

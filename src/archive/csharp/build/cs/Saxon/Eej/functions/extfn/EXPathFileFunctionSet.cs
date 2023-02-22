@@ -63,7 +63,7 @@ namespace Saxon.Eej.functions.extfn {
             register("write-text-lines", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteTextLines), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, null);
             register("write-text-lines", 3, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteTextLines), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
         }
-        public static readonly Saxon.Hej.value.BigDecimalValue VERSION = new Saxon.Hej.value.BigDecimalValue(Singulink.Numerics.BigDecimal.Parse("1.0"));
+        public static readonly Saxon.Hej.value.BigDecimalValue VERSION = new Saxon.Hej.value.BigDecimalValue(Singulink.Numerics.BigDecimal.Parse("1.0", System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture));
         public const string NAMESPACE = "http://expath.org/ns/file";
         public const string PREFIX = "file";
         public const string ERROR_NAMESPACE = NAMESPACE;
@@ -169,11 +169,11 @@ namespace Saxon.Eej.functions.extfn {
                     writer = newOutputStreamWriter(makeFileAppendOutputStream(file), encoding);
                     writer.Write(contents);
                     writer.Close();
-                } catch (/* substitute exception */ System.ArgumentException e) {
+                } catch (Saxon.Ejava.io.UnsupportedEncodingException e) {
                     error(("Unsupported encoding "+encoding), ERROR_UNKNOWN_ENCODING);
-                } catch (/* no matching annotation */ Saxon.Ejava.io.FileNotFoundException e) {
+                } catch (Saxon.Ejava.io.FileNotFoundException e) {
                     error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
-                } catch (/* no matching annotation */ System.IO.IOException e) {
+                } catch (System.IO.IOException e) {
                     error(("Failed to write to file "+file.getAbsolutePath()), e, ERROR_IO);
                 }
                 return Saxon.Hej.value.EmptySequence.getInstance();
@@ -417,7 +417,7 @@ namespace Saxon.Eej.functions.extfn {
                 if ((arguments.Length>2)) {
                     filter = Saxon.Hej.functions.URIQueryParameters.makeGlobFilter(arguments[2].head().getStringValue());
                 } else {
-                    filter = new Inner_FilenameFilter_d486e4927(this);
+                    filter = new Inner_FilenameFilter_19(this);
                 }
                 gatherDirectoryContents(file, "", recursive, filter, result);
                 return Saxon.Hej.value.SequenceExtent.makeSequenceExtent(result);
@@ -443,9 +443,9 @@ namespace Saxon.Eej.functions.extfn {
                 }
             }
         
-            private class Inner_FilenameFilter_d486e4927 : Saxon.Ejava.io.FilenameFilter {
+            private class Inner_FilenameFilter_19 : Saxon.Ejava.io.FilenameFilter {
                 private readonly FileList outerInstance;
-                public Inner_FilenameFilter_d486e4927(FileList outerInstance) {
+                public Inner_FilenameFilter_19(FileList outerInstance) {
                     this.outerInstance = outerInstance;
                 }
                 public bool accept(Saxon.Ejava.io.File dir, string name) {
@@ -947,7 +947,8 @@ namespace Saxon.Eej.functions.extfn {
         }
         private static void handleIOError(System.IO.IOException err) {
             Saxon.Hej.trans.XPathException xe = new Saxon.Hej.trans.XPathException(err);
-            xe.setErrorCodeQName(new Saxon.Hej.om.StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, ERROR_IO));
+            string localName = ((err is Saxon.Ejava.io.UnsupportedEncodingException) ? ERROR_UNKNOWN_ENCODING : ERROR_IO);
+            xe.setErrorCodeQName(new Saxon.Hej.om.StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, localName));
             throw xe;
         }
         private class TextFileLinesIterator : Saxon.Hej.tree.iter.TextLinesIterator {
@@ -965,10 +966,26 @@ namespace Saxon.Eej.functions.extfn {
                 result = ((/*1430*/Saxon.Hej.value.StringValue)base.next());
                 return result;
             }
+            protected internal override Saxon.Hej.trans.XPathException handleIOError(System.Uri uri, System.IO.IOException err) {
+                string message = "Failed to read input file";
+                if (((uri != null) && !(err.Message.Equals(uri.ToString())))) {
+                    message += (' '+uri.ToString());
+                }
+                message += ((" ("+err.GetType().Name)+')');
+                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(message, err);
+                e.setErrorCodeQName(new Saxon.Hej.om.StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, ERROR_IO));
+                return e;
+            }
         
         }
         private static System.IO.TextReader getInputStreamReader(Saxon.Ejava.io.File file, string encoding) {
-            return file.getInputStreamReader(encoding);
+            try {
+                 return file.getInputStreamReader(encoding);
+             }
+             catch (Saxon.Ejava.io.IOException) {
+                 error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
+                 return null;
+             }
         }
         public static string _parent(string path) {
             if (path.Equals("/")) {
@@ -983,9 +1000,9 @@ namespace Saxon.Eej.functions.extfn {
             return null;
         }
     
-        private class Inner_FilenameFilter_d486e4927 : Saxon.Ejava.io.FilenameFilter {
+        private class Inner_FilenameFilter_19 : Saxon.Ejava.io.FilenameFilter {
             private readonly FileList outerInstance;
-            public Inner_FilenameFilter_d486e4927(FileList outerInstance) {
+            public Inner_FilenameFilter_19(FileList outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public bool accept(Saxon.Ejava.io.File dir, string name) {

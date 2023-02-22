@@ -92,6 +92,9 @@ namespace Saxon.Hej.expr.sort {
         public void close() {
             baseItr.close();
         }
+        public void discharge() {
+            baseItr.discharge();
+        }
         public bool supportsGetLength() {
             return true;
         }

@@ -169,6 +169,18 @@ namespace Saxon.Hej.expr {
                     Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ag);
                     return ag;
                 }
+                if ((((untyped && (operand is Saxon.Hej.expr.SimpleStepExpression)) && (((Saxon.Hej.expr.SimpleStepExpression)(operand)).getAxisExpression().getAxis() == Saxon.Hej.om.AxisInfo.ATTRIBUTE)) && (((Saxon.Hej.expr.SimpleStepExpression)(operand)).getAxisExpression().getNodeTest() is Saxon.Hej.pattern.NameTest))) {
+                    Saxon.Hej.om.StructuredQName name = ((Saxon.Hej.expr.SimpleStepExpression)(operand)).getAxisExpression().getNodeTest().getMatchingNodeName();
+                    Saxon.Hej.om.FingerprintedQName qName = new Saxon.Hej.om.FingerprintedQName(name, visitor.getConfiguration().getNamePool());
+                    Saxon.Hej.expr.AttributeGetter ag = new Saxon.Hej.expr.AttributeGetter(qName);
+                    int checks = 0;
+                    if (!(((((Saxon.Hej.expr.SimpleStepExpression)(operand)).getStart().getItemType() is Saxon.Hej.pattern.NodeTest)))) {
+                        checks = Saxon.Hej.expr.AttributeGetter.CHECK_CONTEXT_ITEM_IS_NODE;
+                    }
+                    ag.setRequiredChecks(checks);
+                    Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ag);
+                    return new Saxon.Hej.expr.SlashExpression(((Saxon.Hej.expr.SimpleStepExpression)(operand)).getStart(), ag);
+                }
             }
             return exp;
         }

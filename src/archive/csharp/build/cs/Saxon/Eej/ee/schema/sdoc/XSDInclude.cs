@@ -16,11 +16,11 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 missingAttribute("schemaLocation");
                 return ;
             }
-            Saxon.Eej.ee.schema.SchemaCompiler manager = getXSDSchema().getSchemaCompiler();
+            Saxon.Eej.ee.schema.SchemaCompiler compiler = getXSDSchema().getSchemaCompiler();
             string documentBase = getBaseURI();
             try {
                 string location = Saxon.Hej.functions.ResolveURI.makeAbsolute(schemaLocation, documentBase).ToString();
-                Saxon.Eej.ee.schema.sdoc.XSDSchema existing = manager.getExistingSchemaDocument(location, getXSDSchema().getTargetNamespace());
+                Saxon.Eej.ee.schema.sdoc.XSDSchema existing = compiler.getExistingSchemaDocument(location, getXSDSchema().getTargetNamespace());
                 if ((existing != null)) {
                     includedSchema = existing.getSchema();
                     return ;
@@ -29,23 +29,25 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             Saxon.Ejavax.xml.transform.Source source = null;
             try {
-                source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(getBaseURI(), schemaLocation, manager.getPipelineConfiguration(), null);
+                source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(getBaseURI(), schemaLocation, compiler, null);
             } catch (Saxon.Hej.type.SchemaException e) {
                 handleSchemaException(schemaLocation, e);
             }
-            if ((source != null)) {
-                if (manager.isBeingRead(source.getSystemId())) {
+            if ((source == null)) {
+                warning(("Failed to locate included schema document "+schemaLocation));
+                includedSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), "");
+            } else {
+                if (compiler.isBeingRead(source.getSystemId())) {
                     warning((("Module "+source.getSystemId())+" includes itself recursively"));
                     return ;
                 }
                 try {
                     Saxon.Hej.@event.PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-                    Saxon.Eej.ee.schema.SchemaCompiler compiler = getSchemaNodeFactory().getSchemaCompiler();
                     Saxon.Eej.ee.schema.sdoc.SchemaDocument inc = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, compiler, pipe, this);
                     Saxon.Eej.ee.schema.sdoc.XSDSchema includedXSDSchema = inc.getXSDSchema();
                     includedXSDSchema.setReferrer(this);
                     includedSchema = includedXSDSchema.getSchema();
-                    manager.markAsRead(source.getSystemId(), includedXSDSchema);
+                    compiler.markAsRead(source.getSystemId(), includedXSDSchema);
                 } catch (Saxon.Hej.type.SchemaException e) {
                     handleSchemaException(schemaLocation, e);
                 }
@@ -62,7 +64,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
         }
         public static bool isFileNotFoundException(System.Exception cause) {
-            return cause.InnerException is System.IO.FileNotFoundException || cause.InnerException is System.Net.Http.HttpRequestException;
+            return cause.Message.StartsWith("Unable to retrieve");
         }
         public Saxon.Eej.ee.schema.PreparedSchema getIncludedSchema() {
             return includedSchema;

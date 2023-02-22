@@ -6,7 +6,7 @@ namespace Saxon.Hej.z {
         private int[] startPoints;
         private int[] endPoints;
         private int[] values;
-        private int used = 0;
+        private int used;
         private int count = 0;
         private int defaultValue = System.Int32.MinValue;
         public IntRangeToIntMap(int capacity)  {

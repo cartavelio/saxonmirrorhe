@@ -734,6 +734,10 @@ namespace Saxon.Hej.tree.util {
             public virtual void close() {
             }
 
+            /* Expanding default method discharge from interface SequenceIterator */
+            public virtual void discharge() {
+            }
+
         }
         public class EmptyTextFilter : Saxon.Hej.tree.iter.AxisIterator {
             private readonly Saxon.Hej.tree.iter.AxisIterator @base;
@@ -754,6 +758,10 @@ namespace Saxon.Hej.tree.util {
         
             /* Expanding default method close from interface SequenceIterator */
             public virtual void close() {
+            }
+
+            /* Expanding default method discharge from interface SequenceIterator */
+            public virtual void discharge() {
             }
 
         }
@@ -778,6 +786,10 @@ namespace Saxon.Hej.tree.util {
         
             /* Expanding default method close from interface SequenceIterator */
             public void close() {
+            }
+
+            /* Expanding default method discharge from interface SequenceIterator */
+            public void discharge() {
             }
 
         }
@@ -852,6 +864,10 @@ namespace Saxon.Hej.tree.util {
             public void close() {
             }
 
+            /* Expanding default method discharge from interface SequenceIterator */
+            public void discharge() {
+            }
+
         }
         public sealed class FollowingEnumeration : Saxon.Hej.tree.iter.AxisIterator {
             private readonly Saxon.Hej.tree.iter.AxisIterator ancestorEnum;
@@ -920,6 +936,10 @@ namespace Saxon.Hej.tree.util {
             public void close() {
             }
 
+            /* Expanding default method discharge from interface SequenceIterator */
+            public void discharge() {
+            }
+
         }
         public sealed class PrecedingEnumeration : Saxon.Hej.tree.iter.AxisIterator {
             private readonly Saxon.Hej.tree.iter.AxisIterator ancestorEnum;
@@ -984,6 +1004,10 @@ namespace Saxon.Hej.tree.util {
         
             /* Expanding default method close from interface SequenceIterator */
             public void close() {
+            }
+
+            /* Expanding default method discharge from interface SequenceIterator */
+            public void discharge() {
             }
 
         }

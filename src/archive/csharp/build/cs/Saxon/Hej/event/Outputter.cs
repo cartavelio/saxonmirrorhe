@@ -56,11 +56,11 @@ namespace Saxon.Hej.@event {
         public virtual void append(Saxon.Hej.om.Item item) {
             append(item, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES);
         }
-        public virtual Saxon.Hej.str.UniStringConsumer getStringReceiver(bool asTextNode) {
+        public virtual Saxon.Hej.str.UniStringConsumer getStringReceiver(bool asTextNode, Saxon.Hej.s9api.Location loc) {
             if (asTextNode) {
-                return new Inner_AbstractUniStringConsumer_d589e729(this);
+                return new Inner_AbstractUniStringConsumer_17(this, loc);
             } else {
-                return new Inner_AbstractUniStringConsumer_d589e640(this);
+                return new Inner_AbstractUniStringConsumer_13(this, loc);
             }
         }
         public virtual void close() {
@@ -69,12 +69,14 @@ namespace Saxon.Hej.@event {
             return false;
         }
     
-        private class Inner_AbstractUniStringConsumer_d589e640 : Saxon.Hej.str.AbstractUniStringConsumer {
+        private class Inner_AbstractUniStringConsumer_13 : Saxon.Hej.str.AbstractUniStringConsumer {
             private readonly Outputter outerInstance;
-            public Inner_AbstractUniStringConsumer_d589e640(Outputter outerInstance) {
+            public Inner_AbstractUniStringConsumer_13(Outputter outerInstance, Saxon.Hej.s9api.Location loc) {
                 this.outerInstance = outerInstance;
+                this.loc = loc;
                 buffer = new Saxon.Hej.str.UnicodeBuilder();
             }
+            private Saxon.Hej.s9api.Location loc;
             readonly Saxon.Hej.str.UnicodeBuilder buffer;
             public override  /* REPLACING public */ Saxon.Hej.str.UniStringConsumer accept(Saxon.Hej.str.UnicodeString chars) {
                 /*field*/buffer.accept(/*localparam*/chars);
@@ -85,19 +87,21 @@ namespace Saxon.Hej.@event {
             }
         }
 
-        private class Inner_AbstractUniStringConsumer_d589e729 : Saxon.Hej.str.AbstractUniStringConsumer {
+        private class Inner_AbstractUniStringConsumer_17 : Saxon.Hej.str.AbstractUniStringConsumer {
             private readonly Outputter outerInstance;
-            public Inner_AbstractUniStringConsumer_d589e729(Outputter outerInstance) {
+            public Inner_AbstractUniStringConsumer_17(Outputter outerInstance, Saxon.Hej.s9api.Location loc) {
                 this.outerInstance = outerInstance;
+                this.loc = loc;
                 buffer = new Saxon.Hej.str.UnicodeBuilder();
             }
+            private Saxon.Hej.s9api.Location loc;
             readonly Saxon.Hej.str.UnicodeBuilder buffer;
             public override  /* REPLACING public */ Saxon.Hej.str.UniStringConsumer accept(Saxon.Hej.str.UnicodeString chars) {
                 /*field*/buffer.accept(/*localparam*/chars);
                 return this;
             }
             public override  /* REPLACING public virtual */ void close() {
-                this.outerInstance.characters(/*field*/buffer.toUnicodeString(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
+                this.outerInstance.characters(/*field*/buffer.toUnicodeString(), /*extraParam*/loc, Saxon.Hej.@event.ReceiverOption.NONE);
             }
         }
 

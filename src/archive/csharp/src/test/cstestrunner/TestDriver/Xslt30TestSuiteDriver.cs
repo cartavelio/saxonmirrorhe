@@ -366,9 +366,9 @@ namespace TestDriver {
                 Child("result").Then(Steps.Descendant("error"))
                     .Where(AttributeEq("code", "XTSE3430"))).Any();
             if (strictStreamability) {
-                env.processor.SetProperty(Saxon.Api.Feature<bool>.STRICT_STREAMABILITY, true);
+                env.processor.SetProperty(Saxon.Api.Feature.STRICT_STREAMABILITY, true);
                 env.resetActions.Add(env =>
-                    env.processor.SetProperty(Saxon.Api.Feature<bool>.STRICT_STREAMABILITY, false));
+                    env.processor.SetProperty(Saxon.Api.Feature.STRICT_STREAMABILITY, false));
             }
 
             // If a static error is expected, suppress JIT compilation so we catch it eagerly
@@ -385,24 +385,37 @@ namespace TestDriver {
             XsltExecutable sheet = env.xsltExecutable;
 
             XmlUrlResolver res = new XmlUrlResolver();
-            //string xsltLanguageVersion = specAtt.Contains("XSLT30") || specAtt.Contains("XSLT20+") ? "3.0" : "2.0";
             if (stylesheet != null) {
-                //env.processor.SetProperty(FeatureKeys.ALLOW_MULTITHREADING, "false");
                 XsltCompiler compiler = env.xsltCompiler;
                 compiler.ErrorReporter = err => {
-                    if (!expectStaticError) {
+                    if (err.IsWarning) {
                         string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
                         Location loc = err.Location;
                         try {
-                            Console.Error.WriteLine("*** STATIC ERROR: " + code + " at " + 
+                            Console.Error.WriteLine("*** WARNING: " + code + " at " + 
                                                     loc.SystemId + "#" + loc.LineNumber + 
                                                     "\n   " + err.Message);
                         }
-                        catch (Exception e) {
-                            //Console.Error.WriteLine("*** STATIC ERROR: " + err.Message);
+                        catch (Exception) {
+                            // No action
                         }
                     }
-                    outcome.ReportError(err.ErrorCode);
+                    else {
+                        if (!expectStaticError) {
+                            string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
+                            Location loc = err.Location;
+                            try {
+                                Console.Error.WriteLine("*** STATIC ERROR: " + code + " at " +
+                                                        loc.SystemId + "#" + loc.LineNumber +
+                                                        "\n   " + err.Message);
+                            }
+                            catch (Exception) {
+                                // No action
+                            }
+
+                            outcome.ReportError(err.ErrorCode);
+                        }
+                    }
                 };
                 Stream styleSource;
                 try {
@@ -421,8 +434,8 @@ namespace TestDriver {
 
                 SysCollGen.IEnumerable<XdmNode> paramsi = testInput.Select(Child("param").Where(IsTrue("static")));
                 foreach (XdmNode param in paramsi) {
-                    String name = param.GetAttributeValue("name");
-                    String select = param.GetAttributeValue("select");
+                    string name = param.GetAttributeValue("name");
+                    string select = param.GetAttributeValue("select");
                     XdmValue value;
                     try {
                         value = xpath.Evaluate(select, null);
@@ -437,7 +450,7 @@ namespace TestDriver {
                 }
 
                 foreach (XdmNode pack in usedPackages) {
-                    String fileName2 = pack.GetAttributeValue("file");
+                    string fileName2 = pack.GetAttributeValue("file");
                     Uri fileUri = res.ResolveUri(pack.BaseUri, fileName2);
                     Stream styleSource2 = new FileStream(fileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
                     XsltPackage xpack = compiler.CompilePackage(styleSource2, fileUri);
@@ -593,7 +606,7 @@ namespace TestDriver {
 
 
                         Xslt30Transformer transformer = sheet.Load30();
-                        transformer.XmlResolver = env;
+                        transformer.XmlDocumentResolver = env.GetXmlDocumentResolver();
                         if (env.unparsedTextResolver != null) {
                             transformer.TextResolver = env.unparsedTextResolver;
                         }
@@ -1200,12 +1213,12 @@ namespace TestDriver {
                         }
 
                         case "XSD_1.1": {
-                            String requiredVersion = (inverse ? "1.0" : "1.1");
-                            String oldVersion = env.processor.GetProperty(Saxon.Api.Feature<string>.XSD_VERSION);
+                            string requiredVersion = (inverse ? "1.0" : "1.1");
+                            string oldVersion = (string)env.processor.GetProperty(Saxon.Api.Feature.XSD_VERSION);
                             if (!oldVersion.Equals(requiredVersion)) {
-                                env.processor.SetProperty(Saxon.Api.Feature<string>.XSD_VERSION, requiredVersion);
+                                env.processor.SetProperty(Saxon.Api.Feature.XSD_VERSION, requiredVersion);
                                 env.resetActions.Add(envi => {
-                                    envi.processor.SetProperty(Saxon.Api.Feature<String>.XSD_VERSION, oldVersion);
+                                    envi.processor.SetProperty(Saxon.Api.Feature.XSD_VERSION, oldVersion);
                                 });
                             }
 
@@ -1220,11 +1233,11 @@ namespace TestDriver {
                             return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
                         case "streaming-fallback":
                             bool requiredi = !inverse;
-                            bool old = (bool) env.processor.GetProperty(Saxon.Api.Feature<bool>.STREAMING_FALLBACK);
+                            bool old = (bool) env.processor.GetProperty(Saxon.Api.Feature.STREAMING_FALLBACK);
                             if (old != requiredi) {
-                                env.processor.SetProperty(Saxon.Api.Feature<bool>.STREAMING_FALLBACK, requiredi);
+                                env.processor.SetProperty(Saxon.Api.Feature.STREAMING_FALLBACK, requiredi);
                                 env.resetActions.Add(envi => {
-                                    env.processor.SetProperty(Saxon.Api.Feature<bool>.STREAMING_FALLBACK, old);
+                                    env.processor.SetProperty(Saxon.Api.Feature.STREAMING_FALLBACK, old);
                                 });
                             }
 
@@ -1242,11 +1255,11 @@ namespace TestDriver {
                     string[] platforms = value.Split(' ');
                     return Array.IndexOf(platforms, "CS") >= 0;
                 case "default_language_for_numbering": {
-                    string old = env.processor.GetProperty(Saxon.Api.Feature<string>.DEFAULT_LANGUAGE);
+                    string old = (string)env.processor.GetProperty(Saxon.Api.Feature.DEFAULT_LANGUAGE);
                     if (!value.Equals(old)) {
-                        env.processor.SetProperty(Saxon.Api.Feature<string>.DEFAULT_LANGUAGE, value);
+                        env.processor.SetProperty(Saxon.Api.Feature.DEFAULT_LANGUAGE, value);
                         env.resetActions.Add(envi => {
-                                env.processor.SetProperty(Saxon.Api.Feature<string>.DEFAULT_LANGUAGE, old);
+                                env.processor.SetProperty(Saxon.Api.Feature.DEFAULT_LANGUAGE, old);
                             }
                         );
                     }
@@ -1278,7 +1291,11 @@ namespace TestDriver {
                 case "year_component_values":
                     if ("support year zero".Equals(value)) {
                         if (env != null) {
-                            env.processor.SetProperty(Saxon.Api.Feature<string>.XSD_VERSION, inverse ? "1.0" : "1.1");
+                            string oldValue = (string)env.processor.GetProperty(Saxon.Api.Feature.XSD_VERSION);
+                            env.processor.SetProperty(Saxon.Api.Feature.XSD_VERSION, inverse ? "1.0" : "1.1");
+                            env.resetActions.Add(env => {
+                                env.processor.SetProperty(Saxon.Api.Feature.XSD_VERSION, oldValue);
+                            });
                             return true;
                         }
                         else {
@@ -1583,9 +1600,25 @@ namespace TestDriver {
 
         public Saxon.Ejavax.xml.transform.stream.StreamSource[] resolve(string moduleURI, string baseURI, string[] locations) {
             Uri absoluteUri = (new XmlUrlResolver()).ResolveUri(testCase.BaseUri, moduleURI);
-            FileStream stream = new (driver.queryModules[absoluteUri], FileMode.Open, FileAccess.Read);
-            StreamSource ss = new (stream, absoluteUri.ToString());
-            return new[] {ss};
+            if (driver.queryModules.ContainsKey(absoluteUri)) {
+                FileStream stream = new(driver.queryModules[absoluteUri], FileMode.Open, FileAccess.Read);
+                StreamSource ss = new(stream, absoluteUri.ToString());
+                return new[] { ss };
+            }
+            else {
+                // ReSharper disable once LoopCanBeConvertedToQuery
+                foreach (XdmNode m in testCase.Children("module")) {
+                    if (absoluteUri.ToString().Equals(m.GetAttributeValue("uri"))) {
+                        string fileName = m.GetAttributeValue("file");
+                        Uri pfileUri = (new XmlUrlResolver()).ResolveUri(testCase.BaseUri, fileName);
+                        Stream stream = new FileStream(pfileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
+                        StreamSource ss = new(stream, absoluteUri.ToString());
+                        return new[] { ss };
+                    }
+                }
+
+                return null;
+            }
         }
 
     }

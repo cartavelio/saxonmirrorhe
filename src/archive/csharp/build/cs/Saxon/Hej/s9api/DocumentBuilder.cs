@@ -60,9 +60,7 @@ namespace Saxon.Hej.s9api {
             return this.projectionQuery;
         }
         public Saxon.Api.XdmNode build(Saxon.Ejavax.xml.transform.Source source) {
-            if ((source == null)) {
-                throw new Saxon.Ejava.lang.NullPointerException("source");
-            }
+            Saxon.Ejava.util.Objects.requireNonNull(source, "source");
             Saxon.Hej.lib.ParseOptions options = getParseOptions(source);
             try {
                 Saxon.Hej.om.TreeInfo doc = config.buildDocumentTree(source, options);
@@ -114,6 +112,9 @@ namespace Saxon.Hej.s9api {
                 if ((ff != null)) {
                     options.addFilter(ff);
                 }
+            }
+            if ((source is Saxon.Hej.lib.AugmentedSource)) {
+                options.merge(((Saxon.Hej.lib.AugmentedSource)(source)).getParseOptions());
             }
             return options;
         }

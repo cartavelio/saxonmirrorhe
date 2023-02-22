@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.trace {
     public class XSLTTraceListener : Saxon.Hej.trace.AbstractTraceListener {
-        public override Saxon.Hej.expr.parser.CodeInjector getCodeInjector() {
-            return new Saxon.Hej.trace.XSLTTraceCodeInjector();
-        }
         protected internal override string getOpeningAttributes() {
             return (("xmlns:xsl=\""+Saxon.Hej.lib.NamespaceConstant.XSLT)+'\"');
         }

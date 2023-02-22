@@ -36,46 +36,86 @@ namespace Saxon.Hej.trans {
         public override Saxon.Hej.trans.SimpleMode getActivePart() {
             return this;
         }
-        public void checkForConflictingProperties() {
+        public void resolveProperties(Saxon.Hej.trans.rules.RuleManager manager) {
+            bool failOnMultipleMatch = false;
+            bool warningOnMultipleMatch = true;
             foreach (System.Collections.Generic.KeyValuePair<string,string> entry in getActivePart().explicitPropertyValues) {
                 string prop = entry.Key;
                 string value = entry.Value;
                 if (value.Equals("##conflict##")) {
                     throw new Saxon.Hej.trans.XPathException((((("For "+getLabel())+", there are conflicting values for xsl:mode/@")+prop)+" at the same import precedence"), "XTSE0545");
                 }
-                if (prop.Equals("typed")) {
+                switch (prop) {
+                  case "streamable":
+                    bool streamable = "yes".Equals(value);
+                    setStreamable(streamable);
+                    if (streamable) {
+                        Saxon.Hej.trans.Mode omniMode = manager.obtainMode(Saxon.Hej.trans.Mode.OMNI_MODE, true);
+                        omniMode.setStreamable(true);
+                    }
+                    break ;
+                  case "typed":
                     mustBeTyped = (("yes".Equals(value) || "strict".Equals(value)) || "lax".Equals(value));
                     mustBeUntyped = "no".Equals(value);
-                } else {
-                    if (prop.Equals("on-no-match")) {
-                        Saxon.Hej.trans.rules.BuiltInRuleSet @base = null;
-                        switch (value) {
-                          case "text-only-copy":
-                            @base = Saxon.Hej.trans.rules.TextOnlyCopyRuleSet.getInstance();
-                            break ;
-                          case "shallow-copy":
-                            @base = Saxon.Hej.trans.rules.ShallowCopyRuleSet.getInstance();
-                            break ;
-                          case "deep-copy":
-                            @base = Saxon.Hej.trans.rules.DeepCopyRuleSet.getInstance();
-                            break ;
-                          case "shallow-skip":
-                            @base = Saxon.Hej.trans.rules.ShallowSkipRuleSet.getInstance();
-                            break ;
-                          case "deep-skip":
-                            @base = Saxon.Hej.trans.rules.DeepSkipRuleSet.getInstance();
-                            break ;
-                          case "fail":
-                            @base = Saxon.Hej.trans.rules.FailRuleSet.getInstance();
-                            break ;
-                          default:
-                            break ;
-                        }
-                        if ("yes".Equals(Saxon.Impl.Helpers.MapUtils.Get(explicitPropertyValues, "warning-on-no-match"))) {
-                            @base = new Saxon.Hej.trans.rules.RuleSetWithWarnings(@base);
-                        }
-                        setBuiltInRuleSet(@base);
+                    break ;
+                  case "on-no-match":
+                    Saxon.Hej.trans.rules.BuiltInRuleSet @base = null;
+                    switch (value) {
+                      case "text-only-copy":
+                        @base = Saxon.Hej.trans.rules.TextOnlyCopyRuleSet.getInstance();
+                        break ;
+                      case "shallow-copy":
+                        @base = Saxon.Hej.trans.rules.ShallowCopyRuleSet.getInstance();
+                        break ;
+                      case "deep-copy":
+                        @base = Saxon.Hej.trans.rules.DeepCopyRuleSet.getInstance();
+                        break ;
+                      case "shallow-skip":
+                        @base = Saxon.Hej.trans.rules.ShallowSkipRuleSet.getInstance();
+                        break ;
+                      case "deep-skip":
+                        @base = Saxon.Hej.trans.rules.DeepSkipRuleSet.getInstance();
+                        break ;
+                      case "fail":
+                        @base = Saxon.Hej.trans.rules.FailRuleSet.getInstance();
+                        break ;
+                      default:
+                        break ;
                     }
+                    if ("yes".Equals(Saxon.Impl.Helpers.MapUtils.Get(explicitPropertyValues, "warning-on-no-match"))) {
+                        @base = new Saxon.Hej.trans.rules.RuleSetWithWarnings(@base);
+                    }
+                    setBuiltInRuleSet(@base);
+                    break ;
+                  case "on-multiple-match":
+                    if (value.Equals("fail")) {
+                        failOnMultipleMatch = true;
+                    }
+                    break ;
+                  case "warning-on-multiple-match":
+                    warningOnMultipleMatch = value.Equals("yes");
+                    break ;
+                  case "use-accumulators":
+                    Saxon.Hej.expr.accum.AccumulatorRegistry registry = manager.getStylesheetPackage().getAccumulatorRegistry();
+                    System.Collections.Generic.ISet<Saxon.Hej.expr.accum.Accumulator> accumulators = new System.Collections.Generic.HashSet<Saxon.Hej.expr.accum.Accumulator>();
+                    if (!(value.Length==0)) {
+                        string[] tokens = System.Text.RegularExpressions.Regex.Split(value, "[ \t\r\n]+");
+                        foreach (string eqname in tokens) {
+                            Saxon.Hej.expr.accum.Accumulator acc = registry.getAccumulator(Saxon.Hej.om.StructuredQName.fromEQName(eqname));
+                            accumulators.Add(acc);
+                        }
+                    }
+                    setAccumulators(accumulators);
+                    break ;
+                }
+            }
+            if (failOnMultipleMatch) {
+                setRecoveryPolicy(Saxon.Hej.trans.RecoveryPolicy.DO_NOT_RECOVER);
+            } else {
+                if (warningOnMultipleMatch) {
+                    setRecoveryPolicy(Saxon.Hej.trans.RecoveryPolicy.RECOVER_WITH_WARNINGS);
+                } else {
+                    setRecoveryPolicy(Saxon.Hej.trans.RecoveryPolicy.RECOVER_SILENTLY);
                 }
             }
         }
@@ -728,7 +768,7 @@ namespace Saxon.Hej.trans {
                 rules.Add(rule);
             }
             public void allocateRanks() {
-                rules.Sort((x, y) => x.compareComputedRank(y));
+                Saxon.Impl.Helpers.ListUtils.Sort(rules, (x, y) => x.compareComputedRank(y));
                 int rank = start;
                 for (int i = 0; (i<rules.Count); i++) {
                     if (((i>0) && (rules[(i-1)].compareComputedRank(rules[i]) != 0))) {

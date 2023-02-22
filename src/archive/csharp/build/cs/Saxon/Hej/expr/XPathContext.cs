@@ -19,7 +19,7 @@ namespace Saxon.Hej.expr {
         Saxon.Hej.om.Item getContextItem();
         int getLast();
         bool isAtLast();
-        Saxon.Ejavax.xml.transform.URIResolver getURIResolver();
+        Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver();
         Saxon.Hej.lib.ErrorReporter getErrorReporter();
         Saxon.Hej.expr.Component getCurrentComponent();
         int useLocalParameter(Saxon.Hej.om.StructuredQName parameterId, int slotNumber, bool isTunnel);

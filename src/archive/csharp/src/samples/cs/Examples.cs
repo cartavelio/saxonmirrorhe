@@ -27,7 +27,6 @@ namespace SaxonEE
 
         public static void Main(string[] argv)
         {
-
             Example[] examples = {
                 new XdmNavigation(),
                 new XPathSimple(),
@@ -980,7 +979,7 @@ namespace SaxonEE
             DocumentBuilder builder = processor.NewDocumentBuilder();
             UserXmlResolver buildTimeResolver = new();
             buildTimeResolver.Message = "** Calling build-time XmlResolver: ";
-            builder.XmlResolver = buildTimeResolver;
+            builder.XmlDocumentResolver = buildTimeResolver.GetResourceResolver();
             builder.BaseUri = samplesDir;
 
             String doc = "<!DOCTYPE doc [<!ENTITY e SYSTEM 'flamingo.txt'>]><doc>&e;</doc>";
@@ -1001,13 +1000,13 @@ namespace SaxonEE
 
             XsltCompiler compiler = processor.NewXsltCompiler();
             UserXmlResolver compileTimeResolver = new() {Message = "** Calling compile-time XmlResolver: "};
-            compiler.XmlResolver = compileTimeResolver;
+            compiler.StylesheetModuleResolver = compileTimeResolver.GetResourceResolver();
             compiler.BaseUri = samplesDir;
             Xslt30Transformer transformer = compiler.Compile(new XmlTextReader(new StringReader(stylesheet))).Load30();
 
             // Set the user-written XmlResolver
             UserXmlResolver runTimeResolver = new() {Message = "** Calling transformation-time XmlResolver: "};
-            transformer.XmlResolver = runTimeResolver;
+            transformer.XmlDocumentResolver = runTimeResolver.GetResourceResolver();
 
             // Create a serializer
             Serializer serializer = processor.NewSerializer();
@@ -1231,7 +1230,7 @@ namespace SaxonEE
         {
             // Create a Processor instance.
             Processor processor = new();
-            processor.SetProperty(Saxon.Api.Feature<bool>.TIMING, true);
+            processor.SetProperty(Saxon.Api.Feature.TIMING, true);
 
             // Load the source document
             XdmNode input = processor.NewDocumentBuilder().Build(new Uri(samplesDir, "data/othello.xml"));
@@ -1443,7 +1442,7 @@ namespace SaxonEE
             }
             public Uri ResourceUri => new Uri(fileName);
             
-            public XdmItem GetXdmItem(DynamicContext context) {
+            public XdmItem GetXdmItem() {
                 return builder.Build(ResourceUri);
             }
 
@@ -1980,9 +1979,10 @@ namespace SaxonEE
             XQueryCompiler compiler = processor.NewXQueryCompiler();
             compiler.XQueryResolver = (module, queryBase, hints) => {
                 if (module == "http://www.example.com/module2") {
-                    return new[] {new XQueryModuleSource() {BaseUri = new Uri(module), Content = mod2}};
+                    return new[] {
+                        new TextResource(mod2, new Uri(module))
+                    };
                 }
-
                 return null;
             };
             XQueryExecutable exp = compiler.Compile(mod1);
@@ -2364,48 +2364,40 @@ namespace SaxonEE
     }
 
     ///
-    /// A sample XmlResolver. In the case of a URI ending with ".txt", it returns the
-    /// URI itself, wrapped as an XML document. In the case of the URI "empty.xslt", it returns an empty
+    /// A factory class to generate a resource resolver. In the case of a URI ending with ".txt",
+    /// the resource resolver returns the URI itself, wrapped as an XML document. 
+    /// In the case of the URI "empty.xslt", it returns an empty
     /// stylesheet. In all other cases, it returns null, which has the effect of delegating
     /// processing to the standard XmlResolver.
     ///
 
-    public class UserXmlResolver : XmlUrlResolver
+    public class UserXmlResolver 
     {
 
-        public String Message = null;
+        public string Message = null;
 
-        public override object GetEntity(Uri absoluteUri, String role, Type ofObjectToReturn)
-        {
-            if (Message != null)
-            {
-                Console.WriteLine(Message + absoluteUri + " (role=" + role + ")");
-            }
+        public ResourceResolver GetResourceResolver() {
+            return (request) => {
+                Uri uri = request.Uri;
+                if (Message != null) {
+                    Console.WriteLine(Message + uri + " (nature=" + request.Nature + ")");
+                }
 
-            if (absoluteUri.ToString().EndsWith(".txt"))
-            {
-                MemoryStream ms = new();
-                StreamWriter tw = new(ms);
-                tw.Write("<uri>");
-                tw.Write(absoluteUri);
-                tw.Write("</uri>");
-                tw.Flush();
-                return new MemoryStream(ms.GetBuffer(), 0, (int)ms.Length);
-            }
-            if (absoluteUri.ToString().EndsWith("empty.xslt"))
-            {
-                string ss = "<transform xmlns='http://www.w3.org/1999/XSL/Transform' version='2.0'/>";
-                MemoryStream ms = new();
-                StreamWriter tw = new(ms);
-                tw.Write(ss);
-                tw.Flush();
-                return new MemoryStream(ms.GetBuffer(), 0, (int)ms.Length);
-            }
-            else
-            {
-                return null;
-            }
+                if (uri.ToString().EndsWith(".txt")) {
+                    return new TextResource("<uri>" + uri + "</uri>", uri);
+                }
+
+                if (uri.ToString().EndsWith("empty.xslt")) {
+                    return new TextResource("<transform xmlns='http://www.w3.org/1999/XSL/Transform' version='2.0'/>",
+                        uri);
+                }
+                else {
+                    return null;
+                }
+            };
         }
+
+
     }
 
 }

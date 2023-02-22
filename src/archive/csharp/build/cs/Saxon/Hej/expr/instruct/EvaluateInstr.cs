@@ -177,6 +177,7 @@ namespace Saxon.Hej.expr.instruct {
                 dynamicParams = (Saxon.Hej.ma.map.MapItem)(dynamicParamsOp.getChildExpression().evaluateItem(context));
             }
             if ((expr == null)) {
+                int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
                 Saxon.Hej.ma.map.MapItem options = (((optionsOp == null) ? new Saxon.Impl.DataModel.ImmMap() : (Saxon.Hej.ma.map.MapItem)(optionsOp.getChildExpression().evaluateItem(context))));
                 Saxon.Hej.sxpath.IndependentContext env = new Saxon.Hej.sxpath.IndependentContext(config);
                 env.setWarningHandler((str, loc) => {
@@ -185,7 +186,7 @@ namespace Saxon.Hej.expr.instruct {
                 } );
                 env.setBaseURI(baseUri);
                 env.setExecutable(context.getController().getExecutable());
-                env.setXPathLanguageLevel(31);
+                env.setXPathLanguageLevel(((version == 40) ? 40 : config.getConfigurationProperty(Saxon.Hej.lib.Feature<int>.XPATH_VERSION_FOR_XSLT)));
                 env.setDefaultCollationName(getRetainedStaticContext().getDefaultCollationName());
                 if ((getNamespaceContextExpr() != null)) {
                     env.setNamespaces(namespaceContextBase);
@@ -197,7 +198,7 @@ namespace Saxon.Hej.expr.instruct {
                 Saxon.Hej.functions.FunctionLibraryList libraryList1 = new Saxon.Hej.functions.FunctionLibraryList();
                 foreach (Saxon.Hej.functions.FunctionLibrary lib in libraryList0.getLibraryList()) {
                     if (((lib is Saxon.Hej.functions.registry.BuiltInFunctionSet) && ((Saxon.Hej.functions.registry.BuiltInFunctionSet)(lib)).getNamespace().Equals(Saxon.Hej.lib.NamespaceConstant.FN))) {
-                        libraryList1.addFunctionLibrary(Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance());
+                        libraryList1.addFunctionLibrary(((version == 40) ? Saxon.Hej.functions.registry.XPath40FunctionSet.getInstance() : Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance()));
                     } else {
                         if (((lib is Saxon.Hej.style.StylesheetFunctionLibrary) || (lib is Saxon.Hej.functions.ExecutableFunctionLibrary))) {
                             libraryList1.addFunctionLibrary(new Saxon.Hej.style.PublicStylesheetFunctionLibrary(lib));
@@ -208,7 +209,6 @@ namespace Saxon.Hej.expr.instruct {
                 }
                 env.setFunctionLibrary(libraryList1);
                 env.setDecimalFormatManager(getRetainedStaticContext().getDecimalFormatManager());
-                env.setXPathLanguageLevel(config.getConfigurationProperty(Saxon.Hej.lib.Feature<int>.XPATH_VERSION_FOR_XSLT));
                 if (isSchemaAware) {
                     Saxon.Hej.om.GroundedValue allowAny = options.get(Saxon.Hej.value.StringValue.bmp("allow-any-namespace"));
                     if (((allowAny != null) && allowAny.effectiveBooleanValue())) {

@@ -1186,7 +1186,9 @@ namespace Saxon.Hej.style {
             }
         }
         protected internal static void setInstructionLocation(Saxon.Hej.style.StyleElement source, Saxon.Hej.expr.Expression child) {
-            child.setLocation(source.allocateLocation());
+            if (((child.getLocation() == null) || (child.getLocation() == Saxon.Hej.expr.parser.Loc.NONE))) {
+                child.setLocation(source.saveLocation());
+            }
         }
         internal Saxon.Hej.expr.Expression fallbackProcessing(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl, Saxon.Hej.style.StyleElement instruction) {
             Saxon.Hej.expr.Expression fallback = null;

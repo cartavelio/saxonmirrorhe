@@ -213,8 +213,7 @@ namespace Saxon.Hej.style {
                 } else {
                     if ((use is Saxon.Hej.style.XSLInclude)) {
                         string href = Saxon.Hej.value.Whitespace.trim(use.getAttributeValue("", "href"));
-                        Saxon.Ejavax.xml.transform.URIResolver resolver = compilation.getCompilerInfo().getURIResolver();
-                        Saxon.Hej.om.DocumentKey key = Saxon.Hej.functions.DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), resolver, false);
+                        Saxon.Hej.om.DocumentKey key = Saxon.Hej.functions.DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), false);
                         Saxon.Hej.om.TreeInfo includedTree = Saxon.Impl.Helpers.MapUtils.Get(compilation.getStylesheetModules(), key);
                         Saxon.Hej.style.StyleElement incWrapper = (Saxon.Hej.style.StyleElement)(((Saxon.Hej.tree.linked.DocumentImpl)(includedTree.getRootNode())).getDocumentElement());
                         gatherUsePackageDeclarations(compilation, incWrapper, declarations);
@@ -442,6 +441,7 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.style.StyleElement firstDecl = entry.Value[0].getSourceElement();
                 @as.setSystemId(firstDecl.getSystemId());
                 @as.setLineNumber(firstDecl.getLineNumber());
+                @as.setColumnNumber(firstDecl.getColumnNumber());
                 Saxon.Impl.Helpers.MapUtils.Put(index, entry.Key, @as);
                 Saxon.Hej.expr.Component declaringComponent = @as.getDeclaringComponent();
                 if ((declaringComponent == null)) {
@@ -645,6 +645,7 @@ namespace Saxon.Hej.style {
                         registerImplicitModes(snode, getRuleManager());
                     }
                 }
+                getRuleManager().checkConsistency();
                 foreach (Saxon.Hej.style.ComponentDeclaration decl in topLevel) {
                     Saxon.Hej.style.StyleElement snode = decl.getSourceElement();
                     if ((snode is Saxon.Hej.style.XSLTemplate)) {
@@ -702,7 +703,6 @@ namespace Saxon.Hej.style {
                     timer.report("check decimal formats");
                 }
                 Saxon.Hej.trans.rules.RuleManager ruleManager = getRuleManager();
-                ruleManager.checkConsistency();
                 ruleManager.computeRankings();
                 if (!(compilation.isFallbackToNonStreaming())) {
                     ruleManager.invertStreamableTemplates();
@@ -870,6 +870,9 @@ namespace Saxon.Hej.style {
             System.Collections.Generic.IDictionary<Saxon.Hej.trans.SymbolicName,Saxon.Hej.expr.Component> componentIndex = stylesheetPackage.getComponentIndex();
             foreach (Saxon.Hej.expr.Component component in componentIndex.Values) {
                 int fp = component.getComponentKind();
+                if (((fp == Saxon.Hej.om.StandardNames.XSL_MODE) && ((Saxon.Hej.trans.Mode)(component.getActor())).isUnnamedMode())) {
+                    continue ;
+                }
                 Saxon.Hej.trans.ComponentTest exactNameTest = new Saxon.Hej.trans.ComponentTest(fp, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, new Saxon.Hej.om.FingerprintedQName(component.getActor().getComponentName(), pool), pool), -1);
                 Saxon.Hej.trans.ComponentTest exactFunctionTest = null;
                 if ((fp == Saxon.Hej.om.StandardNames.XSL_FUNCTION)) {

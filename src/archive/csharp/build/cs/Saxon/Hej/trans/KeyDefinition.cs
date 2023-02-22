@@ -72,9 +72,10 @@ namespace Saxon.Hej.trans {
             base.allocateAllBindingSlots(pack);
             allocateBindingSlotsRecursive(pack, this, match, getDeclaringComponent().getComponentBindings());
         }
-        public void setLocation(string systemId, int lineNumber) {
-            setSystemId(systemId);
-            setLineNumber(lineNumber);
+        public void setLocation(Saxon.Hej.s9api.Location loc) {
+            setSystemId(loc.getSystemId());
+            setLineNumber(loc.getLineNumber());
+            setColumnNumber(loc.getColumnNumber());
         }
         public Saxon.Hej.pattern.Pattern getMatch() {
             return match;

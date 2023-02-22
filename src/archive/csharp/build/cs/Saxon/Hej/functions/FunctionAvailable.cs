@@ -25,7 +25,7 @@ namespace Saxon.Hej.functions {
                 }
                 for (int i = minArity; (i<=maxArity); i++) {
                     Saxon.Hej.trans.SymbolicName.F sn = new Saxon.Hej.trans.SymbolicName.F(functionName, i);
-                    if (env.getFunctionLibrary().isAvailable(sn)) {
+                    if (env.getFunctionLibrary().isAvailable(sn, env.getXPathVersion())) {
                         b = true;
                         break ;
                     }
@@ -35,10 +35,10 @@ namespace Saxon.Hej.functions {
                 return null;
             }
         }
-        private bool isFunctionAvailable(string lexicalName, string edition, int arity, Saxon.Hej.expr.XPathContext context) {
+        private bool isFunctionAvailable(string lexicalName, Saxon.Hej.expr.parser.RetainedStaticContext rsc, int arity, Saxon.Hej.expr.XPathContext context) {
             if ((arity == -1)) {
                 for (int i = 0; (i<20); i++) {
-                    if (isFunctionAvailable(lexicalName, edition, i, context)) {
+                    if (isFunctionAvailable(lexicalName, rsc, i, context)) {
                         return true;
                     }
                 }
@@ -59,7 +59,7 @@ namespace Saxon.Hej.functions {
             }
             Saxon.Hej.functions.FunctionLibrary lib = context.getController().getExecutable().getFunctionLibrary();
             Saxon.Hej.trans.SymbolicName.F sn = new Saxon.Hej.trans.SymbolicName.F(qName, arity);
-            return lib.isAvailable(sn);
+            return lib.isAvailable(sn, rsc.getPackageData().getHostLanguageVersion());
         }
         public override Saxon.Hej.value.BooleanValue call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             string lexicalQName = arguments[0].head().getStringValue();
@@ -67,7 +67,7 @@ namespace Saxon.Hej.functions {
             if ((arguments.Length == 2)) {
                 arity = (int)(((Saxon.Hej.value.NumericValue)(arguments[1].head())).longValue());
             }
-            return Saxon.Hej.value.BooleanValue.get(isFunctionAvailable(lexicalQName, getRetainedStaticContext().getPackageData().getTargetEdition(), arity, context));
+            return Saxon.Hej.value.BooleanValue.get(isFunctionAvailable(lexicalQName, getRetainedStaticContext(), arity, context));
         }
     
     }

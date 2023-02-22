@@ -65,10 +65,10 @@ namespace Saxon.Hej.regex {
                         }
                     }
                 }
-                Saxon.Hej.z.IntIterator @base = new Inner_IntIterator_d1451e665(this, matcher, iterators, positions, bound, position);
+                Saxon.Hej.z.IntIterator @base = new Inner_IntIterator_11(this, matcher, iterators, positions, bound, position);
                 return new Saxon.Hej.regex.Operation.ForceProgressIterator(@base);
             } else {
-                Saxon.Hej.z.IntIterator iter = new Inner_IntIterator_d1451e387(this, matcher, iterators, positions, bound, position);
+                Saxon.Hej.z.IntIterator iter = new Inner_IntIterator_5(this, matcher, iterators, positions, bound, position);
                 return new Saxon.Hej.regex.Operation.ForceProgressIterator(iter);
             }
         }
@@ -93,9 +93,9 @@ namespace Saxon.Hej.regex {
             return (op.display()+quantifier);
         }
     
-        private class Inner_IntIterator_d1451e387 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_5 : Saxon.Hej.z.IntIterator {
             private readonly OpRepeat outerInstance;
-            public Inner_IntIterator_d1451e387(OpRepeat outerInstance, Saxon.Hej.regex.REMatcher matcher, System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators, System.Collections.Generic.Stack<System.Int32> positions, int bound, int position) {
+            public Inner_IntIterator_5(OpRepeat outerInstance, Saxon.Hej.regex.REMatcher matcher, System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators, System.Collections.Generic.Stack<System.Int32> positions, int bound, int position) {
                 this.outerInstance = outerInstance;
                 this.matcher = matcher;
                 this.iterators = iterators;
@@ -138,9 +138,9 @@ namespace Saxon.Hej.regex {
             }
         }
 
-        private class Inner_IntIterator_d1451e665 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_11 : Saxon.Hej.z.IntIterator {
             private readonly OpRepeat outerInstance;
-            public Inner_IntIterator_d1451e665(OpRepeat outerInstance, Saxon.Hej.regex.REMatcher matcher, System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators, System.Collections.Generic.Stack<System.Int32> positions, int bound, int position) {
+            public Inner_IntIterator_11(OpRepeat outerInstance, Saxon.Hej.regex.REMatcher matcher, System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators, System.Collections.Generic.Stack<System.Int32> positions, int bound, int position) {
                 this.outerInstance = outerInstance;
                 this.matcher = matcher;
                 this.iterators = iterators;

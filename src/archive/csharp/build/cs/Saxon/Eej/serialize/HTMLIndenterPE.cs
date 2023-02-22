@@ -14,7 +14,7 @@ namespace Saxon.Eej.serialize {
                 indentSpaces = 3;
             } else {
                 try {
-                    indentSpaces = System.Int32.Parse(s);
+                    indentSpaces = Saxon.Impl.Helpers.Utils.ParseInt(s);
                 } catch (Saxon.Ejava.lang.NumberFormatException err) {
                     indentSpaces = 3;
                 }
@@ -24,7 +24,7 @@ namespace Saxon.Eej.serialize {
                 lineLength = 80;
             } else {
                 try {
-                    lineLength = System.Int32.Parse(s);
+                    lineLength = Saxon.Impl.Helpers.Utils.ParseInt(s);
                 } catch (Saxon.Ejava.lang.NumberFormatException err) {
                     lineLength = 80;
                 }

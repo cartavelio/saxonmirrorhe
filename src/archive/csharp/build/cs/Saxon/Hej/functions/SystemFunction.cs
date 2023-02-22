@@ -8,9 +8,6 @@ namespace Saxon.Hej.functions {
         private Saxon.Hej.expr.parser.RetainedStaticContext retainedStaticContext;
         public static Saxon.Hej.expr.Expression makeCall(string name, Saxon.Hej.expr.parser.RetainedStaticContext rsc, params Saxon.Hej.expr.Expression[]  arguments) {
             Saxon.Hej.functions.SystemFunction f = makeFunction(name, rsc, arguments.Length);
-            if ((f == null)) {
-                return null;
-            }
             Saxon.Hej.expr.Expression expr = f.makeFunctionCall(arguments);
             expr.setRetainedStaticContext(rsc);
             return expr;

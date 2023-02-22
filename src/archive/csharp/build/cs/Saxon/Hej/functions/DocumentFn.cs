@@ -69,21 +69,15 @@ namespace Saxon.Hej.functions {
         }
         public static Saxon.Hej.om.NodeInfo makeDoc(string href, string baseURI, Saxon.Hej.expr.PackageData packageData, Saxon.Hej.lib.ParseOptions options, Saxon.Hej.expr.XPathContext c, Saxon.Hej.s9api.Location locator, bool silent) {
             Saxon.Hej.Configuration config = c.getConfiguration();
-            int hash = href.IndexOf('#');
-            string fragmentId = null;
-            if ((hash>=0)) {
-                if ((hash == (href.Length-1))) {
-                    href = href.Substring(0, hash - 0);
-                } else {
-                    fragmentId = href.Substring((hash+1));
-                    href = href.Substring(0, hash - 0);
-                    if (!(Saxon.Hej.om.NameChecker.isValidNCName(fragmentId))) {
-                        Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("The fragment identifier "+Saxon.Hej.trans.Err.wrap(fragmentId))+" is not a valid NCName"));
-                        de.setErrorCode("XTDE1160");
-                        de.setXPathContext(c);
-                        de.setLocator(locator);
-                        throw de;
-                    }
+            string[] parts = extractFragment(href);
+            string fragmentId = parts[1];
+            href = parts[0];
+            Saxon.Hej.functions.URIQueryParameters @params = null;
+            if (config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.RECOGNIZE_URI_QUERY_PARAMETERS)) {
+                int qMark = href.IndexOf('?');
+                if ((qMark>=0)) {
+                    @params = new Saxon.Hej.functions.URIQueryParameters(href.Substring((qMark+1)), config);
+                    href = href.Substring(0, qMark - 0);
                 }
             }
             Saxon.Hej.Controller controller = c.getController();
@@ -119,7 +113,7 @@ namespace Saxon.Hej.functions {
             }
             try {
                 Saxon.Ejavax.xml.transform.Source source = resolveURI(href, baseURI, documentKey.ToString(), c);
-                if ((source is Saxon.Hej.lib.EmptySource)) {
+                if (((source == null) || (source is Saxon.Hej.lib.EmptySource))) {
                     return null;
                 }
                 source = config.getSourceResolver().resolveSource(source, config);
@@ -143,6 +137,9 @@ namespace Saxon.Hej.functions {
                             }
                         }
                         options.setSchemaValidationMode(controller.getSchemaValidationMode());
+                    }
+                    if ((@params != null)) {
+                        options.merge(@params.makeParseOptions(config));
                     }
                     b.getPipelineConfiguration().setParseOptions(options);
                     if (options.isLineNumbering()) {
@@ -194,9 +191,30 @@ namespace Saxon.Hej.functions {
                 throw xerr;
             }
         }
+        private static string[] extractFragment(string href) {
+            int hash = href.IndexOf('#');
+            string fragmentId = null;
+            if ((hash>=0)) {
+                if ((hash == (href.Length-1))) {
+                    href = href.Substring(0, hash - 0);
+                } else {
+                    fragmentId = href.Substring((hash+1));
+                    href = href.Substring(0, hash - 0);
+                    if (!(Saxon.Hej.om.NameChecker.isValidNCName(fragmentId))) {
+                        Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("The fragment identifier "+Saxon.Hej.trans.Err.wrap(fragmentId))+" is not a valid NCName"));
+                        de.setErrorCode("XTDE1160");
+                        throw de;
+                    }
+                }
+            }
+            return new string[]{href, fragmentId};
+        }
         public static Saxon.Ejavax.xml.transform.Source resolveURI(string href, string baseURI, string documentKey, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Ejavax.xml.transform.URIResolver resolver = context.getURIResolver();
-            Saxon.Ejavax.xml.transform.Source source;
+            Saxon.Hej.Configuration config = context.getConfiguration();
+            Saxon.Hej.lib.JJ_ResourceResolver resolver = context.getResourceResolver();
+            if (href.Contains(" ")) {
+                href = Saxon.Hej.functions.ResolveURI.escapeSpaces(href);
+            }
             if ((baseURI == null)) {
                 try {
                     System.Uri uri = new System.Uri(href, System.UriKind.RelativeOrAbsolute);
@@ -207,79 +225,50 @@ namespace Saxon.Hej.functions {
                     throw new Saxon.Hej.trans.XPathException(("Invalid URI passed to document() function: "+href), "FODC0005");
                 }
             }
+            Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+            request.relativeUri = href;
+            if ((baseURI != null)) {
+                request.baseUri = baseURI;
+                request.uri = documentKey;
+            } else {
+                request.uri = href;
+            }
+            request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
+            request.purpose = "source document";
             try {
-                if (((resolver is Saxon.Hej.lib.RelativeURIResolver) && (documentKey != null))) {
-                    source = ((Saxon.Hej.lib.RelativeURIResolver)(resolver)).dereference(documentKey);
-                } else {
-                    source = resolver.resolve(href, baseURI);
-                }
+                return request.resolve(resolver, config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
+            } catch (Saxon.Hej.trans.XPathException err) {
+                err.setErrorCode("FODC0005");
+                err.maybeSetContext(context);
+                throw;
             } catch (System.Exception ex) {
                 Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((((("Exception thrown by URIResolver resolving `"+href)+"` against `")+baseURI)+"'"), ex);
-                if (context.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.TRACE_EXTERNAL_FUNCTIONS)) {
+                if (config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.TRACE_EXTERNAL_FUNCTIONS)) {
                     System.Console.Error.WriteLine(ex);
                 }
                 throw de;
             }
-            if ((((source is Saxon.Ejavax.xml.transform.stream.StreamSource) && (((Saxon.Ejavax.xml.transform.stream.StreamSource)(source)).getInputStream() == null)) && (((Saxon.Ejavax.xml.transform.stream.StreamSource)(source)).getReader() == null))) {
-                string uri = source.getSystemId();
-                if ((uri != null)) {
-                    resolver = context.getController().getStandardURIResolver();
-                    try {
-                        source = resolver.resolve(uri, "");
-                    } catch (Saxon.Ejavax.xml.transform.TransformerException ex) {
-                        throw Saxon.Hej.trans.XPathException.makeXPathException(ex);
-                    }
-                } else {
-                    source = null;
-                }
-            }
-            if (((source == null) && !(((resolver is Saxon.Hej.trans.NonDelegatingURIResolver))))) {
-                resolver = context.getController().getStandardURIResolver();
-                try {
-                    if (((resolver is Saxon.Hej.lib.RelativeURIResolver) && (documentKey != null))) {
-                        source = ((Saxon.Hej.lib.RelativeURIResolver)(resolver)).dereference(documentKey);
-                    } else {
-                        source = resolver.resolve(href, baseURI);
-                    }
-                } catch (Saxon.Ejavax.xml.transform.TransformerException ex) {
-                    throw Saxon.Hej.trans.XPathException.makeXPathException(ex);
-                }
-            }
-            return source;
         }
         protected internal static Saxon.Hej.om.DocumentKey computeDocumentKey(string href, string baseURI, Saxon.Hej.expr.PackageData packageData, Saxon.Hej.expr.XPathContext c) {
-            Saxon.Hej.Controller controller = c.getController();
-            Saxon.Ejavax.xml.transform.URIResolver resolver = controller.getURIResolver();
-            if ((resolver == null)) {
-                resolver = controller.getStandardURIResolver();
-            }
-            return computeDocumentKey(href, baseURI, packageData, resolver, true);
+            return computeDocumentKey(href, baseURI, packageData, true);
         }
-        public static Saxon.Hej.om.DocumentKey computeDocumentKey(string href, string baseURI, Saxon.Hej.expr.PackageData packageData, Saxon.Ejavax.xml.transform.URIResolver resolver, bool strip) {
+        public static Saxon.Hej.om.DocumentKey computeDocumentKey(string href, string baseURI, Saxon.Hej.expr.PackageData packageData, bool strip) {
             string absURI;
-            if ((resolver is Saxon.Hej.lib.RelativeURIResolver)) {
+            href = Saxon.Hej.functions.ResolveURI.escapeSpaces(href);
+            if ((baseURI == null)) {
                 try {
-                    absURI = ((Saxon.Hej.lib.RelativeURIResolver)(resolver)).makeAbsolute(href, baseURI);
-                } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
+                    absURI = new System.Uri(href, System.UriKind.RelativeOrAbsolute).ToString();
+                } catch (System.UriFormatException err) {
                     absURI = ('/'+href);
                 }
             } else {
-                href = Saxon.Hej.functions.ResolveURI.escapeSpaces(href);
-                if ((baseURI == null)) {
-                    try {
-                        absURI = new System.Uri(href, System.UriKind.RelativeOrAbsolute).ToString();
-                    } catch (System.UriFormatException err) {
-                        absURI = ('/'+href);
-                    }
+                if (href.Length==0) {
+                    absURI = baseURI;
                 } else {
-                    if (href.Length==0) {
-                        absURI = baseURI;
-                    } else {
-                        try {
-                            absURI = Saxon.Hej.functions.ResolveURI.makeAbsolute(href, baseURI).ToString();
-                        } catch (Exception err) when (err is System.UriFormatException || err is Saxon.Ejava.lang.IllegalArgumentException) {
-                            absURI = ((baseURI+"/../")+href);
-                        }
+                    try {
+                        absURI = Saxon.Hej.functions.ResolveURI.makeAbsolute(href, baseURI).ToString();
+                    } catch (Exception err) when (err is System.UriFormatException || err is Saxon.Ejava.lang.IllegalArgumentException) {
+                        absURI = ((baseURI+"/../")+href);
                     }
                 }
             }
@@ -291,114 +280,80 @@ namespace Saxon.Hej.functions {
             }
             return new Saxon.Hej.om.DocumentKey(absURI);
         }
-        public static Saxon.Hej.om.NodeInfo preLoadDoc(string href, string baseURI, Saxon.Hej.Configuration config, Saxon.Ejavax.xml.transform.SourceLocator locator) {
+        public static Saxon.Hej.om.NodeInfo preLoadDoc(string href, string baseURI, Saxon.Hej.expr.PackageData packageData, Saxon.Hej.Configuration config, Saxon.Ejavax.xml.transform.SourceLocator locator) {
             int hash = href.IndexOf('#');
             if ((hash>=0)) {
                 throw new Saxon.Hej.trans.XPathException("Fragment identifier not supported for preloaded documents");
             }
-            string documentKey;
-            Saxon.Ejavax.xml.transform.URIResolver resolver = config.getURIResolver();
-            if ((resolver is Saxon.Hej.lib.RelativeURIResolver)) {
-                try {
-                    documentKey = ((Saxon.Hej.lib.RelativeURIResolver)(resolver)).makeAbsolute(href, baseURI);
-                } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
-                    documentKey = ('/'+href);
-                    baseURI = "";
-                }
-            } else {
-                if ((baseURI == null)) {
-                    try {
-                        documentKey = new System.Uri(href, System.UriKind.RelativeOrAbsolute).ToString();
-                    } catch (System.UriFormatException err) {
-                        documentKey = ('/'+href);
-                        baseURI = "";
-                    }
-                } else {
-                    if (href.Length==0) {
-                        documentKey = baseURI;
-                    } else {
-                        try {
-                            documentKey = Saxon.Hej.functions.ResolveURI.makeAbsolute(href, baseURI).ToString();
-                        } catch (Exception err) when (err is System.UriFormatException || err is Saxon.Ejava.lang.IllegalArgumentException) {
-                            documentKey = ((baseURI+"/../")+href);
-                        }
-                    }
+            Saxon.Hej.functions.URIQueryParameters @params = null;
+            if (config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.RECOGNIZE_URI_QUERY_PARAMETERS)) {
+                int qMark = href.IndexOf('?');
+                if ((qMark>=0)) {
+                    @params = new Saxon.Hej.functions.URIQueryParameters(href.Substring((qMark+1)), config);
+                    href = href.Substring(0, qMark - 0);
                 }
             }
+            Saxon.Hej.om.DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData, true);
             Saxon.Hej.om.TreeInfo doc = config.getGlobalDocumentPool().find(documentKey);
             if ((doc != null)) {
                 return doc.getRootNode();
             }
+            Saxon.Hej.lib.JJ_ResourceRequest rr = new Saxon.Hej.lib.JJ_ResourceRequest();
+            rr.relativeUri = href;
+            rr.baseUri = baseURI;
+            rr.uri = documentKey.getAbsoluteURI();
+            Saxon.Ejavax.xml.transform.Source source;
             try {
-                Saxon.Ejavax.xml.transform.URIResolver r = resolver;
-                Saxon.Ejavax.xml.transform.Source source = null;
-                if ((r != null)) {
-                    try {
-                        source = r.resolve(href, baseURI);
-                    } catch (System.Exception ex) {
-                        Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException("Exception thrown by URIResolver", ex);
-                        if (config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.TRACE_EXTERNAL_FUNCTIONS)) {
-                            System.Console.Error.WriteLine(ex);
-                        }
-                        de.setLocator(locator);
-                        throw de;
-                    }
+                source = rr.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
+            } catch (System.Exception ex) {
+                Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException("Exception thrown by ResourceResolver", ex);
+                if (config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.TRACE_EXTERNAL_FUNCTIONS)) {
+                    System.Console.Error.WriteLine(ex);
                 }
-                if (((source == null) && !(((r is Saxon.Hej.trans.NonDelegatingURIResolver))))) {
-                    r = config.getSystemURIResolver();
-                    source = r.resolve(href, baseURI);
-                }
-                source = config.getSourceResolver().resolveSource(source, config);
-                Saxon.Hej.om.TreeInfo newdoc = config.buildDocumentTree(source);
-                config.getGlobalDocumentPool().add(newdoc, documentKey);
-                return newdoc.getRootNode();
-            } catch (Saxon.Ejavax.xml.transform.TransformerException err) {
-                Saxon.Hej.trans.XPathException xerr = Saxon.Hej.trans.XPathException.makeXPathException(err);
-                xerr.setLocator(locator);
-                xerr.setErrorCode("FODC0002");
-                throw new Saxon.Hej.trans.XPathException(err);
+                de.setLocator(locator);
+                throw de;
             }
+            Saxon.Hej.lib.ParseOptions options = config.getParseOptions();
+            if ((@params != null)) {
+                options.merge(@params.makeParseOptions(config));
+            }
+            Saxon.Hej.om.TreeInfo newdoc = config.buildDocumentTree(source, options);
+            config.getGlobalDocumentPool().add(newdoc, documentKey);
+            return newdoc.getRootNode();
         }
-        public static void sendDoc(string href, string baseURL, Saxon.Hej.expr.XPathContext c, Saxon.Hej.s9api.Location locator, Saxon.Hej.@event.Receiver @out, Saxon.Hej.lib.ParseOptions parseOptions) {
+        public static void sendDoc(string href, string baseURI, Saxon.Hej.expr.PackageData packageData, Saxon.Hej.expr.XPathContext context, Saxon.Hej.s9api.Location locator, Saxon.Hej.@event.Receiver @out, Saxon.Hej.lib.ParseOptions parseOptions) {
             Saxon.Hej.@event.PipelineConfiguration pipe = @out.getPipelineConfiguration();
             if ((pipe == null)) {
-                pipe = c.getController().makePipelineConfiguration();
-                pipe.setXPathContext(c);
+                pipe = context.getController().makePipelineConfiguration();
+                pipe.setXPathContext(context);
                 @out.setPipelineConfiguration(pipe);
             }
-            string documentKey;
-            if ((baseURL == null)) {
-                try {
-                    documentKey = new System.Uri(href, System.UriKind.RelativeOrAbsolute).ToString();
-                } catch (System.UriFormatException err) {
-                    documentKey = ('/'+href);
-                    baseURL = "";
-                }
-            } else {
-                if (href.Length==0) {
-                    documentKey = baseURL;
-                } else {
-                    try {
-                        documentKey = Saxon.Hej.functions.ResolveURI.makeAbsolute(href, baseURL).ToString();
-                    } catch (Exception err) when (err is System.UriFormatException || err is Saxon.Ejava.lang.IllegalArgumentException) {
-                        documentKey = ((baseURL+"/../")+href);
-                    }
-                }
+            string[] parts = extractFragment(href);
+            if ((parts[1] != null)) {
+                href = parts[0];
+                @out = new Saxon.Hej.@event.IDFilter(@out, parts[1]);
             }
-            Saxon.Hej.Controller controller = c.getController();
+            Saxon.Hej.om.DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData, true);
+            Saxon.Hej.Controller controller = context.getController();
+            Saxon.Hej.Configuration config = controller.getConfiguration();
             Saxon.Hej.om.TreeInfo doc = controller.getDocumentPool().find(documentKey);
             Saxon.Ejavax.xml.transform.Source source = null;
             if ((doc != null)) {
                 source = doc.getRootNode().asActiveSource();
             } else {
                 try {
-                    Saxon.Ejavax.xml.transform.URIResolver r = controller.getURIResolver();
-                    if ((r != null)) {
-                        source = r.resolve(href, baseURL);
-                    }
+                    Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+                    request.baseUri = baseURI;
+                    request.relativeUri = href;
+                    request.uri = documentKey.getAbsoluteURI();
+                    request.streamable = true;
+                    request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
+                    request.purpose = "source document";
+                    source = request.resolve(context.getResourceResolver(), config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                     if ((source == null)) {
-                        r = controller.getStandardURIResolver();
-                        source = r.resolve(href, baseURL);
+                        Saxon.Hej.trans.XPathException xerr = new Saxon.Hej.trans.XPathException(("Failed to resolve streamed document URI "+request.uri), "FODC0005");
+                        xerr.setLocator(locator);
+                        throw xerr;
                     }
                     if (sourceIsTree(source)) {
                         Saxon.Hej.om.NodeInfo startNode = controller.prepareInputTree(source);

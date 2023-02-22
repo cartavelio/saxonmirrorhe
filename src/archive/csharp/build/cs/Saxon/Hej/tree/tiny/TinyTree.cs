@@ -216,7 +216,7 @@ namespace Saxon.Hej.tree.tiny {
                 int annotation = stype.getFingerprint();
                 if ((((annotation == Saxon.Hej.om.StandardNames.XS_UNTYPED) || (annotation == Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC)) || (annotation == Saxon.Hej.om.StandardNames.XS_ANY_TYPE))) {
                     Saxon.Hej.str.UnicodeString stringValue = Saxon.Hej.tree.tiny.TinyParentNodeImpl.getStringValue(this, nodeNr);
-                    return new Saxon.Hej.value.UntypedAtomicValue(stringValue);
+                    return Saxon.Hej.value.StringValue.makeUntypedAtomic(stringValue);
                 } else {
                     if ((annotation == Saxon.Hej.om.StandardNames.XS_STRING)) {
                         Saxon.Hej.str.UnicodeString stringValue = Saxon.Hej.tree.tiny.TinyParentNodeImpl.getStringValue(this, nodeNr);
@@ -246,7 +246,7 @@ namespace Saxon.Hej.tree.tiny {
                 Saxon.Hej.type.SchemaType stype = getSchemaType(nodeNr);
                 int annotation = stype.getFingerprint();
                 if (((annotation == Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC) || (annotation == Saxon.Hej.om.StandardNames.XS_UNTYPED))) {
-                    return new Saxon.Hej.value.UntypedAtomicValue(Saxon.Hej.tree.tiny.TinyParentNodeImpl.getStringValue(this, nodeNr));
+                    return Saxon.Hej.value.StringValue.makeUntypedAtomic(Saxon.Hej.tree.tiny.TinyParentNodeImpl.getStringValue(this, nodeNr));
                 } else {
                     if ((annotation == Saxon.Hej.om.StandardNames.XS_STRING)) {
                         return new Saxon.Hej.value.StringValue(Saxon.Hej.tree.tiny.TinyParentNodeImpl.getStringValue(this, nodeNr).tidy());
@@ -495,11 +495,11 @@ namespace Saxon.Hej.tree.tiny {
                     if (((nodeKind[next] == Saxon.Hej.type.Type.TEXT) && (depth[(next+1)]<=level))) {
                         int length = beta[next];
                         int start = alpha[next];
-                        return new Saxon.Hej.value.UntypedAtomicValue(textBuffer.substring(start, (start+length)));
+                        return Saxon.Hej.value.StringValue.makeUntypedAtomic(textBuffer.substring(start, (start+length)));
                     } else {
                         if (((nodeKind[next] == Saxon.Hej.type.Type.WHITESPACE_TEXT) && (depth[(next+1)]<=level))) {
                             long compressedValue = ((((long)(alpha[next])<<32))|(((long)(beta[next])&unchecked((long)0xffffffffL))));
-                            return new Saxon.Hej.value.UntypedAtomicValue(new Saxon.Hej.str.CompressedWhitespace(compressedValue));
+                            return Saxon.Hej.value.StringValue.makeUntypedAtomic(new Saxon.Hej.str.CompressedWhitespace(compressedValue));
                         }
                     }
                 }
@@ -520,7 +520,7 @@ namespace Saxon.Hej.tree.tiny {
               case Saxon.Hej.type.Type.WHITESPACE_TEXT:
                 {
                     long compressedValue = ((((long)(alpha[nodeNr])<<32))|(((long)(beta[nodeNr])&unchecked((long)0xffffffffL))));
-                    return new Saxon.Hej.value.UntypedAtomicValue(new Saxon.Hej.str.CompressedWhitespace(compressedValue));
+                    return Saxon.Hej.value.StringValue.makeUntypedAtomic(new Saxon.Hej.str.CompressedWhitespace(compressedValue));
                 }
               case Saxon.Hej.type.Type.COMMENT:
               case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:

@@ -176,7 +176,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             return new Saxon.Eej.ee.stream.adjunct.StreamingAdjunct();
         }
         private static Saxon.Eej.ee.stream.adjunct.StreamingAdjunct adjunctForStreamInstr(Saxon.Eej.ee.stream.StreamInstr stream) {
-            return new Inner_StreamingAdjunct_d289e1400(stream);
+            return new Inner_StreamingAdjunct_114(stream);
         }
         public void setConfiguration(Saxon.Hej.Configuration config) {
             this.config = config;
@@ -254,8 +254,8 @@ namespace Saxon.Eej.ee.stream.adjunct {
             return new Saxon.Eej.ee.stream.feed.FeedMakerDelegate((watchManager, @out, context) => new Saxon.Eej.ee.stream.feed.BufferingFeed(getExpression(), @out, context));
         }
     
-        private class Inner_StreamingAdjunct_d289e1400 : Saxon.Eej.ee.stream.adjunct.StreamingAdjunct {
-            public Inner_StreamingAdjunct_d289e1400(Saxon.Eej.ee.stream.StreamInstr stream) {
+        private class Inner_StreamingAdjunct_114 : Saxon.Eej.ee.stream.adjunct.StreamingAdjunct {
+            public Inner_StreamingAdjunct_114(Saxon.Eej.ee.stream.StreamInstr stream) {
                 this.stream = stream;
             }
             private Saxon.Eej.ee.stream.StreamInstr stream;

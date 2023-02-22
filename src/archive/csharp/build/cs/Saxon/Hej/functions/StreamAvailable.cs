@@ -10,7 +10,8 @@ namespace Saxon.Hej.functions {
         private bool isAvailable(string uri, Saxon.Hej.expr.XPathContext context) {
             try {
                 Saxon.Hej.@event.Receiver tester = new Saxon.Hej.functions.StreamAvailable.StreamTester(context.getConfiguration().makePipelineConfiguration());
-                Saxon.Hej.functions.DocumentFn.sendDoc(uri, getRetainedStaticContext().getStaticBaseUriString(), context, null, tester, new Saxon.Hej.lib.ParseOptions());
+                Saxon.Hej.expr.parser.RetainedStaticContext env = getRetainedStaticContext();
+                Saxon.Hej.functions.DocumentFn.sendDoc(uri, env.getStaticBaseUriString(), env.getPackageData(), context, null, tester, new Saxon.Hej.lib.ParseOptions());
             } catch (Saxon.Hej.trans.QuitParsingException e) {
                 return true;
             } catch (Saxon.Hej.trans.XPathException e) {

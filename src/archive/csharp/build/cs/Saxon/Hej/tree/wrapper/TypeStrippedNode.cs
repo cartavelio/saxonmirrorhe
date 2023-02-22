@@ -20,7 +20,7 @@ namespace Saxon.Hej.tree.wrapper {
             return wrapper;
         }
         public override Saxon.Hej.om.AtomicSequence atomize() {
-            return new Saxon.Hej.value.UntypedAtomicValue(getUnicodeStringValue());
+            return Saxon.Hej.value.StringValue.makeUntypedAtomic(getUnicodeStringValue());
         }
         public override Saxon.Hej.type.SchemaType getSchemaType() {
             if ((getNodeKind() == Saxon.Hej.type.Type.ELEMENT)) {

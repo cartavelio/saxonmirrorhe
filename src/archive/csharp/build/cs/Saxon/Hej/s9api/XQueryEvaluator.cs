@@ -61,10 +61,21 @@ namespace Saxon.Hej.s9api {
             return Saxon.Api.XdmValue.Wrap(oval);
         }
         public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            context.setURIResolver(resolver);
+            context.setResourceResolver(new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(resolver));
         }
         public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            return context.getURIResolver();
+            Saxon.Hej.lib.JJ_ResourceResolver rr = context.getResourceResolver();
+            if ((rr is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
+                return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(rr)).getWrappedURIResolver();
+            } else {
+                return null;
+            }
+        }
+        public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
+            context.setResourceResolver(resolver);
+        }
+        public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
+            return context.getResourceResolver();
         }
         public void setUnparsedTextResolver(Saxon.Hej.lib.UnparsedTextURIResolver resolver) {
             context.setUnparsedTextURIResolver(resolver);
@@ -103,6 +114,8 @@ namespace Saxon.Hej.s9api {
                 }
             } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
                 throw new Saxon.Api.SaxonApiException(e);
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw new Saxon.Api.SaxonApiException(e.getXPathException());
             }
         }
         public void run(Saxon.Hej.s9api.Destination destination) {

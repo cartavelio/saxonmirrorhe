@@ -59,11 +59,11 @@ namespace Saxon.Hej.sxpath {
             }
             contextObject.setLocalVariable(slot, value);
         }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            contextObject.setURIResolver(resolver);
+        public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
+            contextObject.setResourceResolver(resolver);
         }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            return contextObject.getURIResolver();
+        public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
+            return contextObject.getResourceResolver();
         }
         public Saxon.Hej.lib.CollectionFinder getCollectionFinder() {
             return contextObject.getController().getCollectionFinder();

@@ -210,59 +210,67 @@ namespace Saxon.Hej.functions {
             try {
                 System.Uri uri = new System.Uri(arg, System.UriKind.RelativeOrAbsolute);
                 dict.initialPut("isValid", Saxon.Hej.value.BooleanValue.TRUE);
-                bool test = uri.IsAbsoluteUri;
-                dict.initialPut("isAbsolute", Saxon.Hej.value.BooleanValue.get(test));
-                test = Saxon.Impl.Helpers.UriUtils.IsOpaque(uri);
-                dict.initialPut("isOpaque", Saxon.Hej.value.BooleanValue.get(test));
-                string val = uri.Authority;
+                bool absolute = uri.IsAbsoluteUri;
+                dict.initialPut("isAbsolute", Saxon.Hej.value.BooleanValue.get(absolute));
+                dict.initialPut("isOpaque", Saxon.Hej.value.BooleanValue.get(Saxon.Impl.Helpers.UriUtils.IsOpaque(uri)));
+                System.Uri surrogateURI = (absolute ? uri : getSurrogateURI(uri));
+                string val = (absolute ? uri.Authority : null);
                 if ((val != null)) {
                     dict.initialPut("authority", new Saxon.Hej.value.StringValue(val));
                 }
-                val = uri.Authority;
+                val = (absolute ? uri.Authority : null);
                 if ((val != null)) {
                     dict.initialPut("rawAuthority", new Saxon.Hej.value.StringValue(val));
                 }
-                val = uri.UserInfo;
+                val = (absolute ? uri.UserInfo : null);
                 if ((val != null)) {
                     dict.initialPut("userInfo", new Saxon.Hej.value.StringValue(val));
                 }
-                val = uri.UserInfo;
+                val = (absolute ? uri.UserInfo : null);
                 if ((val != null)) {
                     dict.initialPut("rawUserInfo", new Saxon.Hej.value.StringValue(val));
                 }
-                val = uri.Scheme;
+                val = (absolute ? uri.Scheme : null);
                 if ((val != null)) {
                     dict.initialPut("scheme", new Saxon.Hej.value.StringValue(val));
                 }
-                val = uri.Host;
+                val = (absolute ? uri.Host : null);
                 if ((val != null)) {
                     dict.initialPut("host", new Saxon.Hej.value.StringValue(val));
                 }
-                val = uri.GetComponents(System.UriComponents.PathAndQuery, System.UriFormat.Unescaped);
+                val = surrogateURI.GetComponents(System.UriComponents.PathAndQuery, System.UriFormat.Unescaped);
                 if ((val != null)) {
                     dict.initialPut("schemeSpecificPart", new Saxon.Hej.value.StringValue(val));
                 }
-                val = uri.PathAndQuery;
+                val = surrogateURI.PathAndQuery;
                 if ((val != null)) {
                     dict.initialPut("rawSchemeSpecificPart", new Saxon.Hej.value.StringValue(val));
                 }
-                int port = uri.Port;
-                if ((port>=0)) {
-                    dict.initialPut("port", new Saxon.Hej.value.Int64Value(port));
+                if (absolute) {
+                    int port = uri.Port;
+                    if ((port>=0)) {
+                        dict.initialPut("port", new Saxon.Hej.value.Int64Value(port));
+                    }
                 }
-                val = uri.LocalPath;
+                val = surrogateURI.LocalPath;
                 if ((val != null)) {
+                    if ((val.Equals("/") && !(arg.EndsWith("/")))) {
+                        val = "";
+                    }
+                    if (((!(absolute) && val.StartsWith("/")) && !(arg.StartsWith("/")))) {
+                        val = val.Substring(1);
+                    }
                     dict.initialPut("path", new Saxon.Hej.value.StringValue(val));
                 }
-                val = uri.LocalPath;
+                val = surrogateURI.LocalPath;
                 if ((val != null)) {
                     dict.initialPut("rawPath", new Saxon.Hej.value.StringValue(val));
                 }
-                val = uri.Query;
+                val = surrogateURI.Query;
                 if ((val != null)) {
                     dict.initialPut("rawQuery", new Saxon.Hej.value.StringValue(val));
                 }
-                val = Saxon.Impl.Helpers.UriUtils.GetQuery(uri);
+                val = Saxon.Impl.Helpers.UriUtils.GetQuery(surrogateURI);
                 if ((val != null)) {
                     dict.initialPut("query", new Saxon.Hej.value.StringValue(val));
                     Saxon.Hej.ma.map.DictionaryMap @params = new Saxon.Hej.ma.map.DictionaryMap();
@@ -280,11 +288,11 @@ namespace Saxon.Hej.functions {
                     }
                     dict.initialPut("queryParams", @params);
                 }
-                val = uri.Fragment;
+                val = surrogateURI.Fragment;
                 if ((val != null)) {
                     dict.initialPut("rawFragment", new Saxon.Hej.value.StringValue(val));
                 }
-                val = Saxon.Impl.Helpers.StringUtils.nullIfEmpty(uri.Fragment);
+                val = Saxon.Impl.Helpers.UriUtils.GetFragment(surrogateURI);
                 if ((val != null)) {
                     dict.initialPut("fragment", new Saxon.Hej.value.StringValue(val));
                 }
@@ -298,6 +306,9 @@ namespace Saxon.Hej.functions {
                 dict.initialPut("error", new Saxon.Hej.value.StringValue(e.Message));
                 return dict;
             }
+        }
+        private static System.Uri getSurrogateURI(System.Uri relative) {
+            return new System.Uri(new System.Uri("http://dummy.uri/"), relative);
         }
     
     }

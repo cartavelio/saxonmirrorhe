@@ -20,7 +20,7 @@ namespace Saxon.Eej.ee.stream.watch {
         public override void open(Saxon.Eej.ee.stream.watch.Terminator terminator) {
             Saxon.Eej.ee.stream.om.FleetingParentNode anchor = getAnchorNode();
             if (((anchor != null) && (anchor.getNodeKind() == Saxon.Hej.type.Type.DOCUMENT))) {
-                terminator = new Inner_Terminator_d385e227(this);
+                terminator = new Inner_Terminator_3(this);
             }
             action.open(terminator);
         }
@@ -49,9 +49,9 @@ namespace Saxon.Eej.ee.stream.watch {
             this.matchCurrentGroup = matchCurrentGroup;
         }
     
-        private class Inner_Terminator_d385e227 : Saxon.Eej.ee.stream.watch.Terminator {
+        private class Inner_Terminator_3 : Saxon.Eej.ee.stream.watch.Terminator {
             private readonly Trigger outerInstance;
-            public Inner_Terminator_d385e227(Trigger outerInstance) {
+            public Inner_Terminator_3(Trigger outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public override void terminate() {

@@ -44,6 +44,9 @@ namespace Saxon.Hej.expr.sort {
         public void close() {
             population.close();
         }
+        public void discharge() {
+            population.discharge();
+        }
         public Saxon.Eej.ee.stream.ManualGroupIterator getSnapShot(Saxon.Hej.expr.XPathContext context) {
             return new Saxon.Hej.expr.sort.GroupMatchingIterator.ManualGroupMatchingIterator(current, position, currentMembers, runningContext.newMinorContext());
         }

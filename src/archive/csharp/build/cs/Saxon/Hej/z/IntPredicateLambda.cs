@@ -4,7 +4,7 @@ using System.Linq;
 namespace Saxon.Hej.z {
     public class IntPredicateLambda : Saxon.Hej.z.IntPredicateProxy {
         internal Saxon.Ejava.util.function.IntPredicate lambda;
-        public IntPredicateLambda(Saxon.Ejava.util.function.IntPredicate lambda)  {
+        private IntPredicateLambda(Saxon.Ejava.util.function.IntPredicate lambda)  {
             this.lambda = lambda;
         }
         public static Saxon.Hej.z.IntPredicateProxy of(Saxon.Ejava.util.function.IntPredicate lambda) {
