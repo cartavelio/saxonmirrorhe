@@ -942,8 +942,8 @@ public class AlphaCode {
                     for (AlphaCodeTree t : tree.argTypes) {
                         if (t.selfReference != null) {
                             SelfReferenceRecordTest selfie = new SelfReferenceRecordTest(recordTest);
-                            int cardinality = Cardinality.fromOccurrenceIndicator(tree.cardinality);
-                            fieldTypes.add(SequenceType.makeSequenceType(selfie, cardinality));
+                            int xcardinality = Cardinality.fromOccurrenceIndicator(tree.cardinality);
+                            fieldTypes.add(SequenceType.makeSequenceType(selfie, xcardinality));
                         } else {
                             fieldTypes.add(sequenceTypeFromTree(t, config));
                         }
