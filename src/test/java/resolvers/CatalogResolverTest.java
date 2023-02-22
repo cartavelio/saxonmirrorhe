@@ -27,6 +27,7 @@ public class CatalogResolverTest {
         } catch (SaxonApiException ex) {
             assert(ex.getMessage().contains("I/O error"));
         } catch (Exception ex) {
+            ex.printStackTrace();
             fail();
         }
     }

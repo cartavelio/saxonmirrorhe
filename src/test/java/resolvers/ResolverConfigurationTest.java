@@ -57,7 +57,7 @@ public class ResolverConfigurationTest {
             config.setConfigurationProperty(Feature.RESOURCE_RESOLVER, "Hello");
             fail();
         } catch (IllegalArgumentException ex) {
-            assertTrue(ex.getMessage().contains("SAXON_RESOURCE_RESOLVER value must be an instance of"));
+            assertTrue(ex.getMessage().contains("RESOURCE_RESOLVER value must be an instance of"));
         } catch (Exception ex) {
             fail();
         }

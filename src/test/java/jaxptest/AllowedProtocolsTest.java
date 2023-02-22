@@ -226,6 +226,40 @@ public class AllowedProtocolsTest {
                                  false);
     }
 
+    @Test
+    public void testExternalProtocolsRunTime011() {
+        externalProtocolsRunTime("data:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+                                 "<xsl:sequence select=\"document('data:text/xml;base64,PGRvYy8+')/*/local-name()\"/>",
+                                 "file data",
+                                 true);
+    }
+
+    @Test
+    public void testExternalProtocolsRunTime012() {
+        externalProtocolsRunTime("data:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+                                 "<xsl:sequence select=\"document('data:text/xml;base64,PGRvYy8+')/*/local-name()\"/>",
+                                 "file http https",
+                                 false);
+    }
+
+    @Test
+    public void testExternalProtocolsRunTime013() {
+        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+                                 "<xsl:sequence select=\"unparsed-text('classpath:saxon-license.lic')\"/>",
+                                 "file data classpath",
+                                 true);
+    }
+
+    @Test
+    public void testExternalProtocolsRunTime014() {
+        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+                                 "<xsl:sequence select=\"unparsed-text('classpath:saxon-license.lic')\"/>",
+                                 "file http https",
+                                 false);
+    }
+
+   
+
     // TODO: add tests for fn:transform
 
     private void externalProtocolsDTD(String baseURI, String instruction, String rule, boolean expectSuccess) {
