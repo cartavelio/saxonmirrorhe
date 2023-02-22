@@ -1,34 +1,31 @@
-using Saxon.Api;
+
 using ErrorReporter = net.sf.saxon.lib.ErrorReporter;
 using XmlProcessingError = net.sf.saxon.s9api.XmlProcessingError;
 
-namespace SaxonCS3.engine.Saxon.Api.Support {
+namespace Saxon.Api.Support {
     /// <summary>
     /// <c>ErrorReporter</c> wrapper class for internal use in Saxon.
     /// </summary>
-    public class ErrorReporterWrapper : ErrorReporter
+    public class ErrorReporterWrapper : net.sf.saxon.lib.ErrorReporter
 
     {
 
-        private IErrorReporter reporter;
+        private readonly Saxon.Api.ErrorReporter reporter;
 
         /// <summary>
         /// Create a standard <c>ErrorReporter</c>
         /// </summary>
         /// <param name="reporter">The .NET <c>IErrorReporter</c></param>
-        public ErrorReporterWrapper(IErrorReporter reporter)
+        public ErrorReporterWrapper(Saxon.Api.ErrorReporter reporter)
         {
             this.reporter = reporter;
         }
 
-        public IErrorReporter ErrorReporter {
-            get { return reporter; }
-        }
+        public Saxon.Api.ErrorReporter ErrorReporter => reporter;
+        
 
-
-        public void report(XmlProcessingError xpe)
-        {
-            reporter.report(new global::Saxon.Api.XmlProcessingError(xpe));
+        public void report(net.sf.saxon.s9api.XmlProcessingError error) {
+            this.reporter.Invoke(new Saxon.Api.XmlProcessingError(error));
         }
     }
 }

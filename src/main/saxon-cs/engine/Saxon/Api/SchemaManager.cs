@@ -124,44 +124,10 @@ namespace Saxon.Api {
             }
         }
 
-        /// <summary>
-        /// List of errors. The caller may supply an empty list before calling <c>Compile</c>;
-        /// the processor will then populate the list with error information obtained during
-        /// the schema compilation. Each error will be included as an object of type <c>StaticError</c>.
-        /// If no error list is supplied by the caller, error information will be written to
-        /// the standard error stream.
-        /// </summary>
-        /// <remarks>
-        /// <para>By supplying a custom <c>List</c> with a user-written <c>add()</c> method, it is possible to
-        /// intercept error conditions as they occur.</para>
-        /// <para>Note that this error list is used only for errors detected during the compilation
-        /// of the schema. It is not used for errors detected when using the schema to validate
-        /// a source document.</para>
-        /// </remarks>
-        /// <param name="value">Supplied list.</param>
-        public void SetErrorList(IList<XmlProcessingError> value)
-        {
-            reporter = new ErrorReporter(value);
-            //schemaManager.setErrorReporter(reporter);
-        }
-
-        /// <summary>
-        /// Get list of errors as <code>IList&lt;XmlProcessingError&gt;</code>
-        /// </summary>
-        public IList<XmlProcessingError> GetErrorList()
-        {
-            if (reporter == null) {
-                return new List<XmlProcessingError>();
-            }
-            return reporter.ErrorList;
-
-        }
-
-
         /// <summary>Set the <c>ErrorReporter</c> to be used when validating instance documents as a user defined ErrorReporter.
         /// If this property is used then the ErrorList property and SetErrorList method is overriden </summary>
         /// <remarks>The <c>IErrorReporter</c> to be used</remarks>
-        public IErrorReporter ErrorReporter {
+        public ErrorReporter ErrorReporter {
             set {
                 //schemaManager.setErrorReporter(new ErrorReporterWrapper(value));                
             }

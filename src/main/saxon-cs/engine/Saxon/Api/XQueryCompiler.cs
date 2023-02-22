@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using net.sf.saxon;
 using net.sf.saxon.s9api;
+using Saxon.Api.Support;
 using Saxon.Callbacks;
-using SaxonCS3.engine.Saxon.Api.Support;
 
 namespace Saxon.Api {
     /// <summary>
@@ -24,22 +22,16 @@ namespace Saxon.Api {
     /// </remarks>
     [Serializable]
     public class XQueryCompiler {
-        private Configuration config;
-        private Processor processor;
-        private IQueryResolver moduleResolver;
-        private IList<StaticError> errorList;
-        private ErrorReporterToStaticError errorGatherer;
-        private ErrorReporter errorReporter;
-        private net.sf.saxon.s9api.XQueryCompiler compiler;
+        private IQueryResolver _moduleResolver;
+        private ErrorReporter _errorReporter;
 
         // internal constructor: the public interface is a factory method
         // on the Processor object
 
         internal XQueryCompiler(Processor processor) {
-            this.processor = processor;
-            this.config = processor.Implementation;
-            compiler = processor.JProcessor.newXQueryCompiler();
-            compiler.setModuleURIResolver(new StandardModuleURIResolver(processor.XmlResolver));
+            this.Processor = processor;
+            Implementation = processor.JProcessor.newXQueryCompiler();
+            Implementation.setModuleURIResolver(new StandardModuleURIResolver(processor.XmlResolver));
         }
 
         /// <summary>
@@ -54,14 +46,14 @@ namespace Saxon.Api {
         /// <param name="uri">The namespace URI. It is possible to specify
         /// a zero-length string to "undeclare" a namespace.</param>
         public void DeclareNamespace(String prefix, String uri) {
-            compiler.declareNamespace(prefix, uri);
+            Implementation.declareNamespace(prefix, uri);
         }
 
         /// <summary>
         /// Get the <c>Processor</c> from which this <c>XQueryCompiler</c> was constructed
         /// </summary>
 
-        public Processor Processor => processor;
+        public Processor Processor { get; }
 
         /// <summary>
         /// The required context item type for the expression. This is used for
@@ -70,8 +62,8 @@ namespace Saxon.Api {
         /// </summary>
 
         public XdmItemType ContextItemType {
-            get => compiler.getRequiredContextItemType();
-            set => compiler.setRequiredContextItemType(value);
+            get => Implementation.getRequiredContextItemType();
+            set => Implementation.setRequiredContextItemType(value);
         }
 
         /// <summary>
@@ -82,14 +74,14 @@ namespace Saxon.Api {
         /// </summary>
 
 
-        public String BaseUri {
-            get => compiler.getBaseURI().OriginalString;
-            set => compiler.setBaseURI(new Uri(value));
+        public string BaseUri {
+            get => Implementation.getBaseURI().OriginalString;
+            set => Implementation.setBaseURI(new Uri(value));
         }
 
 
         /// <summary>
-        /// Say that the query must be compiled to be schema-aware, even if it contains no
+        /// Property indicating that the query is to be compiled to be schema-aware, even if it contains no
         /// "import schema" declarations. Normally a query is treated as schema-aware
         /// only if it contains one or more "import schema" declarations. 
         /// </summary>
@@ -101,8 +93,8 @@ namespace Saxon.Api {
         /// </remarks>
 
         public bool SchemaAware {
-            get => compiler.isSchemaAware();
-            set => compiler.setSchemaAware(value);
+            get => Implementation.isSchemaAware();
+            set => Implementation.setSchemaAware(value);
         }
 
         /// <summary>
@@ -120,8 +112,8 @@ namespace Saxon.Api {
 
 
         public bool UpdatingEnabled {
-            get => compiler.isUpdatingEnabled();
-            set => compiler.setUpdatingEnabled(value);
+            get => Implementation.isUpdatingEnabled();
+            set => Implementation.setUpdatingEnabled(value);
         }
 
         /// <summary>
@@ -147,75 +139,25 @@ namespace Saxon.Api {
         /// </remarks>
 
         public IQueryResolver QueryResolver {
-            get => moduleResolver;
+            get => this._moduleResolver;
             set {
-                moduleResolver = value;
-                compiler.setModuleURIResolver(new StandardModuleURIResolver());
+                this._moduleResolver = value;
+                Implementation.setModuleURIResolver(
+                    new QueryResolverWrapper(value, this.Processor.XmlResolver));
             }
         }
-
-        /// <summary>
-        /// List of errors. The caller should supply an empty list before calling <c>Compile()</c>;
-        /// the processor will then populate the list with error information obtained during
-        /// the compilation. Each error will be included as an object of type <c>StaticError</c>.
-        /// If no error list is supplied by the caller, error information will be written to
-        /// the standard error stream.
-        /// </summary>
-        /// <remarks>
-        /// By supplying a custom <c>List</c> with a user-written <c>add()</c> method, it is possible to
-        /// intercept error conditions as they occur.
-        /// </remarks>
-        [Obsolete(
-            "IList<StaticError> ErrorList is deprecated, please use the methods SetErrorList and GetErrorList which handle IList<XmlProcessingError>.")]
-        public IList<StaticError> ErrorList {
-            set {
-                errorGatherer = new ErrorReporterToStaticError(value);
-                compiler.setErrorReporter(errorGatherer);
-            }
-            get { return errorList; }
-        }
-
 
         /// <summary>Set the <c>ErrorReporter</c> to be used when validating instance documents as a user defined IErrorReporter.
         ///  Requirements here is IErrorReport implementation with a user-written <c>report()</c> method, it is possible to
         /// intercept error conditions as they occur.
         /// If this property is used then the ErrorList property and SetErrorList method is overriden.</summary>
         /// <remarks>The <c>IErrorReporter</c> to be used</remarks>
-        public IErrorReporter ErrorReporter {
+        public ErrorReporter ErrorReporter {
+            get => this._errorReporter;
             set {
-                errorReporter = null;
-                compiler.setErrorReporter(new ErrorReporterWrapper(value));
+                this._errorReporter = null;
+                Implementation.setErrorReporter(new ErrorReporterWrapper(value));
             }
-        }
-
-        /// <summary>
-        /// List of errors. The caller may supply an empty list before calling <c>Compile</c>;
-        /// the processor will then populate the list with error information obtained during
-        /// the query compilation. Each error will be included as an object of type <c>XmlProcessingError</c>.
-        /// If no error list is supplied by the caller, error information will be written to
-        /// the standard error stream.
-        /// </summary>
-        /// <remarks>
-        /// <para>By supplying a custom <c>List</c> with a user-written <c>add()</c> method, it is possible to
-        /// intercept error conditions as they occur.</para>
-        /// <para>Note that this error list is used only for errors detected during the compilation
-        /// of the stylesheet. It is not used for errors detected when executing the stylesheet.</para>
-        /// </remarks>
-        /// <param name="value">Supplied list.</param>
-        public void SetErrorList(IList<XmlProcessingError> value) {
-            errorReporter = new ErrorReporter(value);
-            compiler.setErrorReporter(errorReporter);
-        }
-
-        /// <summary>
-        /// Get list of errors as <code>IList&lt;XmlProcessingError&gt;</code>
-        /// </summary>
-        public IList<XmlProcessingError> GetErrorList() {
-            if (errorReporter == null) {
-                return new List<XmlProcessingError>();
-            }
-
-            return errorReporter.ErrorList;
         }
 
         /// <summary>
@@ -249,7 +191,7 @@ namespace Saxon.Api {
         /// status.</exception>
         public XQueryExecutable Compile(Stream query) {
             try {
-                net.sf.saxon.s9api.XQueryExecutable exec = compiler.compile(query);
+                net.sf.saxon.s9api.XQueryExecutable exec = Implementation.compile(query);
                 return new XQueryExecutable(exec);
             }
             catch (SaxonApiException e) {
@@ -282,7 +224,7 @@ namespace Saxon.Api {
         /// status.</exception>        
         public XQueryExecutable Compile(String query) {
             try {
-                net.sf.saxon.s9api.XQueryExecutable exec = compiler.compile(query);
+                net.sf.saxon.s9api.XQueryExecutable exec = Implementation.compile(query);
                 return new XQueryExecutable(exec);
             }
             catch (SaxonApiException e) {
@@ -294,13 +236,12 @@ namespace Saxon.Api {
         /// Escape hatch to the underlying Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.XQueryCompiler Implementation {
-            get { return compiler; }
-        }
+        public net.sf.saxon.s9api.XQueryCompiler Implementation { get; }
 
 
         /// <summary>
-        /// Request fast compilation. Fast compilation will generally be achieved at the expense of run-time performance
+        /// Property indicating that fast compilation is preferred.
+        /// Fast compilation will generally be achieved at the expense of run-time performance
         /// and quality of diagnostics. Fast compilation is a good trade-off if (a) the expression is known to be correct,
         /// and (b) once compiled, the expression is only executed once against a document of modest size.
         /// </summary>
@@ -312,9 +253,9 @@ namespace Saxon.Api {
         /// defined in the Configuration.</para>
         /// </remarks>
 
-        public bool FastCompliation {
-            set { compiler.setFastCompilation(value); }
-            get { return compiler.isFastCompilation(); }
+        public bool IsFastCompilation {
+            set => Implementation.setFastCompilation(value); 
+            get => Implementation.isFastCompilation(); 
         }
     }
 }

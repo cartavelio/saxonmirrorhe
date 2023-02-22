@@ -38,7 +38,7 @@ namespace java.util {
             }
             else {
                 char[] delimChars = delim.ToCharArray();
-                tokens = input.Split(delimChars);
+                tokens = input.Split(delimChars, StringSplitOptions.RemoveEmptyEntries);
             }
             
         }

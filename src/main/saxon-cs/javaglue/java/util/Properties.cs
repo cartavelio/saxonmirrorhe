@@ -29,7 +29,7 @@ namespace java.util {
             return getProperty(key) ?? defaultValue;
         }
         public void setProperty(string key, string value) {
-            dict.Add(key, value);
+            dict[key] = value;
         }
 
         public void remove(string key) {

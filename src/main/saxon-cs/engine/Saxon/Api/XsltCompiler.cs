@@ -18,7 +18,6 @@ using net.sf.saxon.trans.packages;
 using net.sf.saxon.tree.util;
 using Saxon.Api.Support;
 using Saxon.Impl.Helpers;
-using SaxonCS3.engine.Saxon.Api.Support;
 using JXsltCompiler = net.sf.saxon.s9api.XsltCompiler;
 using System = java.lang.System;
 
@@ -41,11 +40,10 @@ namespace Saxon.Api {
     public class XsltCompiler {
         private Processor processor;
         private Uri baseUri;
-        private ErrorReporterToStaticError errorGatherer;
-        private ErrorReporter errorReporter;
         private IDictionary<QName, XdmValue> variableList = new Dictionary<QName, XdmValue>();
         private JXsltCompiler jXsltCompiler;
         private XmlResolver xmlResolver = null;
+        private ErrorReporter _errorReporter;
 
         // internal constructor: the public interface is a factory method
         // on the Processor object
@@ -53,9 +51,6 @@ namespace Saxon.Api {
         internal XsltCompiler(Processor processor) {
             this.processor = processor;
             jXsltCompiler = processor.JProcessor.newXsltCompiler();
-            errorGatherer = new ErrorReporterToStaticError(new List<StaticError>());
-            errorReporter = new ErrorReporter(new List<XmlProcessingError>());
-            //xsltCompiler.setErrorReporter(errorReporter);
             jXsltCompiler.setURIResolver(processor.Implementation.getURIResolver());
         }
 
@@ -181,19 +176,19 @@ namespace Saxon.Api {
         
         /// <summary>
         /// Property to say whether just-in-time compilation of template rules should be used.
-        /// jit true if just-in-time compilation is to be enabled. With this option enabled,
+        /// Set to true if just-in-time compilation is to be enabled. With this option enabled,
         /// static analysis of a template rule is deferred until the first time that the
         /// template is matched.This can improve performance when many template
         /// rules are rarely used during the course of a particular transformation; however,
         /// it means that static errors in the stylesheet will not necessarily cause the
         /// <code>Compile(Source)</code> method to throw an exception (errors in code that is
-        ///  actually executed will still be notified to the registered <code>ErrorList</code>
+        ///  actually executed will still be notified to the registered <code>ErrorReporter</code>
         ///  or <code>ErrorList</code>, but this may happen after the {
         /// <c>Compile(Source)</c>
-        ///  method returns). This option is enabled by default in Saxon - EE, and is not available
-        ///  in Saxon - HE or Saxon-PE.
+        ///  method returns). This option is enabled by default in Saxon-EE, and is not available
+        ///  in Saxon-HE or Saxon-PE.
         ///  <p><b> Recommendation:</b> disable this option unless you are confident that the
-        ///  stylesheet you are compiling is error - free.</p>
+        ///  stylesheet you are compiling is error-free.</p>
         /// </summary>
         public bool JustInTimeCompilation {
             get => jXsltCompiler.isJustInTimeCompilation();
@@ -202,63 +197,15 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// List of errors. The caller should supply an empty list before calling Compile;
-        /// the processor will then populate the list with error information obtained during
-        /// the compilation. Each error will be included as an object of type <c>StaticError</c>.
-        /// If no error list is supplied by the caller, error information will be written to
-        /// an error list allocated by the system, which can be obtained as the value of this property.
+        /// The <c>ErrorReporter</c> to be used when reporting static errors in a stylesheet.
         /// </summary>
-        /// <remarks>
-        /// By supplying a custom <c>List</c> with a user-written <c>add()</c> method, it is possible to
-        /// intercept error conditions as they occur.
-        /// </remarks>
-        [Obsolete(
-            "IList<StaticError> ErrorList is deprecated, please use the methods SetErrorList and GetErrorList which handles IList<XmlProcessingError>.")]
-        public IList<StaticError> ErrorList {
+        public ErrorReporter ErrorReporter {
+            get => this._errorReporter;
             set {
-                errorGatherer = new ErrorReporterToStaticError(value);
-                jXsltCompiler.setErrorReporter(errorGatherer);
-            }
-            get => errorGatherer.ErrorList;
-        }
-
-        /// <summary>Set the <c>ErrorReporter</c> to be used when validating instance documents as a user defined IErrorReporter.
-        /// If this property is used then the ErrorList property and SetErrorList method is overriden </summary>
-        /// <remarks>The <c>IErrorReporter</c> to be used</remarks>
-        public IErrorReporter ErrorReporter {
-            set {
-                errorReporter = null;
+                this._errorReporter = value;
                 jXsltCompiler.setErrorReporter(new ErrorReporterWrapper(value));
             }
         }
-
-
-        /// <summary>
-        /// List of errors. The caller may supply an empty list before calling <c>Compile</c>;
-        /// the processor will then populate the list with error information obtained during
-        /// the XSLT compilation. Each error will be included as an object of type <c>XmlProcessingError</c>.
-        /// If no error list is supplied by the caller, error information will be written to
-        /// the standard error stream.
-        /// </summary>
-        /// <remarks>
-        /// <para>By supplying a custom <c>List</c> or IErrorReport implementation with a user-written <c>report()</c> method, it is possible to
-        /// intercept error conditions as they occur.</para>
-        /// <para>Note that this error list is used only for errors detected during the compilation
-        /// of the stylesheet. It is not used for errors detected when executing the stylesheet.</para>
-        /// </remarks>
-        /// <param name="value">Supplied list.</param>
-        public void SetErrorList(IList<XmlProcessingError> value) {
-            errorReporter = new ErrorReporter(value);
-            jXsltCompiler.setErrorReporter(errorReporter);
-        }
-
-        /// <summary>
-        /// Get list of errors as <code>IList&lt;XmlProcessingError&gt;</code>
-        /// </summary>
-        public IList<XmlProcessingError> GetErrorList() {
-            return errorReporter.ErrorList;
-        }
-
 
         /// <summary>
         /// Compile a stylesheet supplied as a Stream.
