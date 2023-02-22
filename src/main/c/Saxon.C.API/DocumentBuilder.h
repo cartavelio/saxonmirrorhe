@@ -235,7 +235,6 @@ class DocumentBuilder {
         SchemaValidator * schemaValidator;
         SaxonProcessor * proc;
         SaxonApiException * exception;
-        std::string cwdXP; /*!< current working directory */
         int64_t docBuilderObject;
         //jclass  docBuilderClass, procClass;
         //jclass saxonCAPIClass;

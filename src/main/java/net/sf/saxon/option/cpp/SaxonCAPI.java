@@ -130,17 +130,6 @@ public class SaxonCAPI {
    	}
 
 
-    @CEntryPoint(name = "createDocumentBuilder", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long createDocumentBuilder(IsolateThread thread, ObjectHandle processorRef) throws SaxonApiException {
-        if(processorRef != WordFactory.nullPointer()) {
-            Processor processor = objectHandles.get(processorRef);
-
-            ObjectHandle handle = objectHandles.create(processor.newDocumentBuilder());
-            return handle.rawValue();
-        }
-        throw new SaxonApiException("Cannot create DocumentBuilder - Processor is null");
-    }
-
     public static class DataWrapper{
         long [] valueRefs;
 
@@ -627,36 +616,20 @@ public class SaxonCAPI {
      * @param filename - File name of the XML document to parse
      * @return XdmNode
      */
-    @CEntryPoint(name = "parseXmlFile")
+    @CEntryPoint(name = "parseXmlFile", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long parseXmlFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer filename) throws SaxonApiException {
         Processor proc = objectHandles.get(processorRef);
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
             cwd =   CTypeConversion.toJavaString(ccwd);
         }
-        XdmNode doc = parseXmlFile(cwd, null, proc, null, CTypeConversion.toJavaString(filename));
-        ObjectHandle handle = objectHandles.create(doc);
-        return handle.rawValue();
+        return j_main_parseXmlFile(thread, ccwd, WordFactory.nullPointer(), processorRef, WordFactory.nullPointer(), filename);
 
     }
 
-    @CEntryPoint(name = "parseXmlFileWithValidator")
+    @CEntryPoint(name = "parseXmlFileWithValidator", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long parseXmlFileWithValidator(IsolateThread thread, CCharPointer ccwd, ObjectHandle processorRef, ObjectHandle validatorRef, CCharPointer filename) throws SaxonApiException {
-        Processor proc = objectHandles.get(processorRef);
-        SchemaValidator validator = null;
-        if(validatorRef != WordFactory.nullPointer()) {
-            validator = objectHandles.get(validatorRef);
-        }
-
-        String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
-            cwd =   CTypeConversion.toJavaString(ccwd);
-        }
-
-        XdmNode node = parseXmlFile(cwd, null, proc, validator, CTypeConversion.toJavaString(filename));
-        ObjectHandle handle = objectHandles.create(node);
-        return handle.rawValue();
-
+        return j_main_parseXmlFile(thread, ccwd, WordFactory.nullPointer(), processorRef, validatorRef, filename);
     }
 
 
@@ -670,26 +643,13 @@ public class SaxonCAPI {
      */
     @CEntryPoint(name = "parseXmlString", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long parseXmlString(IsolateThread thread, ObjectHandle processorRef, CCharPointer xml) throws SaxonApiException {
-
-        Processor proc = objectHandles.get(processorRef);
-
-        XdmNode node = parseXmlString(null,proc, null, null, CTypeConversion.toJavaString(xml));
-        ObjectHandle handle = objectHandles.create(node);
-        return handle.rawValue();
+        return j_main_parseXmlString(thread, WordFactory.nullPointer(),processorRef, WordFactory.nullPointer(), WordFactory.nullPointer(), xml);
     }
 
 
     @CEntryPoint(name = "parseXmlStringWithValidator", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long parseXmlString(IsolateThread thread, ObjectHandle processorRef, ObjectHandle validatorRef, CCharPointer xml) throws SaxonApiException {
-        Processor proc = objectHandles.get(processorRef);
-        SchemaValidator validator = null;
-        if(validatorRef != WordFactory.nullPointer()) {
-            validator = objectHandles.get(validatorRef);
-        }
-
-        XdmNode node = parseXmlString(null,proc, null, validator, CTypeConversion.toJavaString(xml));
-        ObjectHandle handle = objectHandles.create(node);
-        return handle.rawValue();
+        return j_main_parseXmlString(thread, WordFactory.nullPointer(), processorRef, WordFactory.nullPointer(), validatorRef, xml);
 
     }
 
@@ -766,11 +726,65 @@ public class SaxonCAPI {
         return valueForCpp;
     }
 
-    public static XdmNode parseXmlString(String cwd, Processor proci, DocumentBuilder builder, SchemaValidator validator, String xml) throws SaxonApiException {
+    @CEntryPoint(name = "j_main_parseXmlString", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_main_parseXmlString(IsolateThread thread, CCharPointer ccwd, ObjectHandle procRef, ObjectHandle builderRef, ObjectHandle validatorRef, CCharPointer cxml) throws SaxonApiException {
+        DocumentBuilder builder = null;
+        Processor proci = null;
+        String cwd = null;
+        String xml = null;
+        SchemaValidator validator = null;
         try {
-            if(proci == null) {
-                return null;
+           if(cxml == WordFactory.nullPointer()) {
+               throw new SaxonApiException("XML string is null");
+           }  else {
+               xml = CTypeConversion.toJavaString(cxml);
+           }
+            StringReader reader = new StringReader(xml);
+            if(builder == null) {
+                builder = proci.newDocumentBuilder();
+                if (debug) {
+
+                    System.err.println("New documentBuilder obj: " + System.identityHashCode(builder));
+                }
+            } else if (debug) {
+
+                System.err.println("documentBuilder obj passed as argument: " + System.identityHashCode(builder));
             }
+            if (validatorRef != WordFactory.nullPointer()) {
+                validator = objectHandles.get(validatorRef);
+                builder.setSchemaValidator(validator);
+            }
+            Source source = new SAXSource(new InputSource(reader));
+            if (cwd != null && cwd.length() > 0) {
+                if (!cwd.endsWith("/")) {
+                    cwd = cwd.concat("/");
+                }
+                source.setSystemId(cwd);
+            }
+            
+            XdmNode doc = builder.build(source);
+            if (debug) {
+                System.err.println("xmlParseString, Processor: " + System.identityHashCode(proci));
+                System.err.println("documentBuilder obj: " + System.identityHashCode(builder));
+                if(doc != null) {
+                    System.err.println("XdmNode: " + System.identityHashCode(doc));
+                }
+            }
+            ObjectHandle handle = objectHandles.create(doc);
+
+            return handle.rawValue();
+        } catch (SaxonApiException ex) {
+            throw ex;
+        }
+    }
+
+
+
+
+    public static XdmNode main_parseXmlString(String cwd, Processor proci, DocumentBuilder builder, SchemaValidator validator,  String xml) throws SaxonApiException {
+
+        try {
+
             StringReader reader = new StringReader(xml);
             if(builder == null) {
                 builder = proci.newDocumentBuilder();
@@ -792,15 +806,13 @@ public class SaxonCAPI {
                 }
                 source.setSystemId(cwd);
             }
-            
+
             XdmNode doc = builder.build(source);
             if (debug) {
                 System.err.println("xmlParseString, Processor: " + System.identityHashCode(proci));
                 System.err.println("documentBuilder obj: " + System.identityHashCode(builder));
                 if(doc != null) {
                     System.err.println("XdmNode: " + System.identityHashCode(doc));
-                    net.sf.saxon.type.ItemType suppliedItemType = SequenceTool.getItemType(doc.getUnderlyingValue(), proci.getUnderlyingConfiguration().getTypeHierarchy());
-                    System.err.println("xmlParserString, ItemType: " + suppliedItemType.toString());
                 }
             }
             return doc;
@@ -850,22 +862,67 @@ public class SaxonCAPI {
      * @return  XdmNode object for the XML file
      * @throws SaxonApiException
      */
-    public static XdmNode parseXmlFile(String cwd, DocumentBuilder builder, Processor proci, SchemaValidator validator, String filename) throws SaxonApiException {
+    @CEntryPoint(name = "j_parseXmlFile", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_main_parseXmlFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle builderRef, ObjectHandle procRef, ObjectHandle validatorRef, CCharPointer cfilename) throws SaxonApiException {
+        DocumentBuilder builder = null;
+        Processor proci = null;
+        String cwd = null;
+        String filename = null;
+
         try {
-            if(builder == null) {
+
+            if(builderRef == WordFactory.nullPointer() && proci == WordFactory.nullPointer()) {
+
                 builder = proci.newDocumentBuilder();
+            }  else {
+                builder = objectHandles.get(builderRef);
             }
+            if(ccwd != WordFactory.nullPointer()) {
+                cwd = CTypeConversion.toJavaString(ccwd);
+            }
+            if(cfilename == WordFactory.nullPointer()) {
+                throw new SaxonApiException("The XML file name is null");
+            }
+
             Source source = resolveFileToSource(proci, cwd,filename, ResourceRequest.XML_NATURE);
-            if (validator != null) {
+            if (validatorRef == WordFactory.nullPointer()) {
+                SchemaValidator validator = objectHandles.get(validatorRef);
                 builder.setSchemaValidator(validator);
             }
-            return builder.build(source);
+            XdmNode node = builder.build(source);
+
+            ObjectHandle handle = objectHandles.create(node);
+            return handle.rawValue();
         } catch (SaxonApiException ex) {
             throw ex;
         }
     }
 
 
+    public static XdmNode main_parseXmlFile(String cwd, DocumentBuilder builder, Processor proci, SchemaValidator validator, String filename) throws SaxonApiException {
+
+         try {
+
+             if(builder == null) {
+
+                 builder = proci.newDocumentBuilder();
+             }
+
+             if(filename == null) {
+                 throw new SaxonApiException("The XML file name is null");
+             }
+
+             Source source = resolveFileToSource(proci, cwd,filename, ResourceRequest.XML_NATURE);
+             if (validator != null) {
+                 builder.setSchemaValidator(validator);
+             }
+             XdmNode node = builder.build(source);
+
+             return node;
+         } catch (SaxonApiException ex) {
+             throw ex;
+         }
+     }
 
 
     /**
