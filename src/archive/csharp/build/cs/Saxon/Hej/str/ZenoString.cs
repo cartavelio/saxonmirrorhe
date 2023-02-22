@@ -280,9 +280,9 @@ namespace Saxon.Hej.str {
             }
         }
     
-        private class Inner_IntIterator_d1666e380 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_d1605e380 : Saxon.Hej.z.IntIterator {
             private readonly ZenoString outerInstance;
-            public Inner_IntIterator_d1666e380(ZenoString outerInstance) {
+            public Inner_IntIterator_d1605e380(ZenoString outerInstance) {
                 this.outerInstance = outerInstance;
                 outerIterator = outerInstance.segments.GetEnumerator();
             }

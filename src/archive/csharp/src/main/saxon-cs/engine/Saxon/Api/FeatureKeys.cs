@@ -18,7 +18,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string ALLOW_EXTERNAL_FUNCTIONS = 
@@ -47,7 +47,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string ALLOW_OLD_JAVA_URI_FORMAT = 
@@ -106,7 +106,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string COLLATION_URI_RESOLVER_CLASS = 
@@ -116,7 +116,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string COLLECTION_FINDER = 
@@ -126,7 +126,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string COLLECTION_FINDER_CLASS = 
@@ -193,7 +193,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string DEBUG_BYTE_CODE = 
@@ -203,7 +203,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string DEBUG_BYTE_CODE_DIR = 
@@ -270,7 +270,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string DEFAULT_REGEX_ENGINE = 
@@ -295,7 +295,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string DISPLAY_BYTE_CODE = 
@@ -322,7 +322,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string DTD_VALIDATION_RECOVERABLE = 
@@ -348,7 +348,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string ENTITY_RESOLVER_CLASS = 
@@ -377,7 +377,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string ENVIRONMENT_VARIABLE_RESOLVER_CLASS = 
@@ -387,7 +387,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string ERROR_LISTENER_CLASS = 
@@ -417,7 +417,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string EXPATH_FILE_DELETE_TEMPORARY_FILES = 
@@ -427,7 +427,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string GENERATE_BYTE_CODE = 
@@ -437,7 +437,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string IGNORE_SAX_SOURCE_PARSER = 
@@ -465,7 +465,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string LAZY_CONSTRUCTION_MODE = 
@@ -515,7 +515,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string MARK_DEFAULTED_ATTRIBUTES = 
@@ -525,7 +525,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string MAX_COMPILED_CLASSES = 
@@ -535,7 +535,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string MESSAGE_EMITTER_CLASS = 
@@ -556,7 +556,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string MODULE_URI_RESOLVER_CLASS = 
@@ -566,7 +566,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string MONITOR_HOT_SPOT_BYTE_CODE = 
@@ -691,7 +691,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string OUTPUT_URI_RESOLVER = 
@@ -701,7 +701,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string OUTPUT_URI_RESOLVER_CLASS = 
@@ -824,7 +824,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string RETAIN_DTD_ATTRIBUTE_TYPES = 
@@ -847,7 +847,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string SCHEMA_URI_RESOLVER_CLASS = 
@@ -877,7 +877,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string SERIALIZER_FACTORY_CLASS = 
@@ -887,7 +887,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string SOURCE_PARSER_CLASS = 
@@ -897,7 +897,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string SOURCE_RESOLVER_CLASS = 
@@ -1055,7 +1055,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string STYLE_PARSER_CLASS = 
@@ -1101,7 +1101,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string THRESHOLD_FOR_COMPILING_TYPES = 
@@ -1128,7 +1128,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string TRACE_EXTERNAL_FUNCTIONS = 
@@ -1157,7 +1157,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string TRACE_LISTENER_CLASS = 
@@ -1234,7 +1234,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string UNPARSED_TEXT_URI_RESOLVER_CLASS = 
@@ -1244,7 +1244,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string URI_RESOLVER_CLASS = 
@@ -1254,7 +1254,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string USE_PI_DISABLE_OUTPUT_ESCAPING = 
@@ -1355,7 +1355,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string XINCLUDE = 
@@ -1375,7 +1375,7 @@ public abstract class FeatureKeys
     ///                regular expressions, and to determine whether the serializer allows XML 1.1
     ///                documents to be constructed. </para>
     ///            <para>The default is 1.0.</para>
-    ///            <para>Saxon-CS uses the <code>System.Xml</code> parser, which does not support XML 1.1.</para>
+    ///            <para>SaxonCS uses the <code>System.Xml</code> parser, which does not support XML 1.1.</para>
     ///        
     /// </remarks>
 
@@ -1386,7 +1386,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string XML_PARSER_FEATURE = 
@@ -1396,7 +1396,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string XML_PARSER_PROPERTY = 
@@ -1581,7 +1581,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string XQUERY_STATIC_ERROR_LISTENER_CLASS = 
@@ -1700,7 +1700,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string XSLT_STATIC_ERROR_LISTENER_CLASS = 
@@ -1710,7 +1710,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string XSLT_STATIC_URI_RESOLVER_CLASS = 
@@ -1805,7 +1805,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string THRESHOLD_FOR_HOTSPOT_BYTE_CODE = 
@@ -1815,7 +1815,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string ALLOWED_PROTOCOLS = 
@@ -1870,7 +1870,7 @@ public abstract class FeatureKeys
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public const string ZIP_URI_PATTERN = 

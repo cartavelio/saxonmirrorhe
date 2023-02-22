@@ -4,12 +4,12 @@ using System.Linq;
 namespace Saxon.Eej.ee.stream.adjunct {
     public class ExistsStreamer : Saxon.Eej.ee.stream.adjunct.InspectionAdjunct, Saxon.Eej.ee.stream.feed.FeedMaker {
         public Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
-            return new Inner_ExistenceFeed_d238e69(this, getExpression(), @out, context);
+            return new Inner_ExistenceFeed_d227e69(this, getExpression(), @out, context);
         }
     
-        private class Inner_ExistenceFeed_d238e69 : Saxon.Eej.ee.stream.feed.ExistenceFeed {
+        private class Inner_ExistenceFeed_d227e69 : Saxon.Eej.ee.stream.feed.ExistenceFeed {
             private readonly ExistsStreamer outerInstance;
-            public Inner_ExistenceFeed_d238e69(ExistsStreamer outerInstance, /*AB*/Saxon.Hej.expr.Expression arg1, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg2, /*AA*/Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
+            public Inner_ExistenceFeed_d227e69(ExistsStreamer outerInstance, /*AB*/Saxon.Hej.expr.Expression arg1, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg2, /*AA*/Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
                 this.outerInstance = outerInstance;
                 found = false;
             }

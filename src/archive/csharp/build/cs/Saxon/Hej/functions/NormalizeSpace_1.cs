@@ -16,15 +16,15 @@ namespace Saxon.Hej.functions {
             return Saxon.Hej.value.Whitespace.collapseWhitespace(sv);
         }
         public override Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.expr.Expression[] arguments) {
-            return new Inner_SystemFunctionCall_d1148e177(this, this, arguments);
+            return new Inner_SystemFunctionCall_d1106e177(this, this, arguments);
         }
         public override string getCompilerName() {
             return "NormalizeSpaceCompiler";
         }
     
-        private class Inner_SystemFunctionCall_d1148e177 : Saxon.Hej.expr.SystemFunctionCall {
+        private class Inner_SystemFunctionCall_d1106e177 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly NormalizeSpace_1 outerInstance;
-            public Inner_SystemFunctionCall_d1148e177(NormalizeSpace_1 outerInstance, NormalizeSpace_1 arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_d1106e177(NormalizeSpace_1 outerInstance, NormalizeSpace_1 arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext c) {
