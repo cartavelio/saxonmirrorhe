@@ -2155,7 +2155,7 @@ public class XQueryParser extends XPathParser {
                     throw XPathException.makeXPathException(err);
                 }
                 rr.nature = NamespaceConstant.OUTPUT;
-                rr.purpose = ResourceRequest.ANY_PURPOSE;
+                rr.purpose = "serialization";
 
                 Source source = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
 
