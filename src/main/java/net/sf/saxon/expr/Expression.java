@@ -975,6 +975,10 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
     }
 
     /**
+     * Make an Elaborator for this expression.
+     */
+
+    /**
      * Evaluate an updating expression, adding the results to a Pending Update List.
      * The default implementation of this method, which is used for non-updating expressions,
      * throws an UnsupportedOperationException
