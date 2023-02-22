@@ -9,8 +9,8 @@ namespace TestDriver
 
 public class Xslt30ResultsDocument : ResultsDocument {
 
-    public Xslt30ResultsDocument(string rdir, Spec sp)
-         : base(rdir, sp){
+    public Xslt30ResultsDocument(String rdir, Spec sp, String filename)
+         : base(rdir, sp, filename){
     }
 
     public override void writeResultFilePreamble(Processor processor, XdmNode catalog) {
