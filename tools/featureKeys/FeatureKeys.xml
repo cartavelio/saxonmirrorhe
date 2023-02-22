@@ -2918,8 +2918,11 @@
                 This allows the garbage collector to free memory.
             </p>
             <p>If this option is set, then <code>Location</code> objects held in the run-time expression tree may contain a link
-                to an element node in the source stylesheet, enabling a user-written <code>ErrorListener</code> to produce
+                to an element node in the source stylesheet, enabling a user-written <code>ErrorReporter</code> to produce
                 improved diagnostics. This may be an appropriate setting to use, for example, in an IDE.</p>
+            <p>This setting can also be useful to get improved location information for compile-time errors in cases where reliable
+               line numbers are not available for the source stylesheet. This might happen, for example, if the
+               source stylesheet is preprocessed before compilation, or if it is retrieved from an XML database.</p>
             <p>Links to source nodes are not retained in an exported SEF file, regardless of this setting.</p>
         </desc>
     </feature>
