@@ -101,6 +101,7 @@ public class SingletonIntersectExpression extends VennExpression {
         NodeInfo n;
         while ((n = (NodeInfo) iter.next()) != null) {
             if (n.equals(m)) {
+                iter.close();
                 return SingletonIterator.makeIterator(m);
             }
         }
