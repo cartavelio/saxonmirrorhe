@@ -70,7 +70,7 @@
     <p>As well as spellout numbering, the choice of language also affects ordinal numbering, for example 10 is
       output as "10th" in English, "10." in German, "10e" in French, and "10º" in Italian.</p>
 
-    <p>For more details on numbering using ICU, see TBA</p>
+    <p>For more details on numbering using ICU, see <a class="bodylink" href="ICU-numbers-and-dates">Numbers and dates from ICU</a>.</p>
 
     <p>For more details on writing a plug-in for localizing numbers and dates, see <a
         href="../localizing-numbers-and-dates">Localizing numbers and dates</a>.</p>
