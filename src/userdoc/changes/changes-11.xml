@@ -291,6 +291,12 @@
  
         <h2>Extension Instructions</h2>
         
+        <p>The <code>saxon:array</code> instruction has changed to work the same way as the proposed XSLT 4.0 <code>xsl:array</code>
+        instruction: it has an attribute <code>composite="yes|no"</code>. With <code>composite="yes"</code>, the members of the
+        new array may be arbitrary sequences, and should be constructed using <code>saxon:array-member</code> (or <code>fn:parcel()</code>).
+        With <code>composite="no"</code>, the members of the array must be singletons, and are returned by the sequence
+        constructor as a normal sequence of items.</p>
+        
  
         <h2>XPath Syntax Extensions</h2>
         
