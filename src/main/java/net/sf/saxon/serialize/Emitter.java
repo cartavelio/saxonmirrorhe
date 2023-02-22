@@ -39,9 +39,6 @@ import java.util.Properties;
  */
 
 public abstract class Emitter extends SequenceReceiver implements ReceiverWithOutputProperties {
-//    protected StreamResult streamResult;
-//    protected Writer writer;
-//    protected OutputStream outputStream;
     protected UnicodeWriter writer;
     protected Properties outputProperties;
     protected CharacterSet characterSet;
@@ -81,209 +78,23 @@ public abstract class Emitter extends SequenceReceiver implements ReceiverWithOu
         return outputProperties;
     }
 
+    /**
+     * Set the output destination to which the emitter's output will be written
+     * @param unicodeWriter the output destination
+     */
     public void setUnicodeWriter(UnicodeWriter unicodeWriter) {
         this.writer = unicodeWriter;
     }
 
-//    /**
-//     * Set the StreamResult acting as the output destination of the Emitter
-//     *
-//     * @param result the output destination
-//     * @throws net.sf.saxon.trans.XPathException
-//     *          if an error occurs
-//     */
-//
-//    public void setStreamResult(StreamResult result) throws XPathException {
-//        streamResult = result;
-//        if (systemId == null) {
-//            systemId = result.getSystemId();
-//        }
-//    }
-
-//    /**
-//     * Make a Writer for this Emitter to use, given a StreamResult.
-//     *
-//     * @throws net.sf.saxon.trans.XPathException
-//     *          if an error occurs
-//     */
-//
-//    protected void makeWriter() throws XPathException {
-//        if (writer != null) {
-//            return;
-//        }
-//        if (streamResult == null) {
-//            throw new IllegalStateException("Emitter must have either a Writer or a StreamResult to write to");
-//        }
-//        writer = streamResult.getWriter();
-//        if (writer == null) {
-//            OutputStream os = streamResult.getOutputStream();
-//            if (os != null) {
-//                setOutputStream(os);
-//            }
-//        }
-//        if (writer == null) {
-//            makeOutputStream();
-//        }
-//    }
-//
-//    @SuppressWarnings({"ResultOfMethodCallIgnored"})
-//    protected OutputStream makeOutputStream() throws XPathException {
-//        String uriString = streamResult.getSystemId();
-//        if (uriString == null) {
-//            throw new XPathException("Result has no system ID, writer, or output stream defined", SaxonErrorCode.SXRD0004);
-//        }
-//
-//        try {
-//            File file = ExpandedStreamResult.makeWritableOutputFile(uriString);
-//            setOutputStream(new FileOutputStream(file));
-//            // Set the outputstream in the StreamResult object so that the
-//            // call on OutputURIResolver.close() can close it
-//            streamResult.setOutputStream(outputStream);
-//            mustClose = true;
-//        } catch (FileNotFoundException | URISyntaxException | IllegalArgumentException fnf) {
-//            // for example, the system ID doesn't use the file: scheme
-//            XPathException err = new XPathException("Unable to write to output destination", fnf);
-//            err.setErrorCode(SaxonErrorCode.SXRD0004);
-//            throw err;
-//        }
-//        return outputStream;
-//    }
-//
-//    /**
-//     * Determine whether the Emitter wants a Writer for character output or
-//     * an OutputStream for binary output. The standard Emitters all use a Writer, so
-//     * this returns true; but a subclass can override this if it wants to use an OutputStream
-//     *
-//     * @return true if a Writer is needed, as distinct from an OutputStream
-//     */
-//
-//    public boolean usesWriter() {
-//        return true;
-//    }
-//
-//    /**
-//     * Set the output destination as a character stream
-//     *
-//     * @param writer the Writer to use as an output destination
-//     * @throws net.sf.saxon.trans.XPathException
-//     *          if an error occurs
-//     */
-//
-//    public void setWriter(Writer writer) throws XPathException {
-//        this.writer = writer;
-//
-//        // If the writer uses a known encoding, change the encoding in the XML declaration
-//        // to match. Any encoding actually specified in xsl:output is ignored, because encoding
-//        // is being done by the user-supplied Writer, and not by Saxon itself.
-//
-//        if (writer instanceof OutputStreamWriter && outputProperties != null) {
-//            String enc = ((OutputStreamWriter) writer).getEncoding();
-//            outputProperties.setProperty(OutputKeys.ENCODING, enc);
-//            characterSet = getConfiguration().getCharacterSetFactory().getCharacterSet(outputProperties);
-//            allCharactersEncodable = (characterSet instanceof UTF8CharacterSet ||
-//                    characterSet instanceof UTF16CharacterSet);
-//        }
-//    }
-//
-//    /**
-//     * Get the output writer
-//     *
-//     * @return the Writer being used as an output destination, if any
-//     */
-//
-//    public Writer getWriter() {
-//        return writer;
-//    }
-//
-//    /**
-//     * Set the output destination as a byte stream.
-//     * <p>Note that if a specific encoding (other than the default, UTF-8) is required, then
-//     * {@link #setOutputProperties(java.util.Properties)} must be called <i>before</i> calling
-//     * this method.</p>
-//     *
-//     * @param stream the OutputStream being used as an output destination
-//     * @throws net.sf.saxon.trans.XPathException
-//     *          if an error occurs
-//     */
-//
-//    public void setOutputStream(OutputStream stream) throws XPathException {
-//        outputStream = stream;
-//
-//        // If the user supplied an OutputStream, but the Emitter is written to
-//        // use a Writer (this is the most common case), then we create a Writer
-//        // to wrap the supplied OutputStream; the complications are to ensure that
-//        // the character encoding is correct.
-//
-//        if (usesWriter()) {
-//
-//            if (outputProperties == null) {
-//                outputProperties = new Properties();
-//            }
-//
-//            String encoding = outputProperties.getProperty(OutputKeys.ENCODING);
-//            if (encoding == null) {
-//                encoding = "UTF8";
-//                allCharactersEncodable = true;
-//            } else if (encoding.equalsIgnoreCase("UTF-8")) {
-//                encoding = "UTF8";
-//                allCharactersEncodable = true;
-//            } else if (encoding.equalsIgnoreCase("UTF-16")) {
-//                encoding = "UTF16";
-//            }
-//
-//            if (characterSet == null) {
-//                characterSet = getConfiguration().getCharacterSetFactory().getCharacterSet(outputProperties);
-//            }
-//
-//            String byteOrderMark = outputProperties.getProperty(SaxonOutputKeys.BYTE_ORDER_MARK);
-//            if ("no".equals(byteOrderMark) && "UTF16".equals(encoding)) {
-//                // Java always writes a bom for UTF-16, so if the user doesn't want one, use utf16-be
-//                encoding = "UTF-16BE";
-//            } else if (!(characterSet instanceof UTF8CharacterSet)) {
-//
-//                //if (characterSet instanceof PluggableCharacterSet) {
-//                encoding = characterSet.getCanonicalName();
-//            }
-//
-//            while (true) {
-//                try {
-//                    String javaEncoding = encoding;
-//                    if (encoding.equalsIgnoreCase("iso-646") || encoding.equalsIgnoreCase("iso646")) {
-//                        javaEncoding = "US-ASCII";
-//                    }
-//                    if (encoding.equalsIgnoreCase("UTF8")) {
-//                        writer = new UTF8Writer(outputStream);
-//                    } else {
-//                        writer = new BufferedWriter(
-//                                new OutputStreamWriter(
-//                                        outputStream, javaEncoding));
-//                    }
-//                    break;
-//                } catch (Exception err) {
-//                    if (encoding.equalsIgnoreCase("UTF8")) {
-//                        throw new XPathException("Failed to create a UTF8 output writer");
-//                    }
-//                    XmlProcessingIncident de = new XmlProcessingIncident("Encoding " + encoding + " is not supported: using UTF8", "SESU0007");
-//                    getPipelineConfiguration().getErrorReporter().report(de);
-//                    encoding = "UTF8";
-//                    characterSet = UTF8CharacterSet.getInstance();
-//                    allCharactersEncodable = true;
-//                    outputProperties.setProperty(OutputKeys.ENCODING, "UTF-8");
-//                }
-//            }
-//        }
-//
-//    }
-//
-//    /**
-//     * Get the output stream
-//     *
-//     * @return the OutputStream being used as an output destination, if any
-//     */
-//
-//    public OutputStream getOutputStream() {
-//        return outputStream;
-//    }
+    /**
+     * Set a flag indicating that the unicode writer must be closed after use. This will
+     * generally be true if the writer was created by Saxon, and false if it was supplied
+     * by the user
+     * @param mustClose true if the unicode writer is to be closed after use.
+     */
+    public void setMustClose(boolean mustClose) {
+        this.mustClose = mustClose;
+    }
 
     /**
      * Set unparsed entity URI. Needed to satisfy the Receiver interface, but not used,

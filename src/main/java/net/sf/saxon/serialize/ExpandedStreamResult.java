@@ -40,6 +40,7 @@ public class ExpandedStreamResult {
     private OutputStream outputStream;
     private CharacterSet characterSet;
     private String encoding;
+    private boolean mustCloseAfterUse = false;
 
     public ExpandedStreamResult(Configuration config, StreamResult result, Properties outputProperties) throws XPathException {
         this.config = config;
@@ -73,9 +74,9 @@ public class ExpandedStreamResult {
     }
 
     /**
-     * Make a Writer for this Emitter to use, given a StreamResult.
+     * Make a UnicodeWriter for an Emitter to use.
      *
-     * @return the new Writer
+     * @return the new UnicodeWriter
      * @throws net.sf.saxon.trans.XPathException if an error occurs
      */
 
@@ -99,12 +100,23 @@ public class ExpandedStreamResult {
 
         try {
             File file = makeWritableOutputFile(uriString);
+            mustCloseAfterUse = true;
             outputStream = new FileOutputStream(file);
         } catch (FileNotFoundException | URISyntaxException | IllegalArgumentException fnf) {
             throw new XPathException(fnf);
         }
 
         return outputStream;
+    }
+
+    /**
+     * Ask whether the unicode writer myst be closed after use. This will typically be true if the writer was
+     * created by Saxon, rather than being supplied by the user.
+     * @return tru if the unicode writer myst be closed after use
+     */
+
+    public boolean isMustCloseAfterUse() {
+        return mustCloseAfterUse;
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

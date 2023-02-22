@@ -52,6 +52,7 @@ public class JSONEmitter {
     private boolean afterKey = false;
     private int level;
     private final Stack<Boolean> oneLinerStack = new Stack<>();
+    private boolean mustClose = true;
 
     private boolean unfailing = false;
 
@@ -98,6 +99,15 @@ public class JSONEmitter {
             characterSet = UTF8CharacterSet.getInstance();
         }
 
+    }
+
+    /**
+     * Say whether the output must be closed on completion
+     *
+     * @param mustClose true if the output must be closed
+     */
+    public void setMustClose(boolean mustClose) {
+        this.mustClose = mustClose;
     }
 
     /**
@@ -350,7 +360,7 @@ public class JSONEmitter {
         if (first) {
             emit("null");
         }
-        if (writer != null) {
+        if (writer != null && mustClose) {
             try {
                 writer.close();
             } catch (IOException e) {
