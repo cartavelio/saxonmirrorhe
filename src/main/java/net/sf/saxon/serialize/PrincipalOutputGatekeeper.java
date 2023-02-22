@@ -148,7 +148,7 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
     }
 
     private String identifySystemId() {
-        String uri = getSystemId();
+        String uri = controller.getBaseOutputURI();
         return uri==null ? "(no URI supplied)" : uri;
     }
 
