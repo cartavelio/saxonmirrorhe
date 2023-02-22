@@ -55,7 +55,7 @@ public class TupleExpression extends Expression {
 
      @Override
      public Iterable<Operand> operands() {
-         return operanda.operands();
+         return operanda;
      }
 
 

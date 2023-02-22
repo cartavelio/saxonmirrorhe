@@ -10,7 +10,10 @@ package net.sf.saxon.option.cpp;
 
 import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
@@ -19,6 +22,10 @@ import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.ObjectHandles;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
@@ -33,10 +40,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
-import org.graalvm.nativeimage.IsolateThread;
-import org.graalvm.nativeimage.c.function.CEntryPoint;
-import org.graalvm.nativeimage.c.type.CCharPointer;
-import org.graalvm.nativeimage.c.type.CTypeConversion;
 
 
 /**

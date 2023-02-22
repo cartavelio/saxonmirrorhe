@@ -60,7 +60,7 @@ public abstract class SimpleExpression extends Expression implements Callable {
 
      @Override
      public Iterable<Operand> operands() {
-         return operanda.operands();
+         return operanda;
      }
 
 
