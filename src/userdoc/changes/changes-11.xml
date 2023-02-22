@@ -85,6 +85,15 @@
 
     </category>
     
+    <category name="localization">
+        
+        <p>Saxon now uses the Java <code>java.time.ZoneId</code> class for handling timezones in place of the
+        old <code>java.util.Timezone</code>. This may affect the set of timezone names that are recognized.
+        It also affects the way they are displayed: for example US Eastern Time is represented as "ET"
+        whether or not daylight savings time is in effect (previously "EST" was used for dates in winter,
+        and "EDT" for dates in summer.)</p>
+    </category>
+    
     <category name="spi">
         
         <h2>Strings</h2>
@@ -223,7 +232,8 @@
         as "integrated extension functions" where they were previously "reflexive extension functions".
         The only noticeable effect should be that they now enforce the specification more strictly. In
         particular, the function name must be spelled as specified; it is no longer possible to use
-        alternative spellings such as <code>saxon:printStack</code> for <code>saxon:print-stack</code>.</p>
+        alternative spellings such as <code>saxon:printStack</code> for <code>saxon:print-stack</code>,,
+        or <code>saxon:stringToBase64Binary</code> for <code>saxon:string-to-base64Binary</code>.</p>
         
         <p>The functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> now accept
         any encoding supported by the Java VM.</p>
