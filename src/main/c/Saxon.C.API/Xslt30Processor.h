@@ -346,8 +346,7 @@ private:
     void clearProperties();
 
 	SaxonProcessor* proc;/*! */
-	jclass  cppClass;
-	jobject cppXT;
+	int64_t cppXT;
     std::string cwdXT; /*!< current working directory */
 	bool jitCompilation;
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
