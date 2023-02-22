@@ -666,6 +666,7 @@ private:
 
     void createException(const char * message=nullptr);
 
+    void initialize(bool l);
 
     void applyConfigurationProperties();
 
