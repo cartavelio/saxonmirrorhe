@@ -315,6 +315,20 @@ public abstract class TinyNodeImpl implements NodeInfo {
     }
 
     /**
+     * Test whether the URI part of the name of this node is equal to a specific value.
+     * @param ns the alleged namespace URI
+     * @return true if the namespace of the node is the same as the alleged namespace URI
+     */
+
+    public boolean hasURI(String ns) {
+        int code = tree.nameCode[nodeNr];
+        if (code < 0) {
+            return false;
+        }
+        return getNamePool().getStructuredQName(code).hasURI(ns);
+    }
+
+    /**
      * Get the display name of this node (a lexical QName). For elements and attributes this is [prefix:]localname.
      * The original prefix is retained. For unnamed nodes, the result is an empty string.
      *

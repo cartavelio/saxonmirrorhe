@@ -7,6 +7,7 @@
 
 package net.sf.saxon.om;
 
+import net.sf.saxon.tree.tiny.TinyNodeImpl;
 import net.sf.saxon.tree.wrapper.AbstractVirtualNode;
 
 /**
@@ -100,6 +101,10 @@ public class NameOfNode implements NodeName {
      */
     @Override
     public boolean hasURI(String ns) {
+        if (node instanceof TinyNodeImpl) {
+            // fast path (avoids object allocation)
+            return ((TinyNodeImpl)node).hasURI(ns);
+        }
         return node.getURI().equals(ns);
     }
 
