@@ -75,24 +75,27 @@ import java.util.Iterator;
 
 
 /**
- * Very basic utility for applying the  XPath API in JAXP 1.3
+ * A basic utility for applying the XPath API defined from JAXP 1.3
  * to an xml file and printing information about the execution of the XPath object
  * and the nodes it finds.
- * Takes 2 or 3 arguments:
- * (1) an xml filename
- * (2) an XPath expression to apply to the file
- * (3) (optionally) short name of the object model to be used: "saxon" | "dom" | "jdom" | "dom4j" | "xom"
- * Examples:
- * java ApplyXPathJAXP foo.xml /
- * java ApplyXPathJAXP foo.xml /doc/name[1]/@last
- * <p>This version modified by Michael Kay to allow testing of additional
- * features of the interface.do</p>
  *
- * <p>The XPath expression may use:
- * (a) A namespace prefix f which is bound to the namespace http://localhost/f
- * (b) A variable $f:pi whose value is the Double pi
- * (c) A function f:sqrt(x) that calculates the square root of its argument x</p>
+ * <p>The command takes 2 or 3 arguments:</p>
+ * <ol>
+ * <li>an xml filename
+ * <li>an XPath expression to apply to the file
+ * <li>(optionally) short name of the object model to be used: "saxon" | "dom" | "jdom" | "dom4j" | "xom"
+ * </ol>
  *
+ * <h2>Examples:</h2>
+ * <p><code>java ApplyXPathJAXP foo.xml /</code></p>
+ * <p><code>java ApplyXPathJAXP foo.xml /doc/name[1]/@last</code></p>
+ *
+ * <p>The XPath expression may use:</p>
+ * <ol>
+ * <li>A namespace prefix {@code f} which is bound to the namespace {@code http://localhost/f}
+ * <li>A variable {@code $f:pi} whose value is the Double pi
+ * <li>A function {@code f:sqrt(x)} that calculates the square root of its argument x</p>
+ * </ol>
  * @see javax.xml.xpath.XPath
  */
 public class ApplyXPathJAXP {
@@ -139,7 +142,7 @@ public class ApplyXPathJAXP {
             // the actual query and serialization.
             System.out.println("Loading classes, parsing " + filename + ", and setting up serializer");
 
-            // Following is specific to Saxon: should be in a properties file
+            // Following is specific to Saxon
             System.setProperty("javax.xml.xpath.XPathFactory:"+ NamespaceConstant.OBJECT_MODEL_SAXON,
                     "net.sf.saxon.xpath.XPathFactoryImpl");
             System.setProperty("javax.xml.xpath.XPathFactory:"+ XPathConstants.DOM_OBJECT_MODEL,
@@ -213,7 +216,7 @@ public class ApplyXPathJAXP {
 
                         public String getPrefix(String s) { return null; }
 
-                        public Iterator getPrefixes(String s) { return null; }
+                        public Iterator<String> getPrefixes(String s) { return null; }
                     }
                 );
 
@@ -274,7 +277,7 @@ public class ApplyXPathJAXP {
     public static void main(String[] args)
             throws Exception {
         if (args.length != 2 && args.length != 3) {
-            System.out.println("java ApplyXPathJAXP filename.xml xpath [saxon|dom|jdom|dom4j|xom]\n"
+            System.out.println("java ApplyXPathJAXP filename.xml xpath (saxon|dom|jdom|dom4j|xom)?\n"
                     + "Reads filename.xml and applies the xpath; prints the String value of result.");
             return;
         }
