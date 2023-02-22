@@ -20,32 +20,45 @@ public class MappingJavaIterator<S, T> implements Iterator<T> {
 
     private final Iterator<S> input;
     private final java.util.function.Function<S, T> mapper;
+    private T nextItem;
 
     /**
      * Create a mapping iterator
      * @param in the input sequence
-     * @param mapper the mapping function to be applied to each item in the ipnut sequence to
-     *               generate the corresponding item in the result sequence
+     * @param mapper the mapping function to be applied to each item in the input sequence to
+     *               generate the corresponding item in the result sequence. If the mapping
+     *               function returns null for a particular input, the item is omitted from the
+     *               result sequence.
      */
 
     public MappingJavaIterator(Iterator<S> in, java.util.function.Function<S, T> mapper) {
         this.input = in;
         this.mapper = mapper;
+        advance();
     }
 
     @Override
     public boolean hasNext() {
-        return input.hasNext();
+        return nextItem != null;
     }
 
     @Override
     public T next() {
-        while (true) {
-            T next = mapper.apply(input.next());
-            if (next != null) {
-                return next;
+        T result = nextItem;
+        if (result != null) {
+            advance();
+        }
+        return result;
+    }
+
+    private void advance() {
+        while (input.hasNext()) {
+            nextItem = mapper.apply(input.next());
+            if (nextItem != null) {
+                return;
             }
         }
+        nextItem = null;
     }
     //#if CSHARP==false
     //C# emulation of java.util.Iterator omits remove() method
