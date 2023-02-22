@@ -11,6 +11,7 @@ package net.sf.saxon.option.cpp;
 import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.Configuration;
 
+import net.sf.saxon.Transform;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Validation;
@@ -122,6 +123,27 @@ public class SaxonCAPI {
         }
         ObjectHandle handle = objectHandles.create(new Processor(licensei));
         return handle.rawValue();
+    }
+
+    @CEntryPoint(name = "j_run_transform", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long run_transform(IsolateThread thread, int argCount,  CCharPointer cargs){
+
+        String[] args = null;
+
+
+        if(cargs == WordFactory.nullPointer()) {
+            return STATUS_FAIL;
+        }   else {
+            args = new String[argCount];
+            for(int i=0; i < argCount; i++) {
+                args[i] = CTypeConversion.toJavaString(cargs.addressOf(i));
+            }
+        }
+
+        new Transform().doTransform(args);
+
+
+        return STATUS_OK;
     }
 
     @CEntryPoint(name = "j_handles_destroy")

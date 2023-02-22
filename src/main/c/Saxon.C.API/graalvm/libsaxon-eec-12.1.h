@@ -1,5 +1,5 @@
-#ifndef __GRAALVM_EE_12_1_H
-#define __GRAALVM_EE_12_1_H
+#ifndef __LIBSAXON_EEC_12_1_H
+#define __LIBSAXON_EEC_12_1_H
 
 #include <graal_isolate.h>
 
@@ -33,6 +33,8 @@ void addProcessorValue(graal_isolatethread_t*, void *, void *);
 void clearProcessorData(graal_isolatethread_t*, void *);
 
 long long int createSaxonProcessor(graal_isolatethread_t*, int);
+
+long long int j_run_transform(graal_isolatethread_t*, int, char*);
 
 void j_handles_destroy(graal_isolatethread_t*, void *);
 

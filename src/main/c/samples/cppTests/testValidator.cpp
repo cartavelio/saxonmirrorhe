@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
 {
 
 	SaxonProcessor * processor = new SaxonProcessor(true);
-    setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
+    //setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
     cout<<"Test: SchemaValidator with Saxon version="<<processor->version()<<endl<<endl;
 
     char * cwd = nullptr;

@@ -55,7 +55,7 @@ task graalJar(
 ) {
   def prefixLen = "${buildDir}/graalvm".length()
 
-  archiveBaseName = "graalvm-ee-${saxonVersion}"
+  archiveBaseName = "libsaxon-eec-${saxonVersion}"
   manifest {
     from "${buildDir}/graalvm/META-INF/MANIFEST.MF"
   }
@@ -70,7 +70,7 @@ task graalImage(
   doLast {
     exec {
       commandLine "${graalHome}/native-image",
-        "-jar", "${buildDir}/libs/graalvm-ee-${saxonVersion}.jar",
+        "-jar", "${buildDir}/libs/libsaxon-eec-${saxonVersion}.jar",
         "--no-fallback", "-H:Path=${buildDir}/c",
         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
