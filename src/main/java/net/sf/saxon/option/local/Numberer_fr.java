@@ -37,11 +37,11 @@ public class Numberer_fr extends AbstractNumberer {
     private static final String[] frenchMonths = {"Janvier", "F\u00e9vrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Ao\u00fbt", "Septembre", "Octobre", "Novembre", "D\u00e9cembre"};
 
     /*
-      * (non-Javadoc)
-      *
-      * @see net.sf.saxon.expr.number.Numberer_en#ordinalSuffix(java.lang.String,
-      *      long)
-      */
+     * (non-Javadoc)
+     *
+     * @see net.sf.saxon.expr.number.Numberer_en#ordinalSuffix(java.lang.String,
+     *      long)
+     */
     /*@NotNull*/
     @Override
     protected String ordinalSuffix(String ordinalParam, long number) {
@@ -53,20 +53,20 @@ public class Numberer_fr extends AbstractNumberer {
     }
 
     /*
-      * (non-Javadoc)
-      *
-      * @see net.sf.saxon.expr.number.Numberer_en#toWords(long)
-      */
+     * (non-Javadoc)
+     *
+     * @see net.sf.saxon.expr.number.Numberer_en#toWords(long)
+     */
     @Override
     public String toWords(long number) {
         return toWords(number, true);
     }
 
     /*
-      * (non-Javadoc)
-      *
-      * @see net.sf.saxon.expr.number.Numberer_en#toWords(long, int)
-      */
+     * (non-Javadoc)
+     *
+     * @see net.sf.saxon.expr.number.Numberer_en#toWords(long, int)
+     */
     @Override
     public String toWords(long number, int wordCase) {
         String s = toWords(number);
@@ -143,11 +143,11 @@ public class Numberer_fr extends AbstractNumberer {
     }
 
     /*
-      * (non-Javadoc)
-      *
-      * @see net.sf.saxon.expr.number.Numberer_en#toOrdinalWords(java.lang.String,
-      *      long, int)
-      */
+     * (non-Javadoc)
+     *
+     * @see net.sf.saxon.expr.number.Numberer_en#toOrdinalWords(java.lang.String,
+     *      long, int)
+     */
     @Override
     public String toOrdinalWords(String ordinalParam, long number, int wordCase) {
         String ord;
@@ -179,10 +179,10 @@ public class Numberer_fr extends AbstractNumberer {
             String suffix = "i\u00e8me";
             long mod100 = number % 100;
             long int100 = number / 100;
-            if (int100 == 70 || int100 == 90) {
-                int100 -= 10;
-                mod100 += 100;
-            }
+//            if ((int100 == 70 || int100 == 90)) {
+//                int100 -= 10;
+//                mod100 += 100;
+//            }
 
             String prefix = toWords(int100 * 100, false);
             if (int100 % 10000 == 0) {
@@ -208,10 +208,10 @@ public class Numberer_fr extends AbstractNumberer {
     }
 
     /*
-      * (non-Javadoc)
-      *
-      * @see net.sf.saxon.lib.Numberer#monthName(int, int, int)
-      */
+     * (non-Javadoc)
+     *
+     * @see net.sf.saxon.lib.Numberer#monthName(int, int, int)
+     */
     @Override
     public String monthName(int month, int minWidth, int maxWidth) {
         StringBuilder name = new StringBuilder(frenchMonths[month - 1]);
@@ -228,10 +228,10 @@ public class Numberer_fr extends AbstractNumberer {
     }
 
     /*
-      * (non-Javadoc)
-      *
-      * @see net.sf.saxon.lib.Numberer#dayName(int, int, int)
-      */
+     * (non-Javadoc)
+     *
+     * @see net.sf.saxon.lib.Numberer#dayName(int, int, int)
+     */
     @Override
     public String dayName(int day, int minWidth, int maxWidth) {
         StringBuilder name = new StringBuilder(frenchDays[day - 1]);
