@@ -21,6 +21,7 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -40,7 +41,7 @@ import java.util.function.Supplier;
  * =, !=, &lt;, &gt;, etc. This implementation is not used when in backwards-compatible mode
  */
 
-public abstract class GeneralComparison extends BinaryExpression implements ComparisonExpression /*, Callable */ {
+public abstract class GeneralComparison extends BinaryExpression implements ComparisonExpression {
 
     @CSharpSimpleEnum
     public enum ComparisonCardinality {ONE_TO_ONE, MANY_TO_ONE, MANY_TO_MANY}
@@ -202,7 +203,6 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         final Configuration config = visitor.getConfiguration();
-        final TypeHierarchy th = config.getTypeHierarchy();
 
         Expression oldOp0 = getLhsExpression();
         Expression oldOp1 = getRhsExpression();
@@ -426,7 +426,6 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
-        final TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
         final StaticContext env = visitor.getStaticContext();
 
         getLhs().optimize(visitor, contextInfo);
@@ -622,56 +621,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
     /*@Nullable*/
     @Override
     public BooleanValue evaluateItem(XPathContext context) throws XPathException {
-        switch (comparisonCardinality) {
-            case ONE_TO_ONE: {
-                AtomicValue value0 = (AtomicValue) getLhsExpression().evaluateItem(context);
-                AtomicValue value1 = (AtomicValue) getRhsExpression().evaluateItem(context);
-                return BooleanValue.get(evaluateOneToOne(value0, value1, context));
-            }
-            case MANY_TO_ONE: {
-                SequenceIterator iter0 = getLhsExpression().iterate(context);
-                AtomicValue value1 = (AtomicValue) getRhsExpression().evaluateItem(context);
-                return BooleanValue.get(evaluateManyToOne(iter0, value1, context));
-            }
-            case MANY_TO_MANY: {
-                SequenceIterator iter1 = getLhsExpression().iterate(context);
-                SequenceIterator iter2 = getRhsExpression().iterate(context);
-                return BooleanValue.get(evaluateManyToMany(iter1, iter2, context));
-            }
-        }
-        return null;
+        return BooleanValue.get(makeElaborator().elaborateForBoolean().eval(context));
     }
-
-//    /**
-//     * Evaluate the expression
-//     *
-//     * @param context   the dynamic evaluation context
-//     * @param arguments the values of the arguments, supplied as SequenceIterators
-//     * @return the result of the evaluation, in the form of a SequenceIterator
-//     * @throws XPathException if a dynamic error occurs during the evaluation of the expression
-//     */
-//
-//    //@Override
-//    public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-//        switch (comparisonCardinality) {
-//            case ONE_TO_ONE: {
-//                AtomicValue value0 = (AtomicValue) arguments[0].head();
-//                AtomicValue value1 = (AtomicValue) arguments[1].head();
-//                return BooleanValue.get(evaluateOneToOne(value0, value1, context));
-//            }
-//            case MANY_TO_ONE: {
-//                SequenceIterator iter0 = arguments[0].iterate();
-//                AtomicValue value1 = (AtomicValue) arguments[1].head();
-//                return BooleanValue.get(evaluateManyToOne(iter0, value1, context));
-//            }
-//            case MANY_TO_MANY: {
-//                SequenceIterator iter1 = arguments[0].iterate();
-//                SequenceIterator iter2 = arguments[1].iterate();
-//                return BooleanValue.get(evaluateManyToMany(iter1, iter2, context));
-//            }
-//        }
-//        return null;
-//    }
 
     /**
      * Evaluate the expression in a boolean context
@@ -682,180 +633,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
     @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
-        switch (comparisonCardinality) {
-            case ONE_TO_ONE: {
-                AtomicValue value0 = (AtomicValue) getLhsExpression().evaluateItem(context);
-                AtomicValue value1 = (AtomicValue) getRhsExpression().evaluateItem(context);
-                return evaluateOneToOne(value0, value1, context);
-            }
-            case MANY_TO_ONE: {
-                SequenceIterator iter0 = getLhsExpression().iterate(context);
-                AtomicValue value1 = (AtomicValue) getRhsExpression().evaluateItem(context);
-                return evaluateManyToOne(iter0, value1, context);
-            }
-            case MANY_TO_MANY: {
-                SequenceIterator iter1 = getLhsExpression().iterate(context);
-                SequenceIterator iter2 = getRhsExpression().iterate(context);
-                return evaluateManyToMany(iter1, iter2, context);
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Evaluate a (zero-or-one)-to-(zero-or-one) comparison
-     *
-     * @param value0  the first value, or null if empty
-     * @param value1  the second value, or null if empty
-     * @param context dynamic evaluation context
-     * @return the comparison result
-     * @throws XPathException if a dynamic error occurs
-     */
-
-    public boolean evaluateOneToOne(AtomicValue value0, AtomicValue value1, XPathContext context) throws XPathException {
-        try {
-            return !(value0 == null || value1 == null) &&
-                    compare(value0, singletonOperator, value1, comparer.provideContext(context),
-                            runtimeCheckNeeded, context, getRetainedStaticContext());
-        } catch (XPathException e) {
-            // re-throw the exception with location information added
-            e.maybeSetLocation(getLocation());
-            e.maybeSetContext(context);
-            throw e;
-        }
-
-    }
-
-    /**
-     * Evaluate a (zero-to-many)-to-(zero-or-one) comparison
-     *
-     * @param iter0   iterator over the first value
-     * @param value1  the second value, or null if empty
-     * @param context dynamic evaluation context
-     * @return the comparison result
-     * @throws XPathException if a dynamic error occurs
-     */
-
-    public boolean evaluateManyToOne(SequenceIterator iter0, AtomicValue value1, XPathContext context) throws XPathException {
-        try {
-            if (value1 == null) {
-                return false;
-            }
-            if (iter0 instanceof RangeIterator) {
-                if (value1.isUntypedAtomic()) {
-                    value1 = StringConverter.StringToInteger.INSTANCE.convertString(value1.getUnicodeStringValue()).asAtomic();
-                }
-                RangeIterator ri = (RangeIterator)iter0;
-                switch (singletonOperator) {
-                    case Token.FEQ:
-                        return ri.containsEq((NumericValue)value1);
-                    case Token.FNE:
-                        return ri.getFirst().compareTo(ri.getLast()) != 0 || ri.getFirst().compareTo(((NumericValue)value1)) != 0;
-                    case Token.FLE:
-                        return ri.getMin().compareTo(((NumericValue) value1)) <= 0;
-                    case Token.FLT:
-                        return ri.getMin().compareTo(((NumericValue) value1)) < 0;
-                    case Token.FGE:
-                        return ri.getMax().compareTo(((NumericValue) value1)) >= 0;
-                    case Token.FGT:
-                        return ri.getMax().compareTo(((NumericValue) value1)) > 0;
-                    default:
-                        throw new AssertionError();
-                }
-            }
-            AtomicValue item0;
-            AtomicComparer boundComparer = comparer.provideContext(context);
-            while ((item0 = (AtomicValue) iter0.next()) != null) {
-                if (compare(item0, singletonOperator, value1, boundComparer, runtimeCheckNeeded, context, getRetainedStaticContext())) {
-                    iter0.close();
-                    return true;
-                }
-            }
-            return false;
-        } catch (XPathException e) {
-            // re-throw the exception with location information added
-            e.maybeSetLocation(getLocation());
-            e.maybeSetContext(context);
-            throw e;
-        }
-
-    }
-
-    /**
-     * Evaluate a (zero-or-one)-to-(zero-or-one) comparison
-     *
-     * @param iter0   iterator over the first value
-     * @param iter1   iterator the second value
-     * @param context dynamic evaluation context
-     * @return the comparison result
-     * @throws XPathException if a dynamic error occurs
-     */
-
-    public boolean evaluateManyToMany(SequenceIterator iter0, SequenceIterator iter1, XPathContext context) throws XPathException {
-        try {
-            boolean exhausted0 = false;
-            boolean exhausted1 = false;
-
-            List<AtomicValue> value0 = new ArrayList<>();
-            List<AtomicValue> value1 = new ArrayList<>();
-
-            AtomicComparer boundComparer = comparer.provideContext(context);
-
-            // Read items from the two sequences alternately, in each case comparing the item to
-            // all items that have previously been read from the other sequence. In the worst case
-            // the number of comparisons is N*M, and the memory usage is (max(N,M)*2) where N and M
-            // are the number of items in the two sequences. In practice, either M or N is often 1,
-            // meaning that in this case neither list will ever hold more than one item.
-
-            while (true) {
-                if (!exhausted0) {
-                    AtomicValue item0 = (AtomicValue) iter0.next();
-                    if (item0 == null) {
-                        if (exhausted1) {
-                            return false;
-                        }
-                        exhausted0 = true;
-                    } else {
-                        for (AtomicValue item1 : value1) {
-                            if (compare(item0, singletonOperator, item1, boundComparer, runtimeCheckNeeded, context, getRetainedStaticContext())) {
-                                iter0.close();
-                                iter1.close();
-                                return true;
-                            }
-                        }
-                        if (!exhausted1) {
-                            value0.add(item0);
-                        }
-                    }
-                }
-                if (!exhausted1) {
-                    AtomicValue item1 = (AtomicValue) iter1.next();
-                    if (item1 == null) {
-                        if (exhausted0) {
-                            return false;
-                        }
-                        exhausted1 = true;
-                    } else {
-                        for (AtomicValue item0 : value0) {
-                            if (compare(item0, singletonOperator, item1, boundComparer, runtimeCheckNeeded, context, getRetainedStaticContext())) {
-                                iter0.close();
-                                iter1.close();
-                                return true;
-                            }
-                        }
-                        if (!exhausted0) {
-                            value1.add(item1);
-                        }
-                    }
-                }
-            }
-        } catch (XPathException e) {
-            // re-throw the exception with location information added
-            e.maybeSetLocation(getLocation());
-            e.maybeSetContext(context);
-            throw e;
-        }
-
+        return makeElaborator().elaborateForBoolean().eval(context);
     }
 
     /**
@@ -979,7 +757,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         return gc2;
     }
 
-  /**
+    /**
      * Get the (partial) name of a class that supports streaming of this kind of expression
      *
      * @return the partial name of a class that can be instantiated to provide streaming support in Saxon-EE,
@@ -990,10 +768,6 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         return "GeneralComparison";
     }
 
-
-//    protected String displayOperator() {
-//        return "many-to-many " + super.displayOperator();
-//    }
 
     /**
      * Get the element name used to identify this expression in exported expression format
@@ -1041,24 +815,53 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
     public static class GeneralComparisonElaborator extends BooleanElaborator {
 
         public BooleanEvaluator elaborateForBoolean() {
-            final GeneralComparison exp = (GeneralComparison)getExpression();
-            ComparisonCardinality cardinality = exp.getComparisonCardinality();
+            final GeneralComparison exp = (GeneralComparison) getExpression();
+            final ComparisonCardinality cardinality = exp.getComparisonCardinality();
+            final boolean needsRunTimeCheck = exp.needsRuntimeCheck();
+            final AtomicComparer comparer = exp.getAtomicComparer();
+            final RetainedStaticContext staticContext = exp.getRetainedStaticContext();
+            final int singletonOperator = exp.getSingletonOperator();
 
             switch (cardinality) {
                 case ONE_TO_ONE: {
                     final ItemEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForItem();
                     final ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
-                    return context -> exp.evaluateOneToOne((AtomicValue)p0.eval(context), (AtomicValue)p1.eval(context), context);
+                    return context -> {
+                        AtomicValue av0 = (AtomicValue) p0.eval(context);
+                        if (av0 == null) {
+                            return false;
+                        }
+                        AtomicValue av1 = (AtomicValue) p1.eval(context);
+                        if (av1 == null) {
+                            return false;
+                        }
+                        return compare(av0, singletonOperator, av1, comparer.provideContext(context),
+                                       needsRunTimeCheck, context, staticContext);
+                    };
                 }
                 case MANY_TO_ONE: {
                     final PullEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForPull();
                     final ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
-                    return context -> exp.evaluateManyToOne(p0.iterate(context), (AtomicValue) p1.eval(context), context);
+                    return context -> evaluateManyToOne(p0.iterate(context),
+                                                        (AtomicValue) p1.eval(context),
+                                                        singletonOperator,
+                                                        comparer,
+                                                        needsRunTimeCheck,
+                                                        staticContext,
+                                                        exp.getLocation(),
+                                                        context);
                 }
                 case MANY_TO_MANY: {
                     final PullEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForPull();
                     final PullEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForPull();
-                    return context -> exp.evaluateManyToMany(p0.iterate(context), p1.iterate(context), context);
+                    return context -> evaluateManyToMany(p0.iterate(context),
+                                                         p1.iterate(context),
+                                                         singletonOperator,
+                                                         comparer,
+                                                         needsRunTimeCheck,
+                                                         staticContext,
+                                                         exp.getLocation(),
+                                                         context);
                 }
                 default:
                     throw new UnsupportedOperationException();
@@ -1066,8 +869,133 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
         }
 
+        public boolean evaluateManyToOne(SequenceIterator iter0,
+                                         AtomicValue value1,
+                                         int singletonOperator,
+                                         AtomicComparer comparer,
+                                         boolean runTimeCheckNeeded,
+                                         RetainedStaticContext staticContext,
+                                         Location loc,
+                                         XPathContext context) throws XPathException {
+            try {
+                if (value1 == null) {
+                    return false;
+                }
+                if (iter0 instanceof RangeIterator) {
+                    if (value1.isUntypedAtomic()) {
+                        value1 = StringConverter.StringToInteger.INSTANCE.convertString(value1.getUnicodeStringValue()).asAtomic();
+                    }
+                    RangeIterator ri = (RangeIterator) iter0;
+                    switch (singletonOperator) {
+                        case Token.FEQ:
+                            return ri.containsEq((NumericValue) value1);
+                        case Token.FNE:
+                            return ri.getFirst().compareTo(ri.getLast()) != 0 || ri.getFirst().compareTo(((NumericValue) value1)) != 0;
+                        case Token.FLE:
+                            return ri.getMin().compareTo(((NumericValue) value1)) <= 0;
+                        case Token.FLT:
+                            return ri.getMin().compareTo(((NumericValue) value1)) < 0;
+                        case Token.FGE:
+                            return ri.getMax().compareTo(((NumericValue) value1)) >= 0;
+                        case Token.FGT:
+                            return ri.getMax().compareTo(((NumericValue) value1)) > 0;
+                        default:
+                            throw new AssertionError();
+                    }
+                }
+                AtomicValue item0;
+                AtomicComparer boundComparer = comparer.provideContext(context);
+                while ((item0 = (AtomicValue) iter0.next()) != null) {
+                    if (compare(item0, singletonOperator, value1, boundComparer, runTimeCheckNeeded, context, staticContext)) {
+                        iter0.close();
+                        return true;
+                    }
+                }
+                return false;
+            } catch (XPathException e) {
+                // re-throw the exception with location information added
+                e.maybeSetLocation(loc);
+                e.maybeSetContext(context);
+                throw e;
+            }
 
 
+        }
+
+        public boolean evaluateManyToMany(SequenceIterator iter0,
+                                          SequenceIterator iter1,
+                                          int singletonOperator,
+                                          AtomicComparer comparer,
+                                          boolean runTimeCheckNeeded,
+                                          RetainedStaticContext staticContext,
+                                          Location loc,
+                                          XPathContext context) throws XPathException {
+            try {
+                boolean exhausted0 = false;
+                boolean exhausted1 = false;
+
+                List<AtomicValue> value0 = new ArrayList<>();
+                List<AtomicValue> value1 = new ArrayList<>();
+
+                AtomicComparer boundComparer = comparer.provideContext(context);
+
+                // Read items from the two sequences alternately, in each case comparing the item to
+                // all items that have previously been read from the other sequence. In the worst case
+                // the number of comparisons is N*M, and the memory usage is (max(N,M)*2) where N and M
+                // are the number of items in the two sequences. In practice, either M or N is often 1,
+                // meaning that in this case neither list will ever hold more than one item.
+
+                while (true) {
+                    if (!exhausted0) {
+                        AtomicValue item0 = (AtomicValue) iter0.next();
+                        if (item0 == null) {
+                            if (exhausted1) {
+                                return false;
+                            }
+                            exhausted0 = true;
+                        } else {
+                            for (AtomicValue item1 : value1) {
+                                if (compare(item0, singletonOperator, item1, boundComparer,
+                                            runTimeCheckNeeded, context, staticContext)) {
+                                    iter0.close();
+                                    iter1.close();
+                                    return true;
+                                }
+                            }
+                            if (!exhausted1) {
+                                value0.add(item0);
+                            }
+                        }
+                    }
+                    if (!exhausted1) {
+                        AtomicValue item1 = (AtomicValue) iter1.next();
+                        if (item1 == null) {
+                            if (exhausted0) {
+                                return false;
+                            }
+                            exhausted1 = true;
+                        } else {
+                            for (AtomicValue item0 : value0) {
+                                if (compare(item0, singletonOperator, item1, boundComparer,
+                                            runTimeCheckNeeded, context, staticContext)) {
+                                    iter0.close();
+                                    iter1.close();
+                                    return true;
+                                }
+                            }
+                            if (!exhausted0) {
+                                value1.add(item1);
+                            }
+                        }
+                    }
+                }
+            } catch (XPathException e) {
+                // re-throw the exception with location information added
+                e.maybeSetLocation(loc);
+                e.maybeSetContext(context);
+                throw e;
+            }
+        }
     }
 }
 
