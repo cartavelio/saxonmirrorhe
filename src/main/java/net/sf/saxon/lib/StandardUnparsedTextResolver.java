@@ -9,6 +9,7 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.resource.EncodingDetector;
+import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.resource.TypedStreamSource;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -104,7 +105,7 @@ public class StandardUnparsedTextResolver
                             inputStream = openClasspathResource(config, systemId);
                         } else {
                             URL url = new URL(systemId);
-                            inputStream = url.openStream();
+                            inputStream = ResourceLoader.urlStream(url);
                         }
                     } catch (IOException e) {
                         throw new XPathException("unparsed-text(): cannot retrieve " + systemId, e);
