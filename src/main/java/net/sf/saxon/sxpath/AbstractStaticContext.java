@@ -17,7 +17,7 @@ import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
-import net.sf.saxon.functions.registry.XPath20FunctionSet;
+import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
@@ -134,8 +134,8 @@ public abstract class AbstractStaticContext implements StaticContext {
 
     protected final void setDefaultFunctionLibrary() {
         FunctionLibraryList lib = new FunctionLibraryList();
-        lib.addFunctionLibrary(config.getXPath31FunctionSet());
-        lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList());
+        lib.addFunctionLibrary(XPath31FunctionSet.getInstance());
+        lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList(31));
         lib.addFunctionLibrary(new ConstructorFunctionLibrary(getConfiguration()));
         lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
         config.addExtensionBinders(lib);
@@ -144,24 +144,9 @@ public abstract class AbstractStaticContext implements StaticContext {
 
     public final void setDefaultFunctionLibrary(int version) {
         FunctionLibraryList lib = new FunctionLibraryList();
-        switch (version) {
-            case 20:
-            default:
-                lib.addFunctionLibrary(XPath20FunctionSet.getInstance());
-                break;
-            case 30:
-            case 305:
-                lib.addFunctionLibrary(config.getXPath30FunctionSet());
-                break;
-            case 31:
-                lib.addFunctionLibrary(config.getXPath31FunctionSet());
-                break;
-            case 40:
-                lib.addFunctionLibrary(config.getXPath40FunctionSet());
-                break;
-        }
-        lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList());
-        lib.addFunctionLibrary(new ConstructorFunctionLibrary(getConfiguration()));
+        lib.addFunctionLibrary(config.getXPathFunctionSet(version));
+        lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(31));
+        lib.addFunctionLibrary(new ConstructorFunctionLibrary(config));
         lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
         config.addExtensionBinders(lib);
         setFunctionLibrary(lib);

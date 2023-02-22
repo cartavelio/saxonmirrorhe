@@ -107,7 +107,7 @@ public class XSLMapEntry extends StyleElement {
             select = compileSequenceConstructor(exec, decl, false);
             select = select.simplify();
         }
-        Expression exp = MapFunctionSet.getInstance().makeFunction("entry", 2).makeFunctionCall(key, select);
+        Expression exp = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, select);
         if (getConfiguration().getBooleanProperty(Feature.STRICT_STREAMABILITY)) {
             exp = new SequenceInstr(exp);
         }

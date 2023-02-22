@@ -16,9 +16,7 @@ import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
-import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
-import org.graalvm.nativeimage.c.type.WordPointer;
 import org.graalvm.word.WordFactory;
 
 import javax.xml.transform.Source;
@@ -49,8 +47,8 @@ public class XPathProcessor extends SaxonCAPI {
         Configuration config = processor.getUnderlyingConfiguration();
 //#if EE==true || PE==true
         if(config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-            config.getBuiltInExtensionLibraryList().addFunctionLibrary(PHPFunctionSet.getInstance());
-            config.getBuiltInExtensionLibraryList().addFunctionLibrary(CPPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
         }
 //#endif
     }
@@ -62,8 +60,8 @@ public class XPathProcessor extends SaxonCAPI {
         Configuration config = processor.getUnderlyingConfiguration();
 //#if EE==true || PE==true
         if(config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-            config.getBuiltInExtensionLibraryList().addFunctionLibrary(PHPFunctionSet.getInstance());
-            config.getBuiltInExtensionLibraryList().addFunctionLibrary(CPPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
         }
 //#endif
     }

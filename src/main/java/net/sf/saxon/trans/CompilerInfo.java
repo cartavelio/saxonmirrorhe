@@ -589,8 +589,9 @@ public class CompilerInfo {
     }
 
     /**
-     * Set the version of XSLT to be supported by this processor. From Saxon 9.8 this has
-     * no effect; the processor will always be an XSLT 3.0 processor.
+     * Set the version of XSLT to be supported by this processor. From Saxon 9.8 this had
+     * no effect; the processor will always be an XSLT 3.0 processor. In Saxon 11 the
+     * value 40 was permitted to enable experimental XSLT 4.0 extensions.
      *
      * @param version The decimal version number times ten, for example 30 indicates
      *                XSLT 3.0.

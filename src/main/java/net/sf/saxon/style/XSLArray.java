@@ -68,10 +68,10 @@ public class XSLArray extends XSLSequence {
 
         Expression functionCall;
         if (composite) {
-            SystemFunction arrayOf = ArrayFunctionSet.getInstance().makeFunction("of", 1);
+            SystemFunction arrayOf = ArrayFunctionSet.getInstance(40).makeFunction("of", 1);
             functionCall = arrayOf.makeFunctionCall(getSelectExpression());
         } else {
-            SystemFunction arrayFromSeq = ArrayFunctionSet.getInstance().makeFunction("_from-sequence", 1);
+            SystemFunction arrayFromSeq = ArrayFunctionSet.getInstance(40).makeFunction("_from-sequence", 1);
             functionCall = arrayFromSeq.makeFunctionCall(getSelectExpression());
         }
         ExpressionTool.copyLocationInfo(getSelectExpression(), functionCall);

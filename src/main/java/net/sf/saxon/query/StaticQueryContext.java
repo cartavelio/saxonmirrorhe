@@ -320,8 +320,8 @@ public class StaticQueryContext {
      *
      * @param version The XQuery language version. Must be 10 (="1.0") or 30 (="3.0") or 31 (="3.1").
      * @since 9.2; changed in 9.3 to expect a DecimalValue rather than a string. Changed in 9.7 to
-     * accept an int (30 = "3.0") and to allow "3.1".  From 9.8.0.3 the supplied value is ignored
-     * and the language version is always set to "3.1".  From 11.0 the value 40 is accepted.
+     * accept an int (30 = "3.0") and to allow "3.1".  From 9.8.0.3 the supplied value was ignored
+     * and the language version was always set to "3.1".  From 11.0 the value 40 was accepted.
      */
     
     public void setLanguageVersion(int version) {

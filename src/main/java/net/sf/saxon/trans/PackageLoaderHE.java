@@ -288,11 +288,12 @@ public class PackageLoaderHE implements IPackageLoader {
         }
 
         FunctionLibraryList functionLibrary = new FunctionLibraryList();
-        int libraryVersion = xsltVersion <= 31 ? 30 : 40;
-        functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(libraryVersion));
+        int xpathVersion = (xsltVersion <= 31 ? 31 : 40);
+        xsltVersion = (xsltVersion < 40 ? 30 : 40);
+        functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(xsltVersion));
         addVendorFunctionLibrary(functionLibrary, config);
-        functionLibrary.addFunctionLibrary(MapFunctionSet.getInstance());
-        functionLibrary.addFunctionLibrary(ArrayFunctionSet.getInstance());
+        functionLibrary.addFunctionLibrary(MapFunctionSet.getInstance(xpathVersion));
+        functionLibrary.addFunctionLibrary(ArrayFunctionSet.getInstance(xpathVersion));
         functionLibrary.addFunctionLibrary(MathFunctionSet.getInstance());
         //functionLibrary.addFunctionLibrary(overriding);
         functionLibrary.addFunctionLibrary(new StylesheetFunctionLibrary(pack, true));
@@ -2325,9 +2326,9 @@ public class PackageLoaderHE implements IPackageLoader {
                 if (uri == NamespaceUri.MATH) {
                     f = MathFunctionSet.getInstance().makeFunction(qName.getLocalPart(), arity);
                 } else if (uri == NamespaceUri.MAP_FUNCTIONS) {
-                    f = MapFunctionSet.getInstance().makeFunction(qName.getLocalPart(), arity);
+                    f = MapFunctionSet.getInstance(40).makeFunction(qName.getLocalPart(), arity);
                 } else if (uri == NamespaceUri.ARRAY_FUNCTIONS) {
-                    f = ArrayFunctionSet.getInstance().makeFunction(qName.getLocalPart(), arity);
+                    f = ArrayFunctionSet.getInstance(40).makeFunction(qName.getLocalPart(), arity);
                 } else if (uri == NamespaceUri.SAXON) {
                     f = loader.getConfiguration().bindSaxonExtensionFunction(qName.getLocalPart(), arity);
                 }
@@ -2484,9 +2485,9 @@ public class PackageLoaderHE implements IPackageLoader {
             if (name.hasURI(NamespaceUri.MATH)) {
                 exp = MathFunctionSet.getInstance().makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
             } else if (name.hasURI(NamespaceUri.MAP_FUNCTIONS)) {
-                exp = MapFunctionSet.getInstance().makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
+                exp = MapFunctionSet.getInstance(40).makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
             } else if (name.hasURI(NamespaceUri.ARRAY_FUNCTIONS)) {
-                exp = ArrayFunctionSet.getInstance().makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
+                exp = ArrayFunctionSet.getInstance(40).makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
             } else if (name.hasURI(NamespaceUri.SAXON)) {
                 if (name.getLocalPart().equals("apply")) {
                     // legacy saxon:apply function for dynamic function calls: generate fn:apply
@@ -2513,7 +2514,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 List<String> reasons = new ArrayList<>();
                 exp = loader.config.getIntegratedFunctionLibrary().bind(sName, args, null, ic, reasons);
                 if (exp == null) {
-                    exp = loader.config.getBuiltInExtensionLibraryList().bind(sName, args, null, ic, reasons);
+                    exp = loader.config.getBuiltInExtensionLibraryList(31).bind(sName, args, null, ic, reasons);
                 }
                 if (exp instanceof SystemFunctionCall) {
                     SystemFunction fn = ((SystemFunctionCall) exp).getTargetFunction();

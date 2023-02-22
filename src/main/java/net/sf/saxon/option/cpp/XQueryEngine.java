@@ -55,8 +55,8 @@ public class XQueryEngine extends SaxonCAPI {
         schemaAware = config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT);
 //#if EE==true || PE==true
         if (config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-            config.getBuiltInExtensionLibraryList().addFunctionLibrary(PHPFunctionSet.getInstance());
-            config.getBuiltInExtensionLibraryList().addFunctionLibrary(CPPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
         }
 //#endif
     }
@@ -72,8 +72,8 @@ public class XQueryEngine extends SaxonCAPI {
         schemaAware = config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT);
 //#if EE==true || PE==true
         if (config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-            config.getBuiltInExtensionLibraryList().addFunctionLibrary(PHPFunctionSet.getInstance());
-            config.getBuiltInExtensionLibraryList().addFunctionLibrary(CPPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
         }
 //#endif
     }

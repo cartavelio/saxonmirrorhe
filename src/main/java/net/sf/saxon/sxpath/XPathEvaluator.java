@@ -16,6 +16,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
+import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
@@ -107,8 +108,8 @@ public class XPathEvaluator {
 
         FunctionLibrary userlib = exec.getFunctionLibrary();
         FunctionLibraryList lib = new FunctionLibraryList();
-        lib.addFunctionLibrary(config.getXPath31FunctionSet());
-        lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList());
+        lib.addFunctionLibrary(XPath31FunctionSet.getInstance());
+        lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(31));
         lib.addFunctionLibrary(new ConstructorFunctionLibrary(config));
         lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
         config.addExtensionBinders(lib);

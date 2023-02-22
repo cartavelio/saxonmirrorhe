@@ -90,10 +90,10 @@ public class ApplyFn extends SystemFunction  {
             if (target.getItemType() instanceof MapType) {
                 // Convert $map($key) to map:get($map, $key)
                 // This improves streamability analysis - see accumulator-053
-                return makeGetCall(visitor, MapFunctionSet.getInstance(), contextInfo, arguments);
+                return makeGetCall(visitor, MapFunctionSet.getInstance(31), contextInfo, arguments);
             } else if (target.getItemType() instanceof ArrayItemType) {
                 // Convert $array($key) to array:get($array, $key)
-                return makeGetCall(visitor, ArrayFunctionSet.getInstance(), contextInfo, arguments);
+                return makeGetCall(visitor, ArrayFunctionSet.getInstance(31), contextInfo, arguments);
             }
         }
         return null;
@@ -106,7 +106,7 @@ public class ApplyFn extends SystemFunction  {
         getter.setRetainedStaticContext(target.getRetainedStaticContext());
         // Use custom diagnostics for type errors on the argument of the call (bug 4772)
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(visitor.getStaticContext().isInBackwardsCompatibleMode());
-        if (fnSet == MapFunctionSet.getInstance()) {
+        if (fnSet == MapFunctionSet.getInstance(31)) {
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.MISC, "key value supplied when calling a map as a function", 0);
             ((SystemFunctionCall) getter).setArg(1, tc.staticTypeCheck(key, SequenceType.SINGLE_ATOMIC, role, visitor));

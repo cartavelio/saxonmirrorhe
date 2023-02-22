@@ -35,17 +35,18 @@ import java.util.List;
 
 public class ArrayFunctionSet extends BuiltInFunctionSet {
 
-    public static ArrayFunctionSet THE_INSTANCE = new ArrayFunctionSet();
+    private final static ArrayFunctionSet instance31 = new ArrayFunctionSet(31);
+    private final static ArrayFunctionSet instance40 = new ArrayFunctionSet(40);
 
-    public ArrayFunctionSet() {
-        init();
+    private ArrayFunctionSet(int version) {
+        init(version);
     }
 
-    public static ArrayFunctionSet getInstance() {
-        return THE_INSTANCE;
+    public static ArrayFunctionSet getInstance(int version) {
+        return version >= 40 ? instance40 : instance31;
     }
 
-    private void init() {
+    private void init(int version) {
 
 
         register("append", 2, e -> e.populate( ArrayAppend::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
@@ -77,8 +78,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null)
                 .arg(2, foldFunctionType, ONE | INS, null));
 
-        register("foot", 1, e -> e.populate(ArrayFoot::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
         ItemType forEachFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
@@ -148,30 +147,35 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE | ABS, null));
 
+
+
         register("tail", 1, e -> e.populate( ArrayTail::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
-        register("truncate", 1, e -> e.populate(ArrayTruncate::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+        if (version >= 40) {
+            register("foot", 1, e -> e.populate(ArrayFoot::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+
+            register("truncate", 1, e -> e.populate(ArrayTruncate::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+
+            register("of", 1, e -> e.populate(ArrayOf::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, SEQV)
+                    .arg(0, Parcel.TYPE, STAR, null));
+
+            register("members", 1, e -> e.populate(ArrayMembers::new, Parcel.TYPE, STAR, SEQV)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
 
-        // TODO: the following functions should be private
+            // TODO: the following functions should be private
 
-        register("_to-sequence", 1, e -> e.populate( ArrayToSequence::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+            register("_to-sequence", 1, e -> e.populate(ArrayToSequence::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
-        register("_from-sequence", 1, e -> e.populate( ArrayFromSequence::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR | INS, null));
-
-        // TODO: the following functions should be XPath 4.0 only
-
-        register("of", 1, e -> e.populate( ArrayOf::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, SEQV)
-                .arg(0, Parcel.TYPE, STAR, null));
-
-        register("members", 1, e -> e.populate( ArrayMembers::new, Parcel.TYPE, STAR, SEQV)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
+            register("_from-sequence", 1, e -> e.populate(ArrayFromSequence::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, AnyItemType.getInstance(), STAR | INS, null));
 
 
+        }
     }
 
     @Override

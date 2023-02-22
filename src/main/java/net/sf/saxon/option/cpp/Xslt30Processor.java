@@ -54,8 +54,8 @@ public class Xslt30Processor extends SaxonCAPI {
             if (debug) {
                 System.err.println("Xslt30Processor1-1(l), Processor: function libraries added");
             }
-            config.getBuiltInExtensionLibraryList().addFunctionLibrary(PHPFunctionSet.getInstance());
-            config.getBuiltInExtensionLibraryList().addFunctionLibrary(CPPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
         }
 //#endif
     }
@@ -89,8 +89,8 @@ public class Xslt30Processor extends SaxonCAPI {
             if (debug) {
                 System.err.println("XsltProcessor3-1(l), Processor: function libraries added");
             }
-            config.getBuiltInExtensionLibraryList().addFunctionLibrary(PHPFunctionSet.getInstance());
-            config.getBuiltInExtensionLibraryList().addFunctionLibrary(CPPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
         }
 //#endif
 

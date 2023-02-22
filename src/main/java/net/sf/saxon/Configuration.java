@@ -1335,6 +1335,11 @@ public class Configuration implements SourceResolver, NotationSet {
         throw new XPathException("Class " + className + " is not a TraceListener");
     }
 
+    /**
+     * Get the set of functions in the FN namespace defined in the XSLT and F&O specifications
+     * @param version The XSLT version (30 or 40)
+     * @return the function library
+     */
     public BuiltInFunctionSet getXSLTFunctionSet(int version) {
         if (version == 30) {
             return XSLT30FunctionSet.getInstance();
@@ -1345,20 +1350,25 @@ public class Configuration implements SourceResolver, NotationSet {
         }
     }
 
-    public BuiltInFunctionSet getUseWhenFunctionSet() {
-        return UseWhen30FunctionSet.getInstance();
-    }
-
-    public BuiltInFunctionSet getXPath30FunctionSet() {
-        return XPath30FunctionSet.getInstance();
-    }
-
-    public BuiltInFunctionSet getXPath31FunctionSet() {
-        return XPath31FunctionSet.getInstance();
-    }
-
-    public BuiltInFunctionSet getXPath40FunctionSet() {
-        return XPath40FunctionSet.getInstance();
+    /**
+     * Get the set of functions in the FN namespace defined in the F&O specification
+     * @param version The XPath version (eg 20, 30, 31, 40)
+     * @return the function library
+     */
+    public BuiltInFunctionSet getXPathFunctionSet(int version) {
+        switch (version) {
+            case 20:
+                return XPath20FunctionSet.getInstance();
+            case 30:
+            case 305:
+                return XPath30FunctionSet.getInstance();
+            case 31:
+                return XPath31FunctionSet.getInstance();
+            case 40:
+                return XPath40FunctionSet.getInstance();
+            default:
+                return XPath31FunctionSet.getInstance();
+        }
     }
 
     public BuiltInFunctionSet getXQueryUpdateFunctionSet() {
@@ -1410,13 +1420,13 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
 
-    public FunctionLibraryList getBuiltInExtensionLibraryList() {
+    public FunctionLibraryList getBuiltInExtensionLibraryList(int version) {
         if (builtInExtensionLibraryList == null) {
             builtInExtensionLibraryList = new FunctionLibraryList();
             builtInExtensionLibraryList.addFunctionLibrary(VendorFunctionSetHE.getInstance());
             builtInExtensionLibraryList.addFunctionLibrary(MathFunctionSet.getInstance());
-            builtInExtensionLibraryList.addFunctionLibrary(MapFunctionSet.getInstance());
-            builtInExtensionLibraryList.addFunctionLibrary(ArrayFunctionSet.getInstance());
+            builtInExtensionLibraryList.addFunctionLibrary(MapFunctionSet.getInstance(version));
+            builtInExtensionLibraryList.addFunctionLibrary(ArrayFunctionSet.getInstance(version));
             builtInExtensionLibraryList.addFunctionLibrary(ExsltCommonFunctionSet.getInstance());
         }
         return builtInExtensionLibraryList;
@@ -1458,9 +1468,16 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Get a system function. This can be any function defined in XPath 3.1 functions and operators,
-     * including functions in the math, map, and array namespaces. It can also be a Saxon extension
-     * function, provided a licensed Processor is used.
+     * Get a system function. This can be any function defined in XPath functions and operators,
+     * including functions in the math, map, and array namespaces. Experimental 4.0 functions
+     * are available if the configuration property {@link Feature#XQUERY_VERSION}
+     * is set to 4.0.
+     *
+     * <p>Constructor functions for known atomic types are also available, as are integrated
+     * extension functions registered with the configuration.</p>
+     *
+     * <p>Saxon extension functions and reflexive Java extensions are available provided
+     * that a licensed Processor is used.</p>
      *
      * @param name  the name of the required function
      * @param arity the arity of the required function
@@ -1473,11 +1490,26 @@ public class Configuration implements SourceResolver, NotationSet {
             if (staticContextForSystemFunctions == null) {
                 staticContextForSystemFunctions = new IndependentContext(this);
             }
-            FunctionLibraryList lib = new FunctionLibraryList();
-            lib.addFunctionLibrary(XPath31FunctionSet.getInstance());
-            lib.addFunctionLibrary(getBuiltInExtensionLibraryList());
-            lib.addFunctionLibrary(new ConstructorFunctionLibrary(this));
-            lib.addFunctionLibrary(getIntegratedFunctionLibrary());
+            FunctionLibrary lib;
+            NamespaceUri ns = name.getNamespaceUri();
+            int version = getDefaultStaticQueryContext().getLanguageVersion();
+            if (ns.equals(NamespaceUri.FN)) {
+                lib = getXPathFunctionSet(version);
+            } else if (ns.equals(NamespaceUri.SCHEMA)) {
+                lib = new ConstructorFunctionLibrary(this);
+            } else if (ns.equals(NamespaceUri.MATH)) {
+                lib = MathFunctionSet.getInstance();
+            } else if (ns.equals(NamespaceUri.MAP_FUNCTIONS)) {
+                lib = MapFunctionSet.getInstance(version);
+            } else if (ns.equals(NamespaceUri.ARRAY_FUNCTIONS)) {
+                lib = ArrayFunctionSet.getInstance(version);
+            } else {
+                FunctionLibraryList fll = new FunctionLibraryList();
+                fll.addFunctionLibrary(getBuiltInExtensionLibraryList(31));
+                fll.addFunctionLibrary(new ConstructorFunctionLibrary(this));
+                fll.addFunctionLibrary(getIntegratedFunctionLibrary());
+                lib = fll;
+            }
             SymbolicName.F symbolicName = new SymbolicName.F(name, arity);
             return lib.getFunctionItem(symbolicName, staticContextForSystemFunctions);
         } catch (XPathException e) {
@@ -4709,13 +4741,24 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
                 //#endif
 
-                case FeatureCode.XQUERY_VERSION:
-                    if (!"3.1".equals(value)) {
-                        makeErrorReporter().report(
-                                new XmlProcessingIncident("XQuery version ignored: only \"3.1\" is recognized").asWarning());
+                case FeatureCode.XQUERY_VERSION: {
+                    int vn;
+                    switch (value.toString()) {
+                        case "3.1":
+                            vn = 31;
+                            break;
+                        case "4.0":
+                            vn = 40;
+                            break;
+                        default:
+                            makeErrorReporter().report(
+                                    new XmlProcessingIncident("XQuery version ignored: only \"3.1\" is recognized").asWarning());
+                            vn = 40;
+                            break;
                     }
-                    //getDefaultStaticQueryContext().setLanguageVersion(31);
+                    getDefaultStaticQueryContext().setLanguageVersion(vn);
                     break;
+                }
 
                 case FeatureCode.XML_VERSION:
                     String xv = requireString(name, value);
@@ -4768,13 +4811,23 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
                 //#endif
 
-                case FeatureCode.XSLT_VERSION:
-                    if (!"3.0".equals(value)) {
-                        makeErrorReporter().report(
-                                new XmlProcessingIncident("XSLT version ignored: only \"3.0\" is recognized").asWarning());
+                case FeatureCode.XSLT_VERSION: {
+                    int v;
+                    switch (value.toString()) {
+                        case "3.0":
+                            v = 30;
+                            break;
+                        case "4.0":
+                            v = 40;
+                            break;
+                        default:
+                            makeErrorReporter().report(
+                                    new XmlProcessingIncident("XSLT version ignored: only \"3.0\" and \"4.0\" are recognized").asWarning());
+                            v = 30;
                     }
-                    //getDefaultXsltCompilerInfo().setXsltVersion(v);
+                    getDefaultXsltCompilerInfo().setXsltVersion(v);
                     break;
+                }
 
                 case FeatureCode.RESOURCE_RESOLVER:
                     if (!(value instanceof ResourceResolver)) {
@@ -5281,10 +5334,10 @@ public class Configuration implements SourceResolver, NotationSet {
             case FeatureCode.XSLT_STATIC_URI_RESOLVER_CLASS:
                 return null; // TODO: drop this
 
-            case FeatureCode.XSLT_VERSION:
-                return 30;
-
-
+            case FeatureCode.XSLT_VERSION: {
+                int vn = getDefaultXsltCompilerInfo().getXsltVersion();
+                return vn == 40 ? "4.0" : "3.0";
+            }
             case FeatureCode.RESOURCE_RESOLVER:
                 return getResourceResolver();
 
