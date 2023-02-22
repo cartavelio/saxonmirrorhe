@@ -19,13 +19,14 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.ElementAvailable;
 import net.sf.saxon.functions.FunctionLibraryList;
+import net.sf.saxon.lib.EmptySource;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.packages.UsePack;
 import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.tree.linked.DocumentImpl;
@@ -36,7 +37,9 @@ import net.sf.saxon.value.*;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
+import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -304,6 +307,10 @@ public class UseWhenFilter extends ProxyReceiver {
             }
             if (source == null) {
                 source = getConfiguration().getSystemURIResolver().resolve(href, baseUriStr);
+            }
+            if (source instanceof EmptySource) {
+                source = new StreamSource(
+                        new StringReader("<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'/>"));
             }
             NestedIntegerValue newPrecedence = precedence;
             if (isImport) {
