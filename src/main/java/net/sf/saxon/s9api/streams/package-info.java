@@ -6,9 +6,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * This package provides methods to manipulate XDM values using Java 8 streams. It provides
+ * <p>This package provides methods to manipulate XDM values using Java 8 streams. It provides
  * an alternative to XPath navigation of XDM trees, avoiding the high parsing cost and poor
  * compile-time diagnostics of XPath expressions, while being a much higher-level interface
- * than DOM-style navigation from node to node.
+ * than DOM-style navigation from node to node.</p>
  */
 package net.sf.saxon.s9api.streams;
