@@ -122,7 +122,7 @@
                 so equivalent types compare equal.</p>
             </li>
             <li><p>Cleaned up and documented the behavior of <code>ToString()</code> applied to item types and sequence types.
-                In particular, <code>ItemType.ToString()</code> now uses the form <code>xs:boolean</code> rather than 
+                In particular, <code cs="Saxon.Api.XdmItemType#Equals">XdmItemType.ToString()</code> now uses the form <code>xs:boolean</code> rather than 
                 <code>Q{http://www.w3.org/2001/XMLSchema}boolean</code> for the common case of names in the <code>xs</code> namespace.</p>
             </li>
             <li>Added a static method <code cs="Saxon.Api.XdmItemType#ForItem">XdmItemType.ForItem()</code> to get the item type of an item (see the
@@ -283,8 +283,9 @@
             The same effect (and more) can be achieved using the standard XSLT 3.0 instruction
             <a class="bodylink code" href="/xsl-elements/evaluate">xsl:evaluate</a>.</p>
         
-        <p>The Saxon extension function <code>saxon:in-scope-namespaces()</code> has been aligned with the proposed 4.0 function
-            <code>fn:in-scope-namespaces()</code> in that the returned map now always includes an entry for the XML namespace.</p>
+        <p>The Saxon extension function <a class="bodylink code" href="/functions/saxon/in-scope-namespaces">saxon:in-scope-namespaces()</a> has been
+            aligned with the proposed 4.0 function <code>fn:in-scope-namespaces()</code> in that the returned map now always includes an entry for the
+            XML namespace.</p>
         
         
         <!--<h2>Extension Instructions</h2>-->

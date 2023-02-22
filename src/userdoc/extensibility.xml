@@ -510,7 +510,7 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
 
     <p>The Saxon namespace URI <code>http://saxon.sf.net/</code> is recognised as a special case: it identifies
       a built-in vendor extension function supplied in the Saxon product.
-      The various EXSLT and EXpath namespaces are also recognized specially.</p>
+      The various EXSLT and EXPath namespaces are also recognized specially.</p>
 
     <p>In XSLT, the system function <a class="bodylink code" href="/functions/fn/function-available">function-available(String name)</a> returns true if
       there appears to be a method available with the right name. The function also has an optional
