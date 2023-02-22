@@ -52,6 +52,7 @@ task website(
 // ============================================================
 
 task filter_sources_for_javadoc(
+  dependsOn: ["hej_featureKeys"],
   description: "Copy the Java source files for making JavaDoc (excludes some classes)"
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/main/java")
