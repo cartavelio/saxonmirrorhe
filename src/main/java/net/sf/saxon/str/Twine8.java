@@ -148,7 +148,7 @@ public class Twine8 extends UnicodeString {
 
     @Override
     public int codePointAt(long index) throws IndexOutOfBoundsException {
-        int index32 = StringTool.requireInt(index);
+        int index32 = requireInt(index);
         if (index32 < 0 || index32 >= length32()) {
             throw new IndexOutOfBoundsException();
         }
@@ -166,10 +166,8 @@ public class Twine8 extends UnicodeString {
 
     @Override
     public long indexOf(int codePoint, long from) {
-        int from32 = StringTool.requireInt(from);
-        if (from32 < 0) {
-            from32 = 0;
-        } else if (from32 >= length32()) {
+        int from32 = requireNonNegativeInt(from);
+        if (from32 >= length32()) {
             return -1;
         }
         int last = bytes.length;
@@ -205,7 +203,7 @@ public class Twine8 extends UnicodeString {
             return from;
         }
         int initial = other.codePointAt(0);
-        int len = StringTool.requireInt(other.length());
+        int len = requireInt(other.length());
         int lastPossible = length32() - len;
         while (from <= lastPossible) {
             long i = indexOf(initial, from);

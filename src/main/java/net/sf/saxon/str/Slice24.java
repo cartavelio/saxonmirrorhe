@@ -56,7 +56,7 @@ public class Slice24 extends UnicodeString {
         byte b0 = (byte) ((codePoint >> 16) & 0xff);
         byte b1 = (byte) ((codePoint >> 8) & 0xff);
         byte b2 = (byte) (codePoint & 0xff);
-        for (int i = (start + Math.max(requireInt(from), 0))*3; i < end*3; i+=3) {
+        for (int i = (start + requireNonNegativeInt(from))*3; i < end*3; i+=3) {
             if (bytes[i+2] == b2 && bytes[i+1] == b1 && bytes[i] == b0) {
                 return i/3 - start;
             }

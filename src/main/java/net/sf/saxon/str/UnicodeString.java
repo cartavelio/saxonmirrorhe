@@ -99,11 +99,14 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
     /**
      * Get the position of the first occurrence of the specified codepoint,
      * starting the search at a given position in the string
+     *
      * @param codePoint the sought codePoint
-     * @param from the position from which the search should start (0-based)
+     * @param from      the position from which the search should start (0-based). A negative value is
+     *                  treated as zero. A position beyond the end of the string results in a return
+     *                  value of -1 (meaning not found).
      * @return the position (0-based) of the first occurrence found, or -1 if not found
      * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
-     * for codePoint access
+     *                                       for codePoint access
      */
 
     public abstract long indexOf(int codePoint, long from);
@@ -113,7 +116,9 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
      * starting the search at a given position in the string
      *
      * @param predicate condition that the codepoint must satisfy
-     * @param from      the position from which the search should start (0-based)
+     * @param from      the position from which the search should start (0-based). A negative value is
+     *                  treated as zero. A position beyond the end of the string results in a return
+     *                  value of -1 (meaning not found).
      * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
      * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      *                                       for codePoint access
@@ -121,6 +126,7 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
 
     public long indexWhere(IntPredicate predicate, long from) {
         IntIterator iter = codePoints();
+        from = Math.max(from, 0);
         long i = 0;
         while (iter.hasNext()) {
             int ch = iter.next();
@@ -137,7 +143,9 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
      * of this string, comparing codepoints.
      *
      * @param other the other (sought) string
-     * @param from  the position (0-based) where searching is to start (counting in codepoints)
+     * @param from      the position from which the search should start (0-based). A negative value is
+     *                  treated as zero. A position beyond the end of the string results in a return
+     *                  value of -1 (meaning not found).
      * @return the first position where the substring is found, or -1 if it is not found. Also returns
      * -1 if {@code from} is negative, or beyond the length of the string.
      */
@@ -172,6 +180,9 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
      * @param offset the starting position in this string (counting in codepoints)
      * @return true if the other string appears as a substring of this string starting at the
      * given position.
+     * @throws IndexOutOfBoundsException if {@code offset} is less than zero or greater than the
+     * length of this string. Note that there is no exception if {@code offset + other.length()}
+     * exceeds {@code this.length()} - instead this results in a return value of {@code false}.
      */
 
     public boolean hasSubstring(UnicodeString other, long offset) {
@@ -407,6 +418,23 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
             throw new UnsupportedOperationException("String offset exceeds 2^31 characters");
         }
         return (int) value;
+    }
+
+    /**
+     * Utility method for use where strings longer than 2^31 characters cannot yet be handled;
+     * and where negative offsets are to be treated as zero
+     *
+     * @param value the actual value of a character position within a string, or the length of
+     *              a string
+     * @return the value as an integer if it is within range
+     * @throws UnsupportedOperationException if the supplied value exceeds {@link Integer#MAX_VALUE}
+     */
+
+    public static int requireNonNegativeInt(long value) {
+        if (value > Integer.MAX_VALUE) {
+            throw new UnsupportedOperationException("String exceeds 2^31 characters");
+        }
+        return (int) Math.max(value, 0);
     }
 
     /**

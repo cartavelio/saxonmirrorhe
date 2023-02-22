@@ -226,20 +226,6 @@ public class StringTool {
         return -1L;
     }
 
-    /**
-     * Utility method for use where strings longer than 2^31 characters cannot yet be handled.
-     * @param value the actual value of a character position within a string, or the length of
-     *              a string
-     * @return the value as an integer if it is within range
-     * @throws UnsupportedOperationException if the supplied value exceeds {@link Integer#MAX_VALUE}
-     */
-
-    public static int requireInt(long value) {
-        if (value > Integer.MAX_VALUE) {
-            throw new UnsupportedOperationException("String exceeds 2^31 characters");
-        }
-        return (int) value;
-    }
 
     /**
      * Attempt to compress a UnicodeString consisting entirely of whitespace. This is the first thing we

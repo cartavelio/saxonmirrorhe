@@ -70,7 +70,7 @@ public class Slice8 extends UnicodeString {
             return -1;
         }
         byte b = (byte) (codePoint & 0xff);
-        for (int i = start + requireInt(from); i < end; i++) {
+        for (int i = start + requireNonNegativeInt(from); i < end; i++) {
             if (bytes[i] == b) {
                 return i - start;
             }
@@ -80,7 +80,11 @@ public class Slice8 extends UnicodeString {
 
     @Override
     public int codePointAt(long index) {
-        return (bytes[start + requireInt(index)]) & 0xff;
+        int index32 = requireInt(index);
+        if (index32 < 0 || index32 >= length32()) {
+            throw new IndexOutOfBoundsException();
+        }
+        return (bytes[start + index32]) & 0xff;
     }
 
     @Override
