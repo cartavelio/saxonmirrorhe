@@ -19,7 +19,7 @@ XdmValue::XdmValue(const XdmValue &other) {
 	xdmSize = other.xdmSize;
 	jValues = other.jValues;
 	toStringValue = other.toStringValue;
-	values.resize(0);//TODO memory issue might occur here
+	values.resize(0);
 	for (int i = 0; i < xdmSize; i++) {
 		addXdmItem(other.values[i]);
 	}
@@ -63,14 +63,16 @@ XdmValue::XdmValue(int64_t valRef) {
 	xdmSize++;
 	jValues = -1;
 	valueType = nullptr;
+    toStringValue = nullptr;
 }
 
 
 XdmValue::XdmValue(int64_t val, bool arr){
 	xdmSize = 0;
-	//values.resize(0);
+	values.resize(0);
 	jValues = -1;
 	valueType = nullptr;
+    toStringValue = nullptr;
     allocFn fn = operator new;
     long long * results = makeArrayFromXdmValue2(SaxonProcessor::sxn_environ->thread,(void *)fn, (void *)val);
     if(results == nullptr) {
