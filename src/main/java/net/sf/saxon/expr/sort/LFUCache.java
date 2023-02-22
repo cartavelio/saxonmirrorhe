@@ -38,16 +38,7 @@ public class LFUCache<K, V> {
     private int targetSize;
     private int retentionThreshold = 1;
 
-    private static class EntryWithCounter<W> {
-        public W value;
-        int counter;
-        public EntryWithCounter(W value) {
-            this.value = value;
-            this.counter = 0;
-        }
-    }
-
-    private Map<K, EntryWithCounter<V>> map;
+    private Map<K, LFUCacheEntryWithCounter<V>> map;
 
     /**
      * Creates a new LCU cache, suitable for use only within a single thread.
@@ -72,11 +63,11 @@ public class LFUCache<K, V> {
         map = makeMap(cacheSize);
     }
 
-    private Map<K,EntryWithCounter<V>> makeMap(int cacheSize) {
+    private Map<K, LFUCacheEntryWithCounter<V>> makeMap(int cacheSize) {
         if (concurrent) {
-            return new ConcurrentHashMap<K, EntryWithCounter<V>>(cacheSize);
+            return new ConcurrentHashMap<K, LFUCacheEntryWithCounter<V>>(cacheSize);
         } else {
-            return new HashMap<K, EntryWithCounter<V>>(cacheSize);
+            return new HashMap<K, LFUCacheEntryWithCounter<V>>(cacheSize);
         }
     }
 
@@ -88,7 +79,7 @@ public class LFUCache<K, V> {
      * @return the value associated to this key, or null if no value with this key exists in the cache.
      */
     public V get(K key) {
-        EntryWithCounter<V> entry = map.get(key);
+        LFUCacheEntryWithCounter<V> entry = map.get(key);
         if (entry == null) {
             return null;
         } else {
@@ -105,7 +96,7 @@ public class LFUCache<K, V> {
      */
 
     public boolean containsKey(K key) {
-        EntryWithCounter<V> entry = map.get(key);
+        LFUCacheEntryWithCounter<V> entry = map.get(key);
         if (entry == null) {
             return false;
         } else {
@@ -125,7 +116,7 @@ public class LFUCache<K, V> {
      * @param value a value to be associated with the specified key.
      */
     public void put(K key, V value) {
-        map.put(key, new EntryWithCounter<V>(value));
+        map.put(key, new LFUCacheEntryWithCounter<V>(value));
         // Consider purging rarely-used entries
         if (map.size() > 3*targetSize) {
             rebuild();
@@ -133,11 +124,11 @@ public class LFUCache<K, V> {
     }
 
     private void rebuild() {
-        Map<K, EntryWithCounter<V>> m2 = makeMap(targetSize);
+        Map<K, LFUCacheEntryWithCounter<V>> m2 = makeMap(targetSize);
         int retained = 0;
-        for (Map.Entry<K, EntryWithCounter<V>> entry : map.entrySet()) {
+        for (Map.Entry<K, LFUCacheEntryWithCounter<V>> entry : map.entrySet()) {
             if (entry.getValue().counter > retentionThreshold) {
-                m2.put(entry.getKey(), new EntryWithCounter<V>(entry.getValue().value));
+                m2.put(entry.getKey(), new LFUCacheEntryWithCounter<V>(entry.getValue().value));
                 retained++;
             }
         }

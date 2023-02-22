@@ -1364,11 +1364,10 @@ public class Transform {
 
             XdmItem jsonContextItem = null;
             if (jsonSource != null) {
-                JsonBuilder builder = processor.newJsonBuilder();
                 try {
-                    XdmValue jsonTree = builder.parseJson(
-                            new BufferedReader(
-                                    new InputStreamReader(new FileInputStream(jsonSource), StandardCharsets.UTF_8)));
+                    Reader jsonReader = new BufferedReader(
+                            new InputStreamReader(new FileInputStream(jsonSource), StandardCharsets.UTF_8));
+                    XdmValue jsonTree = Query.parseJson(processor, jsonReader);
                     if (!jsonTree.isEmpty()) {
                         transformer.setGlobalContextItem(jsonContextItem = jsonTree.itemAt(0));
                     }

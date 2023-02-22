@@ -176,7 +176,7 @@ public class ZenoString extends UnicodeString {
             if (width == 24) {
                 return 24;
             } else {
-                maxWidth = Integer.max(maxWidth, width);
+                maxWidth = Math.max(maxWidth, width);
             }
         }
         return maxWidth;

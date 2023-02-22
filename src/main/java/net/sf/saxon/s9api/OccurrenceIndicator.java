@@ -8,6 +8,7 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.Cardinality;
 
 /**
@@ -98,6 +99,7 @@ public enum OccurrenceIndicator {
      * @since 9.5
      */
 
+    @CSharpModifiers(code={"public", "override"})
     public String toString() {
         OccurrenceIndicator indicator = this;
         switch (indicator) {

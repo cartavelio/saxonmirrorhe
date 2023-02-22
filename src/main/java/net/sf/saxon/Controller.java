@@ -28,6 +28,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.TraceEventMulticaster;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -1565,6 +1566,7 @@ public class Controller implements ContextOriginator {
      * @return the stylesheet cache
      */
 
+    @CSharpModifiers(code={"internal"})
     public synchronized StylesheetCache getStylesheetCache() {
         if (stylesheetCache == null) {
             this.stylesheetCache = new StylesheetCache();

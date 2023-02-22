@@ -17,9 +17,10 @@ import java.util.function.IntPredicate;
 public abstract class UnicodeString implements AtomicMatchKey, Comparable<UnicodeString> {
 
     /**
-     * Ensure that the implementation is capable of counting codepoints in the string. For an
-     * implementation of {@code UnicodeString}, this is normally a null operation.
-     * @return this {@code UnicodeString}
+     * Ensure that the implementation is capable of counting codepoints in the string. This is
+     * normally a null operation, but it may cause internal reorganisation.
+     * @return this {@code UnicodeString}, or another that represents the same sequence
+     * of characters.
      */
 
     public UnicodeString tidy() {
@@ -68,7 +69,7 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
 
     /**
      * Get the number of bits needed to hold all the characters in this string
-     * @return 7 for ascii characters, 8 for latin-1, 16 for BMP, 24 for general Unicode.
+     * @return 7 for ascii characters (not used??), 8 for latin-1, 16 for BMP, 24 for general Unicode.
      */
 
     public abstract int getWidth();
@@ -124,14 +125,12 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
     }
 
     /**
-     * Get the first position, at or beyond start, where another string appears as a substring
+     * Get the first position, at or beyond <code>from</code>, where another string appears as a substring
      * of this string, comparing codepoints.
      *
      * @param other the other (sought) string
      * @param from  the position (0-based) where searching is to start (counting in codepoints)
      * @return the first position where the substring is found, or -1 if it is not found
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
-     * for codePoint access
      */
 
     public long indexOf(UnicodeString other, long from) {
@@ -164,8 +163,6 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
      * @param offset the starting position in this string (counting in codepoints)
      * @return true if the other string appears as a substring of this string starting at the
      * given position.
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
-     * for codePoint access
      */
 
     public boolean hasSubstring(UnicodeString other, long offset) {
@@ -185,8 +182,7 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
     }
 
     /**
-     * Get an iterator over the code points present in the string. Note that this method
-     * is always available, whether or not the {@code UniString} has been prepared for codePoint access.
+     * Get an iterator over the code points present in the string.
      *
      * @return an iterator that delivers the individual code points
      */
@@ -196,8 +192,7 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
     /**
      * Get the code point at a given position in the string
      * @param index the given position (0-based)
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
-     * for codePoint access
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
 
     public abstract int codePointAt(long index);
@@ -208,8 +203,7 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
      *
      * @param start the start position (0-based): that is, the position of the first
      *              code point to be included
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
-     * for codePoint access
+     * @throws IndexOutOfBoundsException if the start position is out of range
      */
 
     public UnicodeString substring(long start) {
@@ -218,6 +212,8 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
 
     /**
      * Concatenate with another string, returning a new string
+     * @param other the string to be appended
+     * @return the result of concatenating this string followed by the other
      */
 
     public UnicodeString concat(UnicodeString other) {
@@ -225,13 +221,13 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
     }
 
     /**
-     * Get a substring of this codepoint sequence, with a given start and end position
+     * Get a substring of this string, with a given start and end position
      * @param start the start position (0-based): that is, the position of the first
      *              code point to be included
      * @param end the end position (0-based): specifically, the position of the first
      *            code point not to be included
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
-     * for codePoint access
+     * @throws IndexOutOfBoundsException if the start/end positions are out of range (the conditions
+     * are the same as for <code>String.substring()</code>)
      */
 
     public abstract UnicodeString substring(long start, long end);
@@ -312,6 +308,12 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
         return h;
     }
 
+    /**
+     * Compare this string to another using codepoint comparison
+     * @param other the other string
+     * @return -1 if this string comes first, 0 if they are equal, +1 if the other string comes first
+     */
+
     @Override
     public int compareTo(UnicodeString other) {
         IntIterator iter1 = codePoints();
@@ -333,7 +335,6 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
             }
         }
     }
-
 
     /**
      * Get the codepoints of the string as a byte array, allocating three
@@ -382,14 +383,38 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
         return (int) value;
     }
 
+    /**
+     * Copy this string, as a sequence of 8-bit characters, to a specified array
+     * @param target the target array: the caller must ensure there is sufficient capacity
+     * @param offset the position in the target array
+     * @throws UnsupportedOperationException if this UnicodeString is capable of containing characters
+     * needing more than 8 bits
+     */
 
     void copy8bit(byte[] target, int offset) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Copy this string, as a sequence of 16-bit characters, to a specified array
+     *
+     * @param target the target array: the caller must ensure there is sufficient capacity
+     * @param offset the position in the target array
+     * @throws UnsupportedOperationException if this UnicodeString is capable of containing characters
+     *                                       needing more than 16 bits
+     */
+
     void copy16bit(char[] target, int offset) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * Copy this string, as a sequence of 24-bit characters, to a specified array
+     *
+     * @param target the target array: the caller must ensure there is sufficient capacity
+     * @param offset the position in the target array as a byte offset (that is, the character
+     *               offset times 3)
+     */
 
     void copy24bit(byte[] target, int offset) {
         throw new UnsupportedOperationException();

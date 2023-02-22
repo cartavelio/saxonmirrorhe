@@ -132,13 +132,13 @@ public class Slice8 extends UnicodeString {
     }
 
 
-    public void copy8bit(byte[] target, int offset) {
+    void copy8bit(byte[] target, int offset) {
         System.arraycopy(bytes, start, target, offset, end - start);
     }
 
-    public void copy16bit(char[] target, int offset) {
+    void copy16bit(char[] target, int offset) {
         for (int i = start, j = offset; i < end; ) {
-            target[j++] = (char) bytes[i++];
+            target[j++] = (char) (bytes[i++] & 0xff);
         }
     }
 

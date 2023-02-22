@@ -50,6 +50,7 @@ public class Put extends SystemFunction {
              */
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
                 NodeInfo node = (NodeInfo) getArg(0).evaluateItem(context);
                 int kind = node.getNodeKind();

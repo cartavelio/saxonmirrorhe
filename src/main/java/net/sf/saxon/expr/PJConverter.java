@@ -771,6 +771,43 @@ public abstract class PJConverter {
 
     }
 
+    public static class ConditionalUnwrapExternalObject extends PJConverter {
+
+        public static final ConditionalUnwrapExternalObject INSTANCE = new ConditionalUnwrapExternalObject();
+
+        @Override
+        public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
+            SequenceIterator iter = value.iterate();
+            Item head = iter.next();
+            if (head == null) {
+                if (targetClass.isAssignableFrom(EmptySequence.class)) {
+                    return EmptySequence.getInstance();
+                } else {
+                    throw new XPathException("Supplied value is empty: expected + " + targetClass.getName());
+                }
+            }
+            if (head instanceof AnyExternalObject) {
+                Object obj = ((AnyExternalObject) head).getWrappedObject();
+                if (!targetClass.isAssignableFrom(obj.getClass())) {
+                    throw new XPathException(
+                            "External object has wrong class (is " + obj.getClass().getName() +
+                                    ", expected " + targetClass.getName() + ")");
+                }
+                if (iter.next() != null) {
+                    throw new XPathException(
+                            "Supplied sequence has more than one item: expected a single instance of " +
+                                    targetClass.getName());
+
+                }
+                return obj;
+            } else {
+                return value;
+            }
+        }
+
+    }
+
+
     public static class StringItemToString extends PJConverter {
 
         public static final StringItemToString INSTANCE = new StringItemToString();

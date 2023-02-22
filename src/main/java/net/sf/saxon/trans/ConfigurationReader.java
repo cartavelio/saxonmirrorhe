@@ -405,7 +405,7 @@ public class ConfigurationReader implements Receiver {
                     message = message.replace(attributeName, "Value");
                 }
                 if (message.startsWith("Unknown configuration property")) {
-                    message = "Property not available in Saxon-" + targetConfig.getEditionCode();
+                    message = "Property " + attributeName + " not available in Saxon-" + targetConfig.getEditionCode();
                 }
                 error(props.getProperty("#element"), attributeName, value, message);
             }

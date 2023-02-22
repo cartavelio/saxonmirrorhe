@@ -7,6 +7,7 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.type.TypeHierarchy;
@@ -26,20 +27,20 @@ import java.util.Objects;
 
 class ConstructedItemType extends ItemType {
 
-    private final Processor processor;
+    private final Configuration config;
 
     /**
      * Protected constructor
      *
      * @param underlyingType the Saxon internal item type. Must not be null.
-     * @param processor      The s9api processor Must not be null
+     * @param config      The Saxon Configuration Must not be null
      */
 
-    protected ConstructedItemType(/*@Nullable*/ net.sf.saxon.type.ItemType underlyingType, Processor processor) {
+    protected ConstructedItemType(/*@Nullable*/ net.sf.saxon.type.ItemType underlyingType, Configuration config) {
         super(underlyingType);
-        Objects.requireNonNull(processor);
+        Objects.requireNonNull(config);
         Objects.requireNonNull(underlyingType);
-        this.processor = processor;
+        this.config = config;
     }
 
     /**
@@ -52,7 +53,7 @@ class ConstructedItemType extends ItemType {
 
     @Override
     public ConversionRules getConversionRules() {
-        return processor.getUnderlyingConfiguration().getConversionRules();
+        return config.getConversionRules();
     }
 
     /**
@@ -67,7 +68,7 @@ class ConstructedItemType extends ItemType {
 
     @Override
     public boolean matches(XdmItem item) {
-        TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
+        TypeHierarchy th = config.getTypeHierarchy();
         return underlyingType.matches(item.getUnderlyingValue(), th);
     }
 
@@ -84,7 +85,7 @@ class ConstructedItemType extends ItemType {
 
     @Override
     public boolean subsumes(ItemType other) {
-        TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
+        TypeHierarchy th = config.getTypeHierarchy();
         return th.isSubType(other.getUnderlyingItemType(), underlyingType);
     }
 
@@ -101,14 +102,13 @@ class ConstructedItemType extends ItemType {
     }
 
     /**
-     * Get the underlying Processor
+     * Get the underlying Configuration
      *
-     * @return the processor used to create this ItemType. This will be null if the ItemType is one of the three
-     *         static constant item types {@link #ANY_ITEM}, {@link #ANY_NODE}, or {@link #ANY_ATOMIC_VALUE}
+     * @return the Configuration used to create this ItemType.
      */
 
-    protected Processor getProcessor() {
-        return processor;
+    protected Configuration getConfiguration() {
+        return config;
     }
 
 

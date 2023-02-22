@@ -114,7 +114,7 @@ public final class DateTimeValue extends CalendarValue
      * @return the current dateTime, in the local timezone for the platform.
      */
 
-    @CSharpReplaceBody(code="return net.sf.saxon.value.DateTimeValue.fromDateTimeOffset(System.DateTimeOffset.Now);")
+    @CSharpReplaceBody(code="return fromDateTimeOffset(System.DateTimeOffset.Now);")
     public static DateTimeValue now() {
         return DateTimeValue.fromZonedDateTime(ZonedDateTime.now());
     }

@@ -616,10 +616,11 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      * @throws SaxonApiException if no function has been defined with the given name and arity;
      *                           or if any of the arguments does not match its required type according to the function
      *                           signature; or if a dynamic error occurs in evaluating the function.
-     * @since 9.3. Changed in 9.6 to apply the function conversion rules to the supplied arguments.
+     * @since 9.3. Changed in 9.6 to apply the function conversion rules to the supplied arguments. Changed in 11.0
+     * to use varArgs.
      */
 
-    public XdmValue callFunction(QName function, XdmValue[] arguments) throws SaxonApiException {
+    public XdmValue callFunction(QName function, XdmValue... arguments) throws SaxonApiException {
         final UserFunction fn = expression.getMainModule().getUserDefinedFunction(
                 function.getNamespaceURI(), function.getLocalName(), arguments.length);
         if (fn == null) {

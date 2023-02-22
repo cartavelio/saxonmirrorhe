@@ -457,6 +457,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      * @return the in-scope namespaces for an element, or null for any other kind of node.
      */
     @Override
+    @CSharpModifiers(code={"public", "virtual"})
     public NamespaceMap getAllNamespaces() {
         if (getNodeKind() == Type.ELEMENT) {
             throw new AssertionError("getAllNamespaces() not implemented for " + getClass());

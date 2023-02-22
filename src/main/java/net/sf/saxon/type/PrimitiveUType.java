@@ -9,6 +9,7 @@ package net.sf.saxon.type;
 
 
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 public enum PrimitiveUType {
     
@@ -65,6 +66,7 @@ public enum PrimitiveUType {
         return values()[bit];
     }
 
+    @CSharpModifiers(code={"public", "override"})
     public String toString() {
         switch (this) {
             case DOCUMENT:

@@ -113,7 +113,6 @@ public class PullPushTee extends PullFilter {
                 break;
 
             case TEXT:
-
                 out.characters(in.getStringValue(), loc, ReceiverOption.WHOLE_TEXT_NODE);
                 break;
 

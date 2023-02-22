@@ -68,6 +68,5 @@ public interface SequenceIterator extends Closeable {
     default void close() {
     }
 
-
 }
 

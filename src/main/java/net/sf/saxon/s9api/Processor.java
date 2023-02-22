@@ -124,6 +124,7 @@ public class Processor implements Configuration.ApiProvider {
         return new DocumentBuilder(config);
     }
 
+    //#if CSHARP==false
     /**
      * Create a {@code JsonBuilder}. A {@code JsonBuilder} is used to load source JSON documents.
      *
@@ -133,9 +134,9 @@ public class Processor implements Configuration.ApiProvider {
 
     /*@NotNull*/
     public JsonBuilder newJsonBuilder() {
-        return new JsonBuilder(this);
+        return new JsonBuilder(getUnderlyingConfiguration());
     }
-
+    //#endif
 
     /**
      * Create an XPathCompiler. An XPathCompiler is used to compile XPath expressions.

@@ -231,7 +231,7 @@ public class XsltExecutable {
          */
 
         public ItemType getDeclaredItemType() {
-            return new ConstructedItemType(type.getPrimaryType(), processor);
+            return new ConstructedItemType(type.getPrimaryType(), processor.getUnderlyingConfiguration());
         }
 
         /**
