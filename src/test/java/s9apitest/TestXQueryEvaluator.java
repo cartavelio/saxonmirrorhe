@@ -3,11 +3,9 @@ package s9apitest;
 import jaxptest.ConfigTest;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.flwor.ClauseInfo;
-import net.sf.saxon.expr.flwor.ForClause;
-import net.sf.saxon.expr.flwor.OrderByClause;
-import net.sf.saxon.expr.flwor.WhereClause;
+import net.sf.saxon.expr.flwor.*;
 import net.sf.saxon.expr.instruct.TraceExpression;
+import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.TraceListener;
@@ -29,7 +27,10 @@ import java.io.StringWriter;
 import java.util.Map;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * JUnit tests for the s9api XQueryCompiler
@@ -578,29 +579,145 @@ public class TestXQueryEvaluator {
                             case 2:
                             case 4:
                             case 5:
-                                assertTrue(instruction instanceof ClauseInfo, "isClauseInfo0");
+                                assertTrue(instruction instanceof ClauseInfo, "isClauseInfo" + i);
+                                assertTrue(((ClauseInfo) instruction).getClause() instanceof ForClause, "isForClause" + i);
+                                assertTrue(properties.get("var").equals("$i"), "varName" + i);
                                 assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix0");
-                                assertTrue(((ClauseInfo) instruction).getClause() instanceof ForClause, "isForClause0");
-                                assertEquals(2, instruction.getLocation().getLineNumber(), "lineNumber0");
+                                assertEquals(2, instruction.getLocation().getLineNumber(), "lineNumber" + i);
                                 break;
                             case 3:
                             case 6:
-                                assertTrue(instruction instanceof ClauseInfo, "isClauseInfo1");
+                                assertTrue(instruction instanceof ClauseInfo, "isClauseInfo" + i);
+                                assertTrue(((ClauseInfo) instruction).getClause() instanceof WhereClause, "isWhereClause" + i);
+                                assertTrue(properties.containsKey("condition"), "condition" + i);
                                 assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix1");
-                                assertTrue(((ClauseInfo) instruction).getClause() instanceof WhereClause, "isWhereClause1");
-                                assertEquals(3, instruction.getLocation().getLineNumber(), "lineNumber1");
+                                assertEquals(3, instruction.getLocation().getLineNumber(), "lineNumber" + i);
                                 break;
                             case 7:
                             case 8:
-                                assertTrue(instruction instanceof ClauseInfo, "isClauseInfo4");
+                                assertTrue(instruction instanceof ClauseInfo, "isClauseInfo" + i);
                                 assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix4");
-                                assertTrue(((ClauseInfo) instruction).getClause() instanceof OrderByClause, "isOrderBy4");
-                                assertEquals(4, instruction.getLocation().getLineNumber(), "lineNumber4");
+                                assertTrue(((ClauseInfo) instruction).getClause() instanceof OrderByClause, "isOrderBy" + i);
+                                assertEquals(4, instruction.getLocation().getLineNumber(), "lineNumber" + i);
                                 break;
                             default:
                         }
                     }
                 }
+                @Override
+                public void leave(Traceable instruction) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                @Override
+                public void startCurrentItem(Item currentItem) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                @Override
+                public void endCurrentItem(Item currentItem) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                /**
+                 * Method called when a rule search has completed.
+                 *
+                 * @param rule the rule (or possible built-in ruleset) that has been selected
+                 * @param mode the mode in operation
+                 */
+                @SuppressWarnings("EmptyMethod")
+                public void endRuleSearch(Object rule, SimpleMode mode) {
+                    //
+                }
+
+                /**
+                 * Method called when a search for a template rule is about to start
+                 */
+                @Override
+                public void startRuleSearch() {
+                    //
+                }
+            });
+            eval.setDestination(new SAXDestination(new XMLFilterImpl()));
+            eval.run();
+
+        } catch (SaxonApiException err) {
+            err.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testFunctionTracing() {
+        try {
+            String doc = "<a><b>1</b><b>2</b><b>3</b><b>4</b></a>";
+            String q = "declare function local:x($arg) {let $x := $arg/* return count($x) + count($arg)};\n" +
+                    "for $el in //* \n" +
+                    "return local:x($el)";
+            Processor p = new Processor(false);
+            p.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, "");
+            XQueryCompiler comp = p.newXQueryCompiler();
+            comp.setCompileWithTracing(true);
+            XQueryExecutable exec = comp.compile(q);
+            XQueryEvaluator eval = exec.load();
+            eval.setContextItem(p.newDocumentBuilder().build(new StreamSource(new StringReader(doc))));
+            eval.setTraceListener(new TraceListener() {
+                int i = 0;
+
+                @Override
+                public void setOutputDestination(Logger stream) {
+
+                }
+
+                @Override
+                public void open(Controller controller) {
+                    // no action
+                }
+
+                @Override
+                public void close() {
+                    // no action
+                }
+
+                @Override
+                public void enter(Traceable instruction, Map<String, Object> properties, XPathContext context) {
+
+                    System.err.println(i + ": @" + instruction.getLocation().getLineNumber() + " " +
+                                               (instruction instanceof ClauseInfo ? ((ClauseInfo) instruction).getClause().getClauseKey() : instruction.getClass()));
+                    switch (i++) {
+                        case 0:
+                            assertTrue(instruction instanceof XQueryExpression, "isXQueryExpression");
+                            break;
+                        case 1:
+                        case 4:
+                        case 7:
+                            assertTrue(instruction instanceof ClauseInfo, "isClauseInfo" + i);
+                            assertTrue(((ClauseInfo) instruction).getClause() instanceof ForClause, "isForClause" + i);
+                            assertEquals("$el", properties.get("var"), "varName" + i);
+                            assertEquals(2, instruction.getLocation().getLineNumber(), "lineNumber" + i);
+                            break;
+                        case 2:
+                        case 5:
+                        case 8:
+                            assertTrue(instruction instanceof UserFunction);
+                            assertEquals(1, instruction.getLocation().getLineNumber());
+                            assertEquals("local:x", properties.get("name").toString(), "functionName" + i);
+                            assertEquals(1, properties.get("arity"), "functionArity" + i);
+                            break;
+                        case 3:
+                        case 6:
+                        case 9:
+                            assertTrue(instruction instanceof ClauseInfo, "isClauseInfo" + i);
+                            assertTrue(((ClauseInfo) instruction).getClause() instanceof LetClause, "isLetClause" + i);
+                            assertEquals("$x", properties.get("var"), "varName" + i);
+                            assertEquals(1, instruction.getLocation().getLineNumber(), "lineNumber" + i);
+                            break;
+
+                        default:
+                    }
+
+                }
+
                 @Override
                 public void leave(Traceable instruction) {
                     //To change body of implemented methods use File | Settings | File Templates.
