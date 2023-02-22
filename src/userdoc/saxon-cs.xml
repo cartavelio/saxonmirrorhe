@@ -179,8 +179,7 @@ an XSLT transformation whose result is then serialized.</p>
       <p>There are several places where the classes in the <code>Saxon.Api</code> package provide an "escape hatch" into
 the underlying implementation classes. These are provided for the benefit of applications that for some reason 
 need to mix use of the .NET API with the established Java API. The underlying implementation classes are documented
-in Java terms and use Java calling conventions, but this does not stop them being used from any .NET language:
-you may need to consult the <a href="http://www.ikvm.net" class="bodylink">IKVM</a> documentation for details of the mappings.
+in Java terms and use Java calling conventions, but this does not stop them being used from any .NET language.
 The places where such escape hatches are provided are shown below:</p>
       <table>
          <thead>
@@ -257,12 +256,20 @@ supplied with the .NET platform.</p>
 fixed or default values, unless DTD validation is requested. This can be requested using the <code>-v</code> option on the
 command line, or via the API. (See the <code>DtdValidation</code> property of the <a class="javalink" href="Saxon.Api.DocumentBuilder">DocumentBuilder</a>
 class.)</p>
+      
+      <p>The Microsoft parser rejects documents that specify <code><![CDATA[<?xml version="1.1"?>]]></code>, 
+         or that use namespace undeclarations in the form <code>xmlns:p=""</code></p>
 
-      <p>Unparsed entities are not notified to Saxon by the Microsoft parser. 
-The XSLT functions <a class="bodylink code" href="/functions/fn/unparsed-entity-uri">unparsed-entity-uri()</a>
-         and <a class="bodylink code" href="/functions/fn/unparsed-entity-public-id">unparsed-entity-public-id()</a> will therefore not work.</p>
+      <p>The Microsoft parser does not notify unparsed entities to Saxon. 
+         The XSLT functions <a class="bodylink code" href="/functions/fn/unparsed-entity-uri">unparsed-entity-uri()</a>
+         and <a class="bodylink code" href="/functions/fn/unparsed-entity-public-id">unparsed-entity-public-id()</a> will 
+         therefore not work.</p>
          
       <p>Support for OASIS catalogs is not currently available.</p>
+      
+      <p>No other XML parser is currently supported, although it is in principle possible to plug in a third party
+      parser by creating a user-defined implementation of the <code>ActiveSource</code> interface, and using this
+      wherever a <code>Source</code> object is called for.</p>
       
       <h2>HTML Parsing</h2>
       
