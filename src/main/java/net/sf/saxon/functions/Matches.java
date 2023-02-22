@@ -88,10 +88,9 @@ public class Matches extends RegexFunction {
                     regex, flags.toString(), lang, null);
 
         } catch (XPathException err) {
-            XPathException de = new XPathException(err);
-            de.maybeSetErrorCode("FORX0002");
-            de.setXPathContext(context);
-            throw de;
+            err.maybeSetErrorCode("FORX0002");
+            err.maybeSetContext(context);
+            throw err;
         }
         return re.containsMatch(input);
     }
@@ -141,11 +140,19 @@ public class Matches extends RegexFunction {
                 final UnicodeStringEvaluator arg2eval = fn.getArity() == 3
                         ? fnc.getArg(2).makeElaborator().elaborateForUnicodeString(true)
                         : cxt -> EmptyUnicodeString.getInstance();
-                return context -> fn.evalMatches(
-                            arg0eval.eval(context),
-                            arg1eval.eval(context),
-                            arg2eval.eval(context),
-                            context);
+                return context -> {
+                    try {
+                        return fn.evalMatches(
+                                arg0eval.eval(context),
+                                arg1eval.eval(context),
+                                arg2eval.eval(context),
+                                context);
+                    } catch (XPathException err) {
+                        err.maybeSetLocation(fnc.getLocation());
+                        err.maybeSetContext(context);
+                        throw err;
+                    }
+                };
             } else {
                 return context -> staticRegex.containsMatch(arg0eval.eval(context));
             }
