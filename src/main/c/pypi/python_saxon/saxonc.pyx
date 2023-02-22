@@ -1239,7 +1239,8 @@ cdef class PyXslt30Processor:
         for key, value in kwds.items():
                 if isinstance(value, str):
                         if key == "source_file":
-                                c_sourcefile = make_c_str(value)
+                                py_sourcefile_string = value.encode('utf-8') if value is not None else None
+                                c_sourcefile = py_sourcefile_string if value is not None else ""
                         elif key == "base_output_uri":
                                 '''c_base_output_uri = make_c_str(value)'''
                                 py_string_string = value.encode('utf-8') if value is not None else None
@@ -1685,7 +1686,7 @@ cdef class PyXsltExecutable:
             'item'| 'node': source supplied as a PyXdmNode object,\r
             'extc': Set the native library to use with Saxon for extension functions written in C/C++/PHP\r
         """
-        cdef char * c_name = make_c_str(name)
+        cdef char * c_name = NULL
         py_string_string = name.encode('utf-8') if name is not None else None
         c_name = py_string_string if name is not None else ""
 
@@ -2228,7 +2229,8 @@ cdef class PyXsltExecutable:
               c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
 
-        c_templateName = make_c_str(template_name)
+        py_template_name_string = template_name.encode('UTF-8') if template_name is not None else None
+        c_templateName = py_template_name_string if template_name is not None else ""
         cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
@@ -2296,7 +2298,8 @@ cdef class PyXsltExecutable:
               c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
 
-        c_templateName = make_c_str(template_name)
+        py_template_name_string = template_name.encode('UTF-8') if template_name is not None else None
+        c_templateName = py_template_name_string if template_name is not None else ""
         c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
         return make_py_str(c_string)
      
@@ -2333,8 +2336,8 @@ cdef class PyXsltExecutable:
             if key == "output_file":
               py_output_string = value.encode('UTF-8') if value is not None else None
               c_outputfile = py_output_string if value is not None else ""
-
-        c_templateName = make_c_str(template_name)
+        py_template_name_string = template_name.encode('UTF-8') if template_name is not None else None
+        c_templateName = py_template_name_string if template_name is not None else ""
         self.thisxptr.callTemplateReturningFile(c_templateName, c_outputfile)
 
      def call_function_returning_value(self, str function_name, list args, **kwds):
@@ -4358,7 +4361,9 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          cdef saxoncClasses.XdmFunctionItem * c_func = NULL
          if proc is None:
              return None
-         c_func = self.derivedfptr.getSystemFunction(proc.thisptr, make_c_str(name), arity)
+         py_name_string = name.encode('UTF-8') if name is not None else None
+         c_name = py_name_string if name is not None else ""
+         c_func = self.derivedfptr.getSystemFunction(proc.thisptr, c_name, arity)
          if c_func is NULL:
              return None
          func = PyXdmFunctionItem()
