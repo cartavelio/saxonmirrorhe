@@ -8,6 +8,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.trans.KeyManager;
+import net.sf.saxon.trans.XPathException;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,13 +32,13 @@ public final class DocumentPool {
     // each time. For this purpose we use a hashtable from
     // URI to DocumentInfo object.
 
-    private final Map<DocumentKey, TreeInfo> documentNameMap = new HashMap<DocumentKey, TreeInfo>(10);
+    private final Map<DocumentKey, TreeInfo> documentNameMap = new HashMap<>(10);
 
 
     // The set of documents known to be unavailable. These documents must remain
     // unavailable for the duration of a transformation or query!
 
-    private final Set<DocumentKey> unavailableDocuments = new HashSet<DocumentKey>(10);
+    private final Set<DocumentKey> unavailableDocuments = new HashSet<>(10);
 
     /**
      * Add a document to the pool
@@ -59,8 +60,12 @@ public final class DocumentPool {
      * @param uri The document-uri property of the document.
      */
 
-    public synchronized void add(TreeInfo doc, /*@Nullable*/ DocumentKey uri) {
+    public synchronized void add(TreeInfo doc, /*@Nullable*/ DocumentKey uri) throws XPathException {
         if (uri != null) {
+            TreeInfo existing = documentNameMap.get(uri);
+            if (existing != null && existing != doc) {
+                throw new XPathException("Cannot have two different documents with the same document-uri " + uri.getAbsoluteURI());
+            }
             documentNameMap.put(uri, doc);
         }
     }

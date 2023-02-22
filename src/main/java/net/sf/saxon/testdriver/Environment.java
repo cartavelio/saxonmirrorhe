@@ -165,12 +165,16 @@ public class Environment implements URIResolver {
 
         configureByteCode(driver, environment, driver.generateByteCode);
 
+        String xpVersion = driver.spec.version;
+        if (driver.spec.shortSpecName.equals("XT") && driver.spec.version.equals("3.0")) {
+            xpVersion = "3.1";
+        }
         environment.xpathCompiler = environment.processor.newXPathCompiler();
         environment.xpathCompiler.setBaseURI(env.getBaseURI());
-        environment.xpathCompiler.setLanguageVersion(driver.spec.version);
+        environment.xpathCompiler.setLanguageVersion(xpVersion);
         environment.xqueryCompiler = environment.processor.newXQueryCompiler();
         environment.xqueryCompiler.setBaseURI(env.getBaseURI());
-        environment.xqueryCompiler.setLanguageVersion(driver.spec.version);
+        environment.xqueryCompiler.setLanguageVersion(xpVersion);
         if (driver.spec.shortSpecName.equals("XT")) {
             environment.xsltCompiler = environment.processor.newXsltCompiler();
             environment.xsltCompiler.setXsltLanguageVersion(driver.spec.version);
