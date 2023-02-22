@@ -29,6 +29,23 @@ namespace SaxonCS_NUnit {
         }
         
         [Test]
+        public void TestTokenize() {  // bug 5655
+            try {
+                Processor p = new ();
+                XPathCompiler c = p.NewXPathCompiler();
+                XdmValue v = c.Evaluate(@"tokenize('dole0021', '\W+|(?<=\D)(?=\d)|(?<=\d)(?=\D)', ';n')", null);
+                Assert.That(v.Count == 2);
+                Assert.AreEqual(v[0].StringValue, "dole");
+                Assert.AreEqual(v[1].StringValue, "0021");
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
+        
+        
+        
+        [Test]
         public void TestReplace() {
             try {
                 Processor p = new ();
