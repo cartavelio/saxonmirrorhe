@@ -646,17 +646,18 @@ XPath xpath = xpathFactory.newXPath();
 
 
       <p>The <code>NodeInfo</code> interface (<a class="javalink" href="net.sf.saxon.om.NodeInfo">net.sf.saxon.om.NodeInfo</a> on Java,
-         or <a class="cslink" href="Saxon.Hej.om.NodeInfo">Saxon.Hej.om.NodeInfo</a> on C#) represents a
+         or <code>Saxon.Hej.om.NodeInfo</code> on C#) represents a
          node of an XML document. The methods on this class follow the XPath data
          model closely.</p>
       
       <aside>The <code>NodeInfo</code> interface is classified as part of Saxon's <i>system programming interface</i>
       which means it is available for use by applications that require a close level of integration with Saxon, but
       it is not guaranteed to be 100% stable between releases. For a higher level of stability, use the 
-         <a class="javalink" href="net.sf.saxon.s9api.XdmNode">XdmNode</a> interface.</aside>
+         <a class="javalink" href="net.sf.saxon.s9api.XdmNode">XdmNode</a> interface on Java, or
+         <a class="cslink" href="Saxon.Api.XdmNode">XdmNode</a> on C#.</aside>
       
       <aside>Because the interface is intended primarily for internal use, it is essentially the same across Java and C#:
-      in particular it uses Java coding conventions such as methods with names like <code>getSomeProperty()</code>.</aside>
+      in particular it uses Java coding conventions such as methods with names like <code>getNodeKind()</code>.</aside>
 
       
       <p>The most commonly used methods on <code>NodeInfo</code> include:</p>
