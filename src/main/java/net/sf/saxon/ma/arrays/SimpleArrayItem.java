@@ -14,7 +14,6 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.z.IntSet;
 

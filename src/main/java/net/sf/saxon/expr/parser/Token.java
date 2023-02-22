@@ -330,7 +330,7 @@ public abstract class Token {
      */
     public static final int FOR_SLIDING = 74;
     /**
-     * "for member" (Saxon extension)
+     * "for member" (XQuery 4.0)
      */
     public static final int FOR_MEMBER = 75;
 

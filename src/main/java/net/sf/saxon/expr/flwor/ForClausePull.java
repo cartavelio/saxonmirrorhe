@@ -8,9 +8,7 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.FocusTrackingIterator;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Int64Value;
 
@@ -45,11 +43,13 @@ public class ForClausePull extends TuplePull {
                 if (!base.nextTuple(context)) {
                     return false;
                 }
-                currentIteration = new FocusTrackingIterator(forClause.getSequence().iterate(context));
+                currentIteration = new FocusTrackingIterator(getIterator(context));
             }
             Item next = currentIteration.next();
             if (next != null) {
-                context.setLocalVariable(forClause.getRangeVariable().getLocalSlotNumber(), next);
+                context.setLocalVariable(
+                        forClause.getRangeVariable().getLocalSlotNumber(),
+                        variableValue(next));
                 if (forClause.getPositionVariable() != null) {
                     context.setLocalVariable(
                             forClause.getPositionVariable().getLocalSlotNumber(),
@@ -60,6 +60,26 @@ public class ForClausePull extends TuplePull {
                 currentIteration = null;
             }
         }
+    }
+
+    /**
+     * Get an iterator over the items or members in the target collection.
+     * @param context dynamic evaluation context
+     * @return for a simple "for $x" clause, the sequence of items to which $x will be bound.
+     * For a "for member ¢x" clause, the sequence of array members, each wrapped as an object value
+     * @throws XPathException if evaluation fails
+     */
+    protected SequenceIterator getIterator(XPathContext context) throws XPathException {
+        return forClause.getSequence().iterate(context);
+    }
+
+    /**
+     * Get the value to be bound to the iteration variable
+     * @param item the value returned by the sequence iterator
+     * @return the value to be assigned to the iteration variable
+     */
+    protected GroundedValue variableValue(Item item) {
+        return item;
     }
 
     /**
