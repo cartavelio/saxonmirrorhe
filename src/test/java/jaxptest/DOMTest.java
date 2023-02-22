@@ -1816,6 +1816,26 @@ public class DOMTest {
         assertNull(inner.getAttributes().getNamedItemNS(NamespaceConstant.XMLNS, "c"));
     }
 
+    @Test
+    public void testBug5375() {
+        try {
+            TransformerFactory transformerFactory = new TransformerFactoryImpl();
+            DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+            documentFactory.setNamespaceAware(true);
+            InputSource stub = new InputSource(new StringReader("<a xmlns:abc=\"a\" />"));
+            Document document = documentFactory.newDocumentBuilder().parse(stub);
+            DOMResult result = new DOMResult(document.getDocumentElement());
+            String xml = "<X xmlns:ab=\"b\" xmlns:ac=\"c\"/>";
+            transformerFactory.newTransformer().transform(new StreamSource(
+                    new StringReader(xml)), result);
+            StringWriter sw = new StringWriter();
+            transformerFactory.newTransformer().transform(new DOMSource(document), new StreamResult(sw));
+        } catch (SAXException | TransformerException | ParserConfigurationException | IOException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
 
 }
 
