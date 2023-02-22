@@ -5,8 +5,8 @@
     version="3.0">
     
     <!-- testing using a pkg (twice), the used pkg contains two functions which do nothing -->    
-    <xsl:use-package name="urn:use-me" package-version="*"  >
-        <xsl:accept component="function" names="pkg:function1" visibility="public" />
+    <xsl:use-package name="urn:use-me" package-version="3.0"  >
+        <xsl:accept component="function" names="pkg:function1#0" visibility="public" />
     </xsl:use-package>
     
     <xsl:template match="second-child">

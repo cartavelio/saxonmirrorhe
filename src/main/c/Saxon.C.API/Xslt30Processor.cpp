@@ -186,8 +186,9 @@ void Xslt30Processor::exceptionClear(){
  if(exception != nullptr) {
  	delete exception;
  	exception = nullptr;
- }
 
+ }
+      j_clearException(SaxonProcessor::sxn_environ->thread);
  }
 
    void Xslt30Processor::setcwd(const char* dir){
