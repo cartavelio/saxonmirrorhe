@@ -40,12 +40,9 @@ import org.xml.sax.InputSource;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.util.*;
 
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -189,13 +186,13 @@ public class SaxonCAPI {
     }
 
 
-    static CCharPointer stringToNative(AllocatorCCharFn alloc, String string) {
-      byte[] b = string.getBytes(StandardCharsets.UTF_8);
-      CCharPointer a =  alloc.call(b.length + 1);
-      for (int i = 0; i < b.length; i++) {
-        a.write(i, b[i]);
-      }
-      a.write(b.length, (byte) 0);
+    static CCharPointer stringToNative(AllocatorCCharFn alloc, ByteArrayOutputStream bStream) {
+        byte [] b = bStream.toByteArray();
+        CCharPointer a =  alloc.call(b.length + 1);
+        for (int i = 0; i < b.length; i++) {
+            a.write(i, b[i]);
+        }
+        a.write(b.length, (byte) 0);
       return a;
     }
 
