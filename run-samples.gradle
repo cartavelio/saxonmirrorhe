@@ -167,6 +167,8 @@ task he_samples_he() {}
 task he_samples_pe() {}
 task he_samples_ee() {}
 
+task pe_samples(dependsOn: ["he_samples_pe"]) {}
+
 def heSampleConfigurations = ["JAXPExamples",
                               "ExampleContentHandler",
                               "ApplyXPathJAXP_saxon",
@@ -349,27 +351,3 @@ eeSampleConfigurations.each { sample ->
   }
   tasks.findByName("ee_samples").dependsOn t
 }
-
-/*
-
-/*
-}
-
-    <!-- S9APIExamples sample tests -->
-    <macrodef name="samples-s9api"
-        description="Run test of s9api samples">
-        <attribute name="version"
-        <attribute name="target"
-        <sequential>
-            <exec executable="java"
-                dir="${build-resources.dir}/samples"
-                failonerror="true">
-                <arg line="-cp ${basedir}/${build-resources.dir}/samples/java/classes${Z}${basedir}/${build-@{version}j.dir}/saxon-@{version}-${major.version}.jar${Z}${license.dir}"
-                <arg line="he/S9APIExamples"
-                <arg line="@{target}"
-            </exec>
-        </sequential>
-    </macrodef>
-
-        <samples-s9api version="he" target="QueryA"
-*/
