@@ -103,7 +103,7 @@ XPathProcessor::~XPathProcessor(){
 XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
   	if (xpathStr == nullptr) {
 	exception = new SaxonApiException("Error:: XPath string cannot be empty or nullptr");
-	return nullptr;
+	throw exception;
     }
     SaxonProcessor::attachCurrentThread();
 
@@ -118,6 +118,8 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
         return SaxonProcessor::makeXdmValueFromRef(results);
 	} else if(results == -2){
 	    exception = new SaxonApiException();
+	    throw exception;
+
 	}
 
 
@@ -130,7 +132,7 @@ XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
 
     if (xpathStr == nullptr) {
         exception = new SaxonApiException("Error:: XPath string cannot be empty or nullptr");
-        return nullptr;
+        throw exception;
     }
     SaxonProcessor::attachCurrentThread();
 
@@ -171,7 +173,7 @@ XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
     }else if(result== -2){
 
         exception = new SaxonApiException();
-
+        throw exception;
 
     }
     return nullptr;
@@ -208,11 +210,11 @@ void XPathProcessor::declareNamespace(const char *prefix, const char * uri){
     SaxonProcessor::attachCurrentThread();
     if (prefix == nullptr) {
         exception = new SaxonApiException("Null prefix supplied to declareNamespace()");
-        return;
+        throw exception;
     }
     if (uri == nullptr) {
         exception = new SaxonApiException("Null namespace URI supplied to declareNamespace()");
-        return;
+        throw exception;
     }
 	j_xp_declareNamespace(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)prefix, (char *)uri);
 
@@ -275,7 +277,7 @@ bool XPathProcessor::effectiveBooleanValue(const char * xpathStr) {
     }
     if(resultsi == -2) {
         exception = new SaxonApiException();
-        return false;
+        throw exception;
     }
 
     return (bool)resultsi;

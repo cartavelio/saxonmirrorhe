@@ -184,40 +184,37 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         # Clear parameter values set
         void clearParameters(bool deleteValues=false)
 
-        # Get the messages written using the xsl:message instruction
-        void setupXslMessage(bool show, const char* filename=nullptr)
-
 
         # Perform a one shot transformation. The result is returned as a string
-        const char * transformFileToString(const char* sourcefile, const char* stylesheetfile)
+        const char * transformFileToString(const char* sourcefile, const char* stylesheetfile)    except +raise_py_error
 
         # Perform a one shot transformation. The result are saved to file
-        void transformFileToFile(const char* sourcefile, const char* stylesheetfile, const char* outputfile)
+        void transformFileToFile(const char* sourcefile, const char* stylesheetfile, const char* outputfile)   except +raise_py_error
 
         # Perform a one shot transformation. The result is returned as an XdmValue
-        XdmValue * transformFileToValue(const char* sourcefile, const char* stylesheetfile)
+        XdmValue * transformFileToValue(const char* sourcefile, const char* stylesheetfile)   except +raise_py_error
 
         # compile a stylesheet file.
-        XsltExecutable * compileFromFile(const char* stylesheet)
+        XsltExecutable * compileFromFile(const char* stylesheet)  except +raise_py_error
 
         # compile a stylesheet received as a string.
-        XsltExecutable * compileFromString(const char* stylesheet)
+        XsltExecutable * compileFromString(const char* stylesheet)   except +raise_py_error
 
         # Get the stylesheet associated via the xml-stylesheet processing instruction
-        XsltExecutable * compileFromAssociatedFile(const char* sourceFile)
+        XsltExecutable * compileFromAssociatedFile(const char* sourceFile)    except +raise_py_error
 
         # Compile a stylesheet received as a string and save to an exported file (SEF).
-        void compileFromStringAndSave(const char* stylesheet, const char* filename)
+        void compileFromStringAndSave(const char* stylesheet, const char* filename)  except +raise_py_error
 
         # Compile a stylesheet received as a file and save to an exported file (SEF).
-        void compileFromFileAndSave(const char* xslFilename, const char* filename)
+        void compileFromFileAndSave(const char* xslFilename, const char* filename)  except +raise_py_error
 
         # Compile a stylesheet received as an XdmNode. The compiled stylesheet is cached
         # and available for execution later.
-        void compileFromXdmNodeAndSave(XdmNode * node, const char* filename)
+        void compileFromXdmNodeAndSave(XdmNode * node, const char* filename)    except +raise_py_error
 
         # compile a stylesheet received as an XdmNode.
-        XsltExecutable * compileFromXdmNode(XdmNode * node)
+        XsltExecutable * compileFromXdmNode(XdmNode * node)   except +raise_py_error
 
 
         # Checks for pending exceptions without creating a local reference to the exception object
@@ -259,10 +256,10 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void setCaptureResultDocuments(bool flag, bool rawResult)
 
         # The initial value to which templates are to be applied (equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>)
-        void setInitialMatchSelection(XdmValue * selection)
+        void setInitialMatchSelection(XdmValue * selection)     except +raise_py_error
 
         # The initial filename to which templates are to be applied (equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>).
-        void setInitialMatchSelectionAsFile(const char * filename)
+        void setInitialMatchSelectionAsFile(const char * filename)   except +raise_py_error
 
         # Set the output file of where the transformation result is sent
         void setOutputFile(const char* outfile)
@@ -270,13 +267,13 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setResultAsRawValue(bool option)
 
-        map[string,XdmValue*]& getResultDocuments()
+        map[string,XdmValue*]& getResultDocuments()  except +raise_py_error
 
         XsltExecutable *clone()
 
         # Produce a representation of the compiled stylesheet, in XML form, suitable for
         # distribution and reloading.
-        void exportStylesheet(const char * filename)
+        void exportStylesheet(const char * filename)  except +raise_py_error
 
         # Set the value of a stylesheet parameter
         void setParameter(const char* name, XdmValue*value)
@@ -318,52 +315,52 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         #XdmValue * getXslMessages()
 
         # Perform a one shot transformation. The result is stored in the supplied outputfile.
-        void transformFileToFile(const char* sourcefile, const char* outputfile)
+        void transformFileToFile(const char* sourcefile, const char* outputfile)  except +raise_py_error
 
         # Perform a one shot transformation. The result is returned as a string
-        const char * transformFileToString(const char* sourcefile)
+        const char * transformFileToString(const char* sourcefile)   except +raise_py_error
 
         # Perform a one shot transformation. The result is returned as an XdmValue
-        XdmValue * transformFileToValue(const char* sourcefile)
+        XdmValue * transformFileToValue(const char* sourcefile)   except +raise_py_error
 
         # Invoke the stylesheet by applying templates to a supplied input sequence, Saving the results to file.
-        void applyTemplatesReturningFile(const char* outfile)
+        void applyTemplatesReturningFile(const char* outfile)    except +raise_py_error
 
         # Invoke the stylesheet by applying templates to a supplied input sequence, Saving the results as serialized string.
-        const char* applyTemplatesReturningString()
+        const char* applyTemplatesReturningString()  except +raise_py_error
 
         # Invoke the stylesheet by applying templates to a supplied input sequence, Saving the results as an XdmValue.
-        XdmValue * applyTemplatesReturningValue()
+        XdmValue * applyTemplatesReturningValue()  except +raise_py_error
 
         # Invoke a transformation by calling a named template and save result to file.
-        void callTemplateReturningFile(const char* templateName, const char* outfile)
+        void callTemplateReturningFile(const char* templateName, const char* outfile)  except +raise_py_error
 
         # Invoke a transformation by calling a named template and return result as a string.
-        const char* callTemplateReturningString(const char* templateName)
+        const char* callTemplateReturningString(const char* templateName)   except +raise_py_error
 
         # Invoke a transformation by calling a named template and return result as an XdmValue.
-        XdmValue* callTemplateReturningValue(const char* templateName)
+        XdmValue* callTemplateReturningValue(const char* templateName)  except +raise_py_error
 
         # Call a public user-defined function in the stylesheet
         # Here we wrap the result in an XML document, and sending this document to a specified file
-        void callFunctionReturningFile(const char* functionName, XdmValue ** arguments, int argument_length, const char* outfile)
+        void callFunctionReturningFile(const char* functionName, XdmValue ** arguments, int argument_length, const char* outfile)  except +raise_py_error
 
         # Call a public user-defined function in the stylesheet
         # Here we wrap the result in an XML document, and serialized this document to string value
-        const char * callFunctionReturningString(const char* functionName, XdmValue ** arguments, int argument_length)
+        const char * callFunctionReturningString(const char* functionName, XdmValue ** arguments, int argument_length)   except +raise_py_error
 
         # Call a public user-defined function in the stylesheet
         # Here we wrap the result in an XML document, and return the document as an XdmVale
-        XdmValue * callFunctionReturningValue(const char* functionName, XdmValue ** arguments, int argument_length)
+        XdmValue * callFunctionReturningValue(const char* functionName, XdmValue ** arguments, int argument_length)   except +raise_py_error
 
         # Execute transformation to string. Properties supplied in advance.
-        const char * transformToString(XdmNode * source)
+        const char * transformToString(XdmNode * source)   except +raise_py_error
 
         # Execute transformation to Xdm Value. Properties supplied in advance.
-        XdmValue * transformToValue(XdmNode * source)
+        XdmValue * transformToValue(XdmNode * source)    except +raise_py_error
 
         # Execute transformation to file. Properties supplied in advance.
-        void transformToFile(XdmNode * source)
+        void transformToFile(XdmNode * source)   except +raise_py_error
 
         # Checks for pending exceptions without creating a local reference to the exception object
         bool exceptionOccurred()
@@ -390,13 +387,13 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setcwd(const char* cwd)
 
-        void registerSchemaFromNode(XdmNode * node)
+        void registerSchemaFromNode(XdmNode * node)    except +raise_py_error
 
-        void registerSchemaFromFile(const char * xsd)
+        void registerSchemaFromFile(const char * xsd)   except +raise_py_error
 
-        void registerSchemaFromString(const char * schemaStr)
+        void registerSchemaFromString(const char * schemaStr)  except +raise_py_error
 
-        void exportSchema(const char * fileName)
+        void exportSchema(const char * fileName)  except +raise_py_error
 
         void setOutputFile(const char * outputFile)
 
@@ -406,7 +403,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setSourceNode(XdmNode * source)
 
-        XdmNode* getValidationReport()
+        XdmNode* getValidationReport() except +raise_py_error
 
         void setParameter(const char * name, XdmValue*value)
 
@@ -438,9 +435,9 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setBaseURI(const char * uriStr)
 
-        XdmValue * evaluate(const char * xpathStr)
+        XdmValue * evaluate(const char * xpathStr)  except +raise_py_error
    
-        XdmItem * evaluateSingle(const char * xpathStr)
+        XdmItem * evaluateSingle(const char * xpathStr)  except +raise_py_error
 
         void setContextItem(XdmItem * item)
         
@@ -448,7 +445,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setContextFile(const char * filename) 
 
-        bool effectiveBooleanValue(const char * xpathStr)
+        bool effectiveBooleanValue(const char * xpathStr) except +raise_py_error
 
         void setParameter(const char * name, XdmValue*value)
 
@@ -456,7 +453,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setProperty(const char * name, const char * value)
 
-        void declareNamespace(const char *prefix, const char * uri)
+        void declareNamespace(const char *prefix, const char * uri)  except +raise_py_error
 
         void declareVariable(const char * name)
 

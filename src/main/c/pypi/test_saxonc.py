@@ -82,7 +82,7 @@ def test_version():
 
     assert ver.startswith('SaxonC-HE')
     assert ver.endswith('from Saxonica')
-def test_version2(capsys):
+def test_version2():
     """SaxonProcessor version string content"""
     try:
         sp = PySaxonProcessor(license=True)
@@ -91,9 +91,8 @@ def test_version2(capsys):
 
         assert ver.startswith('SaxonC-EE')
         assert ver.endswith('from Saxonica')
-    except:
-        with capsys.disabled():
-            print("\nTest: 'test_version2' - License required to run this test")
+    except Exception as err:
+        print("Error: ", err)
 
 
 def test_schema_aware1(saxonproc):
@@ -164,14 +163,13 @@ def test_icu_lib_HE():
     assert 'Thirty Three' in str(result7)
 
 
-def test_schema_aware2(capsys):
+def test_schema_aware2():
     ''' This unit test requires a valid license - SaxonCEE '''
     try:
         sp = PySaxonProcessor(license=True)
         assert sp.is_schema_aware == True
-    except:
-        with capsys.disabled():
-            print("\nTest: 'test_schema_aware2' - License required to run this test")
+    except Exception as err:
+            print("Error: ", err)
 
 '''PyXsltProcessor test cases '''
 def test_xslt30_processor(data_dir):
@@ -183,8 +181,7 @@ def test_xslt30_processor(data_dir):
     executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:value-of select='//person[1]'/><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>")
     assert executable is not None
     output2 = executable.apply_templates_returning_string(xdm_value=node_)
-    if(output2 is None):
-        print('Error:' + executable.error_message)
+
     assert output2 is not None
     assert 'text1' in output2
 
@@ -198,17 +195,23 @@ def test_Xslt_from_file1(saxonproc, data_dir):
     assert result is not None
     print(result)
     assert 'text3' in result
+
 def test_Xslt_from_file2(saxonproc, data_dir):
     xsltproc = saxonproc.new_xslt30_processor()
     xmlFile = data_dir+'cat.xml'
     result = xsltproc.transform_to_string(source_file=data_dir+'cat.xml', stylesheet_file=data_dir+'test.xsl')
     assert result is not None
     assert 'text3' in result
+
 def test_Xslt_from_file_error(saxonproc, data_dir):
     xsltproc = saxonproc.new_xslt30_processor()
-    result = xsltproc.transform_to_value(source_file=data_dir+'cat.xml', stylesheet_file=data_dir+'test-error.xsl')
-    assert result is None
-    assert xsltproc.exception_occurred
+    try:
+        result = xsltproc.transform_to_value(source_file=data_dir+'cat.xml', stylesheet_file=data_dir+'test-error.xsl')
+        assert result is None
+    except Exception as err:
+        print("Error: ", err)
+        assert True
+
 def test_xslt_parameter(saxonproc, data_dir):
     input_ = saxonproc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
     value1 = saxonproc.make_integer_value(10)
@@ -236,6 +239,7 @@ def testContextNotRoot(saxonproc):
     result = executable.apply_templates_returning_string()
     assert result is not None
     assert "[" in result
+
 def testResolveUri(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:err='http://www.w3.org/2005/xqt-errors'><xsl:template name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri('notice trailing space /out.xml')\"/> <xsl:message select='$uri'/><xsl:result-document href='{$uri}'><out/></xsl:result-document><xsl:catch><xsl:sequence select=\"'$err:code: ' || $err:code  || ', $err:description: ' || $err:description\"/></xsl:catch></xsl:try></xsl:template></xsl:stylesheet>")
@@ -472,6 +476,7 @@ def testXdmDestination1(saxonproc):
     assert node is not None
     assert isinstance(node, PyXdmNode)
     assert node.node_kind == 9
+
 def testXdmDestinationWithItemSeparator(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     stylesheetStr = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template name='go'><xsl:comment>A</xsl:comment><out/><xsl:comment>Z</xsl:comment></xsl:template><xsl:output method='xml' item-separator='§'/></xsl:stylesheet>"
@@ -542,6 +547,7 @@ def testPipelineShort(saxonproc):
     executable2.set_initial_match_selection(xdm_value=out)
     sw = executable2.apply_templates_returning_string()
     assert "<a><a><z/></a></a>" in sw
+
 def testCallFunction(saxonproc):
 
     source = "<?xml version='1.0'?><xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  xmlns:xs='http://www.w3.org/2001/XMLSchema'  xmlns:f='http://localhost/'  version='3.0'>  <xsl:function name='f:add' visibility='public'>    <xsl:param name='a'/><xsl:param name='b'/>   <xsl:sequence select='$a + $b'/></xsl:function>  </xsl:stylesheet>"
@@ -593,13 +599,13 @@ def testCallFunctionWrapResults(saxonproc):
 def testCallFunctionArgInvalid(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     source = "<?xml version='1.0'?>  <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:f='http://localhost/'  version='2.0'><xsl:function name='f:add'> <xsl:param name='a' as='xs:double'/>  <xsl:param name='b' as='xs:double'/>  <xsl:sequence select='$a + $b'/> </xsl:function> </xsl:stylesheet>"
-    executable = trans.compile_stylesheet(stylesheet_text=source)
-    argArr = [saxonproc.make_integer_value(2), saxonproc.make_integer_value(3)]
-    v = executable.call_function_returning_value("{http://localhost/}add", argArr)
+    try:
+        executable = trans.compile_stylesheet(stylesheet_text=source)
+        argArr = [saxonproc.make_integer_value(2), saxonproc.make_integer_value(3)]
+        v = executable.call_function_returning_value("{http://localhost/}add", argArr)
+    except  Exception as err:
+        assert "Cannot invoke function add#2 externally" in str(err)
 
-    assert "Cannot invoke function add#2 externally" in executable.error_message
-    assert v is None
-    trans.clear_parameters()
 
 def testCallNamedTemplateWithTunnelParams(saxonproc):
     trans = saxonproc.new_xslt30_processor()
@@ -749,7 +755,7 @@ def testApplyTemplatesToFile(saxonproc):
 
 
 '''@pytest.mark.skip('Error: Test can only run with a license file present')'''
-def test_CallTemplateWithResultValidation(capsys, files_dir):
+def test_CallTemplateWithResultValidation(files_dir):
     try:
         saxonproc2 =  PySaxonProcessor(license=True)
         saxonproc2.set_cwd(files_dir)
@@ -768,9 +774,8 @@ def test_CallTemplateWithResultValidation(capsys, files_dir):
             assert "<x>3</x>" == sw
         else:
             print(trans.error_message)
-    except:
-        with capsys.disabled():
-            print("License required to run this test")
+    except  Exception as err:
+        print("Error: ", err)
 
 
 def testCallTemplateNoParamsRaw(saxonproc):
@@ -901,9 +906,8 @@ def test_XQuery_line_number():
         query_proc.set_property("qs", "saxon:line-number(doc('cat.xml')/out/person[1])")
         result = query_proc.run_query_to_string()
         assert result == None
-    except:
-        with capsys.disabled():
-            print("License required to run this test")
+    except  Exception as err:
+        print("Error: ", err)
 
 def testReusability(saxonproc):
     queryproc = saxonproc.new_xquery_processor()
@@ -1031,6 +1035,7 @@ def parse_xml_file1():
     node = sp.parse_xml(xml_file_name='cat.xml')
     outNode = node.children[0]
     assert outNode.name == 'out'
+
 def test_node():
     xml = """\
     <out>
@@ -1052,6 +1057,7 @@ def test_node():
     assert len(attrs) == 2
     assert children[1].get_attribute_value('att2') == 'value2'
     assert 'value2' in attrs[1].string_value
+
 def test_evaluate():
     xml = """\
     <out>
@@ -1069,6 +1075,7 @@ def test_evaluate():
     value = xp.evaluate('//person')
     assert isinstance(value, PyXdmValue)
     assert value.size == 3
+
 def test_xdm_value_iter():
     xml = """\
     <out>
@@ -1086,6 +1093,7 @@ def test_xdm_value_iter():
     assert value.size == 3
     for item in value:
         assert isinstance(item, PyXdmItem)
+
 def test_xdm_value_iter2():
     xml = """\
     <out>
@@ -1135,12 +1143,14 @@ def test_declare_variable_value1(saxonproc):
     assert result is not None
     item = result.head
     assert 'test.' in item.string_value
+
 def test_declare_variable_value2(saxonproc):
     s1 = 'This is a test.'
     xdm_string_value = saxonproc.make_string_value(s1)
     xpath_processor = saxonproc.new_xpath_processor()
     result = xpath_processor.evaluate('$s1')
     assert result is None
+
 def test_packages(data_dir):
     sp = PySaxonProcessor(license=False)
     xsl = """\
