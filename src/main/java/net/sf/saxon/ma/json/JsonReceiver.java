@@ -9,6 +9,7 @@ package net.sf.saxon.ma.json;
 
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
@@ -19,8 +20,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.value.DoubleValue;
-import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.StringToDouble11;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.HashSet;
@@ -36,7 +37,7 @@ import java.util.function.IntPredicate;
 
 
 public class JsonReceiver implements Receiver {
-
+    private XPathContext context;
     private PipelineConfiguration pipe;
     private UniStringConsumer output;
     private final StringBuilder textBuffer = new StringBuilder(128);
@@ -48,11 +49,12 @@ public class JsonReceiver implements Receiver {
     private Function numberFormatter = null;
     private static final String ERR_INPUT = "FOJS0006";
 
-    public JsonReceiver(PipelineConfiguration pipe, UniStringConsumer output) {
+    public JsonReceiver(PipelineConfiguration pipe, XPathContext context, UniStringConsumer output) {
         Objects.requireNonNull(pipe);
         Objects.requireNonNull(output);
         setPipelineConfiguration(pipe);
         this.output = output;
+        this.context = context;
     }
 
     @Override
@@ -281,7 +283,7 @@ public class JsonReceiver implements Receiver {
                 }
             } else {
                 Sequence result = SystemFunction.dynamicCall(
-                        numberFormatter, pipe.getXPathContext(), new Sequence[]{new StringValue(uContent)});
+                        numberFormatter, context, new Sequence[]{new StringValue(uContent)});
                 output.accept(((StringValue)result).getUnicodeStringValue());
             }
 

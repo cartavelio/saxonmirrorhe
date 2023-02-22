@@ -13,7 +13,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Objects;
 
 /**
@@ -81,31 +80,32 @@ public class StandardEntityResolver implements EntityResolver {
      */
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-        return config.getCommonResourceResolver().resolveEntity(publicId, systemId);
+        //return config.getResourceResolver().resolveEntity(publicId, systemId);
+        return null; // TODO: fixme
     }
 
-    /**
-     * Get a resource from the classpath. This method is called if the URI uses the (Spring-defined)
-     * "classpath" URI scheme. It attempts to locate the resource on the
-     * classpath and returns an InputSource containing the relevant InputStream. If the
-     * inputstream cannot be located, it returns null. A subclass that does not want classpath
-     * URIs to be resolved in this way should override this method to return null unconditionally.
-     *
-     * @param resourceName    the resource to be fetched from the classpath
-     * @param config the Saxon Configuration object
-     * @return an InputSource representing the named resource (fetched from the classpath)
-     * or null if no resource is available.
-     */
-
-    protected InputSource getResource(String resourceName, Configuration config) {
-        InputStream inputStream = config.getDynamicLoader().getResourceAsStream(resourceName);
-        if (inputStream != null) {
-            InputSource inputSource = new InputSource(inputStream);
-            inputSource.setSystemId("classpath:" + resourceName);
-            return inputSource;
-        } else {
-            return null;
-        }
-    }
+//    /**
+//     * Get a resource from the classpath. This method is called if the URI uses the (Spring-defined)
+//     * "classpath" URI scheme. It attempts to locate the resource on the
+//     * classpath and returns an InputSource containing the relevant InputStream. If the
+//     * inputstream cannot be located, it returns null. A subclass that does not want classpath
+//     * URIs to be resolved in this way should override this method to return null unconditionally.
+//     *
+//     * @param resourceName    the resource to be fetched from the classpath
+//     * @param config the Saxon Configuration object
+//     * @return an InputSource representing the named resource (fetched from the classpath)
+//     * or null if no resource is available.
+//     */
+//
+//    protected InputSource getResource(String resourceName, Configuration config) {
+//        InputStream inputStream = config.getDynamicLoader().getResourceAsStream(resourceName);
+//        if (inputStream != null) {
+//            InputSource inputSource = new InputSource(inputStream);
+//            inputSource.setSystemId("classpath:" + resourceName);
+//            return inputSource;
+//        } else {
+//            return null;
+//        }
+//    }
 }
 

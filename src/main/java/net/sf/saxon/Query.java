@@ -63,7 +63,6 @@ public class Query {
     protected boolean useURLs = false;
     protected String outputFileName = null;
     protected String moduleURIResolverClass = null;
-    protected final String uriResolverClass = null;
     protected boolean explaining = false;
     protected boolean wrap = false;
     protected boolean projection = false;
@@ -312,10 +311,6 @@ public class Query {
                 compiler.setModuleURIResolver((ModuleURIResolver) mr);
             }
 
-            if (uriResolverClass != null) {
-                config.setURIResolver(config.makeURIResolver(uriResolverClass));
-            }
-
             config.displayLicenseMessage();
             if (schemaAware && !config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
                 if ("EE".equals(config.getEditionCode())) {
@@ -413,9 +408,7 @@ public class Query {
                     config.getLogger().warning("Invalid dateTime: " + now + " (ignored)");
                 }
             }
-            if (uriResolverClass != null) {
-                evaluator.setURIResolver(config.makeURIResolver(uriResolverClass));
-            }
+
             processSource(sourceInput, exp, evaluator);
 
             if (sourceJsonFileName != null) {
@@ -784,10 +777,14 @@ public class Query {
     protected Source processSourceFile(String sourceFileName, boolean useURLs) throws TransformerException {
         Source sourceInput;
         if (useURLs || CommandLineOptions.isImplicitURI(sourceFileName)) {
-            sourceInput = config.getURIResolver().resolve(sourceFileName, null);
-            if (sourceInput == null) {
-                sourceInput = config.getSystemURIResolver().resolve(sourceFileName, null);
-            }
+            ResourceRequest request = new ResourceRequest();
+            request.relativeUri = sourceFileName;
+            URI cwd = new File(System.getProperty("user.dir")).toURI();
+            request.baseUri = cwd.toString();
+            request.uri = cwd.resolve(sourceFileName).toString();
+            request.nature = ResourceRequest.XML_NATURE;
+            request.purpose = "source document";
+            sourceInput = request.resolve(config.getResourceResolver());
         } else if (sourceFileName.equals("-")) {
             // take input from stdin
             String sysId = new File(System.getProperty("user.dir")).toURI().toASCIIString();

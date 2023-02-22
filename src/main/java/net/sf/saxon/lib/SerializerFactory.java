@@ -9,6 +9,7 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.query.SequenceWrapper;
@@ -28,11 +29,14 @@ import net.sf.saxon.value.Whitespace;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stax.StAXResult;
 import javax.xml.transform.stream.StreamResult;
-import java.util.*;
+import java.net.URISyntaxException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 /**
@@ -220,12 +224,20 @@ public class SerializerFactory {
             }
             Properties props2 = new Properties(props);
             props2.setProperty(SaxonOutputKeys.PARAMETER_DOCUMENT, "");
-            Source source;
+
+            ResourceRequest rr = new ResourceRequest();
+            rr.relativeUri = paramDoc;
+            rr.baseUri = base;
             try {
-                source = config.getURIResolver().resolve(paramDoc, base);
-            } catch (TransformerException e) {
-                throw XPathException.makeXPathException(e);
+                rr.uri = ResolveURI.makeAbsolute(paramDoc, base).toString();
+            } catch (URISyntaxException err) {
+                throw XPathException.makeXPathException(err);
             }
+            rr.nature = NamespaceConstant.OUTPUT;
+            rr.purpose = "serialization";
+
+            Source source = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+
             ParseOptions options = new ParseOptions();
             options.setSchemaValidationMode(Validation.LAX);
             options.setDTDValidationMode(Validation.SKIP);

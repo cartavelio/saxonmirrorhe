@@ -14,7 +14,6 @@ import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.expr.parser.Optimizer;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.functions.DocumentFn;
@@ -25,6 +24,7 @@ import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionLibrary;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.trans.Timer;
@@ -36,7 +36,6 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntHashMap;
 
-import javax.xml.transform.URIResolver;
 import java.util.*;
 
 
@@ -517,8 +516,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 declarations.add((XSLUsePackage) use);
             } else if (use instanceof XSLInclude) {
                 String href = Whitespace.trim(use.getAttributeValue("", "href"));
-                URIResolver resolver = compilation.getCompilerInfo().getURIResolver();
-                DocumentKey key = DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), resolver, false);
+                DocumentKey key = DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), false);
                 TreeInfo includedTree = compilation.getStylesheetModules().get(key);
                 StyleElement incWrapper = (StyleElement) ((DocumentImpl) includedTree.getRootNode()).getDocumentElement();
                 gatherUsePackageDeclarations(compilation, incWrapper, declarations);

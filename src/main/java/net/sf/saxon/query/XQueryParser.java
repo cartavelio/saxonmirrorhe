@@ -41,7 +41,6 @@ import net.sf.saxon.z.IntPredicateProxy;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.net.URI;
@@ -2136,16 +2135,24 @@ public class XQueryParser extends XPathParser {
         outputPropertiesSeen.add(varName);
         switch (localName) {
             case "parameter-document": {
-                Source source;
+                Configuration config = env.getConfiguration();
+                ResourceRequest rr = new ResourceRequest();
+                rr.relativeUri = value;
+                rr.baseUri = env.getStaticBaseURI();
                 try {
-                    source = env.getConfiguration().getURIResolver().resolve(value, env.getStaticBaseURI());
-                } catch (TransformerException e) {
-                    throw XPathException.makeXPathException(e);
+                    rr.uri = ResolveURI.makeAbsolute(value, env.getStaticBaseURI()).toString();
+                } catch (URISyntaxException err) {
+                    throw XPathException.makeXPathException(err);
                 }
+                rr.nature = NamespaceConstant.OUTPUT;
+                rr.purpose = "serialization";
+
+                Source source = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+
                 ParseOptions options = new ParseOptions();
                 options.setSchemaValidationMode(Validation.LAX);
                 options.setDTDValidationMode(Validation.SKIP);
-                TreeInfo doc = env.getConfiguration().buildDocumentTree(source);
+                TreeInfo doc = config.buildDocumentTree(source);
                 SerializationParamsHandler ph = new SerializationParamsHandler(parameterDocProperties);
                 ph.setSerializationParams(doc.getRootNode());
 

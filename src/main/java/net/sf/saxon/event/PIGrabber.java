@@ -8,11 +8,14 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.functions.ResolveURI;
+import net.sf.saxon.lib.DirectResourceResolver;
+import net.sf.saxon.lib.ResourceRequest;
+import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.s9api.Location;
-import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -21,8 +24,8 @@ import net.sf.saxon.type.SchemaType;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.sax.SAXSource;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -39,7 +42,7 @@ public class PIGrabber extends ProxyReceiver {
     private String reqMedia = null;
     private String reqTitle = null;
     private String baseURI = null;
-    private URIResolver uriResolver = null;
+    private ResourceResolver resourceResolver = null;
     private final List<String> stylesheets = new ArrayList<>();
     private boolean terminated = false;
 
@@ -81,8 +84,8 @@ public class PIGrabber extends ProxyReceiver {
      * @param resolver the URI resolver
      */
 
-    public void setURIResolver(URIResolver resolver) {
-        uriResolver = resolver;
+    public void setResourceResolver(ResourceResolver resolver) {
+        resourceResolver = resolver;
     }
 
     /**
@@ -171,22 +174,28 @@ public class PIGrabber extends ProxyReceiver {
         if (stylesheets.isEmpty()) {
             return null;
         }
-        if (uriResolver == null) {
-            uriResolver = new StandardURIResolver(config);
-        }
         Source[] result = new Source[stylesheets.size()];
+        ResourceRequest request = new ResourceRequest();
+        request.baseUri = baseURI;
+        request.nature = ResourceRequest.XSLT_NATURE;
+        request.purpose = "transformation";
         for (int i = 0; i < stylesheets.size(); i++) {
             String href = stylesheets.get(i);
-            Source s = uriResolver.resolve(href, baseURI);
+            request.relativeUri = href;
+            try {
+                request.uri = ResolveURI.makeAbsolute(href, baseURI).toString();
+            } catch (URISyntaxException e) {
+                throw XPathException.makeXPathException(e);
+            }
+            Source s = request.resolve(resourceResolver,
+                                       config.getResourceResolver(),
+                                       new DirectResourceResolver(config));
             if (s instanceof SAXSource) {
                 ((SAXSource) s).setXMLReader(config.getStyleParser());
-            }
-            if (s == null) {
-                s = config.getSystemURIResolver().resolve(href, baseURI);
             }
             result[i] = s;
         }
         return result;
     }
 
-}//
+}

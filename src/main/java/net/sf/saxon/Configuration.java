@@ -130,8 +130,6 @@ public class Configuration implements SourceResolver, NotationSet {
     private CollationURIResolver collationResolver = new StandardCollationURIResolver();
     private String defaultCollationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
 
-    private Predicate<URI> allowedUriTest = uri -> true;
-
     private Map<String, ResourceCollection> registeredCollections = new HashMap<>();
     private CollectionFinder collectionFinder;
     private EnvironmentVariableResolver environmentVariableResolver = new StandardEnvironmentVariableResolver();
@@ -178,7 +176,6 @@ public class Configuration implements SourceResolver, NotationSet {
     private transient Logger traceOutput = new StandardLogger();
     private ModuleURIResolver standardModuleURIResolver;
     private String styleParserClass;
-    private StandardURIResolver systemURIResolver;
     private UnparsedTextURIResolver unparsedTextURIResolver;
 
     private transient XPathContext theConversionContext = null;
@@ -191,8 +188,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private final TypeChecker typeChecker = new TypeChecker();
     private final TypeChecker10 typeChecker10 = new TypeChecker10();
 
-    private transient CommonResourceResolver commonResolver;
-    private transient URIResolver uriResolver;
+    private transient ResourceResolver commonResolver;
     protected FunctionLibraryList builtInExtensionLibraryList;
     protected int xsdVersion = XSD11;
     private int xmlVersion = XML10;
@@ -380,7 +376,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
         commonResolver = new CatalogResourceResolver();
         defaultXsltCompilerInfo = makeCompilerInfo();
-        systemURIResolver = new StandardURIResolver(this);
+        //systemURIResolver = new StandardURIResolver(this);
         standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
         serializerFactory = new net.sf.saxon.lib.SerializerFactory(this);
         sourceResolver = this;
@@ -390,7 +386,6 @@ public class Configuration implements SourceResolver, NotationSet {
         //#endif
 
         Version.platform.initialize(this);
-        defaultXsltCompilerInfo.setURIResolver(systemURIResolver);
 
         //#if CSHARP==false
         StandardEntityResolver resolver = new StandardEntityResolver(this);
@@ -695,62 +690,46 @@ public class Configuration implements SourceResolver, NotationSet {
         return dynamicLoader.getInstance(className, isTiming() ? traceOutput : null, null);
     }
 
-    /**
-     * Set a Predicate that is applied to a URI to determine whether the standard resource resolvers
-     * ({@link URIResolver}, {@link UnparsedTextURIResolver}, {@link SchemaURIResolver},
-     * {@link CollationURIResolver}, {@link ModuleURIResolver}) should accept it.
-     *
-     * <p>It is possible to set a predicate by means of the configuration property
-     * {@link Feature#ALLOWED_PROTOCOLS}. This method, however, allows an arbitrary predicate to
-     * be supplied.</p>
-     *
-     * <p>The predicate is only applicable to resolvers that choose to use it. This includes
-     * all the standard Saxon-supplied resolvers, but user-supplied resolvers can bypass this
-     * check.</p>
-     *
-     * @param test a condition that a URI must satisfy if access to a resource with this URI
-     *             is to be permitted
-     */
+//    /**
+//     * Set a Predicate that is applied to a URI to determine whether the standard resource resolvers
+//     * ({@link URIResolver}, {@link UnparsedTextURIResolver}, {@link SchemaURIResolver},
+//     * {@link CollationURIResolver}, {@link ModuleURIResolver}) should accept it.
+//     *
+//     * <p>It is possible to set a predicate by means of the configuration property
+//     * {@link Feature#ALLOWED_PROTOCOLS}. This method, however, allows an arbitrary predicate to
+//     * be supplied.</p>
+//     *
+//     * <p>The predicate is only applicable to resolvers that choose to use it. This includes
+//     * all the standard Saxon-supplied resolvers, but user-supplied resolvers can bypass this
+//     * check.</p>
+//     *
+//     * @param test a condition that a URI must satisfy if access to a resource with this URI
+//     *             is to be permitted
+//     */
+//
+//    public void setAllowedUriTest(Predicate<URI> test) {
+//        this.allowedUriTest = test;
+//    }
 
-    public void setAllowedUriTest(Predicate<URI> test) {
-        this.allowedUriTest = test;
-    }
-
-    /**
-     * Get the Predicate that is applied to a URI to determine whether the standard resource resolvers
-     * ({@link URIResolver}, {@link UnparsedTextURIResolver}, {@link SchemaURIResolver},
-     * {@link CollationURIResolver}, {@link ModuleURIResolver}) should accept it.
-     *
-     * <p>It is possible to set a predicate by means of the configuration property
-     * {@link Feature#ALLOWED_PROTOCOLS}.</p>
-     *
-     * <p>The predicate is only applicable to resolvers that choose to use it. This includes
-     * all the standard Saxon-supplied resolvers, but user-supplied resolvers can bypass this
-     * check.</p>
-     *
-     * @return a condition that a URI must satisfy if access to a resource with this URI
-     *      is to be permitted
-     */
-
-    public Predicate<URI> getAllowedUriTest() {
-        return this.allowedUriTest;
-    }
-
-
-    /**
-     * Set the resource resolver to be used in this configuration. Setting the resource
-     * resolver automatically makes it the URI resolver for this configuration and the default
-     * resolver for parsers created from this configuration.
-     * @param resolver The resolver to use.
-     */
-
-    public void setCommonResourceResolver(CommonResourceResolver resolver) {
-        commonResolver = resolver;
-        defaultXsltCompilerInfo.setCommonResourceResolver(resolver);
-        //#if CSHARP==false
-        setURIResolver(commonResolver);
-        //#endif
-    }
+//    /**
+//     * Get the Predicate that is applied to a URI to determine whether the standard resource resolvers
+//     * ({@link URIResolver}, {@link UnparsedTextURIResolver}, {@link SchemaURIResolver},
+//     * {@link CollationURIResolver}, {@link ModuleURIResolver}) should accept it.
+//     *
+//     * <p>It is possible to set a predicate by means of the configuration property
+//     * {@link Feature#ALLOWED_PROTOCOLS}.</p>
+//     *
+//     * <p>The predicate is only applicable to resolvers that choose to use it. This includes
+//     * all the standard Saxon-supplied resolvers, but user-supplied resolvers can bypass this
+//     * check.</p>
+//     *
+//     * @return a condition that a URI must satisfy if access to a resource with this URI
+//     *      is to be permitted
+//     */
+//
+//    public Predicate<URI> getAllowedUriTest() {
+//        return this.allowedUriTest;
+//    }
 
     /**
      * Returns the current resource resolver. If the configuration does
@@ -759,46 +738,38 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return The resolver.
      */
 
-    public CommonResourceResolver getCommonResourceResolver() {
+    public ResourceResolver getResourceResolver() {
         if (commonResolver == null) {
-            setCommonResourceResolver(new CatalogResourceResolver());
+            setResourceResolver(new CatalogResourceResolver());
         }
         return commonResolver;
     }
 
     /**
-     * Get the URIResolver used in this configuration
+     * Set the ResourceResolver to be used in this configuration. This is used as a fallback
+     * whenever the local ResourceResolver for a particular task (for example the XsltCompiler
+     * or the XQueryEvaluator) either (a) has not been set, or (b) has been called and returns null.
      *
-     * @return the URIResolver. If no URIResolver has been set explicitly, the
-     * default URIResolver is used.
-     * @since 8.4
+     * <p>If a user-written <code>ResourceResolver</code> is supplied then it must be able
+     * to handle a wide range of requests, not just for XML source documents and stylesheets,
+     * but also for schemas, unparsed text resources, and external entities. One way
+     * to achieve this by inheriting from the {@link CatalogResourceResolver},
+     * only overriding those methods that need to change. Another method is to
+     * construct a {@link ChainedResourceResolver} that first handles specific
+     * cases, and then passes control to the standard <code>ResourceResolver</code>.</p>
+     *
+     * <p>In cases where the request is for a non-XML resource, the object delivered by the
+     * <code>ResourceResolver</code> must be a <code>StreamSource</code>.</p>
+     *
+     * <p>The <code>ResourceResolver</code> may return null to indicate that the URI is to
+     * be resolved by the fallback <code>DirectResourceResolver</code>.</p>
+     *
+     * @param resolver The ResourceResolver to be used.
+     * @since 11.1. Replaces <code>setURIResolver()</code>
      */
 
-    public URIResolver getURIResolver() {
-        if (uriResolver == null) {
-            return systemURIResolver;
-        }
-        return uriResolver;
-    }
-
-    /**
-     * Set the URIResolver to be used in this configuration. This will be used to
-     * resolve the URIs used statically (e.g. by xsl:include) and also the URIs used
-     * dynamically by functions such as document() and doc(). Note that the URIResolver
-     * does not resolve the URI in the sense of RFC 2396 (which is also the sense in which
-     * the resolve-uri() function uses the term): rather it dereferences an absolute URI
-     * to obtain an actual resource, which is returned as a Source object.
-     *
-     * @param resolver The URIResolver to be used.
-     * @since 8.4
-     */
-
-    public void setURIResolver(URIResolver resolver) {
-        uriResolver = resolver;
-        if (resolver instanceof StandardURIResolver) {
-            ((StandardURIResolver) resolver).setConfiguration(this);
-        }
-        defaultXsltCompilerInfo.setURIResolver(resolver);
+    public void setResourceResolver(ResourceResolver resolver) {
+        commonResolver = resolver;
     }
 
     /**
@@ -820,7 +791,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public StandardURIResolver getSystemURIResolver() {
-        return systemURIResolver;
+        return null; //systemURIResolver;
     }
 
     /**
@@ -829,18 +800,19 @@ public class Configuration implements SourceResolver, NotationSet {
      *
      * @param className The fully-qualified name of the URIResolver class
      * @return The newly created URIResolver
-     * @throws TransformerException if the requested class does not
-     *                              implement the javax.xml.transform.URIResolver interface
+     * @throws XPathException if the requested class does not
+     *                              implement the <code>ResourceResolver</code>> interface
      */
-    public URIResolver makeURIResolver(String className) throws TransformerException {
+    public ResourceResolver makeResourceResolver(String className) throws XPathException {
         Object obj = dynamicLoader.getInstance(className, null);
-        if (obj instanceof StandardURIResolver) {
-            ((StandardURIResolver) obj).setConfiguration(this);
-        }
         if (obj instanceof URIResolver) {
-            return (URIResolver) obj;
+            getLogger().warning("From Saxon 11.1, the value of the -r option should be a ResourceResolver, not a URIResolver");
+            obj = new ResourceResolverWrappingURIResolver((URIResolver)obj);
         }
-        throw new XPathException("Class " + className + " is not a URIResolver");
+        if (obj instanceof ResourceResolver) {
+            return (ResourceResolver) obj;
+        }
+        throw new XPathException("Class " + className + " is not a ResourceResolver");
     }
 
     public void setErrorReporterFactory(java.util.function.Function<Configuration, ? extends ErrorReporter> factory) {
@@ -2698,28 +2670,28 @@ public class Configuration implements SourceResolver, NotationSet {
         return defaultParseOptions.getSpaceStrippingRule() == AllElementsSpaceStrippingRule.getInstance();
     }
 
-    //#if CSHARP==false
-    /**
-     * Get an XML parser for source documents.
-     * <p>This method is intended primarily for internal use.</p>
-     *
-     * @return a parser
-     */
-
-    public XMLReader createXMLParser() {
-        XMLReader parser;
-
-        if (getSourceParserClass() != null) {
-            parser = makeParser(getSourceParserClass());
-        } else {
-            parser = loadParser();
-        }
-
-        CommonResourceResolver resolver = getCommonResourceResolver().chain(parser.getEntityResolver());
-        parser.setEntityResolver(resolver);
-
-        return parser;
-    }
+//    //#if CSHARP==false
+//    /**
+//     * Get an XML parser for source documents.
+//     * <p>This method is intended primarily for internal use.</p>
+//     *
+//     * @return a parser
+//     */
+//
+//    public XMLReader createXMLParser() {
+//        XMLReader parser;
+//
+//        if (getSourceParserClass() != null) {
+//            parser = makeParser(getSourceParserClass());
+//        } else {
+//            parser = loadParser();
+//        }
+//
+//        EntityResolver resolver = new ChainedEntityResolver(getResourceResolver(), parser.getEntityResolver());
+//        parser.setEntityResolver(resolver);
+//
+//        return parser;
+//    }
 
     /**
      * Get a parser for source documents. The parser is allocated from a pool if any are available
@@ -2749,7 +2721,10 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = loadParser();
         }
 
-        CommonResourceResolver resolver = getCommonResourceResolver().chain(parser.getEntityResolver());
+        EntityResolver resolver = new EntityResolverWrappingResourceResolver(getResourceResolver());
+        if (parser.getEntityResolver() != null) {
+            resolver = new ChainedEntityResolver(resolver, parser.getEntityResolver());
+        }
         parser.setEntityResolver(resolver);
 
         if (isTiming()) {
@@ -2855,7 +2830,10 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = loadParser();
         }
 
-        CommonResourceResolver resolver = getCommonResourceResolver().chain(parser.getEntityResolver());
+        EntityResolver resolver = new EntityResolverWrappingResourceResolver(getResourceResolver());
+        if (parser.getEntityResolver() != null) {
+            resolver = new ChainedEntityResolver(resolver, parser.getEntityResolver());
+        }
         parser.setEntityResolver(resolver);
 
         try {
@@ -3961,20 +3939,20 @@ public class Configuration implements SourceResolver, NotationSet {
 
     public PipelineConfiguration makePipelineConfiguration() {
         PipelineConfiguration pipe = new PipelineConfiguration(this);
-        pipe.setURIResolver(getURIResolver());
         pipe.setParseOptions(new ParseOptions(defaultParseOptions));
         pipe.setErrorReporter(makeErrorReporter());
         return pipe;
     }
 
     /**
-     * Make a SchemaURIResolver that wraps a supplied URIResolver
+     * Make a SchemaURIResolver that wraps a supplied ResourceResolver
      *
+     * @param resolver the underlying ResourceResolver
      * @return a new SchemaURIResolver (or null if this is not an EnterpriseConfiguration)
      * @since 10.0
      */
 
-    public SchemaURIResolver makeSchemaURIResolver(URIResolver resolver) {
+    public SchemaURIResolver makeSchemaURIResolver(ResourceResolver resolver) {
         return null;
     }
 
@@ -4347,7 +4325,9 @@ public class Configuration implements SourceResolver, NotationSet {
         } else {
             switch (code) {
                 case FeatureCode.ALLOWED_PROTOCOLS:
-                    allowedUriTest = ProtocolRestricter.make((String)value);
+                    Predicate<URI> allowedUriTest = ProtocolRestricter.make((String)value);
+                    setResourceResolver(new ChainedResourceResolver(
+                            new ProtocolRestricter(allowedUriTest), getResourceResolver()));
                     break;
                 case FeatureCode.COLLATION_URI_RESOLVER:
                     if (!(value instanceof CollationURIResolver)) {
@@ -4643,8 +4623,8 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
 
                 case FeatureCode.URI_RESOLVER_CLASS:
-                    setURIResolver(
-                            (URIResolver) instantiateClassName(name, value, URIResolver.class));
+                    URIResolver u = (URIResolver) instantiateClassName(name, value, URIResolver.class);
+                    setResourceResolver(new ResourceResolverWrappingURIResolver(u));
                     break;
 
                 case FeatureCode.USE_XSI_SCHEMA_LOCATION:
@@ -4807,17 +4787,17 @@ public class Configuration implements SourceResolver, NotationSet {
                     //getDefaultXsltCompilerInfo().setXsltVersion(v);
                     break;
 
-                case FeatureCode.COMMON_RESOURCE_RESOLVER:
-                    if (!(value instanceof CommonResourceResolver)) {
+                case FeatureCode.RESOURCE_RESOLVER:
+                    if (!(value instanceof ResourceResolver)) {
                         throw new IllegalArgumentException(
-                                "SAXON_RESOURCE_RESOLVER value must be an instance of net.sf.saxon.lib.CommonResourceResolver");
+                                "RESOURCE_RESOLVER value must be an instance of net.sf.saxon.lib.ResourceResolver");
                     }
-                    setCommonResourceResolver((CommonResourceResolver) value);
+                    setResourceResolver((ResourceResolver) value);
                     break;
                 //#if CSHARP==false
-                case FeatureCode.COMMON_RESOURCE_RESOLVER_CLASS:
-                    CommonResourceResolver rresolver = (CommonResourceResolver) instantiateClassName(name, value, CommonResourceResolver.class);
-                    setCommonResourceResolver(rresolver);
+                case FeatureCode.RESOURCE_RESOLVER_CLASS:
+                    ResourceResolver rresolver = (ResourceResolver) instantiateClassName(name, value, ResourceResolver.class);
+                    setResourceResolver(rresolver);
                     break;
                 //#endif
 
@@ -5069,16 +5049,8 @@ public class Configuration implements SourceResolver, NotationSet {
         switch (code) {
 
             case FeatureCode.ALLOWED_PROTOCOLS:
-                // TODO: support this in Saxon-CS
-                //#if CSHARP==false
-                if (allowedUriTest instanceof ProtocolRestricter) {
-                    return allowedUriTest.toString();
-                } else {
-                    //#endif
-                    return "all";
-                    //#if CSHARP==false
-                }
-                //#endif
+                // TODO: support this
+                return null;
 
             case FeatureCode.COLLATION_URI_RESOLVER:
                 return getCollationURIResolver();
@@ -5232,7 +5204,11 @@ public class Configuration implements SourceResolver, NotationSet {
                 return getUnparsedTextURIResolver().getClass().getName();
 
             case FeatureCode.URI_RESOLVER_CLASS:
-                return getURIResolver().getClass().getName();
+                if (getResourceResolver() instanceof ResourceResolverWrappingURIResolver) {
+                    return ((ResourceResolverWrappingURIResolver) getResourceResolver()).getClass().getName();
+                } else {
+                    return null;
+                }
 
             case FeatureCode.USE_XSI_SCHEMA_LOCATION:
                 return defaultParseOptions.isUseXsiSchemaLocation();
@@ -5317,18 +5293,18 @@ public class Configuration implements SourceResolver, NotationSet {
             //#endif
 
             case FeatureCode.XSLT_STATIC_URI_RESOLVER_CLASS:
-                return getDefaultXsltCompilerInfo().getURIResolver().getClass().getName();
+                return null; // TODO: drop this
 
             case FeatureCode.XSLT_VERSION:
                 return 30;
 
 
-            case FeatureCode.COMMON_RESOURCE_RESOLVER:
-                return getCommonResourceResolver();
+            case FeatureCode.RESOURCE_RESOLVER:
+                return getResourceResolver();
 
             //#if CSHARP==false
-            case FeatureCode.COMMON_RESOURCE_RESOLVER_CLASS:
-                return getCommonResourceResolver().getClass().getName();
+            case FeatureCode.RESOURCE_RESOLVER_CLASS:
+                return getResourceResolver().getClass().getName();
             //#endif
         }
         throw new IllegalArgumentException("Unknown configuration property " );

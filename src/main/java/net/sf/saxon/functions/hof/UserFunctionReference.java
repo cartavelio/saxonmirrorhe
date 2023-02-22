@@ -406,7 +406,7 @@ public class UserFunctionReference extends Expression
             c2.setTemporaryOutputState(StandardNames.XSL_FUNCTION);
             c2.setCurrentOutputUri(null);
             c2.setCurrentComponent(component);
-            c2.setURIResolver(oldContext.getURIResolver());
+            c2.setResourceResolver(oldContext.getResourceResolver());
             c2.setOrigin(originator);
             return function.makeNewContext(c2, originator);
         }
