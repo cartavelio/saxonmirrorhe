@@ -981,6 +981,25 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         }
 
         @Override
+        public ItemEvaluator elaborateForItem() {
+            if (((CopyOf)getExpression()).copyForUpdate) {
+                PushEvaluator pushEval = elaborateForPush();
+                return context -> {
+                    Controller controller = context.getController();
+                    assert controller != null;
+                    SequenceCollector seq = controller.allocateSequenceOutputter(1);
+                    seq.setTreeModel(TreeModel.LINKED_TREE);
+                    TailCall tc = pushEval.processLeavingTail(new ComplexContentOutputter(seq), context);
+                    Expression.dispatchTailCall(tc);
+                    seq.close();
+                    return seq.getFirstItem();
+                };
+            } else {
+                return super.elaborateForItem();
+            }
+        }
+
+        @Override
         public PushEvaluator elaborateForPush() {
             CopyOf expr = (CopyOf) getExpression();
             if (expr.copyAccumulators) {
@@ -1036,18 +1055,6 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             }
         }
 
-//        /**
-//         * Get a function that evaluates the underlying expression lazily
-//         *
-//         * @param repeatable true if the resulting {@link Sequence} must be usable repeatedly; false
-//         *                   if it only needs to be used once
-//         * @return an evaluator for the expression that returns a {@link Sequence} (which may be a lazy sequence)
-//         */
-//        @Override
-//        public SequenceEvaluator lazily(boolean repeatable) {
-//            PullEvaluator pullEvaluator = elaborateForPull();
-//            return context -> new LazySequence(pullEvaluator.iterate(context));
-//        }
     }
 
 
