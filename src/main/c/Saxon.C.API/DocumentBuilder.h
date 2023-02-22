@@ -166,9 +166,6 @@ class DocumentBuilder {
   */
    XdmNode * parseXmlFromUri(const char* source);
 
-
-
-
     /**
      * Checks for pending exceptions without creating a local reference to the exception object
      * @return bool - true when there is a pending exception; otherwise return false
@@ -178,7 +175,7 @@ class DocumentBuilder {
     //! Clear any exception thrown
     void exceptionClear();
 
-     //! Get the ith error message if there are any error
+     //! Get the error message if there an error has been reported by JNI
     /**
      * A transformation may have a number of errors reported against it.
      * @return char* - The message of the exception
@@ -186,7 +183,7 @@ class DocumentBuilder {
     const char * getErrorMessage();
 
 
-     //! Get the ith error code if there are any error
+     //! Get the error code if an error has been reported by JNI
     /**
      * After the execution of the XPath expression there may be  a number of errors reported against it.
      * @return char* - The error code of the exception.
