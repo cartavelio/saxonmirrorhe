@@ -24,6 +24,7 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.packages.UsePack;
@@ -650,9 +651,9 @@ public class UseWhenFilter extends ProxyReceiver {
         Controller controller = new Controller(getConfiguration());
         controller.getExecutable().setFunctionLibrary((FunctionLibraryList) staticContext.getFunctionLibrary());
         if (staticContext.getXPathVersion() < 30) {
-            controller.setResourceResolver(request -> {
-                throw new XPathException("No external documents are available within an [xsl]use-when expression");
-            });
+            controller.setResourceResolver(new ResourceResolverDelegate(request -> {
+                throw new UncheckedXPathException("No external documents are available within an [xsl]use-when expression");
+            }));
         }
         controller.setCurrentDateTime(currentDateTime);
         // this is to ensure that all use-when expressions in a module use the same date and time
