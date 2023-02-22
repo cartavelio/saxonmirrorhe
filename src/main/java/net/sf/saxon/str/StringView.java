@@ -7,7 +7,6 @@
 
 package net.sf.saxon.str;
 
-import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
 
@@ -44,27 +43,7 @@ public class StringView extends UnicodeString {
         if (baseUnicodeString != null) {
             return baseUnicodeString;
         } else {
-            int uLength = StringTool.getStringLength(baseString);
-            if (uLength == baseString.length()) {
-                // No surrogate pairs
-                return baseUnicodeString = new BMPString(baseString);
-            } else {
-                byte[] triples = new byte[uLength*3];
-                for (int i=0, j=0; i<baseString.length(); i++) {
-                    char c = baseString.charAt(i);
-                    if (UTF16CharacterSet.isSurrogate(c)) {
-                        int cp = UTF16CharacterSet.combinePair(c, baseString.charAt(++i));
-                        triples[j++] = (byte) ((cp >> 16) & 0xff);
-                        triples[j++] = (byte) ((cp >> 8) & 0xff);
-                        triples[j++] = (byte) (cp & 0xff);
-                    } else {
-                        triples[j++] = 0;
-                        triples[j++] = (byte)((c >> 8) & 0xff);
-                        triples[j++] = (byte) (c & 0xff);
-                    }
-                }
-                return baseUnicodeString = new Twine24(triples);
-            }
+            return baseUnicodeString = StringTool.fromCharSequence(baseString);
         }
     }
 

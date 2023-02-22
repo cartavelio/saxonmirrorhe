@@ -14,9 +14,7 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.str.CompressedWhitespace;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.str.UnicodeBuilder;
 
 /**
  * The CommentStripper class is a filter that removes all comments and processing instructions.
@@ -29,8 +27,7 @@ import net.sf.saxon.str.UnicodeBuilder;
 
 public class CommentStripper extends ProxyReceiver {
 
-    /*@Nullable*/ private CompressedWhitespace savedWhitespace = null;
-    private final UnicodeBuilder buffer = new UnicodeBuilder();
+    /*@Nullable*/ private UnicodeString currentTextNode = null;
 
     /**
      * Default constructor for use in subclasses
@@ -71,18 +68,10 @@ public class CommentStripper extends ProxyReceiver {
 
     @Override
     public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
-        if (chars instanceof CompressedWhitespace) {
-            if (buffer.isEmpty() && savedWhitespace == null) {
-                savedWhitespace = (CompressedWhitespace) chars;
-            } else {
-                buffer.accept(((CompressedWhitespace) chars).uncompress());
-            }
+        if (currentTextNode == null) {
+            currentTextNode = chars;
         } else {
-            if (savedWhitespace != null) {
-                buffer.accept(savedWhitespace.uncompress());
-                savedWhitespace = null;
-            }
-            buffer.accept(chars);
+            currentTextNode = currentTextNode.concat(chars);
         }
 
     }
@@ -111,13 +100,10 @@ public class CommentStripper extends ProxyReceiver {
      */
 
     private void flush() throws XPathException {
-        if (!buffer.isEmpty()) {
-            nextReceiver.characters(buffer.toUnicodeString(), Loc.NONE, ReceiverOption.NONE);
-        } else if (savedWhitespace != null) {
-            nextReceiver.characters(savedWhitespace, Loc.NONE, ReceiverOption.NONE);
+        if (currentTextNode != null) {
+            nextReceiver.characters(currentTextNode.economize(), Loc.NONE, ReceiverOption.NONE);
         }
-        savedWhitespace = null;
-        buffer.clear();
+        currentTextNode = null;
     }
 
 }

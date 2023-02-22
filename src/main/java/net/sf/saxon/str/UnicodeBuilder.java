@@ -260,7 +260,6 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
     public void clear() {
         archive = ZenoString.EMPTY;
-        codepoints = new int[256];
         used = 0;
         bits = 0;
     }

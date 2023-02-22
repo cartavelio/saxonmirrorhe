@@ -58,7 +58,7 @@ public class StringTool {
      * @return true if the string contains surrogate characters
      */
 
-    public static boolean containsSurrogates(String str) {
+    public static boolean containsSurrogates(CharSequence str) {
         for (int i=0; i<str.length(); i++) {
             if (UTF16CharacterSet.isSurrogate(str.charAt(i))) {
                 return true;
@@ -85,12 +85,27 @@ public class StringTool {
     }
 
     public static UnicodeString fromCharSequence(CharSequence chars) {
-        UnicodeBuilder sb = new UnicodeBuilder();
-        IntIterator iter = codePoints(chars);
-        while (iter.hasNext()) {
-            sb.append(iter.next());
+        int uLength = StringTool.getStringLength(chars);
+        if (uLength == chars.length()) {
+            // No surrogate pairs
+            return new BMPString(chars.toString());
+        } else {
+            byte[] triples = new byte[uLength * 3];
+            for (int i = 0, j = 0; i < chars.length(); i++) {
+                char c = chars.charAt(i);
+                if (UTF16CharacterSet.isSurrogate(c)) {
+                    int cp = UTF16CharacterSet.combinePair(c, chars.charAt(++i));
+                    triples[j++] = (byte) ((cp >> 16) & 0xff);
+                    triples[j++] = (byte) ((cp >> 8) & 0xff);
+                    triples[j++] = (byte) (cp & 0xff);
+                } else {
+                    triples[j++] = 0;
+                    triples[j++] = (byte) ((c >> 8) & 0xff);
+                    triples[j++] = (byte) (c & 0xff);
+                }
+            }
+            return new Twine24(triples);
         }
-        return sb.toUnicodeString();
     }
 
     public static UnicodeString fromLatin1(String str) {
