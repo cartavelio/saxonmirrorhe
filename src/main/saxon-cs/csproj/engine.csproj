@@ -7,7 +7,17 @@
         <OutputType>Exe</OutputType>
         <NoWarn>2200;0414;0168;0169;0649;1591</NoWarn>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    </PropertyGroup>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+
+        <Authors>Saxonica Ltd.</Authors>
+        <Description>SaxonCS is a high-performance XSLT 3.0 processor. It conforms with the
+latest W3C specifications (notably XSLT 3.0 and XPath 3.1).</Description>
+        <PackageTags>XML,XSLT,Saxonica</PackageTags>
+        <Copyright>Copyright © 2021 Saxonica, Ltd.</Copyright>
+        <PackageProjectUrl>https://saxonica.com/</PackageProjectUrl>
+        <PackageReleaseNotes>Our first native C# release.</PackageReleaseNotes>
+        <PackageSummary>An XSLT processor for .NET.</PackageSummary>
+  </PropertyGroup>
     
     <ItemGroup>
         <Compile Include="../../src/main/saxon-cs/**" />

@@ -1,30 +1,3 @@
-// Find dotnet
-def dotnet = null
-// Laboriously construct a search path that includes some default locations
-// plus the users actual path.
-def spath = ["/usr/local/share/dotnet"]
-System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
-  spath += [dir]
-}
-spath.each { dir ->
-  if (dotnet == null) {
-    def fn = new File(dir + "/dotnet")
-    if (fn.exists() && fn.canExecute()) {
-      dotnet = fn.toString()
-    } else {
-      fn = new File(dir + "/dotnet.exe")
-      if (fn.exists() && fn.canExecute()) {
-        dotnet = fn.toString()
-      }
-    }
-  }
-}
-
-if (dotnet == null) {
-  println("WARNING: Failed to find dotnet[.exe]!")
-}
-
-
 task hecs_featureKeys(
   type: JavaExec,
   description: "Construct the feature keys for Saxon-CS"
@@ -721,13 +694,13 @@ task hecs_dll(
   description: "Compile Saxon-CS DLL for HE"
 ) {
   doLast {
-    if (dotnet == null) {
+    if (dotnetex == null) {
       throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
     }
 
     exec {
         workingDir = "${buildDir}/cs"
-        commandLine dotnet, 'build', '--nologo', '-o', '../csout', 'engine.csproj'
+        commandLine dotnetex, 'build', '--nologo', '-o', '../csout', 'engine.csproj'
     }
   }
 }
@@ -737,13 +710,59 @@ task eecs_dll(
   description: "Compile Saxon-CS DLL for EE"
 ) {
   doLast {
-    if (dotnet == null) {
+    if (dotnetex == null) {
       throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
     }
 
     exec {
         workingDir = "${buildDir}/cs"
-        commandLine dotnet, 'build', '--nologo', '-o', '../csout', 'engine.csproj'
+        commandLine dotnetex, 'build', '--nologo', '-o', '../csout', 'engine.csproj'
+    }
+  }
+}
+
+task dotnetRelease(
+  dependsOn: ['eecs_dll', 'configure_dotnetBuild']
+) {
+  def sver = "${saxonMajorVersion}.${saxonMinorVersion}.${saxonPatchVersion}"
+  doLast {
+    exec {
+      workingDir = projectDir
+      commandLine dotnetex, 'restore', 'build/cs/SaxonCS.sln', '--verbosity', 'Normal'
+    }
+  }
+  doLast {
+    exec {
+      workingDir = projectDir
+      commandLine dotnetex, '--version'
+    }
+  }
+  doLast {
+    exec {
+      workingDir = projectDir
+      commandLine dotnetex, 'build', 'build/cs/SaxonCS.sln', '--verbosity', 'Normal',
+        '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
+        "-p:Version=${sver}", "-p:PackageVersion=${sver}"
+    }
+  }
+}
+
+task configure_dotnetBuild() {
+  doLast {
+    copy {
+      // Copy the csproj and sln files, renaming them so that the release
+      // build uses the names we want the packages to have
+      from "${projectDir}/src/main/saxon-cs/csproj"
+      into "${buildDir}/cs"
+      rename { String filename ->
+        filename.replace("engine", "SaxonCS")
+      }
+    }
+  }
+  doLast {
+    copy {
+      from "${projectDir}/tools/saxon-cs"
+      into "${buildDir}/cs"
     }
   }
 }
@@ -753,13 +772,13 @@ task hecs_hello_world(
   description: "Execute a Hello World query"
 ) {
   doLast {
-    if (dotnet == null) {
+    if (dotnetex == null) {
       throw new GradleException("Cannot run: failed to find dotnet[.exe] on path.")
     }
 
     exec {
         workingDir = "${buildDir}/csout"
-        commandLine dotnet, "engine.dll", "query", "-qs:'Hello World'", "-t" 
+        commandLine dotnetex, "engine.dll", "query", "-qs:'Hello World'", "-t" 
     }
   }
 }
@@ -769,16 +788,13 @@ task eecs_hello_world(
   description: "Execute a Hello World query"
 ) {
   doLast {
-    if (dotnet == null) {
+    if (dotnetex == null) {
       throw new GradleException("Cannot run: failed to find dotnet[.exe] on path.")
     }
 
     exec {
         workingDir = "${buildDir}/csout"
-        commandLine dotnet, "engine.dll", "query", "-qs:'Hello World'", "-t" 
+        commandLine dotnetex, "engine.dll", "query", "-qs:'Hello World'", "-t" 
     }
   }
 }
-
-
-
