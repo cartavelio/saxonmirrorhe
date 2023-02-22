@@ -158,5 +158,15 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
     public AtomicMatchKey getCollationKey(UnicodeString s) {
         return s;
     }
+
+    /**
+     * Test if a supplied string compares equal to the empty string
+     *
+     * @param s1 the supplied string
+     */
+    @Override
+    public boolean isEqualToEmpty(UnicodeString s1) {
+        return s1.isEmpty();
+    }
 }
 

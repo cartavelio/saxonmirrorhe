@@ -196,6 +196,13 @@ public class Twine16 extends UnicodeString {
     }
 
     @Override
+    void copy32bit(int[] target, int offset) {
+        for (int i = 0, j = offset; i < chars.length; ) {
+            target[j++] = chars[i++];
+        }
+    }
+
+    @Override
     public int getWidth() {
         return 16;
     }

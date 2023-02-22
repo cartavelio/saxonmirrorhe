@@ -82,6 +82,11 @@ public abstract class WhitespaceString extends UnicodeString {
         uncompress().copy24bit(target, offset);
     }
 
+    @Override
+    void copy32bit(int[] target, int offset) {
+        uncompress().copy32bit(target, offset);
+    }
+
 
     /**
      * Write the value to a Writer with escaping of special characters

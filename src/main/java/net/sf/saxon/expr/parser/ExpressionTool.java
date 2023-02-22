@@ -1417,8 +1417,9 @@ public class ExpressionTool {
                     new StructuredQName("saxon", NamespaceUri.SAXON, "dot" + exp.hashCode()));
             let.setRequiredType(SequenceType.makeSequenceType(contextItemType, StaticProperty.EXACTLY_ONE));
             let.setSequence(new ContextItemExpression());
-            let.setAction(exp);
-            boolean changed = factorOutDot(exp, let);
+            Expression actionCopy = exp.copy(new RebindingMap());
+            let.setAction(actionCopy);
+            boolean changed = factorOutDot(actionCopy, let);
             if (changed) {
                 return let;
             } else {

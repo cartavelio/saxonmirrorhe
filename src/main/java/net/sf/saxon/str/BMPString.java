@@ -181,5 +181,12 @@ public class BMPString extends UnicodeString {
             target[j++] = (byte) (c & 0xff);
         }
     }
+
+    @Override
+    void copy32bit(int[] target, int offset) {
+        for (int i = 0, j = offset; i < baseString.length(); ) {
+            target[j++] = baseString.charAt(i++);
+        }
+    }
 }
 

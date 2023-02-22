@@ -157,13 +157,7 @@ public class Whitespace {
         if (content instanceof WhitespaceString) {
             return true;
         }
-        IntIterator iter = content.codePoints();
-        while (iter.hasNext()) {
-            if (!isWhite(iter.next())) {
-                return false;
-            }
-        }
-        return true;
+        return content.indexWhere(ch -> !isWhite(ch), 0) >= 0;
     }
 
     /*@NotNull*/ private static final boolean[] C0WHITE = {

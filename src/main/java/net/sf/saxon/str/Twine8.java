@@ -120,6 +120,13 @@ public class Twine8 extends UnicodeString {
         }
     }
 
+    @Override
+    void copy32bit(int[] target, int offset) {
+        for (int i = 0, j = offset; i < bytes.length; ) {
+            target[j++] = bytes[i++] & 0xff;
+        }
+    }
+
     /**
      * Get a substring of this string (following the rules of {@link String#substring}, but measuring
      * Unicode codepoints rather than 16-bit code units)

@@ -70,6 +70,11 @@ public final class EmptyUnicodeString extends UnicodeString {
         // no action
     }
 
+    @Override
+    void copy32bit(int[] target, int offset) {
+        // no action
+    }
+
     /**
      * Get a substring of this string (following the rules of {@link String#substring}, but measuring
      * Unicode codepoints rather than 16-bit code units)

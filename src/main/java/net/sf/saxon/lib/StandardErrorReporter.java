@@ -228,7 +228,7 @@ public class StandardErrorReporter
         if (processingError != latestError) {
             latestError = processingError;
             if (processingError.isWarning()) {
-                if (!isSuppressedWarning(processingError.getErrorCode().getStructuredQName())) {
+                if (processingError.getErrorCode() == null || !isSuppressedWarning(processingError.getErrorCode().getStructuredQName())) {
                     warning(processingError);
                 }
             } else {
