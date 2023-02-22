@@ -343,7 +343,7 @@ public abstract class SchemaValidator extends AbstractDestination {
      */
     public abstract void validateMultiple(Iterable<Source> sources) throws SaxonApiException;
 
-//#if DOTNET == false
+//#if CSHARP == false
     /**
      * Construct a Source object that applies validation to an underlying input Source.
      * This method does not cause validation to take place immediately: the
