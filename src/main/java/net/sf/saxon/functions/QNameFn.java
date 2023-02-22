@@ -71,11 +71,6 @@ public class QNameFn extends SystemFunction {
         );
     }
 
-    @Override
-    public String getCompilerName() {
-        return "QNameFnCompiler";
-    }
-
     /**
      * Make an elaborator for a system function call on this function
      *

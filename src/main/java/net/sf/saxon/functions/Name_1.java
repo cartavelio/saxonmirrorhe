@@ -40,11 +40,6 @@ public class Name_1 extends ScalarSystemFunction {
         return StringValue.EMPTY_STRING;
     }
 
-    @Override
-    public String getCompilerName() {
-        return "NameCompiler";
-    }
-
     /**
      * Make an elaborator for this expression
      *

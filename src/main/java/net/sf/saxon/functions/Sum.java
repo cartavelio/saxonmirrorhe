@@ -199,11 +199,6 @@ public class Sum extends FoldingFunction {
         }
     }
 
-    @Override
-    public String getCompilerName() {
-        return "SumCompiler";
-    }
-
     /**
      * Make an elaborator for a system function call on this function
      *

@@ -45,11 +45,6 @@ public class Contains extends CollatingFunctionFixed {
         return BooleanValue.get(contains(s0, s1, (SubstringMatcher)getStringCollator()));
     }
 
-    @Override
-    public String getCompilerName() {
-        return "ContainsCompiler";
-    }
-
     /**
      * Make an elaborator for this expression
      *

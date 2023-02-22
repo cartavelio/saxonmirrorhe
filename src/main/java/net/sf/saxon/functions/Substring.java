@@ -198,11 +198,6 @@ public class Substring extends SystemFunction implements Callable {
         }
     }
 
-    @Override
-    public String getCompilerName() {
-        return "SubstringCompiler";
-    }
-
     /**
      * Make an elaborator for a system function call on this function
      *

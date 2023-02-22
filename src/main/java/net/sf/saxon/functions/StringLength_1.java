@@ -68,11 +68,6 @@ public class StringLength_1 extends ScalarSystemFunction {
         }
     }
 
-    @Override
-    public String getCompilerName() {
-        return "StringLengthCompiler";
-    }
-
     /**
      * Make an elaborator for a system function call on this function
      *

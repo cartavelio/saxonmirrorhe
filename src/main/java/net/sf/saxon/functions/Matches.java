@@ -113,11 +113,6 @@ public class Matches extends RegexFunction {
         return BooleanValue.get(result);
     }
 
-    @Override
-    public String getCompilerName() {
-        return "MatchesCompiler";
-    }
-
     /**
      * Make an elaborator for a system function call on this function
      *

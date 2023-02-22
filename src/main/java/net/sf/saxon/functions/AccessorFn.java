@@ -77,12 +77,7 @@ public abstract class AccessorFn extends ScalarSystemFunction {
         return ((AtomicValue)item).getComponent(getComponentId());
     }
 
-    @Override
-    public String getCompilerName() {
-        return "AccessorFnCompiler";
-    }
 
-    
     public static class YearFromDateTime extends AccessorFn {
 
         @Override

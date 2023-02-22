@@ -159,11 +159,6 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
         }
     }
 
-    @Override
-    public String getCompilerName() {
-        return "TranslateCompiler";
-    }
-
     /**
      * Make a copy of this SystemFunction. This is required only for system functions such as regex
      * functions that maintain state on behalf of a particular caller.

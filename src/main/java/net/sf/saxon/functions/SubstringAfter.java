@@ -65,11 +65,6 @@ public class SubstringAfter extends CollatingFunctionFixed {
         return collator.substringAfter(arg1, arg2);
     }
 
-    @Override
-    public String getCompilerName() {
-        return "SubstringAfterCompiler";
-    }
-
     /**
      * Make an elaborator for a system function call on this function
      *

@@ -38,11 +38,6 @@ public class BaseUri_1 extends SystemFunction implements Callable {
 
     }
 
-    @Override
-    public String getCompilerName() {
-        return "BaseURICompiler";
-    }
-
     /**
      * Make an elaborator for this expression
      *

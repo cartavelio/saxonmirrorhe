@@ -41,11 +41,6 @@ public class LocalName_1 extends ScalarSystemFunction {
         return StringValue.EMPTY_STRING;
     }
 
-    @Override
-    public String getCompilerName() {
-        return "LocalNameCompiler";
-    }
-
     /**
      * Make an elaborator for this expression
      *

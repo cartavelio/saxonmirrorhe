@@ -59,11 +59,6 @@ public class NormalizeSpace_1 extends ScalarSystemFunction {
         };
     }
 
-    @Override
-    public String getCompilerName() {
-        return "NormalizeSpaceCompiler";
-    }
-
     /**
      * Make an elaborator for a system function call on this function
      *
