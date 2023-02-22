@@ -1,9 +1,126 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- exceptions file for the QT4 Test Suite -->
 <exceptions>
+
+   <exception test-set="fn-deep-equal" 
+      test-case="fn-deep-equal-mix-args-017a fn-deep-equal-mix-args-018a" run="false" report="not implemented">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
+   </exception>
    
-   <exception test-set="fn-slice"  run="false" report="not implemented according to current spec">
+   <exception test-set="fn-distinct-values" 
+      test-case="cbcl-distinct-values-002c
+                 fn-distinct-values-mixed-args-012a
+                 fn-distinct-values-mixed-args-013a" run="false" report="not implemented">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="fn-highest" test-case="highest-117"  run="false" report="bad test">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Bug #30 raised against test case</reason>
+   </exception>
+   
+   <exception test-set="fn-lowest" test-case="lowest-117"  run="false" report="bad test">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Bug #30 raised against test case</reason>
+   </exception>
+   
+   <exception test-set="fn-range"  run="false" report="spec not agreed">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Function neither specified nor implemented</reason>
+   </exception>
+   
+   <exception test-set="fn-range-from"  run="false" report="spec not agreed">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Function neither specified nor implemented</reason>
+   </exception>
+   
+   <exception test-set="fn-range-to"  run="false" report="spec not agreed">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Function neither specified nor implemented</reason>
+   </exception>
+   
+   <exception test-set="fn-replace" test-case="  
+      fn-replace-100
+      fn-replace-101
+      fn-replace-102
+      fn-replace-103
+      fn-replace-104
+      fn-replace-105
+      fn-replace-106
+      fn-replace-107
+      fn-replace-108
+      fn-replace-109
+      fn-replace-110
+      fn-replace-111
+      fn-replace-112
+      fn-replace-113" run="false" report="spec not agreed">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Spec for fn:replace#4 not yet agreed and not implemented</reason>
+   </exception>
+   
+   
+ 
+   <exception test-set="fn-slice"  run="false" report="not implemented">
       <created by="Michael Kay" on="2022-08-09"/>
       <reason>Spec unclear; depends on keyword arguments</reason>
    </exception>
+   
+   
+   
+   <exception test-set="array-partition"  run="false" report="not implemented">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Spec unclear; depends on keyword arguments</reason>
+   </exception>
+   
+   <exception test-set="array-slice"  run="false" report="not implemented">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Spec unclear; depends on keyword arguments</reason>
+   </exception>
+   
+   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="known bug in ICU">
+      <created by="Michael Kay" on="2018-02-01"/>
+      <reason>Known bug in ICU</reason>
+   </exception>
+   
+
+   
+   <exception test-set="op-to" test-case="RangeExpr-408f
+      RangeExpr-408g
+      RangeExpr-408h
+      RangeExpr-408i
+      RangeExpr-408j
+      RangeExpr-408k
+      RangeExpr-410f
+      RangeExpr-410g
+      RangeExpr-410h
+      RangeExpr-410i
+      RangeExpr-410j
+      RangeExpr-410k" run="false" report="tooBig">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Exceeds Saxon limit on max length of a sequence</reason>
+   </exception>
+   
+   
+   
+   
+   <exception test-set="prod-ByExpr"  run="false" report="not implemented">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Not yet implemented (spec not agreed)</reason>
+   </exception>
+   
+   <exception test-set="prod-CastExpr" test-case=" K-SeqExprCast-76a
+      K-SeqExprCast-81a"  run="false" report="not implemented">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
+   </exception>
+   
+  
+   
+   <exception test-set="prod-ThinArrow"  run="false" report="not implemented">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Not yet implemented</reason>
+   </exception>
+
 </exceptions>
