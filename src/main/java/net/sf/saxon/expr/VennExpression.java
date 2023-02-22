@@ -734,14 +734,14 @@ public class VennExpression extends BinaryExpression {
             case Token.INTERSECT: {
                 SequenceIterator i1 = getLhsExpression().iterate(c);
                 SequenceIterator i2 = getRhsExpression().iterate(c);
-                return new IntersectionEnumeration(i1, i2,
-                                                   GlobalOrderComparer.getInstance());
+                return new IntersectionIterator(i1, i2,
+                                                GlobalOrderComparer.getInstance());
             }
             case Token.EXCEPT: {
                 SequenceIterator i1 = getLhsExpression().iterate(c);
                 SequenceIterator i2 = getRhsExpression().iterate(c);
-                return new DifferenceEnumeration(i1, i2,
-                                                 GlobalOrderComparer.getInstance());
+                return new DifferenceIterator(i1, i2,
+                                              GlobalOrderComparer.getInstance());
             }
         }
         throw new UnsupportedOperationException("Unknown operator in Venn Expression");
@@ -824,10 +824,10 @@ public class VennExpression extends BinaryExpression {
                 PullEvaluator p1 = makeElaborator(exp.getLhsExpression()).elaborateForPull();
                 PullEvaluator p2 = makeElaborator(exp.getRhsExpression()).elaborateForPull();
                 if (exp.getOperator() == Token.INTERSECT) {
-                    return context -> new IntersectionEnumeration(
+                    return context -> new IntersectionIterator(
                             p1.eval(context), p2.eval(context), GlobalOrderComparer.getInstance());
                 } else {
-                    return context -> new DifferenceEnumeration(
+                    return context -> new DifferenceIterator(
                             p1.eval(context), p2.eval(context), GlobalOrderComparer.getInstance());
                 }
             }

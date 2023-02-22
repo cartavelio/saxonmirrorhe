@@ -7,11 +7,11 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
@@ -613,69 +613,65 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      * @return a suitable elaborator
      */
 
-//    @Override
-//    public Elaborator getElaborator() {
-//        return new CallTemplateElaborator();
-//    }
+    @Override
+    public Elaborator getElaborator() {
+        return new CallTemplateElaborator();
+    }
 
-    public static class CallTemplateElaborator extends PullElaborator {
-        // TODO: code not yet in operation.
-        // TODO: tail recursion
+    public static class CallTemplateElaborator extends PushElaborator {
 
-        @Override
-        public PullEvaluator elaborateForPull() {
-            ForEach forEach = (ForEach) getExpression();
-            PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
-            PullEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPull();
-            ContextMappingFunction mapper = context -> action.eval(context);
-            return context -> {
-                XPathContextMinor c2 = context.newMinorContext();
-                c2.trackFocus(select.eval(context));
-                return new ContextMappingIterator(mapper, c2);
-            };
-        }
 
         @Override
         public PushEvaluator elaborateForPush() {
-            CallTemplate insn = (CallTemplate)getExpression();
-            Component fixedTarget = insn.getFixedTarget();
-            int bindingSlot = insn.getBindingSlot();
-            return (out, context) -> {
-                Component target = fixedTarget;
-                if (bindingSlot >= 0) {
-                    target = context.getTargetComponent(bindingSlot);
-                    if (target.isHiddenAbstractComponent()) {
-                        XPathException err = new XPathException("Cannot call an abstract template (" +
-                                                                        insn.getCalledTemplateName() +
-                                                                        ") with no implementation", "XTDE3052");
-                        err.setLocation(insn.getLocation());
-                        throw err;
-                    }
-                }
-                NamedTemplate t = (NamedTemplate) target.getActor();
-                XPathContextMajor c2 = context.newContext();
-                c2.setCurrentComponent(target);
-                c2.setOrigin(insn);
-                c2.openStackFrame(t.getStackFrameMap());
-                // TODO: params
-                //c2.setLocalParameters(insn.assembleParams(context, actualParams));
-                //c2.setTunnelParameters(insn.assembleTunnelParams(context, tunnelParams));
-    //            if (insn.isWithinDeclaredStreamableConstruct) {
-    //                c2.setCurrentGroupIterator(null);
-    //            }
-                c2.setCurrentMergeGroupIterator(null);
+            CallTemplate expr = (CallTemplate)getExpression();
+            if (expr.useTailRecursion) {
+                return (output, context) -> {
+                    //noinspection Convert2MethodRef
+                    return expr.processLeavingTail(output, context);
+                };
+//
+//                    Component targetComponent;
+//                    if (bindingSlot >= 0) {
+//                        targetComponent = context.getTargetComponent(bindingSlot);
+//                    } else {
+//                        targetComponent = fixedTarget;
+//                    }
+//                    if (targetComponent == null) {
+//                        throw new XPathException("Internal Saxon error: No binding available for call-template instruction",
+//                                                 SaxonErrorCode.SXPK0001, expr.getLocation());
+//                    }
+//                    if (targetComponent.isHiddenAbstractComponent()) {
+//                        throw new XPathException("Cannot call an abstract template (" +
+//                                                         expr.calledTemplateName.getDisplayName() +
+//                                                         ") with no implementation", "XTDE3052", expr.getLocation());
+//                    }
+//
+//                    // handle parameters if any
+//
+//                    ParameterSet params = assembleParams(context, expr.actualParams);
+//                    ParameterSet tunnels = assembleTunnelParams(context, expr.tunnelParams);
+//
+//                    // Call the named template. Actually, don't call it; rather construct a call package
+//                    // and return it to the caller, who will then process this package.
+//
+//                    //System.err.println("Call template using tail recursion");
+//                    if (params == null) {                  // bug 490967
+//                        params = ParameterSet.EMPTY_PARAMETER_SET;
+//                    }
+//
+//                    // clear all the local variables: they are no longer needed
+//                    Arrays.fill(context.getStackFrame().getStackFrameValues(), null);
+//
+//                    return new CallTemplatePackage(targetComponent, params, tunnels, expr, output, context);
 
-                try {
-                    return t.expand(out, c2);
-                } catch (StackOverflowError e) {
-                    XPathException err = new XPathException.StackOverflow(
-                            "Too many nested template or function calls. The stylesheet may be looping.",
-                            SaxonErrorCode.SXLM0001, insn.getLocation());
-                    err.setXPathContext(context);
-                    throw err;
-                }
 
-            };
+            } else {
+                return (output, context) -> {
+                    expr.process(output, context);
+                    return null;
+                };
+            }
+
 
         }
     }

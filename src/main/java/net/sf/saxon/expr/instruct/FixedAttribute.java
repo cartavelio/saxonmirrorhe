@@ -10,6 +10,7 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -22,12 +23,14 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
+import net.sf.saxon.value.Whitespace;
 
 import java.util.function.BiConsumer;
 
@@ -308,6 +311,79 @@ public final class FixedAttribute extends AttributeCreator {
     @Override
     public String toShortString() {
         return "attr{" + nodeName.getDisplayName() + "=...}";
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new FixedAttributeElaborator();
+    }
+
+
+    private static class FixedAttributeElaborator extends SimpleNodePushElaborator {
+        @Override
+        public PushEvaluator elaborateForPush() {
+            FixedAttribute expr = (FixedAttribute) getExpression();
+            NodeName name = expr.nodeName;
+            Location loc = expr.getLocation();
+            int options = expr.getOptions();
+            boolean collapse = name.equals(StandardNames.XML_ID_NAME);
+
+            if (collapse || expr.getSchemaType() != null
+                    || expr.getValidationAction() == Validation.STRICT || expr.getValidationAction() == Validation.LAX) {
+                UnicodeStringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForUnicodeString(true);
+                return (output, context) -> {
+                    UnicodeString content = contentEval.eval(context);
+                    SimpleType ann = expr.validate(name, content, context);
+                    if (collapse) {
+                        content = Whitespace.collapseWhitespace(content);
+                    }
+
+                    try {
+                        output.attribute(name, ann, content.toString(), loc, options);
+                    } catch (XPathException err) {
+                        throw dynamicError(loc, err, context);
+                    }
+
+                    return null;
+                };
+            } else {
+                StringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForString(true);
+                return (output, context) -> {
+                    String content = contentEval.eval(context);
+                    try {
+                        output.attribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, content, loc, options);
+                    } catch (XPathException err) {
+                        throw Instruction.dynamicError(loc, err, context);
+                    }
+                    return null;
+                };
+            }
+
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            FixedAttribute expr = (FixedAttribute) getExpression();
+            if (expr.getSchemaType() != null ||
+                    expr.getValidationAction() == Validation.STRICT ||
+                    expr.getValidationAction() == Validation.LAX) {
+                ItemEvaluator superEval = super.elaborateForItem();
+                return context -> {
+                    Orphan o = (Orphan)superEval.eval(context);
+                    assert o != null;
+                    expr.validateOrphanAttribute(o, context);
+                    return o;
+                };
+            } else {
+                return super.elaborateForItem();
+            }
+        }
     }
 }
 

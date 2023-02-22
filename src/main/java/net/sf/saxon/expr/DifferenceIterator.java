@@ -21,14 +21,14 @@ import java.util.Comparator;
  */
 
 
-public class DifferenceEnumeration implements SequenceIterator {
+public class DifferenceIterator implements SequenceIterator {
 
 
     private final SequenceIterator p1;
     private final SequenceIterator p2;
 
-    /*@Nullable*/ private NodeInfo nextNode1 = null;
-    private NodeInfo nextNode2 = null;
+    private NodeInfo nextNode1;
+    private NodeInfo nextNode2;
     private final Comparator<? super NodeInfo> comparer;
 
     /**
@@ -41,8 +41,8 @@ public class DifferenceEnumeration implements SequenceIterator {
      * @throws XPathException if a failure occurs reading from either input sequence
      */
 
-    public DifferenceEnumeration(SequenceIterator p1, SequenceIterator p2,
-                                 Comparator<? super NodeInfo> comparer) throws XPathException {
+    public DifferenceIterator(SequenceIterator p1, SequenceIterator p2,
+                              Comparator<? super NodeInfo> comparer) throws XPathException {
         this.p1 = p1;
         this.p2 = p2;
         this.comparer = comparer;

@@ -851,54 +851,10 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         final Controller controller = context.getController();
         boolean isXSLT = getRetainedStaticContext().getPackageData().isXSLT();
         assert controller != null;
-        if (schemaType == null /*&& copyNamespaces*/ && !copyForUpdate) {
-            if (validation == Validation.PRESERVE) {
-                // create a virtual copy of the underlying nodes
-                ItemMappingFunction copier = ItemMapper.of(item -> {
-                    if (item instanceof NodeInfo) {
-                        if (((NodeInfo) item).getTreeInfo().isTyped()) {
-                            if (!copyNamespaces && ((NodeInfo) item).getNodeKind() == Type.ELEMENT) {
-                                // A lot of extra work here just to check for error XTTE0950, but the conditions are rare
-                                Sink sink = new Sink(controller.makePipelineConfiguration());
-                                ((NodeInfo) item).copy(sink, CopyOptions.TYPE_ANNOTATIONS, getLocation());
-                            }
-                            if (((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE &&
-                                    ((SimpleType) ((NodeInfo) item).getSchemaType()).isNamespaceSensitive()) {
-                                throw new XPathException("Cannot copy an attribute with namespace-sensitive content except as part of its containing element", "XTTE0950");
-                            }
-                        }
-                        VirtualCopy vc = VirtualCopy.makeVirtualCopy((NodeInfo) item);
-                        vc.setDropNamespaces(!copyNamespaces);
-                        vc.getTreeInfo().setCopyAccumulators(copyAccumulators);
-                        if (isXSLT && copyAccumulators) {
-                            vc.getTreeInfo().setCopyAccumulators(true);
-                            AccumulatorManager am = ((XsltController) context.getController()).getAccumulatorManager();
-                            am.setApplicableAccumulators(vc.getTreeInfo(), am.getApplicableAccumulators(((NodeInfo) item).getTreeInfo()));
-                        }
-                        if (((NodeInfo) item).getNodeKind() == Type.ELEMENT) {
-                            vc.setSystemId(computeNewBaseUri((NodeInfo) item, getStaticBaseURIString()));
-                        }
-                        return vc;
-                    } else {
-                        return item;
-                    }
-                });
-                return new ItemMappingIterator(getSelect().iterate(context), copier, true);
-            } else if (validation == Validation.STRIP) {
-                // create a virtual copy of the underlying nodes
-                ItemMappingFunction copier = ItemMapper.of(item -> {
-                    if (!(item instanceof NodeInfo)) {
-                        return item;
-                    }
-                    VirtualCopy vc = VirtualUntypedCopy.makeVirtualUntypedTree((NodeInfo) item, (NodeInfo) item);
-                    vc.getTreeInfo().setCopyAccumulators(copyAccumulators);
-                    vc.setDropNamespaces(!copyNamespaces);
-                    if (((NodeInfo) item).getNodeKind() == Type.ELEMENT) {
-                        vc.setSystemId(computeNewBaseUri((NodeInfo) item, getStaticBaseURIString()));
-                    }
-                    return vc;
-                });
-                return new ItemMappingIterator(getSelect().iterate(context), copier, true);
+        if (schemaType == null && !copyForUpdate) {
+            SequenceIterator result = makeVirtualCopy(getSelect().iterate(context), controller, isXSLT);
+            if (result != null) {
+                return result;
             }
         }
         PipelineConfiguration pipe = controller.makePipelineConfiguration();
@@ -916,6 +872,59 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             throw err;
         }
         return out.getSequence().iterate();
+    }
+
+    private ItemMappingIterator makeVirtualCopy(SequenceIterator input, Controller controller, boolean isXSLT) throws XPathException {
+        if (validation == Validation.PRESERVE) {
+            // create a virtual copy of the underlying nodes
+            ItemMappingFunction copier = ItemMapper.of(item -> {
+                if (item instanceof NodeInfo) {
+                    if (((NodeInfo) item).getTreeInfo().isTyped()) {
+                        if (!copyNamespaces && ((NodeInfo) item).getNodeKind() == Type.ELEMENT) {
+                            // A lot of extra work here just to check for error XTTE0950, but the conditions are rare
+                            Sink sink = new Sink(controller.makePipelineConfiguration());
+                            ((NodeInfo) item).copy(sink, CopyOptions.TYPE_ANNOTATIONS, getLocation());
+                        }
+                        if (((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE &&
+                                ((SimpleType) ((NodeInfo) item).getSchemaType()).isNamespaceSensitive()) {
+                            throw new XPathException("Cannot copy an attribute with namespace-sensitive content except as part of its containing element", "XTTE0950");
+                        }
+                    }
+                    VirtualCopy vc = VirtualCopy.makeVirtualCopy((NodeInfo) item);
+                    vc.setDropNamespaces(!copyNamespaces);
+                    vc.getTreeInfo().setCopyAccumulators(copyAccumulators);
+                    if (isXSLT && copyAccumulators) {
+                        vc.getTreeInfo().setCopyAccumulators(true);
+                        AccumulatorManager am = ((XsltController) controller).getAccumulatorManager();
+                        am.setApplicableAccumulators(vc.getTreeInfo(), am.getApplicableAccumulators(((NodeInfo) item).getTreeInfo()));
+                    }
+                    if (((NodeInfo) item).getNodeKind() == Type.ELEMENT) {
+                        vc.setSystemId(computeNewBaseUri((NodeInfo) item, getStaticBaseURIString()));
+                    }
+                    return vc;
+                } else {
+                    return item;
+                }
+            });
+            return new ItemMappingIterator(input, copier, true);
+        } else if (validation == Validation.STRIP) {
+            // create a virtual copy of the underlying nodes
+            ItemMappingFunction copier = ItemMapper.of(item -> {
+                if (!(item instanceof NodeInfo)) {
+                    return item;
+                }
+                VirtualCopy vc = VirtualUntypedCopy.makeVirtualUntypedTree((NodeInfo) item, (NodeInfo) item);
+                vc.getTreeInfo().setCopyAccumulators(copyAccumulators);
+                vc.setDropNamespaces(!copyNamespaces);
+                if (((NodeInfo) item).getNodeKind() == Type.ELEMENT) {
+                    vc.setSystemId(computeNewBaseUri((NodeInfo) item, getStaticBaseURIString()));
+                }
+                return vc;
+            });
+            return new ItemMappingIterator(input, copier, true);
+        } else {
+            return null;
+        }
     }
 
 

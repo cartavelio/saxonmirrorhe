@@ -10,12 +10,17 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.SimpleNodePushElaborator;
+import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.str.UnicodeString;
@@ -197,6 +202,42 @@ public final class Comment extends SimpleNodeConstructor {
         }
         getSelect().export(out);
         out.endElement();
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new CommentElaborator();
+    }
+
+
+    private static class CommentElaborator extends SimpleNodePushElaborator {
+        @Override
+        public PushEvaluator elaborateForPush() {
+            Comment expr = (Comment)getExpression();
+            Location loc = expr.getLocation();
+            UnicodeStringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForUnicodeString(true);
+            if (expr.isXSLT()) {
+                return (out, context) -> {
+                    UnicodeString content = contentEval.eval(context);
+                    content = Comment.checkContentXSLT(content);
+                    out.comment(content, loc, ReceiverOption.NONE);
+                    return null;
+                };
+            } else {
+                return (out, context) -> {
+                    UnicodeString content = contentEval.eval(context);
+                    Comment.checkContentXQuery(content);
+                    out.comment(content, loc, ReceiverOption.NONE);
+                    return null;
+                };
+            }
+        }
     }
 
 }

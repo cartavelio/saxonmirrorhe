@@ -10,6 +10,7 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -17,6 +18,8 @@ import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -324,10 +327,12 @@ public final class ComputedAttribute extends AttributeCreator {
 
     @Override
     public NodeName evaluateNodeName(XPathContext context) throws XPathException {
-        NamePool pool = context.getNamePool();
-
         Item nameValue = getNameExp().evaluateItem(context);
+        return validateNodeName(nameValue, context);
+    }
 
+    protected NodeName validateNodeName(Item nameValue, XPathContext context) throws XPathException {
+        NamePool pool = context.getNamePool();
         String prefix;
         String localName;
         NamespaceUri uri = null;
@@ -511,6 +516,79 @@ public final class ComputedAttribute extends AttributeCreator {
         out.setChildRole("select");
         getSelect().export(out);
         out.endElement();
+    }
+
+    @Override
+    public Elaborator getElaborator() {
+        return new ComputedAttributeElaborator();
+    }
+
+
+    private static class ComputedAttributeElaborator extends SimpleNodePushElaborator {
+        @Override
+        public PushEvaluator elaborateForPush() {
+            ComputedAttribute expr = (ComputedAttribute) getExpression();
+            Location loc = expr.getLocation();
+            int options = expr.getOptions();
+            ItemEvaluator nameEval = Elaborator.makeElaborator(expr.getNameExp()).elaborateForItem();
+
+            if (expr.getSchemaType() != null
+                    || expr.getValidationAction() == Validation.STRICT || expr.getValidationAction() == Validation.LAX) {
+                UnicodeStringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForUnicodeString(true);
+                return (output, context) -> {
+                    Item nameItem = nameEval.eval(context);
+                    NodeName name = expr.validateNodeName(nameItem, context);
+                    UnicodeString content = contentEval.eval(context);
+                    SimpleType ann = expr.validate(name, content, context);
+                    if (name.equals(StandardNames.XML_ID_NAME)) {
+                        content = Whitespace.collapseWhitespace(content);
+                    }
+
+                    try {
+                        output.attribute(name, ann, content.toString(), loc, options);
+                    } catch (XPathException err) {
+                        throw dynamicError(loc, err, context);
+                    }
+
+                    return null;
+                };
+            } else {
+                StringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForString(true);
+                return (output, context) -> {
+                    Item nameItem = nameEval.eval(context);
+                    NodeName name = expr.validateNodeName(nameItem, context);
+                    String content = contentEval.eval(context);
+                    if (name.equals(StandardNames.XML_ID_NAME)) {
+                        content = Whitespace.collapseWhitespace(content);
+                    }
+                    try {
+                        output.attribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, content, loc, options);
+                    } catch (XPathException err) {
+                        throw Instruction.dynamicError(loc, err, context);
+                    }
+                    return null;
+                };
+            }
+
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            ComputedAttribute expr = (ComputedAttribute) getExpression();
+            if (expr.getSchemaType() != null ||
+                    expr.getValidationAction() == Validation.STRICT ||
+                    expr.getValidationAction() == Validation.LAX) {
+                ItemEvaluator superEval = super.elaborateForItem();
+                return context -> {
+                    Orphan o = (Orphan) superEval.eval(context);
+                    assert o != null;
+                    expr.validateOrphanAttribute(o, context);
+                    return o;
+                };
+            } else {
+                return super.elaborateForItem();
+            }
+        }
     }
 
 

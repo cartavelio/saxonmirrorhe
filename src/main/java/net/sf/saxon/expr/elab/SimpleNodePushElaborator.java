@@ -41,7 +41,7 @@ public abstract class SimpleNodePushElaborator extends Elaborator {
             Orphan o = new Orphan(config);
             o.setNodeKind(kind);
             o.setStringValue(content);
-            o.setNodeName(instr.evaluateNodeName(context));
+            o.setNodeName(instr.evaluateNodeName(context));   // TODO elaborate this
             return o;
         };
     }

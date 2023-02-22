@@ -8,6 +8,10 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.*;
@@ -749,5 +753,49 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         return getFunctionName();
     }
 
+    private static class UserFunctionCallElaborator extends PullElaborator {
 
+        /**
+         * Get a function that evaluates the underlying expression in the form of
+         * a {@link SequenceIterator}
+         *
+         * @return an evaluator for the expression that returns a {@link SequenceIterator}
+         */
+        @Override
+        public PullEvaluator elaborateForPull() {
+            final UserFunctionCall expr = (UserFunctionCall) getExpression();
+            return context -> {
+                Sequence result = expr.callFunction(context);
+                return result.iterate();
+            };
+        }
+
+        /**
+         * Get a function that evaluates the underlying expression in push mode, by
+         * writing events to an {@link Outputter}
+         *
+         * @return an evaluator for the expression in push mode
+         */
+        @Override
+        public PushEvaluator elaborateForPush() {
+            final UserFunctionCall expr = (UserFunctionCall) getExpression();
+            return (out, context) -> {
+                //noinspection Convert2MethodRef
+                return expr.processLeavingTail(out, context);
+            };
+        }
+
+        /**
+         * Get a function that evaluates the underlying expression in the form of
+         * a {@link Item}. This must only be called for expressions whose result
+         * has cardinality zero or one.
+         *
+         * @return an evaluator for the expression that returns an {@link Item}.
+         */
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            final UserFunctionCall expr = (UserFunctionCall) getExpression();
+            return context -> (Item) expr.callFunction(context);
+        }
+    }
 }

@@ -10,10 +10,17 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.NoNamespaceName;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.str.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.Twine8;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -264,18 +271,56 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("procInst", this);
-        String flags = "";
         if (isLocal()) {
-            flags += "l";
-        }
-        if (!flags.isEmpty()) {
-            out.emitAttribute("flags", flags);
+            out.emitAttribute("flags", "l");
         }
         out.setChildRole("name");
         getNameExp().export(out);
         out.setChildRole("select");
         getSelect().export(out);
         out.endElement();
+    }
+
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new ProcessingInstructionElaborator();
+    }
+
+
+    private static class ProcessingInstructionElaborator extends SimpleNodePushElaborator {
+        @Override
+        public PushEvaluator elaborateForPush() {
+            ProcessingInstruction expr = (ProcessingInstruction) getExpression();
+            Location loc = expr.getLocation();
+            UnicodeStringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForUnicodeString(true);
+            ItemEvaluator nameEval = Elaborator.makeElaborator(expr.getNameExp()).elaborateForItem();
+            if (expr.isXSLT()) {
+                return (out, context) -> {
+                    StringValue name = (StringValue)nameEval.eval(context);
+                    String checkedName = expr.checkName(name, context);
+                    UnicodeString content = contentEval.eval(context);
+                    content = ProcessingInstruction.checkContentXSLT(content);
+                    out.processingInstruction(checkedName, content, loc, ReceiverOption.NONE);
+                    return null;
+                };
+            } else {
+                return (out, context) -> {
+                    AtomicValue name = (AtomicValue)nameEval.eval(context);
+                    String checkedName = expr.checkName(name, context);
+                    UnicodeString content = contentEval.eval(context);
+                    ProcessingInstruction.checkContentXQuery(content);
+                    out.processingInstruction(checkedName, content, loc, ReceiverOption.NONE);
+                    return null;
+                };
+            }
+        }
     }
 
 

@@ -7,17 +7,25 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ProxyOutputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.str.UniStringConsumer;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -322,26 +330,7 @@ public final class ValueOf extends SimpleNodeConstructor {
             // Note: see bug 4944, which is why we don't use this path if the select
             //       expression might return an empty sequence.
             Location instructionLoc = getLocation();
-            Outputter toText = new ProxyOutputter(output) {
-                @Override
-                public void append(Item item) throws XPathException {
-                    getNextOutputter().characters(item.getUnicodeStringValue(), instructionLoc, options);
-                }
-
-                @Override
-                public void append(Item item, Location loc, int properties) throws XPathException {
-                    Location location = loc.getLineNumber() == -1 ? instructionLoc : loc;
-                    getNextOutputter().characters(item.getUnicodeStringValue(), location, properties | options);
-                }
-
-                @Override
-                @CSharpModifiers(code = {"public", "override"})
-                public UniStringConsumer getStringReceiver(boolean asTextNode, Location loc) {
-                    Location location = loc.getLineNumber() == -1 ? instructionLoc : loc;
-                    return getNextOutputter().getStringReceiver(true, location);
-                }
-
-            };
+            Outputter toText = new TextNodeOutputStreamer(output, instructionLoc, options);
             TailCall tc = getSelectOp().getOperandEvaluator(context).processLeavingTail(toText, context);
             dispatchTailCall(tc);
         } else {
@@ -377,30 +366,33 @@ public final class ValueOf extends SimpleNodeConstructor {
     @Override
     public NodeInfo evaluateItem(XPathContext context) throws XPathException {
         try {
-            UnicodeString val;
-            Item item = getSelectOp().getOperandEvaluator(context).evaluateItem(context);
-            if (item == null) {
-                if (noNodeIfEmpty) {
-                    return null;
-                } else {
-                    val = EmptyUnicodeString.getInstance();
-                }
-            } else {
-                val = item.getUnicodeStringValue();
-            }
-            Controller controller = context.getController();
-            assert controller != null;
-            Orphan o = new Orphan(controller.getConfiguration());
-            o.setNodeKind(Type.TEXT);
-            o.setStringValue(val);
-            if (isDisableOutputEscaping()) {
-                o.setDisableOutputEscaping(true);
-            }
-            return o;
+            Item content = getSelectOp().getOperandEvaluator(context).evaluateItem(context);
+            return makeTextNode(content, noNodeIfEmpty, isDisableOutputEscaping(), context);
         } catch (XPathException err) {
             err.maybeSetLocation(getLocation());
             throw err;
         }
+    }
+
+    private static NodeInfo makeTextNode(Item content, boolean noNodeIfEmpty, boolean doe, XPathContext context) throws XPathException {
+        UnicodeString val;
+        if (content == null) {
+            if (noNodeIfEmpty) {
+                return null;
+            } else {
+                val = EmptyUnicodeString.getInstance();
+            }
+        } else {
+            val = content.getUnicodeStringValue();
+        }
+        Orphan o = new Orphan(context.getConfiguration());
+        o.setNodeKind(Type.TEXT);
+        o.setStringValue(val);
+        if (doe) {
+            o.setDisableOutputEscaping(true);
+        }
+        return o;
+
     }
 
 
@@ -430,6 +422,106 @@ public final class ValueOf extends SimpleNodeConstructor {
         }
         getSelect().export(out);
         out.endElement();
+    }
+
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new ValueOfElaborator();
+    }
+
+
+    private static class ValueOfElaborator extends SimpleNodePushElaborator {
+        @Override
+        public PushEvaluator elaborateForPush() {
+            ValueOf expr = (ValueOf) getExpression();
+            Location loc = expr.getLocation();
+            boolean noNodeIfEmpty = expr.noNodeIfEmpty;
+            int options = expr.getOptions();
+
+            if (noNodeIfEmpty) {
+                ItemEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForItem();
+                return (output, context) -> {
+                    Item value = contentEval.eval(context);
+                    if (value != null) {
+                        output.characters(value.getUnicodeStringValue(), loc, options);
+                    }
+                    return null;
+                };
+            } else if (expr.getSelect().getItemType() == BuiltInAtomicType.STRING &&
+                    !expr.isDisableOutputEscaping()
+                    && !Cardinality.allowsZero(expr.getCardinality())) {
+                // Try to stream the value direct to the serializer where possible
+                // Note: see bug 4944, which is why we don't use this path if the select
+                //       expression might return an empty sequence.
+                // TODO: use a learning strategy, don't do the streaming unless it has benefits
+                //  (monitor the number of calls on characters(), or the size of the strings)
+                PushEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForPush();
+                return (output, context) -> {
+                    Outputter streamer = new TextNodeOutputStreamer(output, loc, options);
+                    return contentEval.process(streamer, context);
+                };
+            } else {
+                UnicodeStringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForUnicodeString(true);
+                return (output, context) -> {
+                    UnicodeString value = contentEval.eval(context);
+                    output.characters(value, loc, options);
+                    return null;
+                };
+            }
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            ValueOf expr = (ValueOf)getExpression();
+            ItemEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForItem();
+            boolean noNodeIfEmpty = expr.noNodeIfEmpty;
+            boolean doe = expr.isDisableOutputEscaping();
+            return context -> ValueOf.makeTextNode(contentEval.eval(context), noNodeIfEmpty, doe, context);
+        }
+
+    }
+
+
+    /**
+     * An Outputter that streams the text node incrementally to the destination, rather than evaluating
+     * it first as an in-memort string.
+     */
+
+    private static class TextNodeOutputStreamer extends ProxyOutputter {
+        private final Location instructionLoc;
+        private final int options;
+
+        public TextNodeOutputStreamer(Outputter output, Location instructionLoc, int options) {
+            super(output);
+            this.instructionLoc = instructionLoc;
+            this.options = options;
+        }
+
+        @Override
+        public void append(Item item) throws XPathException {
+            getNextOutputter().characters(item.getUnicodeStringValue(), instructionLoc, options);
+        }
+
+        @Override
+        public void append(Item item, Location loc, int properties) throws XPathException {
+            Location location = loc.getLineNumber() == -1 ? instructionLoc : loc;
+            getNextOutputter().characters(item.getUnicodeStringValue(), location, properties | options);
+        }
+
+        @Override
+        @CSharpModifiers(code = {"public", "override"})
+        public UniStringConsumer getStringReceiver(boolean asTextNode, Location loc) {
+            Location location = loc.getLineNumber() == -1 ? instructionLoc : loc;
+            return getNextOutputter().getStringReceiver(true, location);
+        }
+
     }
 }
 

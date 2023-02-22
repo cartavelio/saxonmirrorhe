@@ -185,6 +185,30 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
     public void processValue(UnicodeString value, Outputter output, XPathContext context) throws XPathException {
         NodeName attName = evaluateNodeName(context);
         int opt = getOptions();
+        SimpleType ann = validate(attName, value, context);
+        if (attName.equals(StandardNames.XML_ID_NAME)) {
+            value = Whitespace.collapseWhitespace(value);
+        }
+
+        try {
+            output.attribute(attName, ann, value.toString(), getLocation(), opt);
+        } catch (XPathException err) {
+            throw dynamicError(getLocation(), err, context);
+        }
+
+    }
+
+    /**
+     * Validate that the attribute value is valid, and return the type with which the constructed
+     * attribute should be annotated
+     * @param attName the attribute name
+     * @param value the string value of the attribute
+     * @param context the evaluation context
+     * @return the type annotation to be used
+     * @throws XPathException if validation fails
+     */
+
+    protected SimpleType validate(NodeName attName, UnicodeString value, XPathContext context) throws XPathException {
         SimpleType ann;
 
         // we may need to change the namespace prefix if the one we chose is
@@ -224,16 +248,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
         } else {
             ann = BuiltInAtomicType.UNTYPED_ATOMIC;
         }
-        if (attName.equals(StandardNames.XML_ID_NAME)) {
-            value = Whitespace.collapseWhitespace(value);
-        }
-
-        try {
-            output.attribute(attName, ann, value.toString(), getLocation(), opt);
-        } catch (XPathException err) {
-            throw dynamicError(getLocation(), err, context);
-        }
-
+        return ann;
     }
 
     /**

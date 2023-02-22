@@ -8,12 +8,17 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Operand;
+import net.sf.saxon.expr.TailCallLoop;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.EmptyIterator;
 
 import java.util.Collections;
 
@@ -95,5 +100,38 @@ public class BreakInstr extends Instruction implements TailCallLoop.TailCallInfo
         out.startElement("break", this);
         out.endElement();
     }
+
+    @Override
+    public Elaborator getElaborator() {
+        return new BreakElaborator();
+    }
+
+    public static class BreakElaborator extends PushElaborator {
+        @Override
+        public PushEvaluator elaborateForPush() {
+            BreakInstr expr = (BreakInstr)getExpression();
+            return (output, context) -> {
+                expr.markContext(context);
+                return null;
+            };
+        }
+
+        public ItemEvaluator elaborateForItem() {
+            BreakInstr expr = (BreakInstr) getExpression();
+            return (context) -> {
+                expr.markContext(context);
+                return null;
+            };
+        }
+
+        public PullEvaluator elaborateForPull() {
+            BreakInstr expr = (BreakInstr) getExpression();
+            return (context) -> {
+                expr.markContext(context);
+                return EmptyIterator.emptyIterator();
+            };
+        }
+    }
+
 }
 
