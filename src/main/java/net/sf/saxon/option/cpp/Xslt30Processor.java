@@ -234,7 +234,7 @@ public class Xslt30Processor extends SaxonCAPI {
     }
 
     @CEntryPoint(name = "j_compileFromAssociatedFile")
-    public static XsltExecutable compileFromAssociatedFile(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer cwd, CCharPointer filename, boolean jit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static XsltExecutable compileFromAssociatedFile(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer cwd, CCharPointer filename, int cjit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         try {
             Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
@@ -242,6 +242,7 @@ public class Xslt30Processor extends SaxonCAPI {
             Processor processor = xslt30Processor.getProcessor();
             XsltCompiler compiler = processor.newXsltCompiler();
             setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
+            boolean jit = CTypeConversion.toBoolean(cjit);
             if (jit) {
                 compiler.setJustInTimeCompilation(jit);
             }

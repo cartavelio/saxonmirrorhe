@@ -167,6 +167,18 @@ public class SaxonCAPI {
       return a;
     }
 
+    /**
+     * static method to create String object 
+     * @return
+     */
+    @CEntryPoint(name = "j_createStringObject")
+    public static long createStringObject(IsolateThread thread, CCharPointer cValue){
+        String value = CTypeConversion.toJavaString(cValue);
+        ObjectHandle handle = objectHandles.create(value);
+        return handle.rawValue();
+
+    }
+
     
 
 
