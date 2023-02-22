@@ -22,8 +22,12 @@ namespace Saxon.Ejava.util.regex {
             return latestMatch.Success && latestMatch.Length == input.Length;
         }
 
-        public bool find() {
+        public bool find(bool requireNonEmpty) {
             latestMatch = regex.Match(input, position);
+            if (requireNonEmpty && latestMatch.Success && latestMatch.Index == position) {
+                // Bug 5655. With lookahead/lookbehind, we can match zero-length tokens, which we skip
+                latestMatch = regex.Match(input, position + 1);
+            }
             if (latestMatch.Success) {
                 position = latestMatch.Index + latestMatch.Length;
             }
