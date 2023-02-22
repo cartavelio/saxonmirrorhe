@@ -169,12 +169,22 @@
       <!--<xsl:message>CSharp.{name/@identifier}()</xsl:message>-->
       <xsl:choose>
          <xsl:when test="name/@identifier = 'emitCode'">
+            <xsl:text>{arguments/argument[1]/@value}</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'methodRef'">
+            <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'staticRef'">
+            <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'constructorRef'">
+            <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
          </xsl:when>
          <xsl:otherwise>
             <xsl:message terminate="yes">*** Unknown method CSharp.{name/@identifier} in {base-uri()}***</xsl:message>
          </xsl:otherwise>
       </xsl:choose>
-      <xsl:text>{arguments/argument[1]/@value}</xsl:text>
+      
    </xsl:template>
    
    
