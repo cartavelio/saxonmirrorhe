@@ -615,10 +615,15 @@ task graal_eec_jar(
 // ============================================================
 
 ["he", "pe", "ee"].each { edition ->
+  def EDITION = edition.toUpperCase()
   def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
 
-
-  def saxoncReleaseDir = "${buildDir}/releases/saxonc${edition}"
+  def saxoncReleaseName = "libsaxon-${EDITION}C-${systemOsName}-v${saxonVersion}"
+  if (systemOs.isMacOsX()) {
+    def arch = System.getProperty("os.arch") 
+    saxoncReleaseName = "libsaxon-${EDITION}C-${systemOsName}-${arch}-v${saxonVersion}"
+  }
+  def saxoncReleaseDir = "${buildDir}/releases/${saxoncReleaseName}"
 
   task "setup_${edition}c_release"(
           dependsOn: [graalEdition, "${edition}c_graalImage"]
@@ -808,6 +813,15 @@ task graal_eec_jar(
     }
   }
 
+  task "zip_${edition}c_release"(
+    type: Zip,
+    dependsOn: ["setup_${edition}c_release"]
+  ) {
+    from "${buildDir}/releases"
+    include "${saxoncReleaseName}/**"
+    archiveFileName = "${saxoncReleaseName}.zip"
+  }
+
   task "buildCPP_${edition}"(
           dependsOn: ["setup_${edition}c_release"]
   ) {
@@ -816,7 +830,6 @@ task graal_eec_jar(
             : (systemOs.isLinux()
             ? "./build64-linux.sh"
             : ".\\build-windows.bat"))
-
 
     doLast {
       exec {
@@ -829,16 +842,12 @@ task graal_eec_jar(
         println "built C++ Wrappers"
       }
     }
-
   }
-
 
   ["XSLT30", "XPath", "XQuery", "Validator"].each { proc ->
     task "runCPP_${edition}_${proc}"(
              dependsOn: ["buildCPP_${edition}"]
      ) {
-
-
        doLast {
          exec {
            workingDir "${saxoncReleaseDir}/samples/cppTests"
@@ -846,11 +855,8 @@ task graal_eec_jar(
            println "built C++ Wrappers"
          }
        }
-
      }
-
   }
-
 }
 
 ["he", "pe", "ee"].each { edition ->
