@@ -11,6 +11,7 @@ testSuite.configure([
                 "export": "-export",
                 "debug": "-debug",
                 "jit": "-jit",
+                'strict': '-strict',
                 "summarizeresults": "-summarizeresults:"
   ],
 
@@ -67,7 +68,8 @@ def testSuiteMatrix = [
       "_depends": ["cloneXslt30TestSuite"],
 
       "XT30": [
-        "": [:]
+        "": [:],
+        "strict": ["strict":"on"]
       ]
     ]
   ],
@@ -126,7 +128,8 @@ def testSuiteMatrix = [
       "_depends": ["cloneXslt30TestSuite"],
 
       "XT30": [
-        "": [:]
+        "": [:],
+        "strict": ["strict":"on"]
       ]
     ]
   ],
@@ -191,7 +194,8 @@ def testSuiteMatrix = [
 
       "XT30": [
         "": [:],
-        "ex": ["export": "on"]
+        "ex": ["export": "on"],
+        "strict": ["strict":"on"]
       ]
     ],
     "xslt30extra": [
@@ -201,7 +205,8 @@ def testSuiteMatrix = [
 
       "XT30": [
         "": [:],
-        "ex": ["export": "on"]
+        "ex": ["export": "on"],
+        "strict": ["strict":"on"]
       ]
     ],
     "xslt40": [
@@ -210,7 +215,8 @@ def testSuiteMatrix = [
       "_depends": ["cloneXslt40TestSuite"],
 
       "XT40": [
-        "": [:]
+        "": [:],
+        "strict": ["strict":"on"]
       ]
     ],
     "xsd": [
@@ -287,7 +293,8 @@ def testSuiteMatrix = [
       "_depends": ["cloneXslt30TestSuite"],
 
       "XT30": [
-        "": [:]
+        "": [:],
+        "strict": ["strict":"on"]
       ]
     ],
     "xslt30extra": [
@@ -296,6 +303,7 @@ def testSuiteMatrix = [
 
       "XT30": [
         "": [:],
+        "strict": ["strict":"on"]
       ]
     ],
     "xsd": [
