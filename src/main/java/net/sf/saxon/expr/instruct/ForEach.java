@@ -10,10 +10,7 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -63,7 +60,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
         if (threads != null) {
             threadsOp = new Operand(this, threads, OperandRole.SINGLE_ATOMIC);
         }
-        //this.containsTailCall = containsTailCall && action instanceof TailCallReturner;
+        this.containsTailCall = containsTailCall;
     }
 
     /**
@@ -100,6 +97,28 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
     @Override
     public boolean isInstruction() {
         return _isInstruction;
+    }
+
+    /**
+     * Set whether this expression contains a call (on call-template or apply-templates) that is
+     * treated as a tail call because the select expression is known to be a singleton
+     *
+     * @param tc true if the action expression is to be treated as a tail call
+     */
+
+    public void setContainsTailCall(boolean tc) {
+        containsTailCall = tc;
+    }
+
+    /**
+     * Ask whether this expression contains a call (on call-template or apply-templates) that is
+     * treated as a tail call because the select expression is known to be a singleton
+     *
+     * @return true if the action expression is to be treated as a tail call
+     */
+
+    public boolean isContainsTailCall() {
+        return containsTailCall;
     }
 
 
@@ -325,7 +344,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             return new SimpleStepExpression(getSelect(), getAction());
         }
 
-        if (threadsOp != null && !Literal.isEmptySequence(getThreads())) {
+        if (threadsOp != null && !Literal.isEmptySequence(getThreads()) && !containsTailCall) {
             return visitor.obtainOptimizer().generateMultithreadedInstruction(this);
         }
         return this;
@@ -584,6 +603,9 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("forEach", this);
+        if (containsTailCall) {
+            out.emitAttribute("flags", "t");
+        }
         getSelect().export(out);
         getAction().export(out);
         if (separatorOp != null) {
@@ -697,16 +719,31 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
             PushEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPush();
             if (forEach.getSeparatorExpression() == null) {
-                return (out, context) -> {
-                    XPathContextMinor c2 = context.newMinorContext();
-                    FocusIterator iter = c2.trackFocus(select.iterate(context));
-                    TailCall tc = null;
-                    while (iter.next() != null) {
-                        dispatchTailCall(tc);
-                        tc = action.processLeavingTail(out, c2);
-                    }
-                    return tc;
-                };
+                if (forEach.containsTailCall) {
+                    // This path is used when a for-each has a singleton select and contains a call-template
+                    // or apply-templates that is classified as a tail call. The iterator deliberately doesn't
+                    // advance beyond the first (and only) item. See bug 5845.
+                    return (out, context) -> {
+                        XPathContextMinor c2 = context.newMinorContext();
+                        FocusIterator iter = c2.trackFocus(select.iterate(context));
+                        TailCall tc = null;
+                        if (iter.next() != null) {
+                            tc = action.processLeavingTail(out, c2);
+                        }
+                        return tc;
+                    };
+                } else {
+                    return (out, context) -> {
+                        XPathContextMinor c2 = context.newMinorContext();
+                        FocusIterator iter = c2.trackFocus(select.iterate(context));
+                        TailCall tc = null;
+                        while (iter.next() != null) {
+                            dispatchTailCall(tc);
+                            tc = action.processLeavingTail(out, c2);
+                        }
+                        return tc;
+                    };
+                }
             } else {
                 UnicodeStringEvaluator sepEval = forEach.getSeparatorExpression().makeElaborator().elaborateForUnicodeString(true);
                 return (out, context) -> {
