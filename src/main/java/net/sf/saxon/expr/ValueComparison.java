@@ -12,7 +12,6 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -236,6 +235,19 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             }
             comparer = GenericAtomicComparer.makeAtomicComparer(
                     p0, p1, comp, env.getConfiguration().getConversionContext());
+        } else if (comparer instanceof GenericAtomicComparer) {
+            // See if we can improve the choice of comparer based on new information
+            if (p0.isPrimitiveNumeric() && p1.isPrimitiveNumeric()) {
+                comparer = ContextFreeAtomicComparer.getInstance();
+            } else if (p0 == p1 && (
+                    p0 == BuiltInAtomicType.BOOLEAN ||
+                            p0 == BuiltInAtomicType.BASE64_BINARY ||
+                            p0 == BuiltInAtomicType.HEX_BINARY ||
+                            p0 == BuiltInAtomicType.DAY_TIME_DURATION ||
+                            p0 == BuiltInAtomicType.YEAR_MONTH_DURATION
+                    )) {
+                comparer = ContextFreeAtomicComparer.getInstance();
+            }
         }
         return this;
     }
@@ -363,7 +375,6 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
     @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
-        Instrumentation.count("VC (INT)");
         try {
             AtomicValue v0 = (AtomicValue) getLhsExpression().evaluateItem(context);
             if (v0 == null) {

@@ -17,7 +17,6 @@ import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
-import org.w3c.dom.Attr;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -582,7 +581,6 @@ public abstract class Calculator {
     public static class DoubleTimesDouble extends Calculator {
         @Override
         public AtomicValue compute(AtomicValue a, AtomicValue b, XPathContext c) throws XPathException {
-            Attr attr;
             return new DoubleValue(((NumericValue) a).getDoubleValue() * ((NumericValue) b).getDoubleValue());
         }
 
