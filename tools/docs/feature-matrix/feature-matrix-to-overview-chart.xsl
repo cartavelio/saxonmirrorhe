@@ -232,7 +232,7 @@
                             <i>(In the online shop, select the "No XSLT" and "No XQuery" language options.)</i>
                         </a></li>
                         <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/CS.pdf">
-                            <b>CS: </b>Saxon Enterprise Edition for .NET 5</a></li>
+                            <b>CS: </b>Saxon Enterprise Edition for .NET 6</a></li>
                         <li><a class="title" href="../saxon-js/index.xml"><b>JS2: </b>SaxonJS 2, JavaScript processor</a></li>
                     </ul>
                 </div>
@@ -241,7 +241,7 @@
                 <div id="aside">
                     <h2>Packages by platform</h2>
                     <p><b>Java:</b> SaxonJ 12 first released Dec 2022.</p>
-                    <p><b>.NET:</b> SaxonCS 12 for .NET 5 available only as the Enterprise Edition, first
+                    <p><b>.NET:</b> SaxonCS 12 for .NET 6 available only as the Enterprise Edition, first
                         released Dec 2022.</p>
                     <p><b>Native:</b> SaxonC 12 first released Dec 2022, built from SaxonJ 12.</p>
                     <p><b>JavaScript:</b> SaxonJS 2 does not require a commercial license.</p>

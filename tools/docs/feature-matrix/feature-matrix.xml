@@ -541,7 +541,7 @@
     </description>
     <details link="extensibility" name="Extensibility" subpages="has-subpages"/>
     <products>
-      <product J="HE" CS="HE" C="HE"/>
+      <product J="HE" CS="HE"/>
     </products>
   </feature>
 
