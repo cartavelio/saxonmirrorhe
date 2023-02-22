@@ -1,7 +1,7 @@
 package com.saxonica.js;
 
 import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.resource.Loader;
+import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.trans.XPathException;
 
 
@@ -97,7 +97,7 @@ public class JSHelper {
         try {
             URLConnection connection;
             try {
-                connection = Loader.urlConnection(absoluteURL);
+                connection = ResourceLoader.urlConnection(absoluteURL);
             } catch (IOException ioe) {
                 XPathException xpe = new XPathException("Failed to read input file", ioe);
                 xpe.setErrorCode("FOUT1170");
