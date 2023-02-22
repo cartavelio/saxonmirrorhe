@@ -1,5 +1,8 @@
 <featureMatrix version="11" release="Oct 2021" Cversion="1.2" Crelease="Oct 2019" JSversion="2" JSrelease="Jun 2020">
   
+  <!-- For different descriptions in the Product Descriptions, but not the feature matrix table,
+      use description/@editions and alt-description elements -->
+  
   <packages>
     <package edition="HE" platforms="J C JS"/>
     <package edition="PE" platforms="J C"/>
@@ -351,13 +354,13 @@
   <feature class="Performance">
     <shortName>Byte code generation</shortName>
     <description>
-      <p>Allows hot-spot code generation for XSLT, XQuery, XPath, and XML Schema. Available only on the
-        Java platform, typically giving a 25% performance boost.</p>
+      <p>Allows hot-spot code generation for XSLT, XQuery, XPath, and XML Schema, typically giving a
+        25% performance boost.</p>
     </description>
     <details link="using-xsl/compiling" name="Compiling a Stylesheet"/>
     <details link="using-xquery/querycompilation" name="Compiling Queries"/>
     <products>
-      <product editions="EE EET EEQ EEV" J="EEV" C="EEV"/>
+      <product editions="EE EET EEQ EEV" J="EEV"/>
     </products>
   </feature>
 
@@ -381,7 +384,7 @@
         and provides much more "software engineering" control over public and private interfaces,
         and the like. The ability to save packages in compiled form ("stylesheet export file", SEF)
         gives much faster loading of frequently used stylesheets, and also enables in-browser
-        execution using Saxon-JS.</p>
+        execution using SaxonJS.</p>
     </description>
     <details link="using-xsl/compiling" name="Compiling a Stylesheet"/>
     <products>
@@ -390,8 +393,6 @@
   </feature>
   
   <feature class="Performance">
-    <!-- For different descriptions in the Product Descriptions, but not the feature matrix table,
-      use description/@editions and alt-description elements -->
     <shortName>Import stylesheet packages</shortName>
     <description editions="EE EET" J="EET" CS="EET" C="EET">
       <p>Allows the importing of stylesheet packages in compiled form. Possible with all editions
@@ -502,12 +503,15 @@
   
   <feature class="Extensibility">
     <shortName>EXSLT extension functions</shortName>
-    <description>
+    <description CS="PE">
       <p>A selection of EXSLT extension functions are provided (in the modules Common, Dates and
         Times, Math, Random, and Sets), as listed in the documentation. </p>
       <p>Only the <code>exslt:node-set</code> function is available in SaxonCS.</p>
     </description>
-    <!-- TODO split into levels - CS "limited" -->
+    <alt-description J="PE" C="PE">
+      <p>A selection of EXSLT extension functions are provided (in the modules Common, Dates and
+        Times, Math, Random, and Sets), as listed in the documentation. </p>
+    </alt-description>
     <details link="extensions/functions/exslt" name="EXSLT extensions"/>
     <products>
       <product editions="PE EE EET EEQ EEV" J="PE" CS="PE" C="PE"/>
@@ -603,12 +607,11 @@
   <feature class="Extensibility">
     <shortName>SQL extension</shortName>
     <description>
-      <p>XSLT extension functions and instructions providing access to SQL databases. Available on
-        the Java platform only. </p>
+      <p>XSLT extension functions and instructions providing access to SQL databases.</p>
     </description>
     <details link="sql-extension" name="Saxon SQL extension" subpages="has-subpages"/>
     <products>
-      <product editions="PE EE EET EEQ EEV" J="PE" C="PE"/>
+      <product editions="PE EE EET EEQ EEV" J="PE"/>
     </products>
   </feature>
 
@@ -620,7 +623,7 @@
     </description>
     <details link="extensibility/instructions" name="Writing XSLT extension instructions"/>
     <products>
-      <product editions="PE EE EET EEQ EEV" J="PE" C="PE"/>
+      <product editions="PE EE EET EEQ EEV" J="PE"/>
     </products>
   </feature>
 
@@ -662,11 +665,11 @@
     <shortName>JAXP API</shortName>
     <description>
       <p>Implementations of the standard JAXP interfaces for XSLT transformation, XPath evaluation,
-        and XML Schema validation. Applies to the Java platform only.</p>
+        and XML Schema validation.</p>
     </description>
     <details link="conformance/jaxp" name="JAXP API conformance"/>
     <products>
-      <product editions="HE PE EE EET EEQ EEV" J="HE" C="HE"/>
+      <product editions="HE PE EE EET EEQ EEV" J="HE"/>
     </products>
   </feature>
 
@@ -674,7 +677,7 @@
     <shortName>S9API API</shortName>
     <description>
       <p>Saxon's native interface for processing XSLT, XQuery, XPath, and XML Schema. Available in
-        slightly different forms on the Java and .NET platforms.</p>
+        slightly different forms on the Java, .NET and Native platforms.</p>
     </description>
     <products>
       <product editions="HE PE EE EET EEQ EEV CS" J="HE" CS="HE" C="HE"/>
@@ -689,7 +692,7 @@
     </description>
     <details link="sourcedocs/thirdparty" name="Object models"/>
     <products>
-      <product editions="HE PE EE EET EEQ EEV JS2 CS" J="HE" CS="HE" C="HE" JS="HE"/>
+      <product editions="HE PE EE EET EEQ EEV JS2 CS" J="HE" CS="HE" JS="HE"/>
     </products>
   </feature>
   
@@ -700,46 +703,64 @@
     </description>
     <details link="sourcedocs/domino" name="Domino Tree Model"/>
     <products>
-      <product editions="EE EET EEQ EEV" J="EEV" C="EEV"/>
+      <product editions="EE EET EEQ EEV" J="EEV"/>
     </products>
   </feature>
 
   <feature class="Interfaces">
     <shortName>Support for JDOM2, AXIOM, DOM4J, and XOM</shortName>
     <description>
-      <p>Ability to use a JDOM2, AXIOM, DOM4J, and XOM for the input or output of
-        transformations and queries. Applies to the Java platform only. Note that the code for these
-        interfaces is open source and can be compiled to work with Saxon-HE, but it does not come
-        packaged with the Saxon-HE download.</p>
+      <p>Ability to use a JDOM2, AXIOM, DOM4J, and XOM for the input or output of transformations
+        and queries. Note that the code for these interfaces is open source and can be compiled to
+        work with Saxon-HE, but it does not come packaged with the Saxon-HE download.</p>
     </description>
     <details link="sourcedocs/thirdparty" name="Object models"/>
     <products>
-      <product level="Open" editions="HE" J="HE" C="HE">
+      <product level="Open" editions="HE" J="HE">
         <description><p>Although the code for these interfaces does not come packaged with the Saxon-HE download,
           it is open source and can be compiled to work with Saxon-HE. This provides the ability to
           use a JDOM2, AXIOM, DOM4J, and XOM for the input or output of transformations and
-          queries. Applies to the Java platform only.</p></description>
+          queries.</p></description>
       </product>
-      <product level="Inc" editions="PE EE EET EEQ EEV" J="PE" C="PE"/>
+      <product level="Inc" editions="PE EE EET EEQ EEV" J="PE"/>
     </products>
   </feature>
 
   <feature class="Interfaces">
     <shortName>XQJ API</shortName>
     <description>
-      <p>Implementations of the standard XQJ interfaces for XQuery processing. Applies to the Java
-        platform only. Note that the XQJ interfaces have been removed from the standard download of
-        Saxon-HE because the Oracle specification license is not open source, but they are available
-        on request.</p>
+      <p>Implementations of the standard XQJ interfaces for XQuery processing. Note that the XQJ
+        interfaces have been removed from the standard download of Saxon-HE because the Oracle
+        specification license is not open source, but they are available on request.</p>
     </description>
     <details link="conformance/xqj" name="XQJ API conformance"/>
     <products>
-      <product level="Open" editions="HE" J="HE" C="HE">
+      <product level="Open" editions="HE" J="HE">
         <description><p>Implementations of the standard XQJ interfaces for XQuery processing have been removed
           from the Saxon-HE download because the Oracle specification license is not open source,
-          but they are available on request. Applies to the Java platform only.</p></description>
+          but they are available on request.</p></description>
       </product>
-      <product level="Inc" editions="PE EE EET EEQ EEV" J="PE" C="PE"/>
+      <product level="Inc" editions="PE EE EET EEQ EEV" J="PE"/>
+    </products>
+  </feature>
+  
+  <feature class="Interfaces">
+    <shortName>PHP Extension</shortName>
+    <description>
+      <p>The PHP extension is an interface module that allows SaxonC to be invoked from PHP applications.</p>
+    </description>
+    <products>
+      <product C="HE"/>
+    </products>
+  </feature>
+  
+  <feature class="Interfaces">
+    <shortName>Python Extension</shortName>
+    <description>
+      <p>The Python extension is an interface module that allows SaxonC to be invoked from Python applications.</p>
+    </description>
+    <products>
+      <product C="HE"/>
     </products>
   </feature>
 
