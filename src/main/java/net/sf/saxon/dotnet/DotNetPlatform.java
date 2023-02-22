@@ -22,11 +22,13 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.SimpleCollation;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.JavaRegularExpression;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.resource.StandardCollectionFinder;
 import net.sf.saxon.trans.XPathException;
@@ -36,9 +38,7 @@ import org.xml.sax.XMLReader;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
 import java.io.Reader;
@@ -132,10 +132,26 @@ public class DotNetPlatform implements Platform {
 
 
     /**
-     * Get a parser by instantiating the SAXParserFactory
+     * Convert a Source to an ActiveSource. This method is present in the Platform
+     * because different Platforms accept different kinds of Source object.
      *
-     * @return the parser (XMLReader)
+     * @param source A source object, typically the source supplied as the first
+     *               argument to {@link Transformer#transform(Source, Result)}
+     *               or similar methods.
+     * @param config The Configuration. This provides the SourceResolver with access to
+     *               configuration information; it also allows the SourceResolver to invoke the
+     *               resolveSource() method on the Configuration object as a fallback implementation.
+     * @return a source object that Saxon knows how to process. This must be an instance of one
+     * of the classes  StreamSource, SAXSource, DOMSource, {@link AugmentedSource},
+     * {@link NodeInfo},
+     * or {@link PullSource}. Return null if the Source object is not
+     * recognized
+     * @throws XPathException if the Source object is recognized but cannot be processed
      */
+    @Override
+    public ActiveSource resolveSource(Source source, Configuration config) throws XPathException {
+        return null;
+    }
 
     /**
      * No ICU features

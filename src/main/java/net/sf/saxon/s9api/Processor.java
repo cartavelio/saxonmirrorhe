@@ -226,6 +226,7 @@ public class Processor implements Configuration.ApiProvider {
         return s;
     }
 
+    //#if CSHARP==false
     /**
      * Get a new {@link Push} provider. The returned {@link Push} object allows the client
      * application to construct events (such as {@code startElement()}, {@code text()},
@@ -240,7 +241,7 @@ public class Processor implements Configuration.ApiProvider {
         SerializationProperties props = new SerializationProperties();
         return new PushToReceiver(destination.getReceiver(pipe, props));
     }
-
+    //#endif
     //#if CSHARP==false
     /**
      * Register a simple external/extension function that is to be made available within any stylesheet, query,

@@ -7,10 +7,11 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.sort.ItemOrderComparer;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+
+import java.util.Comparator;
 
 /**
  * An enumeration representing a nodeset that is an intersection of two other NodeSets.
@@ -24,7 +25,7 @@ public class IntersectionEnumeration implements SequenceIterator {
     private final SequenceIterator e2;
     /*@Nullable*/ private NodeInfo nextNode1;
     private NodeInfo nextNode2;
-    private final ItemOrderComparer comparer;
+    private final Comparator<? super NodeInfo> comparer;
 
     /**
      * Form an enumeration of the intersection of the nodes in two nodesets
@@ -36,7 +37,7 @@ public class IntersectionEnumeration implements SequenceIterator {
      */
 
     public IntersectionEnumeration(SequenceIterator p1, SequenceIterator p2,
-                                   ItemOrderComparer comparer) throws XPathException {
+                                   Comparator<? super NodeInfo> comparer) throws XPathException {
         e1 = p1;
         e2 = p2;
         this.comparer = comparer;

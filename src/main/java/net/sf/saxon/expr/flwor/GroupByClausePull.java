@@ -11,8 +11,8 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -49,6 +49,7 @@ public class GroupByClausePull extends TuplePull {
      *         are undefined.
      */
     @Override
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public boolean nextTuple(XPathContext context) throws XPathException {
         if (groupIterator == null) {
 

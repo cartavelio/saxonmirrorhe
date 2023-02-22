@@ -9,16 +9,17 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
+import net.sf.saxon.Version;
 import net.sf.saxon.event.Builder;
+import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pull.PullProvider;
-import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -33,6 +34,7 @@ import org.xml.sax.SAXParseException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,20 +170,19 @@ public class ParseXml extends SystemFunction implements Callable {
     private NodeInfo parseXmlPull(StringItem inputArg, XPathContext context) throws XPathException {
         String baseURI = getRetainedStaticContext().getStaticBaseUriString();
 
-        RetentiveErrorHandler errorHandler = new RetentiveErrorHandler();
         try {
             Controller controller = context.getController();
             if (controller == null) {
                 throw new XPathException("parse-xml() function is not available in this environment");
             }
             Configuration config = controller.getConfiguration();
-            PullProvider parser = null; // some magic here
+            PipelineConfiguration pipe = controller.makePipelineConfiguration();
 
             StringReader sr = new StringReader(inputArg.getStringValue());
-            InputSource is = new InputSource(sr);
-            is.setSystemId(baseURI);
-            Source source = new PullSource(parser);
-            source.setSystemId(baseURI);
+            StreamSource ss = new StreamSource(sr, baseURI);
+            // Following code allows the .NET platform to use a Pull parser
+            boolean dtdValidation = false;
+            Source pullSource = Version.platform.getParserSource(pipe, ss, Validation.SKIP, dtdValidation);
 
             Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
             Receiver s = b;
@@ -198,7 +199,7 @@ public class ParseXml extends SystemFunction implements Callable {
 
             s.setPipelineConfiguration(b.getPipelineConfiguration());
 
-            Sender.send(source, s, options);
+            Sender.send(pullSource, s, options);
 
             TinyDocumentImpl node = (TinyDocumentImpl) b.getCurrentRoot();
             node.setBaseURI(baseURI);
@@ -207,7 +208,7 @@ public class ParseXml extends SystemFunction implements Callable {
         } catch (XPathException err) {
             XPathException xe = new XPathException("First argument to parse-xml() is not a well-formed and namespace-well-formed XML document. XML parser reported: " +
                                                            err.getMessage(), "FODC0006");
-            errorHandler.captureRetainedErrors(xe);
+            //errorHandler.captureRetainedErrors(xe);
             xe.maybeSetContext(context);
             throw xe;
         }

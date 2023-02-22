@@ -17,7 +17,6 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -137,15 +136,14 @@ public class ExecutableFunctionLibrary implements FunctionLibrary {
     }
 
     /**
-     * Iterate over all the functions defined in this function library. The objects
-     * returned by the iterator are of class {@link UserFunction}
+     * Get all the functions defined in this function library.
      *
-     * @return an iterator delivering the {@link UserFunction} objects representing
+     * @return an iterable delivering the {@link UserFunction} objects representing
      *         the user-defined functions in a stylesheet or query
      */
 
-    public Iterator<UserFunction> iterateFunctions() {
-        return functions.values().iterator();
+    public Iterable<UserFunction> getAllFunctions() {
+        return functions.values();
     }
 
 }

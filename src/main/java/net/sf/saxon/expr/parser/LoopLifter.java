@@ -69,12 +69,13 @@ public class LoopLifter {
     private boolean changed = false;
     private boolean tracing = false;
     private boolean streaming = false;
+    private final static String MARKER = "marker";
 
     private static class ExpInfo {
         Expression expression;
         int loopLevel;
         boolean multiThreaded;
-        Map<Expression, Boolean> dependees = new IdentityHashMap<>();
+        Map<Expression, String> dependees = new IdentityHashMap<>(); // Used as a Set; the value is irrelevant
 
     }
 
@@ -165,7 +166,7 @@ public class LoopLifter {
             parent = exp;
             while (parent != null && parent != variableSetter) {
                 try {
-                    expInfoMap.get(parent).dependees.put(variableSetter, true);
+                    expInfoMap.get(parent).dependees.put(variableSetter, MARKER);
                 } catch (NullPointerException e) {
                     ExpressionTool.validateTree(parent);
                     e.printStackTrace();
@@ -188,7 +189,7 @@ public class LoopLifter {
                     ExpInfo expInfo = expInfoMap.get(exp);
                     Expression parent = exp.getParentExpression();
                     while (parent != null) {
-                        if (expInfo.dependees.get(parent) != null) {
+                        if (expInfo.dependees.containsKey(parent)) {
                             ExpInfo childInfo = expInfoMap.get(child);
                             if (expInfo.loopLevel != childInfo.loopLevel) {
                                 Operand o = ExpressionTool.findOperand(parent, child);

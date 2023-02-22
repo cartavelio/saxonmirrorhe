@@ -28,6 +28,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.*;
 
 import java.util.ArrayList;
@@ -228,6 +229,7 @@ public class LookupAllExpression extends UnaryExpression {
     /*@NotNull*/
     @Override
     @CSharpInnerClass(outer=true, extra={"net.sf.saxon.expr.XPathContext context"})
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
 
         return new AbstractSequenceIterator() {

@@ -34,7 +34,6 @@ import net.sf.saxon.value.*;
 import javax.xml.transform.stream.StreamSource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -222,7 +221,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         // Add functions to the result.
         HashTrieMap functionsMap = new HashTrieMap();
         XQueryFunctionLibrary functionLib = lib.getGlobalFunctionLibrary();
-        Iterator<XQueryFunction> functionIterator = functionLib.getFunctionDefinitions();
+
         ExportAgent agent = new ExportAgent() {
             @Override
             public void export(ExpressionPresenter out) throws XPathException {
@@ -233,24 +232,19 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
                 throw err;
             }
         };
-        if (functionIterator.hasNext()) {
-            XQueryFunction function;
+        for (XQueryFunction function : functionLib.getFunctionDefinitions()) {
             MapItem newMap;
-            QNameValue functionQName;
-            while (functionIterator.hasNext()) {
-                function = functionIterator.next();
-                functionQName = new QNameValue(function.getFunctionName(), BuiltInAtomicType.QNAME);
-                if (functionQName.getNamespaceURI().equals(moduleUri)) {
-                    UserFunction userFunction = function.getUserFunction();
-                    UserFunctionReference.BoundUserFunction buf =
-                            new UserFunctionReference.BoundUserFunction(agent, userFunction, null, newController);
-                    if (functionsMap.get(functionQName) != null) {
-                        newMap = ((MapItem) functionsMap.get(functionQName)).addEntry(new Int64Value(function.getNumberOfArguments()), buf);
-                    } else {
-                        newMap = new SingleEntryMap(Int64Value.makeIntegerValue(function.getNumberOfArguments()), buf);
-                    }
-                    functionsMap = functionsMap.addEntry(functionQName, newMap);
+            QNameValue functionQName = new QNameValue(function.getFunctionName(), BuiltInAtomicType.QNAME);
+            if (functionQName.getNamespaceURI().equals(moduleUri)) {
+                UserFunction userFunction = function.getUserFunction();
+                UserFunctionReference.BoundUserFunction buf =
+                        new UserFunctionReference.BoundUserFunction(agent, userFunction, null, newController);
+                if (functionsMap.get(functionQName) != null) {
+                    newMap = ((MapItem) functionsMap.get(functionQName)).addEntry(new Int64Value(function.getNumberOfArguments()), buf);
+                } else {
+                    newMap = new SingleEntryMap(Int64Value.makeIntegerValue(function.getNumberOfArguments()), buf);
                 }
+                functionsMap = functionsMap.addEntry(functionQName, newMap);
             }
         }
 

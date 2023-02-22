@@ -151,10 +151,11 @@ public final class MultipleNodeKindTest extends NodeTest {
 
     private void format(LinkedList<PrimitiveUType> list, StringBuilder fsb, Function<ItemType, String> show) {
         if (list.size() == 1) {
-            fsb.append(list.get(0).toItemType().toString());
+            fsb.append(list.getFirst().toItemType().toString());
         } else {
             fsb.append('(');
-            fsb.append(list.removeFirst().toItemType().toString());
+            fsb.append(list.getFirst().toItemType().toString());
+            list.removeFirst();
             fsb.append('|');
             format(list, fsb, show);
             fsb.append(')');

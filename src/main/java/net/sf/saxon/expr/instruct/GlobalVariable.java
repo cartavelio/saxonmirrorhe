@@ -285,19 +285,6 @@ public class GlobalVariable extends Actor
     }
 
     /**
-     * Get an iterator over all the properties available. The values returned by the iterator
-     * will be of type String, and each string can be supplied as input to the getProperty()
-     * method to retrieve the value of the property. The iterator may return properties whose
-     * value is null.
-     *
-     * @return an iterator over the properties.
-     */
-    @Override
-    public Iterator<String> getProperties() {
-        return Collections.emptyIterator();
-    }
-
-    /**
      * Get the host language (XSLT, XQuery, XPath) used to implement the code in this container
      *
      * @return typically {@link HostLanguage#XSLT} or {@link HostLanguage#XQUERY}

@@ -12,6 +12,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.JPConverter;
 import net.sf.saxon.expr.PJConverter;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Result;
@@ -28,6 +29,8 @@ import javax.xml.transform.Source;
  * this interface. To implement <code>TreeModel</code>, it must supply a Builder; in effect this
  * means that it will be possible to use the external object model for output as well as for
  * input.</p>
+ *
+ * <p>From Saxon 11, this interface extends {@link}</p>
  */
 
 public interface ExternalObjectModel {
@@ -103,22 +106,20 @@ public interface ExternalObjectModel {
     Receiver getDocumentBuilder(Result result) throws XPathException;
 
     /**
-     * Test whether this object model recognizes a particular kind of JAXP Source object,
-     * and if it does, send the contents of the document to a supplied Receiver, and return true.
-     * Otherwise, return false.
-     *
-     * @param source   a JAXP Source object
-     * @param receiver the Receiver that is to receive the data from the Source. The caller
-     *                 is responsible for opening and closing the receiver.
-     * @return true if the data from the Source has been sent to the Receiver, false otherwise
-     * @throws net.sf.saxon.trans.XPathException
-     *          if any failure occurs
+     * Give this ExternalObjectModel the opportunity of recognising a Source object and returning
+     * an ActiveSource, which will be used to send an instance of this external model to a supplied
+     * Receiver. The default implementation returns null.
+     * @param supplied a supplied Source
+     * @return an ActiveSource object if the source is recognised, or null if not
+     * @since 11 (introduced to give more cross-platform compatibility)
      */
 
-    boolean sendSource(Source source, Receiver receiver) throws XPathException;
+    default ActiveSource getActiveSource(Source supplied) {
+        return null;
+    }
 
     /**
-     * Wrap or unwrap a node using this object model to return the corresponding Saxon node. If the supplied
+     * Wrap or unwrap a node using this object model to return the corresponding erSaxon node. If the supplied
      * source does not belong to this object model, return null
      *
      * @param source a JAXP Source object

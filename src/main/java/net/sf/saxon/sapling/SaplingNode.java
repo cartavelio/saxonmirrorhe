@@ -8,6 +8,7 @@
 package net.sf.saxon.sapling;
 
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.SchemaValidator;
 import net.sf.saxon.s9api.Serializer;
@@ -73,10 +74,11 @@ public abstract class SaplingNode {
     /**
      * Send a sequence of events representing this node to a supplied Receiver
      * @param receiver the receiver to which the events are to be sent
+     * @param options parse options (currently ignored)
      * @throws XPathException if the receiver throws an exception
      */
 
-    public abstract void sendTo(Receiver receiver) throws XPathException;
+    public abstract void deliver(Receiver receiver, ParseOptions options) throws XPathException;
 
 }
 

@@ -43,7 +43,8 @@ public class OneOrMore<T extends Item> extends ZeroOrMore<T> {
 
     public static OneOrMore<Item> makeOneOrMore(Sequence sequence) throws XPathException {
         List<Item> content = new ArrayList<>();
-        sequence.iterate().forEachOrFail(content::add);
+        //noinspection Convert2MethodRef
+        sequence.iterate().forEachOrFail(it -> content.add(it));
         if (content.isEmpty()) {
             throw new IllegalArgumentException();
         }

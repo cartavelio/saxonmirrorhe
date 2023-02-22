@@ -8,9 +8,9 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
+import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.ReverseList;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceExtent;
@@ -104,7 +104,7 @@ public abstract class ListIterator implements UnfailingIterator, LastPositionFin
 
         @Override
         public SequenceIterator getReverseIterator() {
-            return new ListIterator.Of<T>(new ReverseList<T>(list));
+            return new Reverse.ReverseListIterator(list);
         }
     }
 

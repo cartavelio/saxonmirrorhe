@@ -54,8 +54,7 @@ public class XPathExecutable {
 
     public XPathSelector load() {
         Map<StructuredQName, XPathVariable> declaredVariables = new LinkedHashMap<StructuredQName, XPathVariable>();
-        for (Iterator<XPathVariable> iter = env.iterateExternalVariables(); iter.hasNext(); ) {
-            XPathVariable var = iter.next();
+        for (XPathVariable var :env.getExternalVariables()) {
             declaredVariables.put(var.getVariableQName(), var);
         }
         return new XPathSelector(exp, declaredVariables);
@@ -132,7 +131,7 @@ public class XPathExecutable {
 
     @CSharpInnerClass(outer=false, extra="java.util.Iterator<net.sf.saxon.sxpath.XPathVariable> varIterator")
     public Iterator<QName> iterateExternalVariables() {
-        final Iterator<XPathVariable> varIterator = env.iterateExternalVariables();
+        final Iterator<XPathVariable> varIterator = env.getExternalVariables().iterator();
         return new Iterator<QName>() {
             @Override
             public boolean hasNext() {

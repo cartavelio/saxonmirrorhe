@@ -14,6 +14,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.wrapper.SnapshotNode;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
@@ -86,6 +87,7 @@ public class SnapshotFn extends SystemFunction {
         return ancestors;
     }
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public static BuilderMonitor openAncestors(NodeInfo origin, List<NodeInfo> ancestors, XPathContext context) throws XPathException {
         NodeInfo root = origin.getRoot();
         TinyBuilder builder = new TinyBuilder(context.getController().makePipelineConfiguration());

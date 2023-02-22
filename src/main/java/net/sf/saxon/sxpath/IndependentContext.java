@@ -338,8 +338,8 @@ public class IndependentContext extends AbstractStaticContext
      * @since 9.2
      */
 
-    public Iterator<XPathVariable> iterateExternalVariables() {
-        return variables.values().iterator();
+    public Iterable<XPathVariable> getExternalVariables() {
+        return variables.values();
     }
 
     /**

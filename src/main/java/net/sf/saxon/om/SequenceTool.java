@@ -9,14 +9,14 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.AscendingRangeIterator;
 import net.sf.saxon.expr.DescendingRangeIterator;
+import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
@@ -25,7 +25,6 @@ import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -498,31 +497,6 @@ public class SequenceTool {
         } else {
             return new LargeAttributeMap(list);
         }
-    }
-
-    public static Iterable<? extends Item> groundedValueAsIterable(GroundedValue gv) {
-        // For .NEU - don't use a lambda expression here
-        return new Iterable<Item>() {
-            @Override
-            public Iterator<Item> iterator() {
-                final UnfailingIterator base = gv.iterate();
-                return new Iterator<Item>() {
-
-                    Item pending = null;
-
-                    @Override
-                    public boolean hasNext() {
-                        pending = base.next();
-                        return pending != null;
-                    }
-
-                    @Override
-                    public Item next() {
-                        return pending;
-                    }
-                };
-            }
-        };
     }
 
     /**

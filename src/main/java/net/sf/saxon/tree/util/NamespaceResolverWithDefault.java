@@ -8,6 +8,7 @@
 package net.sf.saxon.tree.util;
 
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -56,8 +57,9 @@ public class NamespaceResolverWithDefault implements NamespaceResolver {
      */
 
     @Override
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public Iterator<String> iteratePrefixes() {
-        ArrayList<String> list = new ArrayList<String>(10);
+        ArrayList<String> list = new ArrayList<>(10);
         for (Iterator<String> it = baseResolver.iteratePrefixes(); it.hasNext(); ) {
             String p = it.next();
             if (p.length() != 0) {

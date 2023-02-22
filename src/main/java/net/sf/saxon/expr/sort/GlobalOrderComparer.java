@@ -7,8 +7,10 @@
 
 package net.sf.saxon.expr.sort;
 
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.transpile.CSharpInjectMembers;
+
+import java.util.Comparator;
 
 /**
  * A Comparer used for comparing nodes in document order. This
@@ -16,7 +18,8 @@ import net.sf.saxon.om.NodeInfo;
  * come from the same document
  */
 
-public final class GlobalOrderComparer implements ItemOrderComparer {
+@CSharpInjectMembers(code="public override int Compare(net.sf.saxon.om.NodeInfo a, net.sf.saxon.om.NodeInfo b) { return compare(a, b); }")
+public final class GlobalOrderComparer implements Comparator<NodeInfo> {
 
     private static final GlobalOrderComparer instance = new GlobalOrderComparer();
 
@@ -30,16 +33,16 @@ public final class GlobalOrderComparer implements ItemOrderComparer {
     }
 
     @Override
-    public int compare(Item a, /*@NotNull*/ Item b) {
+    public int compare(NodeInfo a, /*@NotNull*/ NodeInfo b) {
         if (a == b) {
             return 0;
         }
-        long d1 = ((NodeInfo) a).getTreeInfo().getDocumentNumber();
-        long d2 = ((NodeInfo) b).getTreeInfo().getDocumentNumber();
+        long d1 = a.getTreeInfo().getDocumentNumber();
+        long d2 = b.getTreeInfo().getDocumentNumber();
         if (d1 == d2) {
-            return ((NodeInfo) a).compareOrder((NodeInfo) b);
+            return a.compareOrder(b);
         }
-        return Long.signum(d1 - d2);
+        return (int)Long.signum(d1 - d2);
     }
 }
 

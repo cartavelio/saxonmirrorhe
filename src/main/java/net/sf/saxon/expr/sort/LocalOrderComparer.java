@@ -7,17 +7,18 @@
 
 package net.sf.saxon.expr.sort;
 
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.transpile.CSharpInjectMembers;
+
+import java.util.Comparator;
 
 /**
  * A Comparer used for comparing nodes in document order. This
  * comparer assumes that the nodes being compared come from the same document
- *
- * @author Michael H. Kay
  */
 
-public final class LocalOrderComparer implements ItemOrderComparer {
+@CSharpInjectMembers(code = "public override int Compare(net.sf.saxon.om.NodeInfo a, net.sf.saxon.om.NodeInfo b) { return compare(a, b); }")
+public final class LocalOrderComparer implements Comparator<NodeInfo> {
 
     private static final LocalOrderComparer instance = new LocalOrderComparer();
 
@@ -32,10 +33,8 @@ public final class LocalOrderComparer implements ItemOrderComparer {
     }
 
     @Override
-    public int compare(Item a, Item b) {
-        NodeInfo n1 = (NodeInfo) a;
-        NodeInfo n2 = (NodeInfo) b;
-        return n1.compareOrder(n2);
+    public int compare(NodeInfo a, NodeInfo b) {
+        return a.compareOrder(b);
     }
 }
 

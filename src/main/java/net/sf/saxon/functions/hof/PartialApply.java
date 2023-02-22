@@ -13,6 +13,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -254,6 +255,7 @@ public class PartialApply extends Expression {
      * @return a representation of the expression as a string
      */
     @Override
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public String toString() {
         StringBuilder buff = new StringBuilder(64);
         boolean par = getBaseExpression().operands().iterator().hasNext();

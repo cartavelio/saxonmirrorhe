@@ -187,8 +187,10 @@ public class Query {
         options.setPermittedValues("Tlevel", new String[]{"none", "low", "normal", "high"}, "normal");
         options.addRecognizedOption("Tout", CommandLineOptions.TYPE_FILENAME,
                                     "File for trace listener output");
+        //#if CSHARP==false
         options.addRecognizedOption("TP", CommandLineOptions.TYPE_FILENAME,
                                     "Use profiling trace listener, with specified output file");
+        //#endif
         options.addRecognizedOption("traceout", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "File for output of trace() messages");
         options.setPermittedValues("tree", new String[]{"linked", "tiny", "tinyc"}, null);
@@ -633,6 +635,7 @@ public class Query {
             config.setBooleanProperty(Feature.MONITOR_HOT_SPOT_BYTE_CODE, true);
         }
 
+        //#if CSHARP==false
         value = options.getOptionValue("TP");
         if (value != null) {
             TimingTraceListener listener = new TimingTraceListener();
@@ -648,6 +651,7 @@ public class Query {
                 }
             }
         }
+        //#endif
 
         value = options.getOptionValue("u");
         if (value != null) {

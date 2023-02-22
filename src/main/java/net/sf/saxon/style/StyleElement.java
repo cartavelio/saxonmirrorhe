@@ -54,7 +54,7 @@ import java.util.*;
 
 // Enable the C# code to accept a lambda expression in calls to children()
 @CSharpInjectMembers(code = {""
-        + "    protected java.lang.Iterable<net.sf.saxon.om.NodeInfo> children(System.Predicate<net.sf.saxon.om.NodeInfo> filter) {"
+        + "    protected System.Collections.Generic.IEnumerable<net.sf.saxon.om.NodeInfo> children(System.Predicate<net.sf.saxon.om.NodeInfo> filter) {"
         + "        return new net.sf.saxon.tree.util.Navigator.ChildrenAsIterable(this, net.sf.saxon.pattern.NodeSelector.of(filter));"
         + "    }"})
 
@@ -2002,7 +2002,7 @@ public abstract class StyleElement extends ElementImpl {
             }
         }
         if (containsEmptyTest) {
-            List<NodeInfo> vars = new ArrayList<>();
+            List<NodeInfo> vars = new ArrayList<>();  
             List<NodeInfo> onEmpties = new ArrayList<>();
             List<NodeInfo> others = new ArrayList<>();
             for (NodeInfo kid : children()) {

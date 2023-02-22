@@ -7,10 +7,10 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.sort.ItemOrderComparer;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
@@ -42,9 +42,10 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
         }
     }
 
+    @CSharpInjectMembers(code = "public override int Compare(net.sf.saxon.expr.UnionIterator.Intake a, net.sf.saxon.expr.UnionIterator.Intake b) { return compare(a, b); }")
     private static class IntakeComparer implements Comparator<Intake> {
-        private final ItemOrderComparer itemOrderComparer;
-        public IntakeComparer(ItemOrderComparer itemOrderComparer) {
+        private final Comparator<? super NodeInfo> itemOrderComparer;
+        public IntakeComparer(Comparator<? super NodeInfo> itemOrderComparer) {
             this.itemOrderComparer = itemOrderComparer;
         }
 
@@ -67,7 +68,7 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
      */
 
     public UnionIterator(List<SequenceIterator> inputs,
-                         ItemOrderComparer comparer) throws XPathException {
+                         Comparator<? super NodeInfo> comparer) throws XPathException {
 
         // The comparator between Intakes is based on the supplied comparator between nodes
         // (The implementation using a static inner class is constrained by the C# conversion)

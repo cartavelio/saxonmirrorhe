@@ -7,7 +7,12 @@
 
 package net.sf.saxon.pull;
 
-import javax.xml.transform.Source;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Sender;
+import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.resource.ActiveSource;
+import net.sf.saxon.trans.XPathException;
 
 /**
  * A PullSource is a JAXP Source that encapsulates a PullProvider - that is, an object
@@ -18,7 +23,7 @@ import javax.xml.transform.Source;
  * to understand the individual implementation.
  */
 
-public class PullSource implements Source {
+public class PullSource implements ActiveSource {
 
     private String systemId;
     private final PullProvider provider;
@@ -69,6 +74,29 @@ public class PullSource implements Source {
     @Override
     public String getSystemId() {
         return systemId;
+    }
+
+    @Override
+    public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
+        PipelineConfiguration pipe = receiver.getPipelineConfiguration();
+        boolean xInclude = options.isXIncludeAware();
+        if (xInclude) {
+            throw new XPathException("XInclude processing is not supported with a pull parser");
+        }
+        receiver = Sender.makeValidator(receiver, getSystemId(), options);
+
+        PullProvider provider = getPullProvider();
+
+        provider.setPipelineConfiguration(pipe);
+        receiver.setPipelineConfiguration(pipe);
+        PullPushCopier copier = new PullPushCopier(provider, receiver);
+        try {
+            copier.copy();
+        } finally {
+            if (options.isPleaseCloseAfterUse()) {
+                provider.close();
+            }
+        }
     }
 }
 

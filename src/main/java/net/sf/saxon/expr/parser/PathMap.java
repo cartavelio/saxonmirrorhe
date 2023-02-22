@@ -43,9 +43,9 @@ import java.util.*;
 
 public class PathMap {
 
-    /*@NotNull*/ private final List<PathMapRoot> pathMapRoots = new ArrayList<PathMapRoot>();
+    /*@NotNull*/ private final List<PathMapRoot> pathMapRoots = new ArrayList<>();
     /*@NotNull*/ private final HashMap<Binding, PathMapNodeSet> pathsForVariables =
-            new HashMap<Binding, PathMapNodeSet>();  // a map from a variable Binding to a PathMapNodeSet
+            new HashMap<>();  // a map from a variable Binding to a PathMapNodeSet
 
     /**
      * A node in the path map. A node holds a set of arcs, each representing a link to another
@@ -345,7 +345,7 @@ public class PathMap {
          */
 
         public PathMapNodeSet(PathMapNode singleton) {
-            add(singleton);
+            this.add(singleton);
         }
 
         /**
@@ -375,7 +375,7 @@ public class PathMap {
         public void addNodeSet(/*@Nullable*/ PathMapNodeSet nodes) {
             if (nodes != null) {
                 for (PathMapNode node : nodes) {
-                    add(node);
+                    this.add(node);
                 }
             }
         }
