@@ -220,27 +220,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         StaticProperty.DEPENDS_ON_POSITION | StaticProperty.DEPENDS_ON_LAST |
             StaticProperty.DEPENDS_ON_XSLT_CONTEXT | StaticProperty.DEPENDS_ON_USER_FUNCTIONS;
 
-//    public void allocateArgumentEvaluators() {
-//        // Retained for paths such as streaming, bytecode generation, XQuery updated, that have
-//        // not yet converted to use elaboration mechanisms.
-//        argumentEvaluators = new SequenceEvaluator[getArity()];
-//        int i=0;
-//        for (Operand o : operands()) {
-//            Expression arg = o.getChildExpression();
-//            SequenceType required = function.getArgumentType(i);
-//            int cardinality = required.getCardinality();
-//
-//            if (i == 0 && function.getDeclaredStreamability().isConsuming()) {
-//                argumentEvaluators[i] = new StreamingArgumentEvaluator(arg);
-//            } else if (function.getParameterDefinitions()[i].isIndexedVariable()) {
-//                PullEvaluator argPull = arg.makeElaborator().elaborateForPull();
-//                argumentEvaluators[i] = new IndexedVariableEvaluator(argPull);
-//            } else {
-//                argumentEvaluators[i] = arg.makeElaborator().lazily(true);
-//            }
-//            i++;
-//        }
-//    }
+
     public void allocateArgumentEvaluators() {
         argumentEvaluators = new SequenceEvaluator[getArity()];
         UserFunction target = getFunction();
