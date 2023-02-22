@@ -1,9 +1,6 @@
 package internaltests;
 
-import net.sf.saxon.om.CodedName;
-import net.sf.saxon.om.FingerprintedQName;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NoNamespaceName;
+import net.sf.saxon.om.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,9 +13,10 @@ public class NodeNameTests {
 
     @Test
     public void testCodedName() {
-        FingerprintedQName n = new FingerprintedQName("foo", "http://ns1/", "test");
+        NamespaceUri ns1 = NamespaceUri.of("http://ns1/");
+        FingerprintedQName n = new FingerprintedQName("foo", ns1, "test");
         NamePool pool = new NamePool();
-        int code = pool.allocateFingerprint("http://ns1/", "test");
+        int code = pool.allocateFingerprint(ns1, "test");
         CodedName cd = new CodedName(code, "", pool);
         boolean b = cd.equals(n);
         assertEquals(n.hashCode(), cd.hashCode());
@@ -28,7 +26,7 @@ public class NodeNameTests {
 
     @Test
     public void testNoNamespaceName() {
-        FingerprintedQName n = new FingerprintedQName("", "", "test");
+        FingerprintedQName n = new FingerprintedQName("", NamespaceUri.NULL, "test");
         NoNamespaceName cd = new NoNamespaceName("test");
         boolean b = cd.equals(n);
         assertEquals(n.hashCode(), cd.hashCode());

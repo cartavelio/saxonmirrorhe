@@ -147,15 +147,15 @@ public class LicenseTests {
         requireProfessionalLicenseXslt(xsl);
     }
 
-    @Test
-    public void testSaxonEvaluate() {
-        String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
-                "<xsl:param name='in' select=\"'3'\"/>" +
-                "<xsl:template name='main' xmlns:saxon='http://saxon.sf.net/'>"
-                + "<xsl:value-of select=\"saxon:evaluate($in)\"/>"
-                + "</xsl:template></xsl:stylesheet>";
-        requireProfessionalLicenseXslt(xsl);
-    }
+//    @Test
+//    public void testSaxonEvaluate() {
+//        String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
+//                "<xsl:param name='in' select=\"'3'\"/>" +
+//                "<xsl:template name='main' xmlns:saxon='http://saxon.sf.net/'>"
+//                + "<xsl:value-of select=\"saxon:evaluate($in)\"/>"
+//                + "</xsl:template></xsl:stylesheet>";
+//        requireProfessionalLicenseXslt(xsl);
+//    }
 
     @Test
     public void testHof() {

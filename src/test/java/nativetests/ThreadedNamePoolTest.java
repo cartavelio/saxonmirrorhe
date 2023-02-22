@@ -1,7 +1,7 @@
 package nativetests;
 
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NamePool;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -55,9 +55,9 @@ public class ThreadedNamePoolTest {
                         try {
                             int runs = 1000000 / threads;
                             for (int k=0; k<runs; k++) {
-                                List<Integer> codes = new java.util.ArrayList<Integer>(10000);
+                                List<Integer> codes = new java.util.ArrayList<>(10000);
                                 String local = "N" + random.nextInt(10000);
-                                int code = pool.allocateFingerprint(NamespaceConstant.EXSLT_MATH, local);
+                                int code = pool.allocateFingerprint(NamespaceUri.EXSLT_MATH, local);
                                 codes.add(code);
                                 Iterator<Integer> iterator = codes.iterator();
                                 for (int n = 0; n < 20; n++) {

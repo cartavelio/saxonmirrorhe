@@ -41,9 +41,9 @@ public class EventSourceTest {
                         AttributeMap attributes = EmptyAttributeMap.getInstance();
                         NamespaceMap namespaces = NamespaceMap.emptyMap();
                         receiver.startDocument(ReceiverOption.NONE);
-                        receiver.startElement(new FingerprintedQName("", "", "a"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);
-                        receiver.startElement(new FingerprintedQName("", "", "b"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);
-                        receiver.startElement(new FingerprintedQName("", "", "c"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);
+                        receiver.startElement(new NoNamespaceName("a"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);
+                        receiver.startElement(new NoNamespaceName("b"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);
+                        receiver.startElement(new NoNamespaceName("c"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);
                         receiver.characters(BMPString.of("X"), LOCATION, ReceiverOption.NONE);
                         receiver.endElement();
                         receiver.endElement();

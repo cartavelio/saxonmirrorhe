@@ -1,6 +1,7 @@
 package s9apitest;
 
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Predicates;
 import net.sf.saxon.s9api.streams.Steps;
@@ -69,7 +70,7 @@ public class TestXdmNode {
             XdmNode doc = builder.build(new StreamSource(new StringReader("<in xmlns='http://ns.com/' foo='bar'><baz/></in>")));
             XdmNode element = doc.select(child()).firstItem();
             assertEquals("in", element.getNodeName().getLocalName());
-            assertEquals("http://ns.com/", element.getNodeName().getNamespaceURI());
+            assertEquals(NamespaceUri.of("http://ns.com/"), element.getNodeName().getNamespaceURI());
             assertEquals("", element.getNodeName().getPrefix());
             assertEquals(XdmNodeKind.ELEMENT, element.getNodeKind());
             assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "untyped"), element.getTypeAnnotationName());
@@ -172,7 +173,7 @@ public class TestXdmNode {
             XdmNode doc2 = one.select(Steps.parent((Predicates.isDocument()))).firstItem();
             assertNotNull(doc2);
             assertTrue(doc.equals(doc2)); // For some reason, assertEquals fails with stack overflow
-            assertNull(doc.getTypeAnnotationName());
+            assertEquals("untyped", doc.getTypeAnnotationName().getLocalName());
             XdmNode doc3 = one.select(Steps.ancestor()).firstItem();
             assertNotNull(doc3);
             assertTrue(doc.equals(doc3));
@@ -208,7 +209,7 @@ public class TestXdmNode {
                             new StreamSource(new StringReader("<one foo='bar'>[<two xmlns='http://ns.com/'><three/></two>]</one>")));
             XdmNode grandKid = doc.select(Steps.child("one").then(Steps.child("two"))).firstItem();
             assertEquals("two", grandKid.getNodeName().getLocalName());
-            assertEquals("http://ns.com/", grandKid.getNodeName().getNamespaceURI());
+            assertEquals(NamespaceUri.of("http://ns.com/"), grandKid.getNodeName().getNamespaceURI());
             String foo = grandKid.select(Steps.parent().then(Steps.attribute("foo"))).firstItem().getStringValue();
             assertEquals("bar", foo);
         } catch (SaxonApiException e) {

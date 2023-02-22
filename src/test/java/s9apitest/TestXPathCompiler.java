@@ -575,9 +575,9 @@ public class TestXPathCompiler {
                 @Override
                 public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
                     if ("xfi".equals(prefix)) {
-                        return "http://www.xbrl.org/2008/function/instance";
+                        return NamespaceUri.of("http://www.xbrl.org/2008/function/instance");
                     } else if ("xbrli".equals(prefix)) {
-                        return "http://www.xbrl.org/2003/instance";
+                        return NamespaceUri.of("http://www.xbrl.org/2003/instance");
                     }
                     return null;
                 }
@@ -592,7 +592,7 @@ public class TestXPathCompiler {
             Iterator<net.sf.saxon.s9api.QName> it = exec.iterateExternalVariables();
             while (it.hasNext()) {
                 net.sf.saxon.s9api.QName qn = it.next();
-                dependencies.add(new QName(qn.getNamespaceURI(), qn.getLocalName(), qn.getPrefix()));
+                dependencies.add(new QName(qn.getURI(), qn.getLocalName(), qn.getPrefix()));
             }
 
             if (dependencies.isEmpty()) {

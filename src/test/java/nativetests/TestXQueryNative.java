@@ -244,7 +244,7 @@ public class TestXQueryNative {
     private static class MyStaticQueryContext extends StaticQueryContextPE {
         public MyStaticQueryContext(Configuration config) {
             super((ProfessionalConfiguration)config, false);
-            setDefaultElementNamespace("http://suprise.com/");
+            setDefaultElementNamespace(NamespaceUri.of("http://suprise.com/"));
         }
     }
 
@@ -262,7 +262,7 @@ public class TestXQueryNative {
             StaticQueryContext sqc = config.newStaticQueryContext();
             XQueryExpression exp = sqc.compileQuery("<e/>");
             Item result = exp.iterator(new DynamicQueryContext(config)).next();
-            assertEquals("http://suprise.com/", ((NodeInfo) result).getNamespaceUri(), "wrong URI");
+            assertEquals(NamespaceUri.of("http://suprise.com/"), ((NodeInfo) result).getNamespaceUri(), "wrong URI");
         } catch (XPathException e) {
             fail();
         }
@@ -295,7 +295,7 @@ public class TestXQueryNative {
         Configuration config = Configuration.newConfiguration();
         config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, true);
         StaticQueryContext sqc = config.newStaticQueryContext();
-        String testDir = configTest.getDataDir();
+        String testDir = configTest.getXMarkDir();
         sqc.setBaseURI(testDir);
         //sqc.declareDefaultCollation("");
         DynamicQueryContext dqc = new DynamicQueryContext(config);
@@ -319,7 +319,7 @@ public class TestXQueryNative {
         Configuration config = Configuration.newConfiguration();
         config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, true);
         StaticQueryContext sqc = config.newStaticQueryContext();
-        String testDir = configTest.getDataDir();
+        String testDir = configTest.getXMarkDir();
         sqc.setBaseURI(testDir);
         //sqc.declareDefaultCollation("");
         DynamicQueryContext dqc = new DynamicQueryContext(config);

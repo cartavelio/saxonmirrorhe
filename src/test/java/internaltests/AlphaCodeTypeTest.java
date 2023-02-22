@@ -7,6 +7,7 @@ import com.saxonica.expr.SaxonSyntaxExtension;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -28,7 +29,7 @@ public class AlphaCodeTypeTest {
         try {
             Configuration config = new EnterpriseConfiguration();
             IndependentContext ic = new IndependentContext(config);
-            ic.declareNamespace("foo", "http://foo.com/");
+            ic.declareNamespace("foo", NamespaceUri.of("http://foo.com/"));
             ic.setXPathLanguageLevel(31);
             XPathParser parser = new XPathParser();
             String[] testCases = new String[]{
@@ -74,7 +75,7 @@ public class AlphaCodeTypeTest {
         try {
             Configuration config = new EnterpriseConfiguration();
             IndependentContext ic = new IndependentContext(config);
-            ic.declareNamespace("foo", "http://foo.com/");
+            ic.declareNamespace("foo", NamespaceUri.of("http://foo.com/"));
             ic.setXPathLanguageLevel(31);
             XPathParser parser = new XPathParser();
             String[] testCases = new String[]{
