@@ -888,8 +888,8 @@
         <xsl:param name="c" as="node()"/>
         <xsl:variable name="href">
             <xsl:choose>
-                <xsl:when test="tokenize($c/@class) = 'javalink'">
-                    <!--<xsl:message>javalink</xsl:message>-->
+                <xsl:when test="tokenize($c/@class) = ('javalink', 'cslink')">
+                    <!--<xsl:message>javalink or cslink</xsl:message>-->
                     <xsl:variable name="data-href" select="$c/@data-href"/>
                     <xsl:variable name="ref"
                         select="for $a in substring-before($data-href,'(') return if ($a eq '') then $data-href else $a"/>

@@ -5836,8 +5836,6 @@ and <code>PullProvider</code> interfaces.</p>
             this will generally involve rebuilding the schema from its source representation. It is the user's responsibility
             to ensure that the loaded schema is consistent with the schema that was used to validate the original
             XML document.</p>
-         
-         <p xmlns="">For more information see <xref section="sourcedocs" page="ptree">PTree Files</xref>.</p>
       </change>
    </category>
    <category name="serialization">

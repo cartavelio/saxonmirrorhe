@@ -828,7 +828,7 @@
             href="net.sf.saxon.s9api.SchemaValidator">SchemaValidator</a> object.</p>
 
       <p class="csonly">Using the Saxon.Api interface from C#, parameter values can be supplied using the
-            <code>SetParameter()</code> method on the <a class="javalink"
+            <code>SetParameter()</code> method on the <a class="cslink"
             href="Saxon.Api.SchemaValidator">SchemaValidator</a> object.</p>
 
       <p>It is not currently possible to supply parameter values when using the JAXP interfaces to

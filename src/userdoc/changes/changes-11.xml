@@ -79,7 +79,7 @@
  
     </category>
 
-    <category name="jaxp">
+    <category name="JAXP">
 
         <p>A new interface <code>ActiveSource</code> is introduced as a sub-interface of the JAXP <code>Source</code>
         interface. Unlike <code>Source</code>, this is a true interface in that Saxon will accept any class
@@ -91,7 +91,7 @@
 
     </category>
     
-    <category name="Saxon.Api">
+    <category name="dotnet">
         <div class="csonly">
         <p>In Saxon-CS, the broad structure of the API remains unchanged from the older .NET product, 
                 including some features retained for legacy reasons, but the detail has been modernized and made
