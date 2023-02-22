@@ -91,7 +91,7 @@ public class XPathContextMajor extends XPathContextMinor {
                 new Controller(exec.getConfiguration(), exec);
         if (item != null) {
             SequenceIterator iter = SingletonIterator.makeIterator(item);
-            currentIterator = new FocusTrackingIterator(iter);
+            currentIterator = SequenceTool.focusTracker(iter);
             currentIterator.next();
             last = new LastValue(1);
         }

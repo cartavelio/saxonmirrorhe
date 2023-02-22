@@ -8,6 +8,7 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
+import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -18,7 +19,7 @@ import net.sf.saxon.value.EmptySequence;
  * SingletonIterator: an iterator over a sequence exactly one value
  */
 
-public class SingletonIterator implements SequenceIterator,
+public class SingletonIterator implements SequenceIterator, FocusIterator,
         ReversibleIterator, LastPositionFinder, GroundedIterator, LookaheadIterator {
 
     private final Item item;
@@ -82,6 +83,26 @@ public class SingletonIterator implements SequenceIterator,
             gone = true;
             return item;
         }
+    }
+
+    @Override
+    public Item current() {
+        return gone ? item : null;
+    }
+
+    @Override
+    public int position() {
+        return gone ? 0 : 1;
+    }
+
+    @Override
+    public void close() {
+        // no action
+    }
+
+    @Override
+    public void discharge() {
+        // no action
     }
 
     @Override
