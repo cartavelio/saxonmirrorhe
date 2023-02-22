@@ -752,7 +752,7 @@ task graal_eec_jar(
   }
 
 
-  ["XSLT30", "XPath", "XQuery"].each { proc ->
+  ["XSLT30", "XPath", "XQuery", "Validator"].each { proc ->
     task "runCPP_${edition}_${proc}"(
              dependsOn: ["buildCPP_${edition}"]
      ) {
