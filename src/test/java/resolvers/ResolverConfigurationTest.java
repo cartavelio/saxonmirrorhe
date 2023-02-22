@@ -30,7 +30,7 @@ public class ResolverConfigurationTest {
     @Test
     public void explicitCatalogResourceResolverClass() {
         Configuration config = new Configuration();
-        config.setConfigurationProperty(Feature.SAXON_RESOURCE_RESOLVER_CLASS, "net.sf.saxon.lib.CatalogResourceResolver");
+        config.setConfigurationProperty(Feature.COMMON_RESOURCE_RESOLVER_CLASS, "net.sf.saxon.lib.CatalogResourceResolver");
         assertNotNull(config.getCommonResourceResolver());
         assertEquals("net.sf.saxon.lib.CatalogResourceResolver", config.getCommonResourceResolver().getClass().getName());
     }
@@ -43,7 +43,7 @@ public class ResolverConfigurationTest {
 
         MyResolver resolver = new MyResolver(underlyingResolver);
 
-        config.setConfigurationProperty(Feature.SAXON_RESOURCE_RESOLVER, resolver);
+        config.setConfigurationProperty(Feature.COMMON_RESOURCE_RESOLVER, resolver);
         assertNotNull(config.getCommonResourceResolver());
         assertEquals("resolvers.ResolverConfigurationTest$MyResolver", config.getCommonResourceResolver().getClass().getName());
     }
@@ -53,7 +53,7 @@ public class ResolverConfigurationTest {
         Configuration config = new Configuration();
 
         try {
-            config.setConfigurationProperty(Feature.SAXON_RESOURCE_RESOLVER, "Hello");
+            config.setConfigurationProperty(Feature.COMMON_RESOURCE_RESOLVER, "Hello");
             fail();
         } catch (IllegalArgumentException ex) {
             assertTrue(ex.getMessage().contains("SAXON_RESOURCE_RESOLVER value must be an instance of"));
