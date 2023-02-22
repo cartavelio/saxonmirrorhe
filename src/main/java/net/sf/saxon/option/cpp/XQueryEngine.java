@@ -79,13 +79,13 @@ public class XQueryEngine extends SaxonCAPI {
 
 
 
-    @CEntryPoint(name = "createXQueryEngine")
+    @CEntryPoint(name = "createXQueryEngine", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createXQueryEngine(IsolateThread thread) {
             ObjectHandle handle = objectHandles.create(new net.sf.saxon.option.cpp.XQueryEngine(false));
             return handle.rawValue();
     }
 
-    @CEntryPoint(name = "createXQueryEngineWithProcessor")
+    @CEntryPoint(name = "createXQueryEngineWithProcessor", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createXQueryEngine(IsolateThread thread, ObjectHandle processorRef) {
             Processor processor = objectHandles.get(processorRef);
             if(processor == null) {
@@ -98,18 +98,6 @@ public class XQueryEngine extends SaxonCAPI {
     public static XQueryEngine newInstance(Processor proc) {
         return new XQueryEngine(proc);
     }
-
-    public XdmNode parseXMLString(String xml) throws SaxonApiException {
-        try {
-            return SaxonCAPI.parseXmlString(null, processor, null, null, xml);
-        } catch (SaxonApiException ex) {
-            throw ex;
-        }
-    }
-
-
-
-
 
     static Map<String, Object> convertArraysToMap(Processor processor, XQueryCompiler compiler, String[] params, Object[] values, Map<QName, XdmValue> parameters, Properties props) throws SaxonApiException {
             Map<String, Object> map = new HashMap();
@@ -282,7 +270,7 @@ public class XQueryEngine extends SaxonCAPI {
     }
 
 
-    @CEntryPoint(name = "j_executeQueryToString")
+    @CEntryPoint(name = "j_executeQueryToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
     public static CCharPointer executeQueryToString(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, ObjectHandle processorDataRef) throws SaxonApiException {
 
         ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
@@ -300,7 +288,7 @@ public class XQueryEngine extends SaxonCAPI {
 
     }
 
-    @CEntryPoint(name = "j_executeQueryToValue")
+    @CEntryPoint(name = "j_executeQueryToValue", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long executeQueryToValue(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, ObjectHandle processorDataRef) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
         String[] params = processorDataAccumulator.getParameterNames();
@@ -313,8 +301,8 @@ public class XQueryEngine extends SaxonCAPI {
         return handle.rawValue();
     }
 
-    @CEntryPoint(name = "j_executeQueryToFile")
-    public static void executeQueryToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer c_outFilename, ObjectHandle processorDataRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_executeQueryToFile", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long executeQueryToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer c_outFilename, ObjectHandle processorDataRef) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
         String[] params = processorDataAccumulator.getParameterNames();
         Object[] values = processorDataAccumulator.getValues();
@@ -330,10 +318,11 @@ public class XQueryEngine extends SaxonCAPI {
             if (serializer != null) {
 
                 eval.run(serializer);
-                return;
+                return SaxonCAPI.STATUS_OK;
             } else {
                 eval.run();
             }
+            return SaxonCAPI.STATUS_OK;
 
     }
 
