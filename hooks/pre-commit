@@ -20,7 +20,7 @@ COMMERCIAL=(src/main/java/com src/main/java/javax)
 # excluded from mirroring. (Update the mirror script as well if you
 # change this list!) Files that begin with these prefixes must be
 # in separate commits from all other files.
-EXCLUDE=(src/test/bugs src/test/nunit)
+EXCLUDE=(src/test/bugs src/test/nunit src/test/xmark)
 
 # Count all the files, all the commercial files, and all the excluded
 # files
