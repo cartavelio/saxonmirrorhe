@@ -1757,11 +1757,9 @@
       events that need to be changed. The filter can be injected into the pipeline by supplying 
       the document in the form of an <code java="net.sf.saxon.lib.AugmentedSource">AugmentedSource</code>: a typical example would be:</p>
       
-      <samp><![CDATA[
-AugmentedSource as = AugmentedSource.makeAugmentedSource(new StreamSource(...));
+      <samp><![CDATA[AugmentedSource as = AugmentedSource.makeAugmentedSource(new StreamSource(...));
 as.addFilter(receiver -> new MyFilter(receiver));
-documentBuilder.build(as);
-        ]]></samp>
+documentBuilder.build(as);]]></samp>
       
       <p>Here <code>MyFilter</code> is typically a class that extends <code>ProxyReceiver</code>
       by overriding some of its methods: for example, you might override the <code>comment()</code>
