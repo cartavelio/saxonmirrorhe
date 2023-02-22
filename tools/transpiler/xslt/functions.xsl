@@ -59,9 +59,10 @@
    
    <xsl:variable name="specialTypes" as="map(xs:string, xs:string)" select="map{
       'boolean': 'bool',
+      'com.saxonica.config.Verifier': 'Saxon.Impl.Overrides.Verifier',
       'com.saxonica.ee.parallel.MultithreadedContextMappingIterator': 'Saxon.Impl.Parallel.MultithreadedContextMappingIterator',
       'com.saxonica.ee.parallel.MultithreadedItemMappingIterator': 'Saxon.Impl.Parallel.MultithreadedItemMappingIterator',
-      'com.saxonica.ee.parallel.MultithreadedFocusTrackingIterator': 'Saxon.Impl.Parallel.MultithreadedFocusTrackingIterator',
+      (:'com.saxonica.ee.parallel.MultithreadedFocusTrackingIterator': 'Saxon.Impl.Parallel.MultithreadedFocusTrackingIterator',:)
       'com.saxonica.functions.extfn.ParseHtml': 'Saxon.Impl.Helpers.ParseHtml',
       'java.io.BufferedInputStream': 'System.IO.BufferedStream',
       'java.io.BufferedOutputStream': 'System.IO.BufferedStream',
@@ -112,6 +113,9 @@
       'java.util.Collection': 'System.Collections.Generic.ICollection',
       'java.util.Comparator': 'System.Collections.Generic.Comparer',
       'java.util.concurrent.ConcurrentHashMap': 'System.Collections.Concurrent.ConcurrentDictionary',
+      'java.util.concurrent.ArrayBlockingQueue': 'System.Collections.Concurrent.BlockingCollection',
+      'java.util.concurrent.BlockingQueue': 'System.Collections.Concurrent.BlockingCollection',
+      'java.util.concurrent.LinkedBlockingQueue': 'System.Collections.Concurrent.BlockingCollection',
       'java.util.function.BiFunction': 'System.Func',
       'java.util.function.Function': 'System.Func',
       'java.util.function.Predicate': 'System.Predicate',
@@ -148,6 +152,7 @@
       (:'net.sf.saxon.s9api.MessageListener2': 'Saxon.Api.IMessageListener2', :)
       'net.sf.saxon.s9api.Message': 'Saxon.Api.Message',
       'net.sf.saxon.s9api.QName': 'Saxon.Api.QName',
+      (:'net.sf.saxon.s9api.SchemaManager': 'Saxon.Api.SchemaManager',:)
       'net.sf.saxon.s9api.SequenceType': 'Saxon.Api.XdmSequenceType',
       'net.sf.saxon.s9api.WhitespaceStrippingPolicy': 'Saxon.Api.WhitespacePolicy',
       'net.sf.saxon.s9api.XdmArray': 'Saxon.Api.XdmArray',
