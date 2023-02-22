@@ -274,7 +274,7 @@ public class StringTool {
             }
         }
         if (allWhite) {
-            return CompressedWhitespace.compressWS(in, offset, end);
+            return CompressedWhitespace.compressWS(in, offset, len);
         }
         if (max < 256) {
             byte[] array = new byte[len];
