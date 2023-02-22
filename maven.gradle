@@ -42,25 +42,26 @@ task mavenEe() {
     archiveBaseName = "Saxon-${RELEASE}"
     archiveVersion = saxonVersion
     destinationDirectory = project.file("${buildDir}/maven")
+    with jarClasses(release)
     manifest {
       attributes "Project-Name": "Saxon-${RELEASE}"
       attributes "Main-Class": "net.sf.saxon.Transform"
-    }
-    from ("${buildDir}/services/saxon-${release}") {
-      include "META-INF/**"
-    }
-    from ("${buildDir}/classes/${release}j") {
-      include "**/*.class"
-      exclude "net/sf/saxon/option/**"
-    }
-    from ("${buildDir}/resources/main") {
-      include "net/sf/saxon/data/**"
     }
     doLast {
       signJar("${buildDir}/maven/Saxon-${RELEASE}-${saxonVersion}.jar")
     }
   }
   containerTask.dependsOn t
+
+  task "testMaven${Release}SaxonJar"(dependsOn: ["maven${Release}SaxonJar"]) {
+    Task jartask = tasks.findByName("maven${Release}SaxonJar")
+    def jarfile = jartask.outputs.getFiles().getSingleFile()
+    def jargold = project.file("${projectDir}/tools/java-manifests/saxon-${release}.list")
+    doLast {
+      compareManifests(jarfile, jargold)
+    }
+  }
+  t.finalizedBy(tasks.findByName("testMaven${Release}SaxonJar"))
 
   t = task "maven${Release}SourceJar"(
     type: Jar,
@@ -80,6 +81,53 @@ task mavenEe() {
     }
   }
   containerTask.dependsOn t
+
+  if (release != 'he') {
+    t = task "maven${Release}SqlJar"(
+      type: Jar,
+      dependsOn: ["${release}jCompile"]
+    ) {
+      archiveBaseName = "Saxon-${RELEASE}"
+      classifier = 'sql'
+      archiveVersion = saxonVersion
+      destinationDirectory = project.file("${buildDir}/maven")
+      from ("${buildDir}/classes/${release}j") {
+        include "net/sf/saxon/option/sql/*.class"
+        include "com/saxonica/functions/sql/*.class"
+      }
+      doLast {
+        signJar("${buildDir}/maven/Saxon-${RELEASE}-${saxonVersion}-sql.jar")
+      }
+    }
+    containerTask.dependsOn t
+
+    task "testMaven${Release}SqlJar"(dependsOn: ["maven${Release}SqlJar"]) {
+      Task jartask = tasks.findByName("maven${Release}SqlJar")
+      def jarfile = jartask.outputs.getFiles().getSingleFile()
+      def jargold = project.file("${projectDir}/tools/java-manifests/saxon-${release}-sql.list")
+      doLast {
+        compareManifests(jarfile, jargold)
+      }
+    }
+    t.finalizedBy(tasks.findByName("testMaven${Release}SqlJar"))
+
+    t = task "maven${Release}SqlSourcesJar"(
+      type: Jar, dependsOn: ["${release}jCompile"]
+    ) {
+      archiveBaseName = "Saxon-${RELEASE}"
+      classifier = 'sql-sources'
+      archiveVersion = saxonVersion
+      destinationDirectory = project.file("${buildDir}/maven")
+      from ("${projectDir}/src/main/java") {
+        include "net/sf/saxon/option/sql/*.class"
+        include "com/saxonica/functions/sql/*.class"
+      }
+      doLast {
+        signJar("${buildDir}/maven/Saxon-${RELEASE}-${saxonVersion}-sql-sources.jar")
+      }
+    }
+    containerTask.dependsOn t
+  }
 }
 
 task mavenHeXqjJar(type: Jar, dependsOn: ["eejCompile"]) {
@@ -95,6 +143,16 @@ task mavenHeXqjJar(type: Jar, dependsOn: ["eejCompile"]) {
     signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}-xqj.jar")
   }
 }
+
+task testMavenHeXqjJar(type: Jar, dependsOn: ["mavenHeXqjJar"]) {
+  Task jartask = tasks.findByName("mavenHeXqjJar")
+  def jarfile = jartask.outputs.getFiles().getSingleFile()
+  def jargold = project.file("${projectDir}/tools/java-manifests/saxon-he-xqj.list")
+  doLast {
+    compareManifests(jarfile, jargold)
+  }
+}
+mavenHeXqjJar.finalizedBy(testMavenHeXqjJar)
 
 task mavenHeXqjSourcesJar(type: Jar, dependsOn: ["eejCompile"]) {
   archiveBaseName = "Saxon-HE"

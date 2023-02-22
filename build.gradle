@@ -23,6 +23,8 @@ apply plugin: ManageTestSuitesPlugin
 
 import org.gradle.internal.os.OperatingSystem;
 import com.nwalsh.gradle.docker.DockerContainer
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 
 project.extensions.create("testSuite", TestSuite, project)
 
@@ -131,11 +133,17 @@ if (jarsigner.makeSignedJars && jarsigner.makeSignedExes) {
     println("Build is configured to sign jar files")
   } else {
     println("Build is not configured to sign jar files")
+    if (project.findProperty("releaseBuild") == "true") {
+      throw new GradleException("Release builds must be able to sign jar files")
+    }
   }
   if (jarsigner.makeSignedExes) {
     println("Build is configured to sign executable files")
   } else {
     println("Build is not configured to sign executable files")
+    if (project.findProperty("releaseBuild") == "true") {
+      throw new GradleException("Release builds must be able to sign executable files")
+    }
   }
 }
 
@@ -1037,31 +1045,126 @@ heJarClassPath += "lib/jline-${jlineVersion}.jar lib/jline.jar "
 def peeeJarClassPath = heJarClassPath + "lib/icu4j-${icu4jVersion}.jar lib/icu4j.jar lib"
 heJarClassPath += "lib"
 
+def jarClasses(String release) {
+  // We build jar files for our own release and we build jar files
+  // for Maven releases. This function assures that we put the
+  // same classes in both jar files!
+
+  return copySpec {
+    from ("${buildDir}/services/saxon-${release}") {
+      include "META-INF/**"
+    }
+
+    if (release == "he") {
+      from ("${buildDir}/classes/${release}j") {
+        include "net/**/*.class"
+        exclude "net/sf/saxon/option"
+      }
+    } else if (release == "pe") {
+      from ("${buildDir}/classes/${release}j") {
+        include "net/**/*.class"
+        include "com/saxonica/**/*.class"
+        include "javax/xml/xquery/*.class"
+        exclude "**/sql"
+        exclude "com/saxonica/CompileStylesheet.class"
+        exclude "com/saxonica/CompileStylesheet\$TracingObjectOutputStream.class"
+        exclude "com/saxonica/Validate.class"
+        exclude "com/saxonica/config/EnterpriseConfiguration.class"
+        exclude "com/saxonica/config/EnterpriseConfiguration\$SurrogateSchema.class"
+        exclude "com/saxonica/config/EnterpriseTransformerFactory.class"
+        exclude "com/saxonica/config/EnterpriseXPathFactory.class"
+        exclude "com/saxonica/config/StreamingTransformerFactory.class"
+        exclude "com/saxonica/ee"
+        exclude "com/saxonica/expr/CastToList.class"
+        exclude "com/saxonica/expr/CastToUnion.class"
+        exclude "com/saxonica/expr/CastableToList.class"
+        exclude "com/saxonica/expr/CastableToUnion.class"
+      }
+    } else if (release == "ee") {
+      from ("${buildDir}/classes/${release}j") {
+        include "net/**/*.class"
+        include "com/saxonica/**/*.class"
+        include "javax/xml/xquery/*.class"
+        exclude "**/sql"
+        exclude "com/saxonica/StatsTransform*.class"
+      }
+    } else {
+      throw new GradleException("Unexpected release: ${release}")
+    }
+
+    from ("${buildDir}/resources/main") {
+      include "net/sf/saxon/data/**"
+    }
+  }
+}
+
+def compareManifests(File jarfile, File jargold) {
+  boolean releaseBuild = (project.findProperty("releaseBuild") == "true")
+  def jarmanifest = []
+  ZipInputStream zs = new ZipInputStream(new BufferedInputStream(new FileInputStream(jarfile)))
+  println("COMPARE: $jarfile")
+  println("       : $jargold")
+  ZipEntry entry
+  while ((entry = zs.getNextEntry()) != null) {
+    if (!entry.getName().contains('$')) {
+      jarmanifest.add(entry.getName())
+    }
+  }
+  
+  def goldmanifest = []
+  BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(jargold)))
+  String line
+  while ((line = reader.readLine()) != null) {
+    goldmanifest.add(line)
+  }
+
+  jarmanifest.each { fn ->
+    if (!goldmanifest.contains(fn)) {
+      if (releaseBuild) {
+        println("New file: ${fn}")
+      }
+    }
+  }
+
+  boolean missing = false;
+  goldmanifest.each { fn ->
+    if (!jarmanifest.contains(fn)) {
+      println("Missing file: ${fn}")
+      missing = true;
+    }
+  }
+
+  if (releaseBuild && missing) {
+    throw new GradleException("Jar file appears to be incomplete")
+  }
+}
+
 task hejJar(
   type: Jar,
   dependsOn: ["hej_MetaInf", "hejCompile", "compile_function_library"],
   description: "Build the HE jar file"
 ) {
   archiveBaseName = "saxon-he-${saxonVersion}"
+  with jarClasses("he")
   manifest {
     attributes "Project-Name": "Saxon-HE"
     attributes "Main-Class": "net.sf.saxon.Transform"
     attributes "Class-Path": heJarClassPath
   }
-  from ("${buildDir}/services/saxon-he") {
-    include "META-INF/**"
-  }
-  from ("${buildDir}/classes/hej") {
-    include "net/**/*.class"
-    exclude "net/sf/saxon/option/**"
-  }
-  from ("${buildDir}/resources/main") {
-    include "net/sf/saxon/data/**"
-  }
   doLast {
     signJar("${buildDir}/libs/saxon-he-${saxonVersion}.jar")
   }
 }
+
+task testHejJar(type: Jar, dependsOn: ["hejJar"]) {
+  Task jartask = tasks.findByName("hejJar")
+  def jarfile = jartask.outputs.getFiles().getSingleFile()
+  def jargold = project.file("${projectDir}/tools/java-manifests/saxon-he.list")
+  doLast {
+    compareManifests(jarfile, jargold)
+  }
+}
+hejJar.finalizedBy(testHejJar)
 
 // Because the XQJ files are not open source, don't attempt to build
 // the jar unless the EE sources are available.
@@ -1080,6 +1183,16 @@ if (file("${projectDir}/src/main/java/com/saxonica/xqj").exists()) {
       signJar("${buildDir}/libs/saxon-he-xqj-${saxonVersion}.jar")
     }
   }
+  task testHejJarXqj(type: Jar, dependsOn: ["hejJarXqj"]) {
+    Task jartask = tasks.findByName("hejJarXqj")
+    def jarfile = jartask.outputs.getFiles().getSingleFile()
+    def jargold = project.file("${projectDir}/tools/java-manifests/saxon-he-xqj.list")
+    doLast {
+      compareManifests(jarfile, jargold)
+    }
+  }
+  hejJarXqj.finalizedBy(testHejJarXqj)
+
   task pejJarXqj() {
     // nop
   }
@@ -1108,42 +1221,26 @@ task pejJar(
   description: "Build the PE jar file"
 ) {
   archiveBaseName = "saxon-pe-${saxonVersion}"
+  with jarClasses("pe")
   manifest {
     attributes "Project-Name": "Saxon-PE"
     attributes "Main-Class": "net.sf.saxon.Transform"
     attributes "Class-Path": peeeJarClassPath
   }
-  from ("${buildDir}/services/saxon-pe") {
-    include "META-INF/**"
-  }
-  from ("${buildDir}/classes/pej") {
-    include "net/**/*.class"
-    include "com/saxonica/**/*.class"
-    include "javax/xml/xquery/*.class"
-    exclude "**/sql/**/*.class"
-    exclude "com/saxonica/CompileStylesheet.class"
-    exclude "com/saxonica/CompileStylesheet\$TracingObjectOutputStream.class"
-    exclude "com/saxonica/Validate.class"
-    exclude "com/saxonica/config/EnterpriseConfiguration.class"
-    exclude "com/saxonica/config/EnterpriseConfiguration\$SurrogateSchema.class"
-    exclude "com/saxonica/config/EnterpriseTransformerFactory.class"
-    exclude "com/saxonica/config/EnterpriseXPathFactory.class"
-    exclude "com/saxonica/config/StreamingTransformerFactory.class"
-    exclude "com/saxonica/ee/**/*.class"
-    exclude "com/saxonica/expr/CastToList.class"
-    exclude "com/saxonica/expr/CastToUnion.class"
-    exclude "com/saxonica/expr/CastableToList.class"
-    exclude "com/saxonica/expr/CastableToUnion.class"
-    exclude "com/saxonica/functions/sql/**"
-    exclude "net/sf/saxon/option/sql/**"
-  }
-  from ("${buildDir}/resources/main") {
-    include "net/sf/saxon/data/**"
-  }
   doLast {
     signJar("${buildDir}/libs/saxon-pe-${saxonVersion}.jar")
   }
 }
+
+task testPejJar(type: Jar, dependsOn: ["pejJar"]) {
+  Task jartask = tasks.findByName("pejJar")
+  def jarfile = jartask.outputs.getFiles().getSingleFile()
+  def jargold = project.file("${projectDir}/tools/java-manifests/saxon-pe.list")
+  doLast {
+    compareManifests(jarfile, jargold)
+  }
+}
+pejJar.finalizedBy(testPejJar)
 
 task pejJarSql(
   type: Jar,
@@ -1160,37 +1257,42 @@ task pejJarSql(
   }
 }
 
+task testPejJarSql(type: Jar, dependsOn: ["pejJarSql"]) {
+  Task jartask = tasks.findByName("pejJarSql")
+  def jarfile = jartask.outputs.getFiles().getSingleFile()
+  def jargold = project.file("${projectDir}/tools/java-manifests/saxon-pe-sql.list")
+  doLast {
+    compareManifests(jarfile, jargold)
+  }
+}
+pejJarSql.finalizedBy(testPejJarSql)
+
 task eejJar(
   type: Jar,
   dependsOn: ["eej_MetaInf", "eejCompile", "asm_unzip", "compile_function_library"],
   description: "Build the EE jar file"
 ) {
   archiveBaseName = "saxon-ee-${saxonVersion}"
+  with jarClasses("ee")
   manifest {
     attributes "Project-Name": "Saxon-EE"
     attributes "Main-Class": "net.sf.saxon.Transform"
     attributes "Class-Path": peeeJarClassPath
   }
-  from ("${buildDir}/services/saxon-ee") {
-    include "META-INF/**"
-  }
-  from ("${buildDir}/classes/eej") {
-    include "net/**/*.class"
-    include "com/saxonica/**/*.class"
-    //include "org/objectweb/asm/xml/*.class" // we think these aren't needed
-    include "javax/xml/xquery/*.class"
-    exclude "**/sql/**/*.class"
-    exclude "com/saxonica/StatsTransform*.class"
-    exclude "com/saxonica/functions/sql/**"
-    exclude "net/sf/saxon/option/sql/**"
-  }
-  from ("${buildDir}/resources/main") {
-    include "net/sf/saxon/data/**"
-  }
   doLast {
     signJar("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
   }
 }
+
+task testEejJar(type: Jar, dependsOn: ["eejJar"]) {
+  Task jartask = tasks.findByName("eejJar")
+  def jarfile = jartask.outputs.getFiles().getSingleFile()
+  def jargold = project.file("${projectDir}/tools/java-manifests/saxon-ee.list")
+  doLast {
+    compareManifests(jarfile, jargold)
+  }
+}
+eejJar.finalizedBy(testEejJar)
 
 task eejJarSql(
   type: Jar,
@@ -1206,6 +1308,16 @@ task eejJarSql(
     signJar("${buildDir}/libs/saxon-ee-sql-${saxonVersion}.jar")
   }
 }
+
+task testEejJarSql(type: Jar, dependsOn: ["eejJarSql"]) {
+  Task jartask = tasks.findByName("eejJarSql")
+  def jarfile = jartask.outputs.getFiles().getSingleFile()
+  def jargold = project.file("${projectDir}/tools/java-manifests/saxon-ee-sql.list")
+  doLast {
+    compareManifests(jarfile, jargold)
+  }
+}
+eejJarSql.finalizedBy(testEejJarSql)
 
 // ============================================================
 
@@ -1600,7 +1712,7 @@ def pomXml(String release) {
         dependencyNode = dependenciesNode.appendNode('dependency')
         dependencyNode.appendNode('groupId', it.group)
         dependencyNode.appendNode('artifactId', it.name)
-        dependencyNode.appendNode('version', xmlresolverDataVersion)
+        dependencyNode.appendNode('version', xmlresolverVersion)
         dependencyNode.appendNode('classifier', 'data')
       } else {
         dependencyNode.appendNode('optional', 'true')
@@ -1699,8 +1811,7 @@ publishing {
       }
     } else {
       maven {
-        url = project.findProperty("mavenLocalPublish")
-        //url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+        url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
         credentials {
           username = project.findProperty("sonatypeUsername") ?: "NOUSER"
           password = project.findProperty("sonatypePassword") ?: "NOPASS"
