@@ -917,7 +917,7 @@
             has been validated; if you want to try it on other versions, please let us know your experience.</p>
          </li>
          <li>
-            <p>SaxonCS validation has taken place primarily on MacOS, with some regression testing on Windows and Linux.
+            <p>SaxonCS validation has taken place primarily on MacOS, with extensive regression testing on Windows and Linux.
             It is supported on all three platforms.</p>
          </li>
       </ul>
@@ -931,15 +931,23 @@
 
       <p>To invoke SaxonCS from a C# application, simply add a Nuget dependency to your project
       as you would for any other third-party library.</p>
+      
+      <p>To run XSLT transformations, XQuery queries, or XSD validation from the command line,
+      two approaches are possible:</p>
+      
+      <ul>
+         <li><p>Firstly, having installed the DLL using Nuget, you can use the dotnet command, for example:</p>
+            <kbd>dotnet SaxonCS transform -t -s:source.xml -xsl:stylesheet.xsl</kbd>
+         </li>
+         <li><p>Alternatively, executables are available for specific platforms from 
+            <a class="bodylink" href="https://www.saxonica.com/download/dotnet.xml">https://www.saxonica.com/download/dotnet.xml</a>.
+         Having installed the right executable for your target platform, you can invoke it directly using a command such as:</p>
+            <kbd>SaxonCS transform -t -s:source.xml -xsl:stylesheet.xsl</kbd>
+         </li>
+      </ul>
          
-      <p>Unlike the older Saxon/.NET product, there are no separate .EXE files for the command-line
-         interfaces <code>Transform</code>, <code>Query</code>, and
-         <code>Validate</code>. Instead, these are invoked using the <code>dotnet</code>
-      command, for example:</p>
-         
-         <kbd>dotnet SaxonCS transform -s:source.xml -xsl:stylesheet.xsl</kbd>
-
-
+      <p>Before you can run the software, you will need to ensure that a license file is installed, as described
+         in <a class="bodylink" href="/about/license"/>.</p>
 
 
       <h2 class="subtitle">Sample applications</h2>
