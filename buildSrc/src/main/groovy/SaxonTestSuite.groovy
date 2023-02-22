@@ -552,8 +552,7 @@ class SaxonTestSuite {
     }
 
     def resultFn = "${options['reportDirectory']}/"
-    resultFn += "SaxonResults${project.ext.saxonVersion}-"
-    resultFn += options['language'] + ".xml"
+    resultFn += "SaxonResults${project.ext.saxonVersion}n.xml"
 
     def errorFn = "${options['reportDirectory']}/"
     errorFn += "SaxonFailures${project.ext.saxonVersion}-"
