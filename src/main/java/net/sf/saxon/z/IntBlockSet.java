@@ -128,6 +128,8 @@ public class IntBlockSet extends IntSet {
 
     /**
      * Get the start point of the range
+     *
+     * @return the start point
      */
 
     public int getStartPoint() {
@@ -136,6 +138,8 @@ public class IntBlockSet extends IntSet {
 
     /**
      * Get the end point of the range
+     *
+     * @return the end point
      */
 
     public int getEndPoint() {

@@ -59,6 +59,7 @@ public class HTML50Emitter extends HTMLEmitter {
     /**
      * Decide whether an element is "serialized as an HTML element" in the language of the 3.0 specification
      *
+     * @param name the name of the element
      * @return true if the element is to be serialized as an HTML element
      */
     @Override

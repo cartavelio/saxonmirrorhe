@@ -337,6 +337,8 @@ public class JSONEmitter {
 
     /**
      * End of the document.
+     *
+     * @throws XPathException if any error occurs
      */
 
     public void close() throws XPathException {
