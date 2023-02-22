@@ -205,7 +205,7 @@ public:
      * Validation error are reported as exceptions. All errors can be retrieved.
      * @return char* - The error code of the exception.
     */
-    const char * getErrorCode(int i);
+    const char * getErrorCode();
 
      //! The validation mode may be either strict or lax.
     /**
