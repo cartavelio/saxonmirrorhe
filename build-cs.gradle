@@ -486,6 +486,7 @@ task dotnetRelease(
 
   doLast {
     signExe("${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll")
+    signExe("${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg")
   }
 }
 
@@ -500,11 +501,10 @@ task dotnetPublish(
       workingDir = "${buildDir}/cs"
       commandLine dotnetex, 'publish', 'SaxonCS.sln',
         '--configuration', 'Release', '-r', csrid,
+        '--self-contained', 'true',
+        '-p:PublishSingleFile=true',
         "-p:Version=${csver}", "-p:PackageVersion=${csver}"
     }
-  }
-  doLast {
-    signExe("${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll")
   }
   doLast {
     println("Published SaxonCS release for ${csplatform}")

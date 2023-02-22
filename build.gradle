@@ -124,15 +124,19 @@ if (!hasProperty("saxonLicenseDir")) {
 
 println("Building with Java version ${System.getProperty('java.version')}")
 println("Expecting Saxon license file to be in ${saxonLicenseDir}")
-if (jarsigner.makeSignedJars) {
-  println("Build is configured to sign jar files")
+if (jarsigner.makeSignedJars && jarsigner.makeSignedExes) {
+  println("Build is configured to sign jar files and executables")
 } else {
-  println("Build is not configured to sign jar files")
-}
-if (jarsigner.makeSignedExes) {
-  println("Build is configured to sign Windows executable files")
-} else {
-  println("Build is not configured to sign Windows executable files")
+  if (jarsigner.makeSignedJars) {
+    println("Build is configured to sign jar files")
+  } else {
+    println("Build is not configured to sign jar files")
+  }
+  if (jarsigner.makeSignedExes) {
+    println("Build is configured to sign executable files")
+  } else {
+    println("Build is not configured to sign executable files")
+  }
 }
 
 dependencies {
@@ -1920,7 +1924,6 @@ task compileXqjTck(
 task helloWorld() {
   doLast {
     println("Hello, world.")
-
 /*
     project.properties.keySet().each { key ->
       if (key.startsWith("td")) {
