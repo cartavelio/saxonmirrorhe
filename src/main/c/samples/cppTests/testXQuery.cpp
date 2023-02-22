@@ -446,7 +446,7 @@ int main(int argc, char* argv[])
     }
 
     SaxonProcessor * processor = new SaxonProcessor(false);
-    setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
+
     cout<<"Test: XQueryProcessor with Saxon version="<<processor->version()<<endl<<endl;
 
     char buff[FILENAME_MAX]; //create string buffer to hold path
