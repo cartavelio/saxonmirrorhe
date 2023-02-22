@@ -16,7 +16,9 @@ using net.sf.saxon.style;
 using net.sf.saxon.trans;
 using net.sf.saxon.trans.packages;
 using net.sf.saxon.tree.util;
+using Saxon.Api.Support;
 using Saxon.Impl.Helpers;
+using SaxonCS3.engine.Saxon.Api.Support;
 using JXsltCompiler = net.sf.saxon.s9api.XsltCompiler;
 using System = java.lang.System;
 
@@ -36,7 +38,7 @@ namespace Saxon.Api {
     /// it should not then be modified once initialized.</para>
     /// </remarks>
     [Serializable]
-    public abstract class XsltCompiler {
+    public class XsltCompiler {
         private Processor processor;
         private Uri baseUri;
         private ErrorReporterToStaticError errorGatherer;
@@ -76,26 +78,6 @@ namespace Saxon.Api {
         public Uri BaseUri {
             get => baseUri;
             set => baseUri = value;
-        }
-
-        /// <summary>
-        /// Create a collation based on a given <c>CompareInfo</c> and <c>CompareOptions</c>.    
-        /// </summary>
-        /// <remarks>
-        /// In the current and recent releases of Saxon, collations are always defined at the level of a <c>Configuration</c>.
-        /// Declaring a collation here may therefore have wider effects than intended. It is recommended not to use
-        /// this method, but to use <see cref="Processor.DeclareCollation(Uri, CompareInfo, CompareOptions)"/> instead.
-        /// </remarks>
-        /// <param name="uri">The collation URI to be used within the XPath expression to refer to this collation</param>
-        /// <param name="compareInfo">The <c>CompareInfo</c>, which determines the language-specific
-        /// collation rules to be used</param>
-        /// <param name="options">Options to be used in performing comparisons, for example
-        /// whether they are to be case-blind and/or accent-blind</param>
-        /// <param name="isDefault">If true, this collation will be used as the default collation</param>
-        [Obsolete("Declare collations globally at the Processor level.")]
-        public void DeclareCollation(Uri uri, CompareInfo compareInfo, CompareOptions options, Boolean isDefault) {
-            JDotNetComparator comparator = new JDotNetComparator(uri.ToString(), compareInfo, options);
-            processor.JProcessor.getUnderlyingConfiguration().registerCollation(uri.ToString(), comparator);
         }
 
         /// <summary>
@@ -196,23 +178,7 @@ namespace Saxon.Api {
                 if (value == null) throw new ArgumentNullException(nameof(value));
             }
         }
-
-        /// <summary>
-        /// This property determines whether bytecode is to be generated in the compiled stylesheet.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Bytecode generation is not available in Saxon-CS, attempting to set this property to true has no effect.
-        /// </para>
-        /// </remarks>
-        /// <returns>true if bytecode is to be generated, false if not</returns>
-
-        public bool ByteCodeEnabled {
-            get => false;
-            set { }
-        }
-
-
+        
         /// <summary>
         /// Property to say whether just-in-time compilation of template rules should be used.
         /// jit true if just-in-time compilation is to be enabled. With this option enabled,
@@ -247,7 +213,7 @@ namespace Saxon.Api {
         /// intercept error conditions as they occur.
         /// </remarks>
         [Obsolete(
-            "IList<StaticError> ErrorList is deprecated, please use the methods SetErrorList and GetErrorList which hanldes IList<XmlProcessingError>.")]
+            "IList<StaticError> ErrorList is deprecated, please use the methods SetErrorList and GetErrorList which handles IList<XmlProcessingError>.")]
         public IList<StaticError> ErrorList {
             set {
                 errorGatherer = new ErrorReporterToStaticError(value);
@@ -760,71 +726,72 @@ namespace Saxon.Api {
         /// <c>href</c> attribute must either reference an embedded stylesheet within the same
         /// document or a non-embedded external stylesheet.</remarks>
         public XsltExecutable CompileAssociatedStylesheet(XdmNode source) {
+            throw new NotImplementedException(); // TODO: temporary Saxon-CS restriction
             // TODO: lift the restrictions
-            if (source == null || source.NodeKind != XmlNodeType.Document) {
-                throw new ArgumentException("Source must be a document node");
-            }
-
-            IEnumerator kids = source
-                .Children(Predicates.IsProcessingInstruction().And(Predicates.HasName("", "xml-stylesheet")))
-                .GetEnumerator();
-            while (kids.MoveNext()) {
-                XdmNode n = (XdmNode) kids.Current;
-                // TODO: check the media type
-                String href = ProcInstParser.getPseudoAttribute(n.StringValue, "href");
-                if (href == null) {
-                    throw new DynamicError("xml-stylesheet processing instruction has no href attribute");
-                }
-
-                String fragment = null;
-                int hash = href.LastIndexOf('#');
-                if (hash == 0) {
-                    if (href.Length == 1) {
-                        throw new DynamicError("Relative URI of '#' is invalid");
-                    }
-
-                    fragment = href.Substring(1);
-                    NodeInfo target = ((TreeInfo) source.value).selectID(fragment, true);
-                    XdmNode targetWrapper = null;
-                    if (target == null) {
-                        // There's a problem here because the Microsoft XML parser doesn't
-                        // report id values, so selectID() will never work. We work around that
-                        // by looking for an attribute named "id" appearing on an xsl:stylesheet
-                        // or xsl:transform element
-                        QName qid = new QName("", "id");
-                        IEnumerator en = source.EnumerateAxis(XdmAxis.Descendant);
-                        while (en.MoveNext()) {
-                            XdmNode x = (XdmNode) en.Current;
-                            if (x.NodeKind == XmlNodeType.Element &&
-                                x.NodeName.Uri == "http://www.w3.org/1999/XSL/Transform" &&
-                                (x.NodeName.LocalName == "stylesheet" || x.NodeName.LocalName == "transform" &&
-                                    x.GetAttributeValue(qid) == fragment)) {
-                                targetWrapper = x;
-                            }
-                        }
-                    }
-                    else {
-                        targetWrapper = (XdmNode) XdmValue.Wrap(target);
-                        targetWrapper.SetProcessor(processor);
-                    }
-
-                    if (targetWrapper == null) {
-                        throw new DynamicError("No element with id='" + fragment + "' found");
-                    }
-
-                    return Compile(targetWrapper);
-                }
-                else if (hash > 0) {
-                    throw new NotImplementedException(
-                        "href cannot identify an embedded stylesheet in a different document");
-                }
-                else {
-                    Uri uri = new Uri(n.BaseUri, href);
-                    return Compile(uri);
-                }
-            }
-
-            throw new DynamicError("xml-stylesheet processing instruction not found");
+            // if (source == null || source.NodeKind != XmlNodeType.Document) {
+            //     throw new ArgumentException("Source must be a document node");
+            // }
+            //
+            // IEnumerator kids = source
+            //     .Children(Predicates.IsProcessingInstruction().And(Predicates.HasName("", "xml-stylesheet")))
+            //     .GetEnumerator();
+            // while (kids.MoveNext()) {
+            //     XdmNode n = (XdmNode) kids.Current;
+            //     // TODO: check the media type
+            //     String href = ProcInstParser.getPseudoAttribute(n.StringValue, "href");
+            //     if (href == null) {
+            //         throw new DynamicError("xml-stylesheet processing instruction has no href attribute");
+            //     }
+            //
+            //     String fragment = null;
+            //     int hash = href.LastIndexOf('#');
+            //     if (hash == 0) {
+            //         if (href.Length == 1) {
+            //             throw new DynamicError("Relative URI of '#' is invalid");
+            //         }
+            //
+            //         fragment = href.Substring(1);
+            //         NodeInfo target = ((TreeInfo) source.value).selectID(fragment, true);
+            //         XdmNode targetWrapper = null;
+            //         if (target == null) {
+            //             // There's a problem here because the Microsoft XML parser doesn't
+            //             // report id values, so selectID() will never work. We work around that
+            //             // by looking for an attribute named "id" appearing on an xsl:stylesheet
+            //             // or xsl:transform element
+            //             QName qid = new QName("", "id");
+            //             IEnumerator en = source.EnumerateAxis(XdmAxis.Descendant);
+            //             while (en.MoveNext()) {
+            //                 XdmNode x = (XdmNode) en.Current;
+            //                 if (x.NodeKind == XmlNodeType.Element &&
+            //                     x.NodeName.Uri == "http://www.w3.org/1999/XSL/Transform" &&
+            //                     (x.NodeName.LocalName == "stylesheet" || x.NodeName.LocalName == "transform" &&
+            //                         x.GetAttributeValue(qid) == fragment)) {
+            //                     targetWrapper = x;
+            //                 }
+            //             }
+            //         }
+            //         else {
+            //             targetWrapper = (XdmNode) XdmValue.Wrap(target);
+            //             targetWrapper.SetProcessor(processor);
+            //         }
+            //
+            //         if (targetWrapper == null) {
+            //             throw new DynamicError("No element with id='" + fragment + "' found");
+            //         }
+            //
+            //         return Compile(targetWrapper);
+            //     }
+            //     else if (hash > 0) {
+            //         throw new NotImplementedException(
+            //             "href cannot identify an embedded stylesheet in a different document");
+            //     }
+            //     else {
+            //         Uri uri = new Uri(n.BaseUri, href);
+            //         return Compile(uri);
+            //     }
+            // }
+            //
+            // throw new DynamicError("xml-stylesheet processing instruction not found");
         }
     }
 }

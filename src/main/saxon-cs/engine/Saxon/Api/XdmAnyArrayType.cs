@@ -13,12 +13,15 @@ namespace Saxon.Api {
         /// </summary>
         public static XdmAnyArrayType Instance = new XdmAnyArrayType();
 
-        internal XdmAnyArrayType() {
-            this.type = ArrayItemType.ANY_ARRAY_TYPE;
+        internal XdmAnyArrayType() : base(ArrayItemType.ANY_ARRAY_TYPE) {
         }
 
         public override bool Matches(XdmItem item) {
             return ((Item) item.value).getGenre() == Genre.ARRAY;
+        }
+
+        public override bool Subsumes(XdmItemType other) {
+            return other.Unwrap() is ArrayItemType;
         }
     }
 }

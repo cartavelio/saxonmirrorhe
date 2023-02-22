@@ -4,6 +4,8 @@ using System.Globalization;
 using System.IO;
 using net.sf.saxon;
 using net.sf.saxon.s9api;
+using Saxon.Callbacks;
+using SaxonCS3.engine.Saxon.Api.Support;
 
 namespace Saxon.Api {
     /// <summary>
@@ -37,31 +39,8 @@ namespace Saxon.Api {
             this.processor = processor;
             this.config = processor.Implementation;
             compiler = processor.JProcessor.newXQueryCompiler();
-            compiler.setModuleURIResolver(new JDotNetStandardModuleURIResolver(processor.XmlResolver));
+            compiler.setModuleURIResolver(new StandardModuleURIResolver(processor.XmlResolver));
         }
-
-        /// <summary>
-        /// Create a collation based on a given <c>CompareInfo</c> and <c>CompareOptions</c>    
-        /// </summary>
-        /// <remarks>
-        /// In the current and recent releases of Saxon, collations are always defined at the level of a <c>Configuration</c>.
-        /// Declaring a collation here may therefore have wider effects than intended. It is recommended not to use
-        /// this method, but to use <see cref="Processor.DeclareCollation(Uri, CompareInfo, CompareOptions)"/> instead.
-        /// </remarks>
-        /// <param name="uri">The collation URI to be used within the XPath expression to refer to this collation</param>
-        /// <param name="compareInfo">The <c>CompareInfo</c>, which determines the language-specific
-        /// collation rules to be used</param>
-        /// <param name="options">Options to be used in performing comparisons, for example
-        /// whether they are to be case-blind and/or accent-blind</param>
-        /// <param name="isDefault">If true, this collation will be used as the default collation</param>
-        public void DeclareCollation(Uri uri, CompareInfo compareInfo, CompareOptions options, Boolean isDefault) {
-            JDotNetComparator comparator = new JDotNetComparator(uri.ToString(), compareInfo, options);
-            config.registerCollation(uri.ToString(), comparator);
-            if (isDefault) {
-                compiler.declareDefaultCollation(uri.ToString());
-            }
-        }
-
 
         /// <summary>
         /// Declare a namespace for use by the query. This has the same
@@ -78,7 +57,6 @@ namespace Saxon.Api {
             compiler.declareNamespace(prefix, uri);
         }
 
-
         /// <summary>
         /// Get the <c>Processor</c> from which this <c>XQueryCompiler</c> was constructed
         /// </summary>
@@ -92,8 +70,8 @@ namespace Saxon.Api {
         /// </summary>
 
         public XdmItemType ContextItemType {
-            get { return XdmItemType.MakeXdmItemType(compiler.getRequiredContextItemType().getUnderlyingItemType()); }
-            set { compiler.setRequiredContextItemType(value.Unwrap()); }
+            get => compiler.getRequiredContextItemType();
+            set => compiler.setRequiredContextItemType(value);
         }
 
         /// <summary>
@@ -172,7 +150,7 @@ namespace Saxon.Api {
             get => moduleResolver;
             set {
                 moduleResolver = value;
-                compiler.setModuleURIResolver(new DotNetModuleURIResolver(value));
+                compiler.setModuleURIResolver(new StandardModuleURIResolver());
             }
         }
 

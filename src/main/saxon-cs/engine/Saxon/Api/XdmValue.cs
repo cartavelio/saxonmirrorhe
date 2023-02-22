@@ -270,12 +270,12 @@ namespace Saxon.Api {
                 else if (first is NodeInfo) {
                     return new XdmNode((NodeInfo)first);
                 }
-                else if (first is ZeroOrOne<Item>) {
-                    return Wrap(((JZeroOrOne) value).head());
-                }
-                else if (first is JOne) {
-                    return Wrap(((JOne) value).head());
-                }
+                // else if (first is ZeroOrOne<Item>) {
+                //     return Wrap(((JZeroOrOne) value).head());
+                // }
+                // else if (first is JOne) {
+                //     return Wrap(((JOne) value).head());
+                // }
                 else if (first is MapItem) {
                     return new XdmMap((MapItem) first);
                 }
@@ -285,9 +285,9 @@ namespace Saxon.Api {
                 else if (first is Function) {
                     return new XdmFunctionItem((Function) first);
                 }
-                else if (first is JObjectValue) {
-                    return new XdmExternalObjectValue(((JObjectValue) first).getObject());
-                }
+                // else if (first is JObjectValue) {
+                //     return new XdmExternalObjectValue(((JObjectValue) first).getObject());
+                // }
                 else {
                     return new XdmValue(first);
                 }
@@ -315,7 +315,7 @@ namespace Saxon.Api {
                         case Genre.FUNCTION:
                             return new XdmFunctionItem((Function) first);
                         case Genre.EXTERNAL:
-                            return new XdmExternalObjectValue(first);
+                            //return new XdmExternalObjectValue(first);
                         default:
                             throw new IllegalArgumentException();
                     }
@@ -370,24 +370,25 @@ namespace Saxon.Api {
         }
 
         private static XdmValue MakeSequence(IEnumerable o) {
-            List<XdmItem> list = new List<XdmItem>();
+            List<net.sf.saxon.om.Item> list = new List<net.sf.saxon.om.Item>();
 
             if (o is string) {
                 return XdmAtomicValue.MakeAtomicValue((object) o);
             }
 
             foreach (object oi in o) {
-                XdmValue v = XdmValue.MakeValue(oi);
-                if (v is XdmItem) {
-                    list.Add((Item) v.Unwrap());
+                XdmValue v = MakeValue(oi);
+                if (v is XdmItem item) {
+                    list.Add((net.sf.saxon.om.Item)item.Unwrap());
                 }
                 else {
-                    list.add(new XdmArray(v).Unwrap());
+                    GroundedValue gv = v.Unwrap();
+                    list.Add(SimpleArrayItem.makeSimpleArrayItem(gv.iterate()));
                 }
             }
 
-            Sequence value = new SequenceExtent(list);
-            return XdmValue.Wrap(value);
+            Sequence value = new SequenceExtent.Of<net.sf.saxon.om.Item>(list);
+            return Wrap(value);
         }
 
 
@@ -411,41 +412,15 @@ namespace Saxon.Api {
         /// will be an object of type <c>XdmItem</c>.
         /// </returns>        
         public IList<XdmItem> GetList() {
-            if (value == null) {
-                return new List<XdmItem>();
+            List<XdmItem> list = new List<XdmItem>(value.getLength());
+            foreach (Item it in value.asIterable()) {
+                list.Add(XdmItem.WrapItem(it));
             }
-            else if (value is Item) {
-                IList<XdmItem> list = new List<XdmItem>(1);
-                list.Add((XdmItem) XdmValue.Wrap(value));
-                return list;
-            }
-            else {
-                IList<XdmItem> list = new List<XdmItem>();
-                SequenceIterator iter = value.iterate();
-                while (true) {
-                    Item jitem = iter.next();
-                    if (jitem == null) {
-                        break;
-                    }
-
-                    list.Add((XdmItem) XdmValue.Wrap(jitem));
-                }
-
-                return list;
-            }
+            return list;
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
-            if (value == null) {
-                return EmptyEnumerator<XdmItem>.INSTANCE;
-            }
-            else if (value is Item) {
-                return new SequenceEnumerator<XdmItem>(
-                    new JSequenceXdmIterator(SingletonIterator.makeIterator((Item) value)));
-            }
-            else {
-                return new SequenceEnumerator<XdmItem>(new JSequenceXdmIterator(value.iterate()));
-            }
+            return GetEnumerator();
         }
 
         /// <summary>
@@ -456,18 +431,8 @@ namespace Saxon.Api {
         /// will be an object of type <c>XdmItem</c>.
         /// </returns>    
         IEnumerator<XdmItem> IEnumerable<XdmItem>.GetEnumerator() {
-            if (value == null) {
-                return EmptyEnumerator<XdmItem>.INSTANCE;
-            }
-            else if (value is Item) {
-                return new SequenceEnumerator<XdmItem>(
-                    new JSequenceXdmIterator(SingletonIterator.makeIterator((Item) value)));
-            }
-            else {
-                return new SequenceEnumerator<XdmItem>(new JSequenceXdmIterator(value.iterate()));
-            }
+            return GetEnumerator();
         }
-
 
         /// <summary>
         /// Get the sequence of items in the form of an <c>IEnumerator</c>.
@@ -477,16 +442,7 @@ namespace Saxon.Api {
         /// will be an object of type <c>XdmItem</c>.
         /// </returns>    
         public IEnumerator<XdmItem> GetEnumerator() {
-            if (value == null) {
-                return EmptyEnumerator<XdmItem>.INSTANCE;
-            }
-            else if (value is Item) {
-                return new SequenceEnumerator<XdmItem>(
-                    new JSequenceXdmIterator(SingletonIterator.makeIterator((Item) value)));
-            }
-            else {
-                return new SequenceEnumerator<XdmItem>(new JSequenceXdmIterator(value.iterate()));
-            }
+            return GetList().GetEnumerator();
         }
 
 
@@ -515,7 +471,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>A string representation of the value.</returns>
         public override String ToString() {
-            return XdmValue.FromGroundedValueToJXdmValue(value).toString();
+            return value.ToString();
         }
 
 
@@ -527,8 +483,9 @@ namespace Saxon.Api {
         public XdmValue DocumentOrder() {
             try {
                 SequenceIterator iter = value.iterate();
-                SequenceIterator sorted = new net.sf.saxon.expr.sort.DocumentOrderIterator(iter,
-                    net.sf.saxon.expr.sort.GlobalOrderComparer.getInstance());
+                net.sf.saxon.expr.sort.DocumentOrderIterator sorted = 
+                    new net.sf.saxon.expr.sort.DocumentOrderIterator(iter,
+                        net.sf.saxon.expr.sort.GlobalOrderComparer.getInstance());
                 return XdmValue.Wrap(sorted.materialize());
             }
             catch (net.sf.saxon.trans.XPathException e) {

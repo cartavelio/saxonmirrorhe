@@ -51,6 +51,8 @@ namespace java.util {
             // TODO: check the semantics - what about defaults?
             return dict.Count == 0;
         }
+        
+        
     }
 
 }

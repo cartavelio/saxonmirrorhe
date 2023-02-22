@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using net.sf.saxon.om;
 using net.sf.saxon.pattern;
@@ -10,50 +11,49 @@ namespace Saxon.Api {
     /// Instances of <c>XdmNodeKind</c> represent the item types denoted in XPath as <c>document-node()</c>,
     /// <c>element()</c>, <c>attribute()</c>, <c>text()</c>, and so on. These are all represented by singular named instances.
     /// </summary>
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class XdmNodeKind : XdmItemType {
-        private NodeKindTest nodekind;
         private int kind;
 
-        internal XdmNodeKind(NodeKindTest test) {
-            nodekind = test;
+        internal XdmNodeKind(NodeKindTest test) : base(test) {
             kind = test.getNodeKind();
         }
 
         /// <summary>
         /// The item type <c>document-node()</c>
         /// </summary>
-        public static XdmNodeKind Document = new XdmNodeKind(NodeKindTest.DOCUMENT);
+        public static readonly XdmNodeKind Document = new XdmNodeKind(NodeKindTest.DOCUMENT);
 
         /// <summary>
         /// The item type <c>element()</c>
         /// </summary>
-        public static XdmNodeKind Element = new XdmNodeKind(NodeKindTest.ELEMENT);
+        public static readonly XdmNodeKind Element = new XdmNodeKind(NodeKindTest.ELEMENT);
 
         /// <summary>
         /// The item type <c>attribute()</c>
         /// </summary>
-        public static XdmNodeKind Attribute = new XdmNodeKind(NodeKindTest.ATTRIBUTE);
+        public static readonly XdmNodeKind Attribute = new XdmNodeKind(NodeKindTest.ATTRIBUTE);
 
         /// <summary>
         /// The item type <c>text()</c>
         /// </summary>
-        public static XdmNodeKind Text = new XdmNodeKind(NodeKindTest.TEXT);
+        public static readonly XdmNodeKind Text = new XdmNodeKind(NodeKindTest.TEXT);
 
         /// <summary>
         /// The item type <c>comment()</c>
         /// </summary>
-        public static XdmNodeKind Comment = new XdmNodeKind(NodeKindTest.COMMENT);
+        public static readonly XdmNodeKind Comment = new XdmNodeKind(NodeKindTest.COMMENT);
 
         /// <summary>
         /// The item type <c>processing-instruction()</c>
         /// </summary>
-        public static XdmNodeKind ProcessingInstruction =
+        public static readonly XdmNodeKind ProcessingInstruction =
             new XdmNodeKind(NodeKindTest.PROCESSING_INSTRUCTION);
 
         /// <summary>
         /// The item type <c>namespace-node()</c>
         /// </summary>
-        public static XdmNodeKind Namespace = new XdmNodeKind(NodeKindTest.NAMESPACE);
+        public static readonly XdmNodeKind Namespace = new XdmNodeKind(NodeKindTest.NAMESPACE);
 
         internal static XdmNodeKind ForNodeKindTest(NodeKindTest test) {
             int kind = test.getPrimitiveType();
@@ -104,7 +104,8 @@ namespace Saxon.Api {
         /// <returns>true if this ItemType subsumes the other ItemType. This includes the case where A and B
         ///         represent the same ItemType.</returns>
         public override bool Subsumes(XdmItemType other) {
-            return true;
+            net.sf.saxon.type.ItemType otherType = other.Unwrap();
+            return otherType is NodeTest test && test.getUType() == underlyingType.getUType();
         }
 
         /// <summary>

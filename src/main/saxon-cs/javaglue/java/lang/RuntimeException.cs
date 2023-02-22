@@ -9,6 +9,9 @@ namespace java.lang {
         public RuntimeException(string str, Throwable cause) : base(str, cause) {
 
         }
+        public RuntimeException(Throwable cause) : base(cause) {
+
+        }
 
     }
 }

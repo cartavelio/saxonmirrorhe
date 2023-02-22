@@ -4,10 +4,12 @@ using System.Linq;
 using System.Xml;
 using net.sf.saxon;
 using net.sf.saxon.dotnet;
+using net.sf.saxon.@event;
 using net.sf.saxon.expr.parser;
 using net.sf.saxon.om;
 using net.sf.saxon.pattern;
 using Saxon.Api.Support;
+using Saxon.Impl.Helpers;
 using Type = net.sf.saxon.type.Type;
 
 namespace Saxon.Api {
@@ -164,8 +166,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>The underlying <c>XmlNode</c></returns>
         public XmlNode getUnderlyingXmlNode() {
-            if (value is Saxon.Impl.Dom.DotNetNodeWrapper) {
-                return (XmlNode) ((Saxon.Impl.Dom.DotNetNodeWrapper) value).getRealNode();
+            if (value is Saxon.Impl.Dom.DomNodeWrapper) {
+                return (XmlNode) ((Saxon.Impl.Dom.DomNodeWrapper) value).getRealNode();
             }
 
             return null;
@@ -420,8 +422,8 @@ namespace Saxon.Api {
         /// </param>
         public void WriteTo(XmlWriter writer) {
             NodeInfo node = ((NodeInfo) value);
-            DotNetReceiver receiver = new DotNetReceiver(writer);
-            receiver.setPipelineConfiguration(node.getConfiguration().makePipelineConfiguration());
+            PipelineConfiguration pipe = node.getConfiguration().makePipelineConfiguration();
+            XmlWriterReceiver receiver = new XmlWriterReceiver(writer, pipe);
             receiver.open();
             node.copy(receiver, net.sf.saxon.om.CopyOptions.ALL_NAMESPACES, Loc.NONE);
             receiver.close();

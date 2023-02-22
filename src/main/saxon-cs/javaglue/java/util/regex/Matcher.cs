@@ -1,22 +1,31 @@
 using System;
+using SysRegex = System.Text.RegularExpressions;
 using java.lang;
 
 namespace java.util.regex {
     public class Matcher {
+
+        private SysRegex.Regex regex;
+        private string input;
+
+        public Matcher(SysRegex.Regex regex, string input) {
+            this.regex = regex;
+            this.input = input;
+        }
         public bool matches() {
-            return true;
+            return regex.Match(input).Success;
         }
 
         public bool find() {
-            return true;
+            return regex.Match(input).Success;
         }
         
         public bool find(int start) {
-            return true;
+            return regex.Match(input, start).Success;
         }
         
         public string replaceAll(string str) {
-            return str;
+            return regex.Replace(input, str) ;
         }
 
         public string group(int gp) {

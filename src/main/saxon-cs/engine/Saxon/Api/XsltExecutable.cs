@@ -87,13 +87,7 @@ namespace Saxon.Api {
         /// Escape hatch to the underlying Java implementation object.
         /// </summary>
 
-        public net.sf.saxon.s9api.XsltExecutable Implementation
-        {
-            get
-            {
-                return jExecutable;
-            }
-        }
+        public net.sf.saxon.s9api.XsltExecutable Implementation => jExecutable;
 
         /// <summary>
         /// Get the whitespace stripping policy defined by this stylesheet, that is, the policy
@@ -103,7 +97,9 @@ namespace Saxon.Api {
         /// stylesheet. This policy can be used as input to a <see cref="DocumentBuilder"/>.</returns>
         
         public WhitespacePolicy getWhitespaceStrippingPolicy() {
-            return new WhitespacePolicy(jExecutable);
+            throw new NotImplementedException();
+            // TODO: unclear what to do here. Whitespace-stripping policy can vary for each package.
+            //return new WhitespacePolicy();
         }
 
 

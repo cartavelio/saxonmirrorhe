@@ -13,7 +13,8 @@ using net.sf.saxon.pull;
 
 namespace Saxon.Impl.Helpers {
     public class PullParser : net.sf.saxon.pull.PullProvider, net.sf.saxon.s9api.Location {
-        private readonly java.util.Stack<NamespaceMap> namespaceStack = new java.util.Stack<NamespaceMap>();
+        private readonly System.Collections.Generic.Stack<NamespaceMap> namespaceStack 
+            = new System.Collections.Generic.Stack<NamespaceMap>();
         private readonly XmlReader parser;
         private string baseURI;
         private PullEvent currentEvent = PullEvent.START_OF_INPUT;
@@ -23,7 +24,7 @@ namespace Saxon.Impl.Helpers {
 
         public PullParser(XmlReader parser) {
             this.parser = parser;
-            namespaceStack.push(NamespaceMap.emptyMap());
+            namespaceStack.Push(NamespaceMap.emptyMap());
         }
 
         public int getColumnNumber() {
@@ -225,7 +226,7 @@ namespace Saxon.Impl.Helpers {
                     }
                     else {
                         if ((currentEvent == PullEvent.START_ELEMENT)) {
-                            NamespaceMap nsMap = namespaceStack.peek();
+                            NamespaceMap nsMap = namespaceStack.Peek();
                             if (parser.HasAttributes) {
                                 int limit = parser.AttributeCount;
                                 for (int i = 0; (i < limit); i++) {
@@ -243,11 +244,11 @@ namespace Saxon.Impl.Helpers {
                                 }
                             }
 
-                            namespaceStack.push(nsMap);
+                            namespaceStack.Push(nsMap);
                         }
                         else {
                             if ((currentEvent == PullEvent.END_ELEMENT)) {
-                                namespaceStack.pop();
+                                namespaceStack.Pop();
                             }
                         }
                     }

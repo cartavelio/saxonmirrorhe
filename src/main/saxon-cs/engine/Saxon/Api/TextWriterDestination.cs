@@ -3,6 +3,7 @@ using net.sf.saxon.dotnet;
 using net.sf.saxon.@event;
 using net.sf.saxon.s9api;
 using net.sf.saxon.serialize;
+using Saxon.Impl.Helpers;
 
 namespace Saxon.Api {
     /// <summary>
@@ -65,7 +66,7 @@ namespace Saxon.Api {
         /// to construct or configure the returned <c>Receiver</c>.</param>
         /// <param name="params1"></param>
         public Receiver GetReceiver(PipelineConfiguration pipe, SerializationProperties params1) {
-            DotNetReceiver dnr = new DotNetReceiver(writer);
+            XmlWriterReceiver dnr = new XmlWriterReceiver(writer, pipe);
             dnr.setPipelineConfiguration(pipe);
             dnr.setCloseAfterUse(closeAfterUse);
             return params1.makeSequenceNormalizer(dnr);

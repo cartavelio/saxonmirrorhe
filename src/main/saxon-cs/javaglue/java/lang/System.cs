@@ -21,7 +21,7 @@ namespace java.lang
             return Sys.Environment.GetEnvironmentVariable(name);
         }
 
-        public static java.util.Map<string, string> getProperties() {
+        public static java.util.Properties getProperties() {
             throw new Sys.NotImplementedException();
         }
 

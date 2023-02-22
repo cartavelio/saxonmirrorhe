@@ -48,7 +48,7 @@ namespace Saxon.Api {
         /// and that the order of opening, writing, and closing result documents chosen
         /// by the processor does not necessarily bear any direct resemblance to the way
         /// that the XSLT source code is written.</para></remarks>
-        /**public**/
+        
         XmlDestination HandleResultDocument(string href, Uri baseUri);
 
     }

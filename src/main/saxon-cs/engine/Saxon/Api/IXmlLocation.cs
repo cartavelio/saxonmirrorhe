@@ -27,5 +27,6 @@ namespace Saxon.Api {
 
         /**public**/
         int LineNumber { get; set; }
+        
     }
 }
