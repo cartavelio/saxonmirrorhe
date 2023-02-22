@@ -152,7 +152,7 @@ namespace SaxonCS_NUnit {
                 Assert.True(writer.ToString().Contains("<f/>"), "");
             }
             catch (Exception e) {
-                Assert.Fail(e.Message);
+                Assert.Fail(e.Message + e.StackTrace);
             }
         }
 
@@ -681,6 +681,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("Failed");
             }
             catch (Exception ex) {
+                Console.Error.WriteLine(ex.StackTrace);
                 Assert.Fail(ex.Message);
             }
         }

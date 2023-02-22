@@ -19,7 +19,7 @@ namespace SaxonCS_NUnit
     internal class TestSchemaValidator
     {
 
-        [Test]
+        [Ignore("Uses files on OND machine?")]
         public void TestSimpleValidation()
         {
             UriBuilder ub = new UriBuilder();
@@ -174,78 +174,7 @@ namespace SaxonCS_NUnit
             }
         }
 
-        //throws out of memory exception
-        [Test]
-        public void SchemaValidatorPerf() {
-            // Load a schema
+        
 
-            Processor processor = new Processor(true);
-            processor.SetProperty("http://saxon.sf.net/feature/timing", "true");
-            processor.SetProperty("http://saxon.sf.net/feature/validation-warnings", "false"); //Set to true to suppress the exception
-            SchemaManager manager = processor.SchemaManager;
-            manager.XsdVersion = "1.1";
-            List<XmlProcessingError> errors = new();
-            manager.ErrorReporter = errors.Add;
-
-            UriBuilder ub = new UriBuilder();
-            ub.Scheme = "file";
-            ub.Host = "";
-            ub.Path = @"C:\work\repositories\AHSAMedicalAgreements-v0030z\";
-            Uri baseUri = ub.Uri;
-
-            
-            Uri schemaUri = new Uri(baseUri, "AHSAMedicalAgreements-v0030z.xsd");
-
-            try
-            {
-                manager.Compile(schemaUri);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                Console.WriteLine("Schema compilation failed with " + errors.Count + " errors");
-                foreach (XmlProcessingError error in errors)
-                {
-                    Console.WriteLine("At line " + error.Location.LineNumber + ": " + error.Message);
-                }
-                Assert.Fail();
-            }
-
-
-            // Use this to validate an instance document
-
-            SchemaValidator validator = manager.NewSchemaValidator();
-
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.DtdProcessing = DtdProcessing.Ignore;
-            String inputFileName = new Uri(baseUri, "Providers-H-20200403 MASKED.xml").ToString();
-            XmlReader xmlReader = XmlReader.Create(inputFileName, settings);
-            Console.WriteLine("Validating input file " + inputFileName);
-            List<ValidationFailure> ErrorList = new ();
-            validator.InvalidityListener = ErrorList.Add;
-            XdmDestination psvi = new XdmDestination();
-            validator.SetDestination(psvi);
-
-            try
-            {
-                validator.Validate(xmlReader);
-                Instrumentation.report();
-            }
-            catch (Exception e)
-            {
-                Instrumentation.report();
-                Console.WriteLine(e);
-                Console.WriteLine("Instance validation failed with " + ErrorList.Count + " errors");
-                foreach (ValidationFailure error in ErrorList)
-                {
-                    Console.WriteLine("At line " + error.LineNumber + ": " + error.Message);
-                }
-                Assert.Fail();
-            }
-
-
-
-
-        }
     }
 }

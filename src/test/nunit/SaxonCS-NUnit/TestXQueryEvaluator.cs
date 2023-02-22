@@ -73,7 +73,7 @@ namespace SaxonCS_NUnit {
                     XdmValue evaluation = evaluations.Simplify;
 
                     Assert.That(evaluation is XdmAtomicValue);
-                    Assert.That(((XdmAtomicValue) evaluation).GetBooleanValue(), "Regex match result");
+                    Assert.That(((XdmAtomicValue) evaluation).AsBoolean(), "Regex match result");
                 }
             }
             catch (Exception ex) {
@@ -287,7 +287,7 @@ namespace SaxonCS_NUnit {
                 eval.Run(dest);
                 XdmValue result = dest.XdmValue;
                 Assert.AreEqual(XdmNodeKind.Attribute, ((XdmNode) result.ItemAt(0)).NodeKind, "kind");
-                Assert.AreEqual("2", result.ItemAt(1).GetStringValue(), "att");
+                Assert.AreEqual("2", result.ItemAt(1).StringValue, "att");
                 Assert.AreEqual("a", ((XdmNode) result.ItemAt(2)).NodeName.LocalName, "child");
                 Assert.AreEqual(3, result.Count, "count");
             }
@@ -309,7 +309,7 @@ namespace SaxonCS_NUnit {
                 eval.Run(dest);
                 XdmValue result = dest.XdmValue;
                 Assert.AreEqual(10, result.Count);
-                Assert.AreEqual(1, ((XdmAtomicValue) result.ItemAt(0)).GetLongValue());
+                Assert.AreEqual(1, ((XdmAtomicValue) result.ItemAt(0)).AsLong());
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -582,7 +582,7 @@ namespace SaxonCS_NUnit {
                 QName foo = new QName("http://example.com/library", "foo");
                 XdmValue result = ev.CallFunction(foo, Array.Empty<XdmValue>());
                 Assert.That(result is XdmAtomicValue);
-                Assert.AreEqual("AZAZ", ((XdmAtomicValue) result).GetStringValue());
+                Assert.AreEqual("AZAZ", ((XdmAtomicValue) result).StringValue);
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -977,7 +977,7 @@ namespace SaxonCS_NUnit {
                     new SimpleUriResolver(uri => new MemoryStream("<z>17</z>".GetBytes(Encoding.UTF8)));
 
                 XdmItem result = eval.First();
-                Assert.AreEqual("17", result.GetStringValue());
+                Assert.AreEqual("17", result.StringValue);
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -992,7 +992,7 @@ namespace SaxonCS_NUnit {
                 XQueryCompiler c = p.NewXQueryCompiler();
                 XQueryEvaluator eval = c.Compile("doc('file:///a.xml')/z").Load();
                 XdmItem result = eval.First();
-                Assert.AreEqual("17", result.GetStringValue());
+                Assert.AreEqual("17", result.StringValue);
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);

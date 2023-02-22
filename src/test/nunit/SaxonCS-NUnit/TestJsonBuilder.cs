@@ -22,8 +22,8 @@ namespace SaxonCS_NUnit {
                 XdmValue d = builder.parseJson(sr);
                 Assert.That(d is XdmMap);
                 XdmMap m = (XdmMap) d;
-                Assert.AreEqual(((XdmAtomicValue) m.Get("one")).GetLongValue(), 1);
-                Assert.AreEqual(((XdmAtomicValue) m.Get("two")).GetLongValue(), 2);
+                Assert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
+                Assert.AreEqual(((XdmAtomicValue) m.Get("two")).AsLong(), 2);
                 Assert.AreEqual(m.Size, 2);
             }
             catch (Exception e) {
@@ -39,8 +39,8 @@ namespace SaxonCS_NUnit {
                 XdmValue d = builder.parseJson(sr);
                 Assert.That(d is XdmMap);
                 XdmMap m = (XdmMap) d;
-                Assert.AreEqual(((XdmAtomicValue) m.Get("one")).GetLongValue(), 1);
-                Assert.AreEqual(((XdmAtomicValue) m.Get("two")).GetLongValue(), 2);
+                Assert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
+                Assert.AreEqual(((XdmAtomicValue) m.Get("two")).AsLong(), 2);
                 Assert.AreEqual(m.Size, 2);
             }
             catch (Exception e) {
@@ -72,8 +72,8 @@ namespace SaxonCS_NUnit {
                 XdmValue d = builder.parseJson(sr);
                 Assert.That(d is XdmMap);
                 XdmMap m = (XdmMap) d;
-                Assert.AreEqual(((XdmAtomicValue) m.Get("one")).GetLongValue(), 1);
-                Assert.AreEqual(((XdmAtomicValue) m.Get("two")).GetLongValue(), 2);
+                Assert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
+                Assert.AreEqual(((XdmAtomicValue) m.Get("two")).AsLong(), 2);
                 Assert.AreEqual(m.Size, 2);
             }
             catch (Exception e) {

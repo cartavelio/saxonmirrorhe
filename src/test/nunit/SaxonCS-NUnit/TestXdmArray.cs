@@ -15,7 +15,7 @@ namespace SaxonCS_NUnit {
             Assert.True(3 == a.ArrayLength());
             Assert.True(1 == a.Count);
             try {
-                Assert.True(((XdmAtomicValue) a.Get(1)).GetLongValue() == 2);
+                Assert.True(((XdmAtomicValue) a.Get(1)).AsLong() == 2);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -23,7 +23,7 @@ namespace SaxonCS_NUnit {
 
             a = a.Put(1, new XdmAtomicValue(17));
             try {
-                Assert.True(((XdmAtomicValue) a.Get(1)).GetLongValue() == 17);
+                Assert.True(((XdmAtomicValue) a.Get(1)).AsLong() == 17);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -31,7 +31,7 @@ namespace SaxonCS_NUnit {
 
             List<XdmValue> values = a.AsList();
             try {
-                Assert.True(((XdmAtomicValue) values[1]).GetLongValue() == 17);
+                Assert.True(((XdmAtomicValue) values[1]).AsLong() == 17);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -46,7 +46,7 @@ namespace SaxonCS_NUnit {
             try {
                 XdmValue result = a.Invoke(new XdmValue[] {new XdmAtomicValue(1)}, proc); // 1-based indexing here
                 Assert.True(result is XdmAtomicValue);
-                Assert.True(((XdmAtomicValue) result).GetLongValue() == 1);
+                Assert.True(((XdmAtomicValue) result).AsLong() == 1);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -67,7 +67,7 @@ namespace SaxonCS_NUnit {
                 XQueryEvaluator q = comp.Compile(query).Load();
                 q.SetExternalVariable(new QName("a"), a);
                 XdmAtomicValue result = (XdmAtomicValue) q.EvaluateSingle();
-                Assert.True(3 == result.GetLongValue());
+                Assert.True(3 == result.AsLong());
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
