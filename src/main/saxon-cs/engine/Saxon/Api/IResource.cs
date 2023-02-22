@@ -21,7 +21,7 @@ namespace Saxon.Api {
         /// A URI that identifies this resource
         /// </summary>
 
-		Uri ResourceUri { get; }
+        /**public**/ Uri ResourceUri { get; }   // Note, this is marked **public** for the benefit of API documentation
 
         ///  <summary>
         ///  Get an XDM Item holding the contents of this resource.
@@ -32,12 +32,12 @@ namespace Saxon.Api {
         ///  for binary resource. May also return null if the resource cannot be materialized
         ///  and this is not to be treated as an error.</returns>
 
-        XdmItem GetXdmItem();
+        /**public**/ XdmItem GetXdmItem();
 
         /// <summary> 
         /// The media type (MIME type) of the resource if known (otherwise null)
         /// </summary>
-        string ContentType { get; }
+        /**public**/ string ContentType { get; }
     }
 }
 
