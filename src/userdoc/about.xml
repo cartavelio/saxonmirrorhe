@@ -141,7 +141,7 @@
                  </ul>
                <p>Alternatively, the commercial versions of the
                   product (SaxonJ-PE and SaxonJ-EE) can be downloaded from <a
-                     href="https://www.saxonica.com/" class="bodylink">www.saxonica.com</a>.</p> 
+                     href="https://www.saxonica.com/download/java.xml" class="bodylink">www.saxonica.com/download/java.xml</a>.</p>
                <p>Because the software is pure Java, the same software is used whether you are running on
                   Windows, Linux, or Mac OS/X.</p>
             </li>
@@ -264,11 +264,24 @@
 
             </li>
             <li>
-               <p>Download the software from <a href="https://www.nuget.org" class="bodylink">nuget</a>. 
-                  Search for the package name SaxonCS. Alternatively, add SaxonCS as a dependency to your
-                  Visual Studio or Rider project, and it will be downloaded and installed automatically by the IDE.
-                  No further installation is needed.
+               <p>SaxonCS can be downloaded and installed in two different ways:
                </p>
+               <ul>
+                  <li><p>If you're planning to invoke SaxonCS from your own C# code, you can add it as a dependency
+                     to your Visual Studio or Rider project, and it will be automatically downloaded from <a
+                        href="https://www.nuget.org" class="bodylink">Nuget</a>. No further installation is needed.</p></li>
+                  <li><p>If you're planning to run SaxonCS from the command line, it's best to download an
+                     executable built for the platform you are using: there are versions available for
+                     Windows, Linux, and MacOS, from <a href="https://www.saxonica.com/download/dotnet.xml"
+                        class="bodylink">www.saxonica.com/download/dotnet.xml</a>. For Windows and Linux, the
+                     software comes as a zip file: unzip it into a suitable directory, for example <code>c:\saxon</code>.
+                     For MacOS, the software is distributed as a signed, notarized "DMG" file: download the
+                     DMG file, open it up, and drag the "SaxonCS" application into the Applications folder;
+                     you can then run the executable <code>/Applications/SaxonCS.app/Contents/MacOS/SaxonCS</code>
+                     (for convenience, you may want to create an alias or link the application into another
+                     directory). For further installation details see <a class="bodylink"
+                        href="../../installationdotnet">Installation: .NET</a>.</p></li>
+               </ul>
             </li>
             <li>
                <p>You will need to obtain a file containing a licence key. The license key is
@@ -281,12 +294,13 @@
                   name of this directory.</p>
             </li>
             <li>
-               <p>To run Saxon from the command line, invoke it via the <code>dotnet</code> command,
-               for example:</p>
+               <p>To run SaxonCS from the command line, if you downloaded from Nuget then invoke it via the
+                  <code>dotnet</code> command, for example:</p>
                <kbd>dotnet SaxonCS transform -s:source.xml -xsl:stylesheet.xsl</kbd>
-               
-               <p>See the <a class="bodylink" href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet">dotnet documentation</a>
-               for further details.</p>
+               <p>(See the <a class="bodylink" href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet">dotnet documentation</a>
+               for further details.)</p>
+               <p>If you downloaded an executable, then you can call it directly, for example:</p>
+               <kbd>SaxonCS transform -s:source.xml -xsl:stylesheet.xsl</kbd>
                
                <p>Note that the SaxonCS DLL has a single entry point (<code>Main</code> method). As well as specifying
                the DLL you want to execute (SaxonCS) you therefore need to specify which Saxon utility you want to run, for example
@@ -307,7 +321,7 @@
 
          <p>You can now use the command line to run one of the sample stylesheets or queries that comes with the
                <code>saxon-resources</code> download. Assuming you installed into
-               <code>c:\saxon</code>, make this your current directory, and type:</p>
+               <code>c:\saxon</code> from Nuget, make this your current directory, and type:</p>
 
          <p>
             <i>for XSLT (all on one line):</i>
@@ -324,7 +338,7 @@
          <p>Now open <code>c:\temp.html</code> in your browser to check that it worked.</p>
 
          <p>For more complete details on installing SaxonCS on the .NET platform, see <a
-               class="bodylink" href="../../installationdotnet">Installing: .NET platform</a>.</p>
+               class="bodylink" href="../../installationdotnet">Installation: .NET platform</a>.</p>
          
       </section>
    </section>
@@ -493,8 +507,9 @@
             <li>
                <p>To run SaxonJ you need at least a Java VM, and preferably a Java development
                   environment. SaxonJ 12 requires at least Java SE 8 (also known as JDK 1.8). 
-                  It should also run under all subsequent Java versions, but this may not be 
-                  fully tested. </p>
+                  SaxonJ 12 is built and tested using Java SE 11, but should also still be usable
+                  with Java 8 or later. It should also run under all subsequent Java versions, but this may
+                  not be fully tested. </p>
             </li>
             
             <li>
@@ -567,9 +582,6 @@
             versions of the software are not listed on the website, but are available to existing
             users on request.</p>
 
-         <aside>Please see the <a class="bodylink" href="/changes">change log</a> for details of all
-            changes in this release.</aside>
-
          <p>Installation of SaxonJ on the Java platform simply involves unzipping the supplied
             download file into a suitable directory. The procedure is the same for all editions (HE,
             PE, and EE). The JAR files are differently named in each edition.</p>
@@ -581,7 +593,8 @@
          The "12.0" in the name will change to "12.1", "12.2", etc. in subsequent maintenance releases.</p>
 
          <p>There are some additional JAR files to support optional features such as the SQL
-            interface and the ICU localization library. When running SaxonJ, the principal JAR file
+            interface and the ICU localization library (see <a class="bodylink" href="../jarfiles">JAR files
+               included in the product</a> for details). When running SaxonJ, the principal JAR file
             should be on the class path. The class path is normally represented by an environment
             variable named CLASSPATH: see your Java documentation for details. Note that the JAR
             file itself (not the directory that contains it) should be named on the class path.</p>
@@ -1052,31 +1065,29 @@ any version number.</p>
       
       <kbd>dotnet SaxonCS transform -t -s:source.xml -xsl:stylesheet.xsl</kbd>
 
-     <h3>Installing an application</h3>
+     <h3>Installing as an application</h3>
 
-     <p>To install the application, download the version appropriate for your
+     <p>To install the software as an executable application, download the version appropriate for your
      platform: Linux, Windows, or MacOS from
      <a class="bodylink" href="https://www.saxonica.com/download/dotnet.xml">https://www.saxonica.com/download/dotnet.xml</a>.
      The MacOS application is a universal binary
      that will work with either Intel or AMD64 versions of Mac hardware.</p>
-
-     <h4>Installing on Linux or Windows</h4>
-
-     <p>The Linux and Windows applications are ZIP files that contain the
-     application. You can unzip the archive and place the applications anywhere
-     convenient.</p>
-
-     <h4>Installing on MacOS</h4>
-
-     <p>The MacOS application is distributed as a signed, notarized "DMG" file.
-     Download the DMG file, open it up, and drag the "SaxonCS" application across
-     the screen into the Applications folder.</p>
-
-     <p>The SaxonCS application doesn't have a GUI interface, so simply clicking on
-     the application icon doesn't do anything. From a terminal window, you can
-     run <code>/Applications/SaxonCS.app/Contents/MacOS/SaxonCS</code>.
-     For convenience, create an alias or link the application into another
-     directory such as <code>/usr/local/bin</code>.</p>
+      
+      <ul>
+         <li><p><b>Installing on Linux or Windows</b></p>
+            <p>The Linux and Windows downloads are ZIP files that contain the executable
+               application. You can unzip the archive and place the application anywhere
+               convenient.</p></li>
+         <li><p><b>Installing on MacOS</b></p>
+            <p>The MacOS application is distributed as a signed, notarized "DMG" file.
+               Download the DMG file, open it up, and drag the "SaxonCS" application across
+               the screen into the Applications folder.</p>
+            <p>The SaxonCS application doesn't have a GUI interface, so simply clicking on
+               the application icon doesn't do anything. From a terminal window, you can
+               run <code>/Applications/SaxonCS.app/Contents/MacOS/SaxonCS</code>.
+               For convenience, create an alias or link the application into another
+               directory such as <code>/usr/local/bin</code>.</p></li>
+      </ul>
 
      <p>Having installed the right executable for your target
      platform, you can invoke it directly using a command such as:</p>
